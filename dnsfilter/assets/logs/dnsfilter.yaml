@@ -18,6 +18,11 @@ facets:
     path: dns.question.type
     source: log
   - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
       - Geoip
     name: City Name
     path: network.client.geoip.city.name
@@ -136,6 +141,16 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
+      name: Map `result` to `evt.outcome`
+      enabled: true
+      sources:
+        - result
+      sourceType: attribute
+      target: evt.outcome
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
       name: Map `question_type` to `dns.question.type`
       enabled: true
       sources:
@@ -146,16 +161,16 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: category-processor
-      name: Define `status` based on `threat` and `result`
+      name: Define `status` based on `threat` and `evt.outcome`
       enabled: true
       categories:
-        - filter:
-            query: (@threat:true @result:blocked) OR (@threat:false @result:allowed) OR
-              (@threat:false @result:blocked)
-          name: info
-        - filter:
-            query: "@threat:true @result:allowed"
-          name: warning
+        - name: info
+          filter:
+            query: (@threat:true @evt.outcome:blocked) OR (@threat:false
+              @evt.outcome:allowed) OR (@threat:false @evt.outcome:blocked)
+        - name: warning
+          filter:
+            query: "@threat:true @evt.outcome:allowed"
       target: status
     - type: status-remapper
       name: Define `status` as the official status of the log

@@ -81,14 +81,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@result",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -135,7 +135,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -193,7 +193,6 @@
                             "title": "Top Policies with Blocked Threats",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -202,7 +201,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @threat:true @result:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @threat:true @evt.outcome:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -271,7 +270,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -347,7 +346,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @threat:true $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -434,7 +433,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @result:allowed $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @evt.outcome:allowed $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -504,7 +503,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @result:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @evt.outcome:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -574,7 +573,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @result:allowed $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @evt.outcome:allowed $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -643,7 +642,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @result:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @evt.outcome:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -712,7 +711,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -782,7 +781,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -871,7 +870,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -933,13 +932,12 @@
                             "title": "Server Failure Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:dnsfilter service:traffic-logs @dns.flags.rcode:(SERVFAIL OR REFUSED OR NOTAUTH) $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result",
+                                        "query_string": "source:dnsfilter service:traffic-logs @dns.flags.rcode:(SERVFAIL OR REFUSED OR NOTAUTH) $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1016,7 +1014,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @result:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @evt.outcome:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1086,7 +1084,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1156,7 +1154,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1226,7 +1224,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1243,7 +1241,7 @@
                                                     "should_exclude_missing": true
                                                 },
                                                 {
-                                                    "facet": "@result",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1312,7 +1310,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1329,7 +1327,7 @@
                                                     "should_exclude_missing": true
                                                 },
                                                 {
-                                                    "facet": "@result",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1398,7 +1396,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1501,7 +1499,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1556,7 +1554,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1626,7 +1624,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1702,7 +1700,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @result:allowed $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @evt.outcome:allowed $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1772,7 +1770,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:dnsfilter service:traffic-logs @result:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $result"
+                                                "query": "source:dnsfilter service:traffic-logs @evt.outcome:blocked $application $domain $fqdn $request_address $roaming_client $site $threat $user_name $event_outcome"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1852,6 +1850,12 @@
             "default": "*"
         },
         {
+            "name": "event_outcome",
+            "prefix": "@evt.outcome",
+            "available_values": [],
+            "default": "*"
+        },
+        {
             "name": "fqdn",
             "prefix": "@fqdn",
             "available_values": [],
@@ -1860,12 +1864,6 @@
         {
             "name": "request_address",
             "prefix": "@network.client.ip",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "result",
-            "prefix": "@result",
             "available_values": [],
             "default": "*"
         },
