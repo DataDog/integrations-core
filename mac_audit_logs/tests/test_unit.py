@@ -20,6 +20,17 @@ file_names = [
     "current",
 ]
 
+file_names1 = [
+    (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401000001"),
+    (utils.time_string_to_datetime_utc("20230401000001"), "20230401000001.not_terminated"),
+]
+log_cursor = {
+    "record_time": "20230401000001",
+    "file_name": "20230401000001.not_terminated",
+    "record_milli_sec": " + 244 msec",
+    "is_file_collection_completed": False,
+}
+
 
 def test_instance_check(dd_run_check, aggregator, instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
@@ -125,7 +136,6 @@ def test_convert_local_to_utc_timezone_timestamp_str():
 @patch("os.path.isdir", return_value=True)
 @patch('os.listdir', return_value=file_names)
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-# @patch(utils.get_utc_timestamp_minus_hours, return_value="20230401000000")
 def test_collect_relevant_files(mock_listdir, mock_isdir, utc_timestamp_minus_hours, instance):
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     # Call the method
@@ -140,6 +150,41 @@ def test_collect_relevant_files(mock_listdir, mock_isdir, utc_timestamp_minus_ho
     ]
     # Check if the result matches the expected output
     assert result == expected
+
+
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.get_log_cursor", return_value=123)
+def test_abc(abc, instance):
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    assert check.test() == 123
+
+
+@pytest.mark.unit
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.validate_configurations", return_value=None)
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.get_log_cursor", return_value=log_cursor)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.collect_relevant_files", return_value=file_names1)
+@patch("datadog_checks.mac_audit_logs.check.MacAuditLogsCheck.collect_data_from_files", return_value=None)
+@patch("subprocess.run")
+def test_collect_relevant_files_for_failed_last_iteration(
+    mack_validate_config,
+    mock_get_cursor,
+    utc_timestamp_minus_hours,
+    mock_relevent_files,
+    mock_collect_data,
+    mock_subprocess_run,
+    instance,
+):
+    mac_audit_logs_check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    # Call the method
+    mock_subprocess_run.return_value = MagicMock(stdout='+0530\n')
+    mac_audit_logs_check.log = MagicMock()
+    _ = mac_audit_logs_check.check(None)
+    expected_files = [
+        (utils.time_string_to_datetime_utc("20230401000001"), "20230401000001.not_terminated"),
+    ]
+    mac_audit_logs_check.log.debug.assert_called_with(
+        f"Found the same file as the last failed iteration, relevant files: {expected_files}"
+    )
 
 
 @pytest.mark.unit
