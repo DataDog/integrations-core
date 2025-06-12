@@ -19,7 +19,7 @@ clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhou
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=4a8d8e2888a857d8db3d98765a5ad23ab561241feaef68bbffc5a0bd9c142342
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250218143931-py3-none-manylinux2014_aarch64.whl#sha256=72f55306e2e3df9291ee55e3a6b2f6698fe3999db9570a14da0ea56bbf51e5a9
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250602173441-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=2cc54f12c94bf06d7061effdd9668c8ac9e99ecd7828f0c180e33bbfc5cc36d9
-cryptography @ https://agent-int-packages.datadoghq.com/built/cryptography/cryptography-45.0.3-20250609233846-cp312-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=30e0aa7d03b87922f532142e24886ffc6a8c8782cdabd6fcba930cb5686d59ae
+cryptography @ https://agent-int-packages.datadoghq.com/built/cryptography/cryptography-45.0.3-20250612144757-cp312-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=c9e4b00c6669eac05c39476a4267a28ed8ab1e0aaba06d4de6076cbc35400996
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.9.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=a43a40a1bd806abb68d6b189de44314c3e574aa7e9d3419074d93a0d448eb011
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
 dnspython @ https://agent-int-packages.datadoghq.com/external/dnspython/dnspython-2.7.0-py3-none-any.whl#sha256=b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86
@@ -39,7 +39,7 @@ jellyfish @ https://agent-int-packages.datadoghq.com/external/jellyfish/jellyfis
 jmespath @ https://agent-int-packages.datadoghq.com/external/jmespath/jmespath-1.0.1-py3-none-any.whl#sha256=02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980
 jsonpatch @ https://agent-int-packages.datadoghq.com/external/jsonpatch/jsonpatch-1.33-py2.py3-none-any.whl#sha256=0ae28c0cd062bbd8b8ecc26d7d164fbbea9652a1a3693f3b956c1eae5145dade
 jsonpointer @ https://agent-int-packages.datadoghq.com/external/jsonpointer/jsonpointer-3.0.0-py2.py3-none-any.whl#sha256=13e088adc14fca8b6aa8177c044e12701e6ad4b28ff10e65f2267a90109c9942
-keystoneauth1 @ https://agent-int-packages.datadoghq.com/external/keystoneauth1/keystoneauth1-5.11.0-py3-none-any.whl#sha256=1c88b742206641a755ffdeea26c8672b58cbf422705ac89f0ab5bd7ea21b9dce
+keystoneauth1 @ https://agent-int-packages.datadoghq.com/external/keystoneauth1/keystoneauth1-5.11.1-py3-none-any.whl#sha256=4525adf03b6e591f4b9b8a72c3b14f6510a04816dd5a7aca6ebaa6dfc90b69e6
 krb5 @ https://agent-int-packages.datadoghq.com/built/krb5/krb5-0.7.1-20250609233848-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl#sha256=cd5132add0de00242d5e8b0406263a33000bc53cbe8ad41f1ec07603a6f2f35a
 kubernetes @ https://agent-int-packages.datadoghq.com/external/kubernetes/kubernetes-32.0.1-py2.py3-none-any.whl#sha256=35282ab8493b938b08ab5526c7ce66588232df00ef5e1dbe88a419107dc10998
 lazy-loader @ https://agent-int-packages.datadoghq.com/external/lazy-loader/lazy_loader-0.4-py3-none-any.whl#sha256=342aa8e14d543a154047afb4ba8ef17f5563baad3fc610d7b15b213b0f119efc
@@ -52,7 +52,7 @@ msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.32.3-py3-no
 msal-extensions @ https://agent-int-packages.datadoghq.com/external/msal-extensions/msal_extensions-1.3.1-py3-none-any.whl#sha256=96d3de4d034504e969ac5e85bae8106c8373b5c6568e4c8fa7af2eca9dbe6bca
 oauthlib @ https://agent-int-packages.datadoghq.com/external/oauthlib/oauthlib-3.2.2-py3-none-any.whl#sha256=8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca
 openstacksdk @ https://agent-int-packages.datadoghq.com/external/openstacksdk/openstacksdk-4.6.0-py3-none-any.whl#sha256=0ea54ce3005d48c5134f77dce8df7dd6b4c52d2a103472abc99db19cd4382638
-opentelemetry-api @ https://agent-int-packages.datadoghq.com/external/opentelemetry-api/opentelemetry_api-1.34.0-py3-none-any.whl#sha256=390b81984affe4453180820ca518de55e3be051111e70cc241bb3b0071ca3a2c
+opentelemetry-api @ https://agent-int-packages.datadoghq.com/external/opentelemetry-api/opentelemetry_api-1.34.1-py3-none-any.whl#sha256=b7df4cb0830d5a6c29ad0c0691dbae874d8daefa934b8b1d642de48323d32a8c
 orjson @ https://agent-int-packages.datadoghq.com/external/orjson/orjson-3.10.18-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=559eb40a70a7494cd5beab2d73657262a74a2c59aff2068fdba8f0424ec5b39d
 os-service-types @ https://agent-int-packages.datadoghq.com/external/os-service-types/os_service_types-1.7.0-py2.py3-none-any.whl#sha256=0505c72205690910077fb72b88f2a1f07533c8d39f2fe75b29583481764965d6
 packaging @ https://agent-int-packages.datadoghq.com/external/packaging/packaging-25.0-py3-none-any.whl#sha256=29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484
