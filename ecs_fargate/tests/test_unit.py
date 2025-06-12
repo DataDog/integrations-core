@@ -293,7 +293,8 @@ def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
     instance = extra_config
     check = FargateCheck('ecs_fargate', {}, instances=[instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         dd_run_check(check)
