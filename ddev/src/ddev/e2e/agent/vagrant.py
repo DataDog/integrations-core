@@ -57,8 +57,9 @@ class VagrantAgent(AgentInterface):
         config_file: Path,
     ):
         super().__init__(platform, integration, env, metadata, config_file)
+        self._initialize_vagrant(overwrite=False)
 
-    def _initialize_vagrant(self, **kwargs):
+    def _initialize_vagrant(self, overwrite: bool = False, **kwargs):
         # Initialize and create the directory for Vagrant files specific to this VM
         home_dir = Path.home()
         self._temp_vagrant_dir = home_dir / ".ddev" / "vagrant" / self._vm_name
@@ -66,8 +67,14 @@ class VagrantAgent(AgentInterface):
 
         # Generate Vagrantfile if it doesn't exist
         vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
-        if not vagrantfile_path.exists():
-            print(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
+        if not vagrantfile_path.exists() or overwrite:
+            if not overwrite:
+                print(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
+            else:
+                print(f"Overwriting Vagrantfile found at '{vagrantfile_path}'.")
+                vagrantfile_path.unlink()
+                print(f"Vagrantfile deleted at {vagrantfile_path}")
+
             vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
             vagrantfile_path.write_text(vagrantfile_content)
             print(f"Vagrantfile generated at {vagrantfile_path}")
@@ -280,7 +287,7 @@ end
 
 
         # We can now generate the Vagrantfile content
-        self._initialize_vagrant(agent_install_env_vars=agent_install_env_vars, synced_folders=synced_folders)
+        self._initialize_vagrant(overwrite=True, agent_install_env_vars=agent_install_env_vars, synced_folders=synced_folders)
 
         print(f"Starting Vagrant environment for VM: {self._vm_name} with agent build: '{agent_build}'")
 
@@ -417,7 +424,6 @@ end
                 print(f"Successfully ran post-install command `{' '.join(cmd_parts_guest)}`.\n{stdout}")
 
     def stop(self) -> None:
-        self._initialize_vagrant()
         print(f"Stopping Vagrant VM: {self._vm_name}...")
         stop_guest_commands = self.metadata.get("stop_commands", [])
         if stop_guest_commands:
@@ -463,7 +469,6 @@ end
 
     def restart(self) -> None:
         # Restarts the entire VM
-        self._initialize_vagrant()
 
         print(f"Restarting (reloading) Vagrant VM: {self._vm_name}...")
         reload_cmd_host = ["vagrant", "reload", self._vm_name]
@@ -483,7 +488,6 @@ end
         # If specific post-reload steps are needed, they might go here or be part of provisioning.
 
     def restart_agent_service(self) -> None:
-        self._initialize_vagrant()
         # Restarts the Datadog Agent service *inside* the VM
         print(f"Restarting Datadog Agent service in VM: {self._vm_name}...")
         if self._is_windows_vm:
@@ -515,7 +519,6 @@ end
 
     def invoke(self, args: list[str]) -> None:
         # Runs an 'agent <command>' inside the VM
-        self._initialize_vagrant()
 
         agent_bin = self.metadata.get("vagrant_agent_binary_path", "/opt/datadog-agent/bin/agent/agent")
         if self._is_windows_vm:
@@ -531,7 +534,6 @@ end
         self._run_command(host_cmd)
 
     def enter_shell(self) -> None:
-        self._initialize_vagrant()
         print(f"Entering interactive shell for VM: {self._vm_name}...")
         # _format_command with interactive=True gives ['vagrant', 'ssh', self._vm_name]
         host_cmd = self._format_command([], interactive=True)
