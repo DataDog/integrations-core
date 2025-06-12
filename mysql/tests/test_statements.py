@@ -20,7 +20,7 @@ from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
 from . import common
-from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +159,8 @@ def test_statement_metrics(
     expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
+    elif MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+        expected_tags.add("replication_role:primary")
     assert set(event['tags']) == expected_tags
     query_signature = compute_sql_signature(query)
     matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
@@ -835,9 +837,12 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_samples._job_loop_future.result()
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
+        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
+        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
         aggregator.assert_metric(
             "dd.mysql.async_job.inactive_stop",
-            tags=_expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,),
+            tags=expected_tags,
         )
 
 
@@ -858,9 +863,10 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_samples._db is None, "samples db connection should be gone"
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
-        aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        )
+        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
+        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
+        aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
 
 
 def _expected_dbm_instance_tags(dbm_instance, check):
@@ -873,6 +879,8 @@ def _expected_dbm_instance_tags(dbm_instance, check):
     )
     if MYSQL_FLAVOR.lower() == 'mysql':
         _tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            _tags += ('cluster_uuid:{}'.format(check.cluster_uuid),)
     return _tags
 
 

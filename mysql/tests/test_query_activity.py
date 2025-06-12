@@ -22,7 +22,7 @@ from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
 
-from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_VERSION_PARSED, PORT
+from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -128,6 +128,8 @@ def test_activity_collection(
     )
     if MYSQL_FLAVOR.lower() == 'mysql':
         expected_tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            expected_tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
     assert sorted(activity['ddtags']) == sorted(expected_tags)
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
@@ -553,6 +555,8 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     )
     if MYSQL_FLAVOR.lower() == 'mysql':
         _tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            _tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
     return _tags
 
 
