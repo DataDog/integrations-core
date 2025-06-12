@@ -79,25 +79,22 @@ class VagrantAgent(AgentInterface):
         print(f"Vagrant working directory set to: {self._temp_vagrant_dir}")
     
     def _generate_vagrantfile_content(self, **kwargs) -> str:
-        env_vars = kwargs.get("agent_install_env_vars", {})
-        agent_install_env_vars= " ".join([f"{key}=\"{value}\"" for key, value in env_vars.items()]) if env_vars else ""
+        agent_install_env_vars = kwargs.get("agent_install_env_vars", {})
+        synced_folders = kwargs.get("synced_folders", [])
+
+        agent_install_env_vars_str = " ".join([f"{key}=\"{value}\"" for key, value in agent_install_env_vars.items()]) if agent_install_env_vars else ""
 
         vm_hostname = self._vm_name  # Already sanitized and unique
         vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
-        vagrant_sync_type = self.metadata.get("vagrant_sync_type")
         vb_memory = self.metadata.get("vagrant_vm_memory", "1024")
         vb_cpus = self.metadata.get("vagrant_vm_cpus", "1")
 
-        # sync_type_option = f', type: "{vagrant_sync_type}"' if vagrant_sync_type else ""  # For synced_folder
 
-        # Config file sync setup
-        # self.config_file is the host path to the integration's specific config file, e.g., .../data/conf.yaml
-        # self._config_mount_dir is the target directory on the guest, e.g., /etc/datadog-agent/conf.d/my_integration.d
-        # host_config_file_abs = str(self.config_file.resolve())
-        host_config_dir_abs = str(self.config_file.parent.resolve())
-        guest_config_target_dir = self._config_mount_dir  # This is already OS-specific via its own definition
-        #   if self.config_file.is_file():
-        # volumes.append(f"{self.config_file.parent}:{self._config_mount_dir}")
+        synced_folders_str = ""
+        for volume in synced_folders:
+            path, target = volume.split(":")
+            synced_folders_str += f'config.vm.synced_folder "{path}", "{target}"\n'
+
 
         return f"""\
 # -*- mode: ruby -*-
@@ -118,11 +115,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "{vagrant_box}"
   config.vm.box_version = "1.1"
 
-  # Default synced folder: the directory containing this Vagrantfile (self._temp_vagrant_dir on host)
-  # is synced to /vagrant on Linux guest or C:\\vagrant on Windows guest.
-  # This is used for staging local packages for installation.
-  # config.vm.synced_folder ".", "/vagrant" # Ensure the temp dir itself is synced to /vagrant
-  config.vm.synced_folder "{self.config_file.parent}", "{self._config_mount_dir}"
+  {synced_folders_str}
   config.vm.network "private_network", ip: "172.30.1.5"
 
   config.vm.define "{vm_hostname}" do |node|
@@ -132,8 +125,8 @@ Vagrant.configure("2") do |config|
 
     node.vm.provision "shell", inline: <<-SHELL, run: "always"
       apt update
-      echo "DD_ENV_VARS: {agent_install_env_vars}"
-      {agent_install_env_vars} bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+      echo "DD_ENV_VARS: {agent_install_env_vars_str}" # TODO: remove this, debugging purposes only
+      {agent_install_env_vars_str} bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
       service datadog-agent start && echo "Agent started successfully"
       echo "VM #{vm_hostname} is ready"
     SHELL
@@ -164,9 +157,9 @@ end
     @cached_property
     def _package_mount_dir(self) -> str:
         # Default path INSIDE the VM where host packages are synced/mounted.
-        # Assumes a synced folder like `/vagrant` or `C:\vagrant` on the guest.
-        base_synced_dir = "C:\\vagrant" if self._is_windows_vm else "/vagrant"
-        return os.path.join(base_synced_dir, "packages").replace(
+        # Assumes a synced folder like `/home` or `C:\vagrant` on the guest.
+        base_synced_dir = "C:\\vagrant" if self._is_windows_vm else "/home"
+        return os.path.join(base_synced_dir, "packages/").replace(
             "\\", "\\\\"
         )  # Ensure correct path sep for os.join and escape for f-strings
 
@@ -195,11 +188,7 @@ end
 
         # Prepare the command string to be executed inside the VM via ssh -c "..."
         inner_cmd_list = []
-        if guest_command_parts[0].lower() == "pip":  # Check for pip command
-            inner_cmd_list.extend([self._python_path, "-m", "pip"])
-            inner_cmd_list.extend(guest_command_parts[1:])
-        else:
-            inner_cmd_list.extend(guest_command_parts)
+        inner_cmd_list.extend(guest_command_parts)
 
         # Handle sudo for non-Windows guests if metadata suggests it's needed for the command.
         # This is a basic approach. More complex sudo needs might require specific command metadata.
@@ -265,6 +254,8 @@ end
         # `agent_build` is part of the interface but less directly used for Vagrant
         # as the VM's "build" (box image) is typically defined in the Vagrantfile.
         # It could be used to select a Vagrant box if multiple are defined and match a pattern.
+
+        # prepare agent install scripts environment variables
         agent_install_env_vars = {}
 
         if agent_build:
@@ -274,25 +265,24 @@ end
             agent_install_env_vars["TESTING_YUM_URL"] = "s3.amazonaws.com/yumtesting.datad0g.com"
             agent_install_env_vars["TESTING_YUM_VERSION_PATH"] = f"testing/pipeline-{pipeline_id}-a{major_version}/{major_version}"
 
-        self._initialize_vagrant(agent_install_env_vars=agent_install_env_vars)
+
+        # prepare synced_folders
+        synced_folders = []    
+        synced_folders.extend(self.metadata.get('vagrant_synced_folders', []))
+        if self.config_file.is_file():
+            synced_folders.append(f'{self.config_file.parent}:{self._config_mount_dir}')
+            if local_packages:
+                ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
+
+        # It is safe to assume that the directory name is unique across all repos
+        for local_package in local_packages:
+            synced_folders.append(f'{local_package}:{self._package_mount_dir}/{local_package.name}')
+
+
+        # We can now generate the Vagrantfile content
+        self._initialize_vagrant(agent_install_env_vars=agent_install_env_vars, synced_folders=synced_folders)
 
         print(f"Starting Vagrant environment for VM: {self._vm_name} with agent build: '{agent_build}'")
-
-        # Stage local packages into a `packages` directory in the Current Working Directory.
-        # Assumes the Vagrantfile being used will sync this directory.
-        if local_packages:
-            packages_dir_host = Path.cwd() / "packages"
-            packages_dir_host.mkdir(parents=True, exist_ok=True)
-            print(f"Staging local packages into: {packages_dir_host}")
-            for package_path_on_host, _features in local_packages.items():
-                target_on_host = packages_dir_host / package_path_on_host.name
-                if package_path_on_host.is_dir():
-                    if target_on_host.exists():
-                        shutil.rmtree(target_on_host)  # shutil imported at top level by user
-                    shutil.copytree(package_path_on_host, target_on_host, dirs_exist_ok=True)
-                elif package_path_on_host.is_file():  # e.g., a wheel file
-                    shutil.copy2(package_path_on_host, target_on_host)
-                print(f"Staged local package {package_path_on_host.name} to {target_on_host}")
 
         # Host environment variables for `vagrant up` command itself
         host_operation_env_vars = EnvVars(os.environ)
@@ -316,10 +306,10 @@ end
                 agent_process_env[AgentEnvVars.PROXY_HTTPS] = https_proxy
         self.metadata["resolved_agent_process_env"] = agent_process_env  # Keep for reference
 
-        config_management_context: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
+        ensure_local_pkg: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
         if self.config_file.is_file() and local_packages:
             print(f"Local packages to install; temporarily disabling integration config: {self.config_file}")
-            config_management_context = partial(disable_integration_before_install, self.config_file)
+            ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
 
         up_command_host = ["vagrant", "up", self._vm_name]
         if self.metadata.get("vagrant_provision", True):
@@ -336,7 +326,7 @@ end
 
         post_install_guest_commands = self.metadata.get("post_install_commands", [])
 
-        with config_management_context():
+        with ensure_local_pkg():
             self._initialize(
                 up_command_host,
                 local_packages,
@@ -394,31 +384,20 @@ end
         # Install local packages
         if local_packages:
             print(f"Installing local packages in VM `{self._vm_name}`...")
-            pip_base_cmd_guest =  [self._python_path, '-m', 'pip', 'install', '--disable-pip-version-check', '-e']
-            for host_package_path, features in local_packages.items():
-                package_name_on_host = host_package_path.name
-                # Assumes the package dir itself is synced under self._package_mount_dir
-                package_path_in_guest = (
-                    f"{self._package_mount_dir.rstrip('/')}/{package_name_on_host}"  # Construct path carefully
-                )
-                package_spec_in_guest = (
-                    f"{package_path_in_guest}{features}"  # e.g., /vagrant/packages/my_check[feature]
-                )
-
-                full_pip_cmd_guest = pip_base_cmd_guest + [package_spec_in_guest]
-                formatted_host_cmd = self._format_command(full_pip_cmd_guest)
-
-                print(f"Installing {package_spec_in_guest} using: {' '.join(formatted_host_cmd)}")
-                process = self._captured_process(formatted_host_cmd)
+            base_pip_command = [self._python_path, '-m', 'pip', 'install', '--disable-pip-version-check', '-e']
+            for local_package, features in local_packages.items():
+                package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
+                formatted_cmd = self._format_command([*base_pip_command, package_mount])
+                process = self._run_command(formatted_cmd)
+                process = self._captured_process(formatted_cmd)
                 stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
                 stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
                 if process.returncode:
-                    self._show_logs()
                     raise RuntimeError(
-                        f"Unable to install package `{package_spec_in_guest}` in VM `{self._vm_name}` (RC: {process.returncode}).\n"
+                        f"Failed to run command `{' '.join(formatted_cmd)}` in VM `{self._vm_name}` (RC: {process.returncode}).\n"
                         f"Stdout:\n{stdout}\nStderr:\n{stderr}"
                     )
-                print(f"Successfully installed {package_spec_in_guest}.\n{stdout}")
+                print(f"Successfully installed  localge package `{local_package.name}` in Agent Vagrant VM `{self._vm_name}`.")
 
         # Execute post_install_commands (guest commands)
         if post_install_guest_commands:
