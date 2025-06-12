@@ -394,7 +394,7 @@ end
         # Install local packages
         if local_packages:
             print(f"Installing local packages in VM `{self._vm_name}`...")
-            pip_base_cmd_guest = ["pip", "install", "--disable-pip-version-check", "-e"]
+            pip_base_cmd_guest =  [self._python_path, '-m', 'pip', 'install', '--disable-pip-version-check', '-e']
             for host_package_path, features in local_packages.items():
                 package_name_on_host = host_package_path.name
                 # Assumes the package dir itself is synced under self._package_mount_dir
@@ -438,7 +438,6 @@ end
                 print(f"Successfully ran post-install command `{' '.join(cmd_parts_guest)}`.\n{stdout}")
 
     def stop(self) -> None:
-        return
         self._initialize_vagrant()
         print(f"Stopping Vagrant VM: {self._vm_name}...")
         stop_guest_commands = self.metadata.get("stop_commands", [])
