@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 37.14.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+
+***Fixed***:
+
+* Fix handling of special float values like inf in configs. ([#20406](https://github.com/DataDog/integrations-core/pull/20406))
+
 ## 37.13.0 / 2025-05-29
 
 ***Added***:
