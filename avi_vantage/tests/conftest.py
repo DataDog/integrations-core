@@ -58,7 +58,8 @@ def get_expected_metrics():
 
 @pytest.fixture
 def mock_client():
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    req = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
 
         def get(url: AnyStr, *_: Any, **__: Any):
             parsed = urlparse(url)

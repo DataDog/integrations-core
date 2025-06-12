@@ -139,7 +139,8 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
     instance.update(extra_config)
     check = check(instance)
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         dd_run_check(check)
