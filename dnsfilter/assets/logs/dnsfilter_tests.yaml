@@ -74,6 +74,8 @@ tests:
           question:
             name: "criteo.com"
             type: "A"
+        evt:
+          outcome: "allowed"
         fqdn: "gum.criteo.com"
         id: 2800
         local_ipv4_address: "172.0.0.1"
@@ -93,7 +95,6 @@ tests:
         protocol: "udp"
         region: "BOM"
         responsetime: 0
-        result: "allowed"
         scheduled_policy_id: 56611
         scheduled_policy_name: "test-DD"
         server_address: "10.0.0.2"
@@ -228,6 +229,8 @@ tests:
           question:
             name: "cricketbettingpro.com"
             type: "A"
+        evt:
+          outcome: "blocked"
         fqdn: "www.cricketbettingpro.com"
         id: 2100
         local_ipv4_address: "10.50.8.1"
@@ -247,7 +250,6 @@ tests:
         protocol: "udp"
         region: "BOM"
         responsetime: 0
-        result: "blocked"
         scheduled_policy_id: 56600
         scheduled_policy_name: "test-DD"
         server_address: "10.0.0.2"
@@ -382,6 +384,8 @@ tests:
           question:
             name: "byethost6.com"
             type: "HTTPS"
+        evt:
+          outcome: "allowed"
         fqdn: "www.chalmerset.byethost6.com"
         id: 8200
         local_ipv4_address: "10.50.8.1"
@@ -401,7 +405,6 @@ tests:
         protocol: "udp"
         region: "BOM"
         responsetime: 451
-        result: "allowed"
         scheduled_policy_id: 56600
         scheduled_policy_name: "test-DD"
         server_address: "10.0.0.2"
@@ -536,6 +539,8 @@ tests:
           question:
             name: "wwwassuranceretraite.fr"
             type: "AAAA"
+        evt:
+          outcome: "blocked"
         fqdn: "wwwassuranceretraite.fr"
         id: 2600
         local_ipv4_address: "192.169.190.1"
@@ -555,7 +560,6 @@ tests:
         protocol: "tcp"
         region: "BOM"
         responsetime: 301
-        result: "blocked"
         scheduled_policy_id: 56600
         scheduled_policy_name: "test-DD"
         server_address: "10.0.0.2"
