@@ -36,7 +36,7 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
 
     |Parameters| Description |
     |--------------------|------------------------------------------------------------------------------------------------|
-    | Region   | Select the region in which your Genesys organization exists. Refer to [this documentation][7] to identify your region based on web-app URL.<br><blockquote>Example: App URL: https://apps.usw2.pure.cloud → Region: US West (Oregon)</blockquote>|
+    | Region   | Select the region in which your Genesys organization exists. Refer to [this documentation][7] to identify your region based on web-app URL.<br><blockquote>Example: App URL: https://apps.usw2.pure.cloud -> Region: US West (Oregon)</blockquote>|
 
 3. Enable Metrics Collection:
 
