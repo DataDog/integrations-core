@@ -127,6 +127,8 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "{vm_hostname}" do |node|
     node.vm.hostname = "{vm_hostname}"
+    node.vm.memory = "{vb_memory}"
+    node.vm.cpus = "{vb_cpus}"
 
     node.vm.provision "shell", inline: $set_environment_variables, run: "always"
 
