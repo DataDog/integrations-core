@@ -13,11 +13,16 @@ To create a new trigger action in SolarWinds:
 1. Navigate to **Alerts > Manage Alerts**.
 2. Select any alert and click **Edit Alert**, or create a new alert if you do not have any.
 3. Navigate to **Trigger Actions > Add Action**.
-4. Select "Send a GET or POST Request to a Web Server".
-5. Click "Configure Action".
+4. Select **Send a GET or POST Request to a Web Server**.
+5. Click **Configure Action"**
 6. Fill in the Action Pane with the following details:
 
-        a. Name of Action: Send Alert to Datadog (or whatever you prefer)
+        a. **Name of Action**: Send Alert to Datadog (or whatever you prefer)
+        b. **URL**: https://<YOUR-DC-INTAKE-URL>/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
+        c. **Select**: Use HTTP/S POST
+        d. **Body to Post**: Copy and paste from alert template below
+        e. **Time of Day**: Leave as is
+        f. **Execution Settings**: Leave as is
         b. URL: https://app.datadoghq.com/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
         c. Select: Use HTTP/S POST
         d. Body to Post: Copy and paste from alert template below
@@ -25,14 +30,14 @@ To create a new trigger action in SolarWinds:
         f. Execution Settings: Leave as is
 
 7. Click **Add Action**.
-8. Click the "Reset Actions" step and then repeat steps 4 - 7, using the Reset Action template instead of the Trigger Action template.
+8. Click the **Reset Actions** step and then repeat steps 4 - 7, using the _Reset Action_ template instead of the _Trigger Action_ template.
 9. Click **Next**.
-10. Click **Submit** on the Summary page.
+10. Click **Submit** on the ***Summary** page.
 
 ### Assign actions to alerts
 
 1. From the Alert Manager view, select all the alerts you wish to send to Datadog, then navigate to **Assign Action > Assign Trigger Action**.
-2. Select the "Send Alert to Datadog - Trigger" action and click **Assign**.
+2. Select the _Send Alert to Datadog - Trigger_ action and click **Assign**.
 3. Repeat for **Assign Action > Assign Reset Action** using the "Send Alert to Datadog - Reset" action.
 
 ### Trigger action body to post
