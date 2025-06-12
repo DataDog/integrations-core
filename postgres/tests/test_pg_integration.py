@@ -709,7 +709,7 @@ def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
     """ "
     Makes sure that we only get the control checkpoint metrics in the correct environment
     """
-    
+
     # The control checkpoint metrics is not possible to collect in aurora if wal_level is not logical
     check = integration_check(pg_instance)
     check._version_utils.is_aurora = mock.MagicMock(return_value=True)

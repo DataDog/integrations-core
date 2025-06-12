@@ -321,7 +321,7 @@ class PostgreSql(AgentCheck):
 
         if self.is_aurora and self.wal_level != 'logical':
             self.log.debug("wal_level is required to use pg_current_wal_lsn() on Aurora")
-        
+
         else:
             self.log.debug("Adding control checkpoint metrics")
 
@@ -330,7 +330,6 @@ class PostgreSql(AgentCheck):
 
             else:
                 queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
-
 
         if self.version >= V10:
             # Wal receiver is not supported on aurora
