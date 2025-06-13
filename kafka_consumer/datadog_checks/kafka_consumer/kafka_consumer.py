@@ -35,35 +35,19 @@ class KafkaCheck(AgentCheck):
 
     def log_message(self):
         print("logging message")
-        yaml_config = """
-configs:
-  - topic: marvel
-    partition: 0
-    offset: 0
-    n_messages: 1
-"""
-        print("yaml config  ", yaml_config, type(yaml_config))
-        parsedConfig = yaml.safe_load(str(yaml_config))
-        print("parsed config is ", parsedConfig)
-        for cfg in parsedConfig.get("configs", []):
+        for cfg in self.config.live_messages_configs:
             print("config is ", cfg)
-            if not 'kafka' in cfg:
-                print("skipping config without kafka key")
-                continue
-            cfg = cfg['kafka']
-            topic = cfg.get("topic", None)
-            partition = cfg.get("partition", None)
-            start_offset = cfg.get("start_offset", None)
-            n_messages = cfg.get("n_messages", None)
-            cluster = cfg.get("cluster", None)
+            kafka = cfg['kafka']
+            topic = kafka["topic"]
+            partition = kafka["partition"]
+            start_offset = kafka["start_offset"]
+            n_messages = kafka["n_messages"]
+            cluster = kafka["cluster"]
             print("topic is ", topic, "partition is ", partition, "offset is ", start_offset, "n_messages is ", n_messages, "cluster is ", cluster)
-            if topic is None or partition is None or start_offset is None or n_messages is None or cluster is None:
-                print("skipping config with missing keys")
-                continue
-            config_id = "{}_{}_{}_{}".format(topic, partition, start_offset, n_messages)
+            config_id = cfg["id"]
             if self._messages_have_been_retrieved(config_id):
                 print("messages already retrieved for config_id {}".format(config_id))
-                continue
+                # continue
             for offset in range(start_offset, start_offset + n_messages):
                 print("getting message for topic {}, partition {}, offset {}".format(topic, partition, offset))
                 message = self.client.get_message(topic, partition, offset)
@@ -92,6 +76,7 @@ configs:
                         'timestamp': int(time()),
                         'technology': 'kafka',
                         'cluster': str(cluster),
+                        'config_id': config_id,
                         'topic': str(topic),
                         'partition': str(partition),
                         'offset': str(offset),
@@ -102,6 +87,7 @@ configs:
                 except Exception as e:
                     data = {
                         'timestamp': int(time()),
+                        'config_id': config_id,
                         'technology': 'kafka',
                         'cluster': str(cluster),
                         'topic': str(topic),

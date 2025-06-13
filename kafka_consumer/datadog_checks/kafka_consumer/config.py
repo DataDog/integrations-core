@@ -80,6 +80,11 @@ class KafkaConfig:
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
+        # Data Streams live messages
+        self.live_messages_configs = instance.get('live_messages_configs', [])
+        print("live_messages_configs is: ", self.live_messages_configs)
+
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')
@@ -124,6 +129,22 @@ class KafkaConfig:
             )
 
         self._validate_consumer_groups()
+
+        live_messages_configs = []
+        print("config to validate is: ", self.live_messages_configs)
+        for config in self.live_messages_configs:
+            if 'id' not in config:
+                self.log.warning('Data Streams live messages configuration has no ID')
+            kafka = config.get('kafka', None)
+            print("kafka is", kafka, config)
+            if not kafka:
+                self.log.warning('Data Streams live messages configuration has no kafka configuration')
+                continue
+            if not ('cluster' in kafka and 'topic' in kafka and 'partition' in kafka and 'start_offset' in kafka and 'n_messages' in kafka):
+                self.log.warning('Data Streams live messages configuration missing required kafka parameters.', kafka)
+                continue
+            live_messages_configs.append(config)
+        self.live_messages_configs = live_messages_configs
 
     def _compile_regex(self, consumer_groups_regex, consumer_groups):
         # Turn the dict of regex dicts into a single string and compile
