@@ -249,9 +249,9 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=1)
-        elif mname == 'mysql.info.table.rows.read':
+        elif mname == 'mysql.info.table.rows.changed' and MYSQL_FLAVOR.lower() == 'mariadb':
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), at_least=1)
-        elif mname == 'mysql.info.table.rows.changed':
+        elif mname == 'mysql.info.table.rows.read' and MYSQL_FLAVOR.lower() == 'mariadb':
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), at_least=1)
         else:
             aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
