@@ -83,7 +83,7 @@ jobs:
         body-includes: ${{ env.WARN_MAJOR_UPDATE_MESSAGE }}
 
     - name: Comment
-      if: ${{ steps.changes.outputs.major_bump_fragments == 'true' }} && ${{ steps.find_comment.outputs.comment-id == '' }}
+      if: ${{ steps.changes.outputs.major_bump_fragments == 'true' && steps.find_comment.outputs.comment-id == '' }}
       uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
       with:
         issue-number: ${{ github.event.pull_request.number }}

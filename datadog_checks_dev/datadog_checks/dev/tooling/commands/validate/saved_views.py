@@ -5,9 +5,7 @@ import json
 
 import click
 
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_assets_from_manifest, load_saved_views
-from ..console import (
+from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
     annotate_display_queue,
@@ -16,6 +14,8 @@ from ..console import (
     echo_info,
     echo_success,
 )
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_assets_from_manifest, load_saved_views
 
 REQUIRED_HEADERS = {'name', 'page', 'query', 'type'}
 

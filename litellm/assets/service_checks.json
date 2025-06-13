@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.68.0",
+        "integration": "LiteLLM",
+        "check": "litellm.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "LiteLLM OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the LiteLLM OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

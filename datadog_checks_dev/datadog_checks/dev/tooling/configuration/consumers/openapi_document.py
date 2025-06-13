@@ -6,9 +6,8 @@ from typing import List
 
 from pydantic import BaseModel
 
+from datadog_checks.dev.tooling.configuration.constants import OPENAPI_SCHEMA_PROPERTIES
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
-
-from ..constants import OPENAPI_SCHEMA_PROPERTIES
 
 # We don't need any self-documenting features
 ALLOWED_TYPE_FIELDS = OPENAPI_SCHEMA_PROPERTIES - {'default', 'description', 'example', 'title'}

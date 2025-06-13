@@ -57,6 +57,7 @@
     "dop": 1,
     "is_resumable": false,
     "page_server_reads": 0,
-    "query_signature": "7731f71f7f16e0ec"
+    "query_signature": "7731f71f7f16e0ec",
+    "client_interface_name": "Microsoft JDBC Driver 7.2"
   }
 ]

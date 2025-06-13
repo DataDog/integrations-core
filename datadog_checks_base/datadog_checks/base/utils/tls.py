@@ -7,10 +7,10 @@ import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
 
-from ..config import is_affirmative
+from datadog_checks.base.config import is_affirmative
 
 if TYPE_CHECKING:
-    from ..types import InstanceType  # noqa: F401
+    from datadog_checks.base.types import InstanceType  # noqa: F401
 
 LOGGER = logging.getLogger(__file__)
 

@@ -4,7 +4,7 @@
 
 import click
 
-from ..console import CONTEXT_SETTINGS
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='JMX utilities')

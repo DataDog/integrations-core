@@ -16,7 +16,7 @@ from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
@@ -30,6 +30,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.encoding import decode_with_encodings
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
@@ -280,6 +281,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
+                if conn.encoding == "SQLASCII":
+                    # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
+                    # so we need to read in the data as bytes and then decode as best we can
+                    psycopg2.extensions.register_type(psycopg2.extensions.BYTES, cursor)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
 
@@ -343,16 +348,45 @@ class PostgresStatementSamples(DBMAsyncJob):
         insufficient_privilege_count = 0
         total_count = 0
         normalized_rows = []
-        for row in rows:
+        for raw_row in rows:
             total_count += 1
-            if row.get('backend_type') is not None:
+            row = {}
+            with self._check._get_main_db() as conn:
+                encoding = conn.encoding if conn.encoding != "SQLASCII" else 'utf-8'
+
+            for key, value in raw_row.items():
+                if type(value) is not bytes:
+                    row[key] = value
+                elif key == "query":
+                    try:
+                        # Attempt decoding query in potential encodings
+                        row[key] = decode_with_encodings(value, self._config.query_encodings)
+                    except Exception as e:
+                        # Log the unable to decode query error
+                        self._log.warning("Unable to decode query: %s | Error: %s", value, e)
+                        break
+                else:
+                    try:
+                        # Decode other columns as database encoding, or default to utf-8
+                        try:
+                            row[key] = value.decode(encoding)
+                        except Exception:
+                            # Fallback to trying utf-8
+                            row[key] = value.decode('utf-8', 'backslashreplace')
+                    except Exception as e:
+                        self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
+                        row[key] = "unknown"
+            # We later on fallback to having the statement be set to the backend_type so it's important to only
+            # set it if it is not None
+            if row.get("backend_type") is not None:
+                # backend_type is always a bytea type because it can contain non-UTF8 characters
                 try:
-                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
-                except UnicodeDecodeError:
-                    row['backend_type'] = 'unknown'
-            if (not row['datname'] or not row['query']) and row.get(
-                'backend_type', 'client backend'
-            ) == 'client backend':
+                    row["backend_type"] = row.get("backend_type").tobytes().decode('utf-8', 'backslashreplace')
+                except Exception:
+                    row["backend_type"] = "unknown"
+            if not row.get('query'):
+                continue
+            if (not row.get('datname')) and row.get('backend_type', 'client backend') == 'client backend':
                 continue
             if row['client_addr']:
                 row['client_addr'] = str(row['client_addr'])
@@ -706,6 +740,13 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+            # When sending potentially non-ascii data, e.g. UTF8, we need to force
+            # the client encoding to UTF-8 to match Python string encoding
+            if conn.encoding == 'SQLASCII':
+                self._log.debug(
+                    "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
+                )
+                conn.set_client_encoding('utf-8')
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement

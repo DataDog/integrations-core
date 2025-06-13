@@ -6,8 +6,8 @@ from io import StringIO
 
 import click
 
-from ....utils import read_metric_data_file
-from ...console import CONTEXT_SETTINGS, abort, echo_info
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info
+from datadog_checks.dev.tooling.utils import read_metric_data_file
 
 VALID_FIELDS = {
     'metric_name',

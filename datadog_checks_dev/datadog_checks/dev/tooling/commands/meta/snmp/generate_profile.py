@@ -9,7 +9,8 @@ from tempfile import gettempdir
 import click
 import yaml
 
-from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+
 from .constants import MIB_COMPILED_URL, MIB_SOURCE_URL
 
 

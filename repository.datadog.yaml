@@ -11,7 +11,6 @@ schema-version: v1
 kind: mergegate
 rules:
   - require: commit-signatures
-    enforcement: warn
     excluded_emails:
       - '41898282+github-actions[bot]@users.noreply.github.com'
     allow_unsigned_external: true
