@@ -14,7 +14,7 @@ The built-in Windows WMI ecosystem offers rich, and in many cases exclusive, acc
 
 ### [Default] Agent User Privilege
 
-The default user configured during the standard Agent installation is sufficient to collect telemetry from many WMI classes. However, some WMI classes may require a user with elevated privileges to access their data.
+[The default user][15] configured during the standard Agent installation is sufficient to collect telemetry from many WMI classes. However, some WMI classes may require a user with elevated privileges to access their data.
 
 ### Configuration
 
