@@ -24,5 +24,5 @@ class ConnPoolStatsCollector(MongoCollector):
 
     def collect(self, api):
         db = api["admin"]
-        stats = {'connection_pool': db.command('connPoolStats', maxTimeMS=api._config.timeout)}
+        stats = {'connection_pool': db.command('connPoolStats', maxTimeMS=api._timeout)}
         self._submit_payload(stats)
