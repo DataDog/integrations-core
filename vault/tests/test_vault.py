@@ -76,7 +76,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -169,7 +169,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -212,7 +212,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -253,7 +253,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -296,7 +296,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -327,7 +327,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
@@ -368,7 +368,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -405,7 +405,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -445,7 +445,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 if getattr(mock_requests_get, 'first_health_call', True):
                     mock_requests_get.first_health_call = False
@@ -504,7 +504,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -545,7 +545,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -571,7 +571,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -597,7 +597,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(
                     json_data={
@@ -624,7 +624,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
                 return MockResponse(
                     json_data={
@@ -658,7 +658,7 @@ class TestVault:
         # Keep a reference for use during mock
         requests_get = requests.get
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
             return requests_get(url, *args, **kwargs)
@@ -807,9 +807,9 @@ def test_x_vault_request_header_is_set(monkeypatch, instance, dd_run_check, use_
 
     c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-    requests_get = requests.get
+    requests_get = requests.Session.get
     mock_get = mock.Mock(side_effect=requests_get)
-    monkeypatch.setattr(requests, 'get', mock_get)
+    monkeypatch.setattr(requests.Session, 'get', mock_get)
 
     dd_run_check(c)
 
