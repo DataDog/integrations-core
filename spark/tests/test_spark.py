@@ -404,7 +404,8 @@ SSL_CERT_CONFIG = {
     'spark_url': SSL_SERVER_URL,
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_standalone_mode',
-    'ssl_verify': os.path.join(CERTIFICATE_DIR, 'cert.cert'),
+    'ssl_verify': True,
+    'ssl_ca_cert': os.path.join(CERTIFICATE_DIR, 'cert.cert'),
     'executor_level_metrics': True,
 }
 
