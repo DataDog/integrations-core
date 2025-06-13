@@ -2,12 +2,12 @@
 
 [[envs.default.matrix]]
 python = ["3.12"]
-version = ["5.0", "6.0", "7.0", "cloud"]
+version = ["5.0", "6.0", "7.0", "8.0", "cloud"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "REDIS_VERSION", if = ["5.0", "6.0", "7.0"] },
-  { key = "CLOUD_ENV", value = "false", if = ["5.0", "6.0", "7.0"] },
+  { key = "REDIS_VERSION", if = ["5.0", "6.0", "7.0", "8.0"] },
+  { key = "CLOUD_ENV", value = "false", if = ["5.0", "6.0", "7.0", "8.0"] },
   { key = "REDIS_VERSION", value="7.0", if = ["cloud"] },
   { key = "CLOUD_ENV", value = "true", if = ["cloud"] },
 ]

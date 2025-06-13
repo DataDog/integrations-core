@@ -28,6 +28,10 @@ def instance_collect_sdiag_stats():
     return True
 
 
+def instance_collect_seff_stats():
+    return False
+
+
 def instance_collect_sinfo_stats():
     return True
 

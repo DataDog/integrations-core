@@ -13,7 +13,7 @@ class MySQLConfig(object):
     def __init__(self, instance, init_config):
         self.log = get_check_logger()
         self.database_identifier = instance.get('database_identifier', {})
-        self.empty_default_hostname = instance.get("empty_default_hostname", False)
+        self.exclude_hostname = instance.get("exclude_hostname", False)
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
         self.reported_hostname = instance.get('reported_hostname', '')
@@ -26,9 +26,9 @@ class MySQLConfig(object):
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
-        replication_channel = self.options.get('replication_channel')
-        if replication_channel:
-            self.tags.append("channel:{0}".format(replication_channel))
+        self.replication_channel = self.options.get('replication_channel')
+        if self.replication_channel:
+            self.tags.append("channel:{0}".format(self.replication_channel))
         self.queries = instance.get('queries', [])
         self.ssl = instance.get('ssl', {})
         self.additional_status = instance.get('additional_status', [])
@@ -38,6 +38,7 @@ class MySQLConfig(object):
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.replication_enabled = is_affirmative(self.options.get('replication', self.dbm_enabled))
         self.table_rows_stats_enabled = is_affirmative(self.options.get('table_rows_stats_metrics', False))
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
