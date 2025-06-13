@@ -70,8 +70,16 @@ class ReplicationOpLogCollector(MongoCollector):
                 if oplog_data_size is not None:
                     oplog_data['usedSizeMB'] = round_value(oplog_data_size / 2.0**20, 2)
 
-                op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)
-                op_dsc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.DESCENDING).limit(1)
+                op_asc_cursor = (
+                    oplog.find({"ts": {"$exists": 1}}, max_time_ms=api._config.timeout)
+                    .sort("$natural", pymongo.ASCENDING)
+                    .limit(1)
+                )
+                op_dsc_cursor = (
+                    oplog.find({"ts": {"$exists": 1}}, max_time_ms=api._config.timeout)
+                    .sort("$natural", pymongo.DESCENDING)
+                    .limit(1)
+                )
 
                 try:
                     first_timestamp = op_asc_cursor[0]['ts'].as_datetime()
