@@ -195,7 +195,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
     if MYSQL_REPLICATION == 'group':
-
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         additional_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
         if MYSQL_VERSION_PARSED >= parse_version('8.0'):
@@ -250,6 +249,10 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=1)
+        elif mname == 'mysql.info.table.rows.read':
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), at_least=1)
+        elif mname == 'mysql.info.table.rows.changed':
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), at_least=1)
         else:
             aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
 
@@ -920,3 +923,4 @@ def test_propagate_agent_tags(
                 status=MySql.OK,
                 tags=expected_tags,
             )
+
