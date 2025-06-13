@@ -23,11 +23,11 @@ To create a new trigger action in SolarWinds:
         d. **Body to Post**: Copy and paste from alert template below
         e. **Time of Day**: Leave as is
         f. **Execution Settings**: Leave as is
-        b. URL: https://app.datadoghq.com/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
-        c. Select: Use HTTP/S POST
-        d. Body to Post: Copy and paste from alert template below
-        e. Time of Day: Leave as is
-        f. Execution Settings: Leave as is
+        b. **URL**: https://app.datadoghq.com/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
+        c. **Select**: Use HTTP/S POST
+        d. **Body to Post**: Copy and paste from alert template below
+        e. **Time of Day**: Leave as is
+        f. **Execution Settings**: Leave as is
 
 7. Click **Add Action**.
 8. Click the **Reset Actions** step and then repeat steps 4 - 7, using the _Reset Action_ template instead of the _Trigger Action_ template.
