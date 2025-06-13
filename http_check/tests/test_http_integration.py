@@ -428,7 +428,7 @@ def test_data_methods(aggregator, http_check):
         aggregator.reset()
 
 
-def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
+def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -441,10 +441,11 @@ def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
     }
 
     check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+    with mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning:
 
-    dd_run_check(check)
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)
-    assert 'invalid path: /tmp/unexisting.crt' in aggregator._service_checks[HTTPCheck.SC_STATUS][0].message
+        dd_run_check(check)
+        mock_warning.assert_called_once()
+        assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)
 
 
 def test_instance_auth_token(dd_run_check):
