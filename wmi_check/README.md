@@ -190,7 +190,7 @@ PS> Get-WmiObject -Namespace Root -Class __Namespace | Select Name
 
 #### List WMI Namespace Classes
 
-To list all WMI classes avalably in `XYZ` namespace run the following PowerShell command:
+To list all WMI classes available in `XYZ` namespace run the following PowerShell command:
 
 ```
 Get-WmiObject -List -Namespace ROOT\xyz | Select Name
