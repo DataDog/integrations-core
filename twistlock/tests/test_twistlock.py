@@ -35,7 +35,7 @@ HERE = get_here()
 
 
 def mock_get_factory(fixture_group):
-    def mock_get(url, *args, **kwargs):
+    def mock_get(session, url, *args, **kwargs):
         split_url = url.split('/')
         path = split_url[-1]
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
@@ -72,7 +72,8 @@ def test_config_project(aggregator, instance, fixture_group):
         check.check(instance)
 
         r.assert_called_with(
-            mock.ANY,
+            mock.ANY,  # The session object is passed as the first argument
+            mock.ANY,  # The URL is passed as the second argument
             params=qparams,
             auth=mock.ANY,
             cert=mock.ANY,
