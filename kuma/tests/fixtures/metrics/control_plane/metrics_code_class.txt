@@ -1,0 +1,31 @@
+# HELP api_server_http_requests_inflight Number of inflight HTTP requests
+# TYPE api_server_http_requests_inflight gauge
+api_server_http_requests_inflight{code="200",handler="/",method="GET",service="",zone="default"} 10
+api_server_http_requests_inflight{code="201",handler="/api/items",method="POST",service="",zone="default"} 5
+api_server_http_requests_inflight{code="204",handler="/api/items",method="DELETE",service="",zone="default"} 3
+api_server_http_requests_inflight{code="301",handler="/old-path",method="GET",service="",zone="default"} 2
+api_server_http_requests_inflight{code="302",handler="/redirect",method="GET",service="",zone="default"} 4
+api_server_http_requests_inflight{code="400",handler="/api/items",method="POST",service="",zone="default"} 8
+api_server_http_requests_inflight{code="401",handler="/api/admin",method="GET",service="",zone="default"} 15
+api_server_http_requests_inflight{code="403",handler="/api/secrets",method="GET",service="",zone="default"} 6
+api_server_http_requests_inflight{code="404",handler="",method="GET",service="",zone="default"} 20
+api_server_http_requests_inflight{code="429",handler="/api/rate-limited",method="GET",service="",zone="default"} 50
+api_server_http_requests_inflight{code="500",handler="/api/error",method="GET",service="",zone="default"} 3
+api_server_http_requests_inflight{code="502",handler="/api/proxy",method="GET",service="",zone="default"} 2
+api_server_http_requests_inflight{code="503",handler="/api/maintenance",method="GET",service="",zone="default"} 1
+
+# These should NOT get code_class tags
+api_server_http_requests_inflight{code="20",handler="/edge",method="GET",service="",zone="default"} 1
+api_server_http_requests_inflight{code="2000",handler="/edge",method="GET",service="",zone="default"} 1
+api_server_http_requests_inflight{code="abc",handler="/edge",method="GET",service="",zone="default"} 1
+api_server_http_requests_inflight{code="2a0",handler="/edge",method="GET",service="",zone="default"} 1
+api_server_http_requests_inflight{code="",handler="/edge",method="GET",service="",zone="default"} 1
+api_server_http_requests_inflight{handler="/no-code",method="GET",service="",zone="default"} 5
+
+# HELP cp_info Kuma control plane info
+# TYPE cp_info gauge
+cp_info{build_date="2025-03-28T05:36:43Z",git_commit="de16dff",git_tag="2.10.1",instance_id="kuma-control-plane-test",kuma_version="2.10.1",product="Kuma",zone="default"} 1
+
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.12 

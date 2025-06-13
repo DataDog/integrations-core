@@ -257,7 +257,7 @@ def test(
                 # In order to handle multiple environments the report files must contain the environment name.
                 # Hatch injects the `HATCH_ENV_ACTIVE` environment variable, see:
                 # https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars
-                command.extend(('--junit-xml', f'.junit/test-{"e2e" if e2e else "unit"}-$HATCH_ENV_ACTIVE.xml'))
+                command.extend(('--junit-xml', f'junit/test-{"e2e" if e2e else "unit"}-$HATCH_ENV_ACTIVE.xml'))
                 # Test results class prefix
                 command.extend(('--junit-prefix', target.name))
 

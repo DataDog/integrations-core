@@ -10,7 +10,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.mysql import MySql
 
 from . import common
-from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 from .utils import deep_compare
 
 
@@ -662,6 +662,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     )
     if MYSQL_FLAVOR.lower() == 'mysql':
         expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
         assert schema_event.get("timestamp") is not None
