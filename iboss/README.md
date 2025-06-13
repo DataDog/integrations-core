@@ -2,31 +2,31 @@
 
 ## Overview
 
-[iboss][1] provides secure internet access and Zero Trust enforcement for users anywhere. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.
+[iboss][1] provides secure internet access and Zero Trust enforcement for users, wherever they are. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.
 
 This integration parses and ingest the following types of logs:
 
-- **Web Logs** : Logs provide information about client requests to web resources, enabling monitoring of web traffic and policy enforcement.
-- **DLP Logs** : Logs provide information related to data loss prevention, tracking policy enforcement and potential sensitive data exposures.
-- **Audit Logs** : Logs provide information of user and system activities to provide traceability and support compliance monitoring.
+- **Web Logs** : Provides information about client requests to web resources, enabling monitoring of web traffic and policy enforcement.
+- **DLP Logs** : Provides information related to data loss prevention, tracking policy enforcement and potential sensitive data exposures.
+- **Audit Logs** : Provides information of user and system activities to provide traceability and support compliance monitoring.
 
 Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
 
 This integration ingests the following metrics:
 
-- **Gateway Performance** : Metrics provide insights into request volumes, resource utilization, processing times, and error counts to monitor the health and efficiency of iboss gateways.
-- **Bandwidth** : Metrics provide information about data usage across domains, users, locations, and protocols, enabling monitoring of network traffic volume and flow patterns.
-- **Digital Experience** : Metrics provide insights into user experience by measuring connection times between clients, proxies, and servers across users, assets, and locations.
-- **Web** : Metrics provide visibility into user web activity, including site visits, blocks, malware detections, and search trends, to support usage analysis and policy effectiveness.
-- **CASB** : Metrics provide insights into cloud app usage, user behavior, and traffic patterns, enabling visibility, threat detection, and enforcement of cloud access policies.
-- **Threat** : Metrics provide visibility into detected and prevented threats across users, assets, IPs, and geolocations, enabling threat trend analysis and risk monitoring.
-- **Zero Trust** : Metrics provide visibility into users, devices, resources, and traffic, enabling continuous monitoring, trust evaluation, and policy enforcement within the Zero Trust framework.
+- **Gateway Performance** : Provides insights into request volumes, resource utilization, processing times, and error counts to monitor the health and efficiency of iboss gateways.
+- **Bandwidth** : Provides information about data usage across domains, users, locations, and protocols, enabling monitoring of network traffic volume and flow patterns.
+- **Digital Experience** : Provides insights into user experience by measuring connection times between clients, proxies, and servers across users, assets, and locations.
+- **Web** : Provides visibility into user web activity, including site visits, blocks, malware detections, and search trends, to support usage analysis and policy effectiveness.
+- **CASB** : Provides insights into cloud app usage, user behavior, and traffic patterns, enabling visibility, threat detection, and enforcement of cloud access policies.
+- **Threat** : Provides visibility into detected and prevented threats across users, assets, IPs, and geolocations, enabling threat trend analysis and risk monitoring.
+- **Zero Trust** : Provides visibility into users, devices, resources, and traffic, enabling continuous monitoring, trust evaluation, and policy enforcement within the Zero Trust framework.
 
 Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to help get alerts on any potential issues.
 
 ## Setup
 
-**Note**: These steps are only required for collecting metrics.
+**Note**: The following steps are required only for collecting metrics. For log collection, see the [Log collection](#log-collection) section below.
 
 ### Generate API credentials in iboss
 
@@ -34,18 +34,18 @@ To collect metrics, you can either use an existing user with **Full Administrato
 
 #### Create New RBAC
 
-1. Login to iboss portal as System Administrator.
+1. Log in to iboss portal as a System Administrator.
 2. Go to **Home** > **System Administrators**.
-3. Switch to **Role-Based Access Control** tab.
+3. Switch to the **Role-Based Access Control** tab.
 4. Click on **Add Custom RBAC Group**.
-5. Add **Display Name** for the RBAC.
+5. Add a **Display Name** for the RBAC.
 6. In the **General Info & Permissions** tab, enable only the **Reporting & Analytics** option to limit permissions to reporting only. Next, go to the **Reporting & Analytics Permissions** tab and choose **Full Administrator** from the **Permission Type** dropdown to allow complete access within the reporting module.
 7. Click on **Add RBAC Group**.
 
 
 #### Create New User
 
-1. Login to iboss portal as System Administrator.
+1. Log into iboss portal as System Administrator.
 2. Go to **Home** > **System Administrators**.
 3. Click on **Add New System Administrator**.
 4. Add details for **System Administrator Email Address**, **First Name**, and **Last Name**.
@@ -74,7 +74,7 @@ To collect metrics, you can either use an existing user with **Full Administrato
 
 ### Installation
 
-**Note**: This steps are only required for collecting logs.
+**Note**: These steps are only required for collecting logs.
 
 To install the iboss integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 
@@ -94,9 +94,9 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `iboss.d/conf.yaml` file to start collecting your logs.
+2. Open your `iboss.d/conf.yaml` file, and add the following block to enable log collection.
 
-   See the sample [iboss.d/conf.yaml][6] for available configuration options.
+   See the sample [iboss.d/conf.yaml][5] for available configuration options.
 
    ```yaml
    logs:
@@ -109,19 +109,19 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
    **Note**:
 
    - `PORT`: Port should be similar to the port provided in **Configure syslog message forwarding from iboss** section.
-   - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
+   - Datadog recommends that you do not change the service and source values, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][2].
 
 #### Configure syslog message forwarding from iboss
 
-1. Login in to the iboss Portal.
+1. Log into the iboss portal.
 2. Navigate to **Integration Marketplace**, then select **Log Forwarding** from the left-hand menu and click the **Configure** button associated with the **Syslog Log Forwarding** widget.
 3. Click the **Add Integration** button to add the Syslog integration.
 4. Configure the settings as follows:
-   - **Froward From**: Select **Reporter** from the dropdown.
+   - **Forward From**: Select **Reporter** from the dropdown.
    - **Select Reporting Database**: Select the Primary Reporting Database.
-   - **Service Name**: Choose any friendly name for the integration.
+   - **Service Name**: Choose a descriptive name for the integration.
    - **Enable Service**: Set this to Enabled.
    - **Log Type**: Select **URL** from the dropdown.
    - **Protocol Type**: Select **UDP** or **TCP** from the dropdown.
@@ -132,8 +132,8 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
    - **Log Format**: Select **JSON** from the dropdown.
    - **Transfer Interval**: Select **Continuous** from the dropdown.
    - **Field Delimiter**: Select **SPACE** from the dropdown.
-   - **Send DLP/Web/DNS/Malware/Audit Logs**: Set to Enable based on the preference for sending logs.
-   - **Fields to Forward**: Add all the fields except **DLP Base64 Encoded Meta Data**, **Base64 Encoded Meta Data** and **Chat GPT Message**.
+   - **Send DLP/Web/DNS/Malware/Audit Logs**: Set to Enable based on your preference for sending logs.
+   - **Fields to Forward**: Add all fields except **DLP Base64 Encoded Meta Data**, **Base64 Encoded Meta Data**, and **Chat GPT Message**.
      <br>After entering the required details, click **Add Service**.
 
 ### Validation
@@ -202,7 +202,7 @@ To resolve:
   - Disable Syslog, OR
   - Configure the Agent to listen on a different, available port.
 
-For further assistance, contact [Datadog support][1].
+For further assistance, contact [Datadog support][3].
 
 [1]: https://www.iboss.com/
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
