@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .conftest import write_file
+from tests.helpers.api import write_file
 
 
 def test_codeowners_integrations_core(fake_repo, ddev):
