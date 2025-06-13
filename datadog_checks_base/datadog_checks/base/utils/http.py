@@ -155,7 +155,7 @@ def create_ssl_context(config, overrides=None):
             context.load_default_certs(ssl.Purpose.SERVER_AUTH)
     except FileNotFoundError:
         LOGGER.warning(
-            'TLS CA certificate file not found: %s. ' 'Please check the `tls_ca_cert` configuration option.',
+            'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
             ca_cert,
         )
 
