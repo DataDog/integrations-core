@@ -178,7 +178,7 @@ def get_default_mock(url):
     raise KeyError(f"{url} does not match any response fixtures.")
 
 
-def yarn_requests_get_mock(url, *args, **kwargs):
+def yarn_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == YARN_APP_URL:
@@ -188,7 +188,7 @@ def yarn_requests_get_mock(url, *args, **kwargs):
     return get_default_mock(url)
 
 
-def yarn_requests_auth_mock(*args, **kwargs):
+def yarn_requests_auth_mock(session, url, *args, **kwargs):
     # Make sure we're passing in authentication
     assert 'auth' in kwargs, "Error, missing authentication"
 
@@ -196,10 +196,10 @@ def yarn_requests_auth_mock(*args, **kwargs):
     assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
 
     # Return mocked request.get(...)
-    return yarn_requests_get_mock(*args, **kwargs)
+    return yarn_requests_get_mock(session, url, *args, **kwargs)
 
 
-def mesos_requests_get_mock(url, *args, **kwargs):
+def mesos_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == MESOS_APP_URL:
@@ -220,7 +220,7 @@ def mesos_requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def driver_requests_get_mock(url, *args, **kwargs):
+def driver_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == DRIVER_APP_URL:
@@ -241,7 +241,7 @@ def driver_requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def standalone_requests_get_mock(url, *args, **kwargs):
+def standalone_requests_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
@@ -264,7 +264,7 @@ def standalone_requests_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def standalone_requests_pre20_get_mock(url, *args, **kwargs):
+def standalone_requests_pre20_get_mock(session, url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
@@ -299,7 +299,7 @@ def standalone_requests_pre20_get_mock(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
-def proxy_with_warning_page_mock(url, *args, **kwargs):
+def proxy_with_warning_page_mock(session, url, *args, **kwargs):
     cookies = kwargs.get('cookies') or {}
     proxy_cookie = cookies.get('proxy_cookie')
     url_parts = list(urlparse(url))
@@ -307,7 +307,7 @@ def proxy_with_warning_page_mock(url, *args, **kwargs):
     if proxy_cookie and query.get('proxyapproved') == 'true':
         del query['proxyapproved']
         url_parts[4] = urlencode(query)
-        return standalone_requests_get_mock(urlunparse(url_parts), *args[1:], **kwargs)
+        return standalone_requests_get_mock(session, urlunparse(url_parts), *args[1:], **kwargs)
     else:
         # Display the html warning page with the redirect link
         query['proxyapproved'] = 'true'
@@ -1288,7 +1288,7 @@ def test_yarn_no_json_for_app_properties(
     In these cases we skip only the specific missing apps and metrics while collecting all others.
     """
 
-    def get_without_json(url, *args, **kwargs):
+    def get_without_json(session, url, *args, **kwargs):
         arg_url = Url(url)
         if arg_url == property_url:
             return mock_response
@@ -1322,7 +1322,7 @@ def test_yarn_no_json_for_app_properties(
                 ]
             )
         else:
-            return yarn_requests_get_mock(url, *args, **kwargs)
+            return yarn_requests_get_mock(session, url, *args, **kwargs)
 
     mocker.patch('requests.Session.get', get_without_json)
     dd_run_check(SparkCheck('spark', {}, [YARN_CONFIG]))
