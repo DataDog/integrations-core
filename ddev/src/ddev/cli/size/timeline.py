@@ -28,6 +28,7 @@ from .utils.common_funcs import (
     extract_version_from_about_py,
     get_gitignore_files,
     get_valid_platforms,
+    get_valid_versions,
     is_correct_dependency,
     is_valid_integration,
     print_table,
@@ -128,13 +129,14 @@ def timeline(
                 elif commits != []:
                     gitRepo.checkout_commit(commits[-1])
                 if type == "dependency":
-                    valid_platforms = get_valid_platforms(gitRepo.repo_dir)
+                    valid_versions = get_valid_versions(gitRepo.repo_dir)
+                    valid_platforms = get_valid_platforms(gitRepo.repo_dir, valid_versions)
                     if platform and platform not in valid_platforms:
                         raise ValueError(f"Invalid platform: {platform}")
                 if commits == [""] and type == "integration" and module_exists(gitRepo.repo_dir, module):
                     progress.remove_task(task)
                     progress.stop()
-                    app.display_error(f"No changes found for {type}: {module}")
+                    app.display(f"No changes found for {type}: {module}")
                     return
                 elif commits == [""] and type == "integration" and not module_exists(gitRepo.repo_dir, module):
                     raise ValueError(f"Integration {module} not found in latest commit, is the name correct?")
@@ -156,7 +158,7 @@ def timeline(
                 elif type == "dependency" and commits == [""]:
                     progress.remove_task(task)
                     progress.stop()
-                    app.display_error(f"No changes found for {type}: {module}")
+                    app.display(f"No changes found for {type}: {module}")
                     return
                 if type == "dependency":
                     modules_plat: list[CommitEntryPlatformWithDelta] = []

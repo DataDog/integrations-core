@@ -49,8 +49,8 @@ def status(
     """
     try:
         repo_path = app.repo.path
-        valid_platforms = get_valid_platforms(repo_path)
         valid_versions = get_valid_versions(repo_path)
+        valid_platforms = get_valid_platforms(repo_path, valid_versions)
         if platform and platform not in valid_platforms:
             raise ValueError(f"Invalid platform: {platform}")
         elif version and version not in valid_versions:

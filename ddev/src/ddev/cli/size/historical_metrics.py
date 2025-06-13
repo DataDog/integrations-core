@@ -5,25 +5,24 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from utils.common_funcs import GitRepo
 
-from ddev.cli.size.utils.common_funcs import GitRepo
-
-console = Console(stderr=True)
+console = Console()
 
 
-def upload_historical_metrics(DATE_FROM: str, ORG: str) -> None:
+def upload_historical_metrics(date_from_str: str, org: str) -> None:
     current_path = Path(__file__).resolve()
     repo_path = current_path.parents[5]
 
-    date_from = datetime.strptime(DATE_FROM, "%Y-%m-%d")
-    min_date = datetime.strptime("2024-09-17", "%Y-%m-%d")
+    date_from = datetime.strptime(date_from_str, "%Y-%m-%d")
+    min_date = datetime.strptime("2024-09-18", "%Y-%m-%d")
 
     if date_from < min_date:
-        raise ValueError(f"Date ({DATE_FROM}) must be after 2024-09-17")
+        raise ValueError(f"Date ({date_from}) must be after 2024-09-18")
     try:
         console.print(f"[green]Processing repository: {repo_path}")
         with GitRepo(repo_path) as gitRepo:
-            commits = gitRepo._run(f"git log --reverse --pretty=format:%H --since={DATE_FROM}")
+            commits = gitRepo._run(f"git log --pretty=format:%H --since='{date_from}'")
             console.print(f"Found {len(commits)} commits to process")
             with Progress(
                 SpinnerColumn(),
@@ -38,10 +37,11 @@ def upload_historical_metrics(DATE_FROM: str, ORG: str) -> None:
                     progress.update(
                         commit_task, description=f"Processing commit {i}/{len(commits)}: {commit[:8]} ({date})"
                     )
+                    print(f"Processing commit {i}/{len(commits)}: {commit[:8]} ({date})", flush=True)
                     gitRepo.checkout_commit(commit)
-
+                    print('Temporary repo_dir:', gitRepo.repo_dir)
                     result = subprocess.run(
-                        ["ddev", "size", "status", "--to-dd-org", ORG],
+                        ["ddev", "--here", "size", "status", "--to-dd-org", org],
                         cwd=gitRepo.repo_dir,
                         text=True,
                         capture_output=True,
@@ -51,17 +51,19 @@ def upload_historical_metrics(DATE_FROM: str, ORG: str) -> None:
                         continue
 
                     result = subprocess.run(
-                        ["ddev", "size", "status", "--compressed", "--to-dd-org", ORG],
-                        cwd=gitRepo.repo_dir,
+                        ["ddev", "--here", "size", "status", "--compressed", "--to-dd-org", org],
                         text=True,
+                        cwd=gitRepo.repo_dir,
                         capture_output=True,
                     )
+
                     if result.returncode != 0:
                         console.print(f"[red]Error in commit {commit}: {result.stderr}")
                         continue
 
                     progress.advance(commit_task)
                 progress.update(commit_task, description="[green]All commits processed!")
+
     except KeyboardInterrupt:
         console.print("[red]Process interrupted by user.")
 
@@ -73,6 +75,6 @@ if __name__ == "__main__":
     parser.add_argument('--org', default='default', help='Organization name')
 
     args = parser.parse_args()
-    DATE_FROM = args.date_from
-    ORG = args.org
-    upload_historical_metrics(DATE_FROM, ORG)
+    date_from = args.date_from
+    org = args.org
+    upload_historical_metrics(date_from, org)

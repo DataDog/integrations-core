@@ -88,8 +88,8 @@ def diff(
                 date = datetime.strptime(date_str, "%b %d %Y").date()
                 if date < MINIMUM_DATE:
                     raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
-                valid_platforms = get_valid_platforms(gitRepo.repo_dir)
                 valid_versions = get_valid_versions(gitRepo.repo_dir)
+                valid_platforms = get_valid_platforms(gitRepo.repo_dir, valid_versions)
                 if platform and platform not in valid_platforms:
                     raise ValueError(f"Invalid platform: {platform}")
                 elif version and version not in valid_versions:

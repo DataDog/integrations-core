@@ -5,7 +5,7 @@ import click
 import requests
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_funcs import get_org, get_valid_platforms
+from ddev.cli.size.utils.common_funcs import get_org, get_valid_platforms, get_valid_versions
 
 
 @click.command()
@@ -60,7 +60,8 @@ def create_dashboard(
 
 
 def create_json(app: Application) -> list[dict[str, Any]]:
-    valid_platforms = get_valid_platforms(app.repo.path)
+    valid_versions = get_valid_versions(app.repo.path)
+    valid_platforms = get_valid_platforms(app.repo.path, valid_versions)
     widgets: list[dict[str, Any]] = []
 
     for size_type in ["compressed", "uncompressed"]:
