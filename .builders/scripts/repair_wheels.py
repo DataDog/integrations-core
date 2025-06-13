@@ -16,6 +16,9 @@ from zipfile import ZipFile
 import urllib3
 from utils import extract_metadata, normalize_project_name
 
+# Packages for which we're skipping the openssl-3 build check
+OPENSSL_PACKAGE_BYPASS = ["psycopg"]
+
 
 @cache
 def get_wheel_hashes(project) -> dict[str, str]:
@@ -129,14 +132,15 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
         if not wheel_was_built(wheel):
             print('Using existing wheel')
 
-            unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
-            if unacceptable_files:
-                print(
-                    f"Found copies of unacceptable files in external wheel '{wheel.name}'",
-                    f'(matching {external_invalid_file_patterns}): ',
-                    unacceptable_files,
-                )
-                sys.exit(1)
+            if not any(wheel.name.startswith(pkg_prefix) for pkg_prefix in OPENSSL_PACKAGE_BYPASS):
+                unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
+                if unacceptable_files:
+                    print(
+                        f"Found copies of unacceptable files in external wheel '{wheel.name}'",
+                        f'(matching {external_invalid_file_patterns}): ',
+                        unacceptable_files,
+                    )
+                    sys.exit(1)
 
             shutil.move(wheel, external_dir)
             continue
@@ -179,14 +183,15 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
         if not wheel_was_built(wheel):
             print('Using existing wheel')
 
-            unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
-            if unacceptable_files:
-                print(
-                    f"Found copies of unacceptable files in external wheel '{wheel.name}'",
-                    f'(matching {external_invalid_file_patterns}): ',
-                    unacceptable_files,
-                )
-                sys.exit(1)
+            if not any(wheel.name.startswith(pkg_prefix) for pkg_prefix in OPENSSL_PACKAGE_BYPASS):
+                unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
+                if unacceptable_files:
+                    print(
+                        f"Found copies of unacceptable files in external wheel '{wheel.name}'",
+                        f'(matching {external_invalid_file_patterns}): ',
+                        unacceptable_files,
+                    )
+                    sys.exit(1)
 
             shutil.move(wheel, external_dir)
             continue
