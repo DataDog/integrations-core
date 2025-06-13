@@ -47,7 +47,7 @@ pipeline:
   name: Barracuda CloudGen Firewall
   enabled: true
   filter:
-    query: source:cloudgen_firewall
+    query: source:barracuda_cloudgen_logs
   processors:
     - type: grok-parser
       name: Box Firewall Activity
@@ -147,7 +147,7 @@ pipeline:
       sourceType: attribute
       target: syslog.timestamp
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `hostname` to `syslog.hostname`
@@ -157,7 +157,7 @@ pipeline:
       sourceType: attribute
       target: syslog.hostname
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `component` to `service`
@@ -167,7 +167,7 @@ pipeline:
       sourceType: attribute
       target: service
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: grok-parser
       name: Firewall Threat
@@ -443,14 +443,14 @@ pipeline:
         matchRules: autoFilledRule1
           %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+%{greedyData:message}
     - type: attribute-remapper
-      name: Map `level` to `status`
+      name: Remapping status from level attribute
       enabled: true
       sources:
         - level
       sourceType: attribute
       target: status
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: grok-parser
       name: Box Firewall
@@ -496,7 +496,7 @@ pipeline:
           %{data:hostname}
           %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+%{greedyData:Action}
     - type: status-remapper
-      name: Define `level` as the official status of the log
+      name: Remapper level to status
       enabled: true
       sources:
         - level

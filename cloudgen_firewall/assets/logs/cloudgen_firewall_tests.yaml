@@ -1,170 +1,81 @@
 id: "cloudgen_firewall"
 tests:
- -
-  sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN ATTEMPT: boxconfig[8016]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
-  result:
-    custom:
-      component: "sacumentestlocal/box_Auth_access"
-      event: "LOGIN ATTEMPT"
-      hostname: "sacumentestlocal"
-      level: "Info"
-      message: "LOGIN ATTEMPT: boxconfig[8016]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
-      pid: 8016
-      process: " boxconfig"
-      service: "sacumentestlocal/box_Auth_access"
-      session_status: "Allowed"
-      source: "sacumentestlocal"
-      status: "ATTEMPT"
-      syslog:
-        hostname: "sacumentestlocal"
-        timestamp: 1745305380000
-      timestamp: 1745305380000
-    message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN ATTEMPT: boxconfig[8016]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1745305380000
- -
-  sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:38791 - (D|2|NGAdmin|2|Login|2420|abhishek|sacumentestlocal|1741670525|Login abhishek from 10.10.16.1 : Allowed.)"
-  result:
-    custom:
-      action: "Login"
-      category: "NGAdmin"
-      component: "sacumentestlocal/box_Event_eventS"
-      description: "Login abhishek from 10.10.16.1 : Allowed."
-      destIf: "Login abhishek from 10.10.16.1 : Allowed.)"
-      dest_ip: "abhishek"
-      dest_port: "sacumentestlocal"
-      dest_service: 1.741670525E9
-      event: "Insert Event"
-      event_id: 1071065.0
-      event_type: "- (D|2|NGAdmin|2|Login|2420|abhishek|sacumentestlocal|1741670525|Login abhishek from 10.10.16.1 "
-      hostname: "sacumentestlocal"
-      ip: "127.0.0.1"
-      level: "Info"
-      log_type: "event"
-      message: "event: [1071065] Insert Event from 127.0.0.1:38791 - (D|2|NGAdmin|2|Login|2420|abhishek|sacumentestlocal|1741670525|Login abhishek from 10.10.16.1 : Allowed.)"
-      port: 38791
-      process: "event"
-      process_id: 1071065.0
-      protocol: 2.0
-      service: "sacumentestlocal/box_Event_eventS"
-      session_id: 1.741670525E9
-      severity: 2.0
-      source: "sacumentestlocal"
-      source_host: "sacumentestlocal"
-      source_ip: "127.0.0.1"
-      source_mac: 2420.0
-      source_port: "38791"
-      srcIf: "NGAdmin"
-      status: "event"
-      subcategory: 2.0
-      syslog:
-        hostname: "sacumentestlocal"
-        timestamp: 1745305380000
-      timestamp: 1745305380000
-      traffic: "[1071065] Insert Event from 127.0.0.1:38791 - (D"
-      user_id: 2420.0
-      username: "abhishek"
-    message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:38791 - (D|2|NGAdmin|2|Login|2420|abhishek|sacumentestlocal|1741670525|Login abhishek from 10.10.16.1 : Allowed.)"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1745305380000
- -
-  sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event: [1071200] starting worker 27775: connected from 10.10.16.167:52584"
-  result:
-    custom:
-      component: "sacumentestlocal/box_Event_operative"
-      hostname: "sacumentestlocal"
-      level: "Notice"
-      message: "event: [1071200] starting worker 27775: connected from 10.10.16.167:52584"
-      process: "event"
-      process_id: 1071200.0
-      service: "sacumentestlocal/box_Event_operative"
-      source: "sacumentestlocal"
-      status: "event"
-      syslog:
-        hostname: "sacumentestlocal"
-        timestamp: 1745305380000
-      timestamp: 1745305380000
-      traffic: "[1071200] starting worker 27775: connected from 10.10.16.167:52584"
-    message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event: [1071200] starting worker 27775: connected from 10.10.16.167:52584"
-    status: "notice"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1745305380000
- -
-  sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin Session @10.10.16.167] AdminAction: abhishek logged in"
-  result:
-    custom:
-      Action: "AdminAction: abhishek logged in"
-      action: "firewall"
-      component: "sacumentestlocal/box_Firewall"
-      hostname: "sacumentestlocal"
-      ip: "10.10.16.167"
-      level: "Info"
-      log_type: "firewall"
-      message: "abhishek logged in"
-      process: "AdminAction"
-      service: "sacumentestlocal/box_Firewall"
-      session: "Admin Session "
-      source: "sacumentestlocal"
-      source_ip: "10.10.16.167"
-      status: "firewall"
-      syslog:
-        hostname: "sacumentestlocal"
-        timestamp: 1745305380000
-      timestamp: 1745305380000
-      traffic: "[Admin Session @10.10.16.167] AdminAction: abhishek logged in"
-      user_name: "Admin Session "
-    message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin Session @10.10.16.167] AdminAction: abhishek logged in"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1745305380000
- -
-  sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_SSH_config:  Info     sacumentestlocal [0210108] writeSSHdconf(): starting handling of ssh daemon configuration"
-  result:
-    custom:
-      component: "sacumentestlocal/box_SSH_config"
-      function: "writeSSHdconf"
-      hostname: "sacumentestlocal"
-      level: "Info"
-      message: "[0210108] writeSSHdconf(): starting handling of ssh daemon configuration"
-      process_id: 210108.0
-      service: "sacumentestlocal/box_SSH_config"
-      source: "sacumentestlocal"
-      status: "   sacumentestlocal [0210108] writeSSHdconf()"
-      syslog:
-        hostname: "sacumentestlocal"
-        timestamp: 1745305380000
-      timestamp: 1745305380000
-    message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_SSH_config:  Info     sacumentestlocal [0210108] writeSSHdconf(): starting handling of ssh daemon configuration"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1745305380000
- -
-  sample: "2025-04-28T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_System_mgmaccess:  Info     sacumentestlocal Handler #749 returned with code 0 (No error.)"
-  result:
-    custom:
-      component: "sacumentestlocal/box_System_mgmaccess"
-      hostname: "sacumentestlocal"
-      level: "Info"
-      message: "Handler #749 returned with code 0 (No error.)"
-      pid: 0
-      process: "code"
-      process_host: "with"
-      service: "sacumentestlocal/box_System_mgmaccess: "
-      source: "sacumentestlocal"
-      status: "Info"
-      syslog:
-        hostname: "sacumentestlocal"
-        timestamp: 1745823780000
-      timestamp: 1745823780000
-    message: "2025-04-28T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_System_mgmaccess:  Info     sacumentestlocal Handler #749 returned with code 0 (No error.)"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1745823780000
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
+      boxconfig[8016]: Session localhost_sacumentestlocal: Closed"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
+      [1071065] Insert Event from 127.0.0.1:38791 -
+      (D|2|NGAdmin|2|Login|2420|abhishek|sacumentestlocal|1741670525|Login
+      abhishek from 10.10.16.1 : Allowed.)"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event:
+      [1071200] starting worker 27775: connected from 10.10.16.167:52584"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Config_admin:  Info     sacumentestlocal New Session
+      GCSID_localhost_sacumentestlocal_127.0.0.1_12313_8016"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Config_changes:  Info     sacumentestlocal
+      [abhishek@10.10.16.1_56100]  Deleting session
+      GCSID_abhishek_10.10.16.1_56100_17518"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Config_daemon_download:  Info     sacumentestlocal
+      [Download-firmwareupdates-4585]  No changes"
+    result: null
+  - sample: "2025-04-09T29:25:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal Starting
+      main loop pid=5429."
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal
+      MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte
+      (auto-calculated)"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin
+      Session @10.10.16.167] AdminAction: abhishek logged in"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal Block:
+      FWD|UDP|eth0|10.10.17.180|138|60:45:2e:e0:f1:4b|10.10.17.255|138|netbios-\
+      dgm||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+    result: null
+  - sample: "2025-04-23T15:00:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_IPSDownload:  Info sacumentestlocal Starting
+      main loop pid=4623"
+    result: null
+  - sample: "2025-04-22T19:00:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_audit:  Security sacumentestlocal firewall:
+      [Admin Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+    result: null
+  - sample: "2025-04-22T19:00:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal
+      firewall: [Admin Session abhishek@10.10.16.167] AdminAction: Connection
+      terminated (while 'ecachepb')"
+    result: null
+  - sample: "2025-04-22T19:00:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_threat:  Notice sacumentestlocal firewall:
+      [Main] Sync: BOX sacumentestlocal IP 10.10.16.167"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_System_mgmaccess:  Info     sacumentestlocal
+      Connected new handler #750 of type 'Control'"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_SSH_config:  Info     sacumentestlocal [0210112]
+      writeSSHdconf(): finished activation of ssh daemon configuration"
+    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_SSH_sshd:  Info     sacumentestlocal :
+      pam_unix(sshd:session): session opened for user abhishek by (uid=0)"
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
