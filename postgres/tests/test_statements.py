@@ -801,7 +801,7 @@ def test_failed_explain_handling(
             "FROM persons WHERE city = %s",
             # Use some multi-byte characters (the euro symbol) so we can validate that the code is correctly
             # looking at the length in bytes when testing for truncated statements
-            u"€€€€€€€€€€€€€€€€€€€€€€€€€€",
+            "€€€€€€€€€€€€€€€€€€€€€€€€€€",
             "error:explain-query_truncated-track_activity_query_size=1024",
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
