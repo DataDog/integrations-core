@@ -45,7 +45,7 @@ def mock_size_diff_dependencies():
     with (
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
@@ -114,7 +114,7 @@ def test_diff_no_differences(ddev):
         patch("ddev.cli.size.diff.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
@@ -168,7 +168,7 @@ def test_diff_invalid_platform(ddev):
         patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
@@ -190,7 +190,7 @@ def test_diff_invalid_version(ddev):
         patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
@@ -221,7 +221,7 @@ def test_diff_invalid_platform_and_version(ddev):
         patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.diff.get_valid_platforms",
-            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'windows-x86_64'}),
+            return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
             "ddev.cli.size.diff.get_valid_versions",
