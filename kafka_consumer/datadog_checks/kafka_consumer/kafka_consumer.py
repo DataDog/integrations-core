@@ -47,7 +47,7 @@ class KafkaCheck(AgentCheck):
             config_id = cfg["id"]
             if self._messages_have_been_retrieved(config_id):
                 print("messages already retrieved for config_id {}".format(config_id))
-                # continue
+                continue
             for offset in range(start_offset, start_offset + n_messages):
                 print("getting message for topic {}, partition {}, offset {}".format(topic, partition, offset))
                 message = self.client.get_message(topic, partition, offset)
