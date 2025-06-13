@@ -1,9 +1,11 @@
 id: "cloudgen_firewall"
 tests:
-  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-      boxconfig[8016]: Session localhost_sacumentestlocal: Closed"
-    result: null
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[8016]: Session localhost_sacumentestlocal: Closed"
+    result:
+      custom: {}
+      message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[8016]: Session localhost_sacumentestlocal: Closed"
+      tags:
+      - "source:LOGS_SOURCE"
   - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
       sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
       [1071065] Insert Event from 127.0.0.1:38791 -
