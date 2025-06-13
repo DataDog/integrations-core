@@ -63,7 +63,7 @@ def mocked_request():
 
 @pytest.fixture
 def mocked_auth_request():
-    def requests_auth_get(*args, **kwargs):
+    def requests_auth_get(session, *args, **kwargs):
         # Make sure we're passing in authentication
         assert 'auth' in kwargs, 'Missing "auth" argument in requests.Session.get(...) call'
 
@@ -74,7 +74,7 @@ def mocked_auth_request():
         ), "Incorrect username or password in requests.Session.get"
 
         # Return mocked request.get(...)
-        return requests_get_mock(*args, **kwargs)
+        return requests_get_mock(session, *args, **kwargs)
 
     with patch("requests.Session.get", new=requests_auth_get):
         yield
@@ -83,10 +83,10 @@ def mocked_auth_request():
 @pytest.fixture
 def mocked_bad_cert_request():
     """
-    Mock request.get to an endpoint with a badly configured ssl cert
+    Mock request.Session.get to an endpoint with a badly configured ssl cert
     """
 
-    def requests_bad_cert_get(*args, **kwargs):
+    def requests_bad_cert_get(session, *args, **kwargs):
         # Make sure we're passing in the 'verify' argument
         assert 'verify' in kwargs, 'Missing "verify" argument in requests.Session.get(...) call'
 
@@ -94,13 +94,13 @@ def mocked_bad_cert_request():
             raise SSLError("certificate verification failed for {}".format(args[0]))
 
         # Return the actual response
-        return requests_get_mock(*args, **kwargs)
+        return requests_get_mock(session, *args, **kwargs)
 
     with patch("requests.Session.get", new=requests_bad_cert_get):
         yield
 
 
-def requests_get_mock(*args, **kwargs):
+def requests_get_mock(session, *args, **kwargs):
     if args[0] == YARN_CLUSTER_METRICS_URL:
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'cluster_metrics'))
     elif args[0] == YARN_APPS_URL:
