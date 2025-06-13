@@ -12,6 +12,7 @@ Supported vendors: NVIDIA.
 ## Requirements
 
 - NVIDIA driver version: 450.51 and above
+- Datadog agent version: 7.65 and above
 - Supported OS: Linux only
 - Linux kernel version: 5.8 and above
 

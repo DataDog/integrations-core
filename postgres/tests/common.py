@@ -42,6 +42,7 @@ PASSWORD_ADMIN = 'dd_admin'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
+POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
 
 REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
 REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'

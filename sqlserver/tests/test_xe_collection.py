@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 from lxml import etree
 
+from datadog_checks.base.utils.db.utils import TagManager
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler
 from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
@@ -101,7 +102,8 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
-    check.tags = ["test:tag"]
+    check.tag_manager = TagManager()
+    check.tag_manager.set_tag('test', 'tag')
     check.database_monitoring_query_activity = Mock()
     check.database_monitoring_query_sample = Mock()
     return check

@@ -11,6 +11,7 @@ from .metrics import (
     API_SERVER_METRICS,
     APPLICATION_CONTROLLER_METRICS,
     APPSET_CONTROLLER_METRICS,
+    COMMIT_SERVER_METRICS,
     NOTIFICATIONS_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
 )
@@ -21,12 +22,14 @@ from .metrics import (
     APPSET_CONTROLLER_NAMESPACE,
     REPO_SERVER_NAMESPACE,
     NOTIFICATIONS_CONTROLLER_NAMESPACE,
+    COMMIT_SERVER_NAMESPACE,
 ) = [
     'argocd.api_server',
     'argocd.app_controller',
     'argocd.appset_controller',
     'argocd.repo_server',
     'argocd.notifications_controller',
+    'argocd.commit_server',
 ]
 
 
@@ -39,50 +42,24 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.check_initializations.append(self.configure_additional_transformers)
 
     def parse_config(self):
+        endpoint_configs = [
+            ("app_controller_endpoint", APP_CONTROLLER_NAMESPACE, APPLICATION_CONTROLLER_METRICS),
+            ("appset_controller_endpoint", APPSET_CONTROLLER_NAMESPACE, APPSET_CONTROLLER_METRICS),
+            ("api_server_endpoint", API_SERVER_NAMESPACE, API_SERVER_METRICS),
+            ("repo_server_endpoint", REPO_SERVER_NAMESPACE, REPO_SERVER_METRICS),
+            ("notifications_controller_endpoint", NOTIFICATIONS_CONTROLLER_NAMESPACE, NOTIFICATIONS_CONTROLLER_METRICS),
+            ("commit_server_endpoint", COMMIT_SERVER_NAMESPACE, COMMIT_SERVER_METRICS),
+        ]
+
         self.scraper_configs = []
-        app_controller_endpoint = self.instance.get("app_controller_endpoint")
-        appset_controller_endpoint = self.instance.get("appset_controller_endpoint")
-        api_server_endpoint = self.instance.get("api_server_endpoint")
-        repo_server_endpoint = self.instance.get("repo_server_endpoint")
-        notifications_controller_endpoint = self.instance.get("notifications_controller_endpoint")
+        for endpoint_key, namespace, metrics in endpoint_configs:
+            if endpoint := self.instance.get(endpoint_key):
+                config = self.generate_config(endpoint, namespace, metrics)
+                self.scraper_configs.append(config)
 
-        if (
-            not app_controller_endpoint
-            and not appset_controller_endpoint
-            and not repo_server_endpoint
-            and not api_server_endpoint
-            and not notifications_controller_endpoint
-        ):
-            raise ConfigurationError(
-                "Must specify at least one of the following:"
-                "`app_controller_endpoint`, `appset_controller_endpoint`, `repo_server_endpoint`, `api_server_endpoint`"
-                " or `notifications_controller_endpoint`."
-            )
-
-        if app_controller_endpoint:
-            self.scraper_configs.append(
-                self.generate_config(app_controller_endpoint, APP_CONTROLLER_NAMESPACE, APPLICATION_CONTROLLER_METRICS)
-            )
-        if appset_controller_endpoint:
-            self.scraper_configs.append(
-                self.generate_config(appset_controller_endpoint, APPSET_CONTROLLER_NAMESPACE, APPSET_CONTROLLER_METRICS)
-            )
-        if api_server_endpoint:
-            self.scraper_configs.append(
-                self.generate_config(api_server_endpoint, API_SERVER_NAMESPACE, API_SERVER_METRICS)
-            )
-        if repo_server_endpoint:
-            self.scraper_configs.append(
-                self.generate_config(repo_server_endpoint, REPO_SERVER_NAMESPACE, REPO_SERVER_METRICS)
-            )
-        if notifications_controller_endpoint:
-            self.scraper_configs.append(
-                self.generate_config(
-                    notifications_controller_endpoint,
-                    NOTIFICATIONS_CONTROLLER_NAMESPACE,
-                    NOTIFICATIONS_CONTROLLER_METRICS,
-                )
-            )
+        if not self.scraper_configs:
+            expected_endpoints_str = "`, `".join([endpoint_key[0] for endpoint_key in endpoint_configs])
+            raise ConfigurationError(f"Must specify at least one of the following: `{expected_endpoints_str}`")
 
     def generate_config(self, endpoint, namespace, metrics):
         config = {
