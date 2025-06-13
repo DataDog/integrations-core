@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.15.0 / 2025-06-13
+
+***Security***:
+
+* Updates `requests` to 2.32.4 ([#20494](https://github.com/DataDog/integrations-core/pull/20494))
+
 ## 37.14.0 / 2025-06-12
 
 ***Added***:
