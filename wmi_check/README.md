@@ -226,3 +226,4 @@ Need help? Contact [Datadog support][14].
 [12]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [13]: https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-providers
 [14]: https://docs.datadoghq.com/help/
+[15]: https://docs.datadoghq.com/agent/guide/windows-agent-ddagent-user/
