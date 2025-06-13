@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -132,7 +132,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -177,7 +177,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -230,7 +230,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file @evt.name:SHARE $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file @evt.name:SHARE $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -283,7 +283,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file @evt.name:DELETE $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file @evt.name:DELETE $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -336,7 +336,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file @evt.name:FILE_MARKED_MALICIOUS $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file @evt.name:FILE_MARKED_MALICIOUS $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -388,7 +388,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -464,7 +464,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -536,7 +536,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -605,7 +605,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -682,7 +682,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file -@source.parent.name:\"\" $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file -@source.parent.name:\"\" $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -759,7 +759,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:file $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -843,7 +843,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:box-cloud @box_event_category:file $user_name $event_name $user_email",
+                                        "query_string": "source:box service:enterprise-events @box_event_category:file $user_name $event_name $user_email",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -917,7 +917,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -983,7 +983,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1028,7 +1028,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1081,7 +1081,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder @evt.name:DELETE $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder @evt.name:DELETE $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1134,7 +1134,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder @evt.name:SHARE $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder @evt.name:SHARE $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1186,7 +1186,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1264,7 +1264,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1333,7 +1333,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1410,7 +1410,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1487,7 +1487,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email"
+                                                "query": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1571,7 +1571,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:box-cloud @box_event_category:folder $user_name $event_name $user_email",
+                                        "query_string": "source:box service:enterprise-events @box_event_category:folder $user_name $event_name $user_email",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
