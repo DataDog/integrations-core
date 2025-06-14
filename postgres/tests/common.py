@@ -17,6 +17,7 @@ from datadog_checks.postgres.util import (
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_REPLICATION_STATS_METRICS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     SLRU_METRICS,
@@ -475,6 +476,14 @@ def check_subscription_state_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14:
         return
     for metric_name in _iterate_metric_name(SUBSCRIPTION_STATE_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_recovery_prefetch_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 15.0:
+        return
+
+    for metric_name in _iterate_metric_name(QUERY_PG_STAT_RECOVERY_PREFETCH):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 

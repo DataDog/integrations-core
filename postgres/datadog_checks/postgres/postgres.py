@@ -55,6 +55,7 @@ from .util import (
     QUERY_PG_REPLICATION_STATS_METRICS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_METRICS,
@@ -363,6 +364,7 @@ class PostgreSql(AgentCheck):
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
+            queries.append(QUERY_PG_STAT_RECOVERY_PREFETCH)
         if self.version >= V16:
             if self._config.dbm_enabled:
                 queries.append(STAT_IO_METRICS)
