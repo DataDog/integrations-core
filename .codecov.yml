@@ -410,6 +410,10 @@ coverage:
         target: 75
         flags:
         - litellm
+      Mac_Audit_Logs:
+        target: 75
+        flags:
+        - mac_audit_logs
       MapR:
         target: 75
         flags:
@@ -1314,6 +1318,11 @@ flags:
     paths:
     - litellm/datadog_checks/litellm
     - litellm/tests
+  mac_audit_logs:
+    carryforward: true
+    paths:
+    - mac_audit_logs/datadog_checks/mac_audit_logs
+    - mac_audit_logs/tests
   mapr:
     carryforward: true
     paths:
