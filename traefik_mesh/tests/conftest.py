@@ -49,7 +49,6 @@ def setup_traefik_mesh():
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_traefik_mesh]) as kubeconfig:
         with ExitStack() as stack:
-
             traefik_controller_api_url, traefik_controller_api_port = stack.enter_context(
                 port_forward(kubeconfig, 'traefik-mesh', 9000, 'service', 'traefik-mesh-controller')
             )

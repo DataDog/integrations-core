@@ -10,7 +10,6 @@ from . import common
 
 
 def test_service_check_broken(aggregator, check, dd_run_check):
-
     check = check(common.BAD_INSTANCE)
 
     tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.BAD_PORT)] + common.TAGS2

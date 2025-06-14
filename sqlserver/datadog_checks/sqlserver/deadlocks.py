@@ -27,7 +27,7 @@ from datadog_checks.sqlserver.utils import is_azure_sql_database
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 600
 MAX_DEADLOCKS = 100
@@ -223,9 +223,7 @@ class Deadlocks(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting SQLServer deadlocks.
-                        One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(
-                        e, row
-                    )
+                        One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(e, row)
                 )
                 continue
             query_signatures = {}

@@ -6,11 +6,18 @@ import pathlib
 
 import click
 
-from ...constants import get_root
-from ...license_headers import validate_license_headers
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.license_headers import validate_license_headers
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks
 
 IGNORES = {
     "all": ["tests/compose", "tests/docker"],

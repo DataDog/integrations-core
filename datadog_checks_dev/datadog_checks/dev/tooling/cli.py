@@ -5,7 +5,8 @@ import os
 
 import click
 
-from ..__about__ import __version__
+from datadog_checks.dev.__about__ import __version__
+
 from .commands import ALL_COMMANDS
 from .commands.console import (
     CONTEXT_SETTINGS,

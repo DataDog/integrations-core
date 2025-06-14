@@ -5,14 +5,9 @@ import os
 
 import click
 
-from ....constants import get_root
-from ....utils import complete_valid_checks, get_valid_checks, get_version_string
-from ...console import (
-    CONTEXT_SETTINGS,
-    abort,
-    echo_info,
-    validate_check_arg,
-)
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info, validate_check_arg
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_valid_checks, get_version_string
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')

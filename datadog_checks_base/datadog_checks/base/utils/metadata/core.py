@@ -4,8 +4,8 @@
 import logging
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.utils.common import to_native_string
 
-from ..common import to_native_string
 from .utils import is_primitive
 from .version import parse_version
 

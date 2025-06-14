@@ -18,7 +18,6 @@ from .metrics import RENAME_LABELS_MAP, STORAGE_API_METRICS, SUPABASE_METRICS
 
 
 class SupabaseCheck(OpenMetricsBaseCheckV2, ConfigMixin):
-
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances=None):
@@ -34,7 +33,7 @@ class SupabaseCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         if not privileged_metrics_endpoint and not storage_api_endpoint:
             raise ConfigurationError(
-                "Must specify at least one of the following:" "`privileged_metrics_endpoint` or `storage_api_endpoint`."
+                "Must specify at least one of the following:`privileged_metrics_endpoint` or `storage_api_endpoint`."
             )
 
         if privileged_metrics_endpoint:

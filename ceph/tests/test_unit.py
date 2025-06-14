@@ -118,7 +118,6 @@ def test_luminous_osd_full_metrics(_, aggregator, dd_run_check):
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("raw.json"))
 def test_tagged_metrics(_, aggregator, dd_run_check):
-
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
     dd_run_check(ceph_check)
 
@@ -137,7 +136,6 @@ def test_tagged_metrics(_, aggregator, dd_run_check):
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("raw2.json"))
 def test_osd_perf_with_osdstats(_, aggregator, dd_run_check):
-
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
     dd_run_check(ceph_check)
 
@@ -150,7 +148,6 @@ def test_osd_perf_with_osdstats(_, aggregator, dd_run_check):
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_10.2.2.json"))
 def test_osd_status_metrics(_, aggregator, dd_run_check):
-
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
     dd_run_check(ceph_check)
 

@@ -2321,7 +2321,7 @@ def test_max_query_metrics(
             },
             pytest.raises(
                 ConfigurationError,
-                match="Your configuration is incorrectly attempting to " "set the `collection_type` to ",
+                match="Your configuration is incorrectly attempting to set the `collection_type` to ",
             ),
             None,
             id='\'collection_type\' set to invalid value',
@@ -2946,7 +2946,6 @@ def test_property_metrics_metric_filters(
     service_instance,
     vm_properties_ex,
 ):
-
     default_instance['collection_type'] = 'both'
     default_instance['collect_property_metrics'] = True
     default_instance['metric_filters'] = {
@@ -3063,9 +3062,7 @@ def test_property_metrics_expired_cache(
     service_instance,
     vm_properties_ex,
 ):
-
     with mock.patch('datadog_checks.vsphere.cache.time') as time:
-
         realtime_instance['collect_property_metrics'] = True
 
         service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
@@ -3359,7 +3356,6 @@ def test_make_batch_historical(
     metrics_per_query,
     max_historical_metrics,
 ):
-
     # based on PERF_COUNTER_INFO: there are 7 metrics- counter IDs 100- 106
     # 1 cluster metric, 1 datacenter metric, and 3 datastore metrics
     #
@@ -3453,7 +3449,6 @@ def test_make_batch_realtime(
     metrics_per_query,
     max_historical_metrics,
 ):
-
     if max_query_metrics is not None:
         service_instance.content.setting.QueryOptions = mock.MagicMock(
             return_value=[mock.MagicMock(value=max_query_metrics)]

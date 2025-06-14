@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ..labels import canonicalize_numeric_label
-from ..utils import decumulate_histogram_buckets
+from datadog_checks.base.checks.openmetrics.v2.labels import canonicalize_numeric_label
+from datadog_checks.base.checks.openmetrics.v2.utils import decumulate_histogram_buckets
 
 
 def get_histogram(check, metric_name, modifiers, global_options):

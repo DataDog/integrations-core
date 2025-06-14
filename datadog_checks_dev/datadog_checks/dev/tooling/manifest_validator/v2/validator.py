@@ -8,10 +8,9 @@ import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
-
-from ...constants import get_root
-from ...manifest_validator.common.validator import BaseManifestValidator
-from ..constants import V2
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
+from datadog_checks.dev.tooling.manifest_validator.constants import V2
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.

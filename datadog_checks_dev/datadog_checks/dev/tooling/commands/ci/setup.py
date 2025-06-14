@@ -7,9 +7,9 @@ import subprocess
 
 import click
 
-from ...constants import get_root
-from ...testing import get_test_envs
-from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_debug, echo_info
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import get_test_envs
 
 
 def display_action(script_file):

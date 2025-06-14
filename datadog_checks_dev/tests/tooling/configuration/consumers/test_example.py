@@ -867,9 +867,7 @@ def test_section_description_length_limit():
               description: words
               value:
                 type: string
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT)
     )
 
     files = consumer.render()
@@ -890,9 +888,7 @@ def test_option_description_length_limit():
             description: {}
             value:
               type: string
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT)
     )
 
     files = consumer.render()
@@ -914,9 +910,7 @@ def test_option_description_length_limit_with_noqa():
             value:
               type: string
               example: something
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa'
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa')
     )
 
     files = consumer.render()
@@ -928,9 +922,7 @@ def test_option_description_length_limit_with_noqa():
         ## {}
         #
         # foo: something
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT)
     )
 
 
@@ -1211,9 +1203,7 @@ def test_compact_example_long_line():
                 type: array
                 items:
                   type: string
-        """.format(
-            long_str
-        )
+        """.format(long_str)
     )
     files = consumer.render()
     contents, errors = files['test.yaml.example']
@@ -1225,9 +1215,7 @@ def test_compact_example_long_line():
         #
         # foo:
         #   - [{0}, {0}, {0}, {0}]
-        """.format(
-            long_str
-        )
+        """.format(long_str)
     )
 
 

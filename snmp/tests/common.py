@@ -237,7 +237,7 @@ def generate_container_profile_config(community_string, profile=None):
 
 def generate_container_profile_config_with_ad(profile):
     host = socket.gethostbyname(get_container_ip(SNMP_CONTAINER_NAME))
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     conf = {
         # Make sure the check handles bytes
         'network_address': to_native_string(network),

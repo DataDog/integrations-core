@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...utils import complete_valid_checks
-from ..console import CONTEXT_SETTINGS, echo_info, echo_success
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_info, echo_success
+from datadog_checks.dev.tooling.utils import complete_valid_checks
+
 from .agent_reqs import agent_reqs
 from .codeowners import codeowners
 from .config import config

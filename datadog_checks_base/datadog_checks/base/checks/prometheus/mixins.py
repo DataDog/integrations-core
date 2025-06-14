@@ -11,11 +11,11 @@ from math import isinf, isnan
 import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 
-from ...config import is_affirmative
-from ...utils.http import RequestsWrapper
-from ...utils.prometheus import metrics_pb2
-from .. import AgentCheck
-from ..libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.prometheus import metrics_pb2
 
 
 class PrometheusFormat:
@@ -561,7 +561,7 @@ class PrometheusScraperMixin(object):
             headers['Accept-Encoding'] = 'gzip'
         if pFormat == PrometheusFormat.PROTOBUF:
             headers['accept'] = (
-                'application/vnd.google.protobuf; ' 'proto=io.prometheus.client.MetricFamily; ' 'encoding=delimited'
+                'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
             )
         handler = self.get_http_handler(endpoint, instance)
         if (
@@ -569,7 +569,7 @@ class PrometheusScraperMixin(object):
             and not handler.ignore_tls_warning
             and not is_affirmative(handler.options.get('ssl_verify', True))
         ):
-            self.log.debug(u'An unverified HTTPS request is being made to %s', endpoint)
+            self.log.debug('An unverified HTTPS request is being made to %s', endpoint)
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)

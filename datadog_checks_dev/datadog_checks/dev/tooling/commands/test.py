@@ -6,13 +6,12 @@ import sys
 
 import click
 
-from ..._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
-from ...ci import get_ci_env_vars, running_on_ci
-from ...fs import chdir, file_exists, remove_path
-from ...subprocess import run_command
-from ...utils import ON_WINDOWS
-from ..constants import get_root
-from ..testing import (
+from datadog_checks.dev._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
+from datadog_checks.dev.ci import get_ci_env_vars, running_on_ci
+from datadog_checks.dev.fs import chdir, file_exists, remove_path
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import (
     construct_pytest_options,
     display_check_envs,
     fix_coverage_report,
@@ -20,7 +19,9 @@ from ..testing import (
     prepare_test_commands,
     pytest_coverage_sources,
 )
-from ..utils import code_coverage_enabled, complete_testable_checks
+from datadog_checks.dev.tooling.utils import code_coverage_enabled, complete_testable_checks
+from datadog_checks.dev.utils import ON_WINDOWS
+
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
