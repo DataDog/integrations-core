@@ -230,6 +230,10 @@ def test_managed_auth_config_valid(instance_minimal_defaults, name, managed_iden
         connection._connection_options_validation('somekey', 'somedb')
 
 
+def test_intentional_failure():
+    assert True is False
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     'host, port, expected_host',
