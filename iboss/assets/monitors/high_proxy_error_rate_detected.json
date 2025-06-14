@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2025-05-30",
+	"last_updated_at": "2025-05-30",
+	"title": "High proxy error rate detected",
+	"description": "It monitors the proxy error rate on the gateway. A high error rate may indicate misconfigurations, backend failures, or network issues that can disrupt traffic flow and degrade user experience.",
+	"definition": {
+		"id": 173396854,
+		"name": "High proxy error rate detected",
+		"type": "query alert",
+		"query": "avg(last_5m):(sum:iboss.gateway_performance.proxy_error_count{!gateway_name:none,!gateway_name:all_gateways} by {gateway_name} / sum:iboss.gateway_performance.total_proxy_request_count{!gateway_name:none,!gateway_name:all_gateways} by {gateway_name}) * 100 > 5",
+		"message": "{{#is_warning}}⚠️ **Warning**: Proxy error rate has exceeded the warning threshold on gateway **{{gateway_name.name}}**.\n\n- **Current Error Rate**: {{value}}%  \n- **Warning Threshold**: {{warn_threshold}}%\n{{/is_warning}}\n\n{{#is_alert}}🚨 **Alert**: Proxy error rate has exceeded the alert threshold on gateway **{{gateway_name.name}}**.\n\n- **Current Error Rate**: {{value}}%  \n- **Alert Threshold**: {{threshold}}%\n{{/is_alert}}\n\n\n@example@example.com",
+		"tags": [
+			"integration:iboss"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 5,
+				"warning": 2
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:iboss"
+	]
+}
