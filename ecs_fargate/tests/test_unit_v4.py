@@ -42,7 +42,9 @@ def test_successful_check_linux_v4(check, aggregator, dd_run_check):
     Testing successful fargate check on Linux on ECS ENDPOINT API v4.
     """
 
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_linux_v4):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_linux_v4
+    ):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags_v4):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)

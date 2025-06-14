@@ -51,6 +51,7 @@ class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
         'ssl_key': {'name': 'tls_private_key'},
     }
 

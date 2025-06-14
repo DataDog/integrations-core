@@ -77,7 +77,7 @@ def test_extra_headers_on_http_method_call():
     complete_headers.update({'answer': '42'})
 
     extra_headers = {"foo": "bar"}
-    with mock.patch("requests.get") as get:
+    with mock.patch("requests.Session.get") as get:
         http.get("http://example.com/hello", extra_headers=extra_headers)
 
         expected_options = dict(complete_headers)

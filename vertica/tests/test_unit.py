@@ -19,7 +19,7 @@ private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
 
 def test_ssl_config_ok(aggregator, tls_instance):
     with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
-        with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
+        with mock.patch('datadog_checks.base.utils.http.ssl') as ssl:
             vertica.connect.return_value = mock.MagicMock()
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
@@ -37,7 +37,7 @@ def test_ssl_config_ok(aggregator, tls_instance):
 
 def test_ssl_legacy_config_ok(aggregator, tls_instance_legacy):
     with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
-        with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
+        with mock.patch('datadog_checks.base.utils.http.ssl') as ssl:
             vertica.connect.return_value = mock.MagicMock()
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
