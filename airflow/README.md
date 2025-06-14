@@ -316,7 +316,7 @@ Ensure that `url` matches your Airflow [webserver `base_url`][19], the URL used 
 
 If you are using Airflow's Helm chart, this [exposes the webserver as a ClusterIP service][22] that you should use in the `url` parameter.
 
-For example, your Autodiscovery annotations may look like the following:
+For example in Kubernetes, your Autodiscovery annotations may look like the following:
 
 ```
 apiVersion: v1
