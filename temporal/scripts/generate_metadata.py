@@ -47,23 +47,14 @@ def main():
     parser.add_argument('--tag', required=True, help='Temporal version tag (e.g., v1.19.0)')
     args = parser.parse_args()
 
-    # First, read the existing metadata.csv to keep existing metadata from metrics for later
+    # Preserve existing metadata.csv entries.
     with open('metadata.csv', newline='') as metadata_file:
         reader = csv.DictReader(metadata_file)
         metadata_fields = reader.fieldnames
         previous_metadata = {row['metric_name']: row for row in reader}
 
-    # Fetch metrics from temporal's source code
-    try:
-        temporal_metrics = fetch_temporal_metrics(args.tag)
-    except requests.RequestException as e:
-        print(f"Error fetching metrics from Temporal repository: {e}")
-        sys.exit(1)
-    except ValueError as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+    temporal_metrics = fetch_temporal_metrics(args.tag)
 
-    # Extract metric definitions from the fetched code
     temporal_metric_types = extract_metric_defs(temporal_metrics)
 
     # Sanity check: Check whether there are metrics in the temporal code that are not present
@@ -164,7 +155,6 @@ def extract_metric_defs(go_code: str) -> dict:
         func_name = match.group(2)
         metric_name = match.group(3)
 
-        # Extract type from function name (everything between New and Def)
         type_name = func_name[3:-3]  # Remove "New" prefix and "Def" suffix
 
         results[metric_name.lower()] = type_name.lower()
