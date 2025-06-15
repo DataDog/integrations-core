@@ -162,16 +162,15 @@ def extract_metric_defs(go_code: str) -> dict:
     # 1. Variable name
     # 2. = New*Def(
     # 3. Metric name in quotes
-    pattern = r'(\w+)\s*=\s*(New\w*Def)\s*\(\s*"([^"]+)"'
+    # 4. Type name between New and Def
+    pattern = r'(\w+)\s*=\s*New(\w*)Def\s*\(\s*"([^"]+)"'
 
     # Find all matches in the code
     matches = re.finditer(pattern, go_code)
 
     for match in matches:
-        func_name = match.group(2)
+        type_name = match.group(2)
         metric_name = match.group(3)
-
-        type_name = func_name[3:-3]  # Remove "New" prefix and "Def" suffix
 
         results[metric_name.lower()] = type_name.lower()
 
