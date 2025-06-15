@@ -45,12 +45,15 @@ def _get_integration_name(function_name, self, *args, **kwargs):
     return integration_name if integration_name else "UNKNOWN_INTEGRATION"
 
 
-def tracing_method(f, tracer):
+def tracing_method(f, tracer, is_entry_point):
     if inspect.signature(f).parameters.get('self'):
 
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):
             integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
+            if is_entry_point:
+                configure_tracer(tracer, self)
+
             with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name) as span:
                 span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
                 return f(self, *args, **kwargs)
@@ -69,7 +72,7 @@ def tracing_method(f, tracer):
 
 def traced_warning(f, tracer):
     """
-    Traces the AgentCheck.warning method
+    Traces the AgentCheck.warning method.
     The span is always an error span, including the current stack trace.
     The error message is set to the warning message.
     """
@@ -102,6 +105,62 @@ def traced_warning(f, tracer):
         return f
 
 
+def configure_tracer(tracer, self_check):
+    """
+    Generate a tracer context for the given function with configurable sampling rate.
+    If not set or invalid, defaults to 0 (no sampling).
+    The tracer context is only set at entry point functions so we can attach a trace root to the span.
+    """
+    apm_tracing_enabled = False
+    context_provider = None
+
+    integration_tracing, integration_tracing_exhaustive = tracing_enabled()
+    if integration_tracing or integration_tracing_exhaustive:
+        apm_tracing_enabled = True
+
+    dd_parent_id = None
+    dd_trace_id = None
+    try:
+        # If the check has a dd_trace_id and dd_parent_id, we can use it to create a trace root
+        if hasattr(self_check, "instance") and self_check.instance:
+            dd_trace_id = self_check.instance.get("dd_trace_id", None)
+            dd_parent_id = self_check.instance.get("dd_parent_span_id", None)
+        elif hasattr(self_check, "instances") and self_check.instances and len(self_check.instances) > 0:
+            dd_trace_id = self_check.instances[0].get("dd_trace_id", None)
+            dd_parent_id = self_check.instances[0].get("dd_parent_span_id", None)
+    except (AttributeError, ValueError, TypeError):
+        pass
+
+    try:
+        if dd_trace_id and dd_parent_id:
+            pass
+            from ddtrace.context import Context
+
+            apm_tracing_enabled = True
+            context_provider = Context(
+                trace_id=dd_trace_id,
+                span_id=dd_parent_id,
+            )
+    except ImportError:
+        pass
+    return context_provider
+    try:
+        # Update the tracer configuration to make sure we trace only if we really need to
+        tracer.configure(
+            appsec_enabled=False,
+            enabled=apm_tracing_enabled,
+        )
+
+        # If the current trace context is not set or is set to an empty trace_id, activate the context provider
+        current_context = tracer.current_trace_context()
+    #     if (
+    #         current_context is None or (current_context is not None and len(current_context.trace_id) == 0)
+    #     ) and context_provider:
+    #         tracer.context_provider.activate(context_provider)
+    except Exception:
+        pass
+
+
 def tracing_enabled():
     """
     :return: (integration_tracing, integration_tracing_exhaustive)
@@ -118,42 +177,46 @@ def tracing_enabled():
 
 
 def traced_class(cls):
-    integration_tracing, integration_tracing_exhaustive = tracing_enabled()
-    if integration_tracing:
-        try:
-            integration_tracing_exhaustive = is_affirmative(datadog_agent.get_config('integration_tracing_exhaustive'))
+    """
+    Decorator that adds tracing to all methods of a class.
+    Only traces specific methods by default, unless exhaustive tracing is enabled.
+    """
+    _, integration_tracing_exhaustive = tracing_enabled()
 
-            from ddtrace import patch_all, tracer
+    try:
+        from ddtrace import patch_all, tracer
 
-            patch_all()
+        patch_all()
 
-            def decorate(cls):
-                for attr in cls.__dict__:
-                    attribute = getattr(cls, attr)
+        def decorate(cls):
+            for attr in cls.__dict__:
+                attribute = getattr(cls, attr)
 
-                    if not callable(attribute) or inspect.isclass(attribute):
-                        continue
+                if not callable(attribute) or inspect.isclass(attribute):
+                    continue
 
-                    # Ignoring staticmethod and classmethod because they don't need cls in args
-                    # also ignore nested classes
-                    if isinstance(cls.__dict__[attr], staticmethod) or isinstance(cls.__dict__[attr], classmethod):
-                        continue
+                # Ignoring staticmethod and classmethod because they don't need cls in args
+                # also ignore nested classes
+                if isinstance(cls.__dict__[attr], staticmethod) or isinstance(cls.__dict__[attr], classmethod):
+                    continue
 
-                    # Get rid of SnmpCheck._thread_factory and related
-                    if getattr(attribute, '__module__', 'threading') in EXCLUDED_MODULES:
-                        continue
+                # Get rid of SnmpCheck._thread_factory and related
+                if getattr(attribute, '__module__', 'threading') in EXCLUDED_MODULES:
+                    continue
 
-                    if not integration_tracing_exhaustive and attr not in AGENT_CHECK_DEFAULT_TRACED_METHODS:
-                        continue
+                if not integration_tracing_exhaustive and attr not in AGENT_CHECK_DEFAULT_TRACED_METHODS:
+                    continue
 
-                    if attr == 'warning':
-                        setattr(cls, attr, traced_warning(attribute, tracer))
-                    else:
-                        setattr(cls, attr, tracing_method(attribute, tracer))
-                return cls
+                is_entry_point = attr == 'run' or attr == 'check'
 
-            return decorate(cls)
-        except Exception:
-            pass
+                if attr == 'warning':
+                    setattr(cls, attr, traced_warning(attribute, tracer))
+                else:
+                    setattr(cls, attr, tracing_method(attribute, tracer, is_entry_point))
+            return cls
+
+        return decorate(cls)
+    except Exception:
+        pass
 
     return cls
