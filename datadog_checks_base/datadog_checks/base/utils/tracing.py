@@ -112,7 +112,7 @@ def configure_tracer(tracer, self_check):
     The tracer context is only set at entry point functions so we can attach a trace root to the span.
     """
     # apm_tracing_enabled = False
-    # context_provider = None
+    context_provider = None
 
     integration_tracing, integration_tracing_exhaustive = tracing_enabled()
     if integration_tracing or integration_tracing_exhaustive:
@@ -135,16 +135,16 @@ def configure_tracer(tracer, self_check):
     try:
         if dd_trace_id and dd_parent_id:
             pass
-    #         from ddtrace.context import Context
+            from ddtrace.context import Context
 
-    #         apm_tracing_enabled = True
-    #         context_provider = Context(
-    #             trace_id=dd_trace_id,
-    #             span_id=dd_parent_id,
-    #         )
+            # apm_tracing_enabled = True
+            context_provider = Context(
+                trace_id=dd_trace_id,
+                span_id=dd_parent_id,
+            )
     except ImportError:
         pass
-
+    return context_provider
     # try:
     #     # Update the tracer configuration to make sure we trace only if we really need to
     #     tracer.configure(
