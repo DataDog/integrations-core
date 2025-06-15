@@ -1,5 +1,11 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import unittest
+
 from generate_metadata import extract_metric_defs
+
 
 class TestExtractMetricDefs(unittest.TestCase):
     def test_basic_metric_extraction(self):
@@ -17,7 +23,7 @@ class TestExtractMetricDefs(unittest.TestCase):
             "service_pending_requests": "gauge",
             "service_latency": "timer",
             "event_blob_size": "byteshistogram",
-            "state_transition_count": "dimensionlesshistogram"
+            "state_transition_count": "dimensionlesshistogram",
         }
         self.assertEqual(extract_metric_defs(go_code), expected)
 
@@ -40,10 +46,7 @@ class TestExtractMetricDefs(unittest.TestCase):
             metric2 = NewTimerDef("metric.two")
         )
         '''
-        expected = {
-            "metric.one": "counter",
-            "metric.two": "timer"
-        }
+        expected = {"metric.one": "counter", "metric.two": "timer"}
         self.assertEqual(extract_metric_defs(go_code), expected)
 
     def test_complex_definitions(self):
@@ -67,9 +70,10 @@ class TestExtractMetricDefs(unittest.TestCase):
             "operation.gauge": "gauge",
             "custom.metric": "custom",
             "another.metric": "histogram",
-            "non_retryable_tasks": "counter"
+            "non_retryable_tasks": "counter",
         }
         self.assertEqual(extract_metric_defs(go_code), expected)
 
+
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

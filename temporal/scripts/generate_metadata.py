@@ -38,14 +38,20 @@ def main():
     - Ensures backward compatibility while incorporating new metric definitions
     """
     parser = argparse.ArgumentParser(
-        description='Generate metadata.csv for Temporal integration. Must be run in an environment that has the integration installed.',
+        description=(
+            'Generate metadata.csv for Temporal integration. Must be run in an '
+            'environment that has the integration installed.'
+        ),
         epilog='Example: hatch run py3.8-1.19:python ./scripts/generate_metadata.py --tag=v1.19.0',
     )
 
     parser.add_argument(
         '--tag',
         required=True,
-        help='Temporal version tag (e.g., v1.19.0). This will be used to fetch metric definitions from the Temporal repository.',
+        help=(
+            'Temporal version tag (e.g., v1.19.0). This will be used to fetch metric '
+            'definitions from the Temporal repository.'
+        ),
     )
     args = parser.parse_args()
 
@@ -83,7 +89,8 @@ def main():
             metric_meta['unit_name'] = unit_name
         metadata.append(metric_meta)
 
-    # Handling metrics that might have multiple variations (like histograms that generate .bucket, .count, and .sum metrics)
+    # Handling metrics that might have multiple variations (like histograms that generate
+    # .bucket, .count, and .sum metrics)
     added_dd_metrics = set()
 
     #  Build the metadata for the metrics that both lives in temporal's code and in the METRIC_MAP
@@ -95,19 +102,22 @@ def main():
             )
             if existed_dd_metric:
                 print(
-                    f"INFO: dynamic metric `{dd_metric}` is reserved because it's present in the current metadata.csv file"
+                    f"INFO: dynamic metric `{dd_metric}` is reserved because it's present "
+                    "in the current metadata.csv file"
                 )
                 metadata.extend(existing_dd_metric)
             else:
                 print(
-                    f"WARNING: skipping metric `{dd_metric}` because native dynamic type and is not present in the current metadata.csv file"
+                    f"WARNING: skipping metric `{dd_metric}` because native dynamic type "
+                    "and is not present in the current metadata.csv file"
                 )
             continue
 
         try:
             temporal_type = temporal_metric_types[temporal_name]
         except KeyError:
-            # If metrics does not exist in this Temporal version, try to search metric in the current metadata file and preserve it if it's already exist
+            # If metrics does not exist in this Temporal version, try to search metric in
+            # the current metadata file and preserve it if it's already exist
             existing_dd_metric, existed_dd_metric = check_existing_metric(
                 dd_metric, previous_metadata, added_dd_metrics
             )
@@ -115,7 +125,9 @@ def main():
                 metadata.extend(existing_dd_metric)
             else:
                 print(
-                    f"WARNING: skipping metric `{temporal_name}/{dd_metric}` because it's not present in both temporal metric definitions and the current metatada.csv file"
+                    f"WARNING: skipping metric `{temporal_name}/{dd_metric}` because it's "
+                    "not present in both temporal metric definitions and the current "
+                    "metatada.csv file"
                 )
             continue
 
