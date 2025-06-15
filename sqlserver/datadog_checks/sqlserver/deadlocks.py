@@ -27,7 +27,7 @@ from datadog_checks.sqlserver.utils import is_azure_sql_database
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 600
 MAX_DEADLOCKS = 100
