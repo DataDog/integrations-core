@@ -2,21 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Script to update metadata.csv based on temporal's code and current
-# `METRIC_MAP` as defined on metrics.py
-# Must be run in an environment that has the integration installed,
-# and passed the tag of the temporal version from stdin, e.g.:
-# hatch run py3.8-1.19:python ./scripts/generate_metadata.py --tag=v1.19.0
 
+import argparse
 import csv
 import re
-import sys
-import requests
-import argparse
 from urllib.parse import urljoin
 
-from datadog_checks.temporal.metrics import METRIC_MAP
+import requests
 
+from datadog_checks.temporal.metrics import METRIC_MAP
 
 
 def main():
@@ -43,8 +37,16 @@ def main():
     - Handles metrics that might have been dropped in newer Temporal versions
     - Ensures backward compatibility while incorporating new metric definitions
     """
-    parser = argparse.ArgumentParser(description='Generate metadata.csv for Temporal integration')
-    parser.add_argument('--tag', required=True, help='Temporal version tag (e.g., v1.19.0)')
+    parser = argparse.ArgumentParser(
+        description='Generate metadata.csv for Temporal integration. Must be run in an environment that has the integration installed.',
+        epilog='Example: hatch run py3.8-1.19:python ./scripts/generate_metadata.py --tag=v1.19.0',
+    )
+
+    parser.add_argument(
+        '--tag',
+        required=True,
+        help='Temporal version tag (e.g., v1.19.0). This will be used to fetch metric definitions from the Temporal repository.',
+    )
     args = parser.parse_args()
 
     # Preserve existing metadata.csv entries.
@@ -81,45 +83,58 @@ def main():
             metric_meta['unit_name'] = unit_name
         metadata.append(metric_meta)
 
+    # Handling metrics that might have multiple variations (like histograms that generate .bucket, .count, and .sum metrics)
+    added_dd_metrics = set()
+
     #  Build the metadata for the metrics that both lives in temporal's code and in the METRIC_MAP
-    for temporal_name, name in METRIC_MAP.items():
-        if isinstance(name, dict) and name.get('type') == 'native_dynamic':
+    for temporal_name, dd_metric in METRIC_MAP.items():
+        if isinstance(dd_metric, dict) and dd_metric.get('type') == 'native_dynamic':
             # Native dynamic metrics have its type defined at run time, and usually added manually, see https://github.com/DataDog/integrations-core/pull/18050
-            existing, exist = check_existing_metric(name.get('name'), previous_metadata)
-            if exist:
-                print(f"INFO: dynamic metric `{name}` is reserved because it's present in the current metadata.csv file")
-                metadata.extend(existing)
+            existing_dd_metric, existed_dd_metric = check_existing_metric(
+                dd_metric.get('name'), previous_metadata, added_dd_metrics
+            )
+            if existed_dd_metric:
+                print(
+                    f"INFO: dynamic metric `{dd_metric}` is reserved because it's present in the current metadata.csv file"
+                )
+                metadata.extend(existing_dd_metric)
             else:
-                print(f"WARNING: skipping metric `{name}` because native dynamic type and is not present in the current metadata.csv file")
+                print(
+                    f"WARNING: skipping metric `{dd_metric}` because native dynamic type and is not present in the current metadata.csv file"
+                )
             continue
-            
+
         try:
             temporal_type = temporal_metric_types[temporal_name]
         except KeyError:
             # If metrics does not exist in this Temporal version, try to search metric in the current metadata file and preserve it if it's already exist
-            existing, exist = check_existing_metric(name, previous_metadata)
-            if exist:
-                metadata.extend(existing)
+            existing_dd_metric, existed_dd_metric = check_existing_metric(
+                dd_metric, previous_metadata, added_dd_metrics
+            )
+            if existed_dd_metric:
+                metadata.extend(existing_dd_metric)
             else:
-                print(f"WARNING: skipping metric `{temporal_name}/{name}` because it's not present in both temporal metric definitions and the current metatada.csv file")
+                print(
+                    f"WARNING: skipping metric `{temporal_name}/{dd_metric}` because it's not present in both temporal metric definitions and the current metatada.csv file"
+                )
             continue
 
         # Update the metrics name based on the temporal type
         if temporal_type == 'counter':
-            append_metric_metadata(f'{name}.count')
+            append_metric_metadata(f'{dd_metric}.count')
         elif temporal_type == 'gauge':
-            append_metric_metadata(name, 'gauge')
+            append_metric_metadata(dd_metric, 'gauge')
         elif temporal_type.endswith('histogram'):
             unit_name = None
             if temporal_type == 'byteshistogram':
                 unit_name = "byte"
-            append_metric_metadata(f'{name}.bucket')
-            append_metric_metadata(f'{name}.count')
-            append_metric_metadata(f'{name}.sum', unit_name=unit_name)
+            append_metric_metadata(f'{dd_metric}.bucket')
+            append_metric_metadata(f'{dd_metric}.count')
+            append_metric_metadata(f'{dd_metric}.sum', unit_name=unit_name)
         elif temporal_type == 'timer':
-            append_metric_metadata(f'{name}.bucket')
-            append_metric_metadata(f'{name}.count')
-            append_metric_metadata(f'{name}.sum', unit_name='millisecond')
+            append_metric_metadata(f'{dd_metric}.bucket')
+            append_metric_metadata(f'{dd_metric}.count')
+            append_metric_metadata(f'{dd_metric}.sum', unit_name='millisecond')
         else:
             print(f"Unrecognized metric type {temporal_type}, skipping.")
 
@@ -128,6 +143,7 @@ def main():
         writer = csv.DictWriter(metadata_file, metadata_fields)
         writer.writeheader()
         writer.writerows(metadata)
+
 
 def extract_metric_defs(go_code: str) -> dict:
     """
@@ -161,55 +177,56 @@ def extract_metric_defs(go_code: str) -> dict:
 
     return results
 
-added_keys = set()
 
-def check_existing_metric(name: str, previous_metadata: dict) -> tuple[list, bool]:
+def check_existing_metric(name: str, previous_metadata: dict, added_dd_metrics: set) -> tuple[list, bool]:
     """
     Check if a metric exists in the previous metadata and add it to the current metadata if found.
-    
+
     Args:
         name: The name of the metric to check, example of a metric name: service.pending_requests
         previous_metadata: Dictionary containing the previous metadata
-        
+
     Returns:
         tuple: (metadata list with any existing metrics added, boolean indicating if metric exists)
     """
     pattern = re.compile(rf"^temporal\.server\.{re.escape(name)}(?:\.[a-z]+)*$")
     exist = False
     result = []
-    for key in previous_metadata:
-        if pattern.match(key) and key not in added_keys:
+    for dd_metric in previous_metadata:
+        if pattern.match(dd_metric) and dd_metric not in added_dd_metrics:
             # A metric were supported in the previous temporal version, but dropped in the current temporal version
-            result.append(previous_metadata.get(key))
-            print(f"INFO: {key} is reserved because it exists in the current metatadata.csv file")
+            result.append(previous_metadata.get(dd_metric))
+            print(f"INFO: {dd_metric} is reserved because it exists in the current metatadata.csv file")
             exist = True
-            added_keys.add(key)
+            added_dd_metrics.add(dd_metric)
     return result, exist
+
 
 def fetch_temporal_metrics(tag: str) -> str:
     """
     Fetch the metrics definitions file from Temporal repository for a specific tag.
-    
+
     Args:
         tag (str): The Temporal version tag (e.g., 'v1.19.0')
-        
+
     Returns:
         str: The content of the metrics definitions file
-        
+
     Raises:
         requests.RequestException: If the request fails
         ValueError: If the tag format is invalid
     """
     if not tag.startswith('v'):
         raise ValueError("Tag must start with 'v' (e.g., 'v1.19.0')")
-        
+
     base_url = "https://raw.githubusercontent.com/temporalio/temporal/refs/tags"
     metrics_path = "common/metrics/metric_defs.go"
     url = urljoin(f"{base_url}/{tag}/", metrics_path)
-    
+
     response = requests.get(url)
     response.raise_for_status()
     return response.text
+
 
 if __name__ == '__main__':
     main()
