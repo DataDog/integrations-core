@@ -88,8 +88,10 @@ class VagrantAgent(AgentInterface):
     def _generate_vagrantfile_content(self, **kwargs) -> str:
         agent_install_env_vars = kwargs.get("agent_install_env_vars", {})
         synced_folders = kwargs.get("synced_folders", [])
+        exported_env_vars = kwargs.get("exported_env_vars", {})
 
         agent_install_env_vars_str = " ".join([f"{key}=\"{value}\"" for key, value in agent_install_env_vars.items()]) if agent_install_env_vars else ""
+        exported_env_vars_str = "\n".join([f"export {key}=\"{value}\"" for key, value in exported_env_vars.items()]) if exported_env_vars else ""
 
         vm_hostname = self._vm_name  # Already sanitized and unique
         vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
@@ -113,6 +115,7 @@ tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
 export DD_API_KEY="{os.environ.get("DD_API_KEY")}"
 export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
 export DD_SITE="datadoghq.com"
+{exported_env_vars_str}
 
 EOF
 SCRIPT
@@ -127,8 +130,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "{vm_hostname}" do |node|
     node.vm.hostname = "{vm_hostname}"
-    node.vm.memory = "{vb_memory}"
-    node.vm.cpus = "{vb_cpus}"
 
     node.vm.provision "shell", inline: $set_environment_variables, run: "always"
 
@@ -260,10 +261,6 @@ end
         return self._vm_name
 
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
-        # `agent_build` is part of the interface but less directly used for Vagrant
-        # as the VM's "build" (box image) is typically defined in the Vagrantfile.
-        # It could be used to select a Vagrant box if multiple are defined and match a pattern.
-
         # prepare agent install scripts environment variables
         agent_install_env_vars = {}
 
@@ -287,38 +284,35 @@ end
         for local_package in local_packages:
             synced_folders.append(f'{local_package}:{self._package_mount_dir}/{local_package.name}')
 
-
-        # We can now generate the Vagrantfile content
-        self._initialize_vagrant(overwrite=True, agent_install_env_vars=agent_install_env_vars, synced_folders=synced_folders)
-
-        print(f"Starting Vagrant environment for VM: {self._vm_name} with agent build: '{agent_build}'")
-
         # Host environment variables for `vagrant up` command itself
         host_operation_env_vars = EnvVars(os.environ)
         host_operation_env_vars.update(env_vars)  # User-provided can override system for the vagrant command
 
         # Prepare environment variables intended for the Agent process inside the VM.
-        # These are primarily for reference or if custom start_commands need them.
-        # Agent installation & primary config are now assumed to be in the Vagrantfile.
-        agent_process_env = {}
+        exported_env_vars = {}
         if AgentEnvVars.API_KEY not in env_vars:
-            agent_process_env[AgentEnvVars.API_KEY] = "a" * 32
-        agent_process_env[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname", _get_hostname())
-        agent_process_env[AgentEnvVars.CMD_PORT] = str(self.metadata.get("dd_cmd_port", _find_free_port()))
-        agent_process_env[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
-        agent_process_env[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")
-        agent_process_env[AgentEnvVars.EXPVAR_PORT] = self.metadata.get("dd_expvar_port", "5000")
+            exported_env_vars[AgentEnvVars.API_KEY] = "a" * 32
+        exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname", _get_hostname())
+        exported_env_vars[AgentEnvVars.CMD_PORT] = str(self.metadata.get("dd_cmd_port", _find_free_port()))
+        exported_env_vars[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
+        exported_env_vars[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")
+        exported_env_vars[AgentEnvVars.EXPVAR_PORT] = self.metadata.get("dd_expvar_port", "5000")
         if (proxy_data := self.metadata.get("proxy")) is not None:
             if (http_proxy := proxy_data.get("http")) is not None:
-                agent_process_env[AgentEnvVars.PROXY_HTTP] = http_proxy
+                exported_env_vars[AgentEnvVars.PROXY_HTTP] = http_proxy
             if (https_proxy := proxy_data.get("https")) is not None:
-                agent_process_env[AgentEnvVars.PROXY_HTTPS] = https_proxy
-        self.metadata["resolved_agent_process_env"] = agent_process_env  # Keep for reference
+                exported_env_vars[AgentEnvVars.PROXY_HTTPS] = https_proxy
 
         ensure_local_pkg: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
         if self.config_file.is_file() and local_packages:
             print(f"Local packages to install; temporarily disabling integration config: {self.config_file}")
             ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
+
+
+        # We can now generate the Vagrantfile content
+        self._initialize_vagrant(overwrite=True, exported_env_vars=exported_env_vars, agent_install_env_vars=agent_install_env_vars, synced_folders=synced_folders)
+
+        print(f"Starting Vagrant environment for VM: {self._vm_name} with agent build: '{agent_build}'")
 
         up_command_host = ["vagrant", "up", self._vm_name]
         if self.metadata.get("vagrant_provision", True):
