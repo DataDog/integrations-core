@@ -290,6 +290,7 @@ end
 
         # Prepare environment variables intended for the Agent process inside the VM.
         exported_env_vars = {}
+        exported_env_vars.extend(self.metadata.get('env', []))
         if AgentEnvVars.API_KEY not in env_vars:
             exported_env_vars[AgentEnvVars.API_KEY] = "a" * 32
         exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname", _get_hostname())
