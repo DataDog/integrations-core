@@ -171,6 +171,17 @@ class ChannelMetricCollector(object):
             if pymqi_type not in channel_info:
                 self.log.debug("metric '%s' not found in channel: %s", metric_name, channel_name)
                 continue
+
+            # Special handling for connection metric
+            if metric_name == 'conns':
+                connection_name = to_string(channel_info[pymqi_type]).strip()
+                if not connection_name:
+                    continue
+                connection_tags = tags + ["connection:{}".format(connection_name)]
+                self.gauge(metric_full_name, 1, tags=connection_tags, hostname=self.config.hostname)
+                continue
+
+            # Regular metric handling
             metric_value = int(channel_info[pymqi_type])
             self.gauge(metric_full_name, metric_value, tags=tags, hostname=self.config.hostname)
 
