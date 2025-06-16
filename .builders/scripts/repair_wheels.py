@@ -100,6 +100,25 @@ class WheelName(NamedTuple):
         ]) + '.whl'
 
 
+def check_unacceptable_files(
+    wheel: Path,
+    bypass_prefixes: list[str],
+    invalid_file_patterns: list[str],
+):
+    """Check if a wheel contains any unacceptable files and exit if found."""
+    if any(wheel.name.startswith(pkg_prefix) for pkg_prefix in bypass_prefixes):
+        return
+
+    unacceptable_files = find_patterns_in_wheel(wheel, invalid_file_patterns)
+    if unacceptable_files:
+        print(
+            f"Found copies of unacceptable files in external wheel '{wheel.name}'",
+            f'(matching {invalid_file_patterns}): ',
+            unacceptable_files,
+        )
+        sys.exit(1)
+
+
 def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
     from auditwheel.policy import WheelPolicies
@@ -132,16 +151,11 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
         if not wheel_was_built(wheel):
             print('Using existing wheel')
 
-            if not any(wheel.name.startswith(pkg_prefix) for pkg_prefix in OPENSSL_PACKAGE_BYPASS):
-                unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
-                if unacceptable_files:
-                    print(
-                        f"Found copies of unacceptable files in external wheel '{wheel.name}'",
-                        f'(matching {external_invalid_file_patterns}): ',
-                        unacceptable_files,
-                    )
-                    sys.exit(1)
-
+            check_unacceptable_files(
+                wheel,
+                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
+                invalid_file_patterns=external_invalid_file_patterns,
+            )
             shutil.move(wheel, external_dir)
             continue
 
@@ -183,16 +197,11 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
         if not wheel_was_built(wheel):
             print('Using existing wheel')
 
-            if not any(wheel.name.startswith(pkg_prefix) for pkg_prefix in OPENSSL_PACKAGE_BYPASS):
-                unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
-                if unacceptable_files:
-                    print(
-                        f"Found copies of unacceptable files in external wheel '{wheel.name}'",
-                        f'(matching {external_invalid_file_patterns}): ',
-                        unacceptable_files,
-                    )
-                    sys.exit(1)
-
+            check_unacceptable_files(
+                wheel,
+                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
+                invalid_file_patterns=external_invalid_file_patterns,
+            )
             shutil.move(wheel, external_dir)
             continue
 
