@@ -6,8 +6,8 @@
 [Workato][1] provides a platform for enterprise automation and integration so you can connect, integrate,
 and automate your applications, data, and processes end-to-end.
 
-The Workato integration collects [jobs](https://docs.workato.com/en/recipes/jobs.html#viewing-job-reports) logs
-(recipe execution) and status metrics (connection and recipe state), sending them to Datadog for detailed analysis.
+The Workato integration collects [jobs](https://docs.workato.com/en/recipes/jobs.html#viewing-job-reports), logs
+(recipe execution), and status metrics (connection and recipe state), sending them to Datadog for detailed analysis.
 The logs are parsed and enriched for efficient searching, while the metrics provide insights into operational status.
 
 The integration includes a dashboard that shows job execution status and duration, making it easier to monitor and
