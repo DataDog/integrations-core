@@ -1,0 +1,22 @@
+[
+    {
+        "agent_version": "7.67.0",
+        "integration": "Windows Certificate Store",
+        "groups": [
+            "certificate_store",
+            "subject_cn",
+            "subject_ou",
+            "subject_c",
+            "subject_o",
+            "subject_l"
+        ],
+        "check": "windows_certificate.cert_expiration",
+        "statuses": [
+            "ok",
+            "critical",
+            "warning"
+        ],
+        "name": "Certificate validation",
+        "description": "Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`, returns `WARNING` if the certificate expires in less than `days_warning`, otherwise returns `OK`."
+    }
+]

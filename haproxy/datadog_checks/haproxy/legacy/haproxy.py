@@ -453,7 +453,7 @@ class HAProxyCheckLegacy(AgentCheck):
         return formatted_status
 
     def _process_backend_hosts_metric(self, active_tag=None):
-        agg_statuses = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
+        agg_statuses = defaultdict(lambda: dict.fromkeys(Services.COLLATED_STATUSES, 0))
         active_tag = [] if active_tag is None else active_tag
 
         for host_status, count in self.hosts_statuses.items():
@@ -493,7 +493,7 @@ class HAProxyCheckLegacy(AgentCheck):
         self,
         active_tag=None,
     ):
-        agg_statuses_counter = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
+        agg_statuses_counter = defaultdict(lambda: dict.fromkeys(Services.COLLATED_STATUSES, 0))
         active_tag = [] if active_tag is None else active_tag
         # Initialize `statuses_counter`: every value is a defaultdict initialized with the correct
         # keys, which depends on the `collate_status_tags_per_host` option

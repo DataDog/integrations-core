@@ -54,6 +54,17 @@ def readmes(ctx, check, format_links):
         display_queue = []
         readme_path = get_readme_file(integration)
 
+        if not os.path.exists(readme_path) and repo in ('extras', 'marketplace'):
+            # We are in the process of migrating extras and marketplace to manage READMEs in the Publishing Platform.
+            # We'll revisit this validation once we know for sure how we handle READMEs in the new world.
+            echo_info(
+                f"Skipping README.md validation for {integration}: "
+                "'integrations-extras' and 'marketplace' packages are migrating to the Publishing Platform "
+                "for README management. If you are not using the Publishing Platform, please ensure your package "
+                "includes a README.md file."
+            )
+            continue
+
         # Validate the README itself
         validate_readme(integration, repo, display_queue, files_failed, readme_counter)
 

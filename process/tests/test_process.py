@@ -168,7 +168,7 @@ def mock_psutil_wrapper(method, accessors):
     if accessors is None:
         result = 0
     else:
-        result = {accessor: 0 for accessor in accessors}
+        result = dict.fromkeys(accessors, 0)
     return result
 
 

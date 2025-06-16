@@ -282,11 +282,6 @@ instances:
     #
     # data_directory: /usr/local/pgsql/data
 
-    ## @param tag_replication_role - boolean - optional - default: false
-    ## Tag metrics and checks with `replication_role:<master|standby>`.
-    #
-    # tag_replication_role: false
-
     ## @param table_count_limit - integer - optional - default: 200
     ## The maximum number of tables to collect metrics from.
     #
@@ -440,6 +435,18 @@ instances:
     ## Please note this is an ALPHA feature and is subject to change or deprecation without notice.
     #
     # pg_stat_statements_view: show_pg_stat_statements()
+
+    ## @param query_encodings - list of strings - optional
+    ## Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
+    ## When attempting to decode stored query text for query metrics, samples and activity, the agent will use these
+    ## values in order and return the first successful decoding. Only supported for Postgres 10 and above.
+    ##
+    ## Note that the values should be the Python versions of the encoding names, which can be referenced at:
+    ## https://docs.python.org/3/library/codecs.html#standard-encodings
+    #
+    # query_encodings:
+    #   - utf8
+    #   - latin1
 
     ## Configure collection of query metrics
     #

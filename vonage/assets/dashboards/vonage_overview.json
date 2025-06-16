@@ -1,0 +1,1528 @@
+{
+  "title": "Vonage Dashboard",
+  "description": "[[suggested_dashboards]]",
+  "widgets": [
+    {
+      "id": 4071778046237794,
+      "definition": {
+        "type": "image",
+        "url": "https://lh4.googleusercontent.com/proxy/64OWI21P2AbsqEMbFvsyNm3FytvxVFQLDsbMcCYjpyoUlUwZo_gyT1NQEWWEk2P_emeiSWlkqQqLtYlzHEK1AdHuFfIm48juI9mqyiaKIEFwsE70tRITsDTashKhd5Cv6g",
+        "sizing": "cover",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 7076767531359220,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5968953365388950,
+            "definition": {
+              "title": "Total Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7018532611301034,
+            "definition": {
+              "title": "Message Error Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @error_code:29 @product:SMS"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7883996543871030,
+            "definition": {
+              "title": "Voice Calls Error Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs -@error_code:403 @product:VOICE-FAILED"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7332897484715916,
+            "definition": {
+              "title": "Message Error Rate (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query2 / query1) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @error_code:29 @product:SMS"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2884478970118578,
+            "definition": {
+              "title": "Voice Call Error Rate (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / (query2 + query3)) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs -@error_code:403 @product:VOICE-FAILED"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "data_source": "logs",
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-CALL"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "data_source": "logs",
+                      "name": "query3",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-FAILED"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars",
+                "yaxis": {}
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 5,
+              "width": 3,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 9
+      }
+    },
+    {
+      "id": 5584290042794198,
+      "definition": {
+        "type": "note",
+        "content": "This dashboard provides a high-level overview of your Vonage service. Use it to troubleshoot messages and call errors, and collect comprehensive event-logging and change-tracking info for your Vonage account.\n",
+        "background_color": "transparent",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 8834262960537252,
+      "definition": {
+        "title": "All Vonage Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "query": {
+              "query_string": "source:vonage_logs ",
+              "sort": {
+                "column": "timestamp",
+                "order": "desc"
+              },
+              "data_source": "logs_stream",
+              "storage": "hot",
+              "indexes": []
+            },
+            "response_format": "event_list",
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "content",
+                "width": "auto"
+              }
+            ]
+          }
+        ],
+        "type": "list_stream"
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 8845489185416882,
+      "definition": {
+        "title": "Voice Failed Details",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5320407474608070,
+            "definition": {
+              "title": "Voice Call Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:vonage_logs @product:VOICE-FAILED ",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "desc"
+                    },
+                    "data_source": "logs_stream",
+                    "storage": "hot",
+                    "indexes": []
+                  },
+                  "response_format": "event_list",
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 5
+            }
+          },
+          {
+            "id": 7220606279492472,
+            "definition": {
+              "type": "note",
+              "content": "The Voice API in Vonage enables businesses to integrate voice communication into their applications. \n\n - Initiate and receive voice calls programmatically\n - Call recording, conferencing, and call forwarding, allowing for flexible and efficient communication.\n - Create automated systems that guide callers through menus, improving customer service and reducing wait times.\n - Easy integration into various types of systems\n - Global Reach: Supporsts calls accross countries, connecting with customers worldwide.\n - Enhances customer interactions, improves service delivery, and streamlines communication processes.",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 8072330632267656,
+            "definition": {
+              "title": "Voice Calls dialled across time. ",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Successful Calls",
+                      "style": {
+                        "palette": "green",
+                        "palette_index": 6
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Failed Calls",
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 6
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-CALL"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "data_source": "logs",
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-FAILED"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 7
+            }
+          },
+          {
+            "id": 7454490175400310,
+            "definition": {
+              "title": "Failed Voice Calls Dialled",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-FAILED"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4184179958228184,
+            "definition": {
+              "type": "note",
+              "content": "Status of the Calls \n- `started`: The call has been initiated and is in the process of being connected.\n- `ringing`: The call is currently ringing on the recipient's end, waiting for them to answer.\n- `answered`: The recipient has answered the call, and the conversation can begin.\n- `machine`: The call was answered by a voicemail or an automated answering machine rather than a live person.\n- `completed`: The call has been successfully completed and terminated after the conversation or interaction.\n- `busy`: The call was not connected because the recipient's line was busy.\n- `cancelled`: The call was canceled before it could be connected, either by the caller or due to other factors.\n- `failed`: The call attempt was unsuccessful due to an error or issue, preventing it from connecting.\n- `rejected`: The call was rejected by the recipient, meaning they declined to answer.\n- `timeout`: The call could not be completed within the expected timeframe, leading to a timeout error.",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 5
+            }
+          },
+          {
+            "id": 3794346329095826,
+            "definition": {
+              "title": "Total Voice Calls Dialled",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-FAILED"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "data_source": "logs",
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-CALL"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": false,
+              "text_align": "center",
+              "precision": 0
+            },
+            "layout": {
+              "x": 4,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 6606245020433906,
+            "definition": {
+              "title": "Voice Calls by Vonage Status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "source",
+                          "limit": 15,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "search": {
+                        "query": "source:vonage_logs @product:VOICE-FAILED"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "thick"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 8,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 9,
+        "width": 12,
+        "height": 11
+      }
+    },
+    {
+      "id": 2408188131621548,
+      "definition": {
+        "title": "Message Details",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2656111029870888,
+            "definition": {
+              "title": "Messages by Vonage Status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@status",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 5
+            }
+          },
+          {
+            "id": 1748553349074390,
+            "definition": {
+              "title": "Total SMS logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7665718459559620,
+            "definition": {
+              "title": "Messages Sent Across Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Sent Messages",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @error_code:0 @product:SMS @direction:outbound"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 5
+            }
+          },
+          {
+            "id": 2787473752146948,
+            "definition": {
+              "type": "note",
+              "content": "The SMS API in Vonage allows businesses to send and receive SMS.\n\n- Send bulk or individual messages globally.\n- Receive replies from users, via two-way communication.\n- Track the delivery status of messages\n- Personalize for different users based on their data or preferences.\n- Easy integration into existing applications\n- Enhance customer engagement, streamline communication",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5139340397364240,
+            "definition": {
+              "type": "note",
+              "content": "Status of Messages\n-    `Success`\n-   `Throttled`\n- `Missing Parameters`\n-  `Invalid Parameters`\n-  `Invalid Credentials`\n-   `Internal Error`\n-   `Invalid Message`\n-  `Number Barred`\n-   `Partner Account Barred`\n-  `Partner Quota Violation`\n-   `Too Many Existing Binds`\n-   `Account Not Enabled For HTTP`\n-   `Message Too Long`\n-  `Invalid Signature`\n -   `Invalid Sender Address`\n -   `Invalid Network Code`\n -  `Invalid Callback URL`\n -  `Non-Whitelisted Destination`\n -   `Signature And API Secret Disallowed`\n -  `Number Deactivated`",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 3,
+              "height": 5
+            }
+          },
+          {
+            "id": 1690705097880322,
+            "definition": {
+              "title": "Message Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:vonage_logs @product:SMS ",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "asc"
+                    },
+                    "data_source": "logs_stream",
+                    "storage": "hot",
+                    "indexes": []
+                  },
+                  "response_format": "event_list",
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 3,
+              "y": 5,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 283541546185734,
+            "definition": {
+              "title": "Messages logs Status Across Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Sent Messages",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@status",
+                          "limit": 100,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 3,
+              "y": 8,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 4818989667178904,
+            "definition": {
+              "title": "Messages sent across Countries.",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @product:SMS @country:*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 250,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 250,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 7,
+              "y": 8,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 8470901075596972,
+            "definition": {
+              "title": "Messages Successfully Delivered",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:vonage_logs @error_code:0 @product:SMS"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 20,
+        "width": 12,
+        "height": 13,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 7761428847564640,
+      "definition": {
+        "title": "Audit Details",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 945697867189378,
+            "definition": {
+              "title": "Audit events by Event types",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@event_type",
+                          "limit": 30,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 30,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 5
+            }
+          },
+          {
+            "id": 6737361086114530,
+            "definition": {
+              "title": "Total number of Audit events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs @event_type:*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5973293464439264,
+            "definition": {
+              "title": "Audit logs Sent Across Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:vonage_logs"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@event_type",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 5
+            }
+          },
+          {
+            "id": 6698243798229426,
+            "definition": {
+              "type": "note",
+              "content": "The Vonage Audit API enables you to monitor your account using events and get a series of audit events describing changes made to your Vonage API account over time.",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 3143202353455626,
+            "definition": {
+              "type": "note",
+              "content": "Types of Events\n- 0 :  `USER_STATUS`\n- 1 :  `USER_UPDATE`\n- 2 :  `USER_BILLING_UPDATE`\n- 3 :  `USER_CREATE`\n- 4 :  `USER_LOGIN`\n- 5 :  `USER_LOGOUT`\n- 6 :  `USER_PRODUCT_SEARCH`\n- 7 :  `USER_API_KEYS_UPDATE`\n- 8 :  `ACCOUNT_SECRET_DELETE`\n- 9 :  `ACCOUNT_SECRET_CREATE`\n- 10 :  `ACCOUNT_UPDATE_SPAMMER`\n- 11 :  `ACCOUNT_UPDATE_SETTINGS_API`\n- 12 :  `NUMBER_ASSIGN`\n- 13 :  `NUMBER_UPDATED`\n - 14 :  `NUMBER_LINKED`\n - 15 :  `NUMBER_UNLINKED`\n - 16 :  `APP_CREATE`\n - 17 :  `APP_UPDATE`\n - 18 :  `APP_DELETE`\n - 19 :  `APP_DISABLE`\n - 20 :  'APP_ENABLE'\n - 21 :  'IP_WHITELIST_CREATE'\n - 22 :  'IP_WHITELIST_DELETE'\n - 23 :  'AUTORELOAD_ENABLE'",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 5
+            }
+          },
+          {
+            "id": 2452079115315648,
+            "definition": {
+              "title": "Audit Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:vonage_logs @event_type:*",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "asc"
+                    },
+                    "data_source": "logs_stream",
+                    "storage": "hot",
+                    "indexes": []
+                  },
+                  "response_format": "event_list",
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 4,
+              "y": 5,
+              "width": 8,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 33,
+        "width": 12,
+        "height": 11
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

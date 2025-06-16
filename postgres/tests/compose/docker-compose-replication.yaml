@@ -17,7 +17,7 @@ services:
       - ./etc/postgresql:/etc/postgresql/
     environment:
       POSTGRES_PASSWORD: datad0g
-      POSTGRES_INITDB_ARGS: --data-checksums
+      POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf' -c 'hba_file=/etc/postgresql/pg_hba.conf'
 
   postgres_replica:
@@ -36,7 +36,7 @@ services:
       - ./etc/postgresql_replica:/etc/postgresql/
     environment:
       POSTGRES_PASSWORD: datad0g
-      POSTGRES_INITDB_ARGS: --data-checksums
+      POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
   postgres_replica2:
@@ -55,7 +55,7 @@ services:
       - ./etc/postgresql_replica2:/etc/postgresql/
     environment:
       POSTGRES_PASSWORD: datad0g
-      POSTGRES_INITDB_ARGS: --data-checksums
+      POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
   postgres_logical_replica:
@@ -74,5 +74,5 @@ services:
       - ./etc/postgresql_logical_replica:/etc/postgresql/
     environment:
       POSTGRES_PASSWORD: datad0g
-      POSTGRES_INITDB_ARGS: --data-checksums
+      POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
