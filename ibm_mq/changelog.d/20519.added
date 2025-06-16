@@ -1,0 +1,1 @@
+Add metric ibm_mq.channel.conns to ibm mq integration, add channel and connection metric tests
