@@ -78,9 +78,10 @@ def traced_warning(f, tracer):
     """
     try:
         try:
-            from ddtrace.constants import ERROR_MSG, ERROR_TYPE
+            from ddtrace import ERROR_MSG, ERROR_TYPE
         except ImportError:
-            from ddtrace.ext.errors import ERROR_MSG, ERROR_TYPE
+            ERROR_MSG = 'error.message'
+            ERROR_TYPE = 'error.type'
 
         def wrapper(self, warning_message, *args, **kwargs):
             integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
@@ -111,31 +112,31 @@ def configure_tracer(tracer, self_check):
     If not set or invalid, defaults to 0 (no sampling).
     The tracer context is only set at entry point functions so we can attach a trace root to the span.
     """
-    apm_tracing_enabled = False
+    apm_tracing_disabled = True
     context_provider = None
 
     integration_tracing, integration_tracing_exhaustive = tracing_enabled()
     if integration_tracing or integration_tracing_exhaustive:
-        apm_tracing_enabled = True
+        apm_tracing_disabled = False
 
     dd_parent_id = None
     dd_trace_id = None
     try:
         # If the check has a dd_trace_id and dd_parent_id, we can use it to create a trace root
         if hasattr(self_check, "instance") and self_check.instance:
-            dd_trace_id = self_check.instance.get("dd_trace_id", None)
-            dd_parent_id = self_check.instance.get("dd_parent_span_id", None)
+            dd_trace_id = int(self_check.instance.get("dd_trace_id", 0))
+            dd_parent_id = int(self_check.instance.get("dd_parent_span_id", 0))
         elif hasattr(self_check, "instances") and self_check.instances and len(self_check.instances) > 0:
-            dd_trace_id = self_check.instances[0].get("dd_trace_id", None)
-            dd_parent_id = self_check.instances[0].get("dd_parent_span_id", None)
+            dd_trace_id = int(self_check.instances[0].get("dd_trace_id", 0))
+            dd_parent_id = int(self_check.instances[0].get("dd_parent_span_id", 0))
     except (AttributeError, ValueError, TypeError):
         pass
 
     try:
         if dd_trace_id and dd_parent_id:
-            from ddtrace.context import Context
+            from ddtrace.trace import Context
 
-            apm_tracing_enabled = True
+            apm_tracing_disabled = False
             context_provider = Context(
                 trace_id=dd_trace_id,
                 span_id=dd_parent_id,
@@ -146,13 +147,13 @@ def configure_tracer(tracer, self_check):
         # Update the tracer configuration to make sure we trace only if we really need to
         tracer.configure(
             appsec_enabled=False,
-            enabled=apm_tracing_enabled,
+            apm_tracing_disabled=apm_tracing_disabled,
         )
 
         # If the current trace context is not set or is set to an empty trace_id, activate the context provider
         current_context = tracer.current_trace_context()
         if (
-            current_context is None or (current_context is not None and len(current_context.trace_id) == 0)
+            current_context is None or (current_context is not None and current_context.trace_id == 0)
         ) and context_provider:
             tracer.context_provider.activate(context_provider)
     except Exception:
@@ -182,7 +183,8 @@ def traced_class(cls):
     _, integration_tracing_exhaustive = tracing_enabled()
 
     try:
-        from ddtrace import patch_all, tracer
+        from ddtrace import patch_all
+        from ddtrace.trace import tracer
 
         patch_all()
 
