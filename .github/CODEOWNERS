@@ -265,10 +265,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /extrahop/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /extrahop/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/falco/                                                             @DataDog/saas-integrations
-/falco/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
-/falco/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
-/falco/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/falco/                                                             @DataDog/agent-integrations @DataDog/saas-integrations
+/falco/*.md                                                         @DataDog/agent-integrations @DataDog/saas-integrations @DataDog/documentation
+/falco/manifest.json                                                @DataDog/agent-integrations @DataDog/saas-integrations @DataDog/documentation
+/falco/assets/logs/                                                 @DataDog/agent-integrations @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /freshservice/                                                          @DataDog/saas-integrations
 /freshservice/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
@@ -537,6 +537,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /forcepoint_security_service_edge/*.md                               @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/assets/logs/                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/mac_audit_logs/                                                     @DataDog/agent-integrations
+/mac_audit_logs/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/assets/logs/                                         @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 
 /gpu/                                                                @DataDog/ebpf-platform
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
