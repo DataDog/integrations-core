@@ -159,6 +159,25 @@ class PostgreSql(AgentCheck):
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
 
+        instance_config = copy.deepcopy(self.instance)
+        instance_config['password'] = "***"
+        init_event = {
+            "dbm_type": "agent_health",
+            "event_type": "initialization",
+            "database_instance": self.database_identifier,
+            "ddsource": "postgres",
+            "ddagentversion": datadog_agent.get_version(),
+            "ddtags": self.tags,
+            "timestamp": time() * 1000,
+            "instance_config": json.dumps(instance_config, default=default_json_event_encoding),
+            "agent_config": json.dumps(self.agentConfig, default=default_json_event_encoding),
+        }
+        self.log.info("agent config: %s", self.agentConfig)
+        self.log.info("init event: %s", init_event)
+        self.database_monitoring_query_activity(
+            json.dumps(init_event, default=default_json_event_encoding)
+        )
+
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
             return None
