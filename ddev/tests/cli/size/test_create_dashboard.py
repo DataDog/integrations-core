@@ -27,6 +27,7 @@ def mock_dashboard_env():
 
 def test_create_dashboard_success(ddev, app, mock_dashboard_env):
     result = ddev("size", "create-dashboard", "--dd-org", "default", obj=app)
+    print(result.output)
     assert result.exit_code == 0
     assert "Dashboard URL: https://app.datadoghq.com/dashboard/abc123" in result.output
 
