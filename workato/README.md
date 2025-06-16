@@ -20,7 +20,7 @@ understand trends and issues.
 1. Log in to [Workato][2] as an administrator. 
 2. Navigate to the **Workspace Admin** tab. > API Clients**.
 3. (Create a Client Role with sufficient permission) Click **Client Roles** tab.
-4. Client the **+ Add client role** button.
+4. Click **+ Add client role**.
    1. Check the following boxes to allow minimal read access:
    ```
       Projects
@@ -43,11 +43,11 @@ understand trends and issues.
                 Tags
                     List tags
    ```
-   2. Edit the role name and click **Save changes**.
-7. Client the **API Clients** tab.
+   2. Edit the role name, and click **Save changes**.
+7. Select the **API Clients** tab.
 8. Click **+ Add API Client**, and then enter the required information:
-   1. Under **Name**, Enter a descriptive and identifiable client name.
-   2. Choose the newly created Client Role from the dropdown or ensure the selected role has `LIST` and `GET DETAILS` permissions on all Workato Resources.
+   1. Under **Name**, enter a descriptive and identifiable client name.
+   2. Choose the newly created Client Role from the dropdown, or ensure the selected role has `LIST` and `GET DETAILS` permissions on all Workato Resources.
    3. If the Environments feature is enabled, choose the Environment to which this client has access.
    4. Choose between _Selected Projects_ or _All Projects_ from the **Project access** drop-down menu.
    5. Leave the **Allowed IPs** text box blank to allow access from any IP.
