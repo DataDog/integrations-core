@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from ddev.platform import Platform
 
 
+
 @contextmanager
 def disable_integration_before_install(config_file: Path):
     """
@@ -45,6 +46,7 @@ def disable_integration_before_install(config_file: Path):
         elif not config_file.exists() and (config_file.parent / old_name).exists():
             # If the original was somehow restored or yield failed before new_config_file was used.
             pass  # Already in desired state or original file does not exist to be renamed.
+
 
 
 class VagrantAgent(AgentInterface):
@@ -68,16 +70,22 @@ class VagrantAgent(AgentInterface):
         # Generate Vagrantfile if it doesn't exist
         vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
         if not vagrantfile_path.exists() or overwrite:
-            if not overwrite:
-                print(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
-            else:
+            if overwrite:
                 print(f"Overwriting Vagrantfile found at '{vagrantfile_path}'.")
                 vagrantfile_path.unlink()
                 print(f"Vagrantfile deleted at {vagrantfile_path}")
+            else:
+                print(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
 
+            import hashlib
+            old_file_hash = hashlib.sha256(vagrantfile_path.read_text().encode()).hexdigest()
             vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
             vagrantfile_path.write_text(vagrantfile_content)
             print(f"Vagrantfile generated at {vagrantfile_path}")
+
+            new_file_hash = hashlib.sha256(vagrantfile_content.encode()).hexdigest()
+            if old_file_hash != new_file_hash:
+                self.metadata["vagrant_provision"] = True
         else:
             print(f"Using existing Vagrantfile at {vagrantfile_path}")
 
@@ -316,7 +324,8 @@ end
         print(f"Starting Vagrant environment for VM: {self._vm_name} with agent build: '{agent_build}'")
 
         up_command_host = ["vagrant", "up", self._vm_name]
-        if self.metadata.get("vagrant_provision", True):
+        if self.metadata.get("vagrant_provision", False):
+            print(f"VagrantFile changed, provisioning Vagrant VM: {self._vm_name}")
             up_command_host.append("--provision")
 
         # Agent installation script via Python is removed. Assumed to be in Vagrantfile provisioning.
@@ -516,12 +525,7 @@ end
 
     def invoke(self, args: list[str]) -> None:
         # Runs an 'agent <command>' inside the VM
-
-        agent_bin = self.metadata.get("vagrant_agent_binary_path", "/opt/datadog-agent/bin/agent/agent")
-        if self._is_windows_vm:
-            agent_bin = self.metadata.get(
-                "vagrant_windows_agent_binary_path", "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe"
-            )
+        agent_bin = "/opt/datadog-agent/bin/agent/agent" if not self._is_windows_vm else "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe"
 
         guest_cmd_parts = [agent_bin] + args
         host_cmd = self._format_command(guest_cmd_parts)
