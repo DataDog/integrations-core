@@ -7,7 +7,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: component
-    path: component
+    path: cloudgen_firewall.component
     source: log
     type: string
   - description: ""
@@ -15,7 +15,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: IPs
-    path: cloudgen.ip
+    path: cloudgen_firewall.ip
     source: log
     type: string
   - description: ""
@@ -23,7 +23,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process
-    path: process
+    path: cloudgen_firewall.process
     source: log
     type: string
   - description: ""
@@ -31,7 +31,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process ID
-    path: pid
+    path: cloudgen_firewall.pid
     source: log
     type: string
   - description: ""
@@ -39,7 +39,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: session_status
-    path: session_status
+    path: cloudgen_firewall.session_status
     source: log
     type: string
 pipeline:
@@ -147,7 +147,7 @@ pipeline:
       sourceType: attribute
       target: syslog.timestamp
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `hostname` to `syslog.hostname`
@@ -157,7 +157,7 @@ pipeline:
       sourceType: attribute
       target: syslog.hostname
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `component` to `service`
@@ -167,7 +167,7 @@ pipeline:
       sourceType: attribute
       target: service
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: grok-parser
       name: Firewall Threat
@@ -450,7 +450,7 @@ pipeline:
       sourceType: attribute
       target: status
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: grok-parser
       name: Box Firewall
