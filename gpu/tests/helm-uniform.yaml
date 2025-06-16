@@ -1,0 +1,19 @@
+datadog:
+  apiKey: "${API_KEY}"
+  site: datadoghq.com
+  enable_nvml_detection: true
+  collect_gpu_tags: true
+  tags:
+    - "env:test"
+    - "deployment:gpu-test"
+  gpuMonitoring:
+    enabled: true
+
+agents:
+  image:
+    tag: "${AGENT_VERSION}"
+
+clusterAgent:
+  enabled: true
+  image:
+    tag: "${AGENT_VERSION}"

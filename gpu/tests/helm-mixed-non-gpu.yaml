@@ -1,0 +1,24 @@
+datadog:
+  apiKey: "${API_KEY}"
+  site: datadoghq.com
+  tags:
+    - "env:test"
+    - "deployment:gpu-test"
+
+agents:
+  image:
+    tag: "${AGENT_VERSION}"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: nvidia.com/gpu.present
+            operator: NotIn
+            values:
+              - "true"
+
+clusterAgent:
+  enabled: true
+  image:
+    tag: "${AGENT_VERSION}"

@@ -1,0 +1,50 @@
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+  namespace: "${NAMESPACE}"
+spec:
+  global:
+    credentials:
+      apiKey: "${API_KEY}"
+    site: datadoghq.com
+    tags:
+      - "env:test"
+      - "deployment:gpu-test"
+
+  override:
+    nodeAgent:
+      image:
+        tag: "${AGENT_VERSION}"
+
+    clusterAgent:
+      image:
+        tag: "${AGENT_VERSION}"
+---
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogAgentProfile
+metadata:
+  name: gpu-nodes
+  namespace: "${NAMESPACE}"
+spec:
+  profileAffinity:
+    profileNodeAffinity:
+      - key: nvidia.com/gpu.present
+        operator: In
+        values:
+          - "true"
+  config:
+    override:
+      nodeAgent:
+        runtimeClassName: nvidia
+        containers:
+          system-probe:
+            env:
+              - name: DD_GPU_MONITORING_ENABLED
+                value: "true"
+          agent:
+            env:
+              - name: DD_ENABLE_NVML_DETECTION
+                value: "true"
+              - name: DD_COLLECT_GPU_TAGS
+                value: "true"
