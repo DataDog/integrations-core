@@ -47,6 +47,25 @@ class TestCert:
             assert mock_load_cert_chain.call_args[0][0] == 'cert'
             assert mock_load_cert_chain.call_args[1]["keyfile"] == 'key'
 
+    @pytest.mark.parametrize(
+        'options, expected_cert, expected_key',
+        [
+            pytest.param({}, None, None, id='cert foo'),
+            pytest.param({'cert': 'foo'}, 'foo', None, id='cert foo'),
+            pytest.param({'cert': ('foo','bar')}, 'foo', 'bar', id='cert foo,bar'),
+        ]
+    )
+    def test_request_cert_gets_read(self, options, expected_cert, expected_key):
+        '''Test that the request options are set correctly in the new context.'''
+        with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
+            RequestsWrapper({}, {}).get('https://google.com', **options)
+
+            if options.get('cert') is None:
+                assert mock_load_cert_chain.call_count == 0
+                return
+
+            mock_load_cert_chain.assert_called_once()
+            mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
 
 class TestIgnoreTLSWarning:
     def test_config_default(self):
