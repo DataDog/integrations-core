@@ -39,7 +39,7 @@ def create_dashboard(
             "Content-Type": "application/json",
         }
         json_path = os.path.join(os.path.dirname(__file__), "utils", "dashboard.json")
-        with open(json_path, "r") as f:
+        with open(json_path, "r", encoding="utf-8") as f:
             payload = json.load(f)
 
         response = requests.post(
