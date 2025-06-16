@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture
 def app():
     mock_app = MagicMock()
-    mock_app.repo.path = "/fake/repo"
+    mock_app.repo.path = "fake_repo"
     mock_app.abort = MagicMock()
     return mock_app
 
