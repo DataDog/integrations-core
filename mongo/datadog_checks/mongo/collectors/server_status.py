@@ -36,7 +36,7 @@ class ServerStatusCollector(MongoCollector):
     def collect(self, api):
         db = api[self.db_name]
         # No need to check for `result['ok']`, already handled by pymongo
-        payload = db.command('serverStatus', tcmalloc=self.collect_tcmalloc_metrics)
+        payload = db.command('serverStatus', tcmalloc=self.collect_tcmalloc_metrics, maxTimeMS=api._timeout)
 
         # If these keys exist, remove them for now as they cannot be serialized.
         payload.get('backgroundFlushing', {}).pop('last_finished', None)

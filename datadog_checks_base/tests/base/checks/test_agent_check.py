@@ -41,15 +41,6 @@ def test_check_version():
     assert check.check_version == base_package_version
 
 
-def test_load_config():
-    assert AgentCheck.load_config('raw_foo: bar') == {'raw_foo': 'bar'}
-    assert AgentCheck.load_config('invalid:mapping') == 'invalid:mapping'
-    assert AgentCheck.load_config('') is None
-
-    with pytest.raises(ValueError, match='Failed to load config: '):
-        AgentCheck.load_config(':')
-
-
 def test_persistent_cache(datadog_agent):
     check = AgentCheck()
     check.check_id = 'test'
@@ -1316,3 +1307,24 @@ def test_env_var_logic_preset():
         AgentCheck()
         assert os.getenv('OPENSSL_CONF', None) == preset_conf
         assert os.getenv('OPENSSL_MODULES', None) == preset_modules
+
+
+@pytest.mark.parametrize(
+    "should_profile_value, expected_calls",
+    [
+        (True, 1),
+        (False, 0),
+    ],
+)
+def test_profile_memory(should_profile_value, expected_calls):
+    """
+    Test that profile_memory is called when should_profile_memory is True
+    """
+    check = AgentCheck('test', {}, [{}])
+    check.should_profile_memory = mock.MagicMock(return_value=should_profile_value)
+    check.profile_memory = mock.MagicMock()
+
+    check.run()
+
+    assert check.should_profile_memory.call_count == 1
+    assert check.profile_memory.call_count == expected_calls

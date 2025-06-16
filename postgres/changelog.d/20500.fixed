@@ -1,0 +1,1 @@
+checking wal_level and if is aurora before querying for control checkpoint metrics

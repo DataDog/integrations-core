@@ -25,6 +25,6 @@ class FsyncLockCollector(MongoCollector):
 
     def collect(self, api):
         db = api['admin']
-        ops = db.command('currentOp')
+        ops = db.command('currentOp', maxTimeMS=api._timeout)
         payload = {'fsyncLocked': 1 if ops.get('fsyncLock') else 0}
         self._submit_payload(payload)

@@ -1,9 +1,9 @@
 import json
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, Mock, mock_open, patch
 
-from ddev.cli.size.common import (
+from ddev.cli.size.utils.common_funcs import (
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
@@ -12,12 +12,14 @@ from ddev.cli.size.common import (
     get_dependencies_sizes,
     get_files,
     get_gitignore_files,
+    get_org,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration,
-    print_csv,
-    print_json,
+    save_csv,
+    save_json,
+    save_markdown,
 )
 
 
@@ -113,7 +115,9 @@ def test_get_dependencies_sizes():
     mock_response.status_code = 200
     mock_response.headers = {"Content-Length": "12345"}
     with patch("requests.head", return_value=mock_response):
-        file_data = get_dependencies_sizes(["dependency1"], ["https://example.com/dependency1.whl"], ["1.1.1"], True)
+        file_data = get_dependencies_sizes(
+            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True
+        )
     assert file_data == [
         {
             "Name": "dependency1",
@@ -125,7 +129,7 @@ def test_get_dependencies_sizes():
     ]
 
 
-def test_format_modules_multiple_platform():
+def test_format_modules():
     modules = [
         {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
         {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
@@ -150,31 +154,7 @@ def test_format_modules_multiple_platform():
         },
     ]
 
-    assert format_modules(modules, platform, version, True) == expected_output
-
-
-def test_format_modules_one_plat():
-    modules = [
-        {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
-        {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
-    ]
-    platform = "linux-aarch64"
-    version = "3.12"
-
-    expected_output = [
-        {
-            "Name": "module1",
-            "Type": "A",
-            "Size_Bytes": 1500,
-        },
-        {
-            "Name": "module2",
-            "Type": "B",
-            "Size_Bytes": 3000,
-        },
-    ]
-
-    assert format_modules(modules, platform, version, False) == expected_output
+    assert format_modules(modules, platform, version) == expected_output
 
 
 def test_get_files_grouped_and_with_versions():
@@ -197,14 +177,19 @@ def test_get_files_grouped_and_with_versions():
         return file_sizes[Path(path)]
 
     with (
-        patch("os.walk", return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output]),
-        patch("os.path.getsize", side_effect=mock_getsize),
-        patch("ddev.cli.size.common.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.common.is_valid_integration", side_effect=mock_is_valid_integration),
-        patch("ddev.cli.size.common.extract_version_from_about_py", return_value="1.2.3"),
-        patch("ddev.cli.size.common.convert_to_human_readable_size", side_effect=lambda s: f"{s / 1024:.2f} KB"),
+        patch(
+            "ddev.cli.size.utils.common_funcs.os.walk",
+            return_value=[(str(p), dirs, files) for p, dirs, files in os_walk_output],
+        ),
+        patch("ddev.cli.size.utils.common_funcs.os.path.getsize", side_effect=mock_getsize),
+        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.is_valid_integration", side_effect=mock_is_valid_integration),
+        patch("ddev.cli.size.utils.common_funcs.extract_version_from_about_py", return_value="1.2.3"),
+        patch(
+            "ddev.cli.size.utils.common_funcs.convert_to_human_readable_size",
+            side_effect=lambda s: f"{s / 1024:.2f} KB",
+        ),
     ):
-
         result = get_files(repo_path, compressed=False)
 
     expected = [
@@ -231,13 +216,13 @@ def test_get_gitignore_files():
     mock_gitignore = f"__pycache__{os.sep}\n*.log\n"  # Sample .gitignore file
     repo_path = "fake_repo"
     with patch("builtins.open", mock_open(read_data=mock_gitignore)):
-        with patch("os.path.exists", return_value=True):
+        with patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True):
             ignored_patterns = get_gitignore_files(repo_path)
     assert ignored_patterns == ["__pycache__" + os.sep, "*.log"]
 
 
 def test_compress():
-    fake_content = b'a' * 16384
+    fake_content = b"a" * 16384
     original_size = len(fake_content)
 
     m = mock_open(read_data=fake_content)
@@ -249,56 +234,76 @@ def test_compress():
     assert compressed_size < original_size
 
 
-def test_print_csv():
+def test_save_csv():
+    mock_file = mock_open()
     mock_app = MagicMock()
+
     modules = [
-        {"Name": "module1", "Size B": 123, "Size": "2 B"},
-        {"Name": "module,with,comma", "Size B": 456, "Size": "2 B"},
+        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B"},
+        {"Name": "module,with,comma", "Size_Bytes": 456, "Size": "2 B"},
     ]
 
-    print_csv(mock_app, modules=modules)
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_csv(mock_app, modules, "output.csv")
 
-    expected_calls = [
-        (("Name,Size B",),),
-        (('module1,123',),),
-        (('"module,with,comma",456',),),
-    ]
+    mock_file.assert_called_once_with("output.csv", "w", encoding="utf-8")
+    handle = mock_file()
 
-    actual_calls = mock_app.display.call_args_list
-    assert actual_calls == expected_calls
+    expected_writes = ["Name,Size_Bytes\n", "module1,123\n", '"module,with,comma",456\n']
+
+    assert handle.write.call_args_list == [((line,),) for line in expected_writes]
 
 
-def test_print_json():
+def test_save_json():
     mock_app = MagicMock()
+    mock_file = mock_open()
 
     modules = [
         {"name": "mod1", "size": "100"},
         {"name": "mod2", "size": "200"},
         {"name": "mod3", "size": "300"},
     ]
-    print_json(mock_app, modules)
 
-    expected_calls = [
-        (("[",),),
-        (('{"name": "mod1", "size": "100"}',),),
-        ((",",),),
-        (('{"name": "mod2", "size": "200"}',),),
-        ((",",),),
-        (('{"name": "mod3", "size": "300"}',),),
-        (("]",),),
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_json(mock_app, "output.json", modules)
+
+    mock_file.assert_called_once_with("output.json", "w", encoding="utf-8")
+    handle = mock_file()
+
+    expected_json = json.dumps(modules, indent=2)
+
+    written_content = "".join(call.args[0] for call in handle.write.call_args_list)
+    assert written_content == expected_json
+
+    mock_app.display.assert_called_once_with("JSON file saved to output.json")
+
+
+def test_save_markdown():
+    mock_app = MagicMock()
+    mock_file = mock_open()
+
+    modules = [
+        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B", "Type": "Integration", "Platform": "linux-x86_64"},
+        {"Name": "module2", "Size_Bytes": 456, "Size": "4 B", "Type": "Dependency", "Platform": "linux-x86_64"},
     ]
 
-    actual_calls = mock_app.display.call_args_list
-    print(actual_calls)
-    assert actual_calls == expected_calls
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_markdown(mock_app, "Status", modules, "output.md")
 
-    result = "".join(call[0][0] for call in actual_calls)
-    parsed = json.loads(result)
-    assert parsed == [
-        {"name": "mod1", "size": "100"},
-        {"name": "mod2", "size": "200"},
-        {"name": "mod3", "size": "300"},
-    ]
+    mock_file.assert_called_once_with("output.md", "a", encoding="utf-8")
+    handle = mock_file()
+
+    expected_writes = (
+        "# Status\n\n"
+        "## Platform: linux-x86_64\n\n"
+        "| Name | Size | Type | Platform |\n"
+        "| --- | --- | --- | --- |\n"
+        "| module1 | 2 B | Integration | linux-x86_64 |\n"
+        "| module2 | 4 B | Dependency | linux-x86_64 |\n"
+    )
+
+    written_content = "".join(call.args[0] for call in handle.write.call_args_list)
+    assert written_content == expected_writes
 
 
 def test_extract_version_from_about_py_pathlib():
@@ -306,7 +311,7 @@ def test_extract_version_from_about_py_pathlib():
     fake_path = Path("some") / "module" / "__about__.py"
     fake_content = "__version__ = '1.2.3'\n"
 
-    with patch("builtins.open", mock_open(read_data=fake_content)):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
         version = extract_version_from_about_py(str(fake_path))
 
     assert version == "1.2.3"
@@ -316,7 +321,35 @@ def test_extract_version_from_about_py_no_version_pathlib():
     fake_path = Path("another") / "module" / "__about__.py"
     fake_content = "version = 'not_defined'\n"
 
-    with patch("builtins.open", mock_open(read_data=fake_content)):
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=fake_content)):
         version = extract_version_from_about_py(str(fake_path))
 
     assert version == ""
+
+
+def test_get_org():
+    mock_app = Mock()
+    mock_path = Mock()
+
+    toml_data = """
+        [orgs.default]
+        api_key = "test_api_key"
+        app_key = "test_app_key"
+        site = "datadoghq.com"
+        """
+
+    mock_app.config_file.path = mock_path
+
+    with (
+        patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=toml_data)),
+        patch.object(mock_path, "open", mock_open(read_data=toml_data)),
+    ):
+        result = get_org(mock_app, "default")
+
+    expected = {
+        "api_key": "test_api_key",
+        "app_key": "test_app_key",
+        "site": "datadoghq.com",
+    }
+
+    assert result == expected

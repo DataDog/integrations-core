@@ -140,17 +140,11 @@ def test_header_missing_invalid(ddev, repository, helpers):
             └── {outfile}
 
                 apache:2 Invalid column {{'curated_metric_badheader'}}.
-                apache:2 Missing columns {{'curated_metric'}}.
                 apache:3 Invalid column {{'curated_metric_badheader'}}.
-                apache:3 Missing columns {{'curated_metric'}}.
                 apache:4 Invalid column {{'curated_metric_badheader'}}.
-                apache:4 Missing columns {{'curated_metric'}}.
                 apache:5 Invalid column {{'curated_metric_badheader'}}.
-                apache:5 Missing columns {{'curated_metric'}}.
                 apache:6 Invalid column {{'curated_metric_badheader'}}.
-                apache:6 Missing columns {{'curated_metric'}}.
                 apache:7 Invalid column {{'curated_metric_badheader'}}.
-                apache:7 Missing columns {{'curated_metric'}}.
 
         Errors: 1
         """

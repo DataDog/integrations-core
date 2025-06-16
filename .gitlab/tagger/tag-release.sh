@@ -16,6 +16,12 @@ git config --global user.name "$TAGGER_NAME"
 set +e
 ddev release tag all --skip-prerelease
 status=$?
+# If we fail to fetch tags, fallback to the old behavior of getting list of tags even if they're not fetched
+if [[ $status -eq 3 ]]; then
+    echo "Failed to fetch tags, falling back to list tags without fetching"
+    ddev release tag all --skip-prerelease --no-fetch
+    status=$?
+fi
 set -e
 
 # Only build packages if there were new releases

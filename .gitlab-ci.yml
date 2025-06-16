@@ -96,7 +96,7 @@ release-auto:
     - schedules
   script:
     - ddev --version
-    - ddev config set core .
+    - ddev config override
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main" ]
@@ -128,27 +128,35 @@ release-manual:
 tagger-image-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
-  only:
-    changes:
-      - .gitlab/tagger/**/*
-      - ddev/**/*
-      - .gitlab-ci.yml
-    refs:
-      - master
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'schedule'
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - .gitlab/tagger/**/*
+        - ddev/**/*
+        - .gitlab-ci.yml
+    # Allow to manually trigger a build if we need to
+    - when: manual
+      allow_failure: true
   script:
     - docker buildx build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile . --push
-  except: [ tags, schedules ]
   tags: [ "arch:amd64" ]
 
 validate-log-intgs-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
-  only:
-    changes:
-      - .gitlab/validate-logs-intgs/**/*
-      - .gitlab-ci.yml
-    refs:
-      - master
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'schedule'
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == 'master'
+      changes:
+        - .gitlab/validate-logs-intgs/**/*
+        - .gitlab-ci.yml
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker buildx build --tag $VALIDATE_LOG_INTGS . --push

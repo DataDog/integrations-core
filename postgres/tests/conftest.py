@@ -22,6 +22,7 @@ from .common import (
     PORT_REPLICA2,
     PORT_REPLICA_LOGICAL,
     POSTGRES_IMAGE,
+    POSTGRES_LOCALE,
     POSTGRES_VERSION,
     USER,
 )
@@ -57,7 +58,7 @@ def dd_environment(e2e_instance):
     with docker_run(
         os.path.join(HERE, 'compose', compose_file),
         conditions=[WaitFor(connect_to_pg)],
-        env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE},
+        env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE, "POSTGRES_LOCALE": POSTGRES_LOCALE},
     ):
         yield e2e_instance
 

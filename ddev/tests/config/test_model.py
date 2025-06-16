@@ -101,7 +101,7 @@ class TestRepo:
                 """
                 Error parsing config:
                 repo
-                  unknown repository"""
+                  unknown Repository: 'foo'"""
             ),
         ):
             _ = config.repo
@@ -230,7 +230,7 @@ class TestAgent:
                 """
                 Error parsing config:
                 agent
-                  unknown Agent"""
+                  unknown Agent: 'foo'"""
             ),
         ):
             _ = config.agent
@@ -368,7 +368,7 @@ class TestOrg:
                 """
                 Error parsing config:
                 org
-                  unknown Org"""
+                  unknown Org: 'foo'"""
             ),
         ):
             _ = config.org

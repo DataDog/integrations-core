@@ -34,6 +34,7 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
+    check_metrics_metadata,
     check_performance_metrics,
     check_physical_replication_slots,
     check_slru_metrics,
@@ -97,6 +98,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
 
     aggregator.assert_all_metrics_covered()
+    check_metrics_metadata(aggregator)
 
 
 def _increase_txid(cur):
@@ -701,6 +703,45 @@ def test_pg_control(aggregator, integration_check, pg_instance):
     assert_metric_at_least(
         aggregator, 'postgresql.control.redo_delay_bytes', count=1, higher_bound=300, tags=dd_agent_tags
     )
+
+
+def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
+    """
+    Makes sure that we only get the control checkpoint metrics in the correct environment
+    """
+
+    # The control checkpoint metrics is not possible to collect in aurora if wal_level is not logical
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=True)
+    check._get_wal_level = mock.MagicMock(return_value="replica")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=0)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=0)
+
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=True)
+    check._get_wal_level = mock.MagicMock(return_value="logical")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=1)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=1)
+
+    # We should be able to collect the control checkpoint metrics in non-aurora environments no matter the wal_level
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=False)
+    check._get_wal_level = mock.MagicMock(return_value="replica")
+    aggregator.reset()
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=1)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=1)
 
 
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
