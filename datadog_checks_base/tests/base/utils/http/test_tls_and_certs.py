@@ -52,8 +52,8 @@ class TestCert:
         [
             pytest.param({}, None, None, id='cert foo'),
             pytest.param({'cert': 'foo'}, 'foo', None, id='cert foo'),
-            pytest.param({'cert': ('foo','bar')}, 'foo', 'bar', id='cert foo,bar'),
-        ]
+            pytest.param({'cert': ('foo', 'bar')}, 'foo', 'bar', id='cert foo,bar'),
+        ],
     )
     def test_request_cert_gets_read(self, options, expected_cert, expected_key):
         '''Test that the request options are set correctly in the new context.'''
@@ -66,6 +66,7 @@ class TestCert:
 
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
+
 
 class TestIgnoreTLSWarning:
     def test_config_default(self):
@@ -304,14 +305,19 @@ class TestSSLContext:
 
         assert hasattr(http, 'ssl_context')
         assert isinstance(http.ssl_context, ssl.SSLContext)
-    
+
     @pytest.mark.parametrize(
         "instance, verify_mode, check_hostname",
         [
             pytest.param({'tls_verify': True}, ssl.CERT_REQUIRED, True, id='tls_verify true'),
             pytest.param({'tls_verify': False}, ssl.CERT_NONE, False, id='tls_verify false'),
-            pytest.param({'tls_verify': True, 'tls_validate_hostname': False}, ssl.CERT_REQUIRED, False, id='tls_verify true and tls_validate_hostname false'),
-        ]
+            pytest.param(
+                {'tls_verify': True, 'tls_validate_hostname': False},
+                ssl.CERT_REQUIRED,
+                False,
+                id='tls_verify true and tls_validate_hostname false',
+            ),
+        ],
     )
     def test_ssl_context_has_correct_attributes(self, instance, verify_mode, check_hostname):
         """Test that RequestsWrapper creates an SSLContext instance."""

@@ -76,6 +76,7 @@ def mock_client():
         return MockResponse(
             file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
         )
+
     def mock_post(url: AnyStr, *__: Any, **___: Any):
         return mock.MagicMock(status_code=200, content=b'{"results": []}')
 
