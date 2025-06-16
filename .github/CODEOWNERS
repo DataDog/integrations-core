@@ -538,6 +538,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/assets/logs/                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/mac_audit_logs/                                                     @DataDog/agent-integrations
+/mac_audit_logs/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/assets/logs/                                         @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+
 /gpu/                                                                @DataDog/ebpf-platform
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
 /gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
