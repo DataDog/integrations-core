@@ -152,7 +152,7 @@ def configure_tracer(tracer, self_check):
         )
 
         # If the current trace context is not set or is set to an empty trace_id, activate the context provider
-        current_context = tracer.current_trace_context()
+        _current_context = tracer.current_trace_context()
     #     if (
     #         current_context is None or (current_context is not None and len(current_context.trace_id) == 0)
     #     ) and context_provider:
