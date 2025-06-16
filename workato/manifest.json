@@ -21,9 +21,9 @@
     ]
   },
   "assets": {
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {}
+    "logs": {
+      "source": "workato"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
