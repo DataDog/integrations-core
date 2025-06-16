@@ -9,8 +9,8 @@ import pytest
 from mock import MagicMock, patch  # noqa: F401
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.tls import TlsContextWrapper
 from datadog_checks.base.utils.http import get_tls_config_from_options
+from datadog_checks.base.utils.tls import TlsContextWrapper
 from datadog_checks.dev import TempDir
 
 
@@ -377,7 +377,7 @@ class TestTLSContext:
                 id='verify string and cert',
             ),
             pytest.param(
-                {'verify': 'bar', 'cert': ('foo','key')},
+                {'verify': 'bar', 'cert': ('foo', 'key')},
                 {'tls_verify': True, 'tls_cert': 'foo', 'tls_ca_cert': 'bar', 'tls_private_key': 'key'},
                 id='verify string and cert with key',
             ),

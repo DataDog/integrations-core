@@ -96,9 +96,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @AgentCheck.metadata_entrypoint
     def collect_avi_version(self):
-        self.log.warning(f"http get is:  {self.http.get}")
         response = self.http.get(self.base_url + "/api/cluster/version")
-        self.log.warning(f"Response is:  {response}")
         response.raise_for_status()
         version = response.json()['Version']
         self.set_metadata('version', version)
