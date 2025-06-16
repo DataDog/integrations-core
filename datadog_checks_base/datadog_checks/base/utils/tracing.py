@@ -133,7 +133,6 @@ def configure_tracer(tracer, self_check):
 
     try:
         if dd_trace_id and dd_parent_id:
-            pass
             from ddtrace.context import Context
 
             apm_tracing_enabled = True
@@ -143,7 +142,6 @@ def configure_tracer(tracer, self_check):
             )
     except ImportError:
         pass
-    return context_provider
     try:
         # Update the tracer configuration to make sure we trace only if we really need to
         tracer.configure(
