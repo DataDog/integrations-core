@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
@@ -6,13 +6,13 @@ from __future__ import annotations
 import os
 import shlex
 import sys
-import socket  # For _get_hostname and _find_free_port
-import tempfile
+import hashlib
+
 from contextlib import AbstractContextManager, contextmanager, nullcontext, closing
 from functools import cache, cached_property, partial
+from jinja2 import Template
 from typing import TYPE_CHECKING, Callable, Type
 
-import stamina
 import shutil
 
 from ddev.e2e.agent.interface import AgentInterface
@@ -70,21 +70,21 @@ class VagrantAgent(AgentInterface):
         # Generate Vagrantfile if it doesn't exist
         vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
         if not vagrantfile_path.exists() or overwrite:
+            old_file_hash = None
             if overwrite:
+                old_file_hash = hashlib.sha256(vagrantfile_path.read_text().encode()).hexdigest()
                 print(f"Overwriting Vagrantfile found at '{vagrantfile_path}'.")
                 vagrantfile_path.unlink()
                 print(f"Vagrantfile deleted at {vagrantfile_path}")
             else:
                 print(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
-
-            import hashlib
-            old_file_hash = hashlib.sha256(vagrantfile_path.read_text().encode()).hexdigest()
+    
+            
             vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
             vagrantfile_path.write_text(vagrantfile_content)
             print(f"Vagrantfile generated at {vagrantfile_path}")
-
             new_file_hash = hashlib.sha256(vagrantfile_content.encode()).hexdigest()
-            if old_file_hash != new_file_hash:
+            if old_file_hash and old_file_hash != new_file_hash:
                 self.metadata["vagrant_provision"] = True
         else:
             print(f"Using existing Vagrantfile at {vagrantfile_path}")
@@ -93,13 +93,19 @@ class VagrantAgent(AgentInterface):
         os.environ["VAGRANT_CWD"] = str(self._temp_vagrant_dir)
         print(f"Vagrant working directory set to: {self._temp_vagrant_dir}")
     
+    def _get_vagrantfile_template(self) -> Template:
+        template_path = Path(__file__).parent / "Vagrantfile.template"
+        if not template_path.is_file():
+            raise FileNotFoundError(f"Vagrantfile template not found at {template_path}")
+        return Template(template_path.read_text())
+
     def _generate_vagrantfile_content(self, **kwargs) -> str:
         agent_install_env_vars = kwargs.get("agent_install_env_vars", {})
         synced_folders = kwargs.get("synced_folders", [])
         exported_env_vars = kwargs.get("exported_env_vars", {})
 
-        agent_install_env_vars_str = " ".join([f"{key}=\"{value}\"" for key, value in agent_install_env_vars.items()]) if agent_install_env_vars else ""
-        exported_env_vars_str = "\n".join([f"export {key}=\"{value}\"" for key, value in exported_env_vars.items()]) if exported_env_vars else ""
+        agent_install_env_vars_str = " ".join([f'{key}="{value}"' for key, value in agent_install_env_vars.items()]) if agent_install_env_vars else ""
+        exported_env_vars_str = "\n".join([f'export {key}="{value}"' for key, value in exported_env_vars.items()]) if exported_env_vars else ""
 
         vm_hostname = self._vm_name  # Already sanitized and unique
         vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
@@ -109,48 +115,17 @@ class VagrantAgent(AgentInterface):
         for volume in synced_folders:
             path, target = volume.split(":")
             synced_folders_str += f'config.vm.synced_folder "{path}", "{target}"\n'
+        
+        template = self._get_vagrantfile_template()
 
-
-        return f"""\
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
-$set_environment_variables = <<SCRIPT
-tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
-
-export DD_API_KEY="{os.environ.get("DD_API_KEY")}"
-export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
-export DD_SITE="datadoghq.com"
-export DD_HOSTNAME=$(hostname)
-{exported_env_vars_str}
-
-EOF
-SCRIPT
-
-
-Vagrant.configure("2") do |config|
-  config.vm.box = "{vagrant_box}"
-  config.vm.box_version = "1.1"
-
-  {synced_folders_str}
-  config.vm.network "private_network", ip: "172.30.1.5"
-
-  config.vm.define "{vm_hostname}" do |node|
-    node.vm.hostname = "{vm_hostname}"
-
-    node.vm.provision "shell", inline: $set_environment_variables, run: "always"
-
-    node.vm.provision "shell", inline: <<-SHELL, run: "always"
-      apt update
-      echo "DD_ENV_VARS: {agent_install_env_vars_str}" # TODO: remove this, debugging purposes only
-      {agent_install_env_vars_str} bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
-      service datadog-agent start && echo "Agent started successfully"
-      echo "VM #{vm_hostname} is ready"
-    SHELL
-  end
-
-end
-"""
+        return template.render(
+            dd_api_key=os.environ.get("DD_API_KEY", ""),
+            exported_env_vars_str=exported_env_vars_str,
+            vagrant_box=vagrant_box,
+            synced_folders_str=synced_folders_str,
+            vm_hostname=vm_hostname,
+            agent_install_env_vars_str=agent_install_env_vars_str,
+        )
 
     @cached_property
     def _isatty(self) -> bool:
@@ -297,7 +272,7 @@ end
 
         # Prepare environment variables intended for the Agent process inside the VM.
         exported_env_vars = {}
-        exported_env_vars.extend(self.metadata.get('env', []))
+        exported_env_vars.update(self.metadata.get('env', {}))
         if AgentEnvVars.API_KEY not in env_vars:
             exported_env_vars[AgentEnvVars.API_KEY] = "a" * 32
 
@@ -305,7 +280,6 @@ end
         if self.metadata.get("dd_hostname"):
             exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname")
 
-        exported_env_vars[AgentEnvVars.CMD_PORT] = str(self.metadata.get("dd_cmd_port", _find_free_port()))
         exported_env_vars[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
         exported_env_vars[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")
         exported_env_vars[AgentEnvVars.EXPVAR_PORT] = self.metadata.get("dd_expvar_port", "5000")
@@ -481,7 +455,7 @@ end
             restart_cmd_str = self.metadata.get(
                 "vagrant_linux_agent_restart_command", "sudo systemctl restart datadog-agent.service"
             )
-            guest_cmds = [self.platform.modules.shlex.split(restart_cmd_str)]
+            guest_cmds = [restart_cmd_str]
         
         self._run_commands(guest_cmds, "restart-agent-service")
         print("Datadog Agent service restart sequence completed.")
@@ -504,10 +478,3 @@ end
         # For interactive shells, check=True might exit if shell exits non-zero,
         # but usually, it's what's desired.
         self._run_command(host_cmd, check=True)
-
-@cache
-def _find_free_port() -> int:
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(("", 0))  # Bind to an ephemeral port on all interfaces
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]  # Return the port number assigned
