@@ -443,7 +443,7 @@ pipeline:
         matchRules: autoFilledRule1
           %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+%{greedyData:message}
     - type: attribute-remapper
-      name: Remapping status from level attribute
+      name: Map `level` to `status`
       enabled: true
       sources:
         - level
@@ -496,7 +496,7 @@ pipeline:
           %{data:hostname}
           %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+%{greedyData:Action}
     - type: status-remapper
-      name: Remapper level to status
+      name: Define `level` as the official status of the log
       enabled: true
       sources:
         - level
