@@ -1,97 +1,54 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any  # noqa: F401
+from collections import ChainMap
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper, decorators
+from datadog_checks.base.types import InstanceType
 
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
+from .metrics import METRICS_MAP, RENAME_LABELS_MAP
+
+HTTP_STATUS_CODE_TAG = "http_response_status_code"
 
 
-class KrakendCheck(AgentCheck):
+class KrakendCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = 'krakend'
+    __NAMESPACE__ = "krakend"
 
-    def __init__(self, name, init_config, instances):
-        super(KrakendCheck, self).__init__(name, init_config, instances)
+    def create_scraper(self, config: InstanceType):
+        return decorators.WithHttpCodeClass(
+            OpenMetricsScraper(self, self.get_config_with_defaults(config)),
+            http_status_tag=HTTP_STATUS_CODE_TAG,
+        )
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
+    def get_config_with_defaults(self, config: InstanceType):
+        # If the user does not provide a value for go_metrics or process_metrics,
+        # assume they want whatever behvaior has been set in KrakenD
+        go_metrics = config.get("go_metrics", True)
+        process_metrics = config.get("process_metrics", True)
 
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+        def accept_metric(metric_name):
+            if metric_name.startswith("go_") and not go_metrics:
+                return False
+            if metric_name.startswith("process_") and not process_metrics:
+                return False
+            return True
 
-    def check(self, _):
-        # type: (Any) -> None
-        # The following are useful bits of code to help new users get started.
+        metrics = {
+            original_name: new_name for original_name, new_name in METRICS_MAP.items() if accept_metric(original_name)
+        }
 
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
+        rename_labels = RENAME_LABELS_MAP.copy()
+        if go_metrics:
+            # Only rename the version label if go_metrics are enabled
+            # This is explained in the tile
+            rename_labels["version"] = "go_version"
 
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+        default_configs = {
+            "metrics": [metrics],
+            "rename_labels": rename_labels,
+            "target_info": True,
+        }
 
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
-
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
-
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
-
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        return ChainMap(config, default_configs)
