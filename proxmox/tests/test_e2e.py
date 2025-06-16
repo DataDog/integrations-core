@@ -9,6 +9,5 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 
 @pytest.mark.e2e
 def test_api_down(dd_agent_check, aggregator, instance):
-    with pytest.raises(Exception):
-        aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance)
     aggregator.assert_metric("proxmox.api.up", 0, tags=['proxmox_server:http://localhost:8006/api2/json', 'testing'])
