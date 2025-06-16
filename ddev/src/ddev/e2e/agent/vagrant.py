@@ -103,8 +103,6 @@ class VagrantAgent(AgentInterface):
 
         vm_hostname = self._vm_name  # Already sanitized and unique
         vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
-        vb_memory = self.metadata.get("vagrant_vm_memory", "1024")
-        vb_cpus = self.metadata.get("vagrant_vm_cpus", "1")
 
 
         synced_folders_str = ""
@@ -123,6 +121,7 @@ tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
 export DD_API_KEY="{os.environ.get("DD_API_KEY")}"
 export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
 export DD_SITE="datadoghq.com"
+export DD_HOSTNAME=$(hostname)
 {exported_env_vars_str}
 
 EOF
@@ -301,7 +300,11 @@ end
         exported_env_vars.extend(self.metadata.get('env', []))
         if AgentEnvVars.API_KEY not in env_vars:
             exported_env_vars[AgentEnvVars.API_KEY] = "a" * 32
-        exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname", _get_hostname())
+
+        # By default, the hostname is the VM hostname (set in VagrantFile with DD_HOSTNAME)
+        if self.metadata.get("dd_hostname"):
+            exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname")
+
         exported_env_vars[AgentEnvVars.CMD_PORT] = str(self.metadata.get("dd_cmd_port", _find_free_port()))
         exported_env_vars[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
         exported_env_vars[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")
@@ -377,22 +380,7 @@ end
         print(f"Vagrant VM `{self._vm_name}` started successfully.\n{stdout}")
 
         if start_guest_commands:
-            print(f"Running start-up commands in VM `{self._vm_name}`...")
-            for guest_cmd_str in start_guest_commands:
-                cmd_parts_guest = self.platform.modules.shlex.split(guest_cmd_str)
-                formatted_host_cmd = self._format_command(cmd_parts_guest)
-                shell = True if "|" in guest_cmd_str or "$" in guest_cmd_str else False
-
-                print(f"Running command: {' '.join(formatted_host_cmd)} with shell: {shell}")
-                process = self._captured_process(formatted_host_cmd, shell=shell)
-                stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
-                stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
-                if process.returncode:
-                    raise RuntimeError(
-                        f"Failed to run start-up command `{' '.join(cmd_parts_guest)}` in VM `{self._vm_name}` (RC: {process.returncode}).\n"
-                        f"Stdout:\n{stdout}\nStderr:\n{stderr}"
-                    )
-                print(f"Successfully ran start-up command `{' '.join(cmd_parts_guest)}`.\n{stdout}")
+            self._run_commands(start_guest_commands, "start")
 
         # Install local packages
         if local_packages:
@@ -401,7 +389,6 @@ end
             for local_package, features in local_packages.items():
                 package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
                 formatted_cmd = self._format_command([*base_pip_command, package_mount])
-                process = self._run_command(formatted_cmd)
                 process = self._captured_process(formatted_cmd)
                 stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
                 stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
@@ -414,42 +401,35 @@ end
 
         # Execute post_install_commands (guest commands)
         if post_install_guest_commands:
-            print(f"Running post-install commands in VM `{self._vm_name}`...")
-            for guest_cmd_str in post_install_guest_commands:
-                cmd_parts_guest = self.platform.modules.shlex.split(guest_cmd_str)
-                formatted_host_cmd = self._format_command(cmd_parts_guest)
-                process = self._captured_process(formatted_host_cmd)
-                stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
-                stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
-                if process.returncode:
-                    self._show_logs()
-                    raise RuntimeError(
-                        f"Failed to run post-install command `{' '.join(cmd_parts_guest)}` in VM `{self._vm_name}` (RC: {process.returncode}).\n"
-                        f"Stdout:\n{stdout}\nStderr:\n{stderr}"
-                    )
-                print(f"Successfully ran post-install command `{' '.join(cmd_parts_guest)}`.\n{stdout}")
+            self._run_commands(start_guest_commands, "post-install")
+
+    def _run_commands(self, commands: list[str], command_type: str) -> None:
+        print(f"Running {command_type} commands in VM `{self._vm_name}`...")
+        for guest_cmd_str in commands:
+            cmd_parts_guest = self.platform.modules.shlex.split(guest_cmd_str)
+            formatted_host_cmd = self._format_command(cmd_parts_guest)
+            process = self._captured_process(formatted_host_cmd)
+            stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+            stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+            if process.returncode:
+                raise RuntimeError(
+                    f"Failed to run {command_type} command `{' '.join(cmd_parts_guest)}` in VM `{self._vm_name}` (RC: {process.returncode}).\n"
+                    f"Stdout:\n{stdout}\nStderr:\n{stderr}"
+                )
+            print(f"Successfully ran {command_type} command `{' '.join(cmd_parts_guest)}`.\n{stdout}")
 
     def stop(self) -> None:
         print(f"Stopping Vagrant VM: {self._vm_name}...")
         stop_guest_commands = self.metadata.get("stop_commands", [])
         if stop_guest_commands:
-            print(f"Running stop commands in VM `{self._vm_name}`...")
-            for guest_cmd_str in stop_guest_commands:
-                cmd_parts_guest = self.platform.modules.shlex.split(guest_cmd_str)
-                formatted_host_cmd = self._format_command(cmd_parts_guest)
-                process = self._captured_process(formatted_host_cmd)  # Don't check=True, try to proceed
-                if process.returncode:
-                    print(
-                        f"A stop command `{' '.join(cmd_parts_guest)}` failed (RC: {process.returncode}) "
-                        f"but attempting to continue stopping VM."
-                    )
-
+            self._run_commands(stop_guest_commands, "stop")
+        
         # Halt the VM
         halt_cmd_host = ["vagrant", "halt", self._vm_name]
         print(f"Halting VM: {self._vm_name} with command: {' '.join(halt_cmd_host)}")
         process_halt = self._captured_process(halt_cmd_host)  # cwd is no longer set by _captured_process
         if process_halt.returncode:
-            print(  # Don't raise, still attempt destroy
+            print(
                 f"Failed to halt Vagrant VM `{self._vm_name}` (RC: {process_halt.returncode}). "
                 f"Stderr: {process_halt.stderr.decode('utf-8', errors='replace') if process_halt.stderr else 'N/A'}"
             )
@@ -459,9 +439,8 @@ end
         # Destroy the VM
         destroy_cmd_host = ["vagrant", "destroy", self._vm_name, "--force"]
         print(f"Destroying VM: {self._vm_name} with command: {' '.join(destroy_cmd_host)}")
-        process_destroy = self._captured_process(destroy_cmd_host)  # cwd is no longer set by _captured_process
+        process_destroy = self._captured_process(destroy_cmd_host)
         if process_destroy.returncode:
-            # This is more critical
             raise RuntimeError(
                 f"Failed to destroy Vagrant VM `{self._vm_name}` (RC: {process_destroy.returncode}).\n"
                 f"Stdout: {process_destroy.stdout.decode('utf-8', errors='replace') if process_destroy.stdout else 'N/A'}\n"
@@ -474,8 +453,6 @@ end
         print(f"Vagrant working directory deleted: {self._temp_vagrant_dir}")
 
     def restart(self) -> None:
-        # Restarts the entire VM
-
         print(f"Restarting (reloading) Vagrant VM: {self._vm_name}...")
         reload_cmd_host = ["vagrant", "reload", self._vm_name]
         if self.metadata.get("vagrant_provision_on_reload", True):  # Default to reprovisioning on reload
@@ -490,8 +467,6 @@ end
                 f"Stdout:\n{stdout}\nStderr:\n{stderr}"
             )
         print(f"Vagrant VM `{self._vm_name}` restarted successfully.\n{stdout}")
-        # After a full VM reload, agent service should be managed by guest OS init system.
-        # If specific post-reload steps are needed, they might go here or be part of provisioning.
 
     def restart_agent_service(self) -> None:
         # Restarts the Datadog Agent service *inside* the VM
@@ -507,20 +482,8 @@ end
                 "vagrant_linux_agent_restart_command", "sudo systemctl restart datadog-agent.service"
             )
             guest_cmds = [self.platform.modules.shlex.split(restart_cmd_str)]
-
-        for guest_cmd_parts in guest_cmds:
-            host_cmd = self._format_command(guest_cmd_parts)
-            print(f"Executing agent service command in guest: {' '.join(guest_cmd_parts)}")
-            process = self._captured_process(host_cmd)
-            stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
-            stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
-            if process.returncode:
-                self._show_logs()  # Show agent logs for diagnostics
-                raise RuntimeError(
-                    f"Failed to run agent service command `{' '.join(guest_cmd_parts)}` in VM `{self._vm_name}` (RC: {process.returncode}).\n"
-                    f"Stdout:\n{stdout}\nStderr:\n{stderr}"
-                )
-            print(f"Agent service command `{' '.join(guest_cmd_parts)}` executed successfully.\n{stdout}")
+        
+        self._run_commands(guest_cmds, "restart-agent-service")
         print("Datadog Agent service restart sequence completed.")
 
     def invoke(self, args: list[str]) -> None:
@@ -541,15 +504,6 @@ end
         # For interactive shells, check=True might exit if shell exits non-zero,
         # but usually, it's what's desired.
         self._run_command(host_cmd, check=True)
-
-
-@cache
-def _get_hostname():
-    try:
-        return socket.gethostname().lower()
-    except Exception:
-        return "unknown-vagrant-host"
-
 
 @cache
 def _find_free_port() -> int:
