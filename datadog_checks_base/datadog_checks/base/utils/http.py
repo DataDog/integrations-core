@@ -176,6 +176,27 @@ def create_ssl_context(config, overrides=None):
 
     return context
 
+def get_tls_config_from_options(new_options):
+    '''Extract TLS configuration from request options.'''
+    tls_config = {}
+    verify = new_options.get('verify')
+    cert = new_options.get('cert')
+
+    if verify is True:
+        tls_config["tls_verify"] = True
+    elif verify is False:
+        tls_config["tls_verify"] = False
+    elif isinstance(verify, str):
+        tls_config["tls_verify"] = True
+        tls_config["tls_ca_cert"] = verify
+
+    if isinstance(cert, str):
+        tls_config["tls_cert"] = cert
+    elif isinstance(cert, tuple) and len(cert) == 2:
+        tls_config["tls_cert"] = cert[0]
+        tls_config["tls_private_key"] = cert[1]
+    return tls_config
+
 
 class SSLContextAdapter(requests.adapters.HTTPAdapter):
     """
@@ -542,23 +563,9 @@ class RequestsWrapper(object):
         if not url.startswith('https'):
             return
 
-        request_overrides = {}
-        if new_options.get('verify') != self.options['verify']:
-            if new_options.get('verify') is True:
-                request_overrides["tls_verify"] = True
-            elif new_options.get('verify') is False:
-                request_overrides["tls_verify"] = False
-            elif isinstance(new_options.get('verify'), str):
-                request_overrides["tls_verify"] = True
-                request_overrides["tls_ca_cert"] = new_options.get('verify')
-        if new_options.get('cert') != self.options['cert']:
-            if isinstance(new_options.get('cert'), str):
-                request_overrides["tls_cert"] = new_options.get('cert')
-            elif isinstance(new_options.get('cert'), tuple) and len(new_options.get('cert')) == 2:
-                request_overrides["tls_cert"] = new_options.get('cert')[0]
-                request_overrides["tls_private_key"] = new_options.get('cert')[1]
+        new_tls_config = get_tls_config_from_options(new_options)
 
-        return create_ssl_context(self.tls_config, overrides=request_overrides)
+        return create_ssl_context(self.tls_config, overrides=new_tls_config)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
