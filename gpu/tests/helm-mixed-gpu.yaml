@@ -1,0 +1,32 @@
+datadog:
+  apiKey: "${API_KEY}"
+  site: datadoghq.com
+  kubeStateMetricsEnabled: false # Disabled as we're joining an existing Cluster Agent
+  enable_nvml_detection: true
+  collect_gpu_tags: true
+  tags:
+    - "env:test"
+    - "deployment:gpu-test"
+  gpuMonitoring:
+    enabled: true
+
+agents:
+  image:
+    tag: "${AGENT_VERSION}"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: nvidia.com/gpu.present
+            operator: In
+            values:
+              - "true"
+
+existingClusterAgent:
+  join: true
+
+# Disabled datadogMetrics deployment since it should have been already deployed with the other chart release.
+datadog-crds:
+  crds:
+    datadogMetrics: false

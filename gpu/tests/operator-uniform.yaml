@@ -1,0 +1,33 @@
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+  namespace: "${NAMESPACE}"
+spec:
+  global:
+    credentials:
+      apiKey: "${API_KEY}"
+    site: datadoghq.com
+    tags:
+      - "env:test"
+      - "deployment:gpu-test"
+
+  features:
+    gpu:
+      enabled: true
+
+  override:
+    nodeAgent:
+      image:
+        tag: "${AGENT_VERSION}"
+      containers:
+        agent:
+          env:
+            - name: DD_ENABLE_NVML_DETECTION
+              value: "true"
+            - name: DD_COLLECT_GPU_TAGS
+              value: "true"
+
+    clusterAgent:
+      image:
+        tag: "${AGENT_VERSION}"
