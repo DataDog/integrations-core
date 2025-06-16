@@ -304,6 +304,23 @@ class TestSSLContext:
 
         assert hasattr(http, 'ssl_context')
         assert isinstance(http.ssl_context, ssl.SSLContext)
+    
+    @pytest.mark.parametrize(
+        "instance, verify_mode, check_hostname",
+        [
+            pytest.param({'tls_verify': True}, ssl.CERT_REQUIRED, True, id='tls_verify true'),
+            pytest.param({'tls_verify': False}, ssl.CERT_NONE, False, id='tls_verify false'),
+            pytest.param({'tls_verify': True, 'tls_validate_hostname': False}, ssl.CERT_REQUIRED, False, id='tls_verify true and tls_validate_hostname false'),
+        ]
+    )
+    def test_ssl_context_has_correct_attributes(self, instance, verify_mode, check_hostname):
+        """Test that RequestsWrapper creates an SSLContext instance."""
+        http = RequestsWrapper(instance, {})
+
+        assert hasattr(http, 'ssl_context')
+        assert isinstance(http.ssl_context, ssl.SSLContext)
+        assert http.ssl_context.verify_mode == verify_mode
+        assert http.ssl_context.check_hostname == check_hostname
 
     def test_session_uses_ssl_context_adapter(self):
         """Test that the session uses SSLContextAdapter for consistent TLS configuration."""
