@@ -15,11 +15,9 @@ def app():
 def mock_dashboard_env():
     with (
         patch("ddev.cli.size.create_dashboard.get_org") as mock_get_org,
-        patch("ddev.cli.size.create_dashboard.get_valid_platforms") as mock_get_valid_platforms,
         patch("ddev.cli.size.create_dashboard.requests.post") as mock_post,
     ):
         mock_get_org.return_value = {"api_key": "fake-api-key", "app_key": "fake-app-key", "site": "datadoghq.com"}
-        mock_get_valid_platforms.return_value = ["linux"]
         mock_response = MagicMock()
         mock_response.json.return_value = {"url": "/dashboard/abc123"}
         mock_post.return_value = mock_response
