@@ -7,7 +7,6 @@ tests:
       component: "sacumentestlocal/box_Auth_access"
       event: "LOGIN ATTEMPT"
       hostname: "sacumentestlocal"
-      level: "Info"
       message: "LOGIN ATTEMPT: boxconfig[8016]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
       pid: 8016
       process: " boxconfig"
@@ -20,7 +19,6 @@ tests:
         timestamp: 1745305380000
       timestamp: 1745305380000
     message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN ATTEMPT: boxconfig[8016]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
-    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1745305380000
