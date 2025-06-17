@@ -42,7 +42,11 @@ def get_wheel_hashes(project) -> dict[str, str]:
         continue
 
     data = response.json()
-    hashes = {file['filename']: file['hashes']['sha256'] for file in data['files']}
+    hashes: dict[str, str] = {}
+    for file in data['files']:
+        file_name = file['filename']
+        if file_name.endswith('.whl') and 'sha256' in file['hashes']:
+            hashes[file_name] = file['hashes']['sha256']
 
     return hashes
 
