@@ -107,6 +107,9 @@ def check_unacceptable_files(
 ):
     """Check if a wheel contains any unacceptable files and exit if found."""
     if any(wheel.name.startswith(pkg_prefix) for pkg_prefix in bypass_prefixes):
+        print(
+            f'Warning: Bypassing unacceptable file check for {wheel.name}'
+        )
         return
 
     unacceptable_files = find_patterns_in_wheel(wheel, invalid_file_patterns)
