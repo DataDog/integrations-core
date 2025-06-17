@@ -46,10 +46,47 @@ def test_channel_metrics(instance):
     collector.gauge = Mock()
     collector.get_pcf_channel_metrics(queue_manager)
     # Verify regular metrics were submitted
-    collector.gauge.assert_any_call('ibm_mq.channel.buffers_rcvd', 100, tags=['queue_manager:QM1', 'connection_name:localhost(11414)', 'foo:bar', 'mq_host:localhost', 'port:11414', 'channel:TEST.CHANNEL'], hostname=None)
-    collector.gauge.assert_any_call('ibm_mq.channel.bytes_sent', 5000, tags=['queue_manager:QM1', 'connection_name:localhost(11414)', 'foo:bar', 'mq_host:localhost', 'port:11414', 'channel:TEST.CHANNEL'], hostname=None)
+    collector.gauge.assert_any_call(
+        'ibm_mq.channel.buffers_rcvd',
+        100,
+        tags=[
+            'queue_manager:QM1',
+            'connection_name:localhost(11414)',
+            'foo:bar',
+            'mq_host:localhost',
+            'port:11414',
+            'channel:TEST.CHANNEL',
+        ],
+        hostname=None,
+    )
+    collector.gauge.assert_any_call(
+        'ibm_mq.channel.bytes_sent',
+        5000,
+        tags=[
+            'queue_manager:QM1',
+            'connection_name:localhost(11414)',
+            'foo:bar',
+            'mq_host:localhost',
+            'port:11414',
+            'channel:TEST.CHANNEL',
+        ],
+        hostname=None,
+    )
     # Verify the connection metric was submitted
-    collector.gauge.assert_any_call('ibm_mq.channel.conns', 1, tags=['queue_manager:QM1', 'connection_name:localhost(11414)', 'foo:bar', 'mq_host:localhost', 'port:11414', 'channel:TEST.CHANNEL', 'connection:192.168.1.1(1414)'], hostname=None)
+    collector.gauge.assert_any_call(
+        'ibm_mq.channel.conns',
+        1,
+        tags=[
+            'queue_manager:QM1',
+            'connection_name:localhost(11414)',
+            'foo:bar',
+            'mq_host:localhost',
+            'port:11414',
+            'channel:TEST.CHANNEL',
+            'connection:192.168.1.1(1414)',
+        ],
+        hostname=None,
+    )
 
 
 def test_channel_metrics_no_connection(instance):
@@ -64,7 +101,19 @@ def test_channel_metrics_no_connection(instance):
     collector.gauge = Mock()
     collector.get_pcf_channel_metrics(queue_manager)
     # Verify regular metrics were submitted
-    collector.gauge.assert_any_call('ibm_mq.channel.buffers_rcvd', 100, tags=['queue_manager:QM1', 'connection_name:localhost(11414)', 'foo:bar', 'mq_host:localhost', 'port:11414', 'channel:TEST.CHANNEL'], hostname=None)
+    collector.gauge.assert_any_call(
+        'ibm_mq.channel.buffers_rcvd',
+        100,
+        tags=[
+            'queue_manager:QM1',
+            'connection_name:localhost(11414)',
+            'foo:bar',
+            'mq_host:localhost',
+            'port:11414',
+            'channel:TEST.CHANNEL',
+        ],
+        hostname=None,
+    )
     # Verify connection metric was not submitted
     for call in collector.gauge.call_args_list:
         assert call[0][0] != 'ibm_mq.channel.conns'
@@ -83,7 +132,19 @@ def test_channel_metrics_empty_connection(instance):
     collector.gauge = Mock()
     collector.get_pcf_channel_metrics(queue_manager)
     # Verify regular metrics were submitted
-    collector.gauge.assert_any_call('ibm_mq.channel.buffers_rcvd', 100, tags=['queue_manager:QM1', 'connection_name:localhost(11414)', 'foo:bar', 'mq_host:localhost', 'port:11414', 'channel:TEST.CHANNEL'], hostname=None)
+    collector.gauge.assert_any_call(
+        'ibm_mq.channel.buffers_rcvd',
+        100,
+        tags=[
+            'queue_manager:QM1',
+            'connection_name:localhost(11414)',
+            'foo:bar',
+            'mq_host:localhost',
+            'port:11414',
+            'channel:TEST.CHANNEL',
+        ],
+        hostname=None,
+    )
     # Verify connection metric was not submitted
     for call in collector.gauge.call_args_list:
         assert call[0][0] != 'ibm_mq.channel.conns'
