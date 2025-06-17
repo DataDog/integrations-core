@@ -57,7 +57,6 @@ def dd_environment(config_e2e):
 
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
 
-
         with docker_run(
             os.path.join(common.HERE, 'compose', COMPOSE_FILE),
             env_vars={
@@ -383,7 +382,9 @@ def _create_enable_consumers_procedure(conn):
 
 def init_master():
     logger.debug("initializing master")
-    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_FLAVOR == 'percona' else None)
+    conn = pymysql.connect(
+        host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_FLAVOR == 'percona' else None
+    )
     _add_dog_user(conn)
     _add_bob_user(conn)
     _add_fred_user(conn)
@@ -393,7 +394,10 @@ def init_master():
 @pytest.fixture
 def root_conn():
     conn = pymysql.connect(
-        host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION == 'group' else None
+        host=common.HOST,
+        port=common.PORT,
+        user='root',
+        password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION == 'group' else None,
     )
     yield conn
     conn.close()
@@ -457,7 +461,10 @@ def fred_conn():
 def populate_database():
     logger.debug("populating database")
     conn = pymysql.connect(
-        host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_REPLICATION == 'group' or MYSQL_FLAVOR == 'percona' else None
+        host=common.HOST,
+        port=common.PORT,
+        user='root',
+        password='mypass' if MYSQL_REPLICATION == 'group' or MYSQL_FLAVOR == 'percona' else None,
     )
 
     cur = conn.cursor()

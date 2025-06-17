@@ -35,7 +35,11 @@ def get_version(db):
                 flavor = "MySQL"
             if data in BUILDS:
                 build = data
-        if version_comment and len(version_comment) > 0 and to_native_string(version_comment[0]).lower().startswith('percona'):
+        if (
+            version_comment
+            and len(version_comment) > 0
+            and to_native_string(version_comment[0]).lower().startswith('percona')
+        ):
             flavor = 'Percona'
         if build == '':
             build = 'unspecified'

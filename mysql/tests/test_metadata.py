@@ -11,7 +11,6 @@ from datadog_checks.mysql import MySql
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
-from .utils import deep_compare
 
 
 @pytest.fixture
@@ -323,19 +322,20 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         ],
                         "non_unique": True,
                     },
-                ] + (
-                        [
-                            {
-                                "name": "functional_key_part_index",
-                                "index_type": "BTREE",
-                                "cardinality": 0,
-                                "non_unique": True,
-                                "expression": "(`population` + 1)",
-                            }
-                        ]
-                        if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db and not is_percona
-                        else []
-                    ),
+                ]
+                + (
+                    [
+                        {
+                            "name": "functional_key_part_index",
+                            "index_type": "BTREE",
+                            "cardinality": 0,
+                            "non_unique": True,
+                            "expression": "(`population` + 1)",
+                        }
+                    ]
+                    if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db and not is_percona
+                    else []
+                ),
             },
             {
                 "name": "cities_partitioned",
