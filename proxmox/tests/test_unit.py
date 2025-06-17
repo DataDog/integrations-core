@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
+import logging
+
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
@@ -14,6 +17,15 @@ def test_api_up(dd_run_check, datadog_agent, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric("proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'testing'])
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_no_tags(dd_run_check, datadog_agent, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    del new_instance['tags']
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+    dd_run_check(check)
+    aggregator.assert_metric("proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json'])
 
 
 @pytest.mark.parametrize(
@@ -69,6 +81,7 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_id:qemu/100',
             'proxmox_node:ip-122-82-3-112',
         ],
+        hostname='',
     )
     aggregator.assert_metric(
         "proxmox.node.count",
@@ -80,6 +93,34 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_node:ip-122-82-3-112',
             'proxmox_id:node/ip-122-82-3-112',
         ],
+        hostname='',
+    )
+    aggregator.assert_metric(
+        "proxmox.container.count",
+        1,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:container',
+            'proxmox_container:CT111',
+            'proxmox_id:lxc/111',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+        hostname='',
+    )
+    aggregator.assert_metric(
+        "proxmox.container.count",
+        1,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:container',
+            'proxmox_container:test-container',
+            'proxmox_id:lxc/101',
+            'proxmox_node:ip-122-82-3-112',
+            'proxmox_pool:pool-1',
+        ],
+        hostname='',
     )
     aggregator.assert_metric(
         "proxmox.storage.count",
@@ -92,6 +133,7 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_node:ip-122-82-3-112',
             'proxmox_id:storage/ip-122-82-3-112/local',
         ],
+        hostname='',
     )
     aggregator.assert_metric(
         "proxmox.pool.count",
@@ -103,6 +145,7 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_pool:pool-1',
             'proxmox_id:/pool/pool-1',
         ],
+        hostname='',
     )
     aggregator.assert_metric(
         "proxmox.sdn.count",
@@ -115,4 +158,138 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_id:sdn/ip-122-82-3-112/localnetwork',
             'proxmox_node:ip-122-82-3-112',
         ],
+        hostname='',
+    )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_resource_up_metrics(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+    aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="debian")
+    aggregator.assert_metric("proxmox.node.up", 1, tags=[], hostname='ip-122-82-3-112')
+    aggregator.assert_metric(
+        "proxmox.container.up",
+        0,
+        tags=[
+            'proxmox_container:test-container',
+            'proxmox_id:lxc/101',
+            'proxmox_node:ip-122-82-3-112',
+            'proxmox_pool:pool-1',
+            'proxmox_server:http://localhost:8006/api2/json',
+            'proxmox_type:container',
+            'testing',
+        ],
+        hostname='',
+    )
+    aggregator.assert_metric(
+        "proxmox.container.up",
+        0,
+        tags=[
+            'proxmox_container:CT111',
+            'proxmox_id:lxc/111',
+            'proxmox_node:ip-122-82-3-112',
+            'proxmox_server:http://localhost:8006/api2/json',
+            'proxmox_type:container',
+            'testing',
+        ],
+        hostname='',
+    )
+    aggregator.assert_metric(
+        "proxmox.storage.up",
+        1,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:storage',
+            'proxmox_storage:local',
+            'proxmox_node:ip-122-82-3-112',
+            'proxmox_id:storage/ip-122-82-3-112/local',
+        ],
+        hostname='',
+    )
+    aggregator.assert_metric("proxmox.pool.up", count=0, hostname='')
+    aggregator.assert_metric(
+        "proxmox.sdn.up",
+        1,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:sdn',
+            'proxmox_sdn:localnetwork',
+            'proxmox_id:sdn/ip-122-82-3-112/localnetwork',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+        hostname='',
+    )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(status_code=500)
+                }
+            },
+            id='500',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(status_code=404)
+                }
+            },
+            id='404',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_get_hostname_error(dd_run_check, aggregator, instance, caplog):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    check.check_id = 'test:123'
+    caplog.set_level(logging.INFO)
+    dd_run_check(check)
+
+    aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="VM 100")
+    assert (
+        "Failed to get hostname for vm 101 on node ip-122-82-3-112; endpoint: http://localhost:8006/api2/json;"
+        in caplog.text
+    )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_external_tags(dd_run_check, aggregator, instance, datadog_agent):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+    aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="debian")
+    aggregator.assert_metric("proxmox.node.up", 1, tags=[], hostname='ip-122-82-3-112')
+    datadog_agent.assert_external_tags(
+        "debian",
+        {
+            'proxmox': [
+                'proxmox_id:qemu/100',
+                'proxmox_node:ip-122-82-3-112',
+                'proxmox_server:http://localhost:8006/api2/json',
+                'proxmox_type:vm',
+                'proxmox_vm:VM 100',
+                'testing',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        "ip-122-82-3-112",
+        {
+            'proxmox': [
+                'proxmox_server:http://localhost:8006/api2/json',
+                'testing',
+                'proxmox_id:node/ip-122-82-3-112',
+                'proxmox_node:ip-122-82-3-112',
+                'proxmox_type:node',
+            ]
+        },
     )
