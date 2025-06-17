@@ -95,40 +95,36 @@ def main():
 
     #  Build the metadata for the metrics that both lives in temporal's code and in the METRIC_MAP
     for temporal_name, dd_metric in METRIC_MAP.items():
-        if isinstance(dd_metric, dict) and dd_metric.get('type') == 'native_dynamic':
-            # Native dynamic metrics have its type defined at run time, and usually added manually, see https://github.com/DataDog/integrations-core/pull/18050
-            existing_dd_metric, existed_dd_metric = check_existing_metric(
-                dd_metric.get('name'), previous_metadata, added_dd_metrics
+        metric_name = dd_metric.get('name') if isinstance(dd_metric, dict) else dd_metric
+        is_native_dynamic = isinstance(dd_metric, dict) and dd_metric.get('type') == 'native_dynamic'
+
+        # Check if metric exists in previous metadata
+        existing_dd_metric = check_existing_metric(
+            metric_name, previous_metadata, added_dd_metrics
+        )
+
+        if existing_dd_metric:
+            print(
+                f"INFO: metric `{metric_name}` is reserved because it's present "
+                "in the current metadata.csv file"
             )
-            if existed_dd_metric:
-                print(
-                    f"INFO: dynamic metric `{dd_metric}` is reserved because it's present "
-                    "in the current metadata.csv file"
-                )
-                metadata.extend(existing_dd_metric)
-            else:
-                print(
-                    f"WARNING: skipping metric `{dd_metric}` because native dynamic type "
-                    "and is not present in the current metadata.csv file"
-                )
+            metadata.extend(existing_dd_metric)
             continue
 
-        try:
-            temporal_type = temporal_metric_types[temporal_name]
-        except KeyError:
-            # If metrics does not exist in this Temporal version, try to search metric in
-            # the current metadata file and preserve it if it's already exist
-            existing_dd_metric, existed_dd_metric = check_existing_metric(
-                dd_metric, previous_metadata, added_dd_metrics
+        if is_native_dynamic:
+            print(
+                f"WARNING: skipping metric `{dd_metric}` because native dynamic type "
+                "and is not present in the current metadata.csv file"
             )
-            if existed_dd_metric:
-                metadata.extend(existing_dd_metric)
-            else:
-                print(
-                    f"WARNING: skipping metric `{temporal_name}/{dd_metric}` because it's "
-                    "not present in both temporal metric definitions and the current "
-                    "metatada.csv file"
-                )
+            continue
+
+        temporal_type = temporal_metric_types.get(temporal_name)
+        if temporal_type is None:
+            print(
+                f"WARNING: skipping metric `{temporal_name}/{dd_metric}` because it's "
+                "not present in both temporal metric definitions and the current "
+                "metatada.csv file"
+            )
             continue
 
         # Update the metrics name based on the temporal type
@@ -189,7 +185,7 @@ def extract_metric_defs(go_code: str) -> dict:
     return results
 
 
-def check_existing_metric(name: str, previous_metadata: dict, added_dd_metrics: set) -> tuple[list, bool]:
+def check_existing_metric(name: str, previous_metadata: dict, added_dd_metrics: set) -> list:
     """
     Check if a metric exists in the previous metadata and add it to the current metadata if found.
 
@@ -198,19 +194,17 @@ def check_existing_metric(name: str, previous_metadata: dict, added_dd_metrics: 
         previous_metadata: Dictionary containing the previous metadata
 
     Returns:
-        tuple: (metadata list with any existing metrics added, boolean indicating if metric exists)
+        metadata list with any existing metrics added
     """
     pattern = re.compile(rf"^temporal\.server\.{re.escape(name)}(?:\.[a-z]+)*$")
-    exist = False
     result = []
     for dd_metric in previous_metadata:
         if pattern.match(dd_metric) and dd_metric not in added_dd_metrics:
             # A metric were supported in the previous temporal version, but dropped in the current temporal version
             result.append(previous_metadata.get(dd_metric))
             print(f"INFO: {dd_metric} is reserved because it exists in the current metatadata.csv file")
-            exist = True
             added_dd_metrics.add(dd_metric)
-    return result, exist
+    return result
 
 
 def fetch_temporal_metrics(tag: str) -> str:
