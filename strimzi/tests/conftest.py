@@ -47,7 +47,8 @@ def setup_strimzi():
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
-    with kind_run(conditions=[setup_strimzi]) as kubeconfig:
+    kind_config = os.path.join(HERE, 'kind', STRIMZI_VERSION, 'kind-config.yaml')
+    with kind_run(conditions=[setup_strimzi], kind_config=kind_config) as kubeconfig:
         with ExitStack() as stack:
             cluster_operator_ip, cluster_operator_port = stack.enter_context(
                 port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'strimzi-cluster-operator')
