@@ -35,6 +35,8 @@ def normalize_values(actual_payload):
     actual_payload["tables"].sort(key=lambda x: x["name"])
     for table in actual_payload['tables']:
         table['create_time'] = "normalized_value"
+        if 'indexes' in table:
+            table['indexes'].sort(key=lambda x: x['name'])
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
                 f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"])
