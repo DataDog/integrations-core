@@ -543,14 +543,14 @@ class RequestsWrapper(object):
 
             if self.auth_token_handler:
                 try:
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    response = self.make_request_aia_chasing(session, request_method, method, url, new_options, persist)
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    response = self.make_request_aia_chasing(session, request_method, method, url, new_options, persist)
             else:
-                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                response = self.make_request_aia_chasing(session, request_method, method, url, new_options, persist)
 
             return ResponseWrapper(response, self.request_size)
 
@@ -573,9 +573,9 @@ class RequestsWrapper(object):
 
         return create_ssl_context(self.tls_config, overrides=new_tls_config)
 
-    def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
+    def make_request_aia_chasing(self, session, request_method, method, url, new_options, persist):
         try:
-            response = request_method(url, **new_options)
+            response = request_method(session, url, **new_options)
         except SSLError as e:
             # fetch the intermediate certs
             parsed_url = urlparse(url)
@@ -593,7 +593,7 @@ class RequestsWrapper(object):
                 certadapter = SSLContextAdapter(new_context)
                 session.mount(url, certadapter)
             request_method = getattr(session, method)
-            response = request_method(url, **new_options)
+            response = request_method(session, url, **new_options)
         return response
 
     def populate_options(self, options):
