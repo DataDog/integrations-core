@@ -193,7 +193,12 @@ class MockResponse(Response):
         return self.json_data
 
 
-def mock_http_rest_api_v6(session, method, url, *args, **kwargs):
+def mock_http_rest_api_v6(session, method, url, **kwargs):
+    import logging
+    logging.getLogger(__name__).warning(
+        "Mocked API request: method=%s, url=%s, kwargs=%s",
+        method, url, kwargs
+        )
     if '/api/' in url:
         return MockResponse({}, 404)
     if method == 'get':
@@ -248,7 +253,12 @@ def mock_http_rest_api_v6(session, method, url, *args, **kwargs):
     raise Exception("Rest api mock request not matched: method={}, url={}".format(method, url))
 
 
-def mock_http_rest_api_v7(session, method, url, *args, **kwargs):
+def mock_http_rest_api_v7(session, method, url, **kwargs):
+    import logging
+    logging.getLogger(__name__).warning(
+        "Mocked API request: method=%s, url=%s, kwargs=%s",
+        method, url, kwargs
+        )
     if method == 'get':
         if re.match(r'.*/category/.*$', url):
             parts = url.split('_')
