@@ -105,6 +105,8 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_container:CT111',
             'proxmox_id:lxc/111',
             'proxmox_node:ip-122-82-3-112',
+            'tag1',
+            'test',
         ],
         hostname='',
     )
@@ -113,12 +115,14 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
         1,
         tags=[
             'proxmox_server:http://localhost:8006/api2/json',
-            'testing',
             'proxmox_type:container',
             'proxmox_container:test-container',
             'proxmox_id:lxc/101',
             'proxmox_node:ip-122-82-3-112',
             'proxmox_pool:pool-1',
+            'test',
+            'testing',
+            'testtag',
         ],
         hostname='',
     )
@@ -179,7 +183,9 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
             'proxmox_pool:pool-1',
             'proxmox_server:http://localhost:8006/api2/json',
             'proxmox_type:container',
+            'test',
             'testing',
+            'testtag',
         ],
         hostname='',
     )
@@ -192,6 +198,8 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
             'proxmox_node:ip-122-82-3-112',
             'proxmox_server:http://localhost:8006/api2/json',
             'proxmox_type:container',
+            'tag1',
+            'test',
             'testing',
         ],
         hostname='',

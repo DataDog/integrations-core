@@ -78,6 +78,12 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 f'proxmox_{resource_type_remapped}:{resource_name}',
                 f'proxmox_id:{resource_id}',
             }
+
+            proxmox_tags = resource.get('tags')
+            if proxmox_tags:
+                proxmox_tags = proxmox_tags.split(';')
+                resource_tags.update(proxmox_tags)
+
             if node:
                 resource_tags.add(f'proxmox_node:{node}')
 

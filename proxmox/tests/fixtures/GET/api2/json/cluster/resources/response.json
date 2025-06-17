@@ -55,7 +55,7 @@
             "diskread": 0,
             "uptime": 0,
             "netout": 0,
-            "tags": "sarah-wiit;test;testtag",
+            "tags": "test;testtag",
             "id": "lxc/101",
             "disk": 0,
             "maxcpu": 1,
