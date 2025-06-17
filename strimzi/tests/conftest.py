@@ -32,7 +32,7 @@ def setup_strimzi():
             "kafka",
         ]
     )
-    run_command(["kubectl", "wait", "kafka/my-cluster", "--for=condition=Ready", "--timeout=300s", "-n", "kafka"])
+    run_command(["kubectl", "wait", "kafka/my-cluster", "--for=condition=Ready", "--timeout=600s", "-n", "kafka"])
 
     for file in ("topic.yaml", "user.yaml", "connect.yaml", "connectors.yaml"):
         run_command(
@@ -56,6 +56,11 @@ def render_kind_config(kubernetes_version):
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
+    if not KUBERNETES_VERSION:
+        pytest.fail("KUBERNETES_VERSION is not set")
+    if not STRIMZI_VERSION:
+        pytest.fail("STRIMZI_VERSION is not set")
+
     kind_config_content = render_kind_config(KUBERNETES_VERSION)
     with tempfile.NamedTemporaryFile("w", suffix=".yaml") as kind_config:
         kind_config.write(kind_config_content)
