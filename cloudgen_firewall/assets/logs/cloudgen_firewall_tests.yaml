@@ -145,7 +145,7 @@ tests:
     message: "2025-05-05T29:25:00+05:30 sacumentestlocal sacumentestlocal/box_Config_sync: Notice   sacumentestlocal Starting main loop pid=17721"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1746428580000
+    timestamp: 1
  -
   sample: "2025-05-05T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
   result:
