@@ -127,7 +127,6 @@ class VSphereCheck(AgentCheck):
                 if major_version >= 7:
                     try:
                         # Try to connect to REST API vSphere v7
-                        self.log.warning("Config: %s", self._config)
                         self.api_rest = VSphereRestAPI(self._config, self.log, False)
                         return
                     except Exception:

@@ -1092,8 +1092,6 @@ class MockHttpV6:
     def get(self, url, *args, **kwargs):
         if '/api/' in url:
             return MockResponse({}, 404)
-        import logging
-        logging.getLogger(__name__).warning("MockHttpV6 get request: %s", url)
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')

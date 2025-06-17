@@ -251,10 +251,14 @@ def mock_http_api(monkeypatch):
     else:
         http = MockHttpV6()
 
-    def mock_get(session, *args, **kwargs):
+    def mock_get(*args, **kwargs):
         return http.get(*args, **kwargs)
 
-    def mock_post(session, *args, **kwargs):
+    def mock_post(*args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(args)
+
         return http.post(*args, **kwargs)
 
     monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=mock_get))

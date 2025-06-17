@@ -260,12 +260,6 @@ def test_collect_tags(aggregator, dd_run_check, realtime_instance):
     )
     aggregator.assert_metric('datadog.vsphere.query_tags.time', tags=['vcenter_server:FAKE'])
 
-@pytest.mark.usefixtures('mock_rest_api')
-def test_collect_tags_debug(aggregator, realtime_instance):
-    realtime_instance.update({'collect_tags': True, 'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2']})
-    check = VSphereCheck('vsphere', {}, [{}])
-    check.http.get("https://fake-vcenter.com/api/vcenter/vm", timeout=5)
-
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_tag_prefix(aggregator, dd_run_check, realtime_instance):
