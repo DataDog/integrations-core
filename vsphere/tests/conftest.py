@@ -254,8 +254,11 @@ def mock_http_api(monkeypatch):
     def mock_get(session, *args, **kwargs):
         return http.get(*args, **kwargs)
 
+    def mock_post(session, *args, **kwargs):
+        return http.post(*args, **kwargs)
+
     monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=mock_get))
-    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=mock_get))
+    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=mock_post))
     yield http
 
 
