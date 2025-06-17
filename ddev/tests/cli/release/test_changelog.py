@@ -445,18 +445,15 @@ class TestBuild:
 
         assert result.exit_code == 0, result.output
         # The new changelog entry should appear in command output.
-        assert (
-            helpers.dedent(
-                '''
+        assert helpers.dedent(
+            '''
                 ## 3.4.0 / 2023-10-11
 
                 ***Added***:
 
                 * Foo ([#1](https://github.com/DataDog/integrations-core/pull/1))
                 '''
-            )
-            in helpers.remove_trailing_spaces(result.output)
-        )
+        ) in helpers.remove_trailing_spaces(result.output)
         # Make sure that we don't write anything to the changelog.
         assert changelog.read_text() == helpers.dedent(
             '''
