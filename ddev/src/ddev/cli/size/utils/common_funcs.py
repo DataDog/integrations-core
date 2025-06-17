@@ -324,7 +324,7 @@ def get_dependencies_sizes(
 
 def is_excluded_from_wheel(path: str) -> bool:
     '''
-    This files are excluded from the wheel in the agent build:
+    These files are excluded from the wheel in the agent build:
     https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
     In order to have more accurate results, this files are excluded when computing the size of the dependencies while
     the wheels still include them.
