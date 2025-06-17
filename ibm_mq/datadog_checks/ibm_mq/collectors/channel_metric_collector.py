@@ -62,7 +62,7 @@ class ChannelMetricCollector(object):
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
                 self._submit_metrics_from_properties(
-                    channel_info, channel_name, metrics.channel_status_metrics(), channel_tags
+                    channel_info, channel_name, metrics.channel_metrics(), channel_tags
                 )
 
         # Check specific channels
