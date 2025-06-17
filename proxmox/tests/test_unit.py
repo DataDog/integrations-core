@@ -61,7 +61,14 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metric(
         "proxmox.vm.count",
         1,
-        tags=['proxmox_server:http://localhost:8006/api2/json', 'testing', 'proxmox_type:vm', 'proxmox_vm:VM 100'],
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:vm',
+            'proxmox_vm:VM 100',
+            'proxmox_id:qemu/100',
+            'proxmox_node:ip-122-82-3-112',
+        ],
     )
     aggregator.assert_metric(
         "proxmox.node.count",
@@ -71,6 +78,7 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'testing',
             'proxmox_type:node',
             'proxmox_node:ip-122-82-3-112',
+            'proxmox_id:node/ip-122-82-3-112',
         ],
     )
     aggregator.assert_metric(
@@ -81,12 +89,20 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'testing',
             'proxmox_type:storage',
             'proxmox_storage:local',
+            'proxmox_node:ip-122-82-3-112',
+            'proxmox_id:storage/ip-122-82-3-112/local',
         ],
     )
     aggregator.assert_metric(
         "proxmox.pool.count",
         1,
-        tags=['proxmox_server:http://localhost:8006/api2/json', 'testing', 'proxmox_type:pool', 'proxmox_pool:pool-1'],
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:pool',
+            'proxmox_pool:pool-1',
+            'proxmox_id:/pool/pool-1',
+        ],
     )
     aggregator.assert_metric(
         "proxmox.sdn.count",
@@ -96,5 +112,7 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'testing',
             'proxmox_type:sdn',
             'proxmox_sdn:localnetwork',
+            'proxmox_id:sdn/ip-122-82-3-112/localnetwork',
+            'proxmox_node:ip-122-82-3-112',
         ],
     )

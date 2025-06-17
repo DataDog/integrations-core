@@ -15,6 +15,8 @@ RESOURCE_TYPE_MAP = {
     'sdn': 'sdn',
 }
 
+TAG_REMAPPER = {''}
+
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'proxmox'
@@ -41,7 +43,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.log.error("Encountered an Exception when hitting the Proxmox API %s", e)
             self.gauge("api.up", 0, tags=self.base_tags)
 
-        all_resources = {}
         resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
         resources_response_json = resources_response.json()
         resources = resources_response_json.get("data", [])
@@ -54,10 +55,20 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 resource_name = resource.get(resource.get('type', ''))
 
             resource_id = resource.get('id')
-            all_resources[resource_id] = {'name': resource_name, 'type': resource_type_remapped}
+            resource_tags = {
+                f'proxmox_type:{resource_type_remapped}',
+                f'proxmox_{resource_type_remapped}:{resource_name}',
+                f'proxmox_id:{resource_id}',
+            }
+            node = resource.get('node')
+            if node:
+                resource_tags.add(f'proxmox_node:{node}')
+
+            pool = resource.get('pool')
+            if pool:
+                resource_tags.add(f'proxmox_pool:{pool}')
             self.gauge(
                 f'{resource_type_remapped}.count',
                 1,
-                tags=self.base_tags
-                + [f'proxmox_type:{resource_type_remapped}', f'proxmox_{resource_type_remapped}:{resource_name}'],
+                tags=self.base_tags + list(resource_tags),
             )
