@@ -22,7 +22,11 @@ def get_wheel_hashes(project) -> dict[str, str]:
     retry_wait = 2
     while True:
         try:
-            response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
+            response = urllib3.request(
+                'GET',
+                f'https://pypi.org/simple/{project}',
+                headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            )
         except urllib3.exceptions.HTTPError as e:
             err_msg = f'Failed to fetch hashes for `{project}`: {e}'
         else:
@@ -37,14 +41,8 @@ def get_wheel_hashes(project) -> dict[str, str]:
         retry_wait *= 2
         continue
 
-    html = response.data.decode('utf-8')
-    hashes: dict[str, str] = {}
-    for line in html.splitlines():
-        match = re.search(r'<a href="(?:.+?/)?([^"]+)#sha256=([^"]+)"[^>]*>\1</a>', line)
-        if match:
-            file_name, file_hash = match.groups()
-            if file_name.endswith('.whl'):
-                hashes[file_name] = file_hash
+    data = response.json()
+    hashes = {file['filename']: file['hashes']['sha256'] for file in data['files']}
 
     return hashes
 
