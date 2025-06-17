@@ -323,6 +323,12 @@ def get_dependencies_sizes(
 
 
 def is_excluded_from_wheel(path: str) -> bool:
+    '''
+    This files are excluded from the wheel in the agent build:
+    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
+    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
+    the wheels still include them.
+    '''
     excluded_test_paths = [
         os.path.normpath(path)
         for path in [
@@ -359,7 +365,7 @@ def is_excluded_from_wheel(path: str) -> bool:
 
     # Test folders
     for test_folder in excluded_test_paths:
-        if rel_path == test_folder or rel_path.startswith(test_folder + '/'):
+        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
             return True
 
     # Python type annotations
