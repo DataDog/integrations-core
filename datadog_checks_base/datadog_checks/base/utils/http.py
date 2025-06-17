@@ -126,11 +126,12 @@ def create_ssl_context(config, overrides=None):
         config = config.copy()
         config.update(overrides)
 
+    LOGGER.debug('Creating SSL context with config: %s', config)
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-    context.check_hostname = config['tls_verify'] and config.get('tls_validate_hostname', True)
+    context.check_hostname = is_affirmative(config['tls_verify']) and config.get('tls_validate_hostname', True)
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-    context.verify_mode = ssl.CERT_REQUIRED if config['tls_verify'] else ssl.CERT_NONE
+    context.verify_mode = ssl.CERT_REQUIRED if is_affirmative(config['tls_verify']) else ssl.CERT_NONE
 
     ciphers = config.get('tls_ciphers')
     if ciphers:
@@ -468,8 +469,8 @@ class RequestsWrapper(object):
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
         # Create TLS context for consistent TLS configuration
-        self.ssl_context = create_ssl_context(config)
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
+        self.ssl_context = create_ssl_context(self.tls_config)
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -557,6 +558,8 @@ class RequestsWrapper(object):
         """
         Creates a new TLS context if the new request options differ from the default ones.
         """
+        self.logger.debug('Default options: %s', self.options)
+        LOGGER.debug('New options: %s', new_options)
         # If `verify` or `cert` options differ from the defaults, a new adapter is created.
         if new_options.get('verify') == self.options['verify'] and new_options.get('cert') == self.options['cert']:
             return
@@ -565,6 +568,8 @@ class RequestsWrapper(object):
             return
 
         new_tls_config = get_tls_config_from_options(new_options)
+
+        self.logger.debug('Overrides for new context config: %s', new_tls_config)
 
         return create_ssl_context(self.tls_config, overrides=new_tls_config)
 
