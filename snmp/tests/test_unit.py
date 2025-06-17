@@ -509,8 +509,9 @@ def test_user_profile_override():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), mock_profiles_confd_user_root(
-            os.path.join(tmp, 'profiles')
+        with (
+            mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')),
+            mock_profiles_confd_user_root(os.path.join(tmp, 'profiles')),
         ):
             mkdir_p(os.path.join(tmp, 'default_profiles'))
             mkdir_p(os.path.join(tmp, 'profiles'))
@@ -552,8 +553,9 @@ def test_profile_extends_with_user_profiles():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), mock_profiles_confd_user_root(
-            os.path.join(tmp, 'profiles')
+        with (
+            mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')),
+            mock_profiles_confd_user_root(os.path.join(tmp, 'profiles')),
         ):
             mkdir_p(os.path.join(tmp, 'default_profiles'))
             mkdir_p(os.path.join(tmp, 'profiles'))

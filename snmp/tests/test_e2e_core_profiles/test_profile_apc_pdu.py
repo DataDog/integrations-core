@@ -37,7 +37,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
     ] + [
         'powernet_r_pdu_ident_firmware_rev:kept zombies forward acted zombies but kept forward',
         'powernet_r_pdu_ident_hardware_rev:zombies forward their',
-        'powernet_r_pdu_ident_model_number:zombies kept their kept zombies kept Jaded zombies ' 'but',
+        'powernet_r_pdu_ident_model_number:zombies kept their kept zombies kept Jaded zombies but',
         'powernet_r_pdu_ident_name:oxen',
         'powernet_r_pdu_ident_serial_number:Jaded kept',
     ]

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .....constants import ServiceCheck
+from datadog_checks.base.constants import ServiceCheck
 
 
 def get_service_check(check, metric_name, modifiers, global_options):

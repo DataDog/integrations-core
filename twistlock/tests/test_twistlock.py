@@ -45,7 +45,6 @@ def mock_get_factory(fixture_group):
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
 def test_check(aggregator, instance, fixture_group):
-
     check = TwistlockCheck('twistlock', {}, [instance])
 
     with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
@@ -62,7 +61,6 @@ def test_check(aggregator, instance, fixture_group):
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
 def test_config_project(aggregator, instance, fixture_group):
-
     project = 'foo'
     project_tag = 'project:{}'.format(project)
     qparams = {'project': project}
@@ -107,12 +105,10 @@ def test_report_image_scan_empty_instances(aggregator, instance, fixture_group):
 
 
 def test_err_response(aggregator, instance):
-
     check = TwistlockCheck('twistlock', {}, [instance])
 
     with pytest.raises(Exception, match='^Error in response'):
         with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
-
             check.check(instance)
 
 

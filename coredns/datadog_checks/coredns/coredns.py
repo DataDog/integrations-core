@@ -29,7 +29,6 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
             return super(CoreDNSCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances=None):
-
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
         if instances is not None:

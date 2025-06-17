@@ -153,7 +153,6 @@ def legacy_environment():
             service_name="haproxy-open",
             conditions=[WaitFor(wait_for_haproxy_open)],
         ):
-
             if platform_supports_sockets:
                 with docker_run(
                     compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),

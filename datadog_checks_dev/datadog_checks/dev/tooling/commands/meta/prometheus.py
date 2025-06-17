@@ -8,9 +8,16 @@ from itertools import product
 import click
 import requests
 
-from ....fs import dir_exists, path_join, write_file_lines
-from ...constants import get_root
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from datadog_checks.dev.fs import dir_exists, path_join, write_file_lines
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import get_root
 
 METRIC_SEPARATORS = ('.', '_')
 TYPE_MAP = {'gauge': 'gauge', 'counter': 'count', 'rate': 'gauge', 'histogram': 'gauge', 'summary': 'gauge'}
@@ -50,7 +57,7 @@ def parse_metrics(stream):
 
 
 def get_options_text(options):
-    return '\n{}\n' 'q - Quit'.format('\n'.join('{} - {}'.format(n, option) for n, option in enumerate(options, 1)))
+    return '\n{}\nq - Quit'.format('\n'.join('{} - {}'.format(n, option) for n, option in enumerate(options, 1)))
 
 
 def set_up_stream(ctx, endpoint, filehandle):
@@ -243,16 +250,14 @@ def parse(ctx, endpoint, fh, check, here):
     write_file_lines(metadata_file, output_lines)
     echo_success('success!')
 
-    metric_map = (
-        'METRIC_MAP = {{\n'
-        '{}\n'
-        '}}'.format('\n'.join("    '{}': '{}',".format(metric, data['dd_name']) for metric, data in metric_items))
+    metric_map = 'METRIC_MAP = {{\n{}\n}}'.format(
+        '\n'.join("    '{}': '{}',".format(metric, data['dd_name']) for metric, data in metric_items)
     )
 
     echo_info(metric_map)
 
-    metric_list = (
-        '\nMETRICS = [\n' '{}\n' ']'.format('\n'.join("    '{}',".format(data['dd_name']) for _, data in metric_items))
+    metric_list = '\nMETRICS = [\n{}\n]'.format(
+        '\n'.join("    '{}',".format(data['dd_name']) for _, data in metric_items)
     )
 
     echo_info(metric_list)

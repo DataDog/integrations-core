@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .....errors import ConfigTypeError, ConfigValueError
-from .....utils.common import total_time_to_temporal_percent
-from .....utils.constants import TIME_UNITS
+from datadog_checks.base.errors import ConfigTypeError, ConfigValueError
+from datadog_checks.base.utils.common import total_time_to_temporal_percent
+from datadog_checks.base.utils.constants import TIME_UNITS
 
 
 def get_temporal_percent(check, metric_name, modifiers):

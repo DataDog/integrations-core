@@ -5,11 +5,12 @@ import re
 import time
 from contextlib import contextmanager
 
-from ...errors import SubprocessError
-from ...subprocess import run_command
-from ...utils import ON_WINDOWS, file_exists, find_free_port, get_hostname, get_ip, path_join
-from ..commands.console import echo_debug, echo_warning
-from ..constants import get_root
+from datadog_checks.dev.errors import SubprocessError
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import echo_debug, echo_warning
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.utils import ON_WINDOWS, file_exists, find_free_port, get_hostname, get_ip, path_join
+
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_DOGSTATSD_PORT,

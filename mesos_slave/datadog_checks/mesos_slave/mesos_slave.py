@@ -6,6 +6,7 @@
 
 Collects metrics from mesos slave node.
 """
+
 from urllib.parse import urlparse
 
 from requests.exceptions import Timeout

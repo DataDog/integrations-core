@@ -218,7 +218,6 @@ def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._get_number_of_parameters_for_prepared_statement',
         return_value=0,
     ):
-
         prepared_statement_query = (
             check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
                 DB_NAME, test_query_signature
@@ -241,7 +240,6 @@ def test_generate_prepared_statement_query_three_parameters(integration_check, d
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._get_number_of_parameters_for_prepared_statement',
         return_value=3,
     ):
-
         prepared_statement_query = (
             check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
                 DB_NAME, test_query_signature

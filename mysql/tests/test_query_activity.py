@@ -150,7 +150,9 @@ def test_activity_collection(
     expected_sql_text = (
         query[:1021] + '...'
         if len(query) > 1024 and (MYSQL_VERSION_PARSED == parse_version('5.6') or MYSQL_FLAVOR == 'mariadb')
-        else query[:4093] + '...' if len(query) > 4096 else query
+        else query[:4093] + '...'
+        if len(query) > 4096
+        else query
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
@@ -639,9 +641,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
 
     deadlock_metric_end = aggregator.metrics("mysql.innodb.deadlocks")
 
-    assert (
-        len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1
-    ), "there should be one new deadlock"
+    assert len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1, (
+        "there should be one new deadlock"
+    )
 
 
 def _get_conn_for_user(user, _autocommit=False):

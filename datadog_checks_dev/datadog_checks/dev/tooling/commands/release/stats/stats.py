@@ -5,7 +5,8 @@ import csv
 
 import click
 
-from ...console import CONTEXT_SETTINGS, echo_info
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_info
+
 from .common import Release
 
 
@@ -121,7 +122,6 @@ def merged_prs(ctx, from_ref, to_ref, release_milestone, exclude_releases, expor
 @click.option('--release-milestone', '-r', help="Github release milestone", required=True)
 @click.pass_context
 def report(ctx, from_ref, to_ref, release_milestone):
-
     agent_release = Release.from_github(ctx, 'datadog-agent', release_milestone, from_ref=from_ref, to_ref=to_ref)
     integrations_release = Release.from_github(
         ctx, 'integrations-core', release_milestone, from_ref=from_ref, to_ref=to_ref

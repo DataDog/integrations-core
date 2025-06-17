@@ -368,10 +368,10 @@ def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
     _l3.value = 'my_labél_value'
     _l4 = ref_gauge.metric[0].label.add()
     _l4.name = 'labél_mix'
-    _l4.value = u'my_labél_value🇫🇷🇪🇸🇺🇸'
+    _l4.value = 'my_labél_value🇫🇷🇪🇸🇺🇸'
     _l5 = ref_gauge.metric[0].label.add()
-    _l5.name = u'labél_unicode'
-    _l5.value = u'my_labél_value'
+    _l5.name = 'labél_unicode'
+    _l5.value = 'my_labél_value'
     check = mocked_prometheus_check
     check._submit(check.metrics_mapper[ref_gauge.name], ref_gauge)
     check.gauge.assert_called_with(

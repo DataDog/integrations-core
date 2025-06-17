@@ -682,7 +682,6 @@ class TestShareLabels:
         aggregator.assert_all_metrics_covered()
 
     def test_target_info_tags_propagation(self, aggregator, dd_run_check, mock_http_response):
-
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
         mock_http_response(
@@ -708,7 +707,6 @@ class TestShareLabels:
         aggregator.assert_all_metrics_covered()
 
     def test_target_info_tags_propagation_unordered(self, aggregator, dd_run_check, mock_http_response):
-
         check = get_check({'metrics': ['.+'], 'target_info': True, 'cache_shared_labels': False})
 
         mock_http_response(
@@ -734,7 +732,6 @@ class TestShareLabels:
         aggregator.assert_all_metrics_covered()
 
     def test_target_info_tags_propagation_unordered_w_cache(self, aggregator, dd_run_check, mock_http_response):
-
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
         mock_http_response(
@@ -769,7 +766,6 @@ class TestShareLabels:
         aggregator.assert_all_metrics_covered()
 
     def test_target_info_update_cache(self, aggregator, dd_run_check, mock_http_response):
-
         check = get_check({'metrics': ['.+'], 'target_info': True})
         check_var = check
 
@@ -816,7 +812,6 @@ class TestShareLabels:
         aggregator.assert_all_metrics_covered()
 
     def test_target_info_w_shared_labels_cache(self, aggregator, dd_run_check, mock_http_response):
-
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_free_bytes': True}, 'target_info': True})
         check_var = check
 

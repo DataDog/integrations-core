@@ -187,7 +187,6 @@ def prepare_queue_manager():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-
     if common.MQ_VERSION == 9:
         log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
     elif common.MQ_VERSION == 8:

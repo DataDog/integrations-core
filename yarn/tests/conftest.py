@@ -31,7 +31,6 @@ from .common import (
 
 @pytest.fixture(scope="session")
 def dd_environment():
-
     conditions = [
         CheckEndpoints(urljoin(INSTANCE_INTEGRATION['resourcemanager_uri'], endpoint), attempts=240)
         for endpoint in (YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH)

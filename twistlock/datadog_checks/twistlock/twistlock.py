@@ -252,9 +252,7 @@ class TwistlockCheck(AgentCheck):
             msg_text = """
             There is a new CVE affecting your {}:
             {}
-            """.format(
-                vuln_type, description
-            )
+            """.format(vuln_type, description)
 
             event = {
                 'timestamp': time.mktime(published_date.timetuple()),
