@@ -6,6 +6,15 @@ from typing import Any  # noqa: F401
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.proxmox.config_models import ConfigMixin
 
+RESOURCE_TYPE_MAP = {
+    'qemu': 'vm',
+    'lxc': 'container',
+    'storage': 'storage',
+    'node': 'node',
+    'pool': 'pool',
+    'sdn': 'sdn',
+}
+
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'proxmox'
@@ -31,3 +40,24 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         except Exception as e:
             self.log.error("Encountered an Exception when hitting the Proxmox API %s", e)
             self.gauge("api.up", 0, tags=self.base_tags)
+
+        all_resources = {}
+        resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
+        resources_response_json = resources_response.json()
+        resources = resources_response_json.get("data", [])
+        for resource in resources:
+            resource_type = resource.get('type')
+            resource_type_remapped = RESOURCE_TYPE_MAP.get(resource_type, resource_type)
+            resource_name = resource.get('name')
+            if resource_name is None:
+                # some resources don't have a name attribute
+                resource_name = resource.get(resource.get('type', ''))
+
+            resource_id = resource.get('id')
+            all_resources[resource_id] = {'name': resource_name, 'type': resource_type_remapped}
+            self.gauge(
+                f'{resource_type_remapped}.count',
+                1,
+                tags=self.base_tags
+                + [f'proxmox_type:{resource_type_remapped}', f'proxmox_{resource_type_remapped}:{resource_name}'],
+            )

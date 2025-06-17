@@ -51,3 +51,50 @@ def test_version_metadata(dd_run_check, datadog_agent, aggregator, instance):
         'version.raw': '8.4.1',
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_resource_count_metrics(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+    aggregator.assert_metric(
+        "proxmox.vm.count",
+        1,
+        tags=['proxmox_server:http://localhost:8006/api2/json', 'testing', 'proxmox_type:vm', 'proxmox_vm:VM 100'],
+    )
+    aggregator.assert_metric(
+        "proxmox.node.count",
+        1,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:node',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+    )
+    aggregator.assert_metric(
+        "proxmox.storage.count",
+        1,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:storage',
+            'proxmox_storage:local',
+        ],
+    )
+    aggregator.assert_metric(
+        "proxmox.pool.count",
+        1,
+        tags=['proxmox_server:http://localhost:8006/api2/json', 'testing', 'proxmox_type:pool', 'proxmox_pool:pool-1'],
+    )
+    aggregator.assert_metric(
+        "proxmox.sdn.count",
+        1,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:sdn',
+            'proxmox_sdn:localnetwork',
+        ],
+    )
