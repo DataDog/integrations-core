@@ -1,20 +1,16 @@
 id: barracuda_secure_edge
-# See app_id in your integration's manifest.json file to learn more:
-# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: barracuda-secure-edge
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
-  - description: "Action performed by the Barracuda SecureEdge device."
+  - description: "Action taken by the Barracuda SecureEdge"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: action
-    path: secure_edge_action
+    path: action
     source: log
     type: string
-  - description: "Destination IP address of the event."
+  - description: "Destination IP address"
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -22,15 +18,15 @@ facets:
     path: dest_ip
     source: log
     type: string
-  - description: "Event ID associated with the log entry."
+  - description: "Event id of the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: event_id
-    path: secure_edge_event_id
+    path: event_id
     source: log
     type: string
-  - description: "Event name providing context about the log entry."
+  - description: "Event name of the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -38,23 +34,23 @@ facets:
     path: eventname
     source: log
     type: string
-  - description: "level of the log entry, indicating its severity or importance."
+  - description: "Severity level of the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: level
-    path: secure_edge_level
+    path: level
     source: log
     type: string
-  - description: "module of the Barracuda SecureEdge device that generated the log entry."
+  - description: "Module of the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: module
-    path: secure_edge_module
+    path: module
     source: log
     type: string
-  - description: "productname of the Barracuda SecureEdge device that generated the log entry."
+  - description: "Product Name of the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -62,23 +58,23 @@ facets:
     path: productname
     source: log
     type: string
-  - description: "Protocol used in the event, such as TCP or UDP."
+  - description: "Protocol used in the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: protocol
-    path: secure_edge_protocol
+    path: protocol
     source: log
     type: string
-  - description: "Rule that was applied to the event, providing context on how event was handled."
+  - description: "Rule applied in the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: rule
-    path: secure_edge_rule
+    path: rule
     source: log
     type: string
-  - description: "source IP address of the event, indicating where the event originated."
+  - description: "Source IP address of the Barracuda SecureEdge Events"
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -269,7 +265,7 @@ pipeline:
       sourceType: attribute
       target: syslog.timestamp
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: status-remapper
       name: Define `level` as the official status of the log
