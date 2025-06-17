@@ -1,57 +1,360 @@
 id: "barracuda_secure_edge"
 tests:
-  - sample: "2025 03 31 11:46:17 +00:00 Info     LOGIN ATTEMPT: control[5405]: Login
-      localhost_hapair_daemon from 127.0.0.1 : Allowed."
-    result: null
-  - sample: "2025 04 02 09:37:14 +00:00 Info     event: [1071065] Insert Event from
-      127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State
-      for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the
-      license activation state failed)"
-    result: null
-  - sample: "2025 03 31 11:46:20 +00:00 Internal event: [1070045] Startup
-      CheckEventState (pid=6397): check every 30 sec"
-    result: null
-  - sample: "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login succeeded:
-      localhost_CloudGen-WAN Valid password and valid challenge"
-    result: null
-  - sample: 2025 03 31 11:46:23 +00:00 Info     [init] COMMIT(add)
-      servers/CSC/services/DHCP/dhcpe (DHCP Enterprise Configuration)
-    result: null
-  - sample: 2025 05 12 13:15:40 +00:00 Notice   Starting main loop pid=7232
-    result: null
-  - sample: "2025 03 31 13:15:35 +00:00 Info     control:
-      [localhost_hapair_daemon@127.0.0.1] logged in"
-    result: null
-  - sample: "2025 04 01 06:26:28 +00:00 Internal phibs: SAML: process binary for
-      SAML/ADFS authentication."
-    result: null
-  - sample: "2025 03 31 13:16:17 +00:00 Warning  firewall: [DNS] Operation: DNS
-      server with IP 127.0.0.1 now considererd dead after 4 failed health
-      checks. Will be re-employed when reachable again."
-    result: null
-  - sample: "2025 04 02 12:21:07 +00:00 Info     Allow:
-      LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|14.139.60.103|123|ntp||BOX\
-      -NTP-OUT|0|10.10.16.116|14.139.60.103|0|1|0|0|0|0||||||"
-    result: null
-  - sample: "2025 04 01 10:54:57 +00:00 Info     Handler #17 returned with code 2
-      (IOStreamSock: Connect(10.10.16.116:814): Connection refused)"
-    result: null
-  - sample: "2025 03 31 11:45:31 +00:00 Internal [0140200] make_box(b,ARGS):
-      conf-file checksum 12509353523906182422 mismatches last known good value
-      0, fast activation decision deferred "
-    result: null
-  - sample: "2025 03 31 11:45:37 +00:00 Notice   openxdhcp[4500]: start worker
-      xdhcp1 for active link provider"
-    result: null
-  - sample: "2025 03 31 11:45:27 +00:00 Internal [0210112] writeSSHdconf(): finished
-      activation of ssh daemon configuration "
-    result: null
-  - sample: "2025 04 01 06:05:31 +00:00 Info     LOGIN ATTEMPT: sshd[26823]: Login
-      (password) root from 10.10.16.1 port 55827 Accepted"
-    result: null
-  - sample: "2025 03 31 11:46:35 +00:00 Error    sslvpn: ACTIVATE Self-signed
-      certificate key is empty"
-    result: null
-  - sample: "2025 03 31 11:46:29 +00:00 Info     L2TP server config file changed.
-      restart required "
-    result: null
+ -
+  sample: "2025 03 31 11:46:17 +00:00 Info     LOGIN ATTEMPT: control[5405]: Login localhost_hapair_daemon from 127.0.0.1 : Allowed."
+  result:
+    custom:
+      action: "LOGIN ATTEMPT"
+      id: 5405.0
+      level: "Info"
+      message: "LOGIN ATTEMPT: control[5405]: Login localhost_hapair_daemon from 127.0.0.1 : Allowed."
+      module: "control"
+      syslog:
+        timestamp: 1743421577000
+      timestamp: 1743421577000
+      type: "control"
+      type_id: 5405.0
+    message: "2025 03 31 11:46:17 +00:00 Info     LOGIN ATTEMPT: control[5405]: Login localhost_hapair_daemon from 127.0.0.1 : Allowed."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421577000
+ -
+  sample: "2025 04 02 09:37:14 +00:00 Info     event: [1071065] Insert Event from 127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the license activation state failed)"
+  result:
+    custom:
+      action: "event"
+      demo: "Query Activation State for  Failed"
+      dest_if: "Querying licensing servers for the license activation state failed)"
+      dest_ip: "Query Activation State for  Failed"
+      dest_port: "CloudGen-WAN"
+      dest_service: 1.743586634E9
+      epoch: 1.743586634E9
+      event_id: 1071065.0
+      eventname: "License"
+      id: 1071065.0
+      ip_address: "127.0.0.1"
+      level: "Info"
+      meesage: "[1071065] Insert Event from 127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the license activation state failed)"
+      message: "event: [1071065] Insert Event from 127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the license activation state failed)"
+      module: "event"
+      notification_id: 2.0
+      port: "43134"
+      productname: "CloudGen-WAN"
+      protocol: 2.0
+      severity: 1.0
+      src_if: "ccactivate"
+      src_ip: 1.0
+      src_mac: 4700.0
+      src_port: "License"
+      syslog:
+        timestamp: 1743586634000
+      text: "Insert Event from "
+      timestamp: 1743586634000
+      type: "event"
+    message: "2025 04 02 09:37:14 +00:00 Info     event: [1071065] Insert Event from 127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the license activation state failed)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743586634000
+ -
+  sample: "2025 03 31 11:46:20 +00:00 Internal event: [1070045] Startup CheckEventState (pid=6397): check every 30 sec"
+  result:
+    custom:
+      action: "event"
+      event_id: 1070045.0
+      level: "Internal"
+      meesage: "[1070045] Startup CheckEventState (pid=6397): check every 30 sec"
+      message: "event: [1070045] Startup CheckEventState (pid=6397): check every 30 sec"
+      module: "event"
+      syslog:
+        timestamp: 1743421580000
+      timestamp: 1743421580000
+      type: "event"
+    message: "2025 03 31 11:46:20 +00:00 Internal event: [1070045] Startup CheckEventState (pid=6397): check every 30 sec"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421580000
+ -
+  sample: "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login succeeded: localhost_CloudGen-WAN Valid password and valid challenge"
+  result:
+    custom:
+      level: "Notice"
+      message: "127.0.0.1:23697 login succeeded: localhost_CloudGen-WAN Valid password and valid challenge"
+      module: "23697 login succeeded"
+      source_ip: "127.0.0.1"
+      source_port: 23697.0
+      syslog:
+        timestamp: 1743558351000
+      timestamp: 1743558351000
+      type: "127.0.0.1"
+    message: "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login succeeded: localhost_CloudGen-WAN Valid password and valid challenge"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743558351000
+ -
+  sample: "2025 03 31 11:46:23 +00:00 Info     [init] COMMIT(add) servers/CSC/services/DHCP/dhcpe (DHCP Enterprise Configuration)"
+  result:
+    custom:
+      commit_action: "add"
+      initiator: "init"
+      level: "Info"
+      message: "[init] COMMIT(add) servers/CSC/services/DHCP/dhcpe (DHCP Enterprise Configuration)"
+      path: "servers/CSC/services/DHCP/dhcpe"
+      syslog:
+        timestamp: 1743421583000
+      timestamp: 1743421583000
+    message: "2025 03 31 11:46:23 +00:00 Info     [init] COMMIT(add) servers/CSC/services/DHCP/dhcpe (DHCP Enterprise Configuration)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421583000
+ -
+  sample: "2025 05 12 13:15:40 +00:00 Notice   Starting main loop pid=7232"
+  result:
+    custom:
+      level: "Notice"
+      message: "Starting main loop pid=7232"
+      process_id: 7232.0
+      syslog:
+        timestamp: 1747055740000
+      timestamp: 1747055740000
+    message: "2025 05 12 13:15:40 +00:00 Notice   Starting main loop pid=7232"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1747055740000
+ -
+  sample: "2025 03 31 13:15:35 +00:00 Info     control: [localhost_hapair_daemon@127.0.0.1] logged in"
+  result:
+    custom:
+      action: "control"
+      level: "Info"
+      log_source: "control"
+      meesage: "[localhost_hapair_daemon@127.0.0.1] logged in"
+      message: "control: [localhost_hapair_daemon@127.0.0.1] logged in"
+      module: "control"
+      source_ip: "127.0.0.1"
+      syslog:
+        timestamp: 1743426935000
+      timestamp: 1743426935000
+      type: "control"
+      username: "localhost_hapair_daemon"
+    message: "2025 03 31 13:15:35 +00:00 Info     control: [localhost_hapair_daemon@127.0.0.1] logged in"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743426935000
+ -
+  sample: "2025 04 01 06:26:28 +00:00 Internal phibs: SAML: process binary for SAML/ADFS authentication."
+  result:
+    custom:
+      action: "phibs"
+      auth_component: "phibs"
+      auth_process: "SAML"
+      auth_type: "SAML/ADFS authentication."
+      event: "process binary"
+      level: "Internal"
+      meesage: "SAML: process binary for SAML/ADFS authentication."
+      message: "phibs: SAML: process binary for SAML/ADFS authentication."
+      module: "phibs"
+      syslog:
+        timestamp: 1743488788000
+      timestamp: 1743488788000
+      type: "phibs"
+    message: "2025 04 01 06:26:28 +00:00 Internal phibs: SAML: process binary for SAML/ADFS authentication."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743488788000
+ -
+  sample: "2025 03 31 13:16:17 +00:00 Warning  firewall: [DNS] Operation: DNS server with IP 127.0.0.1 now considererd dead after 4 failed health checks. Will be re-employed when reachable again."
+  result:
+    custom:
+      action: "firewall"
+      event_type: "DNS"
+      level: "Warning"
+      log_source: "firewall"
+      meesage: "[DNS] Operation: DNS server with IP 127.0.0.1 now considererd dead after 4 failed health checks. Will be re-employed when reachable again."
+      message: "DNS server with IP 127.0.0.1 now considererd dead after 4 failed health checks. Will be re-employed when reachable again."
+      module: "firewall"
+      operation_type: "Operation"
+      service: "DNS"
+      syslog:
+        timestamp: 1743426977000
+      timestamp: 1743426977000
+      type: "firewall"
+    message: "2025 03 31 13:16:17 +00:00 Warning  firewall: [DNS] Operation: DNS server with IP 127.0.0.1 now considererd dead after 4 failed health checks. Will be re-employed when reachable again."
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743426977000
+ -
+  sample: "2025 04 02 12:21:07 +00:00 Info     Allow: LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|14.139.60.103|123|ntp||BOX-NTP-OUT|0|10.10.16.116|14.139.60.103|0|1|0|0|0|0||||||"
+  result:
+    custom:
+      action: "Allow"
+      count: 1.0
+      dest_ip: "14.139.60.103"
+      dest_port: 123.0
+      dest_service: "ntp"
+      dst_nat: "14.139.60.103"
+      duration: 0.0
+      info: 0.0
+      level: "Info"
+      meesage: "LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|14.139.60.103|123|ntp||BOX-NTP-OUT|0|10.10.16.116|14.139.60.103|0|1|0|0|0|0||||||"
+      message: "Allow: LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|14.139.60.103|123|ntp||BOX-NTP-OUT|0|10.10.16.116|14.139.60.103|0|1|0|0|0|0||||||"
+      module: "Allow"
+      protocol: "UDP"
+      received_bytes: 0.0
+      received_packets: 0.0
+      rule: "BOX-NTP-OUT"
+      sent_bytes: 0.0
+      sent_packets: 0.0
+      src_if: "p2"
+      src_ip: "10.10.16.116"
+      src_mac: "00:0c:29:ca:a2:3c"
+      src_nat: "10.10.16.116"
+      src_port: 123.0
+      syslog:
+        timestamp: 1743596467000
+      timestamp: 1743596467000
+      type: "Allow"
+    message: "2025 04 02 12:21:07 +00:00 Info     Allow: LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|14.139.60.103|123|ntp||BOX-NTP-OUT|0|10.10.16.116|14.139.60.103|0|1|0|0|0|0||||||"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743596467000
+ -
+  sample: "2025 04 01 10:54:57 +00:00 Info     Handler #17 returned with code 2 (IOStreamSock: Connect(10.10.16.116:814): Connection refused)"
+  result:
+    custom:
+      action: "Handler #17 returned with code 2 (IOStreamSock"
+      ip: "10.10.16.116"
+      level: "Info"
+      message: "Handler #17 returned with code 2 (IOStreamSock: Connect(10.10.16.116:814): Connection refused)"
+      module: "Connect(10.10.16.116"
+      port: 814.0
+      src: "10.10.16.116"
+      syslog:
+        timestamp: 1743504897000
+      timestamp: 1743504897000
+      type: "Handler #17 returned with code 2 (IOStreamSock"
+    message: "2025 04 01 10:54:57 +00:00 Info     Handler #17 returned with code 2 (IOStreamSock: Connect(10.10.16.116:814): Connection refused)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743504897000
+ -
+  sample: "2025 03 31 11:45:31 +00:00 Internal [0140200] make_box(b,ARGS): conf-file checksum 12509353523906182422 mismatches last known good value 0, fast activation decision deferred "
+  result:
+    custom:
+      action: "conf"
+      event_id: 140200.0
+      function: "make_box(b,ARGS)"
+      initiator: "0140200"
+      level: "Internal"
+      message: "conf-file checksum 12509353523906182422 mismatches last known good value 0, fast activation decision deferred"
+      proccess_id: 140200.0
+      syslog:
+        timestamp: 1743421531000
+      timestamp: 1743421531000
+      type: "[0140200] make_box(b,ARGS)"
+    message: "2025 03 31 11:45:31 +00:00 Internal [0140200] make_box(b,ARGS): conf-file checksum 12509353523906182422 mismatches last known good value 0, fast activation decision deferred "
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421531000
+ -
+  sample: "2025 03 31 11:45:37 +00:00 Notice   openxdhcp[4500]: start worker xdhcp1 for active link provider"
+  result:
+    custom:
+      level: "Notice"
+      message: "openxdhcp[4500]: start worker xdhcp1 for active link provider"
+      process: "openxdhcp"
+      process_id: 4500.0
+      syslog:
+        timestamp: 1743421537000
+      timestamp: 1743421537000
+      type: "openxdhcp[4500]"
+    message: "2025 03 31 11:45:37 +00:00 Notice   openxdhcp[4500]: start worker xdhcp1 for active link provider"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421537000
+ -
+  sample: "2025 03 31 11:45:27 +00:00 Internal [0210112] writeSSHdconf(): finished activation of ssh daemon configuration "
+  result:
+    custom:
+      action: "finished"
+      event_id: 210112.0
+      function: "writeSSHdconf()"
+      initiator: "0210112"
+      level: "Internal"
+      message: "finished activation of ssh daemon configuration"
+      proccess_id: 210112.0
+      syslog:
+        timestamp: 1743421527000
+      timestamp: 1743421527000
+      type: "[0210112] writeSSHdconf()"
+    message: "2025 03 31 11:45:27 +00:00 Internal [0210112] writeSSHdconf(): finished activation of ssh daemon configuration "
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421527000
+ -
+  sample: "2025 04 01 06:05:31 +00:00 Info     LOGIN ATTEMPT: sshd[26823]: Login (password) root from 10.10.16.1 port 55827 Accepted"
+  result:
+    custom:
+      action: "LOGIN ATTEMPT"
+      id: 26823.0
+      level: "Info"
+      message: "LOGIN ATTEMPT: sshd[26823]: Login (password) root from 10.10.16.1 port 55827 Accepted"
+      module: "sshd"
+      port: 55827.0
+      src: "10.10.16.1"
+      syslog:
+        timestamp: 1743487531000
+      timestamp: 1743487531000
+      type: "LOGIN ATTEMPT"
+    message: "2025 04 01 06:05:31 +00:00 Info     LOGIN ATTEMPT: sshd[26823]: Login (password) root from 10.10.16.1 port 55827 Accepted"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743487531000
+ -
+  sample: "2025 03 31 11:46:35 +00:00 Error    sslvpn: ACTIVATE Self-signed certificate key is empty"
+  result:
+    custom:
+      action: "sslvpn"
+      event_type: "ACTIVATE"
+      level: "Error"
+      log_source: "sslvpn"
+      meesage: "ACTIVATE Self-signed certificate key is empty"
+      message: "Self-signed certificate key is empty"
+      module: "sslvpn"
+      syslog:
+        timestamp: 1743421595000
+      timestamp: 1743421595000
+      type: "sslvpn"
+    message: "2025 03 31 11:46:35 +00:00 Error    sslvpn: ACTIVATE Self-signed certificate key is empty"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421595000
+ -
+  sample: "2025 03 31 11:46:29 +00:00 Info     L2TP server config file changed. restart required "
+  result:
+    custom:
+      level: "Info"
+      message: "L2TP server config file changed. restart required"
+      syslog:
+        timestamp: 1743421589000
+      timestamp: 1743421589000
+    message: "2025 03 31 11:46:29 +00:00 Info     L2TP server config file changed. restart required "
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1743421589000
