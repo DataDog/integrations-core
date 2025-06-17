@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import pymqi
 import pytest
 from mock import Mock
-import pymqi
 
 from datadog_checks.ibm_mq.collectors import ChannelMetricCollector
 from datadog_checks.ibm_mq.config import IBMMQConfig
