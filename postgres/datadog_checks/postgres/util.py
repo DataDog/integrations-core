@@ -249,6 +249,34 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
     ],
 }
 
+QUERY_PG_STAT_RECOVERY_PREFETCH = {
+    'name': 'pg_stat_recovery_prefetch',
+    'query': """
+        SELECT
+            prefetch,
+            hit,
+            skip_init,
+            skip_new,
+            skip_fpw,
+            skip_rep,
+            wal_distance,
+            block_distance,
+            io_depth
+        FROM pg_stat_recovery_prefetch
+    """.strip(),
+    'columns': [
+        {'name': 'recovery_prefetch.prefetch', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.hit', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_init', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_new', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_fpw', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_rep', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.wal_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.block_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.io_depth', 'type': 'gauge'},
+    ],
+}
+
 QUERY_PG_UPTIME = {
     'name': 'pg_uptime',
     'query': "SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))",
