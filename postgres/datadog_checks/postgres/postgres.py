@@ -5,8 +5,10 @@ import contextlib
 import copy
 import functools
 import os
+import math
 from string import Template
 from time import time
+from typing import Dict
 
 import psycopg2
 from cachetools import TTLCache
@@ -162,20 +164,26 @@ class PostgreSql(AgentCheck):
         instance_config = copy.deepcopy(self.instance)
         instance_config['password'] = "***"
         init_event = {
+            "instance_config": instance_config
+        }
+        # "instance_config": json.dumps(instance_config, default=default_json_event_encoding),
+        # "agent_config": json.dumps(self.agentConfig, default=default_json_event_encoding),
+        self.send_health_event("initialization", init_event)
+    
+    def send_health_event(self, event_type, event: Dict[str, any]):
+        message = {
             "dbm_type": "agent_health",
-            "event_type": "initialization",
+            "event_type": event_type,
             "database_instance": self.database_identifier,
             "ddsource": "postgres",
             "ddagentversion": datadog_agent.get_version(),
             "ddtags": self.tags,
             "timestamp": time() * 1000,
-            "instance_config": json.dumps(instance_config, default=default_json_event_encoding),
-            "agent_config": json.dumps(self.agentConfig, default=default_json_event_encoding),
+            "event": event,
         }
-        self.log.info("agent config: %s", self.agentConfig)
-        self.log.info("init event: %s", init_event)
+        self.log.info("Sending health event: %s", json.dumps(message, default=default_json_event_encoding))
         self.database_monitoring_query_activity(
-            json.dumps(init_event, default=default_json_event_encoding)
+            json.dumps(message, default=default_json_event_encoding)
         )
 
     def _build_autodiscovery(self):
@@ -276,6 +284,7 @@ class PostgreSql(AgentCheck):
             self.log.warning(
                 "Connection to the database %s has been interrupted, closing connection", self._config.dbname
             )
+            self.send_health_event("disconnect", {})
             try:
                 self._db.close()
             except Exception:
@@ -289,14 +298,21 @@ class PostgreSql(AgentCheck):
 
     def _connection_health_check(self, conn):
         try:
+            # CHAOS TESTING DO NOT MERGE
+            # disconnect for every other minute
+            if math.floor(time.time()) % 120  < 60:
+                raise psycopg2.OperationalError("Simulated connection failure for chaos testing")     
+            
             # run a simple query to check if the connection is healthy
             # health check should run after a connection is established
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 cursor.execute("SELECT 1")
                 cursor.fetchall()
+            self.send_health_event("connection_success", {})
         except psycopg2.OperationalError as e:
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
+            self.send_health_event("connection_error", {"error": err_msg})
             raise DatabaseHealthCheckError(err_msg)
 
     @property

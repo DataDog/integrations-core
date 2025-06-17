@@ -267,6 +267,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
         self._is_schemas_collection_in_progress = False
+        self._extensions_cached = None
         self._pg_settings_cached = None
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
@@ -300,20 +301,21 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_extension_query
         if elapsed_s >= self.pg_extensions_collection_interval and self._collect_extensions_enabled:
             self._extensions_cached = self._collect_postgres_extensions()
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_extension",
-            "collection_interval": self.collection_interval,
-            "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._check.cloud_metadata,
-            "metadata": self._extensions_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+        if self._extensions_cached:
+            event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_extension",
+                "collection_interval": self.collection_interval,
+                "dbms_version": payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._check.cloud_metadata,
+                "metadata": self._extensions_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):

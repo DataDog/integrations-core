@@ -685,15 +685,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._log.warning(
                 "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
+            self._check.send_health_event("explain_plan_error", {"error": DBExplainError.database_error.value, "error_message": str(e)})
             return DBExplainError.database_error, e
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
+            self._check.send_health_event("explain_plan_error", {"error": DBExplainError.invalid_schema.value})
             self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
             return DBExplainError.invalid_schema, e
         except psycopg2.errors.DatatypeMismatch as e:
+            self._check.send_health_event("explain_plan_error", {"error": DBExplainError.datatype_mismatch.value})
             self._emit_run_explain_error(dbname, DBExplainError.datatype_mismatch, e)
             return DBExplainError.datatype_mismatch, e
         except psycopg2.DatabaseError as e:
