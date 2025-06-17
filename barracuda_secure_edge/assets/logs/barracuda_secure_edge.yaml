@@ -7,7 +7,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: action
-    path: action
+    path: secure_edge.action
     source: log
     type: string
   - description: "Destination IP address"
@@ -15,7 +15,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: dest_ip
-    path: dest_ip
+    path: secure_edge.dest_ip
     source: log
     type: string
   - description: "Event id of the Barracuda SecureEdge Events"
@@ -23,7 +23,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: event_id
-    path: event_id
+    path: secure_edge.event_id
     source: log
     type: string
   - description: "Event name of the Barracuda SecureEdge Events"
@@ -31,7 +31,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: eventname
-    path: eventname
+    path: secure_edge.eventname
     source: log
     type: string
   - description: "Severity level of the Barracuda SecureEdge Events"
@@ -39,7 +39,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: level
-    path: level
+    path: secure_edge.level
     source: log
     type: string
   - description: "Module of the Barracuda SecureEdge Events"
@@ -47,7 +47,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: module
-    path: module
+    path: secure_edge.module
     source: log
     type: string
   - description: "Product Name of the Barracuda SecureEdge Events"
@@ -55,7 +55,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: productname
-    path: productname
+    path: secure_edge.productname
     source: log
     type: string
   - description: "Protocol used in the Barracuda SecureEdge Events"
@@ -63,7 +63,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: protocol
-    path: protocol
+    path: secure_edge.protocol
     source: log
     type: string
   - description: "Rule applied in the Barracuda SecureEdge Events"
@@ -71,7 +71,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: rule
-    path: rule
+    path: secure_edge.rule
     source: log
     type: string
   - description: "Source IP address of the Barracuda SecureEdge Events"
@@ -79,7 +79,7 @@ facets:
     groups:
       - Barracuda SecureEdge
     name: src_ip
-    path: src_ip
+    path: secure_edge.src_ip
     source: log
     type: string
 pipeline:
