@@ -58,7 +58,7 @@ requests-ntlm==1.3.0
 requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
 requests-unixsocket2==1.0.0
-requests==2.32.3
+requests==2.32.4
 rethinkdb==2.4.10.post1
 securesystemslib[crypto,pynacl]==0.28.0
 semver==3.0.4
