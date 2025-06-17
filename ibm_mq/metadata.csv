@@ -90,3 +90,4 @@ ibm_mq.stats.queue.put_count,count,,message,,"The number of persistent and non-p
 ibm_mq.stats.queue.put_fail_count,count,,message,,The number of unsuccessful attempts to put a message to the queue (parameter identifier: `MQIAMO_PUTS_FAILED`).,0,ibm_mq,stats queue put fail count,
 ibm_mq.stats.queue.q_max_depth,gauge,,message,,The maximum queue depth during the monitoring period (parameter identifier: `MQIAMO_Q_MAX_DEPTH`).,0,ibm_mq,stats queue q max depth,
 ibm_mq.stats.queue.q_min_depth,gauge,,message,,The minimum queue depth during the monitoring period (parameter identifier: `MQIAMO_Q_MIN_DEPTH`).,0,ibm_mq,stats queue q min depth,
+ibm_mq.channel.conns,gauge,,connection,,The number of connections to the channel (parameter identifier: `MQIACH_CONNS`).,0,ibm_mq,conns,
