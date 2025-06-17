@@ -801,20 +801,17 @@ class TestVault:
 
 
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-def test_x_vault_request_header_is_set(monkeypatch, instance, dd_run_check, use_openmetrics):
+def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
 
-    c = Vault(Vault.CHECK_NAME, {}, [instance])
-
     requests_get = requests.Session.get
-    mock_get = mock.Mock(side_effect=requests_get)
-    monkeypatch.setattr(requests.Session, 'get', mock_get)
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=requests_get) as mock_get:
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+        dd_run_check(c)
 
-    dd_run_check(c)
-
-    assert mock_get.call_count > 0
-    for call in mock_get.call_args_list:
-        headers = dict(call.kwargs['headers'])
-        assert 'X-Vault-Request' in headers
-        assert headers['X-Vault-Request'] == 'true'
+        assert mock_get.call_count > 0
+        for call in mock_get.call_args_list:
+            headers = dict(call.kwargs['headers'])
+            assert 'X-Vault-Request' in headers
+            assert headers['X-Vault-Request'] == 'true'
