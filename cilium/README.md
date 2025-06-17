@@ -174,7 +174,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://cilium.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset#installation

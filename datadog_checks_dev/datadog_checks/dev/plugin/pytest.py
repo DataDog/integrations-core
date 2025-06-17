@@ -320,7 +320,7 @@ def mock_performance_objects(mocker, dd_default_hostname):
         counters = {}
         for object_name, data in perf_objects.items():
             instances, counter_values = data
-            instance_counts = {instance_name: 0 for instance_name in instances}
+            instance_counts = dict.fromkeys(instances, 0)
             instance_indices = []
             for instance_name in instances:
                 instance_indices.append(instance_counts[instance_name])

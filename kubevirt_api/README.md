@@ -84,7 +84,7 @@ The KubeVirt API integration does not include any service checks.
 Need help? Contact [Datadog support][7].
 
 [1]: https://docs.datadoghq.com/integrations/kubevirt_api
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=datadogoperator
 [5]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent

@@ -64,6 +64,14 @@ See the [sample nginx_ingress_controller.d/conf.yaml][3] for all available confi
     }
 ```
 
+**Note**: Histogram metrics (like `nginx_ingress.controller.response.*` metrics) are not collected by default and require the additional [collect_nginx_histograms][12] instance config parameter
+to be set to `true`. The parameter defaults to `false` because the histogram metrics are known to have high tag cardinality.
+
+| Parameter            | Value                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `<INSTANCE_CONFIG>`  | `[{"nginx_status_url": "http://%%host%%:18080/nginx_status"},{"prometheus_url": "http://%%host%%:10254/metrics", "collect_nginx_histograms": true}]` |
+
+
 #### Log collection
 
 _Available for Agent versions >6.0_
@@ -97,7 +105,7 @@ The NGINX Ingress Controller does not include any service checks.
 Need help? Contact [Datadog support][9].
 
 [1]: https://kubernetes.github.io/ingress-nginx
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/datadog_checks/nginx_ingress_controller/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -107,3 +115,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/kubernetes/prometheus/
 [11]: https://github.com/nginxinc/nginx-prometheus-exporter#exported-metrics
+[12]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/datadog_checks/nginx_ingress_controller/data/conf.yaml.example#L59C7-L59C31

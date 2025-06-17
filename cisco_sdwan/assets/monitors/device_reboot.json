@@ -11,7 +11,7 @@
 	"name": "[Cisco SD-WAN] Device {{device_hostname.name}} ({{device_ip.name}}) rebooted more than 3 times in the last 10 minutes",
 	"type": "query alert",
 	"query": "sum(last_10m):sum:cisco_sdwan.reboot.count{*} by {device_namespace,device_hostname,device_ip,device_id} > 3",
-	"message": "{{#is_alert}}\nSD-WAN Device {{device_hostname.name}} ({{device_ip.name}}) rebooted more than 3 times in the last 10 minutes.\n{{/is_alert}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+	"message": "{{#is_alert}}\nSD-WAN Device {{device_hostname.name}} ({{device_ip.name}}) rebooted more than 3 times in the last 10 minutes.\n{{/is_alert}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/devices?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
 	"tags": [],
 	"options": {
 		"thresholds": {

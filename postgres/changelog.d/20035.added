@@ -1,1 +1,0 @@
-add replication slot information and replication slot type to postgres replication stat metric
