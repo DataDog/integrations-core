@@ -256,6 +256,7 @@ def mock_http_api(monkeypatch):
 
     def mock_post(*args, **kwargs):
         import logging
+
         logger = logging.getLogger(__name__)
         logger.warning(args)
 

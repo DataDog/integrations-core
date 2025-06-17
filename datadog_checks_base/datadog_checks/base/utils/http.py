@@ -144,7 +144,7 @@ def create_ssl_context(config, overrides=None):
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-    ca_cert = config['tls_ca_cert']
+    ca_cert = config.get('tls_ca_cert')
     try:
         if ca_cert:
             ca_cert = os.path.expanduser(ca_cert)
@@ -161,8 +161,8 @@ def create_ssl_context(config, overrides=None):
         )
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-    client_cert, client_key = config['tls_cert'], config['tls_private_key']
-    client_key_pass = config['tls_private_key_password']
+    client_cert, client_key = config.get('tls_cert'), config.get('tls_private_key')
+    client_key_pass = config.get('tls_private_key_password')
     try:
         if client_key:
             client_key = os.path.expanduser(client_key)
@@ -543,14 +543,14 @@ class RequestsWrapper(object):
 
             if self.auth_token_handler:
                 try:
-                    response = self.make_request_aia_chasing(session, request_method, method, url, new_options, persist)
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = self.make_request_aia_chasing(session, request_method, method, url, new_options, persist)
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
-                response = self.make_request_aia_chasing(session, request_method, method, url, new_options, persist)
+                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
             return ResponseWrapper(response, self.request_size)
 
@@ -573,9 +573,9 @@ class RequestsWrapper(object):
 
         return create_ssl_context(self.tls_config, overrides=new_tls_config)
 
-    def make_request_aia_chasing(self, session, request_method, method, url, new_options, persist):
+    def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
-            response = request_method(session, url, **new_options)
+            response = request_method(url, **new_options)
         except SSLError as e:
             # fetch the intermediate certs
             parsed_url = urlparse(url)
@@ -593,7 +593,7 @@ class RequestsWrapper(object):
                 certadapter = SSLContextAdapter(new_context)
                 session.mount(url, certadapter)
             request_method = getattr(session, method)
-            response = request_method(session, url, **new_options)
+            response = request_method(url, **new_options)
         return response
 
     def populate_options(self, options):

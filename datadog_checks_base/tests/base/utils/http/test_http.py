@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import os
 import ssl
 import subprocess
 import tempfile
 import time
-import os
 
 import mock
 import pytest
@@ -25,24 +25,47 @@ def openssl_https_server():
     key_file = tempfile.NamedTemporaryFile(delete=False, suffix=".key")
     cert_file.close()
     key_file.close()
-    subprocess.run([
-        "openssl", "req", "-x509", "-newkey", "rsa:2048",
-        "-keyout", key_file.name, "-out", cert_file.name,
-        "-days", "3", "-nodes", "-subj", "/CN=localhost"
-    ], check=True)
+    subprocess.run(
+        [
+            "openssl",
+            "req",
+            "-x509",
+            "-newkey",
+            "rsa:2048",
+            "-keyout",
+            key_file.name,
+            "-out",
+            cert_file.name,
+            "-days",
+            "3",
+            "-nodes",
+            "-subj",
+            "/CN=localhost",
+        ],
+        check=True,
+    )
 
     # Start OpenSSL server with a single cipher
     port = 8443
     cipher = "AES256-GCM-SHA384"
-    server_proc = subprocess.Popen([
-        "openssl", "s_server",
-        "-accept", str(port),
-        "-cert", cert_file.name,
-        "-key", key_file.name,
-        "-cipher", cipher,
-        "-tls1_2",
-        "-www"
-    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    server_proc = subprocess.Popen(
+        [
+            "openssl",
+            "s_server",
+            "-accept",
+            str(port),
+            "-cert",
+            cert_file.name,
+            "-key",
+            key_file.name,
+            "-cipher",
+            cipher,
+            "-tls1_2",
+            "-www",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
 
     # Wait for server to be ready
     time.sleep(1)
@@ -98,7 +121,7 @@ class TestTLSCiphers:
 
             # Verify that set_ciphers was called with the expected ciphers during TLS context creation
             mock_set_ciphers.assert_called_once_with(expected_ciphers)
-    
+
     def test_http_success_with_default_ciphers(self, openssl_https_server):
         '''
         Test that the default ciphers are sufficient to connect to the server.
@@ -141,10 +164,11 @@ class TestTLSCiphers:
         }
         init_config = {}
         # Mock SSL set_ciphers to disable it and use the default ciphers
-        with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
+        with mock.patch.object(ssl.SSLContext, 'set_ciphers'):
             http = RequestsWrapper(instance, init_config)
             with pytest.raises(requests.exceptions.SSLError):
                 http.get(url)
+
 
 class TestRequestSize:
     def test_behavior_correct(self, mock_http_response):

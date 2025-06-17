@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt  # noqa: F401
 import functools
-import ssl
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 
 import vsanapiutils
