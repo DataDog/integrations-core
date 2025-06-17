@@ -805,8 +805,10 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
 
-    requests_get = requests.Session.get
-    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=requests_get) as mock_get:
+    def mock_requests_get(url, *args, **kwargs):
+        return requests.get(url, *args, **kwargs)
+
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=mock_requests_get) as mock_get:
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         dd_run_check(c)
 
