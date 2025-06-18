@@ -108,27 +108,36 @@ class QueueMetricCollector(object):
                 pcf = pymqi.PCFExecute(
                     queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
                 )
-                response = pcf.MQCMD_INQUIRE_Q(args)
-            except pymqi.MQMIError as e:
-                # Don't warn if no messages, see:
-                # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
-                    self.log.debug("No queue info available")
-                elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_UNKNOWN_OBJECT_NAME:
-                    self.log.debug("No matching queue of type %d for pattern %s", queue_type, mq_pattern_filter)
-                else:
-                    self.warning("Error discovering queue: %s", e)
-            else:
-                for queue_info in response:
-                    queue = queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)
-                    if queue:
-                        queue_name = to_string(queue).strip()
-                        self.log.debug("Discovered queue: %s", queue_name)
-                        queues.append(queue_name)
-                    else:
+                # Use MQCMD_INQUIRE_Q_NAMES to get only the queue names rather than the full queue info
+                response = pcf.MQCMD_INQUIRE_Q_NAMES(args)
+                queue_names = response[0].get(pymqi.CMQCFC.MQCACF_Q_NAMES, []) if response else []
+                for queue in queue_names:
+                    queue_name = to_string(queue).strip()
+                    if not queue_name:
                         self.log.debug('Discovered queue with empty name, skipping.')
                         continue
+                    # For each queue name inquire the queue info
+                    inquire_args = {
+                        pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
+                        pymqi.CMQC.MQIA_Q_TYPE: queue_type,
+                    }
+                    try:
+                        queue_info_response = pcf.MQCMD_INQUIRE_Q(inquire_args)
+                        if queue_info_response:
+                            self.log.debug("Discovered queue: %s", queue_name)
+                            queues.append(queue_name)
+                    except pymqi.MQMIError as e:
+                        self.log.debug("Error inquiring queue %s: %s", queue_name, e)
+                        self._submit_discovery_error_metric(e, [f"queue:{queue_name}"])
+                        continue
                 self.log.debug("%s queues discovered", str(len(queues)))
+            except pymqi.MQMIError as e:
+                self.log.debug("Error inquiring queue names for pattern %s: %s", mq_pattern_filter, e)
+                self._submit_discovery_error_metric(e, [f"queue_pattern:{mq_pattern_filter}", f"queue_type:{queue_type}"])
+                continue
+            except Exception as e:
+                self.log.debug("Error retrieving queue info for %s: %s", mq_pattern_filter, e)
+                continue
             finally:
                 # Close internal reply queue to prevent filling up a dead-letter queue.
                 # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
@@ -140,6 +149,22 @@ class QueueMetricCollector(object):
             self.warning("No matching queue of type MQQT_LOCAL or MQQT_REMOTE for pattern %s", mq_pattern_filter)
 
         return queues
+
+    def _submit_discovery_error_metric(self, error, tags):
+        error_tags = list(tags)
+        reason = getattr(error, "reason", None)
+        if reason is not None:
+            error_tags.append(f"ibm_error_code:{reason}")
+        error_str = None
+        if hasattr(error, "errorAsString"):
+            try:
+                error_str = error.errorAsString()
+            except Exception:
+                error_str = None
+        if error_str and ":" in error_str:
+            error_name = error_str.split(":")[-1].strip()
+            error_tags.append(f"ibm_error:{error_name}")
+        self.send_metric(GAUGE, "ibm_mq.queue.discovery.error", 1, tags=error_tags)
 
     def queue_manager_stats(self, queue_manager, tags):
         """
