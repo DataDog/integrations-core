@@ -12,10 +12,7 @@ from datadog_checks.base.utils.http import RequestsWrapper, SSLContextAdapter
 
 pytestmark = [pytest.mark.unit]
 
-IANA_TO_OPENSSL_NAME = {
-    'TLS_RSA_WITH_AES_256_GCM_SHA384': 'AES256-GCM-SHA384',
-    'TLS_RSA_WITH_AES_128_GCM_SHA256': 'AES128-GCM-SHA256',
-}
+TEST_CIPHERS = ['AES256-GCM-SHA384','AES128-GCM-SHA256']
 
 
 class TestCert:
@@ -268,7 +265,7 @@ class TestAIAChasing:
 
     def test_fetch_intermediate_certs_tls_ciphers(self):
         """Test that fetch_intermediate_certs uses the correct ciphers."""
-        instance = {'tls_verify': True, 'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384']}
+        instance = {'tls_verify': True, 'tls_ciphers': [TEST_CIPHERS[0]]}
         init_config = {}
 
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
@@ -288,11 +285,11 @@ class TestAIAChasing:
                 # Mock the certificate loading to avoid cryptography operations
                 with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.load_intermediate_certs'):
                     http = RequestsWrapper(instance, init_config)
-                    mock_context.set_ciphers.assert_called_once_with('TLS_RSA_WITH_AES_256_GCM_SHA384')
+                    mock_context.set_ciphers.assert_called_once_with(instance['tls_ciphers'][0])
                     http.fetch_intermediate_certs('example.com', 443)
                     # Assert set_ciphers called a second time after fetch_intermediate_certs
                     assert mock_context.set_ciphers.call_count == 2
-                    assert mock_context.set_ciphers.call_args_list[1][0][0] == 'TLS_RSA_WITH_AES_256_GCM_SHA384'
+                    assert mock_context.set_ciphers.call_args_list[1][0][0] == instance['tls_ciphers'][0]
 
 
 class TestSSLContext:
@@ -348,7 +345,7 @@ class TestSSLContext:
 
     def test_tls_ciphers_applied_consistently(self):
         """Test that tls_ciphers are applied consistently."""
-        instance = {'tls_verify': True, 'tls_ciphers': list(IANA_TO_OPENSSL_NAME.keys())}
+        instance = {'tls_verify': True, 'tls_ciphers': TEST_CIPHERS}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
@@ -365,7 +362,7 @@ class TestSSLContext:
         for cipher in instance['tls_ciphers']:
             # At least one entry's name field should match the OpenSSL name
             assert any(
-                IANA_TO_OPENSSL_NAME.get(cipher) in c.get('name') for c in https_adapter.ssl_context.get_ciphers()
+                cipher in c.get('name') for c in https_adapter.ssl_context.get_ciphers()
             )
 
     def test_default_tls_ciphers(self):
@@ -387,7 +384,7 @@ class TestSSLContext:
             'tls_use_host_header': True,
             'headers': {'Host': 'custom-host.example.com'},
             'tls_verify': True,
-            'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384'],
+            'tls_ciphers': [TEST_CIPHERS[0]],
         }
         init_config = {}
         http = RequestsWrapper(instance, init_config)
@@ -433,7 +430,7 @@ class TestSSLContext:
             'tls_validate_hostname': True,
             'tls_ignore_warning': False,
             'tls_protocols_allowed': ['TLSv1.2', 'TLSv1.3'],
-            'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384'],
+            'tls_ciphers': [TEST_CIPHERS[0]],
         }
         init_config = {}
 
@@ -453,4 +450,4 @@ class TestSSLContext:
 
             # Verify TLS context wrapper has the right config
             assert http.tls_config['tls_verify'] is True
-            assert http.tls_config['tls_ciphers'] == ['TLS_RSA_WITH_AES_256_GCM_SHA384']
+            assert http.tls_config['tls_ciphers'] == instance['tls_ciphers']
