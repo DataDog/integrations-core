@@ -440,8 +440,10 @@ def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
         'skip_proxy': 'false',
     }
 
-    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
-    with mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning:
+    with mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning, mock.patch(
+        'requests.Session.get'
+    ):
+        check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
         dd_run_check(check)
         mock_warning.assert_called()
         assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)
