@@ -136,7 +136,9 @@ class QueueMetricCollector(object):
                 self.log.debug("%s queues discovered", str(len(queues)))
             except pymqi.MQMIError as e:
                 self.log.debug("Error inquiring queue names for pattern %s: %s", mq_pattern_filter, e)
-                self._submit_discovery_error_metric(e, [f"queue_pattern:{mq_pattern_filter}", f"queue_type:{queue_type}"])
+                self._submit_discovery_error_metric(
+                    e, [f"queue_pattern:{mq_pattern_filter}", f"queue_type:{queue_type}"]
+                )
                 continue
             except Exception as e:
                 self.log.debug("Error retrieving queue info for %s: %s", mq_pattern_filter, e)
