@@ -29,7 +29,7 @@ jobs:
         ddev config set repo core
     - name: Measure disk usage (uncompressed)
       run: | 
-        ddev size status  >> size-uncompressed.txt --to-dd-key ${{secrets.DD_API_KEY}}
+        ddev size status --to-dd-key ${{secrets.DD_API_KEY}} > size-uncompressed.txt 
         ddev size status  --format png,csv,markdown
         cat size-uncompressed.txt
         echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
@@ -37,7 +37,7 @@ jobs:
   
     - name: Measure disk usage (compressed)
       run: |
-        ddev size status --compressed  > size-compressed.txt --to-dd-key ${{secrets.DD_API_KEY}}
+        ddev size status --compressed --to-dd-key ${{secrets.DD_API_KEY}} > size-compressed.txt 
         ddev size status --compressed  --format png,csv,markdown
         cat size-compressed.txt
         echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
