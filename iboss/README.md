@@ -78,7 +78,7 @@ To collect metrics, you can either use an existing user with **Full Administrato
 
 To install the iboss integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.68.0 .
+**Note**: This step is not necessary for Agent version >= 7.69.0 .
 
 ```shell
 sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
@@ -138,7 +138,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `iboss` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `iboss` under the Logs Agent section.
 
 ## Data Collected
 
