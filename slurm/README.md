@@ -84,7 +84,7 @@ instances:
     ## @param collect_scontrol_stats - boolean - optional - default: false
     ## Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
     ## node to collect the list of running jobs along with their PIDs.
-    collect_scontrol_stats: false # This should be only set on worker nodes and not the head node
+    collect_scontrol_stats: false # This should only be set on worker nodes and not the head node
 ```
 
 3. [Restart the Agent][4].
