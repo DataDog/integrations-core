@@ -88,14 +88,14 @@ jobs:
       with:
         name: uncompressed_diff.csv
         path: uncompressed_diff.csv
-        if-no-files-found: "No differences were found"
+        if-no-files-found: warn
 
     - name: Upload file sizes diff (compressed)
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: compressed_diff.csv
         path: compressed_diff.csv
-        if-no-files-found: "No differences were found"
+        if-no-files-found: warn
 
     - name: Upload status PNGs
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -109,5 +109,5 @@ jobs:
       with:
         name: diff-visuals
         path: size_diff_visualizations/
-        if-no-files-found: error
+        if-no-files-found: warn
     
