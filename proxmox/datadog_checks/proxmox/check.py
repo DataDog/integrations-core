@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck
@@ -36,6 +35,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
             )
             self.gauge("api.up", 0, tags=self.base_tags)
+            return
 
         resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
         resources_response_json = resources_response.json()
