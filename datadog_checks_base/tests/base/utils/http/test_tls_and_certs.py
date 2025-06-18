@@ -288,10 +288,11 @@ class TestAIAChasing:
                 # Mock the certificate loading to avoid cryptography operations
                 with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.load_intermediate_certs'):
                     http = RequestsWrapper(instance, init_config)
+                    mock_context.set_ciphers.assert_called_once_with('TLS_RSA_WITH_AES_256_GCM_SHA384')
                     http.fetch_intermediate_certs('example.com', 443)
-
-                # Verify set_ciphers was called with the correct cipher list
-                mock_context.set_ciphers.assert_called_once_with('TLS_RSA_WITH_AES_256_GCM_SHA384')
+                    # Assert set_ciphers called a second time after fetch_intermediate_certs
+                    assert mock_context.set_ciphers.call_count == 2
+                    assert mock_context.set_ciphers.call_args_list[1][0][0] == 'TLS_RSA_WITH_AES_256_GCM_SHA384'
 
 
 class TestSSLContext:
