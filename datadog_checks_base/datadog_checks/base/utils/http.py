@@ -139,7 +139,7 @@ def create_ssl_context(config, overrides=None):
             updated_ciphers = "ALL"
         else:
             updated_ciphers = ":".join(ciphers)
-
+        LOGGER.debug('Setting TLS ciphers to: %s', updated_ciphers)
         context.set_ciphers(updated_ciphers)
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
