@@ -889,7 +889,7 @@ def get_org(app: Application, org: str) -> dict[str, str]:
 
 def is_everything_committed(app: Application) -> bool:
     result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
-    app.display(result.stdout)
+    raise Exception(result.stdout)
     return result.stdout.strip() == ""
 
 
