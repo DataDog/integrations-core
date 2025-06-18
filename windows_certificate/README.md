@@ -8,7 +8,7 @@ This integration monitors the Local Machine certificates in the [Windows Certifi
 
 ### Installation
 
-The Windows Certificate Store integration is included in the [Datadog Agent][2] package but requires configuration (see instructions below). The Windows Certificate Store Integration requires Agent versions 7.67.0 or later.
+The Windows Certificate Store integration is included in the [Datadog Agent][2] package but requires configuration (see instructions below). The Windows Certificate Store integration requires Agent versions 7.67.0 or later.
 
 ### Configuration
 
