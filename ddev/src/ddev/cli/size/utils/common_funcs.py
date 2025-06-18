@@ -22,7 +22,7 @@ from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
 
-METRIC_VERSION = 1
+METRIC_VERSION = 2
 
 
 class FileDataEntry(TypedDict):
