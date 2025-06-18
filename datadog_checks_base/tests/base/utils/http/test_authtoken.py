@@ -616,9 +616,7 @@ class TestAuthTokenDCOS:
                 return MockResponse(json_data={})
             return MockResponse(status_code=404)
 
-        with mock.patch('requests.post', side_effect=login), mock.patch(
-            'requests.Session.get', side_effect=auth
-        ):
+        with mock.patch('requests.post', side_effect=login), mock.patch('requests.Session.get', side_effect=auth):
             http = RequestsWrapper(instance, init_config)
             http.get('https://leader.mesos/service/some-service')
 
