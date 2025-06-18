@@ -44,6 +44,7 @@ jobs:
         cat compressed_status.md >> $GITHUB_STEP_SUMMARY
 
 
+
     - name: Measure disk usage differences from last commit (uncompressed)
       run: | 
         BEFORE=$(git rev-parse HEAD^)
@@ -52,7 +53,9 @@ jobs:
         ddev size diff $BEFORE $AFTER  --format png,csv,markdown
         cat diff-uncompressed.txt
         echo "# Size diff (uncompressed)" >> $GITHUB_STEP_SUMMARY
-        cat uncompressed_diff.txt >> $GITHUB_STEP_SUMMARY
+        if [ -f uncompressed_diff.md ]; then
+            cat uncompressed_diff.md >> $GITHUB_STEP_SUMMARY
+        fi
 
     - name: Measure disk usage differences from last commit (compressed)
       run: | 
@@ -62,7 +65,9 @@ jobs:
         ddev size diff $BEFORE $AFTER --compressed  --format png,csv,markdown
         cat diff-compressed.txt
         echo "# Size diff (compressed)" >> $GITHUB_STEP_SUMMARY
-        cat compressed_diff.txt >> $GITHUB_STEP_SUMMARY
+        if [ -f compressed_diff.md ]; then
+            cat compressed_diff.md >> $GITHUB_STEP_SUMMARY
+        fi
 
     - name: Upload file sizes (uncompressed)
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
