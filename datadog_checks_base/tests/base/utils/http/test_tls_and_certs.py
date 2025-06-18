@@ -12,7 +12,7 @@ from datadog_checks.base.utils.http import RequestsWrapper, SSLContextAdapter
 
 pytestmark = [pytest.mark.unit]
 
-TEST_CIPHERS = ['AES256-GCM-SHA384','AES128-GCM-SHA256']
+TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
 
 
 class TestCert:
@@ -361,9 +361,7 @@ class TestSSLContext:
         # Verify that the ciphers are set correctly in the TLS context
         for cipher in instance['tls_ciphers']:
             # At least one entry's name field should match the OpenSSL name
-            assert any(
-                cipher in c.get('name') for c in https_adapter.ssl_context.get_ciphers()
-            )
+            assert any(cipher in c.get('name') for c in https_adapter.ssl_context.get_ciphers())
 
     def test_default_tls_ciphers(self):
         """Test that default TLS ciphers are applied when none are specified."""
