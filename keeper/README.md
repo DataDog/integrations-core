@@ -56,7 +56,7 @@ The Keeper integration does not include any events.
 For any further assistance, contact [Datadog support][3].
 
 [1]: https://www.keepersecurity.com/en_GB/enterprise.html
-[2]: https://keepersecurity.eu/en_GB/console/?#login
+[2]: https://keepersecurity.com/en_GB/console/?#login
 [3]: https://docs.datadoghq.com/help/
 [4]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [5]: https://docs.datadoghq.com/account_management/api-app-keys/#add-an-api-key-or-client-token
