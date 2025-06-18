@@ -231,7 +231,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -446,59 +445,6 @@
                         }
                     },
                     {
-                        "id": 4517499856591913,
-                        "definition": {
-                            "title": "Average CPU Load Over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Average CPU Load",
-                                            "style": {
-                                                "palette": "green",
-                                                "palette_index": 6
-                                            },
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:iboss.gateway_performance.cpu_load_avg{gateway_name:all_gateways}.rollup(avg, 300)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 9,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 6209252823155828,
                         "definition": {
                             "title": "Average CPU Utilization Over Time",
@@ -551,9 +497,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 0,
                             "y": 9,
-                            "width": 6,
+                            "width": 12,
                             "height": 3
                         }
                     },
@@ -708,7 +654,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -746,7 +691,61 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 12,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8300212973788574,
+                        "definition": {
+                            "title": "Average CPU Utilization Over Time by Region",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!region:none,$region} by {region}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -861,108 +860,6 @@
                         }
                     },
                     {
-                        "id": 8947419812606650,
-                        "definition": {
-                            "title": "Average CPU Load Over Time by Region",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.cpu_load_avg{!region:none,$region} by {region}.rollup(avg, 300)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8300212973788574,
-                        "definition": {
-                            "title": "Average CPU Utilization Over Time by Region",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            },
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!region:none,$region} by {region}.rollup(avg, 300)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 6,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 7826030415956226,
                         "definition": {
                             "title": "Average Proxy Time Trend by Region",
@@ -1011,7 +908,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 9,
+                            "y": 6,
                             "width": 6,
                             "height": 3
                         }
@@ -1065,7 +962,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 9,
+                            "y": 6,
                             "width": 6,
                             "height": 3
                         }
@@ -1076,7 +973,7 @@
                 "x": 0,
                 "y": 19,
                 "width": 12,
-                "height": 13
+                "height": 10
             }
         },
         {
@@ -1103,7 +1000,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1141,7 +1037,61 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 12,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4367001404368995,
+                        "definition": {
+                            "title": "Average CPU Utilization Over Time by Gateway",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -1254,108 +1204,6 @@
                         }
                     },
                     {
-                        "id": 4123306085352792,
-                        "definition": {
-                            "title": "Average CPU Load Over Time by Gateway",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.cpu_load_avg{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(avg, 300)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4367001404368995,
-                        "definition": {
-                            "title": "Average CPU Utilization Over Time by Gateway",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            },
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(avg, 300)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 6,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 8702630232472486,
                         "definition": {
                             "title": "Average Proxy Time Trend by Gateway",
@@ -1404,7 +1252,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 9,
+                            "y": 6,
                             "width": 6,
                             "height": 3
                         }
@@ -1458,7 +1306,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 9,
+                            "y": 6,
                             "width": 6,
                             "height": 3
                         }
@@ -1467,9 +1315,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 32,
+                "y": 29,
                 "width": 12,
-                "height": 13
+                "height": 10
             }
         },
         {

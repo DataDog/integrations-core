@@ -51,7 +51,6 @@ iboss.digital_experience.server_peer_time_avg,gauge,,millisecond,,Average server
 iboss.digital_experience.users.client_peer_time_avg,gauge,,millisecond,,Average client response time per user.,0,iboss,user client time avg,,
 iboss.digital_experience.users.proxy_dns_time_avg,gauge,,millisecond,,Average DNS resolution time per user.,0,iboss,user DNS time avg,,
 iboss.digital_experience.users.server_peer_time_avg,gauge,,millisecond,,Average server response time per user.,0,iboss,user server time avg,,
-iboss.gateway_performance.cpu_load_avg,gauge,,,,CPU load average.,0,iboss,CPU load avg,,
 iboss.gateway_performance.cpu_utilization,gauge,,percent,,CPU utilization percentage.,0,iboss,CPU util,,
 iboss.gateway_performance.dns_time_average,gauge,,second,,Average time for DNS resolution.,0,iboss,DNS time avg,,
 iboss.gateway_performance.proxy_error_count,gauge,,request,,Total number of proxy errors.,0,iboss,proxy errs,,
