@@ -13,4 +13,6 @@ rules:
   - require: commit-signatures
     excluded_emails:
       - '41898282+github-actions[bot]@users.noreply.github.com'
+      - '159767151+datadog-agent-integrations-bot[bot]@users.noreply.github.com'
+      - 'packages@datadoghq.com'
     allow_unsigned_external: true

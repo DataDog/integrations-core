@@ -120,14 +120,6 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_INDEXES_EXPRESSION_COLUMN_CHECK = """
-    SELECT COUNT(*) as column_count
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = 'information_schema'
-      AND TABLE_NAME = 'STATISTICS'
-      AND COLUMN_NAME = 'EXPRESSION';
-"""
-
 SQL_INDEXES = """\
 SELECT
     table_name as `table_name`,
@@ -268,3 +260,15 @@ def show_primary_replication_status_query(version, is_mariadb):
         return "SHOW BINARY LOG STATUS;"
     else:
         return "SHOW MASTER STATUS;"
+
+
+def get_indexes_query(version, is_mariadb, table_names):
+    """
+    Get the appropriate indexes query based on MySQL version and flavor.
+    The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
+    MariaDB doesn't support functional indexes.
+    """
+    if not is_mariadb and version.version_compatible((8, 0, 13)):
+        return SQL_INDEXES_8_0_13.format(table_names)
+    else:
+        return SQL_INDEXES.format(table_names)

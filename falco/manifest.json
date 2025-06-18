@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d41073d8-fc86-4506-9180-6234c1f4ef70",
   "app_id": "falco",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
