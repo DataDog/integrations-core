@@ -333,6 +333,8 @@ integration/kaspersky:
 - kaspersky/**/*
 integration/keda:
 - keda/**/*
+integration/keeper:
+- keeper/**/*
 integration/keycloak:
 - keycloak/**/*
 integration/kong:

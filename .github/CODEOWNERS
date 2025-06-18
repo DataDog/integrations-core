@@ -288,6 +288,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
 /incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/keeper/                                                             @DataDog/saas-integrations
+/keeper/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/keeper/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/keeper/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /lastpass/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
