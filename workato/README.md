@@ -17,7 +17,7 @@ understand trends and issues.
 
 ### Generate API credentials in Workato
 
-1. Log in to [Workato][2] as an administrator. 
+1. Log in to [Workato][2] as an administrator.
 2. Navigate to the **Workspace Admin** tab. > API Clients**.
 3. (Create a Client Role with sufficient permission) Click **Client Roles** tab.
 4. Click **+ Add client role**.
@@ -51,7 +51,7 @@ understand trends and issues.
    3. If the Environments feature is enabled, choose the Environment to which this client has access.
    4. Choose between _Selected Projects_ or _All Projects_ from the **Project access** drop-down menu.
    5. Leave the **Allowed IPs** text box blank to allow access from any IP.
-14. Click **Create Client**, and copy the API token for later use.       
+14. Click **Create Client**, and copy the API token for later use.
 
 ### Connect your Workato Account to Datadog
 
@@ -63,7 +63,7 @@ understand trends and issues.
 
 ## Data Collected
 
-### Logs 
+### Logs
 
 The Workato integration collects and forwards job execution results to Datadog.
 
