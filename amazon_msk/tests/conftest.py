@@ -30,10 +30,17 @@ def mock_requests_get(url, *args, **kwargs):
     return MockResponse(file_path=common.get_metrics_fixture_path(exporter_type))
 
 
+def mock_session_get(self, url, *args, **kwargs):
+    exporter_type = 'jmx' if urlparse(url).port == common.JMX_PORT else 'node'
+    return MockResponse(file_path=common.get_metrics_fixture_path(exporter_type))
+
+
 @pytest.fixture
 def mock_data():
     # Mock requests.get because it is used internally within boto3
-    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True), mock.patch('requests.Session.get'):
+    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True), mock.patch(
+        'requests.Session.get', side_effect=mock_session_get
+    ):
         yield
 
 
