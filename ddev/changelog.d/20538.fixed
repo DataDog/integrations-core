@@ -1,0 +1,1 @@
+Fixes the GHA that sends size metrics to Datadog
