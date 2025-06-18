@@ -104,7 +104,7 @@ init_config:
     ## Customize this part if the binaries are not located in the /usr/bin/ directory
     ## @param slurm_binaries_dir - string - optional - default: /usr/bin/
     ## The directory in which all the Slurm binaries are located. These are mainly:
-    ## sinfo, sacct, sdiag, sshare and sdiag.
+    ## sinfo, sacct, sdiag, and sshare.
 
     slurm_binaries_dir: /usr/bin/
 
