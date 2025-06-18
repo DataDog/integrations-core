@@ -23,6 +23,7 @@ TARGET_TAG_PATTERNS = {
     'linux-aarch64': 'manylinux.*_aarch64|linux_aarch64',
     'windows-x86_64': 'win_amd64',
     'macos-x86_64': 'macosx.*_(x86_64|intel|universal2)',
+    'macos-aarch64': 'macosx.*_(aarch64|arm64|universal2)',
 }
 
 
