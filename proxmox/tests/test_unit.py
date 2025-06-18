@@ -9,7 +9,10 @@ import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
+
+from .common import ALL_METRICS
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -17,6 +20,11 @@ def test_api_up(dd_run_check, datadog_agent, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric("proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'testing'])
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric, at_least=1)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('mock_http_get')
