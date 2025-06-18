@@ -22,7 +22,7 @@ from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
 
-METRIC_VERSION = 2
+METRIC_VERSION = 1
 
 
 class FileDataEntry(TypedDict):
@@ -889,6 +889,7 @@ def get_org(app: Application, org: str) -> dict[str, str]:
 
 def is_everything_committed() -> bool:
     result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+    print(result.stdout)
     return result.stdout.strip() == ""
 
 
