@@ -1,1 +1,13 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+proxmox.api.up,gauge,,,,Whether or not the proxmox API is reachable ,0,proxmox,api up,,
+proxmox.container.count,gauge,,,,Timeseries with value 1 for each Container. Make 'sum by {X}' queries to count all the Containers with the tag X.,0,proxmox,container count,,
+proxmox.container.up,gauge,,,,Whether or not the container is up,0,proxmox,container up,,
+proxmox.node.count,gauge,,,,Timeseries with value 1 for each Node. Make 'sum by {X}' queries to count all the Nodes with the tag X.,0,proxmox,node count,,
+proxmox.node.up,gauge,,,,Whether or not the Node is up,0,proxmox,node up,,
+proxmox.pool.count,gauge,,,,Timeseries with value 1 for each Pool. Make 'sum by {X}' queries to count all the Pools with the tag X.,0,proxmox,pool count,,
+proxmox.sdn.count,gauge,,,,Timeseries with value 1 for each SDN. Make 'sum by {X}' queries to count all the SDNs with the tag X.,0,proxmox,sdn count,,
+proxmox.sdn.up,gauge,,,,Whether or not the SDN is up,0,proxmox,sdn up,,
+proxmox.storage.count,gauge,,,,Timeseries with value 1 for each Storage object. Make 'sum by {X}' queries to count all the storage objects with the tag X.,0,proxmox,storage count,,
+proxmox.storage.up,gauge,,,,Whether or not the storage is available,0,proxmox,storage up,,
+proxmox.vm.count,gauge,,,,Timeseries with value 1 for each VM. Make 'sum by {X}' queries to count all the VMs with the tag X.,0,proxmox,vm count,,
+proxmox.vm.up,gauge,,,,Whether or not the VM is up,0,proxmox,vm up,,
