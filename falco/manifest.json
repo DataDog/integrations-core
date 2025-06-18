@@ -46,8 +46,8 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "/usr/bin/falco",
-        "/usr/bin/falcoctl"
+        "falco",
+        "falcoctl"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
