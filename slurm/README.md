@@ -8,7 +8,7 @@ Slurm (Simple Linux Utility for Resource Management) is an open-source workload 
 
 The check collects metrics from the head node (`slurmctld`) by executing and parsing the output of several command-line binaries: [`sinfo`][8], [`squeue`][9], [`sacct`][10], [`sdiag`][11], and [`sshare`][12]. These commands provide detailed information about resource availability, job queues, accounting, diagnostics, and share usage in a Slurm-managed cluster.
 
-On worker nodes, the check can also collect metrics using [scontrol][13], which provides process IDs (PIDs) and other job information that is not available through the head node.
+On worker nodes, the check can also collect metrics using [`scontrol`][13], which provides process IDs (PIDs) and other job information that is not available through the head node.
 
 ## Setup
 
@@ -87,10 +87,16 @@ instances:
     collect_scontrol_stats: false # This should be only set on worker nodes and not the head node
 ```
 
+3. [Restart the Agent][4].
+
 #### Worker Nodes
 
 The `slurm.scontrol.job.info` metric can only be collected from worker nodes. This metric enables the submission of important tags
 that can be used to monitor the resource consumption of specific job steps.
+
+1. Ensure that the dd-agent user has execute permissions on the relevant `scontrol` binaries and the necessary permissions to access the directories where these binaries are located.
+
+2. Edit the `slurm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Slurm data. See the [sample slurm.d/conf.yaml][3] for all available configuration options.
 
 ```yaml
 init_config:
