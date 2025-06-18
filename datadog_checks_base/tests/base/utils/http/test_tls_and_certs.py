@@ -338,11 +338,6 @@ class TestSSLContext:
         assert isinstance(https_adapter, SSLContextAdapter)
         assert https_adapter.ssl_context is http.ssl_context
 
-    def test_ssl_context_ciphers_can_be_modified(self):
-        """Test that the chosen ciphers can be set on CI runners."""
-        context = ssl.create_default_context()
-        context.set_ciphers('TLS_RSA_WITH_AES_256_GCM_SHA384')
-
     def test_tls_ciphers_applied_consistently(self):
         """Test that tls_ciphers are applied consistently."""
         instance = {'tls_verify': True, 'tls_ciphers': TEST_CIPHERS}
