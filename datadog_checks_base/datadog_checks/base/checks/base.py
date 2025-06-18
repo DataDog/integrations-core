@@ -442,7 +442,7 @@ class AgentCheck(object):
     def get_tls_context(self, refresh=False, overrides=None):
         # type: (bool, Dict[AnyStr, Any]) -> ssl.SSLContext
         """
-        Creates and cache an TlsContext instance based on user configuration.
+        Creates and cache an SSLContext instance based on user configuration.
         Note that user configuration can be overridden by using `overrides`.
         This should only be applied to older integration that manually set config values.
 
