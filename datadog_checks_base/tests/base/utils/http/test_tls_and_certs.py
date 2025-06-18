@@ -270,7 +270,6 @@ class TestAIAChasing:
         """Test that fetch_intermediate_certs uses the correct ciphers."""
         instance = {'tls_verify': True, 'tls_ciphers': ['TLS_RSA_WITH_AES_256_GCM_SHA384']}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
 
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
             mock_socket = mock.MagicMock()
@@ -288,6 +287,7 @@ class TestAIAChasing:
 
                 # Mock the certificate loading to avoid cryptography operations
                 with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.load_intermediate_certs'):
+                    http = RequestsWrapper(instance, init_config)
                     http.fetch_intermediate_certs('example.com', 443)
 
                 # Verify set_ciphers was called with the correct cipher list
