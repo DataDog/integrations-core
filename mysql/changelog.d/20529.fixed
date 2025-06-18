@@ -1,1 +1,1 @@
-Correctly set tag values for MySQL Percona Server
+Fixes incorrect tag values when monitoring Percona Server. Previous tags on the database instance resource and metrics indicated dbms_flavor:mysql, but now indicate dbms_flavor:percona. This change issues a new query `SELECT @@version_comment` on startup.
