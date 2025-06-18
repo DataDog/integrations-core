@@ -771,7 +771,7 @@ def send_metrics_to_dd(
     size_type = "compressed" if compressed else "uncompressed"
 
     config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
-    if not is_everything_committed(app):
+    if not is_everything_committed():
         raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
     if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
@@ -887,7 +887,7 @@ def get_org(app: Application, org: str) -> dict[str, str]:
     return org_data
 
 
-def is_everything_committed(app: Application) -> bool:
+def is_everything_committed() -> bool:
     result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
     return result.stdout.strip() == ""
 
