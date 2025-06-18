@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import ssl
 from hashlib import sha256
 from struct import pack, unpack
 
@@ -11,6 +10,7 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.http import create_ssl_context
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
@@ -178,16 +178,7 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
-                context.verify_mode = ssl.CERT_NONE
-                ciphers = self.agent_check.tls_context_wrapper.config.get('tls_ciphers')
-                if ciphers:
-                    if 'ALL' in ciphers:
-                        updated_ciphers = "ALL"
-                    else:
-                        updated_ciphers = ":".join(ciphers)
-
-                    context.set_ciphers(updated_ciphers)
+                context = create_ssl_context(self.agent_check.tls_config, overrides={'tls_verify': False})
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
