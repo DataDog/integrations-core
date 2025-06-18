@@ -1,0 +1,1 @@
+Update SQL server to TagManager and fix race conditions in tag values dependent on server queries

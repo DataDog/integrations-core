@@ -17,6 +17,7 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_performance_metrics,
+    check_recovery_prefetch_metrics,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_wal_metrics,
@@ -51,6 +52,7 @@ def test_common_logical_replica_metrics(aggregator, integration_check, pg_replic
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_file_wal_metrics(aggregator, expected_tags=expected_tags)
+    check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
 
     check_wal_receiver_metrics(aggregator, connected=False, expected_tags=expected_tags)
     check_subscription_metrics(aggregator, expected_tags=expected_tags + ['subscription_name:subscription_cities'])

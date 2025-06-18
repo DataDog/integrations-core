@@ -12,10 +12,12 @@ from .common import (
     API_SERVER_METRICS,
     APP_CONTROLLER_METRICS,
     APPSET_CONTROLLER_METRICS,
+    COMMIT_SERVER_METRICS,
     MOCKED_API_SERVER_INSTANCE,
     MOCKED_APP_CONTROLLER_INSTANCE,
     MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS,
     MOCKED_APPSET_CONTROLLER_INSTANCE,
+    MOCKED_COMMIT_SERVER_INSTANCE,
     MOCKED_NOTIFICATIONS_CONTROLLER_INSTANCE,
     MOCKED_REPO_SERVER_INSTANCE,
     NOT_EXPOSED_METRICS,
@@ -34,6 +36,7 @@ from .utils import get_fixture_path
         ('api_server', MOCKED_API_SERVER_INSTANCE, API_SERVER_METRICS),
         ('repo_server', MOCKED_REPO_SERVER_INSTANCE, REPO_SERVER_METRICS),
         ('notifications_controller', MOCKED_NOTIFICATIONS_CONTROLLER_INSTANCE, NOTIFICATIONS_CONTROLLER_METRICS),
+        ('commit_server', MOCKED_COMMIT_SERVER_INSTANCE, COMMIT_SERVER_METRICS),
     ],
 )
 def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace, instance, metrics):
@@ -59,9 +62,11 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace,
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match="Must specify at least one of the following:"
-        "`app_controller_endpoint`, `appset_controller_endpoint`, `repo_server_endpoint`, `api_server_endpoint` or"
-        " `notifications_controller_endpoint`.",
+        match=(
+            "Must specify at least one of the following: `app_controller_endpoint`, `appset_controller_endpoint`, "
+            "`api_server_endpoint`, `repo_server_endpoint`, `notifications_controller_endpoint`, "
+            "`commit_server_endpoint`"
+        ),
     ):
         check = ArgocdCheck('argocd', {}, [{}])
         dd_run_check(check)
