@@ -548,8 +548,12 @@ class XESessionBase(DBMAsyncJob):
                     rqt_event = self._create_rqt_event(obfuscated_event, raw_sql_fields, query_details)
 
                     if rqt_event:
-                        # Log the first successful RQT event we encounter in this batch
-                        if not rqt_sample_logged and self._log.isEnabledFor(logging.DEBUG):
+                        # Log the first successful RQT event we encounter in this batch, but only for datadog_query_errors session
+                        if (
+                            self.session_name == "datadog_query_errors"
+                            and not rqt_sample_logged
+                            and self._log.isEnabledFor(logging.DEBUG)
+                        ):
                             try:
                                 rqt_payload_json = json_module.dumps(rqt_event, default=str, indent=2)
                                 self._log.debug(f"Sample {self.session_name} RQT event payload:\n{rqt_payload_json}")
