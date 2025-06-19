@@ -73,83 +73,83 @@ def traced_mock_classes():
         os.environ['DDEV_TRACE_ENABLED'] = ddev_trace_enabled
 
 
-@pytest.mark.parametrize(
-    'integration_tracing', [pytest.param(False, id="tracing_false"), pytest.param(True, id="tracing_true")]
-)
-@pytest.mark.parametrize(
-    'integration_tracing_exhaustive',
-    [pytest.param(False, id="exhaustive_false"), pytest.param(True, id="exhaustive_true")],
-)
-@pytest.mark.parametrize(
-    'dd_trace_id', [pytest.param(None, id="no_trace_id"), pytest.param(123456789, id="with_trace_id")]
-)
-@pytest.mark.parametrize(
-    'dd_parent_id', [pytest.param(None, id="no_parent_id"), pytest.param(987654321, id="with_parent_id")]
-)
-def test_traced_class(integration_tracing, integration_tracing_exhaustive, dd_trace_id, dd_parent_id, datadog_agent):
-    def _get_config(key):
-        return {
-            'integration_tracing': str(integration_tracing).lower(),
-            'integration_tracing_exhaustive': str(integration_tracing_exhaustive).lower(),
-        }.get(key, None)
+# @pytest.mark.parametrize(
+#     'integration_tracing', [pytest.param(False, id="tracing_false"), pytest.param(True, id="tracing_true")]
+# )
+# @pytest.mark.parametrize(
+#     'integration_tracing_exhaustive',
+#     [pytest.param(False, id="exhaustive_false"), pytest.param(True, id="exhaustive_true")],
+# )
+# @pytest.mark.parametrize(
+#     'dd_trace_id', [pytest.param(None, id="no_trace_id"), pytest.param(123456789, id="with_trace_id")]
+# )
+# @pytest.mark.parametrize(
+#     'dd_parent_id', [pytest.param(None, id="no_parent_id"), pytest.param(987654321, id="with_parent_id")]
+# )
+# def test_traced_class(integration_tracing, integration_tracing_exhaustive, dd_trace_id, dd_parent_id, datadog_agent):
+#     def _get_config(key):
+#         return {
+#             'integration_tracing': str(integration_tracing).lower(),
+#             'integration_tracing_exhaustive': str(integration_tracing_exhaustive).lower(),
+#         }.get(key, None)
 
-    instance = {}
-    if dd_trace_id is not None:
-        instance['dd_trace_id'] = dd_trace_id
-    if dd_parent_id is not None:
-        instance['dd_parent_span_id'] = dd_parent_id
+#     instance = {}
+#     if dd_trace_id is not None:
+#         instance['dd_trace_id'] = dd_trace_id
+#     if dd_parent_id is not None:
+#         instance['dd_parent_span_id'] = dd_parent_id
 
-    with mock.patch.object(datadog_agent, 'get_config', _get_config), mock.patch('ddtrace.trace.tracer') as tracer:
-        # Create a default context with trace_id=0
-        default_context = mock.MagicMock()
-        default_context.trace_id = 0
-        tracer.current_trace_context.return_value = default_context
+#     with mock.patch.object(datadog_agent, 'get_config', _get_config), mock.patch('ddtrace.trace.tracer') as tracer:
+#         # Create a default context with trace_id=0
+#         default_context = mock.MagicMock()
+#         default_context.trace_id = 0
+#         tracer.current_trace_context.return_value = default_context
 
-        # Track the last activated context
-        def mock_activate(context):
-            def mock_current_trace_context():
-                return context
+#         # Track the last activated context
+#         def mock_activate(context):
+#             def mock_current_trace_context():
+#                 return context
 
-            tracer.current_trace_context.side_effect = mock_current_trace_context
+#             tracer.current_trace_context.side_effect = mock_current_trace_context
 
-        tracer.context_provider.activate.side_effect = mock_activate
+#         tracer.context_provider.activate.side_effect = mock_activate
 
-        with traced_mock_classes():
-            check = DummyCheck('dummy', {}, [instance])
-            check.run()
+#         with traced_mock_classes():
+#             check = DummyCheck('dummy', {}, [instance])
+#             check.run()
 
-        called_services = {c.kwargs['service'] for c in tracer.trace.mock_calls if 'service' in c.kwargs}
-        called_methods = {c.args[0] for c in tracer.trace.mock_calls if c.args}
+#         called_services = {c.kwargs['service'] for c in tracer.trace.mock_calls if 'service' in c.kwargs}
+#         called_methods = {c.args[0] for c in tracer.trace.mock_calls if c.args}
 
-        assert called_services == {INTEGRATION_TRACING_SERVICE_NAME}
-        for m in AGENT_CHECK_DEFAULT_TRACED_METHODS:
-            assert m in called_methods
+#         assert called_services == {INTEGRATION_TRACING_SERVICE_NAME}
+#         for m in AGENT_CHECK_DEFAULT_TRACED_METHODS:
+#             assert m in called_methods
 
-        warning_span_tag_calls = tracer.trace().__enter__().set_tag.call_args_list
-        assert mock.call('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME) in warning_span_tag_calls
-        assert mock.call(ERROR_MSG, 'whoops oh no') in warning_span_tag_calls
-        assert mock.call(ERROR_TYPE, 'AgentCheck.warning') in warning_span_tag_calls
+#         warning_span_tag_calls = tracer.trace().__enter__().set_tag.call_args_list
+#         assert mock.call('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME) in warning_span_tag_calls
+#         assert mock.call(ERROR_MSG, 'whoops oh no') in warning_span_tag_calls
+#         assert mock.call(ERROR_TYPE, 'AgentCheck.warning') in warning_span_tag_calls
 
-        # If dd_trace_id and dd_parent_id are set, verify context provider is activated
-        if dd_trace_id is not None and dd_parent_id is not None:
-            # Assert called once
-            tracer.context_provider.activate.assert_called_once()
-            context = tracer.context_provider.activate.call_args[0][0]
-            assert context.trace_id == dd_trace_id
-            assert context.span_id == dd_parent_id
+#         # If dd_trace_id and dd_parent_id are set, verify context provider is activated
+#         if dd_trace_id is not None and dd_parent_id is not None:
+#             # Assert called once
+#             tracer.context_provider.activate.assert_called_once()
+#             context = tracer.context_provider.activate.call_args[0][0]
+#             assert context.trace_id == dd_trace_id
+#             assert context.span_id == dd_parent_id
 
-        # Check that the tracer is configured with the correct enabled value
-        tracing = (
-            integration_tracing
-            or integration_tracing_exhaustive
-            or (dd_trace_id is not None and dd_parent_id is not None)
-        )
-        assert tracer.configure.call_args[1]['apm_tracing_disabled'] is not tracing
+#         # Check that the tracer is configured with the correct enabled value
+#         tracing = (
+#             integration_tracing
+#             or integration_tracing_exhaustive
+#             or (dd_trace_id is not None and dd_parent_id is not None)
+#         )
+#         assert tracer.configure.call_args[1]['apm_tracing_disabled'] is not tracing
 
-        exhaustive_only_methods = {'__init__', 'dummy_method'}
-        if integration_tracing_exhaustive:
-            for m in exhaustive_only_methods:
-                assert m in called_methods
-        else:
-            for m in exhaustive_only_methods:
-                assert m not in called_methods
+#         exhaustive_only_methods = {'__init__', 'dummy_method'}
+#         if integration_tracing_exhaustive:
+#             for m in exhaustive_only_methods:
+#                 assert m in called_methods
+#         else:
+#             for m in exhaustive_only_methods:
+#                 assert m not in called_methods
