@@ -16,10 +16,10 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 **/metadata.csv       @DataDog/documentation @DataDog/agent-integrations
 
 # Dependencies
-/.deps/                            @DataDog/agent-integrations @DataDog/agent-delivery
-/.builders/                        @DataDog/agent-delivery
-/.builders/images/                 @DataDog/agent-integrations @DataDog/agent-delivery
-/.builders/patches/                @DataDog/agent-integrations @DataDog/agent-delivery
+/.deps/                            @DataDog/agent-integrations @DataDog/agent-build
+/.builders/                        @DataDog/agent-build
+/.builders/images/                 @DataDog/agent-integrations @DataDog/agent-build
+/.builders/patches/                @DataDog/agent-integrations @DataDog/agent-build
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
@@ -538,6 +538,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/assets/logs/                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/mac_audit_logs/                                                     @DataDog/agent-integrations
+/mac_audit_logs/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/assets/logs/                                         @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+
 /gpu/                                                                @DataDog/ebpf-platform
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
 /gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
@@ -574,7 +579,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 docs/developer/process/integration-release.md                         @DataDog/agent-integrations
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
-/.github/workflows/resolve-build-deps.yml                             @DataDog/agent-delivery
+/.github/workflows/resolve-build-deps.yml                             @DataDog/agent-build
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
 /.github/CODEOWNERS                                                   @DataDog/agent-integrations @DataDog/saas-integrations
 /.github/workflows/config/labeler.yml                                 @DataDog/agent-integrations @DataDog/saas-integrations
