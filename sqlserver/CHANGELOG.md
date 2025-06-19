@@ -2,7 +2,30 @@
 
 <!-- towncrier release notes start -->
 
-## 22.3.1 / 2025-04-25
+## 22.6.0 / 2025-05-19 / Agent 7.67.0
+
+***Added***:
+
+* Fill in missing fields for XE events ([#20293](https://github.com/DataDog/integrations-core/pull/20293))
+
+***Fixed***:
+
+* Add object_name to rpc_completed XE events, add activity ID and activity ID Xfer to error events ([#20302](https://github.com/DataDog/integrations-core/pull/20302))
+
+## 22.5.0 / 2025-05-15
+
+***Added***:
+
+* Add database and Azure name to SQL Server database identifier template variables ([#20301](https://github.com/DataDog/integrations-core/pull/20301))
+
+## 22.4.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Added SQLServer Extended Event Handlers ([#20229](https://github.com/DataDog/integrations-core/pull/20229))
+
+## 22.3.1 / 2025-04-25 / Agent 7.66.0
 
 ***Fixed***:
 
@@ -31,6 +54,11 @@
 ***Fixed***:
 
 * Remove unnecessary `like` from SQL Server deadlock query ([#19921](https://github.com/DataDog/integrations-core/pull/19921))
+
+## 22.0.1 / 2025-03-28 / Agent 7.65.0
+
+***Fixed***:
+
 * Fix SQL Server integration when database is using case sensitive collation ([#19930](https://github.com/DataDog/integrations-core/pull/19930))
 * Fixed support for FreeTDS driver ([#19931](https://github.com/DataDog/integrations-core/pull/19931))
 

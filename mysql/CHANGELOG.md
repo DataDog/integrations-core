@@ -2,7 +2,22 @@
 
 <!-- towncrier release notes start -->
 
-## 15.4.0 / 2025-05-14
+## 15.5.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Add support for IAM authentication with MySQL ([#20176](https://github.com/DataDog/integrations-core/pull/20176))
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+***Fixed***:
+
+* Make the pymysql connection ping() to reconnect for metadata collection. Sometimes, when a connection is held by pymysql for a long time without being used (such as during settings collection), the connection gets closed unexpectedly and attempting to re-use it will fail unless we validate that the connection is still valid. ([#20092](https://github.com/DataDog/integrations-core/pull/20092))
+* Fix duplicate explain plan sampling on idle clients and incorrect event timestamp ([#20095](https://github.com/DataDog/integrations-core/pull/20095))
+* Fixes incorrect replica counts when querying from performance_schema.threads ([#20172](https://github.com/DataDog/integrations-core/pull/20172))
+* Check for performance_schema enabled automatically instead of requiring `replication_non_blocking_status` config option when retrieving replica counts ([#20198](https://github.com/DataDog/integrations-core/pull/20198))
+
+## 15.4.0 / 2025-05-14 / Agent 7.66.0
 
 ***Added***:
 

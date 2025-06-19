@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.postgres.util import (
     CHECKSUM_METRICS,
     NEWER_14_METRICS,
@@ -16,6 +17,7 @@ from datadog_checks.postgres.util import (
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_REPLICATION_STATS_METRICS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     SLRU_METRICS,
@@ -41,6 +43,7 @@ PASSWORD_ADMIN = 'dd_admin'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
+POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
 
 REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
 REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
@@ -476,6 +479,14 @@ def check_subscription_state_metrics(aggregator, expected_tags, count=1):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
+def check_recovery_prefetch_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 15.0:
+        return
+
+    for metric_name in _iterate_metric_name(QUERY_PG_STAT_RECOVERY_PREFETCH):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
 def check_subscription_stats_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 15:
         return
@@ -500,3 +511,8 @@ def check_stat_io_metrics(aggregator, expected_tags, count=1):
     ]
     for metric_name in _iterate_metric_name(STAT_IO_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)
+
+
+def check_metrics_metadata(aggregator):
+    exclude = ['dd.postgres.operation.time']
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude)

@@ -95,6 +95,7 @@ class XESessionBase(DBMAsyncJob):
         "client_app_name",
         "username",
         "activity_id",
+        "activity_id_xfer",
     ]
 
     BASE_SQL_FIELDS = [
@@ -109,7 +110,6 @@ class XESessionBase(DBMAsyncJob):
 
     def __init__(self, check, config, session_name):
         self.session_name = session_name
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self._check = check
         self._log = check.log
         self._config = config
@@ -449,7 +449,7 @@ class XESessionBase(DBMAsyncJob):
             "dbm_type": self._determine_dbm_type(),
             "event_source": self.session_name,
             "collection_interval": self.collection_interval,
-            "ddtags": self.tags,
+            "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time() * 1000,
             "sqlserver_version": self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
@@ -581,7 +581,7 @@ class XESessionBase(DBMAsyncJob):
                 "dbm_type": self._determine_dbm_type(),
                 "event_source": self.session_name,
                 "collection_interval": self.collection_interval,
-                "ddtags": self.tags,
+                "ddtags": self._check.tag_manager.get_tags(),
                 "timestamp": time() * 1000,
                 "sqlserver_version": self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                 "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
@@ -749,23 +749,21 @@ class XESessionBase(DBMAsyncJob):
             "primary_sql_field": primary_field,
         }
 
-        # Only include duration and query_start for non-error events
-        is_error_event = self.session_name == "datadog_query_errors"
-        if not is_error_event:
+        # Only exclude duration and query_start for error_reported events, not attention events
+        is_error_reported = event.get("event_name") == "error_reported"
+        if not is_error_reported:
             sqlserver_fields.update(
                 {
                     "duration_ms": event.get("duration_ms"),
                     "query_start": query_details.get("query_start"),
                 }
             )
-        else:
-            # Include error_number and message for error events
-            sqlserver_fields.update(
-                {
-                    "error_number": event.get("error_number"),
-                    "message": event.get("message"),
-                }
-            )
+
+        # Include error_number and message if they're present in the event
+        if event.get("error_number") is not None:
+            sqlserver_fields["error_number"] = event.get("error_number")
+        if event.get("message"):
+            sqlserver_fields["message"] = event.get("message")
 
         # Add additional SQL fields to the sqlserver section
         # but only if they're not the primary field and not empty
@@ -781,7 +779,7 @@ class XESessionBase(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "rqt",
             "event_source": self.session_name,
-            "ddtags": ",".join(self.tags),
+            "ddtags": ",".join(self._check.tag_manager.get_tags()),
             'service': self._config.service,
             "db": db_fields,
             "sqlserver": sqlserver_fields,
