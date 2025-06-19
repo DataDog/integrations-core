@@ -4,25 +4,25 @@
 
 [iboss][1] provides secure internet access and Zero Trust enforcement for users, wherever they are. It combines key security functions such as Secure Web Gateway (SWG), CASB, ZTNA, and DLP into a single, scalable solution. Traffic is routed through iboss's infrastructure to ensure consistent policy enforcement and threat protection.
 
-This integration parses and ingest the following types of logs:
+This integration parses and ingests the following types of logs:
 
-- **Web Logs** : Provides information about client requests to web resources, enabling monitoring of web traffic and policy enforcement.
-- **DLP Logs** : Provides information related to data loss prevention, tracking policy enforcement and potential sensitive data exposures.
-- **Audit Logs** : Provides information of user and system activities to provide traceability and support compliance monitoring.
+- **Web Logs**: Provides information about client requests to web resources, enabling monitoring of web traffic and policy enforcement.
+- **DLP Logs**: Provides information related to data loss prevention, tracking policy enforcement, and potential sensitive data exposures.
+- **Audit Logs**: Provides information about user and system activities to ensure traceability and support compliance monitoring.
 
-Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
+You can visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
 
-This integration ingests the following metrics:
+This integration collects the following metrics:
 
-- **Gateway Performance** : Provides insights into request volumes, resource utilization, processing times, and error counts to monitor the health and efficiency of iboss gateways.
-- **Bandwidth** : Provides information about data usage across domains, users, locations, and protocols, enabling monitoring of network traffic volume and flow patterns.
-- **Digital Experience** : Provides insights into user experience by measuring connection times between clients, proxies, and servers across users, assets, and locations.
-- **Web** : Provides visibility into user web activity, including site visits, blocks, malware detections, and search trends, to support usage analysis and policy effectiveness.
-- **CASB** : Provides insights into cloud app usage, user behavior, and traffic patterns, enabling visibility, threat detection, and enforcement of cloud access policies.
-- **Threat** : Provides visibility into detected and prevented threats across users, assets, IPs, and geolocations, enabling threat trend analysis and risk monitoring.
-- **Zero Trust** : Provides visibility into users, devices, resources, and traffic, enabling continuous monitoring, trust evaluation, and policy enforcement within the Zero Trust framework.
+- **Gateway Performance**: Provides insights into request volumes, resource utilization, processing times, and error counts to monitor the health and efficiency of iboss gateways.
+- **Bandwidth**: Provides information about data usage across domains, users, locations, and protocols, enabling monitoring of network traffic volume and flow patterns.
+- **Digital Experience**: Provides insights into user experience by measuring connection times between clients, proxies, and servers across users, assets, and locations.
+- **Web**: Provides visibility into user web activity, including site visits, blocks, malware detections, and search trends, to support usage analysis and policy effectiveness.
+- **CASB**: Provides insights into cloud app usage, user behavior, and traffic patterns, enabling visibility, threat detection, and enforcement of cloud access policies.
+- **Threat**: Provides visibility into detected and prevented threats across users, assets, IPs, and geolocations, enabling threat trend analysis and risk monitoring.
+- **Zero Trust**: Provides visibility into users, devices, resources, and traffic, enabling continuous monitoring, trust evaluation, and policy enforcement within the Zero Trust framework.
 
-Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to help get alerts on any potential issues.
+Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to alert you to any potential issues.
 
 ## Setup
 
@@ -34,11 +34,11 @@ To collect metrics, you can either use an existing user with **Full Administrato
 
 #### Create New RBAC
 
-1. Log in to iboss portal as a System Administrator.
+1. Log into iboss portal as a System Administrator.
 2. Go to **Home** > **System Administrators**.
 3. Switch to the **Role-Based Access Control** tab.
-4. Click on **Add Custom RBAC Group**.
-5. Add a **Display Name** for the RBAC.
+4. Click **Add Custom RBAC Group**.
+5. Enter a **Display Name** for the RBAC.
 6. In the **General Info & Permissions** tab, enable only the **Reporting & Analytics** option to limit permissions to reporting only. Next, go to the **Reporting & Analytics Permissions** tab and choose **Full Administrator** from the **Permission Type** dropdown to allow complete access within the reporting module.
 7. Click on **Add RBAC Group**.
 
@@ -47,28 +47,28 @@ To collect metrics, you can either use an existing user with **Full Administrato
 
 1. Log into iboss portal as System Administrator.
 2. Go to **Home** > **System Administrators**.
-3. Click on **Add New System Administrator**.
+3. Click **Add New System Administrator**.
 4. Add details for **System Administrator Email Address**, **First Name**, and **Last Name**.
 5. For **Use RBAC Groups**, select the RBAC group with minimal permissions.
-6. Click on **Add New System Administrator**.
+6. Click **Add New System Administrator**.
 
 **Note**: Make sure that MFA is disabled for the user account used by this integration.
 
 ### Connect your iboss Account to Datadog
 
-1. Add your iboss Email Address, and Password.
+1. Add your iboss email address and password.
 
    | Parameters                        | Description                                                                          |
    | --------------------------------- | ------------------------------------------------------------------------------------ |
-   | Email Address                     | The Email Address of your iboss account.                                             |
-   | Password                          | The Password of your iboss account.                                                  |
-   | Get Gateway Performance Metrics   | Enable to collect Gateway Performance Metrics from iboss. The default value is True. |
-   | Get Bandwidth Metrics             | Enable to collect Bandwidth Metrics from iboss. The default value is True.           |
-   | Get Digital Experience Metrics    | Enable to collect Digital Experience Metrics from iboss. The default value is True.  |
-   | Get Web Metrics                   | Enable to collect Web Metrics from iboss. The default value is True.                 |
-   | Get CASB Metrics                  | Enable to collect CASB Metrics from iboss. The default value is True.                |
-   | Get Threat Metrics                | Enable to collect Threat Metrics from iboss. The default value is True.              |
-   | Get Zero Trust Metrics            | Enable to collect Zero Trust Metrics from iboss. The default value is True.          |
+   | Email Address                     | The email address of your iboss account.                                             |
+   | Password                          | The password of your iboss account.                                                  |
+   | Get gateway performance metrics   | Enable to collect gateway performance metrics from iboss. The default value is `true`. |
+   | Get bandwidth metrics             | Enable to collect bandwidth metrics from iboss. The default value is `true`.           |
+   | Get Digital Experience metrics    | Enable to collect Digital Experience metrics from iboss. The default value is `true`.  |
+   | Get web metrics                   | Enable to collect web metrics from iboss. The default value is `true`.                 |
+   | Get CASB metrics                  | Enable to collect CASB metrics from iboss. The default value is `true`.                |
+   | Get threat metrics                | Enable to collect threat metrics from iboss. The default value is `true`.              |
+   | Get zero trust metrics            | Enable to collect zero trust metrics from iboss. The default value is `true`.          |
 
 2. Click **Save**.
 
@@ -96,7 +96,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 
 2. Open your `iboss.d/conf.yaml` file, and add the following block to enable log collection.
 
-   See the sample [iboss.d/conf.yaml][5] for available configuration options.
+   See the sample configuration file ([iboss.d/conf.yaml][5]) for available options.
 
    ```yaml
    logs:
@@ -150,7 +150,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 
 ### Metrics
 
-The iboss integration collects and forwards Gateway Performance, Bandwidth, Digital Experience, Web, CASB, Threat, CASB, and Zero Trust metrics to Datadog.
+The iboss integration collects and forwards Gateway Performance, Bandwidth, Digital Experience, Web, CASB, Threat, and Zero Trust metrics to Datadog.
 
 {{< get-metrics-from-git "iboss" >}}
 
@@ -164,7 +164,7 @@ The iboss integration does not include any events.
 
 If you see a **Permission denied** error while port binding in the Agent logs:
 
-1. Binding to a port number under 1024 requires elevated permissions. Grant access to the port using the `setcap` command:
+1. Binding to a port number under 1024 requires elevated permissions. Grant the necessary permissions using the `setcap` command:
 
    ```shell
    sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
@@ -176,7 +176,7 @@ If you see a **Permission denied** error while port binding in the Agent logs:
    sudo getcap /opt/datadog-agent/bin/agent/agent
    ```
 
-   With the expected output:
+   You should see output similar to:
 
    ```shell
    /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
