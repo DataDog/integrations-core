@@ -1,0 +1,43 @@
+ldlm.namespaces.MGC172.31.16.218@tcp.pool.stats=
+snapshot_time             1749630169.472437000 secs.nsecs
+start_time                1748613451.984630687 secs.nsecs
+elapsed_time              1016717.487806313 secs.nsecs
+granted                   992888 samples [locks] 0 0 0
+grant_rate                992888 samples [locks/s] 0 0 0
+cancel_rate               992888 samples [locks/s] 0 0 0
+grant_plan                992888 samples [locks/s] 113460 113460 112653072480
+slv                       992888 samples [lock.secs] 0 0 0
+recalc_freed              992888 samples [locks] 0 0 0
+recalc_timing             101274 samples [secs] 10 11 1016711
+ldlm.namespaces.MGS.pool.stats=
+snapshot_time             1749630169.472482225 secs.nsecs
+start_time                1748613451.979559951 secs.nsecs
+elapsed_time              1016717.492922274 secs.nsecs
+granted                   992888 samples [locks] 0 0 0
+grant_rate                992888 samples [locks/s] 0 0 0
+cancel_rate               992888 samples [locks/s] 0 0 0
+grant_plan                992888 samples [locks/s] 0 113460 113460
+slv                       992888 samples [lock.secs] 36000 13615200000 49359132000
+recalc_freed              992888 samples [locks] 0 0 0
+recalc_timing             992888 samples [secs] 1 2 1016718
+ldlm.namespaces.lustre-MDT0000-lwp-MDT0000.pool.stats=
+snapshot_time             1749630169.472523270 secs.nsecs
+start_time                1748613452.058754971 secs.nsecs
+elapsed_time              1016717.413768299 secs.nsecs
+ldlm.namespaces.lustre-OST0001-osc-MDT0000.pool.stats=
+snapshot_time             1749630169.472548762 secs.nsecs
+start_time                1748858724.002081225 secs.nsecs
+elapsed_time              771445.470467537 secs.nsecs
+ldlm.namespaces.mdt-lustre-MDT0000_UUID.pool.stats=
+snapshot_time             1749630169.472573162 secs.nsecs
+start_time                1748613452.051278995 secs.nsecs
+elapsed_time              1016717.421294167 secs.nsecs
+granted                   7079 samples [locks] 0 7 13151
+grant                     685 samples [locks] 1 1 685
+cancel                    685 samples [locks] 1 1 685
+grant_rate                7079 samples [locks/s] 0 57 639
+cancel_rate               7079 samples [locks/s] 0 60 634
+grant_plan                7079 samples [locks/s] 3781 113460 26888528
+slv                       7079 samples [lock.secs] 13615164000 13615200000 96381745992000
+recalc_freed              8430 samples [locks] 0 0 0
+recalc_timing             7079 samples [secs] 1 585122 1015935

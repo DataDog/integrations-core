@@ -8,7 +8,10 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
+from datadog_checks.dev import get_here
 
+HERE = get_here()
+FIXTURES_DIR = HERE / 'fixtures'
 
 def test_check(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
@@ -24,3 +27,12 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     check = LustreCheck('lustre', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check('lustre.can_connect', LustreCheck.CRITICAL)
+
+
+def test_jobstats(dd_run_check, aggregator, instance):
+    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+    check = LustreCheck('lustre', {}, [instance])
+    dd_run_check(check)
+
+    # Assert that job stats metrics are collected
+
