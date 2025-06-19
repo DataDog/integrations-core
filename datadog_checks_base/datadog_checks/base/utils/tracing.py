@@ -112,12 +112,12 @@ def configure_tracer(tracer, self_check):
     If not set or invalid, defaults to 0 (no sampling).
     The tracer context is only set at entry point functions so we can attach a trace root to the span.
     """
-    apm_tracing_disabled = True
+    _apm_tracing_disabled = True
     _context_provider = None
 
     integration_tracing, integration_tracing_exhaustive = tracing_enabled()
     if integration_tracing or integration_tracing_exhaustive:
-        apm_tracing_disabled = False
+        _apm_tracing_disabled = False
 
     dd_parent_id = None
     dd_trace_id = None
@@ -136,7 +136,7 @@ def configure_tracer(tracer, self_check):
         if dd_trace_id and dd_parent_id:
             from ddtrace.trace import Context
 
-            apm_tracing_disabled = False
+            _apm_tracing_disabled = False
             _context_provider = Context(
                 trace_id=dd_trace_id,
                 span_id=dd_parent_id,
@@ -144,14 +144,15 @@ def configure_tracer(tracer, self_check):
     except ImportError:
         pass
     try:
+        pass
         # Update the tracer configuration to make sure we trace only if we really need to
-        tracer.configure(
-            appsec_enabled=False,
-            apm_tracing_disabled=apm_tracing_disabled,
-        )
+        # tracer.configure(
+        #     appsec_enabled=False,
+        #     apm_tracing_disabled=apm_tracing_disabled,
+        # )
 
         # If the current trace context is not set or is set to an empty trace_id, activate the context provider
-        _current_context = tracer.current_trace_context()
+        # _current_context = tracer.current_trace_context()
         # if (
         #     current_context is None or (current_context is not None and current_context.trace_id == 0)
         # ) and context_provider:
