@@ -717,6 +717,8 @@ integration/wlan:
 - wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
+integration/workato:
+- workato/**/*
 integration/yarn:
 - yarn/**/*
 integration/zeek:
