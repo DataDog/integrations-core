@@ -1,6 +1,6 @@
 {
     "title": "Barracuda Secure Edge",
-    "description": "[[suggested_dashboards]]",
+    "description": "SecureEdge dashboard provides a visual summary of firewall activity, security events, user access, and system health to help monitor and analyze network security in real time.",
     "widgets": [
       {
         "id": 1735739967105627,
@@ -23,7 +23,7 @@
         "id": 5634058441727079,
         "definition": {
           "type": "note",
-          "content": "Barracuda SecureEdge secures  sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. Barracuda SecureEdge is also available as a service in Azure Virtual WAN and provides companies a way to securely connect to Microsoft Azure Virtual WAN and the Microsoft Global Network backbone.\n\n**Key Features**\n\n-Custom Categories for web filtering\n-Additional web filter actions: Alert and Warn\n-Web search monitoring for predefined categories and custom keywords\n-Silent ad blocking\n-Safe Search\n-Customizable Block pages*",
+          "content": "Barracuda SecureEdge secures sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. Barracuda SecureEdge is also available as a service in Azure Virtual WAN and provides companies a way to securely connect to Microsoft Azure Virtual WAN and the Microsoft Global Network backbone.\n\n**Key Features**\n\n-Custom Categories for web filtering\n-Additional web filter actions: Alert and Warn\n-Web search monitoring for predefined categories and custom keywords\n-Silent ad blocking\n-Safe Search\n-Customizable Block pages*",
           "background_color": "white",
           "font_size": "14",
           "text_align": "left",
@@ -43,7 +43,7 @@
       {
         "id": 5684415529173769,
         "definition": {
-          "title": "Barracuda Secure  Edge Logs Overview",
+          "title": "Barracuda Secure Edge Logs Overview",
           "background_color": "vivid_blue",
           "show_title": true,
           "type": "group",
@@ -373,7 +373,7 @@
       {
         "id": 5871396828983642,
         "definition": {
-          "title": "Authentication events",
+          "title": "Authentication Events",
           "title_align": "center",
           "background_color": "vivid_orange",
           "show_title": true,
@@ -600,7 +600,7 @@
             {
               "id": 3752445230216900,
               "definition": {
-                "title": "Top Reasons for Auth Events",
+                "title": "Top Reasons For Auth Events",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -711,7 +711,7 @@
             {
               "id": 313116993642037,
               "definition": {
-                "title": "Total Users logged",
+                "title": "Total Users Logged",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_value",
@@ -1487,7 +1487,7 @@
             {
               "id": 5966799396123124,
               "definition": {
-                "title": "Network  Event Timeline",
+                "title": "Network Event Timeline",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -1667,7 +1667,7 @@
             {
               "id": 6000789218138106,
               "definition": {
-                "title": "Auth  Access Event  Timeline",
+                "title": "Auth Access Event Timeline",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -1733,7 +1733,7 @@
             {
               "id": 3172417779844822,
               "definition": {
-                "title": "Auth Access Event level",
+                "title": "Auth Access Event Level",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
