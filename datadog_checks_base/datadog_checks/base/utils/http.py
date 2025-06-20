@@ -6,12 +6,12 @@ from __future__ import annotations
 import logging
 import os
 import re
-import ssl
 import warnings
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from urllib.parse import quote, urlparse, urlunparse
 
+from .tls import create_ssl_context
 import lazy_loader
 import requests
 from binary import KIBIBYTE
@@ -117,84 +117,26 @@ KERBEROS_STRATEGIES = {}
 UDS_SCHEME = 'unix'
 
 
-def create_ssl_context(config, overrides=None):
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-    # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
-    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-
-    if overrides is not None:
-        config = config.copy()
-        config.update(overrides)
-
-    LOGGER.debug('Creating SSL context with config: %s', config)
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-    context.check_hostname = is_affirmative(config['tls_verify']) and config.get('tls_validate_hostname', True)
-
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-    context.verify_mode = ssl.CERT_REQUIRED if is_affirmative(config['tls_verify']) else ssl.CERT_NONE
-
-    ciphers = config.get('tls_ciphers')
-    if ciphers:
-        if 'ALL' in ciphers:
-            updated_ciphers = "ALL"
-        else:
-            updated_ciphers = ":".join(ciphers)
-        LOGGER.debug('Setting TLS ciphers to: %s', updated_ciphers)
-        context.set_ciphers(updated_ciphers)
-
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-    ca_cert = config.get('tls_ca_cert')
-    try:
-        if ca_cert:
-            ca_cert = os.path.expanduser(ca_cert)
-            if os.path.isdir(ca_cert):
-                context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
-            else:
-                context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
-        else:
-            context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-    except FileNotFoundError:
-        LOGGER.warning(
-            'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
-            ca_cert,
-        )
-
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-    client_cert, client_key = config.get('tls_cert'), config.get('tls_private_key')
-    client_key_pass = config.get('tls_private_key_password')
-    try:
-        if client_key:
-            client_key = os.path.expanduser(client_key)
-        if client_cert:
-            client_cert = os.path.expanduser(client_cert)
-            context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
-    except FileNotFoundError:
-        LOGGER.warning(
-            'TLS client certificate file not found: %s. ' 'Please check the `tls_cert` configuration option.',
-            client_cert,
-        )
-
-    return context
-
-
 def get_tls_config_from_options(new_options):
     '''Extract TLS configuration from request options.'''
     tls_config = {}
     verify = new_options.get('verify')
     cert = new_options.get('cert')
 
-    if verify is True:
-        tls_config["tls_verify"] = True
-    elif verify is False:
-        tls_config["tls_verify"] = False
-    elif isinstance(verify, str):
+    if isinstance(verify, str):
         tls_config["tls_verify"] = True
         tls_config["tls_ca_cert"] = verify
+    elif isinstance(verify, bool):
+        tls_config["tls_verify"] = verify
+    else:
+        LOGGER.warning(
+            'Unexpected type for `verify` option. Expected bool or str, got %s.',
+            type(verify).__name__,
+        )
 
     if isinstance(cert, str):
         tls_config["tls_cert"] = cert
-    elif isinstance(cert, tuple) and len(cert) == 2:
+    elif isinstance(cert, tuple) or isinstance(cert, list) and len(cert) == 2:
         tls_config["tls_cert"] = cert[0]
         tls_config["tls_private_key"] = cert[1]
     return tls_config
@@ -535,7 +477,7 @@ class RequestsWrapper(object):
                         # If we are using a custom context, we need to revert to the original context
                         self._mount_new_ssl_adapter(session, url)
             else:
-                session = self.create_session(ssl_context=new_context)
+                session = self._create_session(ssl_context=new_context)
             request_method = getattr(session, method)
 
             if self.auth_token_handler:
@@ -582,9 +524,8 @@ class RequestsWrapper(object):
             if not certs:
                 raise e
             new_context = create_ssl_context(self.tls_config, overrides={'tls_ca_cert': certs})
-            # retry the connection via session object
             if not persist:
-                session = self.create_session(new_context)
+                session = self._create_session(new_context)
             else:
                 session = self.session
                 self._mount_new_ssl_adapter(session, url, ssl_context=new_context)
@@ -663,7 +604,7 @@ class RequestsWrapper(object):
 
             # Assume HTTP for now
             try:
-                response = self.get(uri, verify=False)  # SKIP_HTTP_VALIDATION
+                response = self.get(uri)  # SKIP_HTTP_VALIDATION
             except Exception as e:
                 self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
                 continue
@@ -674,7 +615,7 @@ class RequestsWrapper(object):
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
 
-    def create_session(self, ssl_context=None):
+    def _create_session(self, ssl_context=None):
         session = requests.Session()
         context = self.ssl_context if ssl_context is None else ssl_context
 
@@ -714,7 +655,7 @@ class RequestsWrapper(object):
     def session(self):
         if self._session is None:
             # Create a new session if it doesn't exist
-            self._session = self.create_session()
+            self._session = self._create_session()
         return self._session
 
     def handle_auth_token(self, **request):
