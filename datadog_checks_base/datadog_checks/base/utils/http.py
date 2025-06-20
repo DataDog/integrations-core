@@ -202,8 +202,7 @@ def get_tls_config_from_options(new_options):
 
 class SSLContextAdapter(requests.adapters.HTTPAdapter):
     """
-    HTTPS adapter that uses SSL contexts.
-    This ensures consistent TLS configuration across all HTTPS requests.
+    This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
     """
 
     def __init__(self, ssl_context, has_custom_context=False, **kwargs):
@@ -709,7 +708,7 @@ class RequestsWrapper(object):
         # See: https://github.com/msabramo/requests-unixsocket
         session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
 
-        # Attributes can't be passed to the constructor
+        # Options cannot be passed to the requests.Session init method but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
         return session
