@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2025-05-30",
+	"last_updated_at": "2025-05-30",
+	"title": "High average application peer time detected",
+	"description": "It monitors the average peer time for applications on a given asset. High values may indicate latency, connectivity issues, or application inefficiencies, potentially affecting user experience and overall performance.",
+	"definition": {
+		"id": 173409785,
+		"name": "High average application peer time detected",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:iboss.digital_experience.assets.server_peer_time_avg{*} by {asset_id,asset_name} > 1000",
+		"message": "{{#is_warning}}⚠️ **Warning**:  The average application peer time has exceeded the warning threshold for the asset below:\n\n- **Asset ID**: {{asset_id.name}}  \n- **Asset Name**: {{asset_name.name}}  \n- **Current Value**: {{value}}%  \n- **Warning Threshold**: {{warn_threshold}}%\n\n{{/is_warning}}\n\n\n{{#is_alert}}🚨 **Alert**: The average application peer time has exceeded the critical threshold for the asset below:\n\n- **Asset ID**: {{asset_id.name}}  \n- **Asset Name**: {{asset_name.name}} \n- **Current Value**: {{value}}%  \n- **Alert Threshold**: {{threshold}}%\n\n{{/is_alert}}\n\n\n@example@example.com",
+		"tags": [
+			"integration:iboss"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1000,
+				"warning": 500
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:iboss"
+	]
+}
