@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "SecureEdge is a unified SASE platform that includes NGFW, zero trust and secure SD-WAN",
+    "description": "Barracuda Secure Edge is a unified Secure Access Service Edge(SASE) platform that includes NGFW, zero trust and secure SD-WAN",
     "title": "barracuda_secure_edge",
     "media": [
       {
