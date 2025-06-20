@@ -265,14 +265,14 @@ class TestAIAChasing:
 
     def test_fetch_intermediate_certs_tls_ciphers(self):
         """Test that fetch_intermediate_certs uses the correct ciphers."""
-        instance = {'tls_verify': True, 'tls_ciphers': [TEST_CIPHERS[0]]}
+        instance = {'tls_verify': True, 'tls_ciphers': TEST_CIPHERS[0]}
         init_config = {}
 
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
             mock_socket = mock.MagicMock()
             mock_create_socket_connection.return_value = mock_socket
 
-            with mock.patch('datadog_checks.base.utils.http.ssl.SSLContext') as mock_ssl_context_class:
+            with mock.patch('datadog_checks.base.utils.tls.ssl.SSLContext') as mock_ssl_context_class:
                 mock_context = mock.MagicMock()
                 mock_ssl_context_class.return_value = mock_context
 
@@ -285,11 +285,11 @@ class TestAIAChasing:
                 # Mock the certificate loading to avoid cryptography operations
                 with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.load_intermediate_certs'):
                     http = RequestsWrapper(instance, init_config)
-                    mock_context.set_ciphers.assert_called_once_with(instance['tls_ciphers'][0])
+                    mock_context.set_ciphers.assert_called_once_with(instance['tls_ciphers'])
                     http.fetch_intermediate_certs('example.com', 443)
                     # Assert set_ciphers called a second time after fetch_intermediate_certs
                     assert mock_context.set_ciphers.call_count == 2
-                    assert mock_context.set_ciphers.call_args_list[1][0][0] == instance['tls_ciphers'][0]
+                    assert mock_context.set_ciphers.call_args_list[1][0][0] == instance['tls_ciphers']
 
 
 class TestSSLContext:
@@ -377,7 +377,7 @@ class TestSSLContext:
             'tls_use_host_header': True,
             'headers': {'Host': 'custom-host.example.com'},
             'tls_verify': True,
-            'tls_ciphers': [TEST_CIPHERS[0]],
+            'tls_ciphers': TEST_CIPHERS[0],
         }
         init_config = {}
         http = RequestsWrapper(instance, init_config)
@@ -423,7 +423,7 @@ class TestSSLContext:
             'tls_validate_hostname': True,
             'tls_ignore_warning': False,
             'tls_protocols_allowed': ['TLSv1.2', 'TLSv1.3'],
-            'tls_ciphers': [TEST_CIPHERS[0]],
+            'tls_ciphers': TEST_CIPHERS[0],
         }
         init_config = {}
 

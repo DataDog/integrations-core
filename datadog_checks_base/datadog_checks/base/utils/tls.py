@@ -4,9 +4,10 @@
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
+import ssl
+import os
 
 from ..config import is_affirmative
-from .http import create_ssl_context
 
 if TYPE_CHECKING:
     from ..types import InstanceType  # noqa: F401
@@ -29,6 +30,68 @@ STANDARD_FIELDS = {
     'tls_validate_hostname': True,
     'tls_ciphers': 'ALL',
 }
+
+
+def create_ssl_context(config, overrides=None):
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
+    # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
+    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+
+    if overrides is not None:
+        config = config.copy()
+        config.update(overrides)
+
+    LOGGER.debug('Creating SSL context with config: %s', config)
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
+    context.check_hostname = is_affirmative(config['tls_verify']) and config.get('tls_validate_hostname', True)
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
+    context.verify_mode = ssl.CERT_REQUIRED if is_affirmative(config['tls_verify']) else ssl.CERT_NONE
+
+    ciphers = config.get('tls_ciphers', [])
+    if isinstance(ciphers, str):
+        # If ciphers is a string, assume that it is formatted correctly
+        configured_ciphers = "ALL" if "ALL" in ciphers else ciphers
+    else:
+        configured_ciphers = "ALL" if "ALL" in ciphers else ":".join(ciphers)
+    if configured_ciphers:
+        LOGGER.debug('Setting TLS ciphers to: %s', configured_ciphers)
+        context.set_ciphers(configured_ciphers)
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
+    ca_cert = config.get('tls_ca_cert')
+    try:
+        if ca_cert:
+            ca_cert = os.path.expanduser(ca_cert)
+            if os.path.isdir(ca_cert):
+                context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
+            else:
+                context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
+        else:
+            context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+    except FileNotFoundError:
+        LOGGER.warning(
+            'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
+            ca_cert,
+        )
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
+    client_cert, client_key = config.get('tls_cert'), config.get('tls_private_key')
+    client_key_pass = config.get('tls_private_key_password')
+    try:
+        if client_key:
+            client_key = os.path.expanduser(client_key)
+        if client_cert:
+            client_cert = os.path.expanduser(client_cert)
+            context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
+    except FileNotFoundError:
+        LOGGER.warning(
+            'TLS client certificate file not found: %s. ' 'Please check the `tls_cert` configuration option.',
+            client_cert,
+        )
+
+    return context
 
 
 class TlsContextWrapper(object):
