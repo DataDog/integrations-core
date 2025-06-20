@@ -4,7 +4,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from functools import partial
+from typing import TYPE_CHECKING, Any
 
 from .base_scraper import OpenMetricsScraper
 
@@ -28,15 +29,17 @@ class WithHttpCodeClass(OpenMetricsScraper):
         self.http_status_tag = http_status_tag
         super().__init__(scraper.check, scraper.config)
 
-    def consume_metrics(self, runtime_data) -> Generator[Metric]:
-        for metric in self.scraper.consume_metrics(runtime_data):
-            for sample in metric.samples:
-                if (
-                    (code := sample.labels.get(self.http_status_tag))
-                    and isinstance(code, str)
-                    and len(code) == 3
-                    and code.isdigit()
-                ):
-                    sample.labels["code_class"] = f"{code[0]}xx"
+    def _add_http_code_class(self, metric: Metric, http_status_tag: str) -> Metric:
+        for sample in metric.samples:
+            if (
+                (code := sample.labels.get(http_status_tag))
+                and isinstance(code, str)
+                and len(code) == 3
+                and code.isdigit()
+            ):
+                sample.labels["code_class"] = f"{code[0]}xx"
+        return metric
 
-            yield metric
+    def yield_metrics(self, runtime_data: dict[str, Any]) -> Generator[Metric]:
+        add_http_code_class_func = partial(self._add_http_code_class, http_status_tag=self.http_status_tag)
+        yield from map(add_http_code_class_func, self.scraper.yield_metrics(runtime_data))

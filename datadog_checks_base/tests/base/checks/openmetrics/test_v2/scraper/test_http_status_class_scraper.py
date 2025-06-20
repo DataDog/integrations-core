@@ -24,7 +24,7 @@ http_client_routes_total{} 5
 """
 
 
-def get_check(status_label: str):
+def get_check(status_label: str, target_info: bool = False):
     class Check(OpenMetricsBaseCheckV2):
         __NAMESPACE__ = "test"
 
@@ -32,40 +32,43 @@ def get_check(status_label: str):
             scraper = OpenMetricsScraper(self, config)
             return decorators.WithHttpCodeClass(scraper, http_status_tag=status_label)
 
-    return Check("test", {}, [{"metrics": [".*"], "openmetrics_endpoint": "test"}])
+    return Check("test", {}, [{"metrics": [".*"], "openmetrics_endpoint": "test", "target_info": target_info}])
 
 
-def response(status_label: str, status_code: str) -> str:
+def response(status_label: str, status_code: str, target_info: bool) -> str:
     template = Template(RESPONSE_TEMPLATE)
 
-    return template.substitute(status_label=status_label, status_code=status_code)
+    parsed_response = template.substitute(status_label=status_label, status_code=status_code)
+    if target_info:
+        target_info_text = """
+
+        # HELP target_info Target metadata
+        # TYPE target_info gauge
+        target_info{service_name="service",service_version="1.0.0"} 1
+        """
+        parsed_response += target_info_text
+    return parsed_response
+
+
+def parameterize_test_http_status_class_scraper():
+    return [
+        pytest.param("http_response_status_code", "101", "1xx", id="1xx"),
+        pytest.param("http_response_status_code", "200", "2xx", id="2xx"),
+        pytest.param("http_response_status_code", "302", "3xx", id="3xx"),
+        pytest.param("http_response_status_code", "404", "4xx", id="4xx"),
+        pytest.param("http_response_status_code", "523", "5xx", id="5xx"),
+        pytest.param("code", "201", "2xx", id="Custom label 2xx"),
+        pytest.param("code", "403", "4xx", id="Custom label 4xx"),
+        pytest.param("http_response_status_code", "abc", None, id="Invalid status code (abc)"),
+        pytest.param("http_response_status_code", "99", None, id="Invalid status code (99)"),
+    ]
 
 
 @pytest.mark.parametrize(
     "status_label, status_code, expected_class",
-    [
-        ("http_response_status_code", "101", "1xx"),
-        ("http_response_status_code", "200", "2xx"),
-        ("http_response_status_code", "302", "3xx"),
-        ("http_response_status_code", "404", "4xx"),
-        ("http_response_status_code", "523", "5xx"),
-        ("code", "201", "2xx"),
-        ("code", "403", "4xx"),
-        ("http_response_status_code", "abc", None),
-        ("http_response_status_code", "99", None),
-    ],
-    ids=[
-        "1xx",
-        "2xx",
-        "3xx",
-        "4xx",
-        "5xx",
-        "Custom label 2xx",
-        "Custom label 4xx",
-        "Invalid status code (abc)",
-        "Invalid status code (99)",
-    ],
+    parameterize_test_http_status_class_scraper(),
 )
+@pytest.mark.parametrize("target_info", [True, False], ids=["with_target_info", "without_target_info"])
 def test_http_status_class_scraper(
     status_label: str,
     status_code: str,
@@ -73,10 +76,11 @@ def test_http_status_class_scraper(
     aggregator: AggregatorStub,
     mock_http_response: Callable,
     dd_run_check: Callable,
+    target_info: bool,
 ):
-    mock_http_response(response(status_label, status_code))
+    mock_http_response(response(status_label, status_code, target_info))
 
-    check = get_check(status_label=status_label)
+    check = get_check(status_label=status_label, target_info=target_info)
     dd_run_check(check)
 
     expected_tag_count = 1 if expected_class else 0
