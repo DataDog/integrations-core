@@ -129,20 +129,20 @@ def main():
 
         # Update the metrics name based on the temporal type
         if temporal_type == 'counter':
-            append_metric_metadata(f'{dd_metric}.count')
+            append_metric_metadata(f'{metric_name}.count')
         elif temporal_type == 'gauge':
-            append_metric_metadata(dd_metric, 'gauge')
+            append_metric_metadata(metric_name, 'gauge')
         elif temporal_type.endswith('histogram'):
             unit_name = None
             if temporal_type == 'byteshistogram':
                 unit_name = "byte"
-            append_metric_metadata(f'{dd_metric}.bucket')
-            append_metric_metadata(f'{dd_metric}.count')
-            append_metric_metadata(f'{dd_metric}.sum', unit_name=unit_name)
+            append_metric_metadata(f'{metric_name}.bucket')
+            append_metric_metadata(f'{metric_name}.count')
+            append_metric_metadata(f'{metric_name}.sum', unit_name=unit_name)
         elif temporal_type == 'timer':
-            append_metric_metadata(f'{dd_metric}.bucket')
-            append_metric_metadata(f'{dd_metric}.count')
-            append_metric_metadata(f'{dd_metric}.sum', unit_name='millisecond')
+            append_metric_metadata(f'{metric_name}.bucket')
+            append_metric_metadata(f'{metric_name}.count')
+            append_metric_metadata(f'{metric_name}.sum', unit_name='millisecond')
         else:
             print(f"Unrecognized metric type {temporal_type}, skipping.")
 
