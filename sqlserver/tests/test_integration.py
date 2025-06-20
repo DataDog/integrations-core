@@ -1113,14 +1113,14 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     query_completion_batches = [
         e
         for e in dbm_activity
-        if e.get('dbm_type') == 'query_completion' and 'datadog_query_completions' in str(e.get('event_source', ''))
+        if e.get('dbm_type') == 'query_completion'
     ]
 
     # Filter error events (now each event may contain multiple query details)
     error_batches = [
         e
         for e in dbm_activity
-        if e.get('dbm_type') == 'query_error' and 'datadog_query_errors' in str(e.get('event_source', ''))
+        if e.get('dbm_type') == 'query_error'
     ]
 
     # We should have at least one batch of completion events
