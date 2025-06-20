@@ -1,0 +1,432 @@
+id: carbon-black-cloud
+tests:
+  - sample: |-
+      {
+          "version": "2.1.0",
+          "org_key": "ORGKEY",
+          "alert_url": "https://defense.conferdeploy.net/alerts?orgKey=ORGKEY&s%5Bc%5D%5Bquery_string%5D=id%3A0638489d-9d37-4f89-8aa4-274fbd78e6c4",
+          "id": "0638489d-9d37-4f89-8aa4-274fbd78e6c4",
+          "type": "WATCHLIST",
+          "is_updated": false,
+          "detection_timestamp": "2025-05-22T05:04:52.015Z",
+          "backend_timestamp": "2025-05-22T05:05:06.513Z",
+          "backend_update_timestamp": "2025-05-22T05:05:06.513Z",
+          "first_event_timestamp": "2025-05-22T05:00:10.853Z",
+          "last_event_timestamp": "2025-05-22T05:00:10.853Z",
+          "severity": 1,
+          "reason": "Process powershell.exe was detected by the report \"Powershell on 6612402\" in watchlist \"Bruce Test Historical Data (Watchlist)\"",
+          "threat_id": "688658BE7C4C78D16FF6BBF756F03360",
+          "primary_event_id": "mTdp9JebRWiiwgk-ZZJMHw-0",
+          "workflow": {
+              "status": "OPEN",
+              "change_timestamp": "2025-05-22T05:05:06.513Z",
+              "changed_by_type": "SYSTEM",
+              "changed_by": "ALERT_CREATION",
+              "closure_reason": "NO_REASON"
+          },
+          "determination": {
+              "value": "NONE",
+              "change_timestamp": "2025-05-22T05:05:06.513Z"
+          },
+          "alert_notes_present": false,
+          "policy_applied": "NOT_APPLIED",
+          "run_state": "RAN",
+          "reason_code": "688658be-7c4c-38d1-aff6-bbf756f03360:95fa3e69-91e0-3288-a65b-ca08139b1e70",
+          "sensor_action": "ALLOW",
+          "device_target_value": "MEDIUM",
+          "device_policy_id": 80947,
+          "device_policy": "Standar4ul5d1",
+          "device_id": 6612402,
+          "device_name": "DNAME",
+          "device_os": "WINDOWS",
+          "device_os_version": "Windows 10 x64",
+          "device_username": "UNAME",
+          "device_location": "UNKNOWN",
+          "device_external_ip": "10.10.10.10",
+          "device_internal_ip": "10.10.10.10",
+          "report_id": "ieViyYrSbWEI9RzEE1Q",
+          "report_name": "Powershell on 6612402",
+          "ioc_id": "584f5da9-4985-475e-8aad-037f5fd0dc28",
+          "ioc_hit": "(process_name:powershell.exe AND device_id:6612402)",
+          "watchlists": [
+              {
+                  "id": "OtUjDxuzRbSLwqkZG7SRzw",
+                  "name": "Bruce Test Historical Data (Watchlist)"
+              }
+          ],
+          "process_guid": "ABCDEFG-0064e5b2-00001314-00000000-1dbcad65fc9a0a6",
+          "process_pid": 4884,
+          "process_name": "c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe",
+          "process_sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3",
+          "process_md5": "2e5a8590cf6848968fc23de3fa1e25f1",
+          "process_reputation": "TRUSTED_WHITE_LIST",
+          "process_effective_reputation": "TRUSTED_WHITE_LIST",
+          "process_cmdline": "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -EP Bypass \\\\eip.demo\\sysvol\\EIP.DEMO\\scripts\\Luminol.ps1",
+          "process_username": "NT AUTHORITY\\SYSTEM",
+          "process_issuer": [
+              "Microsoft Windows Production PCA 2011"
+          ],
+          "process_publisher": [
+              "Microsoft Windows"
+          ],
+          "parent_guid": "ABCDEFG-0064e5b2-00000648-00000000-1dbc9c81ac95685",
+          "parent_pid": 1608,
+          "parent_name": "c:\\windows\\system32\\svchost.exe",
+          "parent_sha256": "b0b36bff7ae4057f687d839cd4b3d81159ab646f1ee1b22106a927e93decbb61",
+          "parent_md5": "3d1034d6ed3daed60816a25c561e8c83",
+          "parent_reputation": "TRUSTED_WHITE_LIST",
+          "parent_effective_reputation": "TRUSTED_WHITE_LIST",
+          "parent_cmdline": "C:\\Windows\\system32\\svchost.exe -k netsvcs -p -s Schedule",
+          "parent_username": "NT AUTHORITY\\SYSTEM",
+          "mdr_alert_notes_present": false,
+          "mdr_alert": false
+      }
+    result: null
+  - sample: |-
+      {
+          "version": "2.1.0",
+          "org_key": "ORGKEY",
+          "alert_url": "https://defense.conferdeploy.net/alerts?orgKey=ORGKEY&s%5Bc%5D%5Bquery_string%5D=id%3A91de7bb9-f0de-48f7-b0a7-07de95ca311f",
+          "id": "91de7bb9-f0de-48f7-b0a7-07de95ca311f",
+          "type": "WATCHLIST",
+          "is_updated": false,
+          "detection_timestamp": "2025-05-22T06:05:09.228Z",
+          "backend_timestamp": "2025-05-22T06:05:49.021Z",
+          "backend_update_timestamp": "2025-05-22T06:05:49.021Z",
+          "user_update_timestamp": "2025-05-22T06:29:08.472Z",
+          "first_event_timestamp": "2025-05-22T06:00:06.577Z",
+          "last_event_timestamp": "2025-05-22T06:00:06.577Z",
+          "severity": 5,
+          "reason": "Process powershell.exe was detected by the report \"Execution - AMSI - New Fileless Scheduled Task Behavior Detected\" in watchlist \"AMSI Threat Intelligence\"",
+          "threat_id": "C21CA826573A8D974C1E93C8471AAB7F",
+          "primary_event_id": "KIWZ6pTaTZaf5gwfAoZx7A-0",
+          "workflow": {
+              "status": "IN_PROGRESS",
+              "change_timestamp": "2025-05-22T06:29:08.472Z",
+              "changed_by_type": "USER",
+              "changed_by": "test@example.com",
+              "closure_reason": "NO_REASON"
+          },
+          "determination": {
+              "value": "NONE",
+              "change_timestamp": "2025-05-22T06:05:49.021Z"
+          },
+          "alert_notes_present": true,
+          "policy_applied": "NOT_APPLIED",
+          "run_state": "RAN",
+          "reason_code": "c21ca826-573a-3d97-8c1e-93c8471aab7f:8033b29d-81d2-3c47-82d2-f4a7f398b85d",
+          "sensor_action": "ALLOW",
+          "device_target_value": "MEDIUM",
+          "device_policy_id": 80947,
+          "device_policy": "Standar4ul5d1",
+          "device_id": 6612391,
+          "device_name": "DNAME",
+          "device_os": "WINDOWS",
+          "device_os_version": "Windows 10 x64",
+          "device_username": "UNAME",
+          "device_location": "UNKNOWN",
+          "device_external_ip": "10.10.10.10",
+          "device_internal_ip": "10.10.10.10",
+          "report_id": "LrKOC7DtQbm4g8w0UFruQg-d1080521-e617-4e45-94e0-7a145c62c90a",
+          "report_name": "Execution - AMSI - New Fileless Scheduled Task Behavior Detected",
+          "report_description": "Newer Powershell versions introduced built-in cmdlets to manage scheduled tasks natively without calling out to typical scheduled task processes like at.exe or schtasks.exe. This detection looks for behaviors related to the fileless execution of scheduled tasks. If you are responding to this alert, be sure to correlate the fileless scriptload events with events typically found in your environment Generally, attackers will create scheduled tasks with binaries that are located in user writable directories like AppData, Temp, or public folders.",
+          "report_tags": [
+              "execution",
+              "privesc",
+              "persistence",
+              "t1053",
+              "windows",
+              "amsi",
+              "attack",
+              "attackframework"
+          ],
+          "report_link": "https://attack.mitre.org/techniques/T1053/",
+          "ioc_id": "d1080521-e617-4e45-94e0-7a145c62c90a",
+          "ioc_hit": "(fileless_scriptload_cmdline:Register-ScheduledTask OR fileless_scriptload_cmdline:New-ScheduledTask OR scriptload_content:Register-ScheduledTask OR scriptload_content:New-ScheduledTask) AND NOT (process_cmdline:windows\\\\ccm\\\\systemtemp OR crossproc_name:windows\\\\ccm\\\\ccmexec.exe OR (process_publisher:\"VMware, Inc.\" AND process_publisher_state:FILE_SIGNATURE_STATE_TRUSTED))",
+          "watchlists": [
+              {
+                  "id": "Ci7w5B4URg6HN60hatQMQ",
+                  "name": "AMSI Threat Intelligence"
+              }
+          ],
+          "process_guid": "ABCDEFG-0064e5a7-00002208-00000000-1dbcadec2064af3",
+          "process_pid": 8712,
+          "process_name": "c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe",
+          "process_sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3",
+          "process_md5": "2e5a8590cf6848968fc23de3fa1e25f1",
+          "process_reputation": "TRUSTED_WHITE_LIST",
+          "process_effective_reputation": "TRUSTED_WHITE_LIST",
+          "process_cmdline": "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -EP Bypass \\\\eip.demo\\sysvol\\EIP.DEMO\\scripts\\Luminol.ps1",
+          "process_username": "NT AUTHORITY\\SYSTEM",
+          "process_issuer": [
+              "Microsoft Windows Production PCA 2011"
+          ],
+          "process_publisher": [
+              "Microsoft Windows"
+          ],
+          "parent_guid": "ABCDEFG-0064e5a7-00000664-00000000-1dbc94c59c7a4e6",
+          "parent_pid": 1636,
+          "parent_name": "c:\\windows\\system32\\svchost.exe",
+          "parent_sha256": "b0b36bff7ae4057f687d839cd4b3d81159ab646f1ee1b22106a927e93decbb61",
+          "parent_md5": "3d1034d6ed3daed60816a25c561e8c83",
+          "parent_reputation": "TRUSTED_WHITE_LIST",
+          "parent_effective_reputation": "TRUSTED_WHITE_LIST",
+          "parent_cmdline": "C:\\Windows\\system32\\svchost.exe -k netsvcs -p -s Schedule",
+          "parent_username": "NT AUTHORITY\\SYSTEM",
+          "mdr_alert_notes_present": false,
+          "mdr_alert": false,
+          "ml_classification_final_verdict": "NOT_ANOMALOUS",
+          "ml_classification_global_prevalence": "LOW",
+          "ml_classification_org_prevalence": "LOW"
+      }
+    result: null
+  - sample: |-
+      {
+          "version": "1.0.0",
+          "type": "auth.event.logonop",
+          "event_id": "1C3FB97C-5C59-4927-951B-E760A29F6340",
+          "process_guid": "ABCDEFG-008003e3-000002b8-00000000-1dbcf340f8b212d",
+          "parent_guid": "ABCDEFG-008003e3-00000214-00000000-1dbcf340f718da8",
+          "backend_timestamp": "2025-06-09 08:22:27 +0000 UTC",
+          "org_key": "ORGKEY",
+          "device_id": "8389603",
+          "device_name": "DNAME",
+          "device_external_ip": "10.10.10.10",
+          "device_os": "WINDOWS",
+          "device_os_version": "Windows 10 x64",
+          "device_policy": "default",
+          "device_target_priority": "TARGET_PRIORITY_MEDIUM",
+          "device_timestamp": "2025-06-09 08:20:52.9336989 +0000 UTC",
+          "device_installed_by": "test@example.com",
+          "device_internal_ip": "10.10.10.10",
+          "parent_pid": 532,
+          "parent_reputation": "REP_WHITE",
+          "parent_effective_reputation": "REP_WHITE",
+          "parent_effective_reputation_source": "REP_SRC_IGNORE",
+          "parent_publisher": [
+              {
+                  "name": "Microsoft Windows Publisher",
+                  "state": "FILE_SIGNATURE_STATE_SIGNED | FILE_SIGNATURE_STATE_VERIFIED | FILE_SIGNATURE_STATE_TRUSTED | FILE_SIGNATURE_STATE_OS"
+              }
+          ],
+          "parent_name": "c:\\windows\\system32\\wininit.exe",
+          "parent_username": "NT AUTHORITY\\SYSTEM",
+          "parent_hash": [
+              "56a1d646e0ef4d9c6b1c209fa9b22f99",
+              "b7c013f81f2e983a50e636a73bd3026cbddea08cba9afb078664fe08132cb8a1"
+          ],
+          "parent_cmdline": "wininit.exe",
+          "parent_cmdline_length": 11,
+          "parent_issuer": [
+              "Microsoft Windows Production PCA 2011"
+          ],
+          "parent_product_name": "Microsoft® Windows® Operating System",
+          "process_reputation": "REP_WHITE",
+          "process_effective_reputation": "REP_WHITE",
+          "process_effective_reputation_source": "REP_SRC_IGNORE",
+          "process_pid": 696,
+          "process_elevated": true,
+          "process_integrity_level": "SYSTEM",
+          "process_internal_name": "lsass.exe",
+          "process_publisher": [
+              {
+                  "name": "Microsoft Windows Publisher",
+                  "state": "FILE_SIGNATURE_STATE_SIGNED | FILE_SIGNATURE_STATE_VERIFIED | FILE_SIGNATURE_STATE_TRUSTED | FILE_SIGNATURE_STATE_OS"
+              }
+          ],
+          "process_issuer": [
+              "Microsoft Windows Production PCA 2011"
+          ],
+          "process_hash": [
+              "9801fed7259d9dde6a1dccff388c5179",
+              "8871c20eaa9b560f41c9b874f9bf00b057128ff8e91bc5664b83dc7ba95a3c9a"
+          ],
+          "process_cmdline": "C:\\Windows\\system32\\lsass.exe",
+          "process_cmdline_length": 29,
+          "process_username": "NT AUTHORITY\\SYSTEM",
+          "process_name": "c:\\windows\\system32\\lsass.exe",
+          "process_sha256": "8871c20eaa9b560f41c9b874f9bf00b057128ff8e91bc5664b83dc7ba95a3c9a",
+          "process_company_name": "Microsoft Corporation",
+          "process_file_description": "Local Security Authority Process",
+          "process_original_filename": "lsass.exe",
+          "process_privileges": [
+              "SeImpersonatePrivilege",
+              "SeDelegateSessionUserImpersonatePrivilege",
+              "SeDebugPrivilege",
+              "SeTcbPrivilege",
+              "SeAuditPrivilege",
+              "SeChangeNotifyPrivilege",
+              "SeCreateGlobalPrivilege",
+              "SeCreatePagefilePrivilege",
+              "SeCreatePermanentPrivilege",
+              "SeCreateSymbolicLinkPrivilege",
+              "SeIncreaseBasePriorityPrivilege",
+              "SeIncreaseWorkingSetPrivilege",
+              "SeLockMemoryPrivilege",
+              "SeProfileSingleProcessPrivilege",
+              "SeSystemProfilePrivilege",
+              "SeTimeZonePrivilege"
+          ],
+          "process_product_name": "Microsoft® Windows® Operating System",
+          "process_product_version": "10.0.19041.5737",
+          "process_start_time": "2025-05-27 18:20:44.3586861 +0000 UTC",
+          "process_end_time": "2025-06-09 08:20:52.9336989 +0000 UTC",
+          "process_duration": 1087208575,
+          "process_container_pid": 0,
+          "sensor_action": "ACTION_ALLOW",
+          "sensor_version": "4.0.3.2029",
+          "device_location": "UNKNOWN",
+          "device_policy_id": 6525,
+          "filemod_count": 27,
+          "modload_count": 18,
+          "netconn_count": 33,
+          "regmod_count": 22,
+          "scriptload_count": 0,
+          "auth_user_id": "S-1-5-18",
+          "auth_username": "UNAME",
+          "auth_domain_name": "WORKGROUP",
+          "auth_event_action": "ACTION_LOGON_SUCCESS",
+          "auth_virtual_account_logon": false,
+          "auth_restricted_admin_logon": false,
+          "auth_remote_logon": false,
+          "auth_logon_type": 5,
+          "auth_interactive_logon": false,
+          "auth_impersonation_level": "IMPERSONATION_LOCAL_ONLY",
+          "auth_cleartext_credentials_logon": false,
+          "auth_package": "NTLM",
+          "auth_elevated_token_logon": true,
+          "auth_key_length": 0,
+          "windows_event_id": 4624,
+          "auth_failure_status": "0",
+          "auth_failure_sub_status": "0",
+          "auth_logon_id": "00000000-000003E7",
+          "auth_daemon_logon": true,
+          "auth_remote_device": "-",
+          "auth_remote_port": 0,
+          "auth_failed_logon_count": 0
+      }
+    result: null
+  - sample: |-
+      {
+          "device_external_ip": "10.10.10.10",
+          "device_id": 6697317,
+          "device_internal_ip": "10.10.10.10",
+          "device_name": "DNAME",
+          "ioc_hit": "((process_file_description:Sysinternals OR process_company_name:Sysinternals AND device_os:WINDOWS)) -enriched:true",
+          "ioc_id": "c46f2504-fce8-4aac-836b-1fb5b4cd0997-0",
+          "org_key": "ORGKEY",
+          "parent_cmdline": "C:\\Windows\\system32\\services.exe",
+          "parent_path": "c:\\windows\\system32\\services.exe",
+          "parent_pid": 572,
+          "process_cmdline": "C:\\Windows\\sysmon64.exe",
+          "process_path": "c:\\windows\\sysmon64.exe",
+          "process_pid": 2676,
+          "parent_username": "NT AUTHORITY\\SYSTEM",
+          "process_username": "NT AUTHORITY\\SYSTEM",
+          "report_id": "GUWNtEmJQhKmuOTxoRV8hA-c46f2504-fce8-4aac-836b-1fb5b4cd0997",
+          "report_name": "Execution - SysInternals Use",
+          "severity": 2,
+          "report_tags": [
+              "sysinternals",
+              "lol",
+              "attackframework",
+              "attack",
+              "execution",
+              "lateralmovement",
+              "t1072",
+              "windows"
+          ],
+          "schema": 1,
+          "create_time": "2025-06-09T09:49:12.604Z",
+          "device_os": "WINDOWS",
+          "parent_guid": "ABCDEFG-00663165-0000023c-00000000-1d94a889dacde00",
+          "parent_hash": [
+              "2d072114fa0b9e2b51830510fa5f0f69",
+              "751cd7ab78b18a2d8a55c47ca75b90a14234ac974d81be5f198d301b59183873"
+          ],
+          "parent_publisher": [
+              {
+                  "name": "Microsoft Windows Publisher",
+                  "state": "FILE_SIGNATURE_STATE_SIGNED | FILE_SIGNATURE_STATE_VERIFIED | FILE_SIGNATURE_STATE_TRUSTED | FILE_SIGNATURE_STATE_OS"
+              }
+          ],
+          "parent_reputation": "REP_WHITE",
+          "process_guid": "ABCDEFG-00663165-00000a74-00000000-1d94a88a037ef3c",
+          "process_hash": [
+              "b0084fadd62d9b232b8e0e01ce076743",
+              "7108ec59a69d858bfb3f6034c4812c2d7ec348ecc952fd30c65a913c17f68e35"
+          ],
+          "process_publisher": [
+              {
+                  "name": "Microsoft Windows Publisher",
+                  "state": "FILE_SIGNATURE_STATE_SIGNED | FILE_SIGNATURE_STATE_VERIFIED | FILE_SIGNATURE_STATE_TRUSTED | FILE_SIGNATURE_STATE_OS"
+              }
+          ],
+          "process_reputation": "REP_WHITE",
+          "type": "watchlist.hit",
+          "watchlists": [
+              {
+                  "id": "kGpe3dkAS8iblKpeM9Xg",
+                  "name": "Carbon Black Endpoint Visibility"
+              }
+          ]
+      }
+    result: null
+  - sample: |-
+      {
+        "org_key": "ORGKEY",
+        "device_name": "DNAME",
+        "device_external_ip": "10.10.10.10",
+        "process_path": "c:\\program files\\tenable\\nessus agent\\nessusd.exe",
+        "parent_path": "c:\\program files\\tenable\\nessus agent\\nessus-agent-module.exe",
+        "process_cmdline": "\"C:\\Program Files\\Tenable\\Nessus Agent\\nessusd.exe\" --nmh-client ps --json",
+        "parent_cmdline": "C:\\Program Files\\Tenable\\Nessus Agent/nessus-agent-module.exe",
+        "process_username": "NT AUTHORITY\\SYSTEM",
+        "type": "endpoint.event.moduleload",
+        "process_guid": "ABCDEFG-0064e5b2-00000744-00000000-1dbc8a789801dff",
+        "backend_timestamp": "2025-05-19 10:22:39 +0000 UTC",
+        "device_id": "6612402",
+        "device_os": "WINDOWS",
+        "action": "ACTION_LOAD_MODULE",
+        "schema": 1,
+        "event_origin": "EDR",
+        "device_timestamp": "2025-05-19 10:19:43.0005149 +0000 UTC",
+        "sensor_action": "ACTION_ALLOW",
+        "parent_pid": 2212,
+        "parent_reputation": "REP_COMMON",
+        "parent_guid": "ABCDEFG-0064e5b2-000008a4-00000000-1dbc86436a7cf52",
+        "parent_hash": [
+            "d3b3bc81f0aaa59eedbf35d6617cc373",
+            "25be3ce06b0e48c5239ee7649b1276cb1651a15f41ee17a28f9151443cc80e26"
+        ],
+        "process_pid": 1860,
+        "process_terminated": false,
+        "process_publisher": [
+            {
+                "name": "TENABLE, INC.",
+                "state": "FILE_SIGNATURE_STATE_SIGNED | FILE_SIGNATURE_STATE_VERIFIED | FILE_SIGNATURE_STATE_TRUSTED"
+            }
+        ],
+        "process_hash": [
+            "22e8040af88aaaa464ba440ac92d1e72",
+            "7b08af8b3c6d5cd198bf34f3f73c8ff5fc193141ce5e7b19f5c314eef0255445"
+        ],
+        "process_reputation": "REP_COMMON",
+        "modload_name": "c:\\program files\\tenable\\nessus agent\\msvcp140.dll",
+        "modload_count": 0,
+        "modload_md5": "9ff712c25312821b8aec84c4f8782a34",
+        "modload_sha256": "517cd3aac2177a357cca6032f07ad7360ee8ca212a02dd6e1301bf6cfade2094",
+        "modload_publisher": [
+            {
+                "name": "Microsoft Corporation",
+                "state": "FILE_SIGNATURE_STATE_SIGNED | FILE_SIGNATURE_STATE_VERIFIED | FILE_SIGNATURE_STATE_TRUSTED"
+            }
+        ],
+        "modload_hash": [
+            "9ff712c25312821b8aec84c4f8782a34",
+            "517cd3aac2177a357cca6032f07ad7360ee8ca212a02dd6e1301bf6cfade2094"
+        ],
+        "modload_effective_reputation": "REP_WHITE",
+        "version": "1.1.0"
+      }
+    result: null
