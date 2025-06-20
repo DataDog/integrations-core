@@ -47,6 +47,11 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+base = [
+    "datadog-checks-base[deps]~=37.0",
+]
+
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
 
