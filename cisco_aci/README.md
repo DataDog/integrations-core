@@ -76,7 +76,7 @@ To configure this check for an Agent running on a host:
           
    ```
 
-2. If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure [logging is enabled][17] in your Datgadog `.yaml` file:
+2. If you have enabled `send_faultinst_faults` or `send_faultdelegate_faults`, ensure [logging is enabled][17] in your Datadog `.yaml` file:
 
    ```yaml
    logs_enabled: true
@@ -91,9 +91,9 @@ To configure this check for an Agent running on a host:
        service: cisco-aci
    ```
 
-4. [Restart the Agent][4] to begin sending Cisco ACI metrics and optionally ACI fault logs to Datadog.
+4. [Restart the Agent][4] to begin sending Cisco ACI metrics and optionally, ACI fault logs to Datadog.
 
-   **Note**: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, for example.
+   **Note**: Be sure to specify any tenants for the integration to collect metrics on applications (for example, EPG).
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -175,7 +175,7 @@ Because this check queries all the tenants, apps, and endpoints listed before re
     Last Successful Execution Date : 2023-01-04 15:58:04 CST / 2023-01-04 21:58:04 UTC (1672869484000)
   ```
 
-### Need help 
+### Help
 Contact [Datadog support][9].
 
 [1]: /account/settings/agent/latest
