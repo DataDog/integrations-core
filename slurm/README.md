@@ -118,7 +118,6 @@ instances:
 
     # The rest of these settings need to be turned off on the worker node because the information is specific
     # to the head node and isn't retrievable on the worker node.
-    collect_scontrol_stats: false
     collect_sinfo_stats: false
     collect_sdiag_stats: false
     collect_squeue_stats: false
