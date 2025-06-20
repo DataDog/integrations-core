@@ -730,7 +730,7 @@ class XESessionBase(DBMAsyncJob):
         cache_key = (query_signature, raw_sql_fields['raw_query_signature'])
         if not self._raw_statement_text_cache.acquire(cache_key):
             self._log.debug(f"Skipping RQT event creation: Rate limited by cache for signature {query_signature}")
-            return None
+            # return None
 
         # Create basic db fields structure
         db_fields = {
