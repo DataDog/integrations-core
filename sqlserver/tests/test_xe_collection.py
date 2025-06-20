@@ -885,9 +885,7 @@ class TestPayloadGeneration:
         payload = query_completion_handler._create_event_payload(raw_event)
 
         # Validate common payload fields
-        validate_common_payload_fields(
-            payload, expected_type='query_completion'
-        )
+        validate_common_payload_fields(payload, expected_type='query_completion')
 
         # Verify query details
         query_details = payload['query_details']

@@ -1110,18 +1110,10 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
     # Filter completion events (now each event may contain multiple query details)
-    query_completion_batches = [
-        e
-        for e in dbm_activity
-        if e.get('dbm_type') == 'query_completion'
-    ]
+    query_completion_batches = [e for e in dbm_activity if e.get('dbm_type') == 'query_completion']
 
     # Filter error events (now each event may contain multiple query details)
-    error_batches = [
-        e
-        for e in dbm_activity
-        if e.get('dbm_type') == 'query_error'
-    ]
+    error_batches = [e for e in dbm_activity if e.get('dbm_type') == 'query_error']
 
     # We should have at least one batch of completion events
     assert len(query_completion_batches) > 0, "No query completion batches collected"
