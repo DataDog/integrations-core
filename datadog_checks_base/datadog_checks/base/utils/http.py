@@ -528,14 +528,12 @@ class RequestsWrapper(object):
                 session = self.session
                 if new_context is not None:
                     # If the context has changed, we need to create a new adapter
-                    certadapter = SSLContextAdapter(new_context, has_custom_context=True)
-                    session.mount(url, certadapter)
+                    self._mount_new_ssl_adapter(session, url, ssl_context=new_context, has_custom_context=True)
                 else:
                     current_adapter = session.get_adapter(url)
                     if isinstance(current_adapter, SSLContextAdapter) and current_adapter.has_custom_context:
                         # If we are using a custom context, we need to revert to the original context
-                        certadapter = SSLContextAdapter(self.ssl_context)
-                        session.mount(url, certadapter)
+                        self._mount_new_ssl_adapter(session, url)
             else:
                 session = self.create_session(ssl_context=new_context)
             request_method = getattr(session, method)
@@ -589,8 +587,7 @@ class RequestsWrapper(object):
                 session = self.create_session(new_context)
             else:
                 session = self.session
-                certadapter = SSLContextAdapter(new_context)
-                session.mount(url, certadapter)
+                self._mount_new_ssl_adapter(session, url, ssl_context=new_context)
             request_method = getattr(session, method)
             response = request_method(url, **new_options)
         return response
@@ -731,6 +728,13 @@ class RequestsWrapper(object):
             # A persistent connection was never used or an error occurred during instantiation
             # before _session was ever defined (since __del__ executes even if __init__ fails).
             pass
+
+    def _mount_new_ssl_adapter(self, session, url, ssl_context=None, **kwargs):
+        """
+        Mounts a new SSLContextAdapter to the session for the given URL.
+        """
+        adapter = SSLContextAdapter(ssl_context or self.ssl_context, **kwargs)
+        session.mount(url, adapter)
 
 
 @contextmanager
