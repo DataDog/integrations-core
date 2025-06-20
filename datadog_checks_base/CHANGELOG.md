@@ -19,7 +19,7 @@
 
 * Fix tracemalloc usage error ([#20355](https://github.com/DataDog/integrations-core/pull/20355))
 
-## 37.11.0 / 2025-05-15
+## 37.11.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:
 
