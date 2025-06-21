@@ -1200,6 +1200,7 @@ def test_activity_snapshot_collection(
             # only can see own queries
             return
 
+        dbm_activity_event = [e for e in dbm_activity_event if e.get('dbm_type') == 'activity']
         event = dbm_activity_event[0]
         assert event['host'] == "stubbed.hostname"
         assert event['ddsource'] == "postgres"
@@ -1286,6 +1287,7 @@ def test_activity_snapshot_collection(
         time.sleep(dbm_instance['query_activity']['collection_interval'])
         run_one_check(check)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
+        dbm_activity_event = [e for e in dbm_activity_event if e.get('dbm_type') == 'activity']
         event = dbm_activity_event[1]
         assert len(event['postgres_activity']) > 0
         # find bob's query
@@ -1374,6 +1376,7 @@ def test_activity_reported_hostname(
     run_one_check(check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    dbm_activity = [e for e in dbm_activity if e.get('dbm_type') == 'activity']
     assert dbm_activity, "should have at least one activity sample"
     assert dbm_activity[0]['host'] == expected_hostname
 
@@ -1823,6 +1826,7 @@ def test_disabled_activity_or_explain_plans(
         conn.cursor().execute(query, (arg,))
         run_one_check(check)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        dbm_activity = [e for e in dbm_activity if e.get('dbm_type') == 'activity']
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
         if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
