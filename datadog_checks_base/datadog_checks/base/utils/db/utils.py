@@ -10,6 +10,7 @@ import os
 import socket
 import threading
 import time
+from hashlib import md5
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum, auto
 from ipaddress import IPv4Address
@@ -218,6 +219,7 @@ def default_json_event_encoding(o):
         return o.decode('utf-8')
     raise TypeError
 
+obfuscate_cache = {}
 
 def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
     """
@@ -238,6 +240,14 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
         # replace embedded null characters \x00 before obfuscating
         query = query.replace('\x00', '')
 
+    cache_key = md5((query + options).encode('utf-8')).hexdigest()
+    # print(query)
+    if cache_key in obfuscate_cache:
+        # print("Cache hit")
+        # Return cached result if available
+        return obfuscate_cache[cache_key]
+
+    # print("Cache miss")
     statement = datadog_agent.obfuscate_sql(query, options)
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
@@ -256,6 +266,8 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     tables = metadata.pop('tables_csv', None)
     tables = [table.strip() for table in tables.split(',') if table != ''] if tables else None
     statement_with_metadata['metadata']['tables'] = tables
+
+    obfuscate_cache[cache_key] = statement_with_metadata
     return statement_with_metadata
 
 
