@@ -16,7 +16,7 @@ from datadog_checks.http_check import HTTPCheck
 
 from .common import CONFIG_E2E, HERE
 
-MOCKED_HOSTS = ['valid.mock', 'expired.mock', 'wronghost.mock', 'selfsigned.mock']
+MOCKED_HOSTS = ['valid.mock', 'expired.mock', 'wronghost.mock', 'selfsigned.mock', 'tinyproxy.mock']
 
 
 @pytest.fixture(scope='session')
@@ -53,6 +53,14 @@ def http_check():
     # Patch the function to return the certs located in the `tests/` folder
     with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
         yield HTTPCheck('http_check', {}, [{}])
+
+
+@pytest.fixture(scope='function')
+def http_check_via_proxy():
+    # Patch the function to return the certs located in the `tests/` folder
+    # configured with a HTTPS proxy
+    with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
+        yield HTTPCheck('http_check', {'proxy': {'https': 'http://localhost:8008', 'no_proxy': ['any']}}, [{}])
 
 
 @pytest.fixture(scope='session')

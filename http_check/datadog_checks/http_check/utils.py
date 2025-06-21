@@ -3,6 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import sys
+from functools import cache
+from urllib.parse import unquote, urlparse
+
+import socks
 
 from datadog_checks.base.utils.platform import Platform
 
@@ -59,3 +63,54 @@ def _get_ca_certs_paths():
     ca_certs.append('/etc/ssl/certs/ca-certificates.crt')
 
     return ca_certs
+
+
+@cache
+def parse_proxy_url(url: str) -> dict:
+    """
+    parse_proxy_url takes an url string and returns a dictionary of proxy parameters
+    The tuple is of the form (proxy_type, hostname, port, rdns, username, password)
+    The dictionary corresponds exactly to the named parameters expected by socks.set_proxy()
+    If no port is specified, the default port for the proxy type will be used (SOCKS:1080, HTTP:8080).
+
+    >>> parse_proxy_url("socks5://user:password@host:123")
+    {'proxy_type': 2, 'addr': 'host', 'port': 123, 'rdns': False, 'username': 'user', 'password': 'password'}
+    >>> parse_proxy_url("socks5h://host:123")
+    {'proxy_type': 2, 'addr': 'host', 'port': 123, 'rdns': True, 'username': None, 'password': None}
+    """
+    remote_dns = False
+    parsed = urlparse(url)
+
+    if parsed.scheme in ['socks5', 'socks5a', 'socks5h']:
+        proxy_type = socks.SOCKS5
+        remote_dns = parsed.scheme == 'socks5h'
+        default_port = 1080
+    elif parsed.scheme == 'socks4':
+        proxy_type = socks.SOCKS4
+        default_port = 1080
+    elif parsed.scheme == 'http':
+        proxy_type = socks.HTTP
+        remote_dns = True
+        default_port = 8080
+    else:
+        raise ValueError(f'unsupported proxy scheme: {url}')
+
+    if not parsed.hostname:
+        raise ValueError(f'Empty host component for proxy: {url}')
+
+    try:
+        port = parsed.port if parsed.port else default_port
+    except Exception as e:
+        raise ValueError(f'Invalid port component for proxy {url}, {e}')
+
+    username = unquote(parsed.username, errors='replace') if parsed.username else None
+    password = unquote(parsed.password, errors='replace') if parsed.password else None
+
+    return {
+        "proxy_type": proxy_type,
+        "addr": parsed.hostname,
+        "port": port,
+        "rdns": remote_dns,
+        "username": username,
+        "password": password,
+    }
