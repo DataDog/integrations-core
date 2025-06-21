@@ -44,6 +44,6 @@ SC_FAILURE_TAGS = (
 
 def metrics_tags_with_resource(mysql_check):
     _tags = METRIC_TAGS_WITH_RESOURCE
-    if common.MYSQL_FLAVOR.lower() == 'mysql':
+    if common.MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
     return _tags
