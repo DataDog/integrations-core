@@ -36,7 +36,7 @@ def ss_subprocess_mock(*args, **kwargs):
 
 def test_check_bsd(instance, aggregator):
     check = BSDNetwork('network', {}, [instance])
-    with mock.patch('datadog_checks.network.check_bsd.get_subprocess_output') as out:
+    with mock.patch.object(check, '_get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check.check({})
     for metric in common.EXPECTED_METRICS:
