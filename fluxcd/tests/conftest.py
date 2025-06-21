@@ -76,7 +76,7 @@ def mock_metrics_v1():
         content = f.read()
 
     with mock.patch(
-        "requests.get",
+        "requests.Session.get",
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: content.split("\n"),
@@ -94,7 +94,7 @@ def mock_metrics_v2():
         content = f.read()
 
     with mock.patch(
-        "requests.get",
+        "requests.Session.get",
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: content.split("\n"),

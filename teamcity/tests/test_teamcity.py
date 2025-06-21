@@ -66,7 +66,7 @@ def test_config(dd_run_check, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = TeamCityRest('teamcity', {}, [instance])
 
-    with patch('datadog_checks.base.utils.http.requests.get') as r:
+    with patch('datadog_checks.base.utils.http.requests.Session.get') as r:
         dd_run_check(check)
 
         http_wargs = {
