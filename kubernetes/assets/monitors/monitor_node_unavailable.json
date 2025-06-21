@@ -1,7 +1,7 @@
 {
   "version": 2,
   "created_at": "2020-07-28",
-  "last_updated_at": "2023-07-31",
+  "last_updated_at": "2025-06-12",
   "title": "Nodes are unavailable",
   "tags": [
     "integration:kubernetes"
@@ -9,7 +9,7 @@
   "description": "Kubernetes nodes can either be schedulable or unschedulable. When unschedulable, the node prevents the scheduler from placing new pods onto that node. This monitor tracks the percentage of schedulable nodes.",
   "definition": {
     "message": "More than 20% of nodes are unschedulable on ({{kube_cluster_name.name}} cluster). \n Keep in mind that this might be expected based on your infrastructure.",
-    "name": "[kubernetes] Monitor Unschedulable Kubernetes Nodes",
+    "name": "[Kubernetes] Monitor Unschedulable Kubernetes Nodes",
     "options": {
       "escalation_message": "",
       "include_tags": true,
