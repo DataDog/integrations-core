@@ -208,11 +208,15 @@ spec:
 
 For **mixed environments**, use the [DatadogAgentProfiles (DAP) feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. Note that this feature is disabled by default, so it needs to be enabled. For more information, see [Enabling DatadogAgentProfiles](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md#enabling-datadogagentprofiles).
 
-Modifying the DatadogAgent manifest is necessary to enable certain features that are not supported by the DAP yet. First, the existing configuration should enable the `system-probe` container in the datadog-agent pods (this can be easily checked by looking at the list of containers when running `kubectl describe pod <datadog-agent-pod-name> -n <namespace>`). Because the DAP feature does not yet support conditionally enabling containers, a feature that uses `system-probe` needs to be enabled for all agent pods. We recommend enabling the `oomKill` integration, as it is lightweight and does not require any additional configuration or extra cost.
-
-Additionally, the agent needs to be configured so that the NVIDIA container runtime exposes GPUs to the agent. This can be done via environment variables or volume mounts, depending on whether the `accept-nvidia-visible-devices-as-volume-mounts` parameter is set to `true` or `false` in the NVIDIA container runtime configuration. We recommend configuring the agent both ways, as it reduces the chance of misconfiguration and there are no side effects to having both.
-
-Also, the PodResources socket needs to be exposed to the agent too to integrate with the Kubernetes Device Plugin. Again, this needs to be done globally as the DAP does not yet support conditional volume mounts.
+Modifying the DatadogAgent manifest is necessary to enable certain features that are not supported by the DAP yet:
+- In the existing configuration, enable the `system-probe` container in the datadog-agent pods. Because the DAP feature does not yet support conditionally enabling containers, a feature that uses `system-probe` needs to be enabled for all Agent pods.
+  - You can check this by looking at the list of containers when running `kubectl describe pod <datadog-agent-pod-name> -n <namespace>`.
+  - Datadog recommends enabling the `oomKill` integration, as it is lightweight and does not require any additional configuration or cost.
+- Configure the Agent so that the NVIDIA container runtime exposes GPUs to the Agent.
+  - You can do this using environment variables or volume mounts, depending on whether the `accept-nvidia-visible-devices-as-volume-mounts` parameter is set to `true` or `false` in the NVIDIA container runtime configuration.
+  - Datadog recommends configuring the Agent both ways, as it reduces the chance of misconfiguration. There are no side effects to having both.
+- Expose the PodResources socket to the Agent to integrate with the Kubernetes Device Plugin.
+  - This needs to be done globally, as the DAP does not yet support conditional volume mounts.
 
 In summary, the changes that need to be applied to the DatadogAgent manifest are the following:
 
