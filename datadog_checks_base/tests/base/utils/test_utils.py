@@ -203,12 +203,12 @@ class TestBytesUnicode:
         assert ensure_bytes('qwerty') == b'qwerty'
 
     def test_ensure_unicode(self):
-        assert ensure_unicode('éâû') == u'éâû'
-        assert ensure_unicode(u'éâû') == u'éâû'
+        assert ensure_unicode('éâû') == 'éâû'
+        assert ensure_unicode('éâû') == 'éâû'
 
     def test_to_native_string(self):
         # type: () -> None
-        text = u'éâû'
+        text = 'éâû'
         binary = text.encode('utf-8')
         assert to_native_string(binary) == text
 
