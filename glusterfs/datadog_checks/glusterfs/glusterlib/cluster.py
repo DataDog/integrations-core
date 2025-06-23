@@ -1,16 +1,16 @@
 import re
 import sys
 
-from glustercli.cli import peer, quota, volume, snapshot, glusterfs_version, \
-    heal
+from glustercli.cli import glusterfs_version, heal, peer, quota, snapshot, volume
 from glustercli.cli.utils import GlusterCmdException
 
+
 class Cluster(object):
-    """The cluster object is the parent of nodes, bricks and volumes """
+    """The cluster object is the parent of nodes, bricks and volumes"""
 
     def __init__(self, options, args):
         self.cluster_status = "Healthy"
-        self.nodes = 0          # Number of nodes
+        self.nodes = 0  # Number of nodes
         self.nodes_reachable = 0
         self.volume_count = 0
         self.volumes_started = 0
@@ -22,8 +22,7 @@ class Cluster(object):
         self.brickinfo = options.brickinfo
         self.displayquota = options.displayquota
         self.displaysnap = options.displaysnap
-        self.output_mode = options.output_mode.lower() if options.output_mode\
-                           else 'console'
+        self.output_mode = options.output_mode.lower() if options.output_mode else 'console'
 
     def gather_data(self):
         try:
@@ -33,7 +32,7 @@ class Cluster(object):
             if self.volumes:
                 # We have a list of volumes specified on command line
                 self.volume_data = self._get_volume_details(self.volumes, vols)
-            else:               # Get the details of all volumes
+            else:  # Get the details of all volumes
                 self.volume_data = volume.status_detail(group_subvols=True)
         except GlusterCmdException as err:
             errcode, msg, u = err.args[0]
@@ -69,17 +68,14 @@ class Cluster(object):
 
         for v in self.volume_data:
             online = 0
-            bricks = []
             vol_used_percent = 0
             quota = ''
-            voltype = ''        # Set only in case of arbiter volumes
-
+            voltype = ''  # Set only in case of arbiter volumes
 
             for subvol in v['subvols']:
                 for brick in subvol['bricks']:
                     online += 1 if brick['online'] else 0
-                    if v['type'].lower() == 'replicate' and \
-                       brick['type'] == 'Arbiter':
+                    if v['type'].lower() == 'replicate' and brick['type'] == 'Arbiter':
                         voltype = ' - (Arbiter Volume)'
 
             vol_size = v['size_total']
@@ -95,7 +91,7 @@ class Cluster(object):
                 vol_size_used_h = self._readable_format(vol_size_used)
                 v['v_size'] = vol_size_h
                 v['v_size_used'] = vol_size_used_h
-                v['v_used_percent'] = "%.2f"%(vol_used_percent)
+                v['v_used_percent'] = "%.2f" % (vol_used_percent)
             v['online'] = online
             v['voltype'] = voltype
 
@@ -107,7 +103,6 @@ class Cluster(object):
 
     def _get_volume_details(self, display_vols, vols):
         matched_vols = []
-        vol_details = []
 
         # Get the details of matched volumes
         for pat in display_vols:
@@ -118,8 +113,7 @@ class Cluster(object):
                     if re.fullmatch(pat, v):
                         matched_vols.append(v)
                 except Exception as err:
-                    print("Invalid regex: %s. Try .* instead of *"%(err),
-                          file=sys.stderr)
+                    print("Invalid regex: %s. Try .* instead of *" % (err), file=sys.stderr)
                     exit(1)
         try:
             status = volume.status_detail(matched_vols, group_subvols=True)
@@ -128,7 +122,7 @@ class Cluster(object):
             print(msg, file=sys.stderr)
             exit(errcode)
 
-        return(status)
+        return status
 
     def _readable_format(self, size):
         KiB = 1024
@@ -136,19 +130,18 @@ class Cluster(object):
         GiB = MiB * KiB
         TiB = GiB * KiB
         PiB = TiB * KiB
-        units = { 'K': KiB, 'M': MiB, 'G': GiB, 'T': TiB, 'P': PiB }
+        units = {'K': KiB, 'M': MiB, 'G': GiB, 'T': TiB, 'P': PiB}
 
-        if self.unit == 'H':              # Human readable format
+        if self.unit == 'H':  # Human readable format
             for u in ['KiB', 'MiB', 'GiB', 'TiB', 'PiB']:
                 size /= KiB
                 if size < KiB:
-                    return("%.2f %s"%(round(size, 0), u))
-        elif self.unit in units: # Convert the size to specified units
+                    return "%.2f %s" % (round(size, 0), u)
+        elif self.unit in units:  # Convert the size to specified units
             size /= units[self.unit]
-            return("%.2f %siB"%(size, self.unit))
+            return "%.2f %siB" % (size, self.unit)
         else:
-            print("Unknown unit %s, allowed units k/m/g/t/p/h" %(self.unit),
-                  file=sys.stderr)
+            print("Unknown unit %s, allowed units k/m/g/t/p/h" % (self.unit), file=sys.stderr)
             exit(1)
 
     def _update_quota_info(self):
@@ -161,29 +154,25 @@ class Cluster(object):
                     # If the volume is stopped we get an exception
                     pass
                 for q in quota_list:
-                    q['hard_limit'] = self.\
-                                      _readable_format(float(q['hard_limit']))
-                    q['used_space'] = self.\
-                                      _readable_format(float(q['used_space']))
-                    q['avail_space'] = self.\
-                                       _readable_format(float(q['avail_space']))
+                    q['hard_limit'] = self._readable_format(float(q['hard_limit']))
+                    q['used_space'] = self._readable_format(float(q['used_space']))
+                    q['avail_space'] = self._readable_format(float(q['avail_space']))
                 vol['quota_list'] = quota_list
 
     def _update_snapshot_info(self):
         # Update the volumes with their respective snapshots
-        for volume in self.volume_data:
-            if volume['snapshot_count'] > 0:
-                volume['snapshots'] = snapshot.info(volname = volume['name'])
+        for _volume in self.volume_data:
+            if _volume['snapshot_count'] > 0:
+                _volume['snapshots'] = snapshot.info(volname=_volume['name'])
 
     def _update_heal_info(self):
         heal_fail = 0
-        for volume in self.volume_data:
-            if volume['status'].lower() == 'started':
+        for _volume in self.volume_data:
+            if _volume['status'].lower() == 'started':
                 try:
-                    volume['healinfo'] = heal.info(volume['name'])
+                    _volume['healinfo'] = heal.info(_volume['name'])
                 except GlusterCmdException:
                     heal_fail = 1
                     pass
         if heal_fail:
-            print("Note: Unable to get self-heal status for one or more "
-                  "volumes", file=sys.stderr)
+            print("Note: Unable to get self-heal status for one or more " "volumes", file=sys.stderr)
