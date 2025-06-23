@@ -239,10 +239,8 @@ override:
           volumeMounts:
             - name: nvidia-devices
               mountPath: /dev/nvidia-visible-devices
-              readOnly: true
             - name: pod-resources
               mountPath: /var/lib/kubelet/pod-resources
-              readOnly: true
         system-probe:
           env:
             - name: NVIDIA_VISIBLE_DEVICES
@@ -250,10 +248,8 @@ override:
           volumeMounts:
             - name: nvidia-devices
               mountPath: /dev/nvidia-visible-devices
-              readOnly: true
             - name: pod-resources
               mountPath: /var/lib/kubelet/pod-resources
-              readOnly: true
 ```
 
 Once the DatadogAgent configuration is changed, create a profile that enables the GPU feature configuration on GPU nodes only:
