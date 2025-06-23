@@ -20,11 +20,9 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
-    SQL_INDEXES,
-    SQL_INDEXES_8_0_13,
-    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_PARTITION,
     SQL_TABLES,
+    get_indexes_query,
 )
 
 from .util import get_list_chunks
@@ -169,8 +167,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
         tables = self._get_tables(db_name, cursor)
-        tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-        for tables_chunk in tables_chunks:
+        for tables_chunk in get_list_chunks(tables, self.TABLES_CHUNK_SIZE):
             schema_collection_elapsed_time = time.time() - start_time
             if schema_collection_elapsed_time > self._max_execution_time:
                 self._data_submitter.submit()
@@ -357,12 +354,7 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
-        query = (
-            SQL_INDEXES_8_0_13.format(table_names)
-            if cursor.fetchone()["column_count"] > 0
-            else SQL_INDEXES.format(table_names)
-        )
+        query = get_indexes_query(self._check.version, self._check.is_mariadb, table_names)
         self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
         if not rows:

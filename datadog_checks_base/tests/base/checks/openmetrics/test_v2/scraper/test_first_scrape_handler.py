@@ -4,8 +4,7 @@
 import pytest
 
 from datadog_checks.base.stubs import datadog_agent
-
-from .utils import get_check
+from tests.base.checks.openmetrics.test_v2.utils import get_check
 
 test_use_process_start_time_data = """\
 # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.

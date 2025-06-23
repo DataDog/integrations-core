@@ -55,6 +55,7 @@ from .util import (
     QUERY_PG_REPLICATION_STATS_METRICS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_METRICS,
@@ -319,17 +320,17 @@ class PostgreSql(AgentCheck):
                 ]
             )
 
-        if self.wal_level == 'logical':
-            self.log.debug("wal_level is logical, adding control checkpoint metrics")
+        if self.is_aurora and self.wal_level != 'logical':
+            self.log.debug("logical wal_level is required to use pg_current_wal_lsn() on Aurora")
+
+        else:
+            self.log.debug("Adding control checkpoint metrics")
 
             if self.version >= V10:
                 queries.append(QUERY_PG_CONTROL_CHECKPOINT)
 
             else:
                 queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
-
-        else:
-            self.log.debug("wal_level is not logical, skipping control checkpoint metrics")
 
         if self.version >= V10:
             # Wal receiver is not supported on aurora
@@ -363,6 +364,7 @@ class PostgreSql(AgentCheck):
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
+            queries.append(QUERY_PG_STAT_RECOVERY_PREFETCH)
         if self.version >= V16:
             if self._config.dbm_enabled:
                 queries.append(STAT_IO_METRICS)
