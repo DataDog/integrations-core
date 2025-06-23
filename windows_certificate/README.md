@@ -2,13 +2,13 @@
 
 ## Overview
 
-This integration monitors the Local Machine certificates in the [Windows Certificate Store][1] to check whether any of have expired.
+This integration monitors the Local Machine certificates in the [Windows Certificate Store][1] to check whether any have expired.
 
 ## Setup
 
 ### Installation
 
-The Windows Certificate Store integration is included in the [Datadog Agent][2] package but requires configuration (see instructions below).
+The Windows Certificate Store integration is included in the [Datadog Agent][2] package but requires configuration (see instructions below). The Windows Certificate Store integration requires Agent versions 7.67.0 or later.
 
 ### Configuration
 
