@@ -585,6 +585,8 @@ integration/snmp_netapp:
 - snmp_netapp/**/*
 integration/snowflake:
 - snowflake/**/*
+integration/solarwinds:
+- solarwinds/**/*
 integration/solr:
 - solr/**/*
 integration/sonarqube:
@@ -717,6 +719,8 @@ integration/wlan:
 - wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
+integration/workato:
+- workato/**/*
 integration/yarn:
 - yarn/**/*
 integration/zeek:

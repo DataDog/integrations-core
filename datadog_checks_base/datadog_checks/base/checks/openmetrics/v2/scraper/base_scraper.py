@@ -4,25 +4,26 @@
 import fnmatch
 import inspect
 import re
+from collections.abc import Generator
 from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
-
-from ....config import is_affirmative
-from ....constants import ServiceCheck
-from ....errors import ConfigurationError
-from ....utils.functions import no_op, return_true
-from ....utils.http import RequestsWrapper
-from .first_scrape_handler import first_scrape_handler
-from .labels import LabelAggregator, get_label_normalizer
-from .transform import MetricTransformer
+from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
+from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer
+from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransformer
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.functions import no_op, return_true
+from datadog_checks.base.utils.http import RequestsWrapper
 
 
 class OpenMetricsScraper:
@@ -238,18 +239,20 @@ class OpenMetricsScraper:
         """
         runtime_data = {'flush_first_value': bool(self.flush_first_value), 'static_tags': self.static_tags}
 
-        # Determine which consume method to use based on target_info config
-        if self.target_info:
-            consume_method = self.consume_metrics_w_target_info
-        else:
-            consume_method = self.consume_metrics
-
-        for metric in consume_method(runtime_data):
+        for metric in self.yield_metrics(runtime_data):
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
 
             transformer(metric, self.generate_sample_data(metric), runtime_data)
+
+    def yield_metrics(self, runtime_data: dict) -> Generator[Metric]:
+        if self.target_info:
+            consume_method = self.consume_metrics_w_target_info
+        else:
+            consume_method = self.consume_metrics
+
+        yield from consume_method(runtime_data)
 
     def scrape(self):
         try:
