@@ -77,7 +77,7 @@ class Connection:
             # https://docs.microsoft.com/en-us/windows/win32/api/winnetwk/ns-winnetwk-netresourcea
             # https://mhammond.github.io/pywin32/PyNETRESOURCE.html
             self.network_resource = win32wnet.NETRESOURCE()
-            self.network_resource.lpRemoteName = fr'\\{server}'
+            self.network_resource.lpRemoteName = rf'\\{server}'
 
         self.__query_handle = None
 

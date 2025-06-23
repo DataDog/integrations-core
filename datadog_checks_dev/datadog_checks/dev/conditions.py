@@ -95,7 +95,7 @@ class CheckEndpoints(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError('Endpoint: {}\n' 'Error: {}'.format(last_endpoint, last_error))
+            raise RetryError('Endpoint: {}\nError: {}'.format(last_endpoint, last_error))
 
 
 class CheckCommandOutput(LazyFunction):
@@ -169,11 +169,11 @@ class CheckCommandOutput(LazyFunction):
             patterns = '\t- '.join([''] + [str(p) for p in self.patterns])
             missing_patterns = '\t- '.join([''] + [str(p) for p in missing_patterns])
             raise RetryError(
-                u'Command: {}\nFailed to match `{}` of the patterns.\n'
-                u'Provided patterns: {}\n'
-                u'Missing patterns: {}\n'
-                u'Exit code: {}\n'
-                u'Captured Output: {}'.format(
+                'Command: {}\nFailed to match `{}` of the patterns.\n'
+                'Provided patterns: {}\n'
+                'Missing patterns: {}\n'
+                'Exit code: {}\n'
+                'Captured Output: {}'.format(
                     self.command, self.matches, patterns, missing_patterns, exit_code, log_output
                 )
             )

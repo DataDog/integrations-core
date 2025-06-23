@@ -23,6 +23,7 @@ Please refer to `checks.lib.wmi.counter_type` for more information*
 Original discussion thread: https://github.com/DataDog/dd-agent/issues/1952
 Credits to @TheCloudlessSky (https://github.com/TheCloudlessSky)
 """
+
 from copy import deepcopy
 from threading import Event, Thread
 
@@ -227,7 +228,7 @@ class WMISampler(object):
                 result = parsed_value
 
         if result is None:
-            self.logger.error(u"Invalid '%s' WMI Provider Architecture. The parameter is ignored.", value)
+            self.logger.error("Invalid '%s' WMI Provider Architecture. The parameter is ignored.", value)
 
         self._provider = result or ProviderArchitecture.DEFAULT
 
@@ -278,7 +279,7 @@ class WMISampler(object):
         """
         # No data is returned while sampling
         if self._sampling:
-            raise TypeError(u"Sampling `WMISampler` object has no len()")
+            raise TypeError("Sampling `WMISampler` object has no len()")
 
         return len(self._current_sample)
 
@@ -288,7 +289,7 @@ class WMISampler(object):
         """
         # No data is returned while sampling
         if self._sampling:
-            raise TypeError(u"Sampling `WMISampler` object is not iterable")
+            raise TypeError("Sampling `WMISampler` object is not iterable")
 
         if self.is_raw_perf_class:
             # Format required
@@ -334,7 +335,7 @@ class WMISampler(object):
             calculator = get_calculator(counter_type)
         except UndefinedCalculator:
             self.logger.warning(
-                u"Undefined WMI calculator for counter_type %s. Values are reported as RAW.", counter_type
+                "Undefined WMI calculator for counter_type %s. Values are reported as RAW.", counter_type
             )
 
         return calculator
@@ -364,7 +365,7 @@ class WMISampler(object):
         Create a new WMI connection
         """
         self.logger.debug(
-            u"Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
+            "Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
             self.host,
             self.namespace,
             self.provider,
@@ -550,7 +551,7 @@ class WMISampler(object):
             wql = "Select {property_names} from {class_name}{filters}".format(
                 property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
             )
-            self.logger.debug(u"Querying WMI: %s", wql)
+            self.logger.debug("Querying WMI: %s", wql)
         except Exception as e:
             self.logger.error(str(e))
             return []
@@ -575,7 +576,7 @@ class WMISampler(object):
             results = self._parse_results(raw_results, includes_qualifiers=includes_qualifiers)
 
         except pywintypes.com_error:
-            self.logger.warning(u"Failed to execute WMI query (%s)", wql, exc_info=True)
+            self.logger.warning("Failed to execute WMI query (%s)", wql, exc_info=True)
             results = []
 
         return results
@@ -615,7 +616,6 @@ class WMISampler(object):
                 )
 
                 if should_get_qualifier_type:
-
                     # Can't index into "Qualifiers_" for keys that don't exist
                     # without getting an exception.
                     qualifiers = dict((q.Name, q.Value) for q in wmi_property.Qualifiers_)
@@ -628,14 +628,14 @@ class WMISampler(object):
                         self._property_counter_types[wmi_property.Name] = counter_type
 
                         self.logger.debug(
-                            u"Caching property qualifier CounterType: %s.%s = %s",
+                            "Caching property qualifier CounterType: %s.%s = %s",
                             self.class_name,
                             wmi_property.Name,
                             counter_type,
                         )
                     else:
                         self.logger.debug(
-                            u"CounterType qualifier not found for %s.%s", self.class_name, wmi_property.Name
+                            "CounterType qualifier not found for %s.%s", self.class_name, wmi_property.Name
                         )
 
                 try:

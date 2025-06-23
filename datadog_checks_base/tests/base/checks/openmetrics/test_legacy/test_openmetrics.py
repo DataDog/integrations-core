@@ -185,10 +185,10 @@ def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_pr
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes',
         'Virtual memory size in bytes.',
-        labels=['my_1st_label', 'my_2nd_label', 'labél_nat', 'labél_mix', u'labél_uni'],
+        labels=['my_1st_label', 'my_2nd_label', 'labél_nat', 'labél_mix', 'labél_uni'],
     )
     ref_gauge.add_metric(
-        ['my_1st_label_value', 'my_2nd_label_value', 'my_labél_val', u'my_labél_val🐶', u'my_labél_val'], 54927360.0
+        ['my_1st_label_value', 'my_2nd_label_value', 'my_labél_val', 'my_labél_val🐶', 'my_labél_val'], 54927360.0
     )
 
     check = mocked_prometheus_check
