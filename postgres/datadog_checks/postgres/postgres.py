@@ -300,7 +300,7 @@ class PostgreSql(AgentCheck):
         try:
             # CHAOS TESTING DO NOT MERGE
             # disconnect for every other minute
-            if math.floor(time.time()) % 120  < 60:
+            if math.floor(time()) % 120  < 60:
                 raise psycopg2.OperationalError("Simulated connection failure for chaos testing")     
             
             # run a simple query to check if the connection is healthy
