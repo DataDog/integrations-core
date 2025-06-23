@@ -223,7 +223,7 @@ In summary, the changes that need to be applied to the DatadogAgent manifest are
 ```yaml
 spec:
   features:
-    oomKill: # Only enable this feature if there is nothing else that requires the system-probe container in all agent pods
+    oomKill: # Only enable this feature if there is nothing else that requires the system-probe container in all Agent pods
       enabled: true
 
 override:
