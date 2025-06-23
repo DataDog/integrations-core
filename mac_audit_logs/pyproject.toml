@@ -5,8 +5,8 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-{project_name}"
-description = "The {integration_name} check"
+name = "datadog-mac-audit-logs"
+description = "The mac_audit_logs check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.12"
@@ -14,10 +14,10 @@ keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "{check_name}",
+    "mac_audit_logs",
 ]
 authors = [
-    {{ name = "{author}", email = "{email_packages}" }},
+    { name = "Datadog", email = "packages@datadoghq.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -29,20 +29,22 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=37.11.0",
+    "datadog-checks-base>=37.0.0",
 ]
 dynamic = [
     "version",
 ]
 
 [project.optional-dependencies]
-deps = []
+deps = [
+    "lxml==5.1.1",
+]
 
 [project.urls]
-Source = "https://github.com/DataDog/{repo_name}"
+Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/{check_name}/__about__.py"
+path = "datadog_checks/mac_audit_logs/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -53,7 +55,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/{check_name}",
+    "/datadog_checks/mac_audit_logs",
 ]
 dev-mode-dirs = [
     ".",
