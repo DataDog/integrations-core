@@ -338,6 +338,8 @@ metadata:
     # (...)
 ```
 
+Replace `<CONTAINER_IDENTIFIER>` with the container's name within the pod (the value returned by `.name`).
+
 ##### Connect Airflow to DogStatsD
 
 Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics. For more information about the metrics reported by the Airflow version used and the additional configuration options, see the Airflow documentation below:

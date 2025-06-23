@@ -21,7 +21,7 @@ def instance_collect_sacct_stats():
 
 
 def instance_collect_scontrol_stats():
-    return True
+    return False
 
 
 def instance_collect_sdiag_stats():

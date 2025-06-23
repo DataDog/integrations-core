@@ -1,0 +1,1 @@
+Add OpenMetrics decorator to add code_class to metrics that have an HTTP status code tag

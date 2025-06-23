@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d41073d8-fc86-4506-9180-6234c1f4ef70",
   "app_id": "falco",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -21,6 +21,9 @@
       "Category::Log Collection",
       "Category::Security",
       "Submitted Data Type::Logs",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
       "Offering::Integration"
     ]
   },
@@ -29,9 +32,23 @@
       "auto_install": false,
       "source_type_id": 31431531,
       "source_type_name": "Falco",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
       "events": {
         "creates_events": false
       },
+      "metrics": {
+        "prefix": "falco.",
+        "check": [
+          "falco.evt.source"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "falco",
+        "falcoctl"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }

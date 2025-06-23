@@ -1,0 +1,1 @@
+Add support for ingesting target_info when using the WithHttpCodeClass decorator

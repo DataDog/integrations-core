@@ -1,0 +1,59 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param MONITOR - boolean - required
+    ## Flag indicating Mac audit log collection status. Set to true to enable collection.
+    #
+  - MONITOR: true
+
+    ## @param AUDIT_LOGS_DIR_PATH - string - required
+    ## Path to the directory containing the BSM audit logs.
+    #
+    AUDIT_LOGS_DIR_PATH: /var/audit
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param min_collection_interval - number - required
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    min_collection_interval: 15
+
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event).
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: integration
+#     service: mac-audit-logs
+#     source: mac-audit-logs

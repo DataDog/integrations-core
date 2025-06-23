@@ -214,4 +214,27 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381689039
+ -
+  sample: "[2025-02-18 14:46:00,123] {{python_operator.py:105}} INFO - Task started"
+  tags:
+    - "dirname:path/to/airflow/logs/dag_id_airflow_dag_0/run_id_scheduled__2025-02-18T14_46_00+00_00/task_id_print_task_0"
+  result:
+    custom:
+      airflow:
+        dagRun:
+          dag_id: "airflow_dag_0"
+          run_id: "scheduled__2025-02-18T14_46_00+00_00"
+        task:
+          task_id: "print_task_0"
+      dirname: "path/to/airflow/logs/dag_id_airflow_dag_0/run_id_scheduled__2025-02-18T14_46_00+00_00/task_id_print_task_0"
+      filename: "python_operator.py"
+      level: "INFO"
+      lineno: 105
+      timestamp: 1739889960123
+    message: "Task started"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "dirname:path/to/airflow/logs/dag_id_airflow_dag_0/run_id_scheduled__2025-02-18T14_46_00+00_00/task_id_print_task_0"
+    timestamp: 1739889960123
 
