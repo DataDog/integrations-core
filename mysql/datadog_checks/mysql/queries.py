@@ -41,14 +41,19 @@ FROM performance_schema.events_statements_summary_by_digest
 WHERE schema_name IS NOT NULL
 GROUP BY schema_name"""
 
-SQL_WORKER_THREADS = "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'"
+SQL_REPLICA_WORKER_THREADS = (
+    "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE PROCESSLIST_COMMAND LIKE 'Binlog dump%'"
+)
 
-SQL_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'"
+SQL_REPLICA_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE 'Binlog dump%'"
 
 SQL_INNODB_ENGINES = """\
 SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
+
+SQL_SERVER_UUID = """\
+SELECT @@server_uuid"""
 
 SQL_SERVER_ID_AWS_AURORA = """\
 SHOW VARIABLES LIKE 'aurora_server_id'"""
@@ -118,36 +123,67 @@ WHERE table_schema = %s AND table_name IN ({});
 SQL_INDEXES = """\
 SELECT
     table_name as `table_name`,
-    index_schema as `index_schema`,
     index_name as `name`,
     collation as `collation`,
+    cardinality as `cardinality`,
     index_type as `index_type`,
-    group_concat(seq_in_index order by seq_in_index asc) as seq_in_index,
-    group_concat(column_name order by seq_in_index asc) as columns,
-    group_concat(sub_part order by seq_in_index asc) as sub_parts,
-    group_concat(packed order by seq_in_index asc) as packed,
-    group_concat(nullable order by seq_in_index asc) as nullables,
-    group_concat(non_unique order by seq_in_index asc) as non_uniques
+    seq_in_index as `seq_in_index`,
+    column_name as `column_name`,
+    sub_part as `sub_part`,
+    packed as `packed`,
+    nullable as `nullable`,
+    non_unique as `non_unique`,
+    NULL as `expression`
 FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_schema = %s AND table_name IN ({})
-GROUP BY table_name, index_schema, index_name, collation, index_type;
+WHERE table_schema = %s AND table_name IN ({});
+"""
+
+SQL_INDEXES_8_0_13 = """\
+SELECT
+    table_name as `table_name`,
+    index_name as `name`,
+    collation as `collation`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    seq_in_index as `seq_in_index`,
+    column_name as `column_name`,
+    sub_part as `sub_part`,
+    packed as `packed`,
+    nullable as `nullable`,
+    non_unique as `non_unique`,
+    expression as `expression`
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE table_schema = %s AND table_name IN ({});
 """
 
 SQL_FOREIGN_KEYS = """\
 SELECT
-    constraint_schema as `constraint_schema`,
-    constraint_name as `name`,
-    table_name as `table_name`,
-    group_concat(column_name order by ordinal_position asc) as column_names,
-    referenced_table_schema as `referenced_table_schema`,
-    referenced_table_name as `referenced_table_name`,
-    group_concat(referenced_column_name) as referenced_column_names
+    kcu.constraint_schema as constraint_schema,
+    kcu.constraint_name as name,
+    kcu.table_name as table_name,
+    group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
+    kcu.referenced_table_schema as referenced_table_schema,
+    kcu.referenced_table_name as referenced_table_name,
+    group_concat(kcu.referenced_column_name) as referenced_column_names,
+    rc.update_rule as update_action,
+    rc.delete_rule as delete_action
 FROM
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+LEFT JOIN
+    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+    ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+    AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
 WHERE
-    table_schema = %s AND table_name in ({})
-    AND referenced_table_name is not null
-GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
+    kcu.table_schema = %s AND kcu.table_name in ({})
+    AND kcu.referenced_table_name is not null
+GROUP BY
+    kcu.constraint_schema,
+    kcu.constraint_name,
+    kcu.table_name,
+    kcu.referenced_table_schema,
+    kcu.referenced_table_name,
+    rc.update_rule,
+    rc.delete_rule
 """
 
 SQL_PARTITION = """\
@@ -163,12 +199,7 @@ SELECT
     subpartition_expression as `subpartition_expression`,
     partition_description as `partition_description`,
     table_rows as `table_rows`,
-    data_length as `data_length`,
-    max_data_length as `max_data_length`,
-    index_length as `index_length`,
-    data_free as `data_free`,
-    partition_comment as `partition_comment`,
-    tablespace_name as `tablespace_name`
+    data_length as `data_length`
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
     table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
@@ -222,3 +253,22 @@ def show_replica_status_query(version, is_mariadb, channel=''):
         return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
     else:
         return "{0};".format(base_query)
+
+
+def show_primary_replication_status_query(version, is_mariadb):
+    if not is_mariadb and version.version_compatible((8, 4, 0)):
+        return "SHOW BINARY LOG STATUS;"
+    else:
+        return "SHOW MASTER STATUS;"
+
+
+def get_indexes_query(version, is_mariadb, table_names):
+    """
+    Get the appropriate indexes query based on MySQL version and flavor.
+    The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
+    MariaDB doesn't support functional indexes.
+    """
+    if not is_mariadb and version.version_compatible((8, 0, 13)):
+        return SQL_INDEXES_8_0_13.format(table_names)
+    else:
+        return SQL_INDEXES.format(table_names)

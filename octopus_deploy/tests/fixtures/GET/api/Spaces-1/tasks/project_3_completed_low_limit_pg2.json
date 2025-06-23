@@ -1,0 +1,78 @@
+{
+    "ItemType": "Task",
+    "TotalResults": 3,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "TotalCounts": {
+      "Canceled": 0,
+      "Cancelling": 0,
+      "Executing": 0,
+      "Failed": 13,
+      "Queued": 0,
+      "Success": 1783,
+      "TimedOut": 0,
+      "Interrupted": 0
+    },
+    "TotalCountsInOtherSpaces": {
+      "Canceled": 0,
+      "Cancelling": 0,
+      "Executing": 0,
+      "Failed": 0,
+      "Queued": 0,
+      "Success": 0,
+      "TimedOut": 0,
+      "Interrupted": 0
+    },
+    "Items": [
+      {
+        "Id": "ServerTasks-1845",
+        "SpaceId": "Spaces-1",
+        "Name": "Deploy",
+        "Description": "Deploy test release 0.0.1 to Development",
+        "Arguments": {
+          "DeploymentId": "Deployments-17"
+        },
+        "State": "Success",
+        "Completed": "Monday, 23 September 2024 3:00:21 PM +00:00",
+        "QueueTime": "2024-09-23T14:44:02.123+00:00",
+        "QueueTimeExpiry": null,
+        "StartTime": "2024-09-23T14:44:20.123+00:00",
+        "LastUpdatedTime": "2024-09-23T15:00:21.752+00:00",
+        "CompletedTime": "2024-09-23T14:45:01.123+00:00",
+        "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+        "Duration": "2 seconds",
+        "ErrorMessage": "",
+        "HasBeenPickedUpByProcessor": true,
+        "IsCompleted": true,
+        "FinishedSuccessfully": true,
+        "HasPendingInterruptions": false,
+        "CanRerun": false,
+        "HasWarningsOrErrors": false,
+        "UnmetPreconditions": null,
+        "ProjectId": "Projects-3",
+        "Links": {
+          "Self": "/api/tasks/ServerTasks-1845",
+          "Web": "/app#/Spaces-1/tasks/ServerTasks-1845",
+          "Raw": "/api/tasks/ServerTasks-1845/raw",
+          "Rerun": "/api/tasks/rerun/ServerTasks-1845",
+          "Cancel": "/api/tasks/ServerTasks-1845/cancel",
+          "State": "/api/tasks/ServerTasks-1845/state",
+          "BlockedBy": "/api/tasks/ServerTasks-1845/blockedby",
+          "QueuedBehind": "/api/tasks/ServerTasks-1845/queued-behind{?skip,take}",
+          "Details": "/api/tasks/ServerTasks-1845/details{?verbose,tail,ranges}",
+          "StatusMessages": "/api/tasks/ServerTasks-1845/status/messages",
+          "Prioritize": "/api/tasks/ServerTasks-1845/prioritize",
+          "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-1845",
+          "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-1845"
+        }
+      }
+    ],
+    "Links": {
+      "Self": "/api/tasks?skip=0&take=30",
+      "Template": "/api/tasks{?skip,active,environment,tenant,runbook,project,name,node,running,states,hasPendingInterruptions,hasWarningsOrErrors,take,ids,partialName,spaces,includeSystem,description,fromCompletedDate,toCompletedDate,fromQueueDate,toQueueDate,fromStartDate,toStartDate}",
+      "Page.All": "/api/tasks?skip=0&take=2147483647",
+      "Page.Current": "/api/tasks?skip=0&take=30",
+      "Page.Last": "/api/tasks?skip=0&take=30"
+    }
+  }

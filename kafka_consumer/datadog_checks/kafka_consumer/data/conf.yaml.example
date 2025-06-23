@@ -93,6 +93,14 @@ instances:
     #     <TOPIC_NAME_2>: []
     #   test_consumer.+: {}
 
+    ## @param collect_consumer_group_state - boolean - optional - default: false
+    ## Setting the collect_consumer_group_state to true collects the 
+    ## consumer group state as a tag. 
+    ##
+    ## WARNING: Enabling this feature might cause some increase in Agent resource consumption.
+    #
+    # collect_consumer_group_state: false
+
     ## @param monitor_unlisted_consumer_groups - boolean - optional - default: false
     ## Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups
     ## and fetch all their known offsets. If this is not set to true, you must specify `consumer_groups`.
@@ -238,6 +246,16 @@ instances:
     ## Verifies that the server's cert hostname matches the one requested.
     #
     # tls_validate_hostname: true
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param tls_crlfile - string - optional
     ## Filename path containing the CRL to check for certificate expiration.

@@ -13,6 +13,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_SERVERNAME,
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
@@ -32,8 +33,10 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
+    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
 )
+from datadog_checks.sqlserver.utils import Database
 
 from .common import (
     CHECK_NAME,
@@ -95,7 +98,12 @@ def test_sqlserver_file_stats_metrics(
     if not include_file_stats_metrics:
         assert file_stats_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             db, state, logical_name, file_location, *metric_values = result
             metrics = zip(file_stats_metrics.metric_names()[0], metric_values)
@@ -176,7 +184,12 @@ def test_sqlserver_ao_metrics(
     if not include_ao_metrics:
         assert ao_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_ao_availability_groups:
             (
                 replica_role,
@@ -292,7 +305,12 @@ def test_sqlserver_availability_groups_metrics(
     if not include_ao_metrics:
         assert availability_groups_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             ag, availability_group_name, synchronization_health_desc, *metric_values = result
             metrics = zip(availability_groups_metrics.metric_names()[0], metric_values)
@@ -383,7 +401,12 @@ def test_sqlserver_database_replication_stats_metrics(
     if not include_ao_metrics:
         assert database_replication_stats_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             ag, availability_group_name, replica_server_name, synchronization_state_desc, *metric_values = result
             metrics = zip(database_replication_stats_metrics.metric_names()[0], metric_values)
@@ -521,7 +544,12 @@ def test_sqlserver_availability_replicas_metrics(
     if not include_ao_metrics:
         assert availability_replicas_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             (
                 database_name,
@@ -586,7 +614,12 @@ def test_sqlserver_fci_metrics(
     if not include_fci_metrics:
         assert fci_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             node_name, status, failover_cluster, *metric_values = result
             metrics = zip(fci_metrics.metric_names()[0], metric_values)
@@ -634,7 +667,12 @@ def test_sqlserver_primary_log_shipping_metrics(
     if not include_primary_log_shipping_metrics:
         assert primary_log_shipping_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             primary_id, primary_server, primary_db, *metric_values = result
             metrics = zip(primary_log_shipping_metrics.metric_names()[0], metric_values)
@@ -694,7 +732,12 @@ def test_sqlserver_secondary_log_shipping_metrics(
     if not include_secondary_log_shipping_metrics:
         assert primary_log_shipping_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             secondary_server, secondary_db, secondary_id, primary_server, primary_db, *metric_values = result
             metrics = zip(primary_log_shipping_metrics.metric_names()[0], metric_values)
@@ -741,7 +784,12 @@ def test_sqlserver_server_state_metrics(
     if not include_server_state_metrics:
         assert server_state_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             metrics = zip(server_state_metrics.metric_names()[0], result)
             for metric_name, metric_value in metrics:
@@ -785,7 +833,12 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
     if not include_tempdb_file_space_usage_metrics:
         assert tempdb_file_space_usage_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             database_id, *metric_values = result
             metrics = zip(tempdb_file_space_usage_metrics.metric_names()[0], metric_values)
@@ -867,7 +920,12 @@ def test_sqlserver_index_usage_metrics(
     if not include_index_usage_metrics:
         assert index_usage_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             for row in result:
                 db, index_name, schema, table, *metric_values = row
@@ -919,7 +977,6 @@ def test_sqlserver_db_fragmentation_metrics(
         instance_docker_metrics['database_metrics']['db_fragmentation_metrics'][
             'collection_interval'
         ] = db_fragmentation_metrics_interval
-    print(instance_docker_metrics)
     mocked_results = [
         [
             ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
@@ -990,7 +1047,12 @@ def test_sqlserver_db_fragmentation_metrics(
     if not include_db_fragmentation_metrics:
         assert db_fragmentation_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             for row in result:
                 database_name, object_name, schema, index_id, index_name, *metric_values = row
@@ -1007,7 +1069,7 @@ def test_sqlserver_db_fragmentation_metrics(
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
                     if db_fragmentation_object_names:
                         for m in aggregator.metrics(metric_name):
-                            tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+                            tags_by_key = dict([t.split(':', 1) for t in m.tags])
                             assert tags_by_key['object_name'].lower() in db_fragmentation_object_names
                 if not include_db_fragmentation_metrics_tempdb:
                     assert database_name != 'tempdb'
@@ -1073,7 +1135,12 @@ def test_sqlserver_os_schedulers_metrics(
     if not include_task_scheduler_metrics:
         assert os_schedulers_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             scheduler_id, parent_node_id, *metric_values = result
             metrics = zip(os_schedulers_metrics.metric_names()[0], metric_values)
@@ -1138,7 +1205,12 @@ def test_sqlserver_os_tasks_metrics(
     if not include_task_scheduler_metrics:
         assert os_tasks_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             scheduler_id, *metric_values = result
             metrics = zip(os_tasks_metrics.metric_names()[0], metric_values)
@@ -1204,7 +1276,12 @@ def test_sqlserver_master_files_metrics(
     if not include_master_files_metrics:
         assert master_files_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             db, database, file_id, file_type, file_location, database_files_state_desc, size, state = result
             size *= 8  # size is in pages, 1 page = 8 KB
@@ -1280,7 +1357,12 @@ def test_sqlserver_database_files_metrics(
     if not include_database_files_metrics:
         assert database_files_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
             for row in result:
                 file_id, file_type, file_location, file_name, database_files_state_desc, size, space_used, state = row
@@ -1298,6 +1380,68 @@ def test_sqlserver_database_files_metrics(
                 ] + tags
                 for metric_name, metric_value in metrics:
                     aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_table_size_metrics', [True, False])
+def test_sqlserver_table_size_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_table_size_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'table_size_metrics': {'enabled': include_table_size_metrics},
+    }
+
+    mocked_results = [
+        ('table1', 'dbo', 'master', 100, 1024, 500, 200),
+        ('table2', 'dbo', 'master', 100, 1024, 500, 200),
+        ('table3', 'dbo', 'master', 100, 1024, 500, 200),
+        ('table4', 'dbo', 'datadog_test-1', 100, 1024, 500, 200),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check.databases = {Database(db) for db in AUTODISCOVERY_DBS}
+
+    execute_query_handler_mocked = mock.MagicMock()
+    execute_query_handler_mocked.return_value = mocked_results
+
+    table_size_metrics = SqlserverTableSizeMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        databases=AUTODISCOVERY_DBS,
+    )
+
+    sqlserver_check._database_metrics = [table_size_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_table_size_metrics:
+        assert table_size_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
+        for mock_row in mocked_results:
+            table_name, schema, database, *metric_values = mock_row
+            metrics = zip(table_size_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'table:{table_name}',
+                f'schema:{schema}',
+                f'database:{database}',
+            ] + tags
+            # check that the aggregator got the mocked metrics
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
 @pytest.mark.integration
@@ -1342,7 +1486,12 @@ def test_sqlserver_database_stats_metrics(
     if not include_database_files_metrics:
         assert database_stats_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             db, database, database_state_desc, database_recovery_model_desc, *metric_values = result
             metrics = zip(database_stats_metrics.metric_names()[0], metric_values)
@@ -1406,7 +1555,12 @@ def test_sqlserver_database_backup_metrics(
     if not include_database_backup_metrics:
         assert database_backup_metrics.enabled is False
     else:
-        tags = sqlserver_check._config.tags
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        ]
         for result in mocked_results:
             db, database, *metric_values = result
             metrics = zip(database_backup_metrics.metric_names()[0], metric_values)
@@ -1445,7 +1599,12 @@ def test_sqlserver_xe_session_metrics(
         modified_instance[key] = value
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [modified_instance])
     dd_run_check(sqlserver_check)
-    expected_tags = sqlserver_check._config.tags
+    expected_tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
     expected_tags.append('session_name:datadog')
     aggregator.assert_metric("sqlserver.xe.session_status", value=1, tags=expected_tags)
 
@@ -1491,3 +1650,35 @@ def test_sqlserver_database_metrics_defaults(
             databases=AUTODISCOVERY_DBS,
         )
         assert database_metrics.enabled == enabled
+
+
+@pytest.mark.unit
+def test_sqlserver_database_metrics_init(
+    init_config,
+    instance_docker_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {
+            'enabled': True,
+            'enabled_tempdb': False,
+        },
+    }
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check.databases = {Database(db) for db in AUTODISCOVERY_DBS + ['tempdb']}
+    assert sqlserver_check.database_metrics is not None
+
+    index_usage_metrics = [
+        metric for metric in sqlserver_check.database_metrics if isinstance(metric, SqlserverIndexUsageMetrics)
+    ]
+    assert len(index_usage_metrics) == 1
+    assert index_usage_metrics[0].enabled is True
+    assert 'tempdb' not in index_usage_metrics[0].databases
+
+    database_file_metrics = [
+        metric for metric in sqlserver_check.database_metrics if isinstance(metric, SqlserverDatabaseFilesMetrics)
+    ]
+    assert len(database_file_metrics) == 1
+    assert database_file_metrics[0].enabled is True
+    assert 'tempdb' in database_file_metrics[0].databases

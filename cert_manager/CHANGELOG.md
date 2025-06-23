@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.3.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Add collection of the `certmanager_certificate_renewal_timestamp_seconds` metric as `certificate.renewal_timestamp` ([#19643](https://github.com/DataDog/integrations-core/pull/19643))
+
+## 5.2.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
 ## 5.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:

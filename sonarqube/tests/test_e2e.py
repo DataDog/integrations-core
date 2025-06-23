@@ -1,14 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 
 from .common import CHECK_CONFIG
 from .metrics import ALL_METRICS
-
-pytestmark = [pytest.mark.e2e]
 
 
 def test_e2e(dd_agent_check):

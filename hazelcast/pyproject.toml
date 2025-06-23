@@ -28,7 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.0.0",
+    "datadog-checks-base>=37.4.0",
 ]
 dynamic = [
     "version",
@@ -36,7 +36,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "hazelcast-python-client==5.4.0",
+    "hazelcast-python-client==5.5.0",
 ]
 
 [project.urls]

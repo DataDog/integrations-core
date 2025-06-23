@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import copy
 from typing import Callable, List, Optional
 
 from datadog_checks.base.log import get_check_logger
@@ -28,7 +29,7 @@ class SqlserverDatabaseMetricsBase:
         ] = new_query_executor
         self.execute_query_handler: Callable[[str, Optional[str]], List[tuple]] = execute_query_handler
         self.track_operation_time: bool = track_operation_time
-        self._databases: Optional[List[str]] = databases
+        self._databases: Optional[List[str]] = copy.copy(databases)
         self._query_executors: List[QueryExecutor] = []
         self.log = get_check_logger()
 

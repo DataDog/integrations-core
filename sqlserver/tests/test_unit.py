@@ -14,6 +14,15 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_FULL_SERVERNAME,
+    STATIC_INFO_INSTANCENAME,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
+    STATIC_INFO_SERVERNAME,
+    STATIC_INFO_VERSION,
+)
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -65,6 +74,18 @@ def test_missing_db(instance_docker, dd_run_check):
     instance['ignore_missing_database'] = True
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
+        # Saturate static information to avoid trying to connect to the database
+        expected_keys = {
+            STATIC_INFO_VERSION,
+            STATIC_INFO_MAJOR_VERSION,
+            STATIC_INFO_ENGINE_EDITION,
+            STATIC_INFO_RDS,
+            STATIC_INFO_SERVERNAME,
+            STATIC_INFO_INSTANCENAME,
+        }
+        for key in expected_keys:
+            check.static_info_cache[key] = 'foo'
+
         check.initialize_connection()
         check.make_metric_list_to_collect()
         dd_run_check(check)
@@ -443,7 +464,12 @@ def test_set_default_driver_conf_linux():
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    check_tags = sqlserver_check._config.tags
+    check_tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
     expected_tags = check_tags + [
         'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'connection_host:{}'.format(DOCKER_SERVER),
@@ -754,7 +780,9 @@ def test_submit_data():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
-    dataSubmitter.store_db_infos([{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}])
+    dataSubmitter.store_db_infos(
+        [{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}], ["test_db1", "test_db2"]
+    )
     schema1 = {"id": "1"}
     schema2 = {"id": "2"}
     schema3 = {"id": "3"}
@@ -785,6 +813,46 @@ def test_submit_data():
     data = json.loads(submitted_data[0])
     data.pop("timestamp")
     assert deep_compare(data, expected_data)
+
+
+@pytest.mark.parametrize(
+    "db_infos, databases, expected_dbs",
+    [
+        pytest.param(
+            [
+                {"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CI_AS"},
+                {"id": 4, "name": "TEST_DB2", "collation": "SQL_Latin1_General_CP1_CI_AS"},
+            ],
+            ["test_db1", "test_db2"],
+            ["test_db1", "test_db2"],
+            id="case_insensitive",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["TEST_DB1"],
+            [],
+            id="case_sensitive",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "test_db1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["test_db1"],
+            ["test_db1"],
+            id="case_sensitive_lowercase",
+        ),
+        pytest.param(
+            [{"id": 3, "name": "TEST_DB1", "collation": "SQL_Latin1_General_CP1_CS_AS"}],
+            ["TEST_DB1"],
+            ["TEST_DB1"],
+            id="case_sensitive_uppercase",
+        ),
+    ],
+)
+def test_store_db_infos_case_sensitive(db_infos, databases, expected_dbs):
+    dataSubmitter, _ = set_up_submitter_unit_test()
+    dataSubmitter.db_info.clear()
+
+    dataSubmitter.store_db_infos(db_infos, databases)
+    assert list(dataSubmitter.db_info.keys()) == expected_dbs
 
 
 def test_fetch_throws(instance_docker):
@@ -842,3 +910,32 @@ def test_get_unixodbc_sysconfig():
         "embedded",
         "etc",
     ], "incorrect unix odbc config dir"
+
+
+@pytest.mark.parametrize(
+    'template, expected, tags',
+    [
+        ('$resolved_hostname', 'stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname:$port', 'prod-stubbed.hostname:22', ['env:prod', 'port:1']),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$resolved_hostname', '$env-stubbed.hostname', []),
+        ('$env-$resolved_hostname', 'prod-stubbed.hostname', ['env:prod']),
+        ('$env-$server_name/$instance_name', 'prod-server/instance', ['env:prod']),
+        ('$full_server_name', 'server\\instance', ['env:prod']),
+    ],
+)
+def test_database_identifier(instance_docker, template, expected, tags):
+    """
+    Test functionality of calculating database_identifier
+    """
+    instance_docker['host'] = 'localhost,22'
+    instance_docker['database_identifier'] = {'template': template}
+    instance_docker['tags'] = tags
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.static_info_cache[STATIC_INFO_SERVERNAME] = 'server'
+    check.static_info_cache[STATIC_INFO_INSTANCENAME] = 'instance'
+    check.static_info_cache[STATIC_INFO_FULL_SERVERNAME] = 'server\\instance'
+    # Reset for recalculation with static info
+    check._database_identifier = None
+
+    assert check.database_identifier == expected

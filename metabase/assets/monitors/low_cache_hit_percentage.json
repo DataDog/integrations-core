@@ -1,0 +1,68 @@
+{
+	"version": 2,
+	"created_at": "2024-10-23",
+	"last_updated_at": "2024-10-23",
+	"title": "Low cache hit percentage",
+	"description": "This monitor tracks the cache hit percentage for queries running within your Metabase account. A low cache hit rate may indicate inefficient cache utilization, leading to increased database load and slower response times.",
+	"definition": {
+		"id": 156194158,
+		"name": "Low cache hit percentage",
+		"type": "log alert",
+		"query": "formula(\"(query1 / query) * 100\").last(\"30m\") < 50",
+		"message": "{{#is_alert}}\n\nThe cache hit percentage for queries is below {{threshold}}%.\nCache hit percentage: {{value}}%\n\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"integration:metabase",
+			"service:query-logs"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 50
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"variables": [
+				{
+					"data_source": "logs",
+					"name": "query1",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:metabase service:query-logs @cache_hit:true"
+					},
+					"storage": "hot"
+				},
+				{
+					"data_source": "logs",
+					"name": "query",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:metabase service:query-logs @cache_hit:*"
+					},
+					"storage": "hot"
+				}
+			],
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:metabase"
+	]
+}

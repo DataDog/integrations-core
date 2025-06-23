@@ -4,13 +4,13 @@
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import PIPELINES_METRICS, PIPELINES_OPTIONAL_METRICS, TRIGGERS_METRICS
+from .common import PIPELINES_E2E_METRICS, PIPELINES_OPTIONAL_METRICS, TRIGGERS_METRICS
 
 
 def test_check(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
-    for expected_metric in PIPELINES_METRICS:
+    for expected_metric in PIPELINES_E2E_METRICS:
         aggregator.assert_metric(f"tekton.pipelines_controller.{expected_metric}")
 
     for optional_metrics in PIPELINES_OPTIONAL_METRICS:

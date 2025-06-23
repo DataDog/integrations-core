@@ -90,6 +90,8 @@ class InstanceConfig(BaseModel):
     pwd: Optional[str] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
+    send_faultdelegate_faults: Optional[bool] = None
+    send_faultinst_faults: Optional[bool] = None
     send_ndm_metadata: Optional[bool] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
@@ -98,6 +100,7 @@ class InstanceConfig(BaseModel):
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_ignore_warning: Optional[bool] = None
     tls_private_key: Optional[str] = None
     tls_protocols_allowed: Optional[tuple[str, ...]] = None

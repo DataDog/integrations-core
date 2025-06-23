@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import binascii
 import time
 from datetime import datetime
 
@@ -41,6 +42,8 @@ class MongoSlowOperations(DBMAsyncJob):
         self._slow_operations_config = check._config.slow_operations
         self._collection_interval = self._slow_operations_config["collection_interval"]
         self._max_operations = self._slow_operations_config["max_operations"]
+        self._explain_verbosity = self._slow_operations_config["explain_verbosity"]
+        self._cursor_timeout = check._config.timeout
 
         # _explained_operations_ratelimiter: limit how often we try to re-explain the same query
         self._explained_operations_ratelimiter = RateLimitingTTLCache(
@@ -201,6 +204,7 @@ class MongoSlowOperations(DBMAsyncJob):
                 command=slow_operation["command"],
                 explain_plan_rate_limiter=self._explained_operations_ratelimiter,
                 explain_plan_cache_key=(dbname, slow_operation["query_signature"]),
+                verbosity=self._explain_verbosity,
             ):
                 if slow_operation.get("execStats"):
                     # execStats is available with profiling, so we just need to format it
@@ -208,7 +212,12 @@ class MongoSlowOperations(DBMAsyncJob):
                 else:
                     # explain the slow operation from the logs
                     explain_plan = get_explain_plan(
-                        self._check.api_client, slow_operation.get("op"), slow_operation["command"], dbname
+                        api_client=self._check.api_client,
+                        command=slow_operation["command"],
+                        dbname=dbname,
+                        op_duration=self._get_operation_duration_microsecs(slow_operation),
+                        cursor_timeout=self._cursor_timeout,
+                        verbosity=self._explain_verbosity,
                     )
 
                 explain_plan_payload = self._create_slow_operation_explain_plan_payload(slow_operation, explain_plan)
@@ -347,16 +356,21 @@ class MongoSlowOperations(DBMAsyncJob):
                     "op": self._get_slow_operation_op_type(slow_operation),
                     "ns": slow_operation.get("ns"),
                     "plan_summary": slow_operation.get("planSummary"),
-                    "microsecs_running": slow_operation.get("millis", slow_operation.get("durationMillis", 0)) * 1000,
+                    "microsecs_running": self._get_operation_duration_microsecs(slow_operation),
                     "num_yields": slow_operation.get("numYield", slow_operation.get("numYields", 0)),
                     "write_conflicts": slow_operation.get("writeConflicts"),
                     "lock_stats": self._get_slow_operation_lock_stats(slow_operation),
                     "flow_control_stats": self._get_slow_operation_flow_control_stats(slow_operation),
                     "cursor": self._get_slow_operation_cursor(slow_operation),
+                    "lsid": self._get_slow_operation_lsid(slow_operation["command"]),
                 }
             ),
         }
         return self._sanitize_event(event)
+
+    def _get_operation_duration_microsecs(self, slow_operation: dict) -> int:
+        # The total duration of the slow operation in microseconds
+        return slow_operation.get("millis", slow_operation.get("durationMillis", 0)) * 1000
 
     def _get_slow_operation_op_type(self, slow_operation):
         return slow_operation.get("op") or slow_operation.get("type")
@@ -377,6 +391,15 @@ class MongoSlowOperations(DBMAsyncJob):
                 "comment": slow_operation.get("originatingCommandComment"),
             }
         return None
+
+    def _get_slow_operation_lsid(self, command):
+        lsid = command.get("lsid")
+        if not lsid or not lsid.get("id"):
+            return None
+
+        return {
+            "id": binascii.hexlify(lsid['id']).decode(),
+        }
 
     def _get_slow_operation_lock_stats(self, slow_operation):
         lock_stats = slow_operation.get("locks")

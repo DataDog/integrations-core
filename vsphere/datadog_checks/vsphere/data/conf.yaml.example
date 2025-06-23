@@ -173,6 +173,7 @@ instances:
     ##         resources do not have realtime metrics
     ## Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
     ##         historical metrics
+    ## Note3: If no filters are set for a resource type, all resources of that resource type are collected.
     #
     # resource_filters:
     #   - resource: vm
@@ -724,6 +725,16 @@ instances:
         #   - SSLv3
         #   - TLSv1.2
         #   - TLSv1.3
+
+        ## @param tls_ciphers - list of strings - optional
+        ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+        ## `ALL` ciphers are used. For list of ciphers see: 
+        ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+        #
+        # tls_ciphers:
+        #   - TLS_AES_256_GCM_SHA384
+        #   - TLS_CHACHA20_POLY1305_SHA256
+        #   - TLS_AES_128_GCM_SHA256
 
         ## @param headers - mapping - optional
         ## The headers parameter allows you to send specific headers with every request.

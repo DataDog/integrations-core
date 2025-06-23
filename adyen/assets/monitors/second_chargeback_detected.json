@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "Second Chargeback detected",
+	"description": "Second chargebacks occur when the issuer rejects the defense or Adyen accepts the pre-arbitration case, marking the final stage of the chargeback process. This monitor tracks the occurrence of second chargebacks to ensure timely awareness and prompt action to address these cases effectively.",
+	"definition": {
+		"id": 154586409,
+		"name": "Second Chargeback detected",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:dispute @evt.name:SECOND_CHARGEBACK\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}\nSecond chargeback refers to an alert from Adyen indicating that the issuer declined the defense, or Adyen accepted their pre-arbitration case. Defense documents can not be uploaded as this is the final stage.\n\nA second chargeback has been initiated for pspReference {{log.attributes.pspReference}}. Please take necessary action accordingly.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:dispute"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}

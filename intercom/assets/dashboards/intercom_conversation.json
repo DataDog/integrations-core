@@ -1,0 +1,1650 @@
+{
+    "title": "Intercom Conversation",
+    "description": "This dashboard provides a comprehensive view of conversation metrics, tracking total conversations, unique ids, and AI-driven interactions. It covers user engagement with read, unread, and priority conversations, and monitors admin participation.",
+    "widgets": [
+        {
+            "id": 6225288685694040,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn.bfldr.com/OLAMIFTW/at/8j935ttmptgxs72twq8zk36f/Intercom_Logo_Lockup_Black.png?auto=webp&format=png",
+                "url_dark_theme": "https://cdn.bfldr.com/OLAMIFTW/at/tc9zfv2f3gc6bc8n9qh47gf/Intercom_Logo_Lockup_White.png?auto=webp&format=png",
+                "sizing": "contain",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        {
+            "id": 2170603558098884,
+            "definition": {
+                "type": "note",
+                "content": "**Overview**\n\nThis dashboard provides a concise view of conversations, with Overview covering total and AI-driven interactions, Status insights, Rating and Remarks for user feedback, Breakdown by attributes, and Logs for conversation history.\n\nFor more information, see the [Intercom Integration Documentation](https://docs.datadoghq.com/integrations/intercom/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 3
+            }
+        },
+        {
+            "id": 5185798468740536,
+            "definition": {
+                "title": "Conversation Overview",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3010091770766660,
+                        "definition": {
+                            "title": "Total Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#f2e5ff"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2356000820604452,
+                        "definition": {
+                            "title": "Inbound Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.user.created $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2517373666557558,
+                        "definition": {
+                            "title": "Conversations with AI Agent Participation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @data.item.ai_agent_participated:true $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8589586015163576,
+                        "definition": {
+                            "title": "Outbound Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2 - query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.* $AppId"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.user.created $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1483094321953550,
+                        "definition": {
+                            "title": "Conversations with Copilot Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @data.item.custom_attributes.copilot_used:true $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 3369276352580868,
+            "definition": {
+                "title": "Conversation Status",
+                "background_color": "vivid_yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 804864477250522,
+                        "definition": {
+                            "title": "Priority Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @data.item.priority:priority $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#ffcccc"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1684566877105766,
+                        "definition": {
+                            "title": "Conversations Replied by Admin",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.admin.replied $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3691821778471824,
+                        "definition": {
+                            "title": "Closed Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.admin.closed $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8005267547192310,
+                        "definition": {
+                            "title": "Snoozed/Unsnoozed Conversation Logs over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Snoozed Conversations",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Unsnoozed Conversations",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.admin.snoozed $AppId"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.admin.unsnoozed $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 2302411052359286,
+            "definition": {
+                "title": "Conversation Rating & Remarks",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6890963303419340,
+                        "definition": {
+                            "title": "Conversation Rating Distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.item.conversation_rating.rating",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "1"
+                                                },
+                                                "palette": "black_on_light_red",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "2"
+                                                },
+                                                "palette": "black_on_light_red",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★ ★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "3"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★ ★ ★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "4"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★ ★ ★ ★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "5"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★ ★ ★ ★ ★"
+                                                }
+                                            }
+                                        ]
+                                    ],
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "type": "group",
+                                                "name": "@data.item.conversation_rating.rating",
+                                                "order": "asc"
+                                            }
+                                        ],
+                                        "count": 5
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 727075484298512,
+                        "definition": {
+                            "title": "Rated Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.rating.added $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4222323143179672,
+                        "definition": {
+                            "title": "Non-Rated Conversations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.rating.added $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2644610456165382,
+                        "definition": {
+                            "title": "Conversation Remarks",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.email",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@data.item.conversation_rating.remark",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@data.item.conversation_rating.rating",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@data.item.id",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [
+                                        [],
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "1"
+                                                },
+                                                "palette": "black_on_light_red",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "2"
+                                                },
+                                                "palette": "black_on_light_red",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "3"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★★★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "4"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★★★★"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "5"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "★★★★★"
+                                                }
+                                            }
+                                        ]
+                                    ],
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "type": "group",
+                                                "name": "@data.item.conversation_rating.remark",
+                                                "order": "asc"
+                                            }
+                                        ],
+                                        "count": 10000
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 7011236923287130,
+            "definition": {
+                "title": "Conversation Breakdown",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 470995113993354,
+                        "definition": {
+                            "title": "Conversation by Author Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.item.source.author.type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3347971102226882,
+                        "definition": {
+                            "title": "Conversation by Source Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.item.source.type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5247675630366102,
+                        "definition": {
+                            "title": "Conversation Closed by Teammates",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.item.conversation_parts.conversation_parts.author.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@data.item.conversation_parts.conversation_parts.author.type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation @topic:conversation.admin.closed $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8192531077964338,
+                        "definition": {
+                            "title": "Conversation by URL",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.item.first_contact_reply.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3784662998260552,
+                        "definition": {
+                            "title": "Conversation by Delivery",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.item.source.delivered_as",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 5,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6224197028924524,
+                        "definition": {
+                            "title": "Conversation by Email",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@data.item.source.id"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.email",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@data.item.source.id"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId -@usr.email:\"\""
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 8,
+                            "width": 7,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 12,
+                "height": 13
+            }
+        },
+        {
+            "id": 1078813600796590,
+            "definition": {
+                "title": "Conversation Logs",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1731470464403416,
+                        "definition": {
+                            "title": "Conversation Logs over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Conversations",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:intercom service:conversation $AppId"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1124979554619552,
+                        "definition": {
+                            "title": "Conversation Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:intercom service:conversation $AppId ",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 37,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 638964396789664,
+            "definition": {
+                "title": "Monitors Summary",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4113001593727152,
+                        "definition": {
+                            "title": "Conversation Monitors Summary",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(source:intercom AND service:conversation)",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 46,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "AppId",
+            "prefix": "@app_id",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

@@ -28,7 +28,7 @@ def test_check_mock_keda_openmetrics(dd_run_check, instance, aggregator, mock_ht
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match='The setting `openmetrics_endpoint` is required',
+        match='\nopenmetrics_endpoint\n  Field required',
     ):
         check = KedaCheck('keda', {}, [{}])
         dd_run_check(check)

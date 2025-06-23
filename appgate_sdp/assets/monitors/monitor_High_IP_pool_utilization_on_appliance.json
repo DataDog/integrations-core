@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2025-04-02",
+	"last_updated_at": "2025-04-02",
+	"title": "High IP pool utilization on appliance",
+	"description": "The IP pool utilization is too high",
+	"definition": {
+		"id": 168105524,
+		"name": "High IP pool utilization on appliance",
+		"type": "query alert",
+		"query": "avg(last_5m):(avg:appgate.ctr_ip_pool{usage:current} by {name,appliance_name,collective_name,func,site_name} + avg:appgate.ctr_ip_pool{usage:reserved} by {name,appliance_name,collective_name,site_name,func}) / avg:appgate.ctr_ip_pool{usage:total} by {name,appliance_name,collective_name,site_name,func} * 100 > 90",
+		"message": "Appliance: {{appliance_name.name}} \nHigh IP pool utilization on appliance",
+		"tags": [
+			"integration:appgate_sdp"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 90,
+				"warning": 75
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {},
+			"on_missing_data": "default"
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:appgate-sdp"
+	]
+}

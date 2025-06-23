@@ -75,7 +75,7 @@
                         "id": 4528647613111842,
                         "definition": {
                             "type": "note",
-                            "content": "Here you can see an overview of your LLM of your system activity and any NIM alerts. The service checks on the left speak to the health of your NVIDIA NIM environment, while the ones on the right report on the readiness of your dependencies.\n",
+                            "content": "This integration is currently in Preview. Its availability is subject to change in the future. \n\nHere you can see an overview of your LLM of your system activity and any NIM alerts. The service checks on the left speak to the health of your NVIDIA NIM environment, and the checks on the right report on the readiness of your dependencies.",
                             "background_color": "green",
                             "font_size": "14",
                             "text_align": "center",

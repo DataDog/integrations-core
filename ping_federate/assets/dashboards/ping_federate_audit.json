@@ -35,7 +35,7 @@
       "prefix": "@ping_federate.transaction.role"
     }
   ],
-  "title": "PingFederate - Audit Overview",
+  "title": "PingFederate - Audit",
   "widgets": [
     {
       "definition": {
@@ -45,8 +45,8 @@
         "margin": "md",
         "sizing": "contain",
         "type": "image",
-        "url": "https://support.pingidentity.com/s/sfsites/c/sfc/servlet.shepherd/version/download/0688Z00000QVi33QAD",
-        "url_dark_theme": "",
+        "url": "https://allvectorlogo.com/img/2016/06/pingfederate-logo.png",
+        "url_dark_theme": "https://allvectorlogo.com/img/2016/06/pingfederate-logo.png",
         "vertical_align": "center"
       },
       "id": 1462463458386846,

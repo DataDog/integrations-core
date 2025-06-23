@@ -11,14 +11,30 @@ The Cisco Secure Email Threat Defense integration provides out-of-the-box dashbo
 
 ## Setup
 
-### Configuration
+### Generate API credentials in Cisco Secure Email Threat Defense
 
-1. Log in to the Cisco Secure Email Threat Defense UI.
+1. Log into the Cisco Secure Email Threat Defense UI.
 2. Navigate to **Administration** and select the **API Clients** tab.
 3. Click on **Add New Client**.
 4. Enter a **Client Name** and an optional description.
 5. Click on **Submit**. This generates your **Client ID** and **Client Password**.
 6. Retrieve the API key from the **API Key** section.
+
+### Connect your Cisco Secure Email Threat Defense Account to Datadog
+
+1. Add your Cisco Secure Email Threat Defense credentials
+
+    | Parameters | Description |
+    | ---------- | ----------- |
+    | Host Name | Host name is based on the region where your Cisco Secure Email Threat Defense server is located. For details, please reach out to your system administrator. |
+    | Client ID | Client ID from Cisco Secure Email Threat Defense account. |
+    | Client Password | Client password from your Cisco Secure Email Threat Defense account. |
+    | API Key | API key from your Cisco Secure Email Threat Defense account. |
+    | Verdict Delay | Events are fetched with a delay according to the time (in minutes) specified in the Verdict Delay. |
+
+
+2. Click the **Save** button to save your settings.
+
 
 ## Data Collected
 

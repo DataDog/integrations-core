@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "High number of failed captures detected",
+	"description": "Failed captures occur when authorized funds cannot be collected, often due to issues with the payment method or card issuer. This monitor tracks capture failures to ensure prompt action and prevent disruptions in transaction processing.",
+	"definition": {
+		"id": 154605619,
+		"name": "High number of failed captures detected",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false\").index(\"*\").rollup(\"cardinality\", \"@pspReference\").last(\"1d\") > 10",
+		"message": "{{#is_alert}}Failed capture refers to a transaction for which the funds that were authorized could not be successfully taken from the customer's account, typically due to issues with the payment method or card issuer.\n\nImmediate attention is required to resolve the issue and ensure the transaction completes successfully.{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:transaction"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}

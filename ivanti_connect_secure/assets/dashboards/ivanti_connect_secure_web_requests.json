@@ -1,0 +1,2123 @@
+{
+    "title": "Ivanti Connect Secure - Web Requests",
+    "description": "- This dashboard offers real-time insights into web traffic, request performance, and security.",
+    "widgets": [
+        {
+            "id": 3098264915522038,
+            "definition": {
+                "type": "image",
+                "url": "https://static.ivanti.com/sites/marketing/media/images/logos/ivanti-logo-red.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 495983273354694,
+            "definition": {
+                "type": "note",
+                "content": "This dashboard provides detailed insights into web traffic and and request performance allowing administrators to monitor the efficiency of web-based services. \n\nThis holistic overview ensures seamless monitoring of web requests, system performance, and security.\n\nFor more information, see the [Ivanti Connect Secure Integration Documentation](https://docs.datadoghq.com/integrations/ivanti_connect_secure).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 8184424141356950,
+            "definition": {
+                "title": "Overview",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7891400334881222,
+                        "definition": {
+                            "title": "Total Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e7e7e7"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8702748035003160,
+                        "definition": {
+                            "title": "Web Requests Logs over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Web Requests",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@sev_string",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "order_by": "values",
+                                        "color_order": "monotonic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3274263286625714,
+                        "definition": {
+                            "title": "Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:ivanti-connect-secure service:WEB $User-Name $Client-IP $Severity",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 1346757977294856,
+            "definition": {
+                "title": "Completed Web Requests",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5146917433044620,
+                        "definition": {
+                            "title": "Bytes Transferred to Client",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6775190727522570,
+                        "definition": {
+                            "title": "Bytes Transferred over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bytes Received",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Bytes Sent",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3915996048937024,
+                        "definition": {
+                            "title": "Bytes Transferred to Server",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8631073122782398,
+                        "definition": {
+                            "title": "Avg. Time to Complete Request",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@ivanti_connect_secure.time_taken"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#aac4ee"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 624094248567906,
+                        "definition": {
+                            "title": "Top 10 HTTP Status Categories by Status Code",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.status_category",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.status_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8610000416714176,
+                        "definition": {
+                            "title": "Top 10 Source IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5853307673142186,
+                        "definition": {
+                            "title": "Top 10 Users",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5796036850516612,
+                        "definition": {
+                            "title": "Top 10 URL Accessed",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1567011495370008,
+                        "definition": {
+                            "title": "Distribution of Web Requests Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB20174 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.method",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 11,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 12,
+                "height": 16
+            }
+        },
+        {
+            "id": 5562721714976786,
+            "definition": {
+                "title": "Failed Web Requests",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1520006953467994,
+                        "definition": {
+                            "title": "Top 10 Source IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB30441 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2335292804712816,
+                        "definition": {
+                            "title": "Top 10 URLs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB30441 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2650647154121712,
+                        "definition": {
+                            "title": "Top 10 Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB30441 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2026695412688908,
+                        "definition": {
+                            "title": "Top 10 Web Request Failure Reasons",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB30441 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1072034159647484,
+                        "definition": {
+                            "title": "Failed Web Requests Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:WEB30441 $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Failed Web Requests",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 12,
+                "height": 13
+            }
+        },
+        {
+            "id": 4294235843261072,
+            "definition": {
+                "title": "Blocked Web Requests",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5957451149511586,
+                        "definition": {
+                            "title": "Top 10 Source IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20172 OR WEB23290 OR WEB30439 OR WEB20900 OR WEB20907) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4199997968602876,
+                        "definition": {
+                            "title": "Top 10 URLs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20172 OR WEB23290 OR WEB30439 OR WEB20900 OR WEB20907) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6427914576923036,
+                        "definition": {
+                            "title": "Top 10 Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20172 OR WEB23290 OR WEB30439 OR WEB20900 OR WEB20907) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3521285468371178,
+                        "definition": {
+                            "title": "Distribution of Events by Reason",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20172 OR WEB23290 OR WEB30439 OR WEB20900 OR WEB20907) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1896965215288960,
+                        "definition": {
+                            "title": "Blocked Requests by Region",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20172 OR WEB23290 OR WEB30439 OR WEB20900 OR WEB20907) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "palette": "YlOrRd",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3363820052396604,
+                        "definition": {
+                            "title": "Blocked Web Requests Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20172 OR WEB23290 OR WEB30439 OR WEB20900 OR WEB20907) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Blocked Web Requests",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 40,
+                "width": 12,
+                "height": 17
+            }
+        },
+        {
+            "id": 3683897892036274,
+            "definition": {
+                "title": "Denied Web Requests",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6222284302605338,
+                        "definition": {
+                            "title": "Top 10 Source IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20171 OR WEB20899 OR WEB20906) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1584671496933226,
+                        "definition": {
+                            "title": "Top 10 URLs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20171 OR WEB20899 OR WEB20906) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2669932105395980,
+                        "definition": {
+                            "title": "Top 10 Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20171 OR WEB20899 OR WEB20906) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1523396446164258,
+                        "definition": {
+                            "title": "Denied Web Requests Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20171 OR WEB20899 OR WEB20906) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Denied Web Requests",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1699338616894124,
+                        "definition": {
+                            "title": "Denied Requests by Region",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:ivanti-connect-secure service:WEB @message_id:(WEB20171 OR WEB20899 OR WEB20906) $User-Name $Client-IP $Severity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "palette": "YlOrRd",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 57,
+                "width": 12,
+                "height": 13
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "User-Name",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Client-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Severity",
+            "prefix": "@sev_string",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

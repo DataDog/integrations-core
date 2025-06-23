@@ -4,9 +4,9 @@
 
 from __future__ import division
 
-import copy
 import time
 from collections import defaultdict
+from string import Template
 
 from cachetools import TTLCache
 
@@ -14,9 +14,12 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
+    TagManager,
     default_json_event_encoding,
-    resolve_db_host,
     tracked_query,
+)
+from datadog_checks.base.utils.db.utils import (
+    resolve_db_host as agent_host_resolver,
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -41,6 +44,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
+    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
     SQLServerXESessionMetrics,
 )
@@ -50,6 +54,7 @@ from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
+from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 try:
     import datadog_agent
@@ -63,12 +68,12 @@ from datadog_checks.sqlserver.const import (
     AUTODISCOVERY_QUERY,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
+    AZURE_SERVER_SUFFIX,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
-    ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     INSTANCE_METRICS_NEWER_2016,
@@ -79,8 +84,11 @@ from datadog_checks.sqlserver.const import (
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
     STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_FULL_SERVERNAME,
+    STATIC_INFO_INSTANCENAME,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_RDS,
+    STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
     VALID_METRIC_TYPES,
@@ -111,12 +119,21 @@ set_default_driver_conf()
 class SQLServer(AgentCheck):
     __NAMESPACE__ = "sqlserver"
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
+
+        self.static_info_cache = TTLCache(
+            maxsize=100,
+            # cache these for a full day
+            ttl=60 * 60 * 24,
+        )
 
         self._resolved_hostname = None
         self._agent_hostname = None
         self._database_hostname = None
+        self._database_identifier = None
         self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []
@@ -124,7 +141,9 @@ class SQLServer(AgentCheck):
         self.do_check = True
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
-        self.tags = self._config.tags
+        self.cloud_metadata = self._config.cloud_metadata
+        self.tag_manager = TagManager()
+        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
         self.databases = set()
         self.autodiscovery_query = None
@@ -141,11 +160,9 @@ class SQLServer(AgentCheck):
         self.agent_history = SqlserverAgentHistory(self, self._config)
         self.deadlocks = Deadlocks(self, self._config)
 
-        self.static_info_cache = TTLCache(
-            maxsize=100,
-            # cache these for a full day
-            ttl=60 * 60 * 24,
-        )
+        # XE Session Handlers
+        self.xe_session_handlers = []
+
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
             maxsize=1,
@@ -153,12 +170,11 @@ class SQLServer(AgentCheck):
         )  # type: TTLCache
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
-        self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.load_static_information)
-        self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
+        self.check_initializations.append(self.initialize_xe_session_handlers)
 
         # Query declarations
         self._query_manager = None
@@ -167,6 +183,13 @@ class SQLServer(AgentCheck):
 
         self._schemas = Schemas(self, self._config)
 
+    def initialize_xe_session_handlers(self):
+        """Initialize the XE session handlers without starting them"""
+        # Initialize XE session handlers if not already initialized
+        if not self.xe_session_handlers:
+            self.xe_session_handlers = get_xe_session_handlers(self, self._config)
+            self.log.debug("Initialized %d XE session handlers", len(self.xe_session_handlers))
+
     def cancel(self):
         self.statement_metrics.cancel()
         self.procedure_metrics.cancel()
@@ -174,6 +197,13 @@ class SQLServer(AgentCheck):
         self.sql_metadata.cancel()
         self._schemas.cancel()
         self.deadlocks.cancel()
+
+        # Cancel all XE session handlers
+        for handler in self.xe_session_handlers:
+            try:
+                handler.cancel()
+            except Exception as e:
+                self.log.error("Error canceling XE session handler for %s: %s", handler.session_name, e)
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -189,42 +219,49 @@ class SQLServer(AgentCheck):
             )
 
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
-        tags = self.tags + (extra_tags or [])
+        tags = self.tag_manager.get_tags() + (extra_tags or [])
         return QueryExecutor(
             executor,
             self,
             queries=queries,
             tags=tags,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             track_operation_time=track_operation_time,
         )
 
-    def set_resolved_hostname_metadata(self):
-        self.set_metadata("resolved_hostname", self.resolved_hostname)
+    def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
+        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
+        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def set_resource_tags(self):
-        self.tags.append("database_hostname:{}".format(self.database_hostname))
-
-        if self._config.cloud_metadata.get("gcp") is not None:
-            self.tags.append(
-                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self._config.cloud_metadata.get("gcp")["project_id"],
-                    self._config.cloud_metadata.get("gcp")["instance_id"],
-                )
+        if self.cloud_metadata.get("gcp") is not None:
+            self.tag_manager.set_tag(
+                "dd.internal.resource:gcp_sql_database_instance",
+                "{}:{}".format(
+                    self.cloud_metadata.get("gcp")["project_id"],
+                    self.cloud_metadata.get("gcp")["instance_id"],
+                ),
+                replace=True,
             )
-        if self._config.cloud_metadata.get("aws") is not None:
-            self.tags.append(
-                "dd.internal.resource:aws_rds_instance:{}".format(
-                    self._config.cloud_metadata.get("aws")["instance_endpoint"],
-                )
+        if self.cloud_metadata.get("aws") is not None:
+            self.tag_manager.set_tag(
+                "dd.internal.resource:aws_rds_instance",
+                self.cloud_metadata.get("aws")["instance_endpoint"],
+                replace=True,
             )
-        elif AWS_RDS_HOSTNAME_SUFFIX in self._resolved_hostname:
+        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self._resolved_hostname))
-        if self._config.cloud_metadata.get("azure") is not None:
-            deployment_type = self._config.cloud_metadata.get("azure")["deployment_type"]
-            name = self._config.cloud_metadata.get("azure")["name"]
+            self.tag_manager.set_tag("dd.internal.resource:aws_rds_instance", self.resolved_hostname, replace=True)
+            self.cloud_metadata["aws"] = {
+                "instance_endpoint": self.resolved_hostname,
+            }
+        if self.cloud_metadata.get("azure") is not None:
+            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+            name = self.cloud_metadata.get("azure")["name"]
             db_instance = None
             if "sql_database" in deployment_type and self._config.dbm_enabled:
                 # azure_sql_server_database resource should be set to {fully_qualified_server_name}/{database_name}
@@ -235,69 +272,101 @@ class SQLServer(AgentCheck):
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
                 if "azure_sql_server_database" in r_type and db_instance:
-                    self.tags.append("dd.internal.resource:{}:{}".format(r_type, db_instance))
+                    self.tag_manager.set_tag(
+                        "dd.internal.resource:{}".format(r_type), "{}".format(db_instance), replace=True
+                    )
                 else:
-                    self.tags.append("dd.internal.resource:{}:{}".format(r_type, name))
+                    self.tag_manager.set_tag("dd.internal.resource:{}".format(r_type), "{}".format(name), replace=True)
         # finally, emit a `database_instance` resource for this instance
-        self.tags.append(
-            "dd.internal.resource:database_instance:{}".format(
-                self._resolved_hostname,
-            )
+        self.tag_manager.set_tag(
+            "dd.internal.resource:database_instance",
+            self.database_identifier,
+            replace=True,
         )
 
-    def set_resolved_hostname(self):
-        # load static information cache
+    @property
+    def host_and_port(self):
+        return split_sqlserver_host_port(self.instance.get("host"))
+
+    @property
+    def host(self):
+        return self.host_and_port[0]
+
+    @property
+    def port(self):
+        return self.host_and_port[1]
+
+    def resolve_db_host(self):
+        return agent_host_resolver(self.host)
+
+    @property
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.exclude_hostname:
+            return None
+        return self.resolved_hostname
+
+    @property
+    def resolved_hostname(self):
+        # type: () -> str
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
             else:
-                host, _ = split_sqlserver_host_port(self.instance.get("host"))
-                self._resolved_hostname = resolve_db_host(host)
-                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-                if engine_edition == ENGINE_EDITION_SQL_DATABASE:
-                    configured_database = self.instance.get("database", None)
-                    if not configured_database:
-                        configured_database = "master"
-                        self.warning(
-                            "Missing 'database' in instance configuration."
-                            "For Azure SQL Database a non-master application database must be specified."
-                        )
-                    elif configured_database == "master":
-                        self.warning(
-                            "Wrong 'database' configured."
-                            "For Azure SQL Database a non-master application database must be specified."
-                        )
-                    azure_server_suffix = ".database.windows.net"
-                    if host.endswith(azure_server_suffix):
-                        host = host[: -len(azure_server_suffix)]
-                    # for Azure SQL Database, each database on a given "server" has isolated compute resources,
-                    # meaning that the agent is only able to see query activity for the specific database it's
-                    # connected to. For this reason, each Azure SQL database is modeled as an independent host.
-                    azure = self._config.cloud_metadata.get("azure")
-                    if azure and azure.get("aggregate_sql_databases"):
-                        # If the aggregate_sql_databases option is enabled, the agent will group all Azure SQL
-                        # databases and report them as a single database instance.
-                        self._resolved_hostname = host
-                    else:
-                        self._resolved_hostname = "{}/{}".format(host, configured_database)
-        # set resource tags to properly tag with updated hostname
-        self.set_resource_tags()
+                self._resolved_hostname = self.resolve_db_host()
+        return self._resolved_hostname
 
     @property
-    def resolved_hostname(self):
-        return self._resolved_hostname
+    def database_identifier(self):
+        # type: () -> str
+        if self._database_identifier is None:
+            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
+            # Copy self.tag_manager._tags and map values to single values instead of lists
+            tag_dict = {}
+            tags = self.tag_manager.get_tags()
+            # sort tags to ensure consistent ordering
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            tag_dict['resolved_hostname'] = self.resolved_hostname
+            tag_dict['host'] = str(self.host)
+            tag_dict['port'] = str(self.port) if self.port is not None else None
+            database = self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
+            if database is not None:
+                tag_dict['database'] = database
+            if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
+                tag_dict['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
+            if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
+                tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
+            if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
+                tag_dict['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
+            if self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME) is not None:
+                tag_dict['full_server_name'] = self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME)
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
 
     @property
     def database_hostname(self):
         # type: () -> str
         if self._database_hostname is None:
-            host, _ = split_sqlserver_host_port(self.instance.get("host"))
-            self._database_hostname = resolve_db_host(host)
+            self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
     def load_static_information(self):
         engine_edition_reloaded = False
-        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
+        expected_keys = {
+            STATIC_INFO_VERSION,
+            STATIC_INFO_MAJOR_VERSION,
+            STATIC_INFO_ENGINE_EDITION,
+            STATIC_INFO_RDS,
+            STATIC_INFO_SERVERNAME,
+            STATIC_INFO_INSTANCENAME,
+        }
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
             with self.connection.open_managed_default_connection():
@@ -321,6 +390,25 @@ class SQLServer(AgentCheck):
                                 self.log.warning("failed to parse SQL Server major version from version: %s", version)
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_SERVERNAME not in self.static_info_cache:
+                        cursor.execute("select CAST(ServerProperty('ServerName') AS VARCHAR) AS ServerName")
+                        result = cursor.fetchone()
+                        if result:
+                            full_servername = result[0]
+                            servername = full_servername.split("\\")[0]
+                            instancename = (
+                                full_servername.split("\\")[1] if len(full_servername.split("\\")) > 1 else None
+                            )
+                            self.static_info_cache[STATIC_INFO_SERVERNAME] = servername
+                            self.static_info_cache[STATIC_INFO_INSTANCENAME] = instancename
+                            self.static_info_cache[STATIC_INFO_FULL_SERVERNAME] = full_servername
+
+                            self.tag_manager.set_tag("sqlserver_servername", servername, replace=True)
+                            if instancename:
+                                self.tag_manager.set_tag("sqlserver_instancename", instancename, replace=True)
+                        else:
+                            self.log.warning("failed to load servername static information due to empty results")
+
                     if STATIC_INFO_ENGINE_EDITION not in self.static_info_cache:
                         cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
                         result = cursor.fetchone()
@@ -340,10 +428,14 @@ class SQLServer(AgentCheck):
             # after it's loaded
             if engine_edition_reloaded:
                 self._resolved_hostname = None
-            self.set_resolved_hostname()
+            # re-initialize database_identifier to ensure we take into consideration any included static information
+            self._database_identifier = None
+            # re-initialize tags dependent on database_identifier
+            self.add_core_tags()
+            self.set_resource_tags()
 
     def debug_tags(self):
-        return self.tags + ["agent_hostname:{}".format(self.agent_hostname)]
+        return self.tag_manager.get_tags() + ["agent_hostname:{}".format(self.agent_hostname)]
 
     def debug_stats_kwargs(self, tags=None):
         tags = tags if tags else []
@@ -361,6 +453,7 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
+        # Initialize the connection object once
         self.connection = Connection(
             init_config=self.init_config,
             instance_config=self.instance,
@@ -404,8 +497,7 @@ class SQLServer(AgentCheck):
         ]
         if not disable_generic_tags:
             service_check_tags.append("host:{}".format(self.resolved_hostname))
-        if self.tags is not None:
-            service_check_tags.extend(self.tags)
+        service_check_tags.extend(self.tag_manager.get_tags())
         service_check_tags = list(set(service_check_tags))
 
         if status is AgentCheck.OK:
@@ -487,7 +579,7 @@ class SQLServer(AgentCheck):
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
                 common_metrics.extend(INSTANCE_METRICS_DATABASE)
-            self._add_performance_counters(common_metrics, metrics_to_collect, self.tags, db=None)
+            self._add_performance_counters(common_metrics, metrics_to_collect, self.tag_manager.get_tags(), db=None)
 
             # populated through autodiscovery
             if self.databases:
@@ -495,7 +587,7 @@ class SQLServer(AgentCheck):
                     self._add_performance_counters(
                         INSTANCE_METRICS_DATABASE,
                         metrics_to_collect,
-                        self.tags,
+                        self.tag_manager.get_tags(),
                         db=db.name,
                         physical_database_name=db.physical_db_name,
                     )
@@ -505,7 +597,7 @@ class SQLServer(AgentCheck):
             sql_counter_type = None
             base_name = None
 
-            custom_tags = self.tags + cfg.get("tags", [])
+            custom_tags = self.tag_manager.get_tags() + cfg.get("tags", [])
             cfg["tags"] = custom_tags
 
             db_table = cfg.get("table", DEFAULT_PERFORMANCE_TABLE)
@@ -733,7 +825,7 @@ class SQLServer(AgentCheck):
             if self._query_manager is None:
                 # use QueryManager to process custom queries
                 self._query_manager = QueryManager(
-                    self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+                    self, self.execute_query_raw, tags=self.tag_manager.get_tags(), hostname=self.reported_hostname
                 )
                 self._query_manager.compile_queries()
             self._send_database_instance_metadata()
@@ -744,13 +836,20 @@ class SQLServer(AgentCheck):
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:
-                self.agent_history.run_job_loop(self.tags)
-                self.statement_metrics.run_job_loop(self.tags)
-                self.procedure_metrics.run_job_loop(self.tags)
-                self.activity.run_job_loop(self.tags)
-                self.sql_metadata.run_job_loop(self.tags)
-                self._schemas.run_job_loop(self.tags)
-                self.deadlocks.run_job_loop(self.tags)
+                self.agent_history.run_job_loop(self.tag_manager.get_tags())
+                self.statement_metrics.run_job_loop(self.tag_manager.get_tags())
+                self.procedure_metrics.run_job_loop(self.tag_manager.get_tags())
+                self.activity.run_job_loop(self.tag_manager.get_tags())
+                self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
+                self._schemas.run_job_loop(self.tag_manager.get_tags())
+                self.deadlocks.run_job_loop(self.tag_manager.get_tags())
+
+                # Run XE session handlers
+                for handler in self.xe_session_handlers:
+                    try:
+                        handler.run_job_loop(self.tag_manager.get_tags())
+                    except Exception as e:
+                        self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
         else:
             self.log.debug("Skipping check")
 
@@ -793,6 +892,7 @@ class SQLServer(AgentCheck):
             SqlserverIndexUsageMetrics,
             SqlserverDBFragmentationMetrics,
             SqlserverDatabaseFilesMetrics,
+            SqlserverTableSizeMetrics,
         ]
 
     @property
@@ -927,7 +1027,7 @@ class SQLServer(AgentCheck):
 
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
-                    tags.extend(self.tags)
+                    tags.extend(self.tag_manager.get_tags())
 
                     if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
@@ -966,9 +1066,10 @@ class SQLServer(AgentCheck):
         return should_run
 
     def _send_database_instance_metadata(self):
-        if self.resolved_hostname not in self._database_instance_emitted:
+        if self.database_identifier not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self.reported_hostname,
+                "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
@@ -979,13 +1080,13 @@ class SQLServer(AgentCheck):
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 ),
                 "integration_version": __version__,
-                "tags": self.non_internal_tags,
+                "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.connection_host,
                 },
             }
-            self._database_instance_emitted[self.resolved_hostname] = event
+            self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

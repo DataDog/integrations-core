@@ -10,11 +10,20 @@ METRIC_MAP = {
     'DCGM_FI_DEV_FB_USED': 'frame_buffer.used',
     'DCGM_FI_DEV_GPU_TEMP': 'temperature',
     'DCGM_FI_DEV_GPU_UTIL': 'gpu_utilization',
-    'DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL': 'nvlink_bandwidth',
-    'DCGM_FI_DEV_PCIE_REPLAY_COUNTER': 'pcie_replay',  # becomes pcie_replay.count
+    'DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL': {
+        'name': 'nvlink_bandwidth',
+        'type': 'counter_gauge',
+    },  # becomes nvlink_bandwidth.total and nvlink_bandwidth.count
+    'DCGM_FI_DEV_PCIE_REPLAY_COUNTER': {
+        'name': 'pcie_replay',
+        'type': 'counter_gauge',
+    },  # becomes pcie_replay.total and pcie_replay.count
     'DCGM_FI_DEV_POWER_USAGE': 'power_usage',
     'DCGM_FI_DEV_SM_CLOCK': 'sm_clock',
-    'DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION': 'total_energy_consumption',
+    'DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION': {
+        'name': 'total_energy_consumption',
+        'type': 'counter_gauge',
+    },  # becomes total_energy_consumption.total and total_energy_consumption.count
     'DCGM_FI_DEV_VGPU_LICENSE_STATUS': 'vgpu_license_status',
     'DCGM_FI_DEV_XID_ERRORS': 'xid_errors',
     # Metrics related to memory get grouped together because there are more of them available.
@@ -22,14 +31,26 @@ METRIC_MAP = {
     'DCGM_FI_DEV_MEM_COPY_UTIL': 'mem.copy_utilization',
     'DCGM_FI_DEV_MEMORY_TEMP': 'mem.temperature',
     # NVML Specific Missing Metrics (5)
-    'DCGM_FI_DEV_COUNT': 'device',  # becomes device.count
+    'DCGM_FI_DEV_COUNT': {
+        'name': 'device',
+        'type': 'counter_gauge',
+    },  # becomes device.total and device.count
     'DCGM_FI_DEV_FAN_SPEED': 'fan_speed',
-    'DCGM_FI_PROF_PCIE_RX_BYTES': 'pcie_rx_throughput',
-    'DCGM_FI_PROF_PCIE_TX_BYTES': 'pcie_tx_throughput',
+    'DCGM_FI_PROF_PCIE_RX_BYTES': {
+        'name': 'pcie_rx_throughput',
+        'type': 'counter_gauge',
+    },
+    'DCGM_FI_PROF_PCIE_TX_BYTES': {
+        'name': 'pcie_tx_throughput',
+        'type': 'counter_gauge',
+    },  # becomes pcie_tx_throughput.total and pcie_tx_throughput.count
     # Others from default-counters.csv
     'DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS': 'correctable_remapped_rows',
     'DCGM_FI_DEV_ROW_REMAP_FAILURE': 'row_remap_failure',
-    'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': 'uncorrectable_remapped_rows',
+    'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': {
+        'name': 'uncorrectable_remapped_rows',
+        'type': 'counter_gauge',
+    },  # becomes uncorrectable_remapped_rows.total and uncorrectable_remapped_rows.count
     # More recommended metrics
     'DCGM_FI_DEV_CLOCK_THROTTLE_REASONS': 'clock_throttle_reasons',
     'DCGM_FI_DEV_FB_RESERVED': 'frame_buffer.reserved',

@@ -1,0 +1,2237 @@
+{
+    "title": "Delinea Privilege Manager - Application Control Events",
+    "description": "The Delinea Privilege Manager Application Control Events dashboard provides detailed insights into the following types of events:\n\n-   **Application Action Events** : Application Action Events contain generic information about the application that ran, the policy that was triggered, the date and time stamp, the computer, and the user.\n-   **Application Justification Events** : Application Justification Events are generated when an application requiring a justification workflow is run by a user.\n-   **Bad Rated Application Action Events** : Bad Rated Application Action Events are generated when an application with a poor security rating is being installed or is executed.",
+    "widgets": [
+        {
+            "id": 5805681002203506,
+            "definition": {
+                "type": "image",
+                "url": "https://delinea.com/hubfs/Delinea/images/delinea-image-product-privilege-manager.jpeg",
+                "sizing": "contain",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 5261924818440508,
+            "definition": {
+                "type": "note",
+                "content": "\n\n**Dashboard Overview**\n\nThe Delinea Privilege Manager Application Control Events dashboard provides detailed insights into following types of events:\n  - **Application Action Events** : Application Action Events contain generic information about the application that ran, the policy that was triggered, the date and time stamp, the computer, and the user.\n  - **Application Justification Events** : Application Justification Events are generated when an application requiring a justification workflow is run by a user.\n  - **Bad Rated Application Action Events** : Bad Rated Application Action Events are generated when an application with a poor security rating is being installed or is executed.\n  For more information, see the [Delinea Privilege Manager Integration Documentation](https://docs.datadoghq.com/integrations/delinea_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8000520579904328,
+            "definition": {
+                "title": "Application Action Events",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1680728472512232,
+                        "definition": {
+                            "title": "Total Application Action Events Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3978356191401414,
+                        "definition": {
+                            "title": "Application Action Events Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4234220604384730,
+                        "definition": {
+                            "title": "Top 10 Hosts with Application Action Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@syslog.hostname",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1579242523653068,
+                        "definition": {
+                            "title": "Top 10 Computers with Application Action Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ComputerName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6211716633277990,
+                        "definition": {
+                            "title": "Top 10 Users with Application Action Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8613243818401374,
+                        "definition": {
+                            "title": "Top 10 Applications with Application Path",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@FilePath",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6659570408405280,
+                        "definition": {
+                            "title": "Events Distribution By Policy Name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@PolicyName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6292698592173982,
+                        "definition": {
+                            "title": "Top 10 Applications Rated as Bad by VirusTotal",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events @SecurityRatingSystemName:\"VirusTotal Rating System\" @Rating:Bad $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2266836176482180,
+                        "definition": {
+                            "title": "Top 10 Applications Rated as Suspicious by VirusTotal",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events @SecurityRatingSystemName:\"VirusTotal Rating System\" @Rating:Suspicious $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 24,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1125624564493702,
+                        "definition": {
+                            "title": "Application Action Events by VirusTotal Rating",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-action-events @SecurityRatingSystemName:\"VirusTotal Rating System\" $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@Rating",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 28,
+                            "width": 12,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 3857506494166094,
+                        "definition": {
+                            "title": "Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:delinea-privilege-manager service:application-action-events $ComputerName $UserName $HostName",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@ComputerName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@FileName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@PolicyName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@log_message",
+                                            "width": "compact"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 33,
+                            "width": 12,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 1
+            }
+        },
+        {
+            "id": 7405800016622172,
+            "definition": {
+                "title": "Application Justification Events",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4750437022694470,
+                        "definition": {
+                            "title": "Total Application Justification Events Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7234026942855210,
+                        "definition": {
+                            "title": "Application Justification Events Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5316682962736354,
+                        "definition": {
+                            "title": "Top 10 Computers With Application Justification Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ComputerName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5549866307505560,
+                        "definition": {
+                            "title": "Top 10 Users with Application Justification Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3699826946762658,
+                        "definition": {
+                            "title": "Latest User Activity with Justification Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@EventReceivedByServer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@UserReason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [],
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "type": "group",
+                                                "name": "@EventReceivedByServer",
+                                                "order": "desc"
+                                            }
+                                        ],
+                                        "count": 1000
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 623835523520988,
+                        "definition": {
+                            "title": "Top 10 Applications with Application Path",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@FilePath",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1233282339612600,
+                        "definition": {
+                            "title": "Events Distribution By Policy Name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@PolicyName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2128286448385846,
+                        "definition": {
+                            "title": "Top 10 Applications Rated as Bad by VirusTotal in Application Justification Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events @SecurityRatingSystemName:\"VirusTotal Rating System\" @Rating:Bad $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6230783234740508,
+                        "definition": {
+                            "title": "Top 10 Applications Rated as Suspicious by VirusTotal in Application Justification Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events @SecurityRatingSystemName:\"VirusTotal Rating System\" @Rating:Suspicious $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 24,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6799105311539144,
+                        "definition": {
+                            "title": "Application Justification Events by VirusTotal Rating",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:application-justification-events @SecurityRatingSystemName:\"VirusTotal Rating System\" $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@Rating",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 28,
+                            "width": 12,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 2287586601840700,
+                        "definition": {
+                            "title": "Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:delinea-privilege-manager service:application-justification-events $ComputerName $UserName $HostName",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@ComputerName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@FileName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@UserReason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@PolicyName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@log_message",
+                                            "width": "compact"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 33,
+                            "width": 12,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 1
+            }
+        },
+        {
+            "id": 1445873648767964,
+            "definition": {
+                "title": "Bad Rated Application Action Events",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2278531857579572,
+                        "definition": {
+                            "title": "Total Bad Rated Application Action Events Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2812722702645852,
+                        "definition": {
+                            "title": "Bad Rated Application Action Events Level Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1569018274838258,
+                        "definition": {
+                            "title": "Top 10 Users Engaging with Bad Rated Application",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6322630822369028,
+                        "definition": {
+                            "title": "Top 10 Computers Involved with Bad Rated Application",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ComputerName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6219501540208000,
+                        "definition": {
+                            "title": "Top 10 Bad Rated Applications",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 755382794633804,
+                        "definition": {
+                            "title": "Events Distribution By Policy Name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@PolicyName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "EVENTS COUNT",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2740815455877820,
+                        "definition": {
+                            "title": "Top 10 Applications Rated as Bad by VirusTotal",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events @SecurityRatingSystemName:\"VirusTotal Rating System\" @Rating:Bad $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@FileName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 900484043967686,
+                        "definition": {
+                            "title": "Bad Rated Application Action Events by Rating System and Rating",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:delinea-privilege-manager service:bad-rated-application-action-events @Rating:* $ComputerName $UserName $HostName"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@SecurityRatingSystemName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@Rating",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 12,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 1082378330939218,
+                        "definition": {
+                            "title": "Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:delinea-privilege-manager service:bad-rated-application-action-events $ComputerName $UserName $HostName",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@ComputerName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@FileName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@SecurityRatingSystemName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@Rating",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@PolicyName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@log_message",
+                                            "width": "compact"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 25,
+                            "width": 12,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 1,
+                "is_column_break": true
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "ComputerName",
+            "prefix": "@ComputerName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "UserName",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "HostName",
+            "prefix": "@syslog.hostname",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

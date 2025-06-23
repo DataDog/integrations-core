@@ -27,7 +27,9 @@ class ReplicationOpLogCollector(MongoCollector):
 
     def _get_oplog_size(self, api, oplog_collection_name):
         try:
-            oplog_storage_stats = api.get_collection_stats("local", oplog_collection_name, stats=["storageStats"])[0]
+            oplog_storage_stats = list(
+                api.get_collection_stats("local", oplog_collection_name, stats=["storageStats"])
+            )[0]
         except pymongo.errors.OperationFailure as e:
             self.log.warning(
                 "Could not collect oplog used size for collection %s: %s", oplog_collection_name, e.details
@@ -68,8 +70,16 @@ class ReplicationOpLogCollector(MongoCollector):
                 if oplog_data_size is not None:
                     oplog_data['usedSizeMB'] = round_value(oplog_data_size / 2.0**20, 2)
 
-                op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)
-                op_dsc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.DESCENDING).limit(1)
+                op_asc_cursor = (
+                    oplog.find({"ts": {"$exists": 1}}, max_time_ms=api._timeout)
+                    .sort("$natural", pymongo.ASCENDING)
+                    .limit(1)
+                )
+                op_dsc_cursor = (
+                    oplog.find({"ts": {"$exists": 1}}, max_time_ms=api._timeout)
+                    .sort("$natural", pymongo.DESCENDING)
+                    .limit(1)
+                )
 
                 try:
                     first_timestamp = op_asc_cursor[0]['ts'].as_datetime()

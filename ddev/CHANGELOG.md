@@ -2,6 +2,55 @@
 
 <!-- towncrier release notes start -->
 
+## 11.4.0 / 2025-05-27
+
+***Added***:
+
+* Allow ddev to override configuration values from a local .ddev.toml file found either in the local directory or any parent directory. This allows modifying ddev behavior when running it in different directories. ([#19877](https://github.com/DataDog/integrations-core/pull/19877))
+* Added new commands to track and analyze size changes in integrations and dependencies:
+  - **`ddev size status`**: Shows current sizes of all modules.
+  - **`ddev size diff [COMMIT_BEFORE] [COMMIT_AFTER]`**: Compares size changes between two commits.
+  - **`ddev size timeline {integration | dependency} [INTEGRATION_NAME/DEPENDENCY_NAME]`**: Visualizes the size evolution of a module over time. ([#20128](https://github.com/DataDog/integrations-core/pull/20128))
+* Add ZillizCloud requested metric units ([#20195](https://github.com/DataDog/integrations-core/pull/20195))
+* Bump datadog-checks-dev version to 35.1 ([#20370](https://github.com/DataDog/integrations-core/pull/20370))
+
+## 11.3.0 / 2025-04-30
+
+***Added***:
+
+* Add support for license-expression when retrieving licenses from PyPi ([#20117](https://github.com/DataDog/integrations-core/pull/20117))
+
+***Fixed***:
+
+* Diasble tag signing in unit tests for release agent CLI command ([#19971](https://github.com/DataDog/integrations-core/pull/19971))
+
+## 11.2.0 / 2025-02-26
+
+***Added***:
+
+* Update version spec for datadog_checks_dev. This adds the new tls_ciphers configuration field and some fixes. ([#19720](https://github.com/DataDog/integrations-core/pull/19720))
+
+***Fixed***:
+
+* Validation error for unknown licenses says how to fix the validation. ([#19566](https://github.com/DataDog/integrations-core/pull/19566))
+* Recreate release branch if it already exists. ([#19670](https://github.com/DataDog/integrations-core/pull/19670))
+
+## 11.1.0 / 2025-01-21
+
+***Security***:
+
+* Add FIPS switch ([#19179](https://github.com/DataDog/integrations-core/pull/19179))
+
+***Added***:
+
+* First version of helper for creating logs saved views. ([#17353](https://github.com/DataDog/integrations-core/pull/17353))
+* Add script to convert monitor export json into the JSON we can use ([#17936](https://github.com/DataDog/integrations-core/pull/17936))
+* Add decimal/binary specific byte units ([#19252](https://github.com/DataDog/integrations-core/pull/19252))
+
+***Fixed***:
+
+* Stop generating Python 2 markers for dependency updates. ([#19386](https://github.com/DataDog/integrations-core/pull/19386))
+
 ## 11.0.0 / 2024-12-09
 
 ***Removed***:

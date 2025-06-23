@@ -2,6 +2,36 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 4.4.0 / 2025-04-17 / Agent 7.66.0
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+## 4.3.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+
+## 4.2.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 4.1.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

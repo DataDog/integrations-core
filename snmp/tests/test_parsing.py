@@ -51,7 +51,7 @@ def test_parse_index_transform_ok_cases(index_transform, expected_rules):
         index_transform
     )
 
-    results = parse_metrics(yaml.load(metrics), resolver=mock.MagicMock(), logger=logger, bulk_threshold=10)
+    results = parse_metrics(yaml.safe_load(metrics), resolver=mock.MagicMock(), logger=logger, bulk_threshold=10)
     actual_transform_rules = results['parsed_metrics'][0].column_tags[0].index_slices
     assert actual_transform_rules == expected_rules
 
@@ -102,5 +102,5 @@ def test_parse_index_transform_config_error(index_transform, error_msg):
     )
 
     with pytest.raises(ConfigurationError) as e:
-        parse_metrics(yaml.load(metrics), resolver=mock.MagicMock(), logger=logger, bulk_threshold=10)
+        parse_metrics(yaml.safe_load(metrics), resolver=mock.MagicMock(), logger=logger, bulk_threshold=10)
     assert error_msg in str(e.value)

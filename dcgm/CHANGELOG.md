@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 3.3.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Add the gauge/total version of some monotonic counter metrics ([#19459](https://github.com/DataDog/integrations-core/pull/19459))
+
+## 3.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
 ## 3.1.0 / 2024-10-04 / Agent 7.59.0
 
 * Align OMv2 labels with Kubernetes agent tags ([#18654](https://github.com/DataDog/integrations-core/pull/18654))

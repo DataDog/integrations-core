@@ -12,9 +12,8 @@
     "name": "[Teradata] Low number of ready threads",
     "options": {
       "new_group_delay": 60,
-      "no_data_timeframe": 10,
       "notify_audit": true,
-      "notify_no_data": true,
+      "on_missing_data": "show_and_notify_no_data",
       "renotify_interval": 0,
       "require_full_window": false,
       "threshold_windows": {

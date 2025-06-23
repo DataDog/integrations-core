@@ -64,6 +64,7 @@ exclude = [
 ]
 target-version = "py311"
 line-length = 120
+namespace-packages = ["datadog_checks"]
 
 [tool.ruff.lint]
 # Rules were ported over from the legacy flake8 settings for parity
@@ -107,6 +108,9 @@ ban-relative-imports = "all"
 "**/tests/**/*" = ["S101", "TID252"]
 "datadog_checks/*/config_models/deprecations.py" = ["E501"]
 "tests/models/config_models/deprecations.py" = ["E501"]
+
+[tool.ddev]
+repo = "core"
 
 [project]
 name = "integrations-core"

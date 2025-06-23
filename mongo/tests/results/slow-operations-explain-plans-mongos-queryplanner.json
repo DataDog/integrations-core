@@ -1,0 +1,1176 @@
+[
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545338.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "test",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    }
+                },
+                "signature": "b3496d9d56ae2977"
+            },
+            "query_signature": "2e0dfc1416f51975",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"test\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "test.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "test.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 12000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            },
+            "cursor": {
+                "cursor_id": 5170666760900931828,
+                "originating_command": null,
+                "comment": null
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545521.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "test",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    }
+                },
+                "signature": "b3496d9d56ae2977"
+            },
+            "query_signature": "6f544fbdad56d0dc",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"test\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "test.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "test.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 14000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545338.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "integration",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    }
+                },
+                "signature": "b3496d9d56ae2977"
+            },
+            "query_signature": "cde36dfcce436712",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"integration\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "integration.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "integration.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 12000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            },
+            "cursor": {
+                "cursor_id": 5170666760900931828,
+                "originating_command": null,
+                "comment": null
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545521.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "integration",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    }
+                },
+                "signature": "b3496d9d56ae2977"
+            },
+            "query_signature": "d6bf9ce5ca12a12c",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"integration\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "integration.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "integration.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 14000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            }
+        }
+    }
+]

@@ -31,7 +31,13 @@ from datadog_checks.sqlserver.queries import (
     SCHEMA_QUERY,
     TABLES_IN_SCHEMA_QUERY,
 )
-from datadog_checks.sqlserver.utils import convert_to_bool, execute_query, get_list_chunks, is_azure_sql_database
+from datadog_checks.sqlserver.utils import (
+    convert_to_bool,
+    execute_query,
+    get_list_chunks,
+    is_azure_sql_database,
+    is_collation_case_insensitive,
+)
 
 
 class SubmitData:
@@ -45,8 +51,9 @@ class SubmitData:
         self.db_to_schemas = {}  # dbname : { id : schema }
         self.db_info = {}  # name to info
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version):
+    def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version):
         self._base_event["host"] = hostname
+        self._base_event["database_instance"] = database_instance
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
@@ -57,9 +64,23 @@ class SubmitData:
         self.db_to_schemas.clear()
         self.db_info.clear()
 
-    def store_db_infos(self, db_infos):
+    def store_db_infos(self, db_infos, databases):
+        dbs = set(databases)
         for db_info in db_infos:
-            self.db_info[db_info['name']] = db_info
+            case_insensitive = is_collation_case_insensitive(db_info.get('collation'))
+            db_name = db_info['name']
+            db_name_lower = db_name.lower()
+            if db_name not in dbs:
+                if db_name.lower() in dbs and case_insensitive:
+                    db_name = db_name_lower
+                else:
+                    self._log.debug(
+                        "Skipping db {} as it is not in the databases list {} or collation is case sensitive".format(
+                            db_name, dbs
+                        )
+                    )
+                    continue
+            self.db_info[db_name] = db_info
 
     def store(self, db_name, schema, tables, columns_count):
         self._columns_count += columns_count
@@ -154,8 +175,8 @@ class Schemas(DBMAsyncJob):
             "kind": "sqlserver_databases",
             "collection_interval": collection_interval,
             "dbms_version": None,
-            "tags": self._check.non_internal_tags,
-            "cloud_metadata": self._check._config.cloud_metadata,
+            "tags": self._check.tag_manager.get_tags(),
+            "cloud_metadata": self._check.cloud_metadata,
         }
         self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
 
@@ -259,6 +280,8 @@ class Schemas(DBMAsyncJob):
                         "referencing_column": str
                         "referenced_table": str
                         "referenced_column": str
+                        "delete_action": str
+                        "update_action": str
                 partitions: partition dict
                     partition
                     key/value:
@@ -266,9 +289,10 @@ class Schemas(DBMAsyncJob):
         """
         self._data_submitter.reset()
         self._data_submitter.set_base_event_data(
-            self._check.resolved_hostname,
-            self._check.non_internal_tags,
-            self._check._config.cloud_metadata,
+            self._check.reported_hostname,
+            self._check.database_identifier,
+            self._check.tag_manager.get_tags(),
+            self._check.cloud_metadata,
             "{},{}".format(
                 self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                 self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
@@ -277,7 +301,7 @@ class Schemas(DBMAsyncJob):
 
         databases = self._check.get_databases()
         db_infos = self._query_db_information(databases)
-        self._data_submitter.store_db_infos(db_infos)
+        self._data_submitter.store_db_infos(db_infos, databases)
         self._fetch_for_databases()
         self._data_submitter.submit()
         self._log.debug("Finished collect_schemas_data")
@@ -345,6 +369,8 @@ class Schemas(DBMAsyncJob):
                     "referencing_column": str
                     "referenced_table": str
                     "referenced_column": str
+                    "delete_action": str
+                    "update_action": str
             partitions: partition dict
                 partition
                 key/value:
@@ -423,7 +449,7 @@ class Schemas(DBMAsyncJob):
             foreign_key_query = FOREIGN_KEY_QUERY_PRE_2017
         rows = execute_query(foreign_key_query.format(table_ids), cursor)
         for row in rows:
-            table_id = row.pop("id", None)
+            table_id = row.pop("table_id", None)
             table_id_str = str(table_id)
             table_id_to_table_data.get(table_id_str).setdefault("foreign_keys", [])
             table_id_to_table_data.get(table_id_str)["foreign_keys"].append(row)

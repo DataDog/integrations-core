@@ -1,0 +1,9 @@
+{
+  "title": "Network Metrics",
+  "description": "[[suggested_dashboards]]",
+  "widgets": [],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

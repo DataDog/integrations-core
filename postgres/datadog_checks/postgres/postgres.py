@@ -5,6 +5,7 @@ import contextlib
 import copy
 import functools
 import os
+from string import Template
 from time import time
 
 import psycopg2
@@ -48,10 +49,13 @@ from .util import (
     FUNCTION_METRICS,
     INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
+    QUERY_PG_CONTROL_CHECKPOINT_LT_10,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
+    QUERY_PG_REPLICATION_STATS_METRICS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_METRICS,
@@ -64,6 +68,7 @@ from .util import (
     STAT_WAL_METRICS,
     SUBSCRIPTION_STATE_METRICS,
     VACUUM_PROGRESS_METRICS,
+    VACUUM_PROGRESS_METRICS_LT_17,
     WAL_FILE_METRICS,
     DatabaseConfigurationError,
     DatabaseHealthCheckError,  # noqa: F401
@@ -72,7 +77,7 @@ from .util import (
     payload_pg_version,
     warning_with_tags,
 )
-from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, VersionUtils
+from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionUtils
 
 try:
     import datadog_agent
@@ -93,9 +98,12 @@ class PostgreSql(AgentCheck):
     SERVICE_CHECK_NAME = 'postgres.can_connect'
     METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None
+        self._database_identifier = None
         self._agent_hostname = None
         self._database_hostname = None
         self._db = None
@@ -104,6 +112,7 @@ class PostgreSql(AgentCheck):
         self.system_identifier = None
         self.cluster_name = None
         self.is_aurora = None
+        self.wal_level = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
@@ -119,6 +128,7 @@ class PostgreSql(AgentCheck):
         self._config = PostgresConfig(self.instance, self.init_config, self)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
+        self.add_core_tags()
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
@@ -168,9 +178,14 @@ class PostgreSql(AgentCheck):
         )
         return discovery
 
-    def set_resource_tags(self):
+    def add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event but which require check calculations outside the config.
+        """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
+    def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -187,6 +202,9 @@ class PostgreSql(AgentCheck):
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.cloud_metadata["aws"] = {
+                "instance_endpoint": self.resolved_hostname,
+            }
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             # some `deployment_type`s map to multiple `resource_type`s
@@ -195,10 +213,11 @@ class PostgreSql(AgentCheck):
                 self.tags.append(
                     "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
                 )
-        # finally, emit a `database_instance` resource for this instance
+        # finally, tag the `database_instance` resource for this instance
+        # metrics intake will use this tag to add all the tags for the instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self.database_identifier,
             )
         )
 
@@ -208,7 +227,7 @@ class PostgreSql(AgentCheck):
             self,
             queries=queries,
             tags=self.tags_without_db,
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             track_operation_time=True,
         )
 
@@ -298,9 +317,20 @@ class PostgreSql(AgentCheck):
                     q_pg_stat_database,
                     q_pg_stat_database_conflicts,
                     QUERY_PG_UPTIME,
-                    QUERY_PG_CONTROL_CHECKPOINT,
                 ]
             )
+
+        if self.is_aurora and self.wal_level != 'logical':
+            self.log.debug("logical wal_level is required to use pg_current_wal_lsn() on Aurora")
+
+        else:
+            self.log.debug("Adding control checkpoint metrics")
+
+            if self.version >= V10:
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT)
+
+            else:
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
 
         if self.version >= V10:
             # Wal receiver is not supported on aurora
@@ -314,7 +344,8 @@ class PostgreSql(AgentCheck):
             if self._config.collect_buffercache_metrics:
                 queries.append(BUFFERCACHE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
-            queries.append(VACUUM_PROGRESS_METRICS)
+            queries.append(QUERY_PG_REPLICATION_STATS_METRICS)
+            queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
             queries.append(STAT_SUBSCRIPTION_METRICS)
 
         if self.version >= V12:
@@ -333,6 +364,7 @@ class PostgreSql(AgentCheck):
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
+            queries.append(QUERY_PG_STAT_RECOVERY_PREFETCH)
         if self.version >= V16:
             if self._config.dbm_enabled:
                 queries.append(STAT_IO_METRICS)
@@ -399,7 +431,7 @@ class PostgreSql(AgentCheck):
                 "wal_age",
                 wal_file_age,
                 tags=self.tags_without_db,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
             )
 
     def _get_local_wal_file_age(self):
@@ -453,6 +485,20 @@ class PostgreSql(AgentCheck):
             self.is_aurora = self._version_utils.is_aurora(self.db())
         return self.is_aurora
 
+    def _get_wal_level(self):
+        with self.db() as conn:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                cursor.execute('SHOW wal_level;')
+                wal_level = cursor.fetchone()[0]
+                return wal_level
+
+    @property
+    def reported_hostname(self):
+        # type: () -> str
+        if self._config.exclude_hostname:
+            return None
+        return self.resolved_hostname
+
     @property
     def resolved_hostname(self):
         # type: () -> str
@@ -462,6 +508,28 @@ class PostgreSql(AgentCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def database_identifier(self):
+        # type: () -> str
+        if self._database_identifier is None:
+            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
+            tag_dict = {}
+            tags = self.tags.copy()
+            # sort tags to ensure consistent ordering
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            tag_dict['resolved_hostname'] = self.resolved_hostname
+            tag_dict['host'] = str(self._config.host)
+            tag_dict['port'] = str(self._config.port)
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
 
     def set_resolved_hostname_metadata(self):
         """
@@ -609,7 +677,7 @@ class PostgreSql(AgentCheck):
             # Submit metrics to the Agent.
             for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
-                submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
+                submit_metric(self, name, value, tags=set(tags), hostname=self.reported_hostname)
 
                 # if relation-level metrics idx_scan or seq_scan, cache it
                 if name in ('index_scans', 'seq_scans'):
@@ -644,16 +712,19 @@ class PostgreSql(AgentCheck):
         start_time = time()
         databases = self.autodiscovery.get_items()
         for db in databases:
-            with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
-                    for scope in scopes:
-                        self._query_scope(cursor, scope, instance_tags, False, db)
+            try:
+                with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+                    with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                        for scope in scopes:
+                            self._query_scope(cursor, scope, instance_tags, False, db)
+            except Exception as e:
+                self.log.error("Error collecting metrics for database %s %s", db, str(e))
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
             f"dd.postgres.{scope_type}.time",
             elapsed_ms,
             tags=self.tags + self._get_debug_tags(),
-            hostname=self.resolved_hostname,
+            hostname=self.reported_hostname,
             raw=True,
         )
         telemetry_metric = scope_type.replace("_", "", 1)  # remove the first underscore to match telemetry convention
@@ -683,7 +754,7 @@ class PostgreSql(AgentCheck):
             self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
     def _emit_running_metric(self):
-        self.gauge("running", 1, tags=self.tags_without_db, hostname=self.resolved_hostname)
+        self.gauge("running", 1, tags=self.tags_without_db, hostname=self.reported_hostname)
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
@@ -731,10 +802,6 @@ class PostgreSql(AgentCheck):
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
 
-        replication_stats_metrics = self.metrics_cache.get_replication_stats_metrics(self.version)
-        if replication_stats_metrics:
-            metric_scope.append(replication_stats_metrics)
-
         with self.db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
@@ -743,7 +810,7 @@ class PostgreSql(AgentCheck):
                         "db.count",
                         results_len,
                         tags=self.tags_without_db,
-                        hostname=self.resolved_hostname,
+                        hostname=self.reported_hostname,
                     )
 
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
@@ -760,7 +827,7 @@ class PostgreSql(AgentCheck):
                         "checksums.enabled",
                         1,
                         tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
-                        hostname=self.resolved_hostname,
+                        hostname=self.reported_hostname,
                     )
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
@@ -802,7 +869,7 @@ class PostgreSql(AgentCheck):
             conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
-            if 'aws' in self.cloud_metadata:
+            if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
                 # if we are running on AWS, check if IAM auth is enabled
                 aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
                 if aws_managed_authentication['enabled']:
@@ -884,7 +951,7 @@ class PostgreSql(AgentCheck):
                 "dd.postgres.error",
                 1,
                 tags=self.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
 
@@ -918,10 +985,11 @@ class PostgreSql(AgentCheck):
             self.warning(warning)
 
     def _send_database_instance_metadata(self):
-        if self.resolved_hostname not in self._database_instance_emitted:
+        if self.database_identifier not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self.reported_hostname,
                 "port": self._config.port,
+                "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
@@ -937,7 +1005,7 @@ class PostgreSql(AgentCheck):
                     "connection_host": self._config.host,
                 },
             }
-            self._database_instance_emitted[self.resolved_hostname] = event
+            self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def debug_stats_kwargs(self, tags=None):
@@ -956,6 +1024,9 @@ class PostgreSql(AgentCheck):
             self._connect()
             # We don't want to cache versions between runs to capture minor updates for metadata
             self.load_version()
+
+            # Check wal_level
+            self.wal_level = self._get_wal_level()
 
             # Add raw version as a tag
             tags.append(f'postgresql_version:{self.raw_version}')
@@ -1002,7 +1073,7 @@ class PostgreSql(AgentCheck):
                 AgentCheck.CRITICAL,
                 tags=tags,
                 message=message,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
             raise e
@@ -1011,7 +1082,7 @@ class PostgreSql(AgentCheck):
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=tags,
-                hostname=self.resolved_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
         finally:

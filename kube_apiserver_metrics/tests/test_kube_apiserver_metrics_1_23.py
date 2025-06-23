@@ -49,6 +49,7 @@ class TestKubeAPIServerMetrics:
         'request_duration_seconds.sum',
         'request_duration_seconds.count',
         'registered_watchers',
+        'process_cpu_total',
         'process_resident_memory_bytes',
         'process_virtual_memory_bytes',
         'etcd_request_duration_seconds.sum',

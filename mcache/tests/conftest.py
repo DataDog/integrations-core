@@ -65,6 +65,17 @@ def dd_environment(e2e_instance):
             yield e2e_instance
 
 
+@pytest.fixture(scope='session')
+def dd_environment_ipv6(instance_ipv6):
+    with docker_run(
+        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        service_name='memcached_ipv6',
+        env_vars={'PWD': HERE},
+        conditions=[WaitFor(connect_to_mcache, args=(['{}:{}'.format('[2001:db8::2]', PORT)], USERNAME, PASSWORD))],
+    ):
+        yield instance_ipv6
+
+
 @pytest.fixture
 def client():
     return bmemcached.Client(["{}:{}".format(HOST, PORT)], USERNAME, PASSWORD)
@@ -93,3 +104,9 @@ def e2e_instance():
 @pytest.fixture
 def instance_socket():
     return {'socket': get_host_socket_path(), 'tags': ['foo:bar'], 'username': USERNAME, 'password': PASSWORD}
+
+
+@pytest.fixture(scope='session')
+def instance_ipv6():
+    # This IPv6 address is defined in the docker-compose file.
+    return {'url': '2001:db8::2', 'port': PORT, 'tags': ['foo:bar'], 'username': USERNAME, 'password': PASSWORD}

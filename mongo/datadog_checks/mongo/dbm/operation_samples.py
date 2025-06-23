@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import binascii
 import time
 from typing import List, Optional
 
@@ -62,6 +63,8 @@ class MongoOperationSamples(DBMAsyncJob):
     def __init__(self, check):
         self._operation_samples_config = check._config.operation_samples
         self._collection_interval = self._operation_samples_config["collection_interval"]
+        self._explain_verbosity = self._operation_samples_config["explain_verbosity"]
+        self._cursor_timeout = check._config.timeout
 
         # _explained_operations_ratelimiter: limit how often we try to re-explain the same query
         self._explained_operations_ratelimiter = RateLimitingTTLCache(
@@ -134,15 +137,18 @@ class MongoOperationSamples(DBMAsyncJob):
                     command=command,
                     explain_plan_rate_limiter=self._explained_operations_ratelimiter,
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
+                    verbosity=self._explain_verbosity,
                 ):
                     yield activity, None
                     continue
 
                 explain_plan = get_explain_plan(
                     api_client=self._check.api_client,
-                    op=operation.get("op"),
                     command=command,
                     dbname=operation_metadata["dbname"],
+                    op_duration=self._get_operation_duration_microsecs(operation),
+                    cursor_timeout=self._cursor_timeout,
+                    verbosity=self._explain_verbosity,
                 )
                 sample = self._create_operation_sample_payload(
                     now, operation_metadata, obfuscated_command, query_signature, explain_plan, activity
@@ -189,10 +195,6 @@ class MongoOperationSamples(DBMAsyncJob):
             # the replica set members and to discover additional members of a replica set.
             self._check.log.debug("Skipping hello operation: %s", operation)
             return False
-        if "explain" in command:
-            # Skip explain operations as explain cannot explain itself
-            self._check.log.debug("Skipping explain operation: %s", operation)
-            return False
 
         return True
 
@@ -211,6 +213,10 @@ class MongoOperationSamples(DBMAsyncJob):
         if not effective_users:
             return None
         return effective_users[0].get("user")
+
+    def _get_operation_duration_microsecs(self, operation: dict) -> int:
+        # The in-flight duration of the operation in microseconds
+        return operation.get("microsecs_running", 0)
 
     def _get_operation_metadata(self, operation: dict) -> OperationSampleOperationMetadata:
         namespace = operation.get("ns")
@@ -263,6 +269,28 @@ class MongoOperationSamples(DBMAsyncJob):
             "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
 
+    def _get_operation_lsid(self, operation: dict) -> Optional[dict]:
+        lsid = operation.get("lsid")
+        if not lsid or not lsid.get("id"):
+            return None
+
+        return {
+            "id": binascii.hexlify(lsid['id']).decode(),
+        }
+
+    def _get_operation_transaction(self, operation: dict) -> Optional[dict]:
+        transaction = operation.get("transaction")
+        if not transaction:
+            return None
+
+        return {
+            "txn_number": transaction.get("parameters", {}).get("txnNumber"),
+            "txn_retry_counter": transaction.get("parameters", {}).get("txnRetryCounter"),
+            "time_open_micros": transaction.get("timeOpenMicros"),
+            "time_active_micros": transaction.get("timeActiveMicros"),
+            "time_inactive_micros": transaction.get("timeInactiveMicros"),
+        }
+
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
         return {
             "active": operation.get("active", False),  # bool
@@ -272,8 +300,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "plan_summary": operation.get("planSummary"),  # str
             "query_framework": operation.get("queryFramework"),  # str
             "current_op_time": operation.get("currentOpTime"),  # str  start time of the operation
-            "microsecs_running": operation.get("microsecs_running"),  # int
-            "transaction_time_open_micros": operation.get("transaction", {}).get("timeOpenMicros"),  # int
+            "microsecs_running": self._get_operation_duration_microsecs(operation),  # int
             # Conflicts
             "prepare_read_conflicts": operation.get("prepareReadConflicts", 0),  # int
             "write_conflicts": operation.get("writeConflicts", 0),  # int
@@ -295,6 +322,8 @@ class MongoOperationSamples(DBMAsyncJob):
             ),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
+            "transaction": self._get_operation_transaction(operation),  # dict
+            "lsid": self._get_operation_lsid(operation),  # dict
         }
 
     def _get_query_signature(self, obfuscated_command: str) -> str:

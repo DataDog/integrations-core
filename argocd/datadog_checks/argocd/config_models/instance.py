@@ -96,6 +96,7 @@ class InstanceConfig(BaseModel):
     cache_shared_labels: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    commit_server_endpoint: Optional[str] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -146,6 +147,7 @@ class InstanceConfig(BaseModel):
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_ignore_warning: Optional[bool] = None
     tls_private_key: Optional[str] = None
     tls_protocols_allowed: Optional[tuple[str, ...]] = None

@@ -24,6 +24,7 @@ METRICS = {
     'apiserver_request_duration_seconds': 'request_duration_seconds',
     'apiserver_request_latencies': 'request_latencies',
     'apiserver_request_latency_seconds': 'request_latencies',
+    'process_cpu_seconds_total': 'process_cpu_total',
     'process_resident_memory_bytes': 'process_resident_memory_bytes',
     'process_virtual_memory_bytes': 'process_virtual_memory_bytes',
     'grpc_client_started_total': 'grpc_client_started_total',

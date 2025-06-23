@@ -2,6 +2,47 @@
 
 <!-- towncrier release notes start -->
 
+## 8.5.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+***Fixed***:
+
+* Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
+
+## 8.4.0 / 2025-04-17 / Agent 7.66.0
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Add failover support with Agent High Availability feature. ([#19992](https://github.com/DataDog/integrations-core/pull/19992))
+
+## 8.3.1 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Remove unused code. ([#19701](https://github.com/DataDog/integrations-core/pull/19701))
+
+## 8.3.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 8.2.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 8.1.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
 ## 8.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

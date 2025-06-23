@@ -78,6 +78,7 @@ ad.datadoghq.com/discovery.checks: |
     }
   }
 ```
+**Note**: The Autodiscovery Annotations v2 syntax is supported for Agent v7.36+.
 
 This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
@@ -225,8 +226,8 @@ instances:
     metrics:
     - '.*'
     exclude_metrics:
-      - istio_*
-      - envoy_*
+      - istio_.*
+      - envoy_.*
 
 ```
 
@@ -258,7 +259,7 @@ Additional helpful documentation, links, and articles:
 [2]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [3]: https://www.datadoghq.com/blog/istio-datadog/
 [4]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[5]: https://app.datadoghq.com/account/settings/agent/latest
+[5]: /account/settings/agent/latest
 [6]: https://github.com/DataDog/integrations-core/tree/master/envoy#istio
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/conf.yaml.example

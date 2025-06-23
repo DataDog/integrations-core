@@ -1,0 +1,2279 @@
+{
+    "title": "Plaid Dashboard",
+    "description": "[[suggested_dashboards]]",
+    "widgets": [
+        {
+            "id": 3400095124075958,
+            "definition": {
+                "type": "image",
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Plaid_logo.svg/1024px-Plaid_logo.svg.png",
+                "sizing": "cover",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 8042867912922960,
+            "definition": {
+                "title": "Overview",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8289666179599236,
+                        "definition": {
+                            "title": "Total number of Plaid Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:plaid_logs"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5198861967020346,
+                        "definition": {
+                            "title": "Networks Used",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1901817483012866,
+                        "definition": {
+                            "title": "Currencies used",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Plaid Transfer",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Plaid Recurring Transfer",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Plaid Investment Transactions",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@iso_currency_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "iso_currency_code"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "iso_currency_code"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@iso_currency_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "iso_currency_code"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "iso_currency_code"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@iso_currency_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "iso_currency_code"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "iso_currency_code"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 491873656711604,
+                        "definition": {
+                            "title": "Plaid logs timeline",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 14
+            }
+        },
+        {
+            "id": 6888657947628120,
+            "definition": {
+                "type": "note",
+                "content": "Plaid specializes in financial technology by offering APIs that allow developers to integrate banking services into their applications. By connecting users' bank accounts to apps, Plaid enables features like account verification, transaction history retrieval, and balance checks. This functionality is crucial for various applications, including budgeting tools, personal finance management, and payment processing.",
+                "background_color": "orange",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 7101223040909356,
+            "definition": {
+                "title": "All Plaid Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "query": {
+                            "query_string": "source:plaid_logs",
+                            "sort": {
+                                "column": "timestamp",
+                                "order": "desc"
+                            },
+                            "data_source": "logs_stream",
+                            "storage": "hot",
+                            "indexes": []
+                        },
+                        "response_format": "event_list",
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "compact"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 6,
+                "height": 6
+            }
+        },
+        {
+            "id": 6396584169657892,
+            "definition": {
+                "title": "Currencies used",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:plaid_logs"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@iso_currency_code",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "iso_currency_code"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count",
+                                    "metric": "iso_currency_code"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 2,
+                "height": 4
+            }
+        },
+        {
+            "id": 6872091701376976,
+            "definition": {
+                "title": "Transfer Timelines",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:plaid_logs"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@type",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        }
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            },
+            "layout": {
+                "x": 2,
+                "y": 10,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 6507797404373716,
+            "definition": {
+                "title": "Plaid Investment Transactions",
+                "title_align": "center",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7690725951466864,
+                        "definition": {
+                            "type": "note",
+                            "content": "The Investments product allows you to obtain holding, security, and transactions data for investment-type accounts in financial institutions within the United States and Canada. This data can be used for personal financial management tools and wealth management analysis.",
+                            "background_color": "orange",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "top",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7996023834699400,
+                        "definition": {
+                            "title": "Total number of Investment transactions logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3785939928442116,
+                        "definition": {
+                            "title": "Distribution of the transactions by subtype.",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@subtype",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1041903857507390,
+                        "definition": {
+                            "title": "Investment Transactions  Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:plaid_logs @log_name:plaid_investment_transactions",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "full"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5152333920839504,
+                        "definition": {
+                            "title": "Count of Investment Transactions over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7366483526900876,
+                        "definition": {
+                            "title": "Top list of Account Types.",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 652365151769232,
+            "definition": {
+                "title": "Plaid Transfer Logs",
+                "title_align": "center",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3363459086507342,
+                        "definition": {
+                            "type": "note",
+                            "content": "Plaid Transfer (US only) is a flexible multi-rail payment platform designed for companies looking to add or improve their bank payment solution. Transfer provides all of the necessary tools to easily send and manage ACH, RTP and FedNow transactions, including:\n\n\n1. Fast settlement, simplified reconciliation: Sweep transaction funds into your treasury account quickly and balance your books with an intuitive reconciliation report.\n\n2. Multi-rail routing: Dynamic routing between RTP and FedNow. Fall back to same day ACH if needed\n\n3. Streamlined operational support: Manage daily operations with dashboards to easily monitor transfer activity.\n\n4. Payment risk reduction: reduce your return rates by using Plaid's risk engine.",
+                            "background_color": "orange",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "top",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4216355682334136,
+                        "definition": {
+                            "title": "Total number of Transfer logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1006113490567224,
+                        "definition": {
+                            "title": "Count of Refunds",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @refunds.id:*"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": false
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4707654362742308,
+                        "definition": {
+                            "title": "Count of Failed Transfers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @status:failed"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5746707889039122,
+                        "definition": {
+                            "title": "Rate of Failed Transfers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100 / query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @status:failed"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 1,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1898575658151360,
+                        "definition": {
+                            "title": "Distribution of the status of refunds",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@refunds.status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2969310121977812,
+                        "definition": {
+                            "title": "Count of Unswept transfers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @sweep_status:unswept"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4639822590053068,
+                        "definition": {
+                            "title": "Count of Successful transfers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer !@status:failed"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 2,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2650168106140842,
+                        "definition": {
+                            "title": "Number of refunds over a time period",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @refunds.id:*"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2503574499969062,
+                        "definition": {
+                            "title": "Top reasons for failed refunds",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@refunds.failure_reason.description",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5887611767399214,
+                        "definition": {
+                            "title": "Distribution of failed transfers by description",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@failure_reason.description",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "cardinality",
+                                                        "order": "desc",
+                                                        "metric": "source"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "source"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 5,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 732336393932538,
+                        "definition": {
+                            "title": " Distribution of the transactions by Account Type.",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8104647410697636,
+                        "definition": {
+                            "title": "Count of currencies used for transfers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@iso_currency_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5561341637093252,
+                        "definition": {
+                            "title": "Top networks used for transfers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5715489024571678,
+                        "definition": {
+                            "title": "Number of types of transfers over a time period",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2883319279943518,
+                        "definition": {
+                            "title": "Status of transfers over a time period",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2217330694014924,
+                        "definition": {
+                            "title": "Distribution of currencies used for transfers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@iso_currency_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 11,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 12,
+                "height": 14,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 47687444627418,
+            "definition": {
+                "title": "Plaid Recurring Transfers",
+                "title_align": "center",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2618835281195602,
+                        "definition": {
+                            "type": "note",
+                            "content": "Recurring transfers allow you to automatically originate fixed amount ACH transactions with a regular interval according to a schedule you define. Plaid currently supports intervals with an arbitrary number of weeks or months.\n\nOnce you set up the recurring transfer, Plaid automatically originates the ACH transaction on the planned date, defined by the recurring schedule. You can look up and cancel recurring transfers. You may also receive updates about the recurring transfer itself, as well as each individual transfer originated by the recurring transfer.",
+                            "background_color": "orange",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "top",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5067077707489416,
+                        "definition": {
+                            "title": "Total number of Recurring Transfers logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 891342897945468,
+                        "definition": {
+                            "title": "Distribution of the recurring transfers by status.",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3970705828026586,
+                        "definition": {
+                            "title": "Recurring Transfer Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:plaid_logs @log_name:plaid_recurring_transfer",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "full"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3184454323637298,
+                        "definition": {
+                            "title": "Count of recurring transfers over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1407447907889578,
+                        "definition": {
+                            "title": " Top list of Account Types of Recurring transfers ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 36,
+                "width": 12,
+                "height": 8
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

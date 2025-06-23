@@ -10,7 +10,7 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 
-from .util import connect_with_autocommit
+from .util import connect_with_session_variables
 
 try:
     import datadog_agent
@@ -83,7 +83,6 @@ class MySQLMetadata(DBMAsyncJob):
         self._version_processed = False
         self._connection_args = connection_args
         self._db = None
-        self._check = check
         self._databases_data = DatabasesData(self, check, config)
         self._last_settings_collection_time = 0
         self._last_databases_collection_time = 0
@@ -95,7 +94,14 @@ class MySQLMetadata(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = connect_with_autocommit(**self._connection_args)
+            self._db = connect_with_session_variables(**self._connection_args)
+        else:
+            # Metadata checks runs far less frequently than other checks, and there are reports
+            # that unused pymysql connections sometimes end up being closed unexpectedly.
+            # This is a simple attempt to ensure that the connection is still valid before
+            # returning it. ping() will by default automatically reconnect
+            # if the connection is lost.
+            self._db.ping()
         return self._db
 
     def _close_db_conn(self):
@@ -119,7 +125,7 @@ class MySQLMetadata(DBMAsyncJob):
                 "dd.mysql.db.error",
                 1,
                 tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+                hostname=self._check.reported_hostname,
             )
             raise
 
@@ -170,7 +176,7 @@ class MySQLMetadata(DBMAsyncJob):
             rows = cursor.fetchall()
             settings = [dict(row) for row in rows]
         event = {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "agent_version": datadog_agent.get_version(),
             "dbms": "mysql",
             "kind": "mysql_variables",

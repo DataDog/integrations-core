@@ -26,7 +26,7 @@ def seed_mock_client():
     client.list_consumer_groups.return_value = ["consumer_group1"]
     client.get_partitions_for_topic.return_value = ['partition1']
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
-    client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
+    client.describe_consumer_group.return_value = 'STABLE'
     client.consumer_get_cluster_id_and_list_topics.return_value = (
         "cluster_id",
         # topics
@@ -205,7 +205,6 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
-            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_metric(
@@ -217,7 +216,6 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
-            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_event(
@@ -225,6 +223,39 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
         "topic: topic1, partition: partition1 has negative consumer lag. "
         "This should never happen and will result in the consumer skipping new messages "
         "until the lag turns positive.",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+
+
+def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
+    mock_client = seed_mock_client()
+    kafka_instance["collect_consumer_group_state"] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric(
+        "kafka.consumer_offset",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+            'consumer_group_state:STABLE',
+        ],
+    )
+    aggregator.assert_metric(
+        "kafka.consumer_lag",
         count=1,
         tags=[
             'consumer_group:consumer_group1',
@@ -380,3 +411,58 @@ def test_get_interpolated_timestamp():
     assert _get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
     assert _get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
     assert _get_interpolated_timestamp({10: 200}, 15) is None
+
+
+@pytest.mark.parametrize(
+    'persistent_cache_contents, instance_overrides, consumer_lag_seconds_count',
+    [
+        pytest.param(
+            "",
+            {
+                'consumer_groups': {},
+                'data_streams_enabled': 'true',
+                'monitor_unlisted_consumer_groups': True,
+            },
+            0,
+            id='Read from cache failed',
+        ),
+    ],
+)
+def test_load_broker_timestamps_empty(
+    persistent_cache_contents,
+    instance_overrides,
+    consumer_lag_seconds_count,
+    kafka_instance,
+    dd_run_check,
+    caplog,
+    aggregator,
+    check,
+):
+    kafka_instance.update(instance_overrides)
+    mock_client = seed_mock_client()
+    check = check(kafka_instance)
+    check.client = mock_client
+    check.read_persistent_cache = mock.Mock(return_value=persistent_cache_contents)
+    dd_run_check(check)
+
+    caplog.set_level(logging.WARN)
+    expected_warning = " Could not read broker timestamps from cache"
+
+    assert expected_warning in caplog.text
+    aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
+    assert check.read_persistent_cache.mock_calls == [mock.call("broker_timestamps_")]
+
+
+def test_client_init(kafka_instance, check, dd_run_check):
+    """
+    We only open a connection to a consumer once per consumer group.
+
+    Doing so more often degrades performance, as described in this issue:
+    https://github.com/DataDog/integrations-core/issues/19564
+    """
+    mock_client = seed_mock_client()
+    check = check(kafka_instance)
+    check.client = mock_client
+    dd_run_check(check)
+
+    assert check.client.open_consumer.mock_calls == [mock.call("consumer_group1")]

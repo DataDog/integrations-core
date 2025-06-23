@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pyodbc==5.1.0; (sys_platform != 'darwin' or platform_machine != 'arm64')",
+    "pyodbc==5.2.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
 ]
 
 [project.urls]

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 import pytest
 
 
@@ -20,4 +22,11 @@ def instance():
         'collect_sshare_stats': False,
         'collect_sacct_stats': False,
         'collect_gpu_stats': True,
+        'collect_scontrol_stats': False,
     }
+
+
+@pytest.fixture
+def caplog(caplog):
+    caplog.set_level(logging.DEBUG)
+    return caplog

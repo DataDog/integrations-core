@@ -19,6 +19,7 @@ EXPECTED_METRICS = [
     'correctable_remapped_rows.count',
     'dec_utilization',
     'device.count',
+    'device.total',
     'dram.active',
     'enc_utilization',
     'fan_speed',
@@ -33,9 +34,13 @@ EXPECTED_METRICS = [
     'mem.copy_utilization',
     'mem.temperature',
     'nvlink_bandwidth.count',
+    'nvlink_bandwidth.total',
     'pcie_replay.count',
+    'pcie_replay.total',
     'pcie_rx_throughput.count',
+    'pcie_rx_throughput.total',
     'pcie_tx_throughput.count',
+    'pcie_tx_throughput.total',
     'pipe.fp16_active',
     'pipe.fp32_active',
     'pipe.fp64_active',
@@ -50,9 +55,12 @@ EXPECTED_METRICS = [
     'sm_occupancy',
     'temperature',
     'total_energy_consumption.count',
+    'total_energy_consumption.total',
     'uncorrectable_remapped_rows.count',
+    'uncorrectable_remapped_rows.total',
     'vgpu_license_status',
     'xid_errors',
 ]
+
 EXPECTED_METRICS = [f'dcgm.{m}' for m in EXPECTED_METRICS]
 assert sorted(EXPECTED_METRICS) == EXPECTED_METRICS, 'Please keep this list in alphabetic order!'

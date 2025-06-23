@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import ssl
 
 import mock
 import pytest
@@ -24,6 +25,39 @@ class TestAttribute:
 
         assert check.http == check._http
         assert isinstance(check.http, RequestsWrapper)
+
+
+class TestTLSCiphers:
+    @pytest.mark.parametrize(
+        'instance,expected_ciphers',
+        [
+            pytest.param(
+                {'tls_verify': False},
+                'ALL',
+                id="No Ciphers, default to 'ALL'",
+            ),
+            pytest.param(
+                {'tls_ciphers': ['PSK-CAMELLIA128-SHA256', 'DHE-PSK-CAMELLIA128-SHA256']},
+                'PSK-CAMELLIA128-SHA256:DHE-PSK-CAMELLIA128-SHA256',
+                id='Add specific ciphers only',
+            ),
+            pytest.param(
+                {'tls_ciphers': ['ALL']},
+                'ALL',
+                id="'ALL' manually",
+            ),
+        ],
+    )
+    def test_cipher_construction(self, instance, expected_ciphers):
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        mock_socket = mock.MagicMock()
+
+        with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers, mock.patch(
+            'datadog_checks.base.utils.http.create_socket_connection', return_value=mock_socket
+        ):
+            http.fetch_intermediate_certs('https://www.google.com')
+            mock_set_ciphers.assert_called_once_with(expected_ciphers)
 
 
 class TestRequestSize:

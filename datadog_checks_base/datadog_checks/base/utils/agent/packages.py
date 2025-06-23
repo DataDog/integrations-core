@@ -1,12 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import sys
-
-if sys.version_info >= (3, 8):
-    from importlib.metadata import distributions
-else:
-    from importlib_metadata import distributions
+from importlib.metadata import distributions
 
 DATADOG_CHECK_PREFIX = 'datadog-'
 

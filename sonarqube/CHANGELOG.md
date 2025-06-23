@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 5.1.0 / 2024-11-28
+## 5.2.1 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Parse new_* metrics available through sonarqube WEB API. We stopped handling them to avoid crashes in https://github.com/DataDog/integrations-core/pull/8552, but now they're back by popular demand! ([#19574](https://github.com/DataDog/integrations-core/pull/19574))
+
+## 5.2.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 5.1.0 / 2024-11-28 / Agent 7.61.0
 
 ***Added***:
 

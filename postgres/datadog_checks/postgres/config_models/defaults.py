@@ -84,6 +84,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_exclude_hostname():
+    return False
+
+
 def instance_idle_connection_timeout():
     return 60000
 
@@ -98,6 +102,10 @@ def instance_ignore_databases():
         'alloydbadmin',
         'alloydbmetadata',
     ]
+
+
+def instance_ignore_schemas_owned_by():
+    return ['rds_superuser', 'rdsadmin']
 
 
 def instance_log_unobfuscated_plans():
@@ -149,7 +157,7 @@ def instance_table_count_limit():
 
 
 def instance_tag_replication_role():
-    return False
+    return True
 
 
 def instance_use_global_custom_queries():
