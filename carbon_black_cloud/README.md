@@ -2,7 +2,7 @@
 
 [Carbon Black Cloud][1] is a software-as-a-service (SaaS) solution that provides next-generation anti-virus (NGAV), endpoint detection and response (EDR), advanced threat hunting, and vulnerability management within a single console using a single sensor. 
 
-Integrate Carbon Black Cloud with Datadog to gain insights into Alerts, Auth Events, Endpoint Events and Watchlist Hits using pre-built dashboard visualizations. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate Carbon Black Cloud with Datadog to gain insights into Alerts, Audit Logs, Auth Events, Endpoint Events and Watchlist Hits using pre-built dashboard visualizations. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 
 ## Setup
@@ -26,6 +26,7 @@ Integrate Carbon Black Cloud with Datadog to gain insights into Alerts, Auth Eve
 7. Enter the **S3 bucket** name you have created on AWS.
 8. For the **S3 prefix**, please use the base prefix **carbon-black-cloud** for all types. The following specific prefixes should be applied according to the type:
     1. For **Alert** type, use the prefix: `carbon-black-cloud-alerts`
+    2. For **Audit log** type, use the prefix: `carbon-black-cloud-audit-logs`
     2. For **Auth event** type, use the prefix: `carbon-black-cloud-auth-events`
     3. For **Endpoint event** types, use the prefix: `carbon-black-cloud-endpoint-events`
     4. For **Watchlist Hit** type, use the prefix: `carbon-black-cloud-watchlist-hits`
@@ -36,7 +37,7 @@ Integrate Carbon Black Cloud with Datadog to gain insights into Alerts, Auth Eve
 
 ### Logs
 
-The Carbon Black Cloud integration collects `Alert`, `Auth event`, `Endpoint event`, and `Watchlist hit` logs.
+The Carbon Black Cloud integration collects `Alert`, `Audit log`,`Auth event`, `Endpoint event`, and `Watchlist hit` logs.
 
 ### Metrics
 

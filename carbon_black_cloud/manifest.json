@@ -22,6 +22,11 @@
         "media_type": "image"
       },
       {
+        "caption": "Carbon Black Cloud - Audit Logs",
+        "image_url": "images/carbon_black_cloud_audit_logs.png",
+        "media_type": "image"
+      },
+      {
         "caption": "Carbon Black Cloud - Auth Events",
         "image_url": "images/carbon_black_cloud_auth_events.png",
         "media_type": "image"
@@ -57,6 +62,7 @@
     "dashboards": {
       "Carbon Black Cloud - Overview": "assets/dashboards/carbon_black_cloud_overview.json",
       "Carbon Black Cloud - Alerts": "assets/dashboards/carbon_black_cloud_alerts.json",
+      "Carbon Black Cloud - Audit Logs": "assets/dashboards/carbon_black_cloud_audit_logs.json",
       "Carbon Black Cloud - Auth Events": "assets/dashboards/carbon_black_cloud_auth_events.json",
       "Carbon Black Cloud - Watchlist Hits": "assets/dashboards/carbon_black_cloud_watchlist_hits.json",
       "Carbon Black Cloud - Endpoint Events": "assets/dashboards/carbon_black_cloud_endpoint_events.json"

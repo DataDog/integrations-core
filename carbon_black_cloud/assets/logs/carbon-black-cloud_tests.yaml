@@ -1122,3 +1122,13 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1747650159000
+ -
+  sample: |-
+    {
+      "actor_ip": "10.10.10.10",
+      "actor": "TEST5B1C1E",
+      "create_time": "2025-06-20T10:11:59.903Z",
+      "description": "Connector (App) TEST5B1C1E created session successfully",
+      "org_key": "ORGKEY"
+    }
+  result: null

@@ -80,6 +80,9 @@ pipeline:
         - filter:
             query: "@alert_url:*"
           name: alerts
+        - filter:
+            query: "@description:*"
+          name: audit
       target: service
     - type: service-remapper
       name: Define `service` as the official service of the log
@@ -149,6 +152,28 @@ pipeline:
           expression: backend_update_epoch_timestamp - user_update_epoch_timestamp
           target: timestamp_difference
           replaceMissing: true
+    - type: pipeline
+      name: Check `backend_update_timestamp` is greater
+      enabled: true
+      filter:
+        query: "@timestamp_difference:>=0"
+      processors:
+        - type: date-remapper
+          name: Define `backend_update_timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - backend_update_timestamp
+    - type: pipeline
+      name: Check `user_update_timestamp` is greater
+      enabled: true
+      filter:
+        query: "@timestamp_difference:<0"
+      processors:
+        - type: date-remapper
+          name: Define `user_update_timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - user_update_timestamp
     - type: pipeline
       name: Auth Events
       enabled: true
@@ -259,6 +284,27 @@ pipeline:
           enabled: true
           sources:
             - status
+    - type: pipeline
+      name: Audit
+      enabled: true
+      filter:
+        query: service:audit
+      processors:
+        - type: date-remapper
+          name: Define `create_time` as the official date of the log
+          enabled: true
+          sources:
+            - create_time
+        - type: attribute-remapper
+          name: Map `actor` to `usr.name`
+          enabled: true
+          sources:
+            - actor
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: attribute-remapper
       name: Map `type` to `evt.name`
       enabled: true
@@ -270,10 +316,11 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `device_internal_ip` to `network.client.ip`
+      name: Map `device_internal_ip` and `actor_ip` to `network.client.ip`
       enabled: true
       sources:
         - device_internal_ip
+        - actor_ip
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
@@ -286,25 +333,3 @@ pipeline:
         - network.client.ip
       target: network.client.geoip
       ip_processing_behavior: do-nothing
-    - type: pipeline
-      name: Check `backend_update_timestamp` is greater
-      enabled: true
-      filter:
-        query: "@timestamp_difference:>0"
-      processors:
-        - type: date-remapper
-          name: Define `backend_update_timestamp` as the official date of the log
-          enabled: true
-          sources:
-            - backend_update_timestamp
-    - type: pipeline
-      name: Check `user_update_timestamp` is greater
-      enabled: true
-      filter:
-        query: "@timestamp_difference:<0"
-      processors:
-        - type: date-remapper
-          name: Define `user_update_timestamp` as the official date of the log
-          enabled: true
-          sources:
-            - user_update_timestamp
