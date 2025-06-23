@@ -153,7 +153,7 @@ class GUnicornCheck(AgentCheck):
                     master_procs.append(p)
             except psutil.NoSuchProcess:
                 self.log.debug("Process %s disappeared while scanning", p.name())
-            except psutil.Error as e::
+            except psutil.Error as e:
                 self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
         self.log.debug("There are %s master process(es) with the name %s", len(master_procs), name)
         return master_procs
