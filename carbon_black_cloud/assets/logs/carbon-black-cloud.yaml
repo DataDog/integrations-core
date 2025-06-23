@@ -316,7 +316,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `device_internal_ip` and `actor_ip` to `network.client.ip`
+      name: Map `device_internal_ip`, `actor_ip` to `network.client.ip`
       enabled: true
       sources:
         - device_internal_ip

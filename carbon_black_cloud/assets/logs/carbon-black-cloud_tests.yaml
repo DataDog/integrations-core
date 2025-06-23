@@ -1131,4 +1131,27 @@ tests:
       "description": "Connector (App) TEST5B1C1E created session successfully",
       "org_key": "ORGKEY"
     }
-  result: null
+  result:
+    custom:
+      create_time: "2025-06-20T10:11:59.903Z"
+      description: "Connector (App) TEST5B1C1E created session successfully"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      org_key: "ORGKEY"
+      service: "audit"
+      usr:
+        name: "TEST5B1C1E"
+    message: |-
+      {
+        "actor" : "TEST5B1C1E",
+        "org_key" : "ORGKEY",
+        "create_time" : "2025-06-20T10:11:59.903Z",
+        "description" : "Connector (App) TEST5B1C1E created session successfully",
+        "actor_ip" : "10.10.10.10"
+      }
+    service: "audit"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750414319903
