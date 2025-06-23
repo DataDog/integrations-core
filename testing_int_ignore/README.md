@@ -1,10 +1,4 @@
-## Overview
 
-placeholder text
-
-## Setup
-
-placeholder text
 
 ### Installation
 
