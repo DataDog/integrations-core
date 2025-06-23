@@ -206,7 +206,7 @@ spec:
               value: "true"
 ```
 
-For **mixed environments**, use the [DatadogAgentProfiles (DAP) feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. Note that this feature is disabled by default, so it needs to be enabled [as described here](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md#enabling-datadogagentprofiles).
+For **mixed environments**, use the [DatadogAgentProfiles (DAP) feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. Note that this feature is disabled by default, so it needs to be enabled. For more information, see [Enabling DatadogAgentProfiles](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md#enabling-datadogagentprofiles).
 
 Modifying the DatadogAgent manifest is necessary to enable certain features that are not supported by the DAP yet. First, the existing configuration should enable the `system-probe` container in the datadog-agent pods (this can be easily checked by looking at the list of containers when running `kubectl describe pod <datadog-agent-pod-name> -n <namespace>`). Because the DAP feature does not yet support conditionally enabling containers, a feature that uses `system-probe` needs to be enabled for all agent pods. We recommend enabling the `oomKill` integration, as it is lightweight and does not require any additional configuration or extra cost.
 
