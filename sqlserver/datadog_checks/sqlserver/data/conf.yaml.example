@@ -290,6 +290,15 @@ instances:
         #
         # xe_metrics: {}
 
+        ## @param table_size_metrics - mapping - optional
+        ## Configure collection of table size metrics.
+        ##
+        ## Set `table_size_metrics.enabled` to true to enable collection of table size metrics. 
+        ## Does not collect tempdb metrics.
+        ## Defaults to false.
+        #
+        # table_size_metrics: {}
+
     ## Configure collection of SQL Server Agent jobs events and metrics
     #
     # agent_jobs:
@@ -647,7 +656,7 @@ instances:
         #
         # keep_identifier_quotation: false
 
-    ## Configure the collection of raw query statements in query activity, execution plans, and XE events.
+    ## Configure the collection of raw query statements in query activity, and XE events.
     ## To collect raw query statements from XE events, set `xe_collection.query_completions.enabled` and
     ## `xe_collection.query_errors.enabled` to `true`.
     ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
