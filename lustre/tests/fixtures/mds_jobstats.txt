@@ -1,4 +1,3 @@
-mdt.lustre-MDT0000.job_stats=
 job_stats:
 - job_id:          vim.0
   snapshot_time:   1749555518.685497069 secs.nsecs

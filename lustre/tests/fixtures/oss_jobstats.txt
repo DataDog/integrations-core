@@ -1,4 +1,3 @@
-obdfilter.lustre-OST0001.job_stats=
 job_stats:
 - job_id:          vim.0
   snapshot_time:   1749555918.867061397 secs.nsecs
