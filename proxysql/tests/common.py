@@ -159,6 +159,8 @@ INSTANCE_ALL_METRICS = {
         'users_metrics',
         'memory_metrics',
         'query_rules_metrics',
+        'backends_metrics',
+        'all_backends_metrics',
     ],
 }
 
@@ -175,6 +177,8 @@ INSTANCE_ALL_METRICS_STATS = {
         'users_metrics',
         'memory_metrics',
         'query_rules_metrics',
+        'backends_metrics',
+        'all_backends_metrics',
     ],
 }
 
