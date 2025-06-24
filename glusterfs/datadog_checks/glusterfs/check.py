@@ -44,7 +44,10 @@ class GlusterfsCheck(AgentCheck):
         if init_config.get('gstatus_path'):
             self.gstatus_cmd = init_config.get('gstatus_path')
         else:
-            path = datadog_agent.get_config('run_path') + GSTATUS_PATH_SUFFIX
+            path = datadog_agent.get_config('run_path')
+            if path.endswith('/run'):
+                path = path[:-4]
+            path = os.path.join(path, GSTATUS_PATH_SUFFIX)
             if os.path.exists(path):
                 self.gstatus_cmd = path
             else:
