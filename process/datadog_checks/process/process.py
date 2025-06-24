@@ -95,9 +95,7 @@ class ProcessCheck(AgentCheck):
         self.pid_cache_duration = int(init_config.get('pid_cache_duration', DEFAULT_PID_CACHE_DURATION))
 
         # Control whether to reset the shared process list cache on process changes
-        self.reset_cache_on_process_changes = is_affirmative(
-            init_config.get('reset_cache_on_process_changes', True)
-        )
+        self.reset_cache_on_process_changes = is_affirmative(init_config.get('reset_cache_on_process_changes', True))
 
         self._conflicting_procfs = False
         self._deprecated_init_procfs = False

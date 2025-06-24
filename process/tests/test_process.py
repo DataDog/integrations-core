@@ -400,6 +400,7 @@ def test_process_service_check(aggregator):
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)
 
+
 def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):
     """Test that reset() is called/not called based on reset_cache_on_process_changes config."""
     # Config=True (default)
@@ -408,7 +409,7 @@ def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):
     process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
     with patch.object(process.process_list_cache, 'reset') as mock_reset:
         dd_run_check(process)
-         # Should call reset since the config is true
+        # Should call reset since the config is true
         mock_reset.assert_called()
     # Config=False
     init_config = {'reset_cache_on_process_changes': False}
