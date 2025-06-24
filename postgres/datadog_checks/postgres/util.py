@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import string
 from enum import Enum
 from typing import Any, List, Tuple  # noqa: F401
@@ -130,6 +131,40 @@ def get_list_chunks(lst, n):
         yield lst[i : i + n]
 
 
+SET_TRIM_PATTERN = re.compile(
+    r"""
+    ^
+    (?:
+        \s*
+        # match one leading comment
+        (?:
+            /\*
+            .*
+            \*/
+            \s*
+        )?
+
+        # match leading SET commands
+        SET\b
+        (?:
+            [^';] | # keywords, integer literals, etc.
+            '[^']*' # single-quoted strings
+        )+
+        ;
+    )+
+    """,
+    flags=(re.I | re.X),
+)
+
+
+# Expects one or more SQL statements in a string. If the string
+# begins with any SET statements, they are removed and the rest
+# of the string is returned. Otherwise, the string is returned
+# as it was received.
+def trim_leading_set_stmts(sql):
+    return SET_TRIM_PATTERN.sub('', sql, 1).lstrip()
+
+
 fmt = PartialFormatter()
 
 AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
@@ -211,6 +246,34 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
         {'name': 'conflicts.snapshot', 'type': 'monotonic_count'},
         {'name': 'conflicts.bufferpin', 'type': 'monotonic_count'},
         {'name': 'conflicts.deadlock', 'type': 'monotonic_count'},
+    ],
+}
+
+QUERY_PG_STAT_RECOVERY_PREFETCH = {
+    'name': 'pg_stat_recovery_prefetch',
+    'query': """
+        SELECT
+            prefetch,
+            hit,
+            skip_init,
+            skip_new,
+            skip_fpw,
+            skip_rep,
+            wal_distance,
+            block_distance,
+            io_depth
+        FROM pg_stat_recovery_prefetch
+    """.strip(),
+    'columns': [
+        {'name': 'recovery_prefetch.prefetch', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.hit', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_init', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_new', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_fpw', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_rep', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.wal_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.block_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.io_depth', 'type': 'gauge'},
     ],
 }
 

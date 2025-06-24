@@ -1,5 +1,7 @@
+import io
 import json
 import os
+import zipfile
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, mock_open, patch
 
@@ -45,7 +47,7 @@ def test_get_valid_platforms():
 
     expected_platforms = {"linux-aarch64", "linux-x86_64", "macos-x86_64", "windows-x86_64"}
     with patch("os.listdir", return_value=filenames):
-        platforms = get_valid_platforms("fake_repo")
+        platforms = get_valid_platforms("fake_repo", {"3.12"})
         assert platforms == expected_platforms
 
 
@@ -111,19 +113,29 @@ def test_get_dependencies_list():
 
 
 def test_get_dependencies_sizes():
+    # Create a valid zip file in memory
+    fake_zip_bytes = io.BytesIO()
+    with zipfile.ZipFile(fake_zip_bytes, 'w') as zf:
+        zf.writestr('dummy.txt', 'hello world')
+    fake_zip_bytes.seek(0)
+    zip_content = fake_zip_bytes.read()
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.headers = {"Content-Length": "12345"}
-    with patch("requests.head", return_value=mock_response):
+    mock_response.content = zip_content
+    mock_response.__enter__.return_value = mock_response
+    mock_response.__exit__.return_value = None
+    with patch("requests.get", return_value=mock_response):
         file_data = get_dependencies_sizes(
             ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True
         )
+
     assert file_data == [
         {
             "Name": "dependency1",
             "Version": "1.1.1",
-            "Size_Bytes": 12345,
-            "Size": convert_to_human_readable_size(12345),
+            "Size_Bytes": 11,
+            "Size": convert_to_human_readable_size(11),
             "Type": "Dependency",
         }
     ]
@@ -307,7 +319,6 @@ def test_save_markdown():
 
 
 def test_extract_version_from_about_py_pathlib():
-    # Usa Path para compatibilidad multiplataforma
     fake_path = Path("some") / "module" / "__about__.py"
     fake_content = "__version__ = '1.2.3'\n"
 

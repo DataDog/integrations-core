@@ -20,7 +20,7 @@ from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
 from . import common
-from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -132,10 +132,10 @@ def test_statement_metrics(
     ) as m_get_runtime_aurora_tags:
         m_obfuscate_sql.side_effect = _obfuscate_sql
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = []
+        m_get_runtime_aurora_tags.return_value = {}
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
+            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
 
         # Run a query
         run_query(query)
@@ -156,9 +156,11 @@ def test_statement_metrics(
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
+    elif MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+        expected_tags.add("replication_role:primary")
     assert set(event['tags']) == expected_tags
     query_signature = compute_sql_signature(query)
     matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
@@ -425,7 +427,7 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
 
@@ -433,10 +435,10 @@ def test_statement_samples_collect(
         mysql_check, '_get_runtime_aurora_tags', passthrough=True
     ) as m_get_runtime_aurora_tags:
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = []
+        m_get_runtime_aurora_tags.return_value = {}
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
+            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
 
         logger.debug("running first check")
         dd_run_check(mysql_check)
@@ -835,8 +837,12 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_samples._job_loop_future.result()
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
+        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
+        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
         aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.inactive_stop",
+            tags=expected_tags,
         )
 
 
@@ -857,32 +863,41 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_samples._db is None, "samples db connection should be gone"
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
-        aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
-        )
+        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
+        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
+        aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance.get('tags', []) + [
+def _expected_dbm_instance_tags(dbm_instance, check):
+    _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-    ]
+    )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            _tags += ('cluster_uuid:{}'.format(check.cluster_uuid),)
+    return _tags
 
 
 # the inactive job metrics are emitted from the main integrations
 # directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
+def _expected_dbm_job_err_tags(dbm_instance, check):
+    _tags = dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-    ]
+    )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        _tags += ("server_uuid:{}".format(check.server_uuid),)
+    return _tags
 
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])

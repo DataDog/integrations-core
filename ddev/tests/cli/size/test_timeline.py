@@ -452,11 +452,17 @@ def test_timeline_dependency_missing_no_platform(ddev):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "size",
@@ -483,11 +489,17 @@ def test_timeline_dependency_missing_for_platform(ddev, app):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "size",
@@ -520,11 +532,17 @@ def test_timeline_dependency_no_changes(ddev, app):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "size",
@@ -539,6 +557,5 @@ def test_timeline_dependency_no_changes(ddev, app):
             "linux-x86_64",
             obj=app,
         )
-
         assert result.exit_code == 0
         assert "no changes found" in result.output.lower()
