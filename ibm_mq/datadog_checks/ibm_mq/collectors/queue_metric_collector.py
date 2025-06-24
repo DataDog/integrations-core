@@ -127,15 +127,20 @@ class QueueMetricCollector(object):
                             self.log.debug("Discovered queue: %s", queue_name)
                             queues.append(queue_name)
                     except pymqi.MQMIError as e:
-                        self.log.debug("Error inquiring queue %s: %s", queue_name, e)
-                        self._submit_discovery_error_metric(e, [f"queue:{queue_name}"])
-                        continue
+                        # Don't warn if no messages, see:
+                        # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                        if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                            self.log.debug("No queue info available for pattern %s", mq_pattern_filter)
+                        elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_UNKNOWN_OBJECT_NAME:
+                            self.log.debug("No matching queue of type %d for pattern %s", queue_type, mq_pattern_filter)
+                        else:
+                            self.log.debug("Error inquiring queue %s: %s", queue_name, e)
+                            self._submit_discovery_error_metric(e, [f"queue:{queue_name}"])
+                            continue
                 self.log.debug("%s queues discovered", str(len(queues)))
             except pymqi.MQMIError as e:
                 self.log.debug("Error inquiring queue names for pattern %s: %s", mq_pattern_filter, e)
-                self._submit_discovery_error_metric(
-                    e, [f"queue_pattern:{mq_pattern_filter}", f"queue_type:{queue_type}"]
-                )
+                self._submit_discovery_error_metric(e, [f"queue_pattern:{mq_pattern_filter}"])
                 continue
             except Exception as e:
                 self.log.debug("Error retrieving queue info for %s: %s", mq_pattern_filter, e)
