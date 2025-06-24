@@ -409,7 +409,7 @@ def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):
     process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
     with patch.object(process.process_list_cache, 'reset') as mock_reset:
         dd_run_check(process)
-         # Should call reset when no processes found since the config is true
+         # Should call reset since the config is true
         mock_reset.assert_called()
     # Config=False
     init_config = {'reset_cache_on_process_changes': False}
