@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pyvmomi==9.0.0.0",
+    "pyvmomi==8.0.3.0.1",
 ]
 
 [project.urls]
