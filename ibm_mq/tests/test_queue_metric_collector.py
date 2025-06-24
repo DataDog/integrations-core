@@ -46,6 +46,8 @@ def make_collector(instance=None):
 
 
 def test_discover_queues_handles_known_mq_errors(instance):
+    # Simulate what should happen when a queue throws an error we expect.
+    # Should not raise, should log debug, should not call _submit_discovery_error_metric
     collector = make_collector(instance)
     queue_manager = Mock()
     pcf_mock = Mock()
@@ -62,6 +64,8 @@ def test_discover_queues_handles_known_mq_errors(instance):
 
 
 def test_discover_queues_submits_error_metric_on_unexpected_mq_error(instance):
+    # Simulate what should happen when a queue throws an error we don't expect.
+    # Should raise, should log debug, should call _submit_discovery_error_metric
     collector = make_collector(instance)
     queue_manager = Mock()
     pcf_mock = Mock()
@@ -77,6 +81,8 @@ def test_discover_queues_submits_error_metric_on_unexpected_mq_error(instance):
 
 
 def test_discover_queues_disconnects_on_exception(instance):
+    # Simulate what should happen when a queue throws an exception.
+    # Should raise, should log debug, should call disconnect
     collector = make_collector(instance)
     queue_manager = Mock()
     pcf_mock = Mock()
@@ -89,6 +95,8 @@ def test_discover_queues_disconnects_on_exception(instance):
 
 
 def test_discover_queues_warns_when_no_queues_found(instance):
+    # Simulate what should happen when no queues are found.
+    # Should log warning, should return empty list
     collector = make_collector(instance)
     queue_manager = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute') as PCFExecute:
