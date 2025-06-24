@@ -62,7 +62,7 @@ class LustreCheck(AgentCheck):
 
 
     def check(self, _):
-        self.submit_jobstats_metrics(self.node_type)
+        self.submit_jobstats_metrics()
         # self.submit_lnet_metrics()
         # self.submit_lnet_local_ni_metrics()
         # self.submit_lnet_peer_ni_metrics()
@@ -142,8 +142,7 @@ class LustreCheck(AgentCheck):
                             # TODO: Handle histogram metrics if needed
                             continue 
                         self.log.warning(f'Jobstats metric {metric_name} with type {metric_type} has value {metric_value}')
-                        print(f'lustre.jobstats.{metric_name}.{metric_type}')
-                        self.gauge(f'jobstats.{metric_name}.{metric_type}', metric_value, tags=[f'component_type:{self.node_type}', f'component_name:{component_name}', f'job_id:{job_id}'])
+                        self.gauge(f'job_stats.{metric_name}.{metric_type}', metric_value, tags=[f'component_type:{self.node_type}', f'component_name:{component_name}', f'job_id:{job_id}'])
 
 
     def get_jobstats_params_list(self, component_type):

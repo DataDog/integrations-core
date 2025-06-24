@@ -8,7 +8,7 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
-from datadog_checks.lustre.metrics import LNET_LOCAL_METRICS, LNET_PEER_METRICS, LNET_STATS_METRICS
+from datadog_checks.lustre.metrics import LNET_LOCAL_METRICS, LNET_PEER_METRICS, LNET_STATS_METRICS, JOBSTATS_MDS_METRICS, JOBSTATS_OSS_METRICS
 from datadog_checks.dev import get_here
 import os
 import mock
@@ -45,22 +45,32 @@ def test_check(dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_jobstats(aggregator, instance, mock_oss, disable_subprocess):
+@pytest.mark.parametrize(
+    'node_type, fixture_file, expected_metrics',
+    [
+        pytest.param('mds', 'mds_jobstats.txt', JOBSTATS_MDS_METRICS, id='mds'),
+        pytest.param('oss', 'oss_jobstats.txt', JOBSTATS_OSS_METRICS, id='oss'),
+    ],
+)
+def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expected_metrics):
+    instance = {'node_type': node_type}
     with mock.patch.object(LustreCheck, 'lctl_list_param') as mock_list_param:
         with mock.patch.object(LustreCheck, 'lctl_get_param') as mock_get_param:
-            mock_list_param.return_value = ['obdfilter.lustre-OST0001.job_stats']
-            with open(os.path.join(FIXTURES_DIR, 'oss_jobstats.txt'), 'r') as f:
+            mock_list_param.return_value = ['some.job_stats.param']
+            with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
                 mock_get_param.return_value = f.read()
-                check = LustreCheck('lustre', {}, [instance])
-                check.submit_jobstats_metrics()
-    # TODO: Add assertions to verify the job stats metrics
+            check = LustreCheck('lustre', {}, [instance])
+            check.submit_jobstats_metrics()
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+
 
 def test_lnet_stats(aggregator, instance, mock_client):
     with mock.patch.object(LustreCheck, 'lnet_get_stats') as mock_get:
         with open(os.path.join(FIXTURES_DIR, 'all_lnet_stats.txt'), 'r') as f:
             mock_get.return_value = f.read()
-            check = LustreCheck('lustre', {}, [instance])
-            check.submit_lnet_stats_metrics()
+        check = LustreCheck('lustre', {}, [instance])
+        check.submit_lnet_stats_metrics()
     for metric in LNET_STATS_METRICS:
         aggregator.assert_metric(metric)
 
@@ -68,8 +78,8 @@ def test_lnet_local(aggregator, instance, mock_client):
     with mock.patch.object(LustreCheck, 'lnet_get_stats') as mock_get:
         with open(os.path.join(FIXTURES_DIR, 'all_lnet_net.txt'), 'r') as f:
             mock_get.return_value = f.read()
-            check = LustreCheck('lustre', {}, [instance])
-            check.submit_lnet_local_ni_metrics()
+        check = LustreCheck('lustre', {}, [instance])
+        check.submit_lnet_local_ni_metrics()
     for metric in LNET_LOCAL_METRICS:
         aggregator.assert_metric(metric)
 
@@ -77,7 +87,7 @@ def test_lnet_peer(aggregator, instance, mock_client):
     with mock.patch.object(LustreCheck, 'lnet_get_stats') as mock_get:
         with open(os.path.join(FIXTURES_DIR, 'all_lnet_peer.txt'), 'r') as f:
             mock_get.return_value = f.read()
-            check = LustreCheck('lustre', {}, [instance])
-            check.submit_lnet_peer_ni_metrics()
+        check = LustreCheck('lustre', {}, [instance])
+        check.submit_lnet_peer_ni_metrics()
     for metric in LNET_PEER_METRICS:
         aggregator.assert_metric(metric)
