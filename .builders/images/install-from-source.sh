@@ -23,8 +23,11 @@ curl "${url}" -Lo "${workdir}/${archive_name}"
 echo "${SHA256}  ${workdir}/${archive_name}" | sha256sum --check
 tar -C "${workdir}" -xf "${workdir}/${archive_name}"
 pushd "${workdir}/${relative_path}"
+echo TMP: configure
 ${CONFIGURE_SCRIPT:-./configure} "$@"
+echo TMP: make
 make -j $(nproc)
+echo TMP: install
 ${INSTALL_COMMAND:-make install}
 popd
 rm -rf "${workdir}"
