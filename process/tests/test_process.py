@@ -399,3 +399,21 @@ def test_process_service_check(aggregator):
     aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)
+
+
+def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):
+    """Test that reset() is called/not called based on reset_cache_on_process_changes config."""
+    # Test 1: Config=True (default)
+    init_config = {'reset_cache_on_process_changes': True}
+    instance = {'name': 'nonexistent_process_12345', 'search_string': ['nonexistent_process_12345']}
+    process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
+    with patch.object(process.process_list_cache, 'reset') as mock_reset:
+        dd_run_check(process)
+        mock_reset.assert_called()  # Should call reset when no processes found
+    # Test 2: Config=False
+    init_config = {'reset_cache_on_process_changes': False}
+    instance = {'name': 'nonexistent_process_12345', 'search_string': ['nonexistent_process_12345']}
+    process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
+    with patch.object(process.process_list_cache, 'reset') as mock_reset:
+        dd_run_check(process)
+        mock_reset.assert_not_called()  # Should NOT call reset
