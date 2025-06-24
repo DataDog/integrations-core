@@ -99,15 +99,10 @@ def main():
         is_native_dynamic = isinstance(dd_metric, dict) and dd_metric.get('type') == 'native_dynamic'
 
         # Check if metric exists in previous metadata
-        existing_dd_metric = check_existing_metric(
-            metric_name, previous_metadata, added_dd_metrics
-        )
+        existing_dd_metric = check_existing_metric(metric_name, previous_metadata, added_dd_metrics)
 
         if existing_dd_metric:
-            print(
-                f"INFO: metric `{metric_name}` is reserved because it's present "
-                "in the current metadata.csv file"
-            )
+            print(f"INFO: metric `{metric_name}` is reserved because it's present " "in the current metadata.csv file")
             metadata.extend(existing_dd_metric)
             continue
 
