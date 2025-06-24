@@ -97,6 +97,7 @@ MEMORY_METRICS = (
 
 BACKENDS_METRICS = ('proxysql.backends.count',)
 
+ALL_BACKENDS_METRICS = ('proxysql.all_backends.count',)
 QUERY_RULES_TAGS_METRICS = ('proxysql.query_rules.rule_hits',)
 
 
