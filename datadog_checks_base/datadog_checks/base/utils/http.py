@@ -7,11 +7,11 @@ import logging
 import os
 import re
 import warnings
+from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from urllib.parse import quote, urlparse, urlunparse
 
-from .tls import create_ssl_context
 import lazy_loader
 import requests
 from binary import KIBIBYTE
@@ -29,6 +29,7 @@ from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .network import create_socket_connection
 from .time import get_timestamp
+from .tls import create_ssl_context
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -445,7 +446,7 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
-        new_options = self.populate_options(options)
+        new_options = ChainMap(options, self.options)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
             self.logger.debug('An unverified HTTPS request is being made to %s', url)
@@ -505,12 +506,9 @@ class RequestsWrapper(object):
         # If the URL is not HTTPS, no need to update the TLS context.
         if not url.startswith('https'):
             return
-
         new_tls_config = get_tls_config_from_options(new_options)
-
         self.logger.debug('Overrides for new context config: %s', new_tls_config)
-
-        return create_ssl_context(self.tls_config, overrides=new_tls_config)
+        return create_ssl_context(ChainMap(new_tls_config, self.tls_config))
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
@@ -523,7 +521,7 @@ class RequestsWrapper(object):
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
                 raise e
-            new_context = create_ssl_context(self.tls_config, overrides={'tls_ca_cert': certs})
+            new_context = create_ssl_context(ChainMap({'tls_ca_cert': certs}, self.tls_config))
             if not persist:
                 session = self._create_session(new_context)
             else:
@@ -532,17 +530,6 @@ class RequestsWrapper(object):
             request_method = getattr(session, method)
             response = request_method(url, **new_options)
         return response
-
-    def populate_options(self, options):
-        # Avoid needless dictionary update if there are no options
-        if not options:
-            return self.options
-
-        for option, value in self.options.items():
-            # Make explicitly set options take precedence
-            options.setdefault(option, value)
-
-        return options
 
     def fetch_intermediate_certs(self, hostname, port=443):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
@@ -556,7 +543,7 @@ class RequestsWrapper(object):
 
         with sock:
             try:
-                context = create_ssl_context(self.tls_config, overrides={'tls_verify': False})
+                context = create_ssl_context(ChainMap({'tls_verify': False}, self.tls_config))
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -646,7 +633,8 @@ class RequestsWrapper(object):
         # See: https://github.com/msabramo/requests-unixsocket
         session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
 
-        # Options cannot be passed to the requests.Session init method but can be set as attributes on an initialized Session instance.
+        # Options cannot be passed to the requests.Session init method
+        # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
         return session

@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import os
+import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
-import ssl
-import os
 
 from ..config import is_affirmative
 
@@ -32,14 +32,10 @@ STANDARD_FIELDS = {
 }
 
 
-def create_ssl_context(config, overrides=None):
+def create_ssl_context(config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
     context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-
-    if overrides is not None:
-        config = config.copy()
-        config.update(overrides)
 
     LOGGER.debug('Creating SSL context with config: %s', config)
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname

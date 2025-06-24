@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import ChainMap
 from hashlib import sha256
 from struct import pack, unpack
 
@@ -178,7 +179,7 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                context = create_ssl_context(self.agent_check.tls_config, overrides={'tls_verify': False})
+                context = create_ssl_context(ChainMap({'tls_verify': False}, self.agent_check.tls_config))
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
