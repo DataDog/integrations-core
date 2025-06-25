@@ -30,7 +30,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.set_metadata('version', version)
             self.gauge("api.up", 1, tags=self.base_tags)
 
-        except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
             self.log.error(
                 "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
             )
