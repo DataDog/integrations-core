@@ -6,7 +6,6 @@ import os
 import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
-from dataclasses import dataclass
 from pydantic import BaseModel
 
 from ..config import is_affirmative
@@ -37,11 +36,12 @@ STANDARD_FIELDS = {
     'tls_ciphers': 'ALL',
 }
 
-class TlsConfig(BaseModel):
+class TlsConfig(BaseModel, frozen=True):
     """
     Class used internally to cache HTTPS adapters with specific TLS configurations.
     """
     tls_ca_cert: str | None = None
+    tls_intermediate_ca_certs: tuple[str, ...] | None = None
     tls_cert: str | None = None
     tls_ciphers: str = 'ALL'
     tls_use_host_header: bool = False
@@ -51,9 +51,6 @@ class TlsConfig(BaseModel):
     tls_protocols_allowed: tuple[str, ...] = DEFAULT_PROTOCOL_VERSIONS
     tls_validate_hostname: bool = True
     tls_verify: bool = True
-
-    class Config:
-        frozen = True
     
 
 def create_ssl_context(config):
@@ -94,6 +91,15 @@ def create_ssl_context(config):
         LOGGER.warning(
             'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
             ca_cert,
+        )
+    intermediate_ca_certs = config.get('tls_intermediate_ca_certs')
+    try:
+        if intermediate_ca_certs:
+            context.load_verify_locations(cadata='\n'.join(intermediate_ca_certs))
+    except ssl.SSLError:
+        LOGGER.warning(
+            "TLS intermediate CA certificate(s) could not be loaded: %s. ",
+            intermediate_ca_certs,
         )
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain

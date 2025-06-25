@@ -138,11 +138,10 @@ class SSLContextAdapter(requests.adapters.HTTPAdapter):
     This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
     """
 
-    def __init__(self, ssl_context, has_custom_context=False, **kwargs):
+    def __init__(self, ssl_context, **kwargs):
         self.ssl_context = ssl_context
         # This is used to determine if the adapter was created with a custom context
         # for the purpose of reverting to the default context when needed.
-        self.has_custom_context = has_custom_context
         super(SSLContextAdapter, self).__init__()
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
@@ -483,13 +482,13 @@ class RequestsWrapper(object):
         """
         # If `verify` or `cert` options differ from the defaults, a new adapter is created.
         if new_options.get('verify') == self.options['verify'] and new_options.get('cert') == self.options['cert']:
-            return
+            return self.tls_config
         if not url.startswith('https'):
-            return
+            return self.tls_config
         requested_tls_config = get_tls_config_from_options(new_options)
         self.logger.debug('Overrides for new context config: %s', requested_tls_config)
         new_tls_config = self.tls_config.copy()
-        new_tls_config.update(new_tls_config)
+        new_tls_config.update(requested_tls_config)
         return new_tls_config
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
@@ -503,7 +502,7 @@ class RequestsWrapper(object):
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
                 raise e
-            new_ca_certs = {'tls_ca_cert': certs}
+            new_ca_certs = {'tls_intermediate_ca_certs': certs}
             new_tls_config = self.tls_config.copy()
             new_tls_config.update(new_ca_certs)
             if not persist:
@@ -622,6 +621,7 @@ class RequestsWrapper(object):
             pass
 
     def _mount_https_adapter(self, session, tls_config):
+        # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)
         https_adapter = self._https_adapters.get(tls_config_key)
 
