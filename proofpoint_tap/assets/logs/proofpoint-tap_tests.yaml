@@ -84,7 +84,7 @@ tests:
     status: "critical"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 175079266600
+    timestamp: 1750792666000
  -
   sample: |-
     {
