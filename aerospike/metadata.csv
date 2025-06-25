@@ -780,3 +780,4 @@ aerospike.xdr_timelag,gauge,,second,,[Legacy] The difference between the current
 aerospike.xdr_uninitialized_destination_error,gauge,,,,[Legacy] The number of records in the digest log not shipped because the destination cluster has not been initialized for a DC that is configured for a namespace.,0,aerospike,,
 aerospike.xdr_unknown_namespace_error,gauge,,,,[Legacy] The number of records in the digest log not shipped because they belong to an unknown namespace on the source cluster.,0,aerospike,,
 aerospike.xdr_uptime,gauge,,second,,[Legacy] The time the XDR process has been running. Deprecated in 3.11.1.1,0,aerospike,,
+aerospike.xdr_uptime2,gauge,,second,,[Legacy] The time the XDR process has been running. Deprecated in 3.11.1.1,0,aerospike,,
