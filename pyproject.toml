@@ -34,6 +34,7 @@ include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
 
+
 [tool.mypy]
 plugins = "pydantic.mypy"
 # Follows imports and type-check imported modules.
