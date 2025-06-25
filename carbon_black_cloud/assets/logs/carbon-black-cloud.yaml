@@ -127,7 +127,7 @@ pipeline:
           sources:
             - status
         - type: grok-parser
-          name: Convert backend_update_timestamp to epoch timestamp
+          name: Convert `backend_update_timestamp` to epoch timestamp
           enabled: true
           source: backend_update_timestamp
           samples:
@@ -137,7 +137,7 @@ pipeline:
             matchRules: rule
               %{date("yyyy-MM-dd'T'HH:mm:ss.SSSz"):backend_update_epoch_timestamp}
         - type: grok-parser
-          name: Convert user_update_timestamp to epoch timestamp
+          name: Convert `user_update_timestamp` to epoch timestamp
           enabled: true
           source: user_update_timestamp
           samples:
