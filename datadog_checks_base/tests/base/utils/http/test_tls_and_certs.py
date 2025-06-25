@@ -29,7 +29,8 @@ class TestCert:
         init_config = {}
 
         with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
-            RequestsWrapper(instance, init_config)
+            http = RequestsWrapper(instance, init_config)
+            http.session
 
             assert mock_load_cert_chain.call_count == 1
             assert mock_load_cert_chain.call_args[0][0] == 'cert'
@@ -39,7 +40,8 @@ class TestCert:
         init_config = {}
 
         with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
-            RequestsWrapper(instance, init_config)
+            http = RequestsWrapper(instance, init_config)
+            http.session
 
             assert mock_load_cert_chain.call_count == 1
             assert mock_load_cert_chain.call_args[0][0] == 'cert'
@@ -286,6 +288,7 @@ class TestAIAChasing:
                 # Mock the certificate loading to avoid cryptography operations
                 with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.load_intermediate_certs'):
                     http = RequestsWrapper(instance, init_config)
+                    http.session
                     mock_context.set_ciphers.assert_called_once_with(instance['tls_ciphers'])
                     http.fetch_intermediate_certs('example.com', 443)
                     # Assert set_ciphers called a second time after fetch_intermediate_certs
@@ -313,7 +316,8 @@ class TestSSLContext:
 
         # Mock the SSLContext creation
         with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
-            RequestsWrapper(instance, init_config)
+            http = RequestsWrapper(instance, init_config)
+            http.session  # Trigger the SSLContext creation
 
             # Verify that the default ciphers are set
             assert mock_set_ciphers.call_count == 1
