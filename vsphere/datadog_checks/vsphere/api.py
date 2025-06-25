@@ -406,6 +406,7 @@ class VSphereAPI(object):
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []
         performance_metrics = []
+        to_resource_metadata = []
         for cluster_reference, nested_ids in cluster_nested_elts.items():
             self.log.debug("Querying vSAN metrics for cluster %s", cluster_reference.name)
             unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
@@ -439,9 +440,12 @@ class VSphereAPI(object):
                 )
             health_metrics.append(processed_health_metrics)
 
+            resource_metadata = {'name': cluster_reference.name, 'vcenter_server': self.config.hostname}
             vsan_perf_query_spec = []
             for nested_id in nested_ids:
                 for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
+                    if id_to_tags[nested_id][0] == 'cluster':
+                        resource_metadata['id'] = nested_id
                     vsan_perf_query_spec.append(
                         vim.cluster.VsanPerfQuerySpec(
                             entityRefId=(entity_type + str(nested_id)),
@@ -452,8 +456,24 @@ class VSphereAPI(object):
             discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
             for entity_type in discovered_metrics:
                 for metric in entity_type.value:
+                    if metric.metricId.label in ('used', 'total'):
+                        if metric.values != 'None':
+                            label_map = {
+                                'used': 'size_used',
+                                'total': 'size_total',
+                            }
+                            resource_metadata[label_map[metric.metricId.label]] = int(metric.values.split(',')[-1])
                     metric.metricId.dynamicProperty.append(
                         id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
                     )
+            cpuCount = 0
+            for host in cluster_reference.host:
+                for vm in host.vm:
+                    cpuCount += vm.summary.config.numCpu
+            resource_metadata['class'] = 'standard'
+            # the price of VMware vSphere Standard is $1394 per CPU per year.
+            resource_metadata['cost'] = 1394 * cpuCount
+            resource_metadata['num_hosts'] = len(cluster_reference.host)
             performance_metrics.append(discovered_metrics)
-        return [health_metrics, performance_metrics]
+            to_resource_metadata.append(resource_metadata)
+        return [health_metrics, performance_metrics, to_resource_metadata]
