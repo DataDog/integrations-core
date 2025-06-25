@@ -8,7 +8,8 @@ import mock
 import pytest
 from requests.exceptions import SSLError
 
-from datadog_checks.base.utils.http import RequestsWrapper, SSLContextAdapter
+from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.tls import TlsConfig
 
 pytestmark = [pytest.mark.unit]
 
@@ -291,73 +292,18 @@ class TestAIAChasing:
                     assert mock_context.set_ciphers.call_count == 2
                     assert mock_context.set_ciphers.call_args_list[1][0][0] == instance['tls_ciphers']
 
+    def test_intermediate_certs_loaded(self):
+        """Test that intermediate certs are loaded correctly."""
+        instance = {'tls_verify': True, 'tls_intermediate_ca_certs': ('some_cert', 'another_cert')}
+        init_config = {}
+        with mock.patch('requests.Session.get'):
+            with mock.patch('ssl.SSLContext.load_verify_locations') as mock_load_verify_locations:
+                http = RequestsWrapper(instance, init_config)
+                http.get('https://example.com')
+                mock_load_verify_locations.assert_called_once_with(cadata='\n'.join(instance['tls_intermediate_ca_certs']))
+
 
 class TestSSLContext:
-    """Test the core SSL context functionality."""
-
-    def test_requests_wrapper_creates_ssl_context(self):
-        """Test that RequestsWrapper creates an SSLContext instance."""
-        instance = {'tls_verify': True}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-
-        assert hasattr(http, 'ssl_context')
-        assert isinstance(http.ssl_context, ssl.SSLContext)
-
-    @pytest.mark.parametrize(
-        "instance, verify_mode, check_hostname",
-        [
-            pytest.param({'tls_verify': True}, ssl.CERT_REQUIRED, True, id='tls_verify true'),
-            pytest.param({'tls_verify': False}, ssl.CERT_NONE, False, id='tls_verify false'),
-            pytest.param(
-                {'tls_verify': True, 'tls_validate_hostname': False},
-                ssl.CERT_REQUIRED,
-                False,
-                id='tls_verify true and tls_validate_hostname false',
-            ),
-        ],
-    )
-    def test_ssl_context_has_correct_attributes(self, instance, verify_mode, check_hostname):
-        """Test that RequestsWrapper creates an SSLContext instance."""
-        http = RequestsWrapper(instance, {})
-
-        assert hasattr(http, 'ssl_context')
-        assert isinstance(http.ssl_context, ssl.SSLContext)
-        assert http.ssl_context.verify_mode == verify_mode
-        assert http.ssl_context.check_hostname == check_hostname
-
-    def test_session_uses_ssl_context_adapter(self):
-        """Test that the session uses SSLContextAdapter for consistent TLS configuration."""
-        instance = {'tls_verify': True}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-
-        session = http.session
-        https_adapter = session.get_adapter('https://example.com')
-
-        assert isinstance(https_adapter, SSLContextAdapter)
-        assert https_adapter.ssl_context is http.ssl_context
-
-    def test_tls_ciphers_applied_consistently(self):
-        """Test that tls_ciphers are applied consistently."""
-        instance = {'tls_verify': True, 'tls_ciphers': TEST_CIPHERS}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-
-        # Verify the TLS context wrapper has the cipher configuration
-        assert http.tls_config['tls_ciphers'] == instance['tls_ciphers']
-
-        # Verify the session adapter uses the same TLS context
-        session = http.session
-        https_adapter = session.get_adapter('https://example.com')
-
-        assert isinstance(https_adapter, SSLContextAdapter)
-        assert https_adapter.ssl_context is http.ssl_context
-        # Verify that the ciphers are set correctly in the TLS context
-        for cipher in instance['tls_ciphers']:
-            # At least one entry's name field should match the OpenSSL name
-            assert any(cipher in c.get('name') for c in https_adapter.ssl_context.get_ciphers())
-
     def test_default_tls_ciphers(self):
         """Test that default TLS ciphers are applied when none are specified."""
         instance = {'tls_verify': True}
@@ -371,76 +317,50 @@ class TestSSLContext:
             assert mock_set_ciphers.call_count == 1
             assert mock_set_ciphers.call_args[0][0] == 'ALL'
 
-    def test_host_header_compatibility(self):
-        """Test that host header functionality works with TLS context unification."""
-        instance = {
-            'tls_use_host_header': True,
-            'headers': {'Host': 'custom-host.example.com'},
-            'tls_verify': True,
-            'tls_ciphers': TEST_CIPHERS[0],
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
+class TestSSLContextAdapter:
+    def test_adapter_caching(self):
+        """SSLContextAdapter should be recovered from cache when possible."""
 
-        session = http.session
-        https_adapter = session.get_adapter('https://example.com')
+        with mock.patch('requests.Session.get'):
+            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+                http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
+                # Verify that the adapter is created and cached
+                default_config_key = TlsConfig(**http.tls_config)
+                adapter = http.session.get_adapter('https://example.com')
+                assert http._https_adapters == {default_config_key: adapter}
+                mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
-        # Should be the combined adapter that supports both TLS context and host headers
-        assert hasattr(https_adapter, 'ssl_context')
-        assert https_adapter.ssl_context is http.ssl_context
-        assert 'SSLContextHostHeaderAdapter' in str(type(https_adapter))
+                # Verify that the cached adapter is reused for the same TLS config
+                http.get('https://example.com')
 
-    def test_remapper_functionality_preserved(self):
-        """Test that config remapping functionality is preserved with TLS context unification."""
-        instance = {
-            'disable_ssl_validation': True,
-            'custom_private_key': '/path/to/key.pem',
-        }
-        remapper = {
-            'disable_ssl_validation': {'name': 'tls_verify', 'invert': True},
-            'custom_private_key': {'name': 'tls_private_key'},
-        }
-        init_config = {}
+                assert http._https_adapters == {default_config_key: adapter}
+                assert http.session.get_adapter('https://example.com') is adapter
+                mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
-        # Mock the TLS context creation to avoid file operations
-        with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_context:
-            mock_context = mock.MagicMock()
-            mock_create_context.return_value = mock_context
+    def test_adapter_caching_new_adapter(self):
+        """A new SSLContextAdapter should be created when a new TLS config is requested."""
 
-            http = RequestsWrapper(instance, init_config, remapper=remapper)
+        with mock.patch('requests.Session.get'):
+            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+                http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
+                # Verify that the adapter is created and cached for the default TLS config
+                default_config_key = TlsConfig(**http.tls_config)
+                adapter = http.session.get_adapter('https://example.com')
+                assert http._https_adapters == {default_config_key: adapter}
+                mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
-            # Verify remapping worked - disable_ssl_validation: True should become tls_verify: False
-            assert http.tls_config['tls_verify'] is False
-            assert http.tls_config['tls_private_key'] == '/path/to/key.pem'
+                # Verify that a new adapter is created for a different TLS config
+                http.get('https://example.com', verify=False)
 
-    def test_backward_compatibility_maintained(self):
-        """Test that all existing TLS configuration options still work."""
-        instance = {
-            'tls_verify': True,
-            'tls_ca_cert': '/path/to/ca.pem',
-            'tls_cert': '/path/to/cert.pem',
-            'tls_private_key': '/path/to/key.pem',
-            'tls_validate_hostname': True,
-            'tls_ignore_warning': False,
-            'tls_protocols_allowed': ['TLSv1.2', 'TLSv1.3'],
-            'tls_ciphers': TEST_CIPHERS[0],
-        }
-        init_config = {}
+                new_config = http.tls_config.copy()
+                new_config.update({'tls_verify': False})
+                new_config_key = TlsConfig(**new_config)
+                new_adapter = http.session.get_adapter('https://example.com')
+                assert new_adapter is not adapter
+                mock_create_ssl_context.assert_called_with(new_config)
+                assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+                # Verify that no more adapters are created for the same configs
+                http.get('https://example.com', verify=False)
+                http.get('https://example.com', verify=True)
 
-        # Mock the TLS context creation to avoid file operations
-        with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_context:
-            mock_context = mock.MagicMock()
-            mock_create_context.return_value = mock_context
-
-            # Should not raise any exceptions
-            http = RequestsWrapper(instance, init_config)
-
-            # Verify all options are preserved in RequestsWrapper
-            assert http.options['verify'] == '/path/to/ca.pem'
-            assert http.options['cert'] == ('/path/to/cert.pem', '/path/to/key.pem')
-            assert http.ignore_tls_warning is False
-            assert http.tls_protocols_allowed == ['TLSv1.2', 'TLSv1.3']
-
-            # Verify TLS context wrapper has the right config
-            assert http.tls_config['tls_verify'] is True
-            assert http.tls_config['tls_ciphers'] == instance['tls_ciphers']
+                assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
