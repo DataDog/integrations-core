@@ -43,7 +43,7 @@ class TlsConfig(BaseModel, frozen=True):
     Class used internally to cache HTTPS adapters with specific TLS configurations.
     """
 
-    tls_ca_cert: str | None = None
+    tls_ca_cert: str | bool | None = None
     tls_intermediate_ca_certs: tuple[str, ...] | None = None
     tls_cert: str | None = None
     tls_ciphers: str = 'ALL'
