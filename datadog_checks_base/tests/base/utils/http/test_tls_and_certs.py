@@ -300,7 +300,9 @@ class TestAIAChasing:
             with mock.patch('ssl.SSLContext.load_verify_locations') as mock_load_verify_locations:
                 http = RequestsWrapper(instance, init_config)
                 http.get('https://example.com')
-                mock_load_verify_locations.assert_called_once_with(cadata='\n'.join(instance['tls_intermediate_ca_certs']))
+                mock_load_verify_locations.assert_called_once_with(
+                    cadata='\n'.join(instance['tls_intermediate_ca_certs'])
+                )
 
 
 class TestSSLContext:
@@ -316,6 +318,7 @@ class TestSSLContext:
             # Verify that the default ciphers are set
             assert mock_set_ciphers.call_count == 1
             assert mock_set_ciphers.call_args[0][0] == 'ALL'
+
 
 class TestSSLContextAdapter:
     def test_adapter_caching(self):

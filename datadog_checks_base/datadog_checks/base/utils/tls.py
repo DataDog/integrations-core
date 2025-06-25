@@ -6,6 +6,7 @@ import os
 import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
+
 from pydantic import BaseModel
 
 from ..config import is_affirmative
@@ -36,10 +37,12 @@ STANDARD_FIELDS = {
     'tls_ciphers': 'ALL',
 }
 
+
 class TlsConfig(BaseModel, frozen=True):
     """
     Class used internally to cache HTTPS adapters with specific TLS configurations.
     """
+
     tls_ca_cert: str | None = None
     tls_intermediate_ca_certs: tuple[str, ...] | None = None
     tls_cert: str | None = None
@@ -51,7 +54,7 @@ class TlsConfig(BaseModel, frozen=True):
     tls_protocols_allowed: tuple[str, ...] = DEFAULT_PROTOCOL_VERSIONS
     tls_validate_hostname: bool = True
     tls_verify: bool = True
-    
+
 
 def create_ssl_context(config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
