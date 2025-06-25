@@ -2,15 +2,23 @@
 
 ## Overview
 
-This integration monitors [barracuda_secure_edge][4].
+Barracuda Secure Edge is a unified Secure Access Service Edge (SASE) platform that includes Next-Generation Firewall (NGFW), zero trust, and secure Software-Defined Wide Area Network (SD-WAN) capabilities. This integration allows you to collect and analyze logs from your [barracuda_secure_edge][4] deployment to monitor security events, network traffic, and system activity.
 
 ## Setup
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
+### Prerequisites
+
+1. Administrative access to Barracuda Secure Edge installed on your server.
+2. The Datadog Agent installed and running (on a server or container that can receive syslog messages).
+3. Network Access between the firewall and the Datadog Agent (usually port 514, but may be a custom value).
+4. Syslog support enabled in the Datadog Agent (with a TCP or UDP  listener configured).
+
+### Setup Configurations
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` with:
 
     ```yaml
       logs_enabled: true
     ```
-2. Add this configuration block to your `secure_edge.d/conf.yaml` file to start collecting your Secure Edge logs:
+2. Add this configuration block to your `secure_edge.d/conf.yaml` to start collecting your Secure Edge logs:
 
     ```yaml
       logs:
@@ -28,13 +36,6 @@ This integration monitors [barracuda_secure_edge][4].
 
 The barracuda_secure_edge check is included in the [Datadog Agent][2] package.
 
-### Prerequisites
-
-1. Administrative access to Barracuda Secure Edge installed on your server.
-2. The Datadog Agent installed and running (on a server or container that can receive syslog messages).
-3. Network Access between the firewall and the Datadog Agent (usually port 514, but may be a custom value).
-4. Syslog support enabled in the Datadog Agent (with a TCP or UDP  listener configured).
-
 ### Validation
 
 1. Confirm the Datadog Agent is listening on the correct port (`514` in the following examples)
@@ -43,7 +44,7 @@ The barracuda_secure_edge check is included in the [Datadog Agent][2] package.
     `sudo lsof -i :514`
 2. Confirm logs are reaching the Agent from the correct log source.
     `tail -f /var/phion/logs/*.log`
-**Note**: If the file doesn't exist, verify that syslog logs are being written by your configuration.
+**Note**: If the file doesn't exist, verify that syslog logs are being written to a file by your configuration.
 3. Use the tcpdump command to confirm network traffic. On the Datadog Agent host:
     `sudo tcpdump -i any port 514`
 After running this command, you should see traffic from the Secure Edge IP address. If you don't see any such traffic, check the firewall rules between Secure Edge and the Datadog Agent. Confirm the correct protocol (UDP or TCP) is being used on both sides.
@@ -56,20 +57,27 @@ After running this command, you should see traffic from the Secure Edge IP addre
 Barracuda_Secure_Edge does not include any metrics.
 
 
-### Log Collection
 ## Data Collected
-The Barracuda Secure Edge logs contain key information such as the event timestamp, source and destination IPs and ports, protocol used, firewall action (allow/deny), the matched rule name, user identity (if available), log type (e.g., firewall, VPN, authentication), network interface, device name, and status of the operation, all of which help monitor traffic behavior, access control, and system activity and many more which are collected by DataDog.
+### Metrics
+Barracuda_Secure_Edge does not include any metrics.
 
 ### Events
+The Barracuda Secure Edge integration does not include any events.
 
-The Secure_edge integration includes log events such as failed logins and rule hits.
+### Logs
+The Barracuda Secure Edge integration collects logs containing the following types of information:
+- **Security Events**: Firewall actions (allow/deny), rule matches, and security policy violations
+- **Network Traffic**: Source and destination IPs/ports, protocols, and network interfaces
+- **Authentication**: User login attempts, successes, and failures
+- **VPN Activity**: VPN connection events and status
+- **System Events**: Device status, configuration changes, and system health
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://www.barracuda.com/products/network-protection/secureedge
-[5]: https://app.datadoghq.com/logs/livetail
+[5]: /logs/livetail
