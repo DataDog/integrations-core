@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 from lxml import etree
 
+from datadog_checks.base.utils.db.utils import TagManager
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler
 from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
@@ -52,14 +53,13 @@ def assert_event_field_values(event, expected_values):
             assert event[field] == expected
 
 
-def validate_common_payload_fields(payload, expected_source, expected_type):
+def validate_common_payload_fields(payload, expected_type):
     """Validate common fields in event payloads"""
     assert 'timestamp' in payload
     assert payload['host'] == 'test-host'
     assert payload['ddagentversion'] == '7.30.0'
     assert payload['ddsource'] == 'sqlserver'
     assert payload['dbm_type'] == expected_type
-    assert payload['event_source'] == expected_source
     assert 'service' in payload
 
     # Fields that only exist in regular events (non-RQT)
@@ -101,7 +101,8 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
-    check.tags = ["test:tag"]
+    check.tag_manager = TagManager()
+    check.tag_manager.set_tag('test', 'tag')
     check.database_monitoring_query_activity = Mock()
     check.database_monitoring_query_sample = Mock()
     return check
@@ -884,9 +885,7 @@ class TestPayloadGeneration:
         payload = query_completion_handler._create_event_payload(raw_event)
 
         # Validate common payload fields
-        validate_common_payload_fields(
-            payload, expected_source='datadog_query_completions', expected_type='query_completion'
-        )
+        validate_common_payload_fields(payload, expected_type='query_completion')
 
         # Verify query details
         query_details = payload['query_details']
@@ -938,7 +937,7 @@ class TestPayloadGeneration:
         rqt_event = query_completion_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
         # Validate common payload fields
-        validate_common_payload_fields(rqt_event, expected_source='datadog_query_completions', expected_type='rqt')
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'
@@ -997,7 +996,7 @@ class TestPayloadGeneration:
         rqt_event = error_events_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
         # Validate common payload fields
-        validate_common_payload_fields(rqt_event, expected_source='datadog_query_errors', expected_type='rqt')
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'
@@ -1097,7 +1096,7 @@ class TestPayloadGeneration:
         rqt_event = error_events_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
         # Validate common payload fields
-        validate_common_payload_fields(rqt_event, expected_source='datadog_query_errors', expected_type='rqt')
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'

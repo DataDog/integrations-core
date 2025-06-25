@@ -12,6 +12,7 @@ Supported vendors: NVIDIA.
 ## Requirements
 
 - NVIDIA driver version: 450.51 and above
+- Datadog agent version: 7.65 and above
 - Supported OS: Linux only
 - Linux kernel version: 5.8 and above
 
@@ -108,6 +109,8 @@ For Helm configurations where all the nodes have GPUs, you can set up the Datado
 
 ```yaml
 datadog:
+  enable_nvml_detection: true
+  collect_gpu_tags: true
   gpuMonitoring:
     enabled: true
 ```
@@ -142,6 +145,8 @@ Additionally, if you need to select nodes based on the presence of a label key, 
 # GPU-specific values-gpu.yaml (for GPU nodes)
 datadog:
   kubeStateMetricsEnabled: false # Disabled as we're joining an existing Cluster Agent
+  enable_nvml_detection: true
+  collect_gpu_tags: true
   gpuMonitoring:
     enabled: true
 
@@ -174,6 +179,8 @@ helm install -f values.yaml -f values-gpu.yaml datadog-gpu datadog
 
 #### Datadog Operator
 
+_**Minimum required operator version: 1.14**_
+
 To enable the GPU feature in clusters where all the nodes have GPUs, set the `features.gpu.enabled` parameter in the DatadogAgent manifest:
 
 ```yaml
@@ -185,6 +192,18 @@ spec:
   features:
     gpu:
       enabled: true
+  # for operator versions 1.14.x and 1.15.x  add this section
+  override:
+    nodeAgent:
+      containers:
+        agent:
+          env:
+            # add this env var, if using operator version 1.14.x
+            - name: DD_ENABLE_NVML_DETECTION
+              value: "true" 
+            # add this env var, if using operator versions 1.14.x or 1.15.x
+            - name: DD_COLLECT_GPU_TAGS
+              value: "true" 
 ```
 
 For **mixed environments**, use the [DatadogAgentProfiles feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. In this case, it is not necessary to modify the DatadogAgent manifest. Instead, create a profile that enables the configuration on GPU nodes only:
@@ -209,6 +228,14 @@ spec:
           system-probe:
             env:
               - name: DD_GPU_MONITORING_ENABLED
+                value: "true"
+          # add this env var, if using operator version 1.14.x      
+          agent:
+            env:
+              - name: DD_ENABLE_NVML_DETECTION
+                value: "true" 
+              # add this env var, if using operator versions 1.14.x or 1.15.x
+              - name: DD_COLLECT_GPU_TAGS
                 value: "true"
 ```
 

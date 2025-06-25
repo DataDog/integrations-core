@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2025-05-30",
+    "last_updated_at": "2025-05-30",
+    "title": "High rate of unprevented threats detected",
+    "description": "It monitors the rate of unprevented threats detected on an asset. A high rate indicates potential security gaps or ineffective controls, increasing the risk of breaches and compromising system integrity.",
+    "definition": {
+        "id": 173398529,
+        "name": "High rate of unprevented threats detected",
+        "type": "query alert",
+        "query": "avg(last_5m):((sum:iboss.threat.asset.threat_count{*} by {asset_id,asset_name} - sum:iboss.threat.asset.prevented_threat_count{*} by {asset_id,asset_name}) / sum:iboss.threat.asset.threat_count{*} by {asset_id,asset_name}) * 100 >= 5",
+        "message": "{{#is_warning}}⚠️ **Warning**: The rate of unprevented threats has exceeded the warning threshold for the asset below:\n\n- **Asset ID**: {{asset_id.name}}  \n- **Asset Name**: {{asset_name.name}}  \n- **Current Value**: {{value}}%  \n- **Warning Threshold**: {{warn_threshold}}%\n{{/is_warning}}\n\n\n{{#is_alert}}🚨 **Alert**: The rate of unprevented threats has exceeded the critical threshold for the asset below:\n\n- **Asset ID**: {{asset_id.name}}  \n- **Asset Name**: {{asset_name.name}}  \n- **Current Value**: {{value}}%  \n- **Alert Threshold**: {{threshold}}%\n{{/is_alert}}\n\n\n@example@example.com",
+        "tags": [
+            "integration:iboss"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 5,
+                "warning": 2
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:iboss"
+    ]
+}

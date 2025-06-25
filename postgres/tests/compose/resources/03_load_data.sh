@@ -69,7 +69,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
 EOSQL
 
 # Create publication for logical replication tests
-if [[ !("$PG_MAJOR" == 9.*) ]]; then
+if [[ ! ("$PG_MAJOR" == 9.*) ]]; then
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -p5432 datadog_test <<-EOSQL
     CREATE PUBLICATION publication_persons for table persons_indexed;
     CREATE PUBLICATION publication_cities for table cities;
@@ -77,7 +77,7 @@ psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -p5432 datadog_test <<-EOSQL
 EOSQL
 fi
 
-if [[ !("$PG_MAJOR" == 9.*) && !("$PG_MAJOR" == 10) ]]; then
+if [[ ! ("$PG_MAJOR" == 9.*) && ! ("$PG_MAJOR" == 10) ]]; then
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE test_part (id SERIAL PRIMARY KEY, filler text) PARTITION BY RANGE (id);
     CREATE TABLE test_part1 PARTITION OF test_part FOR VALUES FROM (MINVALUE) TO (500);
