@@ -519,6 +519,8 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
+integration/proofpoint_tap:
+- proofpoint_tap/**/*
 integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
