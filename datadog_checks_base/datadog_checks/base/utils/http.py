@@ -29,7 +29,7 @@ from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .network import create_socket_connection
 from .time import get_timestamp
-from .tls import create_ssl_context, TlsConfig, DEFAULT_PROTOCOL_VERSIONS, SUPPORTED_PROTOCOL_VERSIONS
+from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -83,7 +83,7 @@ STANDARD_FIELDS = {
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
     'username': None,
-    **TlsConfig().__dict__  # This will include all TLS-related fields
+    **TlsConfig().__dict__,  # This will include all TLS-related fields
 }
 # For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
@@ -128,6 +128,7 @@ def get_tls_config_from_options(new_options):
         tls_config["tls_cert"] = cert[0]
         tls_config["tls_private_key"] = cert[1]
     return tls_config
+
 
 def update_session_https_adapter(session, tls_config):
     return session
@@ -654,7 +655,6 @@ class RequestsWrapper(object):
         # Cache the adapter for reuse
         self._https_adapters[tls_config_key] = https_adapter
         session.mount('https://', https_adapter)
-
 
 
 @contextmanager
