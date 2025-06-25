@@ -8,7 +8,7 @@ This check collects distributed system observability metrics from [Envoy][1].
 
 ### Security
 
-[Datadog App & API Protection][30] extends visibility and inline threat mitigation to your Envoy proxy instance.
+[Datadog App and API Protection][30] extends visibility and inline threat mitigation to your Envoy proxy instance.
 
 With this integration, you can detect and block attacks such as API abuse, business logic exploitation, and code layer threats directly at the edge of your cloud infrastructure.
 
@@ -183,13 +183,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 [Run the Agent's status subcommand][13] and look for `envoy` under the Checks section.
 
-### Installation (Security - App & API Protection)
+### Installation (Security - App and API Protection)
 
 The installation process requires a different approach than enabling this integration.
 
 #### Envoy
 
-The installation instructions are available in the [Enabling App & API Protection for Envoy][31] documentation.
+The installation instructions are available in the [Enabling App and API Protection for Envoy][31] documentation.
 
 #### Istio
 
@@ -197,7 +197,7 @@ The installation instructions are available in the [Enabling App and API Protect
 
 #### Validation
 
-To validate App & API Protection threat detection, send known attack patterns to your Envoy instance. For example, you can trigger the Security Scanner Detected rule by running the following curl script:
+To validate App and API Protection threat detection, send known attack patterns to your Envoy instance. For example, you can trigger the Security Scanner Detected rule by running the following curl script:
 
 ```sh
 for ((i=1;i<=250;i++)); 
@@ -209,7 +209,7 @@ do
 done
 ```
 
-A few minutes after enabling the App & API Protection for Envoy and sending known attack patterns, threat information will appear in the Application Signals Explorer.
+A few minutes after enabling the App and API Protection for Envoy and sending known attack patterns, threat information will appear in the Application Signals Explorer.
 
 ## Data Collected
 
