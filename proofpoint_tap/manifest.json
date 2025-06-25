@@ -26,6 +26,14 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "Proofpoint TAP - Overview": "assets/dashboards/proofpoint_tap_overview.json",
+      "Proofpoint TAP - Clicks Insights": "assets/dashboards/proofpoint_tap_clicks_insights.json",
+      "Proofpoint TAP - Messages Insights": "assets/dashboards/proofpoint_tap_messages_insights.json"
+    },
+    "logs": {
+      "source": "proofpoint-tap"
     }
   },
   "author": {
