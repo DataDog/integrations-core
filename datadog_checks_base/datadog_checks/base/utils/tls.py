@@ -5,7 +5,8 @@ import logging
 import os
 import ssl
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
+from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
+from dataclasses import dataclass
 
 from ..config import is_affirmative
 
@@ -21,6 +22,10 @@ LOGGER = logging.getLogger(__file__)
 # prefix.
 UNIQUE_FIELD_PREFIX = '_tls_context_'
 
+# https://github.com/python/cpython/blob/ef516d11c1a0f885dba0aba8cf5366502077cdd4/Lib/ssl.py#L158-L165
+DEFAULT_PROTOCOL_VERSIONS = ('SSLv3', 'TLSv1.2', 'TLSv1.3')
+SUPPORTED_PROTOCOL_VERSIONS = ('SSLv3', 'TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3')
+
 STANDARD_FIELDS = {
     'tls_verify': True,
     'tls_ca_cert': None,
@@ -30,6 +35,22 @@ STANDARD_FIELDS = {
     'tls_validate_hostname': True,
     'tls_ciphers': 'ALL',
 }
+
+@dataclass(frozen=True, eq=True)
+class TlsConfig:
+    """
+    Class used internally to cache HTTPS adapters with specific TLS configurations.
+    """
+    tls_ca_cert: str | None = None
+    tls_cert: str | None = None
+    tls_ciphers: str = 'ALL'
+    tls_use_host_header: bool = False
+    tls_ignore_warning: bool = False
+    tls_private_key: str | None = None
+    tls_private_key_password: str | None = None
+    tls_protocols_allowed: tuple[str, ...] = DEFAULT_PROTOCOL_VERSIONS
+    tls_validate_hostname: bool = True
+    tls_verify: bool = True
 
 
 def create_ssl_context(config):
