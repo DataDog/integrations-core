@@ -7,32 +7,34 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.base.utils.common import get_docker_hostname
-from datadog_checks.dev import WaitFor, docker_run, run_command
-
 from .common import CONFIG, INSTANCE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HOST = get_docker_hostname()
 
 E2E_METADATA = {
+    "agent_type": "vagrant",
+    "vagrant_guest_os": "linux",
     "start_commands": [
-        "apt-get update",
-        'apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker.io',
+        "sudo apt update",
+        "sudo apt install -y software-properties-common",
+        "sudo add-apt-repository -y ppa:gluster/glusterfs-7",
+        "sudo apt install -y glusterfs-server glusterfs-client",
+        "sudo systemctl start glusterd",
+        "sudo systemctl enable glusterd",
+        "sudo mkdir -p /gluster/brick1",
+        "sudo gluster volume create volume1 172.30.1.5:/gluster/brick1 force",
+        "sudo gluster volume start volume1",
+        "sudo mkdir -p /gluster/brick2",
+        "sudo gluster volume create volume2 172.30.1.5:/gluster/brick2 force",
+        "sudo gluster volume start volume2",
     ],
-    "docker_volumes": ["/var/run/docker.sock:/var/run/docker.sock"],
 }
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    compose_file = os.path.join(HERE, "docker", "docker-compose.yaml")
-    with docker_run(
-        compose_file=compose_file,
-        conditions=[WaitFor(create_volume)],
-        down=delete_volume,
-    ):
-        yield CONFIG, E2E_METADATA
+    vm_config = copy.deepcopy(CONFIG)
+    yield vm_config, E2E_METADATA
 
 
 @pytest.fixture
@@ -53,33 +55,3 @@ def mock_gstatus_data():
 
     with mock.patch("datadog_checks.glusterfs.check.GlusterfsCheck.get_gstatus_data", return_value=data):
         yield
-
-
-def create_volume():
-    # The image for some reason doesn't actually start glusterd. So the below two lines will start it manually.
-    # Tried also adding the command to the Dockerfile, but that didn't work either. So leaving this here for now.
-    run_command(
-        "docker exec gluster-node-2 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
-        capture=True,
-        check=False,
-    )
-    run_command(
-        "docker exec gluster-node-1 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
-        capture=True,
-        check=False,
-    )
-
-    commands = [
-        "node-2 mkdir -p /export-test",
-        "node-1 mkdir -p /export-test",
-        "node-1 gluster peer probe gluster-node-2",
-        "node-1 gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force",
-        "node-1 gluster volume start gv0",
-    ]
-
-    for command in commands:
-        run_command(f"docker exec gluster-{command}", capture=True, check=True)
-
-
-def delete_volume():
-    run_command("docker exec gluster-node-1 gluster volume delete gv0", capture=True, check=True)
