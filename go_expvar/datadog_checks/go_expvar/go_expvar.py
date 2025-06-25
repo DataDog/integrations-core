@@ -67,7 +67,7 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 
 class GoExpvar(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
-        'ssl_verify': {'name': 'tls_verify', 'default': None},
+        'ssl_verify': {'name': 'tls_verify', 'default': False},
         'ssl_certfile': {'name': 'tls_cert', 'default': None},
         'ssl_keyfile': {'name': 'tls_private_key', 'default': None},
     }
