@@ -65,6 +65,7 @@ def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expec
         aggregator.assert_metric(metric)
 
 
+# TODO: parametrize
 def test_lnet_stats(aggregator, instance, mock_client):
     with mock.patch.object(LustreCheck, 'lnet_get_stats') as mock_get:
         with open(os.path.join(FIXTURES_DIR, 'all_lnet_stats.txt'), 'r') as f:

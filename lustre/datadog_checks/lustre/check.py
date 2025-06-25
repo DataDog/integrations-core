@@ -87,6 +87,9 @@ class LustreCheck(AgentCheck):
             self.log.error(f'Failed to determine node type: {e}')
             return 'client'
 
+    # TODO: add timeouts to subprocess calls
+    # TODO: confider abstracting to lctl.run() method
+    # TODO: same for lnet
     def lctl_list_param(self, param_regex):
         '''
         List the parameters from the command line.
