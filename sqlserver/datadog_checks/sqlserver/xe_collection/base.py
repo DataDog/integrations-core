@@ -25,6 +25,8 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 from datadog_checks.sqlserver.utils import is_azure_sql_database
 from .xml_tools import extract_int_value, extract_value
 
+from .xml_tools import extract_int_value, extract_value
+
 try:
     import datadog_agent
 except ImportError:
@@ -467,7 +469,6 @@ class XESessionBase(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": self._determine_dbm_type(),
-            "event_source": self.session_name,
             "collection_interval": self.collection_interval,
             "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time() * 1000,
@@ -599,7 +600,6 @@ class XESessionBase(DBMAsyncJob):
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": self._determine_dbm_type(),
-                "event_source": self.session_name,
                 "collection_interval": self.collection_interval,
                 "ddtags": self._check.tag_manager.get_tags(),
                 "timestamp": time() * 1000,
@@ -798,7 +798,6 @@ class XESessionBase(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "rqt",
-            "event_source": self.session_name,
             "ddtags": ",".join(self._check.tag_manager.get_tags()),
             'service': self._config.service,
             "db": db_fields,
