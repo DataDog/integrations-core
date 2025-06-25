@@ -626,11 +626,15 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
+                
+                # Do not submit plan events if no plan is available
+                if not raw_plan:
+                    continue
+                    
                 obfuscated_plan, collection_errors = None, None
 
                 try:
-                    if raw_plan:
-                        obfuscated_plan = obfuscate_xml_plan(raw_plan, self._config.obfuscator_options)
+                    obfuscated_plan = obfuscate_xml_plan(raw_plan, self._config.obfuscator_options)
                 except Exception as e:
                     context = (
                         "query_signature=[{0}] query_hash=[{1}] query_plan_hash=[{2}] plan_handle=[{3}] err=[{4}]"
