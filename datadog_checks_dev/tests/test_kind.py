@@ -33,8 +33,10 @@ class TestKindRun:
             else:
                 expected_exception = Exception
 
-        with pytest.raises(expected_exception), patch('datadog_checks.dev.kind.KindUp'), patch(
-            'datadog_checks.dev.kind.KindDown'
+        with (
+            pytest.raises(expected_exception),
+            patch('datadog_checks.dev.kind.KindUp'),
+            patch('datadog_checks.dev.kind.KindDown'),
         ):
             with kind_run(attempts=attempts, conditions=[condition], attempts_wait=0):
                 pass
@@ -48,8 +50,9 @@ class TestKindRun:
         up = MagicMock()
         up.return_value = ""
 
-        with patch('datadog_checks.dev.kind.KindUp', return_value=up), patch(
-            'datadog_checks.dev.kind.KindDown', return_value=MagicMock()
+        with (
+            patch('datadog_checks.dev.kind.KindUp', return_value=up),
+            patch('datadog_checks.dev.kind.KindDown', return_value=MagicMock()),
         ):
             with kind_run(attempts=3, conditions=[condition], attempts_wait=0):
                 pass

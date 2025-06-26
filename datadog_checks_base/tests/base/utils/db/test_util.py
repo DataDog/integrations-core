@@ -371,7 +371,7 @@ def test_dbm_async_job_inactive_stop(aggregator):
         pytest.param({"foo": decimal.Decimal("1.0")}, id='dict-with-decimal'),
         pytest.param({"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)}, id='dict-with-datetime'),
         pytest.param({"foo": datetime.date(2020, 1, 1)}, id='dict-with-date'),
-        pytest.param({"foo": IPv4Address(u"192.168.1.1")}, id='dict-with-IPv4Address'),
+        pytest.param({"foo": IPv4Address("192.168.1.1")}, id='dict-with-IPv4Address'),
     ],
 )
 def test_default_json_event_encoding(input):

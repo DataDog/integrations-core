@@ -16,9 +16,9 @@ class TestTimedCache:
 
     def test_get_with_default(self):
         cache = TimedCache(600)
-        assert (
-            cache.get('nonexistent', 'default') == 'default'
-        ), "Should return the default value when the key is not found."
+        assert cache.get('nonexistent', 'default') == 'default', (
+            "Should return the default value when the key is not found."
+        )
 
     def test_item_deletion(self):
         cache = TimedCache(600)
