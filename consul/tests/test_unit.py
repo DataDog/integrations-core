@@ -188,7 +188,7 @@ def test_service_checks(aggregator):
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
         "consul_service:server-loadbalancer",
-        "consul_node:node-1",
+        "consul_node:node-2",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -318,7 +318,7 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-loadbalancer',
         'consul_service_id:server-loadbalancer',
         'consul_service:server-loadbalancer',
-        'consul_node:node-1',
+        'consul_node:node-2',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
