@@ -133,7 +133,7 @@ files:
         example: true
       enabled: true
 
-    - name: node_health_check
+    - name: health_check_metric
       description: |
         Whether to enable new node health checks from this instance.
       value:

@@ -230,15 +230,15 @@ def test_service_checks(aggregator):
 
 
 @pytest.mark.parametrize(
-    'node_health_check, expected_metric_count, expected_metric_total',
+    'health_check_metric, expected_metric_count, expected_metric_total',
     [
-        pytest.param(True, 1, 6, id="node_health_check enabled"),
-        pytest.param(False, 0, 0, id="node_health_check disabled"),
+        pytest.param(True, 1, 6, id="health_check_metric enabled"),
+        pytest.param(False, 0, 0, id="health_check_metric disabled"),
     ],
 )
-def test_node_health_checks(aggregator, node_health_check, expected_metric_count, expected_metric_total):
+def test_health_checks(aggregator, health_check_metric, expected_metric_count, expected_metric_total):
     config = consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG
-    config['node_health_check'] = node_health_check
+    config['health_check_metric'] = health_check_metric
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
@@ -253,7 +253,7 @@ def test_node_health_checks(aggregator, node_health_check, expected_metric_count
         'consul_node:node-2',
         'consul_status:passing',
     ]
-    aggregator.assert_metric('consul.node.up', 1, tags=expected_tags, count=expected_metric_count)
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
 
     expected_tags = [
         'check:server-api',
@@ -262,7 +262,7 @@ def test_node_health_checks(aggregator, node_health_check, expected_metric_count
         'consul_service:server-loadbalancer',
         'consul_status:passing',
     ]
-    aggregator.assert_metric('consul.node.up', 1, tags=expected_tags, count=expected_metric_count)
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
 
     expected_tags = [
         'check:server-api',
@@ -271,7 +271,7 @@ def test_node_health_checks(aggregator, node_health_check, expected_metric_count
         'consul_service_id:server-loadbalancer',
         'consul_status:passing',
     ]
-    aggregator.assert_metric('consul.node.up', 1, tags=expected_tags, count=expected_metric_count)
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
 
     expected_tags = [
         'check:server-api',
@@ -281,7 +281,7 @@ def test_node_health_checks(aggregator, node_health_check, expected_metric_count
         'consul_service_id:server-loadbalancer',
         'consul_status:passing',
     ]
-    aggregator.assert_metric('consul.node.up', 1, tags=expected_tags, count=expected_metric_count)
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
 
     expected_tags = [
         'check:server-status-empty',
@@ -291,7 +291,7 @@ def test_node_health_checks(aggregator, node_health_check, expected_metric_count
         'consul_service_id:server-empty',
         'consul_status:',
     ]
-    aggregator.assert_metric('consul.node.up', 0, tags=expected_tags, count=expected_metric_count)
+    aggregator.assert_metric('consul.check.up', 0, tags=expected_tags, count=expected_metric_count)
 
     expected_tags = [
         'check:server-loadbalancer',
@@ -301,9 +301,9 @@ def test_node_health_checks(aggregator, node_health_check, expected_metric_count
         'consul_service_id:server-loadbalancer',
         'consul_status:critical',
     ]
-    aggregator.assert_metric('consul.node.up', 3, tags=expected_tags, count=expected_metric_count)
+    aggregator.assert_metric('consul.check.up', 3, tags=expected_tags, count=expected_metric_count)
 
-    aggregator.assert_metric('consul.node.up', count=expected_metric_total)
+    aggregator.assert_metric('consul.check.up', count=expected_metric_total)
 
 
 def test_service_checks_disable_service_tag(aggregator):

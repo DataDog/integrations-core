@@ -68,6 +68,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
+    health_check_metric: Optional[bool] = None
     kerberos_auth: Optional[str] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
@@ -81,7 +82,6 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     network_latency_checks: Optional[bool] = None
     new_leader_checks: Optional[bool] = None
-    node_health_check: Optional[bool] = None
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None

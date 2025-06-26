@@ -22,9 +22,9 @@ from .common import (
     CONSUL_CATALOG_CHECK,
     CONSUL_CHECK,
     HEALTH_CHECK,
+    HEALTH_CHECK_METRIC,
     MAX_CONFIG_TTL,
     MAX_SERVICES,
-    NODE_HEALTH_CHECK,
     SOURCE_TYPE_NAME,
     STATUS_SC,
     STATUS_SEVERITY,
@@ -110,8 +110,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
-        self.node_health_check = self.instance.get(
-            'node_health_check', self.init_config.get('node_health_check', False)
+        self.health_check_metric = self.instance.get(
+            'health_check_metric', self.init_config.get('health_check_metric', False)
         )
 
         if self.threads_count > 1:
@@ -370,7 +370,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 if status is None:
                     status = self.UNKNOWN
 
-                if self.node_health_check or sc_id not in service_checks:
+                if self.health_check_metric or sc_id not in service_checks:
                     tags = ["check:{}".format(check["CheckID"])]
                     if check["ServiceName"]:
                         tags.append('consul_service:{}'.format(check['ServiceName']))
@@ -382,11 +382,11 @@ class ConsulCheck(OpenMetricsBaseCheck):
                     if check["Node"]:
                         tags.append("consul_node:{}".format(check["Node"]))
 
-                    if self.node_health_check:
+                    if self.health_check_metric:
                         status_value = STATUS_SEVERITY.get(status)
                         node_tags = copy.deepcopy(tags)
                         node_tags.append(f"consul_status:{check['Status']}")
-                        self.gauge(NODE_HEALTH_CHECK, status_value, tags=main_tags + node_tags)
+                        self.gauge(HEALTH_CHECK_METRIC, status_value, tags=main_tags + node_tags)
 
                     if sc_id not in service_checks:
                         service_checks[sc_id] = {'status': status, 'tags': tags}

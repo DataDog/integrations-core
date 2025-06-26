@@ -40,6 +40,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_health_check_metric():
+    return False
+
+
 def instance_kerberos_auth():
     return 'disabled'
 
@@ -69,10 +73,6 @@ def instance_network_latency_checks():
 
 
 def instance_new_leader_checks():
-    return False
-
-
-def instance_node_health_check():
     return False
 
 

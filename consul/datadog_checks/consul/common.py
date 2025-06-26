@@ -9,7 +9,7 @@ from datadog_checks.base import AgentCheck
 CONSUL_CHECK = 'consul.up'
 CONSUL_CAN_CONNECT = 'consul.can_connect'
 HEALTH_CHECK = 'consul.check'
-NODE_HEALTH_CHECK = 'consul.node.up'
+HEALTH_CHECK_METRIC = 'consul.check.up'
 
 CONSUL_CATALOG_CHECK = 'consul.catalog'
 

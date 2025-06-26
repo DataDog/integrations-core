@@ -1,1 +1,1 @@
-Add option to emit new `consul.node.up` metric
+Add option to emit new `consul.check.up` metric

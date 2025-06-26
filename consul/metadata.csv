@@ -54,7 +54,7 @@ consul.net.node.latency.p75,gauge,,millisecond,,[Integration] P75 latency from t
 consul.net.node.latency.p90,gauge,,millisecond,,[Integration] P90 latency from this node to all others,-1,consul,p90 latency,
 consul.net.node.latency.p95,gauge,,millisecond,,[Integration] P95 latency from this node to all others,-1,consul,p95 latency,
 consul.net.node.latency.p99,gauge,,millisecond,,[Integration] P99 latency from this node to all others,-1,consul,p99 latency,
-consul.node.up,gauge,,,,"A metric representing the status of a service check on a node. A value of 0 = unavailable, 1 = passing, 2 = warning, 3 = critical",-1,consul,node up,
+consul.check.up,gauge,,,,"A metric representing the status of a service check. A value of 0 = unavailable, 1 = passing, 2 = warning, 3 = critical",-1,consul,node up,
 consul.peers,gauge,,,,[Integration] The number of peers in the peer set,0,consul,peer,cpu|memory
 consul.raft.apply,count,10,transaction,,[DogStatsD] [Prometheus] The number of raft transactions occurring,0,consul,raft trans,
 consul.raft.commitTime.95percentile,gauge,10,millisecond,,[DogStatsD] The p95 time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt p95,
