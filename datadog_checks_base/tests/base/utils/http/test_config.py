@@ -79,7 +79,7 @@ class TestVerify:
 
         with mock.patch.object(ssl.SSLContext, 'load_verify_locations') as mock_load_verify_locations:
             http = RequestsWrapper(instance, init_config)
-            http.session
+            http.get('https://example.com')
 
             assert mock_load_verify_locations.call_count == 1
             assert mock_load_verify_locations.call_args[1]['cafile'] == 'ca_cert'
@@ -90,7 +90,7 @@ class TestVerify:
 
         with mock.patch.object(ssl.SSLContext, 'load_verify_locations') as mock_load_verify_locations:
             http = RequestsWrapper(instance, init_config)
-            http.session
+            http.get('https://example.com')
 
             assert http.options['verify'] == 'ca_cert'
             assert mock_load_verify_locations.call_count == 1
