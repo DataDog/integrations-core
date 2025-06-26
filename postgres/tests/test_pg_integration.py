@@ -45,6 +45,7 @@ from .common import (
     check_stat_replication_physical_slot,
     check_stat_wal_metrics,
     check_uptime_metrics,
+    check_wait_event_metrics,
     check_wal_receiver_metrics,
     requires_static_version,
 )
@@ -96,6 +97,14 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
+    expected_wait_event_tags = expected_tags + [
+        'app:datadog-agent',
+        'user:datadog',
+        'db:datadog_test',
+        'backend_type:client backend',
+        'wait_event:NoWaitEvent',
+    ]
+    check_wait_event_metrics(aggregator, expected_tags=expected_wait_event_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
 
