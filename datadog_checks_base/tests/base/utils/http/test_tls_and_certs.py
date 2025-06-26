@@ -303,9 +303,10 @@ class TestAIAChasing:
             with mock.patch('ssl.SSLContext.load_verify_locations') as mock_load_verify_locations:
                 http = RequestsWrapper(instance, init_config)
                 assert http.session.verify is True  # The session attribute instantiates the SSLContext
-                mock_load_verify_locations.assert_called_with(
-                    cadata='\n'.join(instance['tls_intermediate_ca_certs'])
-                )
+                assert mock_load_verify_locations.call_count >= 1
+                all_calls = mock_load_verify_locations.mock_calls
+                # Assert that the last call contains the intermediate CA certs
+                assert all_calls[-1].kwargs["cadata"] == "\n".join(instance['tls_intermediate_ca_certs'])
 
 
 class TestSSLContext:
