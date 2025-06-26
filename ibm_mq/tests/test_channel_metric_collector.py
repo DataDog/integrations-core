@@ -176,7 +176,7 @@ def test_channel_status_metrics(instance):
         )
         # Verify the connection metric was submitted
         collector.gauge.assert_any_call(
-            'ibm_mq.channel.conns',
+            'ibm_mq.channel.conn_status',
             1,
             tags=[
                 'queue_manager:QM1',
@@ -186,6 +186,47 @@ def test_channel_status_metrics(instance):
                 'port:11414',
                 'channel:TEST.CHANNEL',
                 'connection:192.168.1.1(1414)',
+            ],
+            hostname=None,
+        )
+
+
+def test_connections_active_metric(instance):
+    # Patch pymqi.PCFExecute before creating the collector
+    with patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute') as mock_pcf:
+        # Mock two running channel instances and one stopped
+        channel_info_running_1 = {
+            pymqi.CMQCFC.MQCACH_CHANNEL_NAME: b'TEST.CHANNEL',
+            pymqi.CMQCFC.MQIACH_CHANNEL_STATUS: pymqi.CMQCFC.MQCHS_RUNNING,
+        }
+        channel_info_running_2 = {
+            pymqi.CMQCFC.MQCACH_CHANNEL_NAME: b'TEST.CHANNEL',
+            pymqi.CMQCFC.MQIACH_CHANNEL_STATUS: pymqi.CMQCFC.MQCHS_RUNNING,
+        }
+        channel_info_stopped = {
+            pymqi.CMQCFC.MQCACH_CHANNEL_NAME: b'TEST.CHANNEL',
+            pymqi.CMQCFC.MQIACH_CHANNEL_STATUS: pymqi.CMQCFC.MQCHS_STOPPED,
+        }
+        mock_pcf_instance = Mock()
+        mock_pcf_instance.MQCMD_INQUIRE_CHANNEL_STATUS.return_value = [
+            channel_info_running_1, channel_info_running_2, channel_info_stopped
+        ]
+        mock_pcf.return_value = mock_pcf_instance
+        config = IBMMQConfig(instance, {})
+        collector = ChannelMetricCollector(config, service_check=Mock(), gauge=Mock(), log=Mock())
+        queue_manager = Mock()
+        collector._submit_channel_status(queue_manager, 'TEST.CHANNEL', config.tags_no_channel)
+        # Should submit connections_active = 2
+        collector.gauge.assert_any_call(
+            'ibm_mq.channel.connections_active',
+            2,
+            tags=[
+                'queue_manager:QM1',
+                'connection_name:localhost(11414)',
+                'foo:bar',
+                'mq_host:localhost',
+                'port:11414',
+                'channel:TEST.CHANNEL',
             ],
             hostname=None,
         )

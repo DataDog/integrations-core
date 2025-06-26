@@ -226,7 +226,8 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.mca_status', GAUGE),
     ('ibm_mq.channel.msgs', GAUGE),
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
-    ('ibm_mq.channel.conns', GAUGE),
+    ('ibm_mq.channel.conn_status', GAUGE),
+    ('ibm_mq.channel.connections_active', GAUGE),
 ]
 
 CHANNEL_STATS_METRICS = [
