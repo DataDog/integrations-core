@@ -12,7 +12,7 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import Literal, Optional, Type, TypedDict
+from typing import Literal, Optional, Type, TypedDict, overload
 
 import matplotlib.pyplot as plt
 import requests
@@ -760,12 +760,34 @@ def draw_treemap_rects_with_labels(
             )
 
 
+@overload
 def send_metrics_to_dd(
     app: Application,
     modules: list[FileDataEntryPlatformVersion],
     org: str,
     key: str,
     compressed: bool,
+    mode: Literal["status"],
+    commits: None,
+) -> None: ...
+@overload
+def send_metrics_to_dd(
+    app: Application,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str,
+    key: str,
+    compressed: bool,
+    mode: Literal["diff"],
+    commits: list[str],
+) -> None: ...
+def send_metrics_to_dd(
+    app: Application,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str,
+    key: str,
+    compressed: bool,
+    mode: Literal["status", "diff"],
+    commits: list[str] | None,
 ) -> None:
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
@@ -778,8 +800,12 @@ def send_metrics_to_dd(
     if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
-    message, tickets, prs = get_last_commit_data()
-    timestamp = get_last_commit_timestamp()
+    if mode == "status":
+        message, tickets, prs = get_last_commit_data()
+        timestamp = get_last_commit_timestamp()
+    elif mode == "diff":
+        message, tickets, prs = get_last_commit_data(commits[1])
+        timestamp = get_last_commit_timestamp(commits[1])
 
     metrics = []
     n_integrations_metrics = []
@@ -787,16 +813,16 @@ def send_metrics_to_dd(
 
     n_integrations: dict[tuple[str, str], int] = {}
     n_dependencies: dict[tuple[str, str], int] = {}
-
+    prev_commit = check_commits(commits)
     for item in modules:
         metrics.append(
             {
-                "metric": f"{metric_name}.size",
+                "metric": f"{metric_name}.{mode}",
                 "type": "gauge",
                 "points": [(timestamp, item["Size_Bytes"])],
                 "tags": [
-                    f"name:{item['Name']}",
-                    f"type:{item['Type']}",
+                    f"module_name:{item['Name']}",
+                    f"module_type:{item['Type']}",
                     f"name_type:{item['Type']}({item['Name']})",
                     f"python_version:{item['Python_Version']}",
                     f"module_version:{item['Version']}",
@@ -807,7 +833,8 @@ def send_metrics_to_dd(
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                     f"commit_message:{message}",
-                ],
+                ]
+                + ([f"to_prev_commit:{prev_commit}"] if mode == "diff" else []),
             }
         )
         key_count = (item['Platform'], item['Python_Version'])
@@ -820,34 +847,35 @@ def send_metrics_to_dd(
         elif item['Type'] == 'Dependency':
             n_dependencies[key_count] += 1
 
-    for (platform, py_version), count in n_integrations.items():
-        n_integrations_metrics.append(
-            {
-                "metric": f"{metric_name}.integration_count",
-                "type": "gauge",
-                "points": [(timestamp, count)],
-                "tags": [
-                    f"platform:{platform}",
-                    f"python_version:{py_version}",
-                    "team:agent-integrations",
-                    f"metrics_version:{METRIC_VERSION}",
-                ],
-            }
-        )
-    for (platform, py_version), count in n_dependencies.items():
-        n_dependencies_metrics.append(
-            {
-                "metric": f"{metric_name}.dependency_count",
-                "type": "gauge",
-                "points": [(timestamp, count)],
-                "tags": [
-                    f"platform:{platform}",
-                    f"python_version:{py_version}",
-                    "team:agent-integrations",
-                    f"metrics_version:{METRIC_VERSION}",
-                ],
-            }
-        )
+    if mode == "status":
+        for (platform, py_version), count in n_integrations.items():
+            n_integrations_metrics.append(
+                {
+                    "metric": f"{metric_name}.integration_count",
+                    "type": "gauge",
+                    "points": [(timestamp, count)],
+                    "tags": [
+                        f"platform:{platform}",
+                        f"python_version:{py_version}",
+                        "team:agent-integrations",
+                        f"metrics_version:{METRIC_VERSION}",
+                    ],
+                }
+            )
+        for (platform, py_version), count in n_dependencies.items():
+            n_dependencies_metrics.append(
+                {
+                    "metric": f"{metric_name}.dependency_count",
+                    "type": "gauge",
+                    "points": [(timestamp, count)],
+                    "tags": [
+                        f"platform:{platform}",
+                        f"python_version:{py_version}",
+                        "team:agent-integrations",
+                        f"metrics_version:{METRIC_VERSION}",
+                    ],
+                }
+            )
 
     initialize(
         api_key=config_file_info["api_key"],
@@ -855,8 +883,9 @@ def send_metrics_to_dd(
     )
 
     api.Metric.send(metrics=metrics)
-    api.Metric.send(metrics=n_integrations_metrics)
-    api.Metric.send(metrics=n_dependencies_metrics)
+    if mode == "status":
+        api.Metric.send(metrics=n_integrations_metrics)
+        api.Metric.send(metrics=n_dependencies_metrics)
 
 
 def get_org(app: Application, org: str) -> dict[str, str]:
@@ -892,13 +921,21 @@ def is_everything_committed() -> bool:
     return result.stdout.strip() == ""
 
 
-def get_last_commit_timestamp() -> int:
-    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
+def get_last_commit_timestamp(commit: Optional[str] = None) -> int:
+    if commit:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%ct", commit], capture_output=True, text=True, check=True
+        )
+    else:
+        result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
     return int(result.stdout.strip())
 
 
-def get_last_commit_data() -> tuple[str, list[str], list[str]]:
-    result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
+def get_last_commit_data(commit: Optional[str] = None) -> tuple[str, list[str], list[str]]:
+    if commit:
+        result = subprocess.run(["git", "log", "-1", "--format=%s", commit], capture_output=True, text=True, check=True)
+    else:
+        result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
 
@@ -911,6 +948,28 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
     if not prs:
         prs = [""]
     return message, tickets, prs
+
+
+def check_commits(commits: list[str] | None) -> str:
+    # Check if commits are from master branch
+    for commit in commits:
+        result = subprocess.run(["git", "branch", "--contains", commit], capture_output=True, text=True, check=True)
+        if "master" not in result.stdout:
+            return False
+
+    # Check if commits are in sequence by verifying commit2 is parent of commit1
+    result = subprocess.run(
+        ["git", "rev-parse", f"{commits[1]}^"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    parent_commit = result.stdout.strip()
+
+    if parent_commit != commits[1]:
+        raise ValueError("Second commit must be the direct parent of first commit. Metrics cannot be uploaded.")
+
+    return True
 
 
 class WrongDependencyFormat(Exception):

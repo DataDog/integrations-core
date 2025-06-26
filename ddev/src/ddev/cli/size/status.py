@@ -84,7 +84,7 @@ def status(
         if format:
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
         if to_dd_org or to_dd_key:
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, compressed)
+            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, compressed, "status")
     except Exception as e:
         app.abort(str(e))
 
