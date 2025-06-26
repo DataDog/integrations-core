@@ -54,41 +54,33 @@ def test_check(dd_run_check, aggregator, instance):
 )
 def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expected_metrics):
     instance = {'node_type': node_type}
-    with mock.patch.object(LustreCheck, 'lctl_list_param') as mock_list_param:
-        with mock.patch.object(LustreCheck, 'lctl_get_param') as mock_get_param:
-            mock_list_param.return_value = ['some.job_stats.param']
+    def mock_run_command(bin, *args):
+        if args[0] == 'list_param':
+            return 'some.job_stats.param'
+        elif args[0] == 'get_param':
             with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
-                mock_get_param.return_value = f.read()
-            check = LustreCheck('lustre', {}, [instance])
-            check.submit_jobstats_metrics()
+                return f.read()
+    with mock.patch.object(LustreCheck, 'run_command', side_effect=mock_run_command) as mock_run:
+        check = LustreCheck('lustre', {}, [instance])
+        check.submit_jobstats_metrics()
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
 
 
 # TODO: parametrize
-def test_lnet_stats(aggregator, instance, mock_client):
-    with mock.patch.object(LustreCheck, 'lnet_get_stats') as mock_get:
-        with open(os.path.join(FIXTURES_DIR, 'all_lnet_stats.txt'), 'r') as f:
-            mock_get.return_value = f.read()
+@pytest.mark.parametrize(
+        'method, fixture_file, expected_metrics',
+        [
+            pytest.param("submit_lnet_stats_metrics", 'all_lnet_stats.txt', LNET_STATS_METRICS, id='stats'),
+            pytest.param("submit_lnet_local_ni_metrics", 'all_lnet_net.txt', LNET_LOCAL_METRICS, id='local'),
+            pytest.param("submit_lnet_peer_ni_metrics", 'all_lnet_peer.txt', LNET_PEER_METRICS, id='peer'),
+        ],
+)
+def test_lnet(aggregator, instance, mock_client, method, fixture_file, expected_metrics):
+    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
+        with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
+            mock_run.return_value = f.read()
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_lnet_stats_metrics()
-    for metric in LNET_STATS_METRICS:
-        aggregator.assert_metric(metric)
-
-def test_lnet_local(aggregator, instance, mock_client):
-    with mock.patch.object(LustreCheck, 'lnet_get_stats') as mock_get:
-        with open(os.path.join(FIXTURES_DIR, 'all_lnet_net.txt'), 'r') as f:
-            mock_get.return_value = f.read()
-        check = LustreCheck('lustre', {}, [instance])
-        check.submit_lnet_local_ni_metrics()
-    for metric in LNET_LOCAL_METRICS:
-        aggregator.assert_metric(metric)
-
-def test_lnet_peer(aggregator, instance, mock_client):
-    with mock.patch.object(LustreCheck, 'lnet_get_stats') as mock_get:
-        with open(os.path.join(FIXTURES_DIR, 'all_lnet_peer.txt'), 'r') as f:
-            mock_get.return_value = f.read()
-        check = LustreCheck('lustre', {}, [instance])
-        check.submit_lnet_peer_ni_metrics()
-    for metric in LNET_PEER_METRICS:
+        getattr(check, method)()
+    for metric in expected_metrics:
         aggregator.assert_metric(metric)

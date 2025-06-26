@@ -72,9 +72,8 @@ class LustreCheck(AgentCheck):
         Determine the host type from the command line.
         '''
         self.log.debug('Determining node type...')
-        cmd = f'{self.lctl_path} dl'
         try:
-            output_lines = subprocess.run(cmd, shell=True, capture_output=True, text=True).stdout.splitlines()
+            output_lines = self.run_command(self.lctl_path, 'dl').splitlines()
             # Example line:   0 UP osd-ldiskfs lustre-OST0001-osd lustre-OST0001-osd_UUID 5
             devices = [line.strip().split()[2] for line in output_lines]
             if 'mdt' in devices:
@@ -87,40 +86,15 @@ class LustreCheck(AgentCheck):
             self.log.error(f'Failed to determine node type: {e}')
             return 'client'
 
-    # TODO: add timeouts to subprocess calls
-    # TODO: confider abstracting to lctl.run() method
-    # TODO: same for lnet
-    def lctl_list_param(self, param_regex):
+    def run_command(self, bin, *args, sudo=False):
         '''
-        List the parameters from the command line.
+        Run a command using the given binary.
         '''
-        cmd = f'{self.lctl_path} list_param {param_regex}'
+        cmd = f' {"sudo " if sudo else ""}{bin}{" ".join(args)}'
         try:
-            return subprocess.run(cmd, shell=True, capture_output=True, text=True).stdout.splitlines()
+            return subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True).stdout
         except Exception as e:
-            self.log.error(f'Failed to list parameters for {param_regex}: {e}')
-            return []
-
-    def lctl_get_param(self, param_regex):
-        '''
-        Get the value of a parameter from the command line.
-        '''
-        cmd = f'{self.lctl_path} get_param -ny {param_regex}'
-        try:
-            return subprocess.run(cmd, shell=True, capture_output=True, text=True).stdout
-        except Exception as e:
-            self.log.error(f'Failed to get data for {param_regex}: {e}')
-            return ''
-
-    def lnet_get_stats(self, stats_type):
-        '''
-        Show the lnet stats from the command line.
-        '''
-        cmd = f'sudo {self.lnetctl_path} {stats_type} show -v 3'
-        try:
-            return subprocess.run(cmd, shell=True, capture_output=True, text=True).stdout
-        except Exception as e:
-            self.log.error(f'Failed to show lnet stats: {e}')
+            self.log.error(f'Failed to run command {cmd}: {e}')
             return ''
 
     def submit_jobstats_metrics(self):
@@ -162,14 +136,15 @@ class LustreCheck(AgentCheck):
         else:
             self.log.debug(f'Invalid component_type: {component_type}')
             return []
-        return self.lctl_list_param(param_regex)
+        raw_params = self.run_command(self.lctl_path, "list_param", param_regex)
+        return [line.strip() for line in raw_params.splitlines() if line.strip()]
 
 
     def get_jobstats_metrics(self, jobstats_param):
         '''
         Get the jobstats metrics for a given jobstats param.
         '''
-        jobstats_output = self.lctl_get_param(jobstats_param)
+        jobstats_output = self.run_command(self.lctl_path, "get_param", "-ny", jobstats_param)
         try:
             return yaml.safe_load(jobstats_output)
         except KeyError:
@@ -188,7 +163,7 @@ class LustreCheck(AgentCheck):
         '''
         Get the lnet stats from the command line.
         '''
-        lnet_stats = self.lnet_get_stats(stats_type)
+        lnet_stats = self.run_command(self.lnetctl_path, stats_type, 'show', '-v', '3', sudo=True)
         try:
             return yaml.safe_load(lnet_stats)
         except (KeyError, ValueError):
@@ -236,7 +211,7 @@ class LustreCheck(AgentCheck):
         for param in self.param_list: 
             if not param.regex.endswith('.stats'):
                 continue
-            raw_stats = self.lctl_get_param(param.regex)
+            raw_stats = self.run_command(self.lctl_path, "get_param", "-ny", param.regex)
             parsed_stats = self.parse_stats(raw_stats)
             for stat_name, stat_value in parsed_stats.items():
                 if isinstance(stat_value, int):
