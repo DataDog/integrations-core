@@ -16,6 +16,9 @@ def get_version(db):
         cursor.execute('SELECT VERSION()')
         result = cursor.fetchone()
 
+        cursor.execute('SELECT @@version_comment')
+        version_comment = cursor.fetchone()
+
         # Version might include a build, a flavor, or both
         # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
         # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
@@ -32,6 +35,12 @@ def get_version(db):
                 flavor = "MySQL"
             if data in BUILDS:
                 build = data
+        if (
+            version_comment
+            and len(version_comment) > 0
+            and to_native_string(version_comment[0]).lower().startswith('percona')
+        ):
+            flavor = 'Percona'
         if build == '':
             build = 'unspecified'
 
