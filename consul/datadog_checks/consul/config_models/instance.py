@@ -81,6 +81,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     network_latency_checks: Optional[bool] = None
     new_leader_checks: Optional[bool] = None
+    node_health_check: Optional[bool] = None
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
