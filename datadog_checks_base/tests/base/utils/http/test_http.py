@@ -150,7 +150,7 @@ class TestTLSCiphers:
         }
         init_config = {}
         http = RequestsWrapper(instance, init_config)
-        http.get('https://example.com')
+        assert http.session.verify == cert_path  # The session attribute instantiates the SSLContext
         with pytest.raises(requests.exceptions.SSLError):
             http.get(url)
 

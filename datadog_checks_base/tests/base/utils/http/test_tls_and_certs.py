@@ -288,7 +288,7 @@ class TestAIAChasing:
                 # Mock the certificate loading to avoid cryptography operations
                 with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.load_intermediate_certs'):
                     http = RequestsWrapper(instance, init_config)
-                    http.get('https://example.com')
+                    assert http.session.verify is True  # The session attribute instantiates the SSLContext
                     mock_context.set_ciphers.assert_called_once_with(instance['tls_ciphers'])
                     http.fetch_intermediate_certs('example.com', 443)
                     # Assert set_ciphers called a second time after fetch_intermediate_certs
