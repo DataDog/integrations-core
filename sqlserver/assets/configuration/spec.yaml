@@ -989,7 +989,6 @@ files:
         display_default: 300
     - name: collect_schemas
       description: |
-        Available for Agent 7.56 and newer.
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
         only for the database configured with `database` parameter.
       options:
@@ -1019,7 +1018,7 @@ files:
         Migration: Use `collect_schemas` instead.
       description: |
         DEPRECATED: Use `collect_schemas` instead.
-        Available for Agent 7.56 and newer.
+        Available for Agent 7.59 and newer.
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
         only for the database configured with `database` parameter.
       options:

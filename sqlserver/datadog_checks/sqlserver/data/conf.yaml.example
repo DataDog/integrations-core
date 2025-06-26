@@ -783,7 +783,6 @@ instances:
     #
     # ignore_missing_database: false
 
-    ## Available for Agent 7.56 and newer.
     ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
     ## only for the database configured with `database` parameter.
     #
