@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.14.1 / 2025-06-26
+
+***Fixed***:
+
+* checking wal_level and if is aurora before querying for control checkpoint metrics ([#20500](https://github.com/DataDog/integrations-core/pull/20500))
+
 ## 22.14.0 / 2025-06-12
 
 ***Added***:
