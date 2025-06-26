@@ -712,3 +712,18 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
             ):
                 found = True
     assert found
+
+
+@pytest.mark.unit
+def test_schemas_collection_config(dbm_instance):
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert check.config.schema_config == {}
+
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}
+
+    dbm_instance.pop('schemas_collection')
+    dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}
