@@ -337,6 +337,7 @@
                             "title": "Threats by Assets",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -344,13 +345,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.asset.threat_count{*} by {asset_name,asset_type,account_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.asset.threat_count{*} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.threat.asset.prevented_threat_count{*} by {asset_name,asset_type,account_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.asset.prevented_threat_count{*} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -369,26 +370,26 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Threat Count",
-                                            "formula": "query1",
                                             "conditional_formats": [
                                                 {
                                                     "comparator": ">",
                                                     "value": 0,
                                                     "palette": "white_on_red"
                                                 }
-                                            ]
+                                            ],
+                                            "formula": "query1"
                                         },
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Prevented Threat Count",
-                                            "formula": "query2",
                                             "conditional_formats": [
                                                 {
                                                     "comparator": ">",
                                                     "value": 0,
                                                     "palette": "white_on_green"
                                                 }
-                                            ]
+                                            ],
+                                            "formula": "query2"
                                         }
                                     ]
                                 }
