@@ -67,7 +67,6 @@ def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expec
         aggregator.assert_metric(metric)
 
 
-# TODO: parametrize
 @pytest.mark.parametrize(
         'method, fixture_file, expected_metrics',
         [
@@ -84,3 +83,34 @@ def test_lnet(aggregator, instance, mock_client, method, fixture_file, expected_
         getattr(check, method)()
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+
+
+def test_device_health(aggregator, instance, mock_client):
+    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
+        with open(os.path.join(FIXTURES_DIR, 'client_dl_yaml.txt'), 'r') as f:
+            mock_run.return_value = f.read()
+        check = LustreCheck('lustre', {}, [instance])
+        check.submit_device_health()
+    
+    expected_metrics = [
+        'lustre.device.health',
+        'lustre.device.refcount'
+    ]
+    
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+    
+    # Verify specific device metrics
+    aggregator.assert_metric('lustre.device.health', value=1, tags=[
+        'device_type:mgc',
+        'device_name:MGC172.31.16.218@tcp',
+        'device_uuid:7d3988a7-145f-444e-9953-58e3e6d97385',
+        'node_type:client'
+    ])
+    
+    aggregator.assert_metric('lustre.device.refcount', value=5, tags=[
+        'device_type:mgc',
+        'device_name:MGC172.31.16.218@tcp',
+        'device_uuid:7d3988a7-145f-444e-9953-58e3e6d97385',
+        'node_type:client'
+    ])

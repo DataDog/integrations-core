@@ -226,7 +226,6 @@ class LustreCheck(AgentCheck):
                     else:
                         self.log.debug(f'Unexpected metric value for {stat_name}.{metric_type}: {metric_value}')
 
-
     def parse_stats(self, raw_stats):
         '''
         Parse the raw stats into a dictionary.
@@ -258,3 +257,28 @@ class LustreCheck(AgentCheck):
                 continue
             stats[stat_name] = stat_value
         return stats
+
+    def submit_device_health(self):
+        '''
+        Submit device health metrics based on device status from lctl dl command.
+        '''
+        try:
+            output = self.run_command(self.lctl_path, 'dl', '-y')
+            devices_data = yaml.safe_load(output)
+            
+            for device in devices_data.get('devices', []):
+                device_status = 1 if device['status'] == 'UP' else 0
+                tags = [
+                    f'device_type:{device["type"]}',
+                    f'device_name:{device["name"]}',
+                    f'device_uuid:{device["uuid"]}',
+                    f'node_type:{self.node_type}'
+                ]
+                
+                self.gauge('device.health', device_status, tags=tags)
+                self.gauge('device.refcount', device['refcount'], tags=tags)
+                
+        except Exception as e:
+            self.log.error(f'Failed to submit device health metrics: {e}')
+        
+
