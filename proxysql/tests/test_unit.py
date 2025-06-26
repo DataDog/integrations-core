@@ -101,7 +101,7 @@ def test_config_ok(dd_run_check, instance_basic):
 
 @pytest.mark.unit
 def test_tls_config_ok(dd_run_check, instance_basic_tls):
-    with mock.patch('datadog_checks.base.utils.http.ssl') as ssl:
+    with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
         with mock.patch('datadog_checks.proxysql.proxysql.pymysql') as pymysql:
             check = get_check(instance_basic_tls)
 
