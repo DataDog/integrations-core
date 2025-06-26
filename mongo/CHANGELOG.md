@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 10.1.1 / 2025-06-26
+
+***Fixed***:
+
+* Add `maxTimeMS` to limit agent resource consumption and prevent operations from running indefinitely on the server side. ([#20515](https://github.com/DataDog/integrations-core/pull/20515))
+
 ## 10.1.0 / 2025-06-12
 
 ***Added***:
