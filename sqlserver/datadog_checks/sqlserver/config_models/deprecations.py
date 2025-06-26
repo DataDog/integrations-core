@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 def instance():
     return {
         'deadlocks_collection': {'Agent version': '7.59.0', 'Migration': 'Use `collect_deadlocks` instead.'},

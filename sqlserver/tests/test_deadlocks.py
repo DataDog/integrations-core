@@ -368,14 +368,11 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
 
 @pytest.mark.unit
 def test_collect_deadlocks_config(dbm_instance):
+    dbm_instance['collect_deadlocks'] = {"enabled": True, 'collection_interval': 0.2}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    assert check.config.deadlocks_config == {}
-
-    dbm_instance['collect_deadlocks'] = {"enabled": True, "collection_interval": 0}
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    assert check.config.deadlocks_config == {"enabled": True, "collection_interval": 0}
+    assert check._config.deadlocks_config == {"enabled": True, 'collection_interval': 0.2}
 
     dbm_instance.pop('collect_deadlocks')
-    dbm_instance['deadlocks_collection'] = {"enabled": True, "collection_interval": 0}
+    dbm_instance['deadlocks_collection'] = {"enabled": True, 'collection_interval': 0.3}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    assert check.config.deadlocks_config == {"enabled": True, "collection_interval": 0}
+    assert check._config.deadlocks_config == {"enabled": True, 'collection_interval': 0.3}

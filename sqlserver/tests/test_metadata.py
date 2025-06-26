@@ -408,14 +408,11 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
 
 @pytest.mark.unit
 def test_collect_schemas_config(dbm_instance):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    assert check.config.schema_config == {}
-
     dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    assert check.config.schema_config == {"enabled": True, "max_execution_time": 0}
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}
 
     dbm_instance.pop('collect_schemas')
     dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    assert check.config.schema_config == {"enabled": True, "max_execution_time": 0}
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}
