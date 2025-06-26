@@ -270,9 +270,9 @@ class LustreCheck(AgentCheck):
             for device in devices_data.get('devices', []):
                 device_status = 1 if device['status'] == 'UP' else 0
                 tags = [
-                    f'device_type:{device["type"]}',
-                    f'device_name:{device["name"]}',
-                    f'device_uuid:{device["uuid"]}',
+                    f'device_type:{device.get("type", "unknown")}',
+                    f'device_name:{device.get("name", "unknown")}',
+                    f'device_uuid:{device.get("uuid", "unknown")}',
                     f'node_type:{self.node_type}'
                 ]
                 
