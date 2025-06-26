@@ -73,12 +73,13 @@ class LustreCheck(AgentCheck):
         '''
         self.log.debug('Determining node type...')
         try:
-            output_lines = self.run_command(self.lctl_path, 'dl').splitlines()
-            # Example line:   0 UP osd-ldiskfs lustre-OST0001-osd lustre-OST0001-osd_UUID 5
-            devices = [line.strip().split()[2] for line in output_lines]
-            if 'mdt' in devices:
+            output = self.run_command(self.lctl_path, 'dl', '-y')
+            devices_data = yaml.safe_load(output)
+            device_types = [device['type'] for device in devices_data.get('devices', [])]
+            
+            if 'mdt' in device_types:
                 return 'mds'
-            elif 'ost' in devices:
+            elif 'ost' in device_types:
                 return 'oss'
             else:
                 return 'client'

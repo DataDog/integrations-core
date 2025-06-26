@@ -18,21 +18,6 @@ HERE = get_here()
 FIXTURES_DIR = os.path.join(HERE, 'fixtures')
 
 @pytest.fixture
-def mock_client():
-    with mock.patch.object(LustreCheck, 'get_node_type', return_value='client'):
-        yield
-
-@pytest.fixture
-def mock_mds():
-    with mock.patch.object(LustreCheck, 'get_node_type', return_value='mds'):
-        yield
-
-@pytest.fixture
-def mock_oss():
-    with mock.patch.object(LustreCheck, 'get_node_type', return_value='oss'):
-        yield
-
-@pytest.fixture
 def disable_subprocess():
     with mock.patch('datadog_checks.lustre.check.subprocess.run'):
         yield
@@ -75,7 +60,7 @@ def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expec
             pytest.param("submit_lnet_peer_ni_metrics", 'all_lnet_peer.txt', LNET_PEER_METRICS, id='peer'),
         ],
 )
-def test_lnet(aggregator, instance, mock_client, method, fixture_file, expected_metrics):
+def test_lnet(aggregator, instance, method, fixture_file, expected_metrics):
     with mock.patch.object(LustreCheck, 'run_command') as mock_run:
         with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
             mock_run.return_value = f.read()
@@ -85,7 +70,7 @@ def test_lnet(aggregator, instance, mock_client, method, fixture_file, expected_
         aggregator.assert_metric(metric)
 
 
-def test_device_health(aggregator, instance, mock_client):
+def test_device_health(aggregator, instance):
     with mock.patch.object(LustreCheck, 'run_command') as mock_run:
         with open(os.path.join(FIXTURES_DIR, 'client_dl_yaml.txt'), 'r') as f:
             mock_run.return_value = f.read()
@@ -114,3 +99,20 @@ def test_device_health(aggregator, instance, mock_client):
         'device_uuid:7d3988a7-145f-444e-9953-58e3e6d97385',
         'node_type:client'
     ])
+
+
+@pytest.mark.parametrize(
+    'fixture_file, expected_node_type',
+    [
+        pytest.param('client_dl_yaml.txt', 'client', id='client'),
+        pytest.param('mds_dl_yaml.txt', 'mds', id='mds'),
+        pytest.param('oss_dl_yaml.txt', 'oss', id='oss'),
+    ],
+)
+def test_get_node_type(fixture_file, expected_node_type):
+    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
+        with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
+            mock_run.return_value = f.read()
+        check = LustreCheck('lustre', {}, [{}])
+        node_type = check.get_node_type()
+        assert node_type == expected_node_type

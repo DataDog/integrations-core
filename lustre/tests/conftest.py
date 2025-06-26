@@ -11,4 +11,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return {'node_type': 'client'}
