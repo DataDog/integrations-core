@@ -31,7 +31,6 @@ DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
-
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._base_event = base_event
@@ -116,7 +115,6 @@ def agent_check_getter(self):
 
 
 class DatabasesData:
-
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -313,7 +311,6 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):
-
         if len(table_list) == 0:
             return 0, []
 

@@ -71,7 +71,7 @@ class Varnish(AgentCheck):
 
         self.name = self.instance.get('name')
         self.metrics_filter = self.instance.get("metrics_filter", [])
-        self.tags = self.custom_tags + [u'varnish_name:%s' % (self.name if self.name is not None else 'default')]
+        self.tags = self.custom_tags + ['varnish_name:%s' % (self.name if self.name is not None else 'default')]
         self.check_initializations.append(self.validate_config)
 
     def validate_config(self):

@@ -355,7 +355,6 @@ class SparkCheck(AgentCheck):
 
         if metrics_json.get('apps'):
             if metrics_json['apps'].get('app') is not None:
-
                 for app_json in metrics_json['apps']['app']:
                     app_id = app_json.get('id')
                     tracking_url = app_json.get('trackingUrl')
@@ -545,9 +544,7 @@ class SparkCheck(AgentCheck):
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
-                self.log.debug(
-                    "No structured streaming metrics to collect from" " app %s. %s", app_name, e, exc_info=True
-                )
+                self.log.debug("No structured streaming metrics to collect from app %s. %s", app_name, e, exc_info=True)
                 pass
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):

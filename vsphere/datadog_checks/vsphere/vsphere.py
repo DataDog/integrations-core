@@ -1150,7 +1150,6 @@ class VSphereCheck(AgentCheck):
 
             # Submit property metrics after the cache is refreshed
             if self._config.collect_property_metrics:
-
                 resources_with_property_metrics = [
                     resource
                     for resource in self._config.collected_resource_types

@@ -8,7 +8,6 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class KubeflowCheck(OpenMetricsBaseCheckV2):
-
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'kubeflow'
 

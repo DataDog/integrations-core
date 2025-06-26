@@ -7,7 +7,6 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class NvidiaNIMCheck(OpenMetricsBaseCheckV2):
-
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'nvidia_nim'
@@ -20,7 +19,6 @@ class NvidiaNIMCheck(OpenMetricsBaseCheckV2):
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-
         endpoint = self.instance["openmetrics_endpoint"].replace("/metrics", "/v1/version")
         response = self.http.get(endpoint)
         response.raise_for_status()

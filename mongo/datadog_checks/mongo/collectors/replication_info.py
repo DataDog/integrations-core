@@ -92,6 +92,6 @@ class ReplicationOpLogCollector(MongoCollector):
                     pass
             except KeyError:
                 # encountered an error trying to access options.size for the oplog collection
-                self.log.warning(u"Failed to record `ReplicationInfo` metrics.")
+                self.log.warning("Failed to record `ReplicationInfo` metrics.")
 
         self._submit_payload({'oplog': oplog_data})

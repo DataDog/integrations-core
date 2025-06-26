@@ -7,6 +7,7 @@ Collects metrics from the gunicorn web server.
 
 http://gunicorn.org/
 """
+
 import re
 import subprocess
 import time
@@ -28,7 +29,6 @@ def get_gunicorn_version(cmd):
 
 
 class GUnicornCheck(AgentCheck):
-
     # Config
     PROC_NAME = 'proc_name'
 

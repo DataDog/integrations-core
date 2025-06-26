@@ -28,7 +28,6 @@ def multidict(ordered_pairs):
 
 
 class RiakCs(AgentCheck):
-
     SERVICE_CHECK_NAME = 'riakcs.can_connect'
 
     def check(self, instance):

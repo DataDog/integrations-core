@@ -97,9 +97,10 @@ def test_check(_, __, ___, aggregator, instance, dd_events, dd_run_check):
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_id": "space_name"})
 def test_get_events(_, __, ___, instance, dd_events):
     scroll_events_mock = mock.MagicMock(return_value=dd_events)
-    with mock.patch.object(CloudFoundryApiCheck, "scroll_events", scroll_events_mock), mock.patch.object(
-        CloudFoundryApiCheck, "get_oauth_token"
-    ) as get_oauth_token_mock:
+    with (
+        mock.patch.object(CloudFoundryApiCheck, "scroll_events", scroll_events_mock),
+        mock.patch.object(CloudFoundryApiCheck, "get_oauth_token") as get_oauth_token_mock,
+    ):
         check_v2 = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
         check_v2._api_version = "v2"
         check_v3 = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
@@ -511,7 +512,6 @@ def test_build_dd_event(_, __, ___, instance):
 @mock.patch("datadog_checks.cloud_foundry_api.cloud_foundry_api.get_next_url", side_effect=["next", ""])
 @mock.patch.object(CloudFoundryApiCheck, "http")
 def test_scroll_api_pages(http_mock, get_next_url_mock, __, ___, ____, aggregator, instance):
-
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
 
     # When exhausting all pages
@@ -613,17 +613,19 @@ def test_get_orgs(_, __, instance, orgs_v2_p1, orgs_v2_p2, orgs_v3_p1, orgs_v3_p
         "321c58b0-777b-472f-812e-c08c53817074": "org_3",
         "0ba4c8cb-9e71-4d6e-b6ff-74e301ed6467": "org_4",
     }
-    with mock.patch.object(
-        CloudFoundryApiCheck, "scroll_api_pages", return_value=[orgs_v2_p1, orgs_v2_p2]
-    ), mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"):
+    with (
+        mock.patch.object(CloudFoundryApiCheck, "scroll_api_pages", return_value=[orgs_v2_p1, orgs_v2_p2]),
+        mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"),
+    ):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
         check._api_version = "v2"
 
         assert check.get_orgs() == expected_orgs
 
-    with mock.patch.object(
-        CloudFoundryApiCheck, "scroll_api_pages", return_value=[orgs_v3_p1, orgs_v3_p2]
-    ), mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"):
+    with (
+        mock.patch.object(CloudFoundryApiCheck, "scroll_api_pages", return_value=[orgs_v3_p1, orgs_v3_p2]),
+        mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"),
+    ):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
         check._api_version = "v3"
 
@@ -639,17 +641,19 @@ def test_get_spaces(_, __, instance, spaces_v2_p1, spaces_v2_p2, spaces_v3_p1, s
         "d5d005a4-0320-4daa-ac0a-81f8dcd00fe0": "space_3",
         "8c7e64bb-0bf8-4a7a-92e1-2fe06e7ec793": "space_4",
     }
-    with mock.patch.object(
-        CloudFoundryApiCheck, "scroll_api_pages", return_value=[spaces_v2_p1, spaces_v2_p2]
-    ), mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"):
+    with (
+        mock.patch.object(CloudFoundryApiCheck, "scroll_api_pages", return_value=[spaces_v2_p1, spaces_v2_p2]),
+        mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"),
+    ):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
         check._api_version = "v2"
 
         assert check.get_spaces() == expected_spaces
 
-    with mock.patch.object(
-        CloudFoundryApiCheck, "scroll_api_pages", return_value=[spaces_v3_p1, spaces_v3_p2]
-    ), mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"):
+    with (
+        mock.patch.object(CloudFoundryApiCheck, "scroll_api_pages", return_value=[spaces_v3_p1, spaces_v3_p2]),
+        mock.patch.object(CloudFoundryApiCheck, "get_oauth_token"),
+    ):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
         check._api_version = "v3"
 
