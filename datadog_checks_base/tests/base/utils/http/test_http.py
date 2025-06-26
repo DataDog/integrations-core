@@ -118,7 +118,7 @@ class TestTLSCiphers:
         # Mock SSL context creation before RequestsWrapper initialization
         with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
             http = RequestsWrapper(instance, init_config)
-            http.session  # Trigger SSL context creation
+            http.get('https://example.com')
 
             # Verify that set_ciphers was called with the expected ciphers during TLS context creation
             mock_set_ciphers.assert_called_once_with(expected_ciphers)
@@ -150,7 +150,7 @@ class TestTLSCiphers:
         }
         init_config = {}
         http = RequestsWrapper(instance, init_config)
-        http.session  # Trigger SSL context creation
+        http.get('https://example.com')
         with pytest.raises(requests.exceptions.SSLError):
             http.get(url)
 
