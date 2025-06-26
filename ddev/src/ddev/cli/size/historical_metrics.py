@@ -39,6 +39,36 @@ def upload_historical_metrics(date_from_str: str, org: str) -> None:
                     )
                     print(f"Processing commit {i}/{len(commits)}: {commit[:8]} ({date})", flush=True)
                     gitRepo.checkout_commit(commit)
+                    if i > 1:
+                        result = subprocess.run(
+                            ["ddev", "--here", "size", "diff", "--to-dd-org", org, commits[i - 1], commit],
+                            cwd=gitRepo.repo_dir,
+                            text=True,
+                            capture_output=True,
+                        )
+                        if result.returncode != 0:
+                            console.print(f"[red]Error in commit {commit}: {result.stderr}")
+                            continue
+                        result = subprocess.run(
+                            [
+                                "ddev",
+                                "--here",
+                                "size",
+                                "diff",
+                                "--compressed",
+                                "--to-dd-org",
+                                org,
+                                commits[i - 1],
+                                commit,
+                            ],
+                            cwd=gitRepo.repo_dir,
+                            text=True,
+                            capture_output=True,
+                        )
+                        if result.returncode != 0:
+                            console.print(f"[red]Error in commit {commit}: {result.stderr}")
+                            continue
+
                     result = subprocess.run(
                         ["ddev", "--here", "size", "status", "--to-dd-org", org],
                         cwd=gitRepo.repo_dir,

@@ -323,43 +323,43 @@ def get_dependencies_sizes(
 
 
 def is_excluded_from_wheel(path: str) -> bool:
-    '''
+    """
     These files are excluded from the wheel in the agent build:
     https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
     In order to have more accurate results, this files are excluded when computing the size of the dependencies while
     the wheels still include them.
-    '''
+    """
     excluded_test_paths = [
         os.path.normpath(path)
         for path in [
-            'idlelib/idle_test',
-            'bs4/tests',
-            'Cryptodome/SelfTest',
-            'gssapi/tests',
-            'keystoneauth1/tests',
-            'openstack/tests',
-            'os_service_types/tests',
-            'pbr/tests',
-            'pkg_resources/tests',
-            'psutil/tests',
-            'securesystemslib/_vendor/ed25519/test_data',
-            'setuptools/_distutils/tests',
-            'setuptools/tests',
-            'simplejson/tests',
-            'stevedore/tests',
-            'supervisor/tests',
-            'test',  # cm-client
-            'vertica_python/tests',
-            'websocket/tests',
+            "idlelib/idle_test",
+            "bs4/tests",
+            "Cryptodome/SelfTest",
+            "gssapi/tests",
+            "keystoneauth1/tests",
+            "openstack/tests",
+            "os_service_types/tests",
+            "pbr/tests",
+            "pkg_resources/tests",
+            "psutil/tests",
+            "securesystemslib/_vendor/ed25519/test_data",
+            "setuptools/_distutils/tests",
+            "setuptools/tests",
+            "simplejson/tests",
+            "stevedore/tests",
+            "supervisor/tests",
+            "test",  # cm-client
+            "vertica_python/tests",
+            "websocket/tests",
         ]
     ]
 
     type_annot_libraries = [
-        'krb5',
-        'Cryptodome',
-        'ddtrace',
-        'pyVmomi',
-        'gssapi',
+        "krb5",
+        "Cryptodome",
+        "ddtrace",
+        "pyVmomi",
+        "gssapi",
     ]
     rel_path = Path(path).as_posix()
 
@@ -373,7 +373,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     if path_parts:
         dependency_name = path_parts[0]
         if dependency_name in type_annot_libraries:
-            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
+            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
                 return True
 
     return False
@@ -770,6 +770,8 @@ def send_metrics_to_dd(
     mode: Literal["status"],
     commits: None,
 ) -> None: ...
+
+
 @overload
 def send_metrics_to_dd(
     app: Application,
@@ -780,6 +782,8 @@ def send_metrics_to_dd(
     mode: Literal["diff"],
     commits: list[str],
 ) -> None: ...
+
+
 def send_metrics_to_dd(
     app: Application,
     modules: list[FileDataEntryPlatformVersion],
@@ -804,6 +808,9 @@ def send_metrics_to_dd(
         message, tickets, prs = get_last_commit_data()
         timestamp = get_last_commit_timestamp()
     elif mode == "diff":
+        if not commits:
+            raise Exception("commits must not be None or empty in diff mode")
+        prev_commit = check_commits(commits)
         message, tickets, prs = get_last_commit_data(commits[1])
         timestamp = get_last_commit_timestamp(commits[1])
 
@@ -813,7 +820,7 @@ def send_metrics_to_dd(
 
     n_integrations: dict[tuple[str, str], int] = {}
     n_dependencies: dict[tuple[str, str], int] = {}
-    prev_commit = check_commits(commits)
+
     for item in modules:
         metrics.append(
             {
@@ -837,14 +844,14 @@ def send_metrics_to_dd(
                 + ([f"to_prev_commit:{prev_commit}"] if mode == "diff" else []),
             }
         )
-        key_count = (item['Platform'], item['Python_Version'])
+        key_count = (item["Platform"], item["Python_Version"])
         if key_count not in n_integrations:
             n_integrations[key_count] = 0
         if key_count not in n_dependencies:
             n_dependencies[key_count] = 0
-        if item['Type'] == 'Integration':
+        if item["Type"] == "Integration":
             n_integrations[key_count] += 1
-        elif item['Type'] == 'Dependency':
+        elif item["Type"] == "Dependency":
             n_dependencies[key_count] += 1
 
     if mode == "status":
@@ -936,8 +943,8 @@ def get_last_commit_data(commit: Optional[str] = None) -> tuple[str, list[str], 
         result = subprocess.run(["git", "log", "-1", "--format=%s", commit], capture_output=True, text=True, check=True)
     else:
         result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
-    ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
-    pr_pattern = r'#(\d+)'
+    ticket_pattern = r"\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b"
+    pr_pattern = r"#(\d+)"
 
     message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
@@ -950,7 +957,7 @@ def get_last_commit_data(commit: Optional[str] = None) -> tuple[str, list[str], 
     return message, tickets, prs
 
 
-def check_commits(commits: list[str] | None) -> str:
+def check_commits(commits: list[str]) -> bool:
     # Check if commits are from master branch
     for commit in commits:
         result = subprocess.run(["git", "branch", "--contains", commit], capture_output=True, text=True, check=True)
