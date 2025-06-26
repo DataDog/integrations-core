@@ -133,6 +133,14 @@ files:
         example: true
       enabled: true
 
+    - name: node_health_check
+      description: |
+        Whether to enable new node health checks from this instance.
+      value:
+        type: boolean
+        display_default: false
+        example: true
+
     - template: instances/http
     - template: instances/default
   - template: logs

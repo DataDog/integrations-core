@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import copy
 from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta, timezone
 from itertools import islice
@@ -23,6 +24,7 @@ from .common import (
     HEALTH_CHECK,
     MAX_CONFIG_TTL,
     MAX_SERVICES,
+    NODE_HEALTH_CHECK,
     SOURCE_TYPE_NAME,
     STATUS_SC,
     STATUS_SEVERITY,
@@ -108,6 +110,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
+        self.node_health_check = self.instance.get(
+            'node_health_check', self.init_config.get('node_health_check', False)
+        )
+
         if self.threads_count > 1:
             self.thread_pool = ThreadPool(self.threads_count)
         else:
@@ -356,7 +362,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             # Make service checks from health checks for all services in catalog
             health_state = self.consul_request('/v1/health/state/any')
 
-            sc = {}
+            service_checks = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
                 sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
@@ -364,7 +370,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 if status is None:
                     status = self.UNKNOWN
 
-                if sc_id not in sc:
+                if self.node_health_check or sc_id not in service_checks:
                     tags = ["check:{}".format(check["CheckID"])]
                     if check["ServiceName"]:
                         tags.append('consul_service:{}'.format(check['ServiceName']))
@@ -375,12 +381,20 @@ class ConsulCheck(OpenMetricsBaseCheck):
                         tags.append("consul_service_id:{}".format(check["ServiceID"]))
                     if check["Node"]:
                         tags.append("consul_node:{}".format(check["Node"]))
-                    sc[sc_id] = {'status': status, 'tags': tags}
 
-                elif STATUS_SEVERITY[status] > STATUS_SEVERITY[sc[sc_id]['status']]:
-                    sc[sc_id]['status'] = status
+                    if self.node_health_check:
+                        status_value = STATUS_SEVERITY.get(status)
+                        node_tags = copy.deepcopy(tags)
+                        node_tags.append(f"consul_status:{check['Status']}")
+                        self.gauge(NODE_HEALTH_CHECK, status_value, tags=main_tags + node_tags)
 
-            for s in sc.values():
+                    if sc_id not in service_checks:
+                        service_checks[sc_id] = {'status': status, 'tags': tags}
+
+                elif STATUS_SEVERITY[status] > STATUS_SEVERITY[service_checks[sc_id]['status']]:
+                    service_checks[sc_id]['status'] = status
+
+            for s in service_checks.values():
                 self.service_check(HEALTH_CHECK, s['status'], tags=main_tags + s['tags'])
 
         except Exception as e:

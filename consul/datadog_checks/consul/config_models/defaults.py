@@ -72,6 +72,10 @@ def instance_new_leader_checks():
     return False
 
 
+def instance_node_health_check():
+    return False
+
+
 def instance_persist_connections():
     return False
 
