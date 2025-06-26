@@ -627,9 +627,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
 
-                # Do not submit plan events if no plan is available
-                if not raw_plan:
-                    continue
 
                 obfuscated_plan, collection_errors = None, None
 
@@ -650,6 +647,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
                     )
                 tags = self._check.tag_manager.get_tags()
+
+                if is_plan_encrypted:
+                    collection_errors.append({'code': "plan_encrypted", 'message': "cannot collect encrypted plan"})
+
+                # Do not submit plan events if no plan is available and there is no collection error.
+                # This avoids sending empty plan events when a plan is not available in the cache.
+                if not raw_plan and not collection_errors:
+                    continue
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
