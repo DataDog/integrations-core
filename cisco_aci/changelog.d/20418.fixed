@@ -1,1 +1,0 @@
-skip topology link resolution for cisco-aci when remote port index is None 
