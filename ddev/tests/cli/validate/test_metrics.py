@@ -7,62 +7,36 @@ from pathlib import Path
 
 import pytest
 
-from .conftest import _fake_repo as _base_fake_repo
-from .conftest import write_file
-
-
-def _fake_repo(tmp_path_factory, config_file, name):
-    repo = _base_fake_repo(tmp_path_factory, config_file, name)
-
-    write_file(
-        repo.path / 'metadata_integration',
+FILES_IN_FAKE_REPO = [
+    (
+        'metadata_integration',
         'manifest.json',
         """{
-          "manifest_version": "2.0.0",
-          "app_uuid": "15b15f01-b342-4001-89ac-9e92fc4f3234",
-          "app_id": "druid",
-          "display_on_public_website": true,
-          "assets": {
-            "integration": {
-              "metrics": {
-                "prefix": "metadata_integration.",
-                "check": [],
-                "metadata_path": "metadata.csv"
-              }
+        "manifest_version": "2.0.0",
+        "app_uuid": "15b15f01-b342-4001-89ac-9e92fc4f3234",
+        "app_id": "druid",
+        "display_on_public_website": true,
+        "assets": {
+        "integration": {
+            "metrics": {
+            "prefix": "metadata_integration.",
+            "check": [],
+            "metadata_path": "metadata.csv"
             }
-          }
         }
+        }
+    }
 """,
-    )
-
-    write_file(
-        repo.path / 'metadata_integration',
+    ),
+    (
+        'metadata_integration',
         'metadata.csv',
         """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,
 metadata_integration.metric_a,gauge,,,,My metric A,0,metadata_integration,,
 """,
-    )
-
-    return repo
-
-
-@pytest.fixture
-def fake_repo(
-    tmp_path_factory,
-    config_file,
-):
-    yield _fake_repo(tmp_path_factory, config_file, 'core')
-
-
-@pytest.fixture
-def fake_extras_repo(tmp_path_factory, config_file):
-    yield _fake_repo(tmp_path_factory, config_file, 'extras')
-
-
-@pytest.fixture
-def fake_marketplace_repo(tmp_path_factory, config_file):
-    yield _fake_repo(tmp_path_factory, config_file, 'marketplace')
+    ),
+]
 
 
 def test_metrics_empty(ddev, repository, helpers):
@@ -91,7 +65,7 @@ def test_metrics_empty(ddev, repository, helpers):
 def test_column_number(ddev, repository, helpers):
     outfile = os.path.join('apache', 'metadata.csv')
 
-    write_file(
+    helpers.write_file(
         repository.path / 'apache',
         'metadata.csv',
         helpers.dedent(
@@ -154,7 +128,7 @@ def test_header_missing_invalid(ddev, repository, helpers):
 def test_normalized_metrics(ddev, repository, helpers):
     outfile = os.path.join('apache', 'metadata.csv')
 
-    write_file(
+    helpers.write_file(
         repository.path / 'apache',
         'metadata.csv',
         helpers.dedent(
@@ -582,7 +556,7 @@ def test_header_empty(ddev, repository, helpers):
 def test_prefix_match(ddev, repository, helpers):
     outfile = os.path.join('apache', 'metadata.csv')
 
-    write_file(
+    helpers.write_file(
         repository.path / 'apache',
         'metadata.csv',
         helpers.dedent(
@@ -613,7 +587,7 @@ def test_prefix_match(ddev, repository, helpers):
 def test_duplicate_metric_name(ddev, repository, helpers):
     outfile = os.path.join('apache', 'metadata.csv')
 
-    write_file(
+    helpers.write_file(
         repository.path / 'apache',
         'metadata.csv',
         helpers.dedent(
@@ -644,7 +618,7 @@ def test_duplicate_metric_name(ddev, repository, helpers):
 def test_warnings(ddev, repository, helpers):
     outfile = os.path.join('apache', 'metadata.csv')
 
-    write_file(
+    helpers.write_file(
         repository.path / 'apache',
         'metadata.csv',
         helpers.dedent(
@@ -687,8 +661,9 @@ def test_metrics_passing(ddev, helpers):
     )
 
 
+@pytest.mark.parametrize('fake_repo', [FILES_IN_FAKE_REPO], indirect=True)
 def test_metrics_ordered(fake_repo, ddev, helpers):
-    write_file(
+    helpers.write_file(
         fake_repo.path / "metadata_integration",
         'metadata.csv',
         """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
@@ -709,9 +684,10 @@ metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,
     )
 
 
+@pytest.mark.parametrize('fake_repo', [FILES_IN_FAKE_REPO], indirect=True)
 def test_passing_with_experimental_column(fake_repo, ddev, helpers):
     # Testing to ensure that experimental header sample_tags is allowed
-    write_file(
+    helpers.write_file(
         fake_repo.path / "metadata_integration",
         'metadata.csv',
         """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
@@ -732,10 +708,11 @@ metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,,
     )
 
 
+@pytest.mark.parametrize('fake_repo', [FILES_IN_FAKE_REPO], indirect=True)
 def test_passing_invalid_experimental_column(fake_repo, ddev, helpers):
     # Testing to ensure that experimental header sample_tags is allowed. But if other tags are added,
     # it will be flagged as an error
-    write_file(
+    helpers.write_file(
         fake_repo.path / "metadata_integration",
         'metadata.csv',
         """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags,foo
@@ -761,6 +738,7 @@ metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,,,
     )
 
 
+@pytest.mark.parametrize('fake_repo', [FILES_IN_FAKE_REPO], indirect=True)
 def test_metrics_not_ordered(fake_repo, ddev, helpers):
     outfile = os.path.join('metadata_integration', 'metadata.csv')
     result = ddev('validate', 'metadata', 'metadata_integration')
@@ -780,6 +758,7 @@ def test_metrics_not_ordered(fake_repo, ddev, helpers):
     )
 
 
+@pytest.mark.parametrize('fake_repo', [FILES_IN_FAKE_REPO], indirect=True)
 def test_metrics_not_ordered_sync(fake_repo, ddev, helpers):
     result = ddev('validate', 'metadata', 'metadata_integration', '--sync')
 
@@ -804,8 +783,9 @@ def test_metrics_not_ordered_sync(fake_repo, ddev, helpers):
     )
 
 
+@pytest.mark.parametrize('fake_repo', [FILES_IN_FAKE_REPO], indirect=True)
 def test_metrics_not_ordered_but_allowed(fake_repo, ddev, helpers):
-    write_file(
+    helpers.write_file(
         fake_repo.path / ".ddev",
         'config.toml',
         """[overrides.validate.metrics]
@@ -827,9 +807,7 @@ unsorted = [
     )
 
 
-@pytest.mark.parametrize('repo_fixture', ['fake_extras_repo', 'fake_marketplace_repo'])
-def test_metrics_not_ordered_but_not_in_core(repo_fixture, ddev, helpers, request):
-    request.getfixturevalue(repo_fixture)
+def _assert_metrics_not_ordered_for_non_core_repo(ddev, helpers):
     result = ddev('validate', 'metadata', 'metadata_integration')
 
     assert result.exit_code == 0, result.output
@@ -840,3 +818,13 @@ def test_metrics_not_ordered_but_not_in_core(repo_fixture, ddev, helpers, reques
         Passed: 1
         """
     )
+
+
+@pytest.mark.parametrize('fake_extras_repo', [FILES_IN_FAKE_REPO], indirect=True)
+def test_metrics_not_ordered_for_extras_repo(fake_extras_repo, ddev, helpers):
+    _assert_metrics_not_ordered_for_non_core_repo(ddev, helpers)
+
+
+@pytest.mark.parametrize('fake_marketplace_repo', [FILES_IN_FAKE_REPO], indirect=True)
+def test_metrics_not_ordered_for_marketplace_repo(fake_marketplace_repo, ddev, helpers):
+    _assert_metrics_not_ordered_for_non_core_repo(ddev, helpers)
