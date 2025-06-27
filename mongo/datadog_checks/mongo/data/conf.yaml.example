@@ -225,7 +225,7 @@ instances:
 
     ## Configure collection of MongoDB schemas (inferred) by sampling documents.
     #
-    # schemas:
+    # collect_schemas:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of schemas. Requires `dbm: true`.
