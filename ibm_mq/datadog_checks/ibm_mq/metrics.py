@@ -109,6 +109,7 @@ def channel_status_metrics():
         'batches': pymqi.CMQCFC.MQIACH_BATCHES,
         'current_msgs': pymqi.CMQCFC.MQIACH_CURRENT_MSGS,
         'indoubt_status': pymqi.CMQCFC.MQIACH_INDOUBT_STATUS,
+        'conn_status': pymqi.CMQCFC.MQCACH_CONNECTION_NAME,
     }
 
 
