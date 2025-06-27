@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDeco
 from datadog_checks.base import AgentCheck
 from datadog_checks.proxmox.config_models import ConfigMixin
 
-from .constants import NODE_RESOURCE, OK_STATUS, RESOURCE_METRICS, RESOURCE_TYPE_MAP, VM_RESOURCE
+from .constants import NODE_RESOURCE, OK_STATUS, RESOURCE_TYPE_MAP, VM_RESOURCE
 
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
@@ -20,12 +20,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         self.base_tags = [f"proxmox_server:{self.config.proxmox_server}"]
         if self.config.tags:
             self.base_tags.extend(self.config.tags)
-
-    def _submit_resource_metrics(self, resource, resource_type, tags, hostname):
-        for metric_name in RESOURCE_METRICS:
-            metric_value = resource.get(metric_name)
-            if metric_value is not None:
-                self.gauge(f'{resource_type}.{metric_name}', metric_value, tags=tags, hostname=hostname)
 
     def check(self, _):
         try:
@@ -124,6 +118,5 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 tags,
                 hostname=hostname,
             )
-            self._submit_resource_metrics(resource, resource_type_remapped, tags, hostname)
 
         self.set_external_tags(external_tags)
