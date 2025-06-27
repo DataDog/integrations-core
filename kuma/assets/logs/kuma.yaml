@@ -47,7 +47,7 @@ pipeline:
   name: Kuma
   enabled: true
   filter:
-    query: source:kuma OR source:kuma-cp OR source:kuma-dp OR source:kuma-init
+    query: source:kuma
   processors:
     - type: grok-parser
       name: Kuma Log Parser
