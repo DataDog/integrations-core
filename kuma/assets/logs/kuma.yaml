@@ -54,28 +54,8 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - '2025-05-26T20:47:04.174Z	INFO	controllers.Service	annotating service
-          which is part of the mesh	{"service":
-          {"name":"datadog-admission-controller","namespace":"datadog-operator"},
-          "annotation": "ingress.kubernetes.io/service-upstream=true"}'
-        - "[2025-06-03 18:54:16.678][33][info][main]
-          [source/server/server.cc:430]   envoy.ssl.server_context_factory:
-          envoy.ssl.server_context_factory.default"
-        - 2025-05-26T20:45:01.427Z	INFO	plugins.authn.api-server.tokens	bootstrap
-          of Admin User Token is enabled. To extract credentials execute
-          'kubectl get secret admin-user-token -n kuma-system
-          --template={{.data.value}} | base64 -d'. You configure kumactl with
-          them 'kumactl config control-planes add --auth-type=tokens --auth-conf
-          token=YOUR_TOKEN'. To disable bootstrap of Admin User Token set
-          KUMA_API_SERVER_AUTHN_TOKENS_BOOTSTRAP_ADMIN_TOKEN to false.
-        - '[2025-06-26T13:19:18.314Z] default "GET /api?timeout=32s HTTP/1.1"
-          404 NR 0 0 0 - "10.42.1.26" "kubectl/v1.31.5+k3s1 (linux/arm64)
-          kubernetes/56ec5dd" "-" "0efbfa26-1e2d-9144-919a-e9985d0eab30"
-          "localhost:8080" "unknown" "edge-gateway_kuma-demo_svc" "10.42.3.27"
-          "-"'
-        - "[2025-06-26T21:29:21.535Z] - default
-          10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took
-          14004ms, sent 6195 bytes, received: 194 bytes"
+        - '[2025-06-26T21:29:21.535Z] - default 10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms, sent 6195 bytes, received: 194 bytes'
+        - '[2025-06-26T13:19:18.314Z] default "GET /api?timeout=32s HTTP/1.1" 404 NR 0 0 0 - "10.42.1.26" "kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd" "-" "0efbfa26-1e2d-9144-919a-e9985d0eab30" "localhost:8080" "unknown" "edge-gateway_kuma-demo_svc" "10.42.3.27" "-"'
       grok:
         supportRules: |
           isoTimestamp %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ")}
