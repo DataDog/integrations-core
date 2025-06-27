@@ -209,7 +209,9 @@ def test_connections_active_metric(instance):
         }
         mock_pcf_instance = Mock()
         mock_pcf_instance.MQCMD_INQUIRE_CHANNEL_STATUS.return_value = [
-            channel_info_running_1, channel_info_running_2, channel_info_stopped
+            channel_info_running_1,
+            channel_info_running_2,
+            channel_info_stopped,
         ]
         mock_pcf.return_value = mock_pcf_instance
         config = IBMMQConfig(instance, {})
