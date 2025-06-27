@@ -381,6 +381,6 @@ class LustreCheck(AgentCheck):
     def get_changelog(self, target):
         self.log.info(f'Collecting changelogs for: {target}')
         index_from_memory = self.get_log_cursor(stream=target) 
-        start_index = 0 if index_from_memory is None else index_from_memory
-        end_index = str(start_index + self.changelog_lines_per_run)
+        start_index = '0' if index_from_memory is None else index_from_memory
+        end_index = str(int(start_index) + int(self.changelog_lines_per_run))
         return self.run_command(self.lfs_path, 'changelog', target, start_index, end_index, sudo=True)

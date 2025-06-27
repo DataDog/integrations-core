@@ -39,7 +39,7 @@ def test_check(dd_run_check, aggregator, instance):
 )
 def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expected_metrics):
     instance = {'node_type': node_type}
-    def mock_run_command(bin, *args):
+    def mock_run_command(bin, *args, **kwargs):
         if args[0] == 'list_param':
             return 'some.job_stats.param'
         elif args[0] == 'get_param':
@@ -109,10 +109,73 @@ def test_device_health(aggregator, instance):
         pytest.param('oss_dl_yaml.txt', 'oss', id='oss'),
     ],
 )
-def test_get_node_type(fixture_file, expected_node_type):
+def test_node_type(fixture_file, expected_node_type):
     with mock.patch.object(LustreCheck, 'run_command') as mock_run:
         with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
             mock_run.return_value = f.read()
         check = LustreCheck('lustre', {}, [{}])
-        node_type = check.get_node_type()
+        node_type = check._find_node_type()
         assert node_type == expected_node_type
+
+
+def test_submit_changelogs(aggregator, instance):
+    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
+        with open(os.path.join(FIXTURES_DIR, 'client_dl_yaml.txt'), 'r') as f:
+            mock_run.return_value = f.read()
+        check = LustreCheck('lustre', {}, [instance])
+        check.filesystems = ['lustre']
+        check._update_changelog_targets()
+        
+        # Mock the get_changelog method to return test data
+        test_changelog_data = (
+            "4 07RMDIR 12:47:32.913242547 2025.06.02 0x1 t=[0x200000bd1:0x3:0x0] bacillus\n"
+            "5 02MKDIR 12:48:25.401684027 2025.06.02 0x0 t=[0x200000bd1:0x4:0x0] bacillus\n" 
+            "6 01CREAT 12:50:50.996256280 2025.06.02 0x0 t=[0x200000bd1:0x5:0x0] bulgaricus.txt\n"
+        )
+        with mock.patch.object(check, 'get_changelog', return_value=test_changelog_data):
+            with mock.patch.object(check, 'send_log') as mock_send_log:
+                check.submit_changelogs()
+        
+        # Verify send_log was called for each changelog entry
+        assert mock_send_log.call_count == 3
+        
+        # Verify the first call arguments
+        first_call = mock_send_log.call_args_list[0]
+        expected_data = {
+            'operation_type': '07RMDIR',
+            'timestamp': '12:47:32.913242547',
+            'datestamp': '2025.06.02',
+            'flags': '0x1',
+            'message': 't=[0x200000bd1:0x3:0x0] bacillus'
+        }
+        assert first_call[0][0] == expected_data
+        assert first_call[0][1] == {'index': '4'}
+
+
+def test_get_changelog(instance):
+    with mock.patch.object(LustreCheck, 'run_command') as mock_run_command:
+        with open(os.path.join(FIXTURES_DIR, 'client_changelogs.txt'), 'r') as f:
+            mock_run_command.return_value = f.read()
+        
+        check = LustreCheck('lustre', {}, [instance])
+        
+        # Mock get_log_cursor to return a starting index
+        with mock.patch.object(check, 'get_log_cursor', return_value='100'):
+            result = check.get_changelog('lustre-MDT0000')
+            
+            # Verify the command was called with correct arguments
+            mock_run_command.assert_called_with(
+                '/usr/bin/lfs', 'changelog', 'lustre-MDT0000', '100', '1100', sudo=True
+            )
+            
+            # Verify the result contains changelog data
+            assert result is not None
+            assert len(result) > 0
+        
+        # Test with no previous cursor (start from 0)
+        with mock.patch.object(check, 'get_log_cursor', return_value=None):
+            result = check.get_changelog('lustre-MDT0000')
+            
+            mock_run_command.assert_called_with(
+                '/usr/bin/lfs', 'changelog', 'lustre-MDT0000', '0', '1000', sudo=True
+            )
