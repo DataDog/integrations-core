@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "created_at": "2025-06-09",
+  "last_updated_at": "2025-06-09",
+  "title": "Connection is lost",
+  "description": "A connection has been lost while running and is now offline.",
+  "definition": {
+	"id": 174104476,
+	"name": "Workato Connection status is {{#is_alert}}lost{{/is_alert}}{{#is_alert_recovery}}recovered{{/is_alert_recovery}} for {{name}}",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:workato.connections.failure{connection_lost_reason:*} by {name,connection_lost_reason} > 0",
+	"message": "{{#is_alert}}The Workato Connection {{name}} has lost connection due to {{connection_lost_reason}} {{/is_alert}}\n{{#is_alert_recovery}}The Workato Connection status for {{name}} has recovered {{/is_alert_recovery}}\n\n@email@example.com",
+	"tags": [
+		"source:workato"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 0
+		},
+		"notify_audit": false,
+		"threshold_windows": null,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"notify_by": [
+			"*"
+		],
+		"new_group_delay": 0
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:workato"
+  ]
+}

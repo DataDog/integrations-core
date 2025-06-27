@@ -1,0 +1,73 @@
+id: workato
+metric_id: workato
+backend_only: false
+facets:
+  - description: "Workato Project Name"
+    facetType: list
+    groups:
+      - Workato
+    name: workato.project_name
+    path: workato.project_name
+    source: log
+    type: string
+  - description: "Workato Recipe Name"
+    facetType: list
+    groups:
+      - Workato
+    name: workato.recipe_name
+    path: workato.recipe_name
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Workato Jobs
+  enabled: true
+  filter:
+    query: source:workato
+  processors:
+    - type: date-remapper
+      name: Define `completed_at` as the official date of the log
+      enabled: true
+      sources:
+        - completed_at
+    - type: attribute-remapper
+      name: Map `project.name` to `workato.project_name`
+      enabled: true
+      sources:
+        - project.name
+      sourceType: attribute
+      target: workato.project_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `recipe.name` to `workato.recipe_name`
+      enabled: true
+      sources:
+        - recipe.name
+      sourceType: attribute
+      target: workato.recipe_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: attribute-remapper
+      name: Map `error_parts.error_type` to `error`
+      enabled: true
+      sources:
+        - error_parts.error_type
+      sourceType: attribute
+      target: error
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: arithmetic-processor
+      name: Duration Mapper
+      enabled: true
+      expression: duration * 1000
+      target: workato.duration
+      replaceMissing: true
