@@ -430,7 +430,7 @@ files:
           - name: schemas_collection
             hidden: true
             deprecation:
-              Agent version: 7.59.0
+              Agent version: 7.69.0
               Migration: Use `collect_schemas` instead.
             description: |
               DEPRECATED: Use `collect_schemas` instead.

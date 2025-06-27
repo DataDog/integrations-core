@@ -4,4 +4,4 @@
 
 
 def instance():
-    return {'schemas_collection': {'Agent version': '7.59.0', 'Migration': 'Use `collect_schemas` instead.'}}
+    return {'schemas_collection': {'Agent version': '7.69.0', 'Migration': 'Use `collect_schemas` instead.'}}
