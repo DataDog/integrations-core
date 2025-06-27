@@ -1,5 +1,7 @@
 # Agent Check: Lustre
 
+<!-- TODO: Say that changelog users must be registered for changelogs to be collected. -->
+
 ## Overview
 
 This check monitors [Lustre][1] through the Datadog Agent. 
