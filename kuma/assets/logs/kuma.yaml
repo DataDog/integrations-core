@@ -2,6 +2,21 @@ id: kuma
 metric_id: kuma
 backend_only: false
 facets:
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
   - description: Destination Kuma service for the request.
     facetType: list
     groups:
