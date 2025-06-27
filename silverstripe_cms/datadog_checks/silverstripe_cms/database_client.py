@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import psycopg
+import pymysql
 from psycopg import ClientCursor
 from psycopg.rows import dict_row
-import pymysql
 
 from datadog_checks.base.errors import ConfigurationError
 
