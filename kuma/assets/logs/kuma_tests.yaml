@@ -1,17 +1,13 @@
-id: kuma
+id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
 tests:
-  - sample: 2025-05-26T20:44:41.327Z	INFO	plugin.runtime.gateway	registered gateway
-      plugin
+  - sample: "[2025-06-26T21:29:21.535Z] - default
+      10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms,
+      sent 6195 bytes, received: 194 bytes"
     result: null
-  - sample: '2025-05-26T20:47:04.174Z	INFO	controllers.Service	annotating service
-      which is part of the mesh	{"service":
-      {"name":"datadog-admission-controller","namespace":"datadog-operator"},
-      "annotation": "ingress.kubernetes.io/service-upstream=true"}'
-    result: null
-  - sample: I0526 20:44:41.456499       1 leaderelection.go:257] attempting to
-      acquire leader lease kuma-system/cp-leader-lease...
-    result: null
-  - sample: "2025/05/31 15:56:10 http: TLS handshake error from 10.42.0.1:41588: EOF"
+  - sample: '[2025-06-26T13:19:18.314Z] default "GET /api?timeout=32s HTTP/1.1" 404
+      NR 0 0 0 - "10.42.1.26" "kubectl/v1.31.5+k3s1 (linux/arm64)
+      kubernetes/56ec5dd" "-" "0efbfa26-1e2d-9144-919a-e9985d0eab30"
+      "localhost:8080" "unknown" "edge-gateway_kuma-demo_svc" "10.42.3.27" "-"'
     result: null
   - sample: "[2025-06-03 18:44:06.650][31][info][upstream]
       [source/common/listener_manager/lds_api.cc:106] lds: add/update listener
@@ -20,14 +16,23 @@ tests:
   - sample: "[2025-06-03 18:54:23.975][32][info][main] [source/server/server.cc:998]
       main dispatch loop exited"
     result: null
-  - sample: "[INFO] SIGTERM: Shutting down servers then terminating"
+  - sample: 2025-05-26T20:44:41.327Z	INFO	plugin.runtime.gateway	registered gateway
+      plugin
     result: null
   - sample: >-
-      [2025-06-25 22:31:54.965][21][error][tracing]
-      [source/extensions/tracers/datadog/logger.cc:23] Unexpected telemetry
-      response status 503 with body (if any, starts on next line):
+      2025-05-26T20:47:04.174Z	INFO	controllers.Service	annotating service which
+      is part of the mesh	{"service":
+      {"name":"datadog-admission-controller","namespace":"datadog-operator"},
+      "annotation": "ingress.kubernetes.io/service-upstream=true"}
 
-      upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
+      kuma_cp_structured_log %{isoTimestamp:date}\t%{word:level}\t%{notSpace:logger.name}\t%{notTab:message}(\t%{data::json})?
+    result: null
+  - sample: I0526 20:44:41.456499       1 leaderelection.go:257] attempting to
+      acquire leader lease kuma-system/cp-leader-lease...
+    result: null
+  - sample: "2025/05/31 15:56:10 http: TLS handshake error from 10.42.0.1:41588: EOF"
+    result: null
+  - sample: "[INFO] SIGTERM: Shutting down servers then terminating"
     result: null
 
 # The `result` field should be left blank to start. Once you submit your log asset files with
