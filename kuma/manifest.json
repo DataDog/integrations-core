@@ -47,6 +47,9 @@
         "kuma-dp run"
       ]
     },
+    "saved_views": {
+      "Kuma Mesh Access Logs Overview": "assets/saved_views/logs_overview.json"
+    },
     "logs": {
       "source": "kuma"
     }
