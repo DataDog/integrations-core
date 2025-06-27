@@ -81,7 +81,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
             resource_tags = {
                 f'proxmox_type:{resource_type_remapped}',
-                f'proxmox_{resource_type_remapped}:{resource_name}',
+                f'proxmox_name:{resource_name}',
                 f'proxmox_id:{resource_id}',
             }
 
@@ -90,11 +90,11 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 proxmox_tags = proxmox_tags.split(';')
                 resource_tags.update(proxmox_tags)
 
-            if node:
+            if node and resource_type_remapped != 'node':
                 resource_tags.add(f'proxmox_node:{node}')
 
             pool = resource.get('pool')
-            if pool:
+            if pool and resource_type_remapped != 'pool':
                 resource_tags.add(f'proxmox_pool:{pool}')
 
             self.gauge(
