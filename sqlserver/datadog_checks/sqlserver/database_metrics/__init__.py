@@ -21,3 +21,4 @@ from .secondary_log_shipping_metrics import SqlserverSecondaryLogShippingMetrics
 from .server_state_metrics import SqlserverServerStateMetrics
 from .tempdb_file_space_usage_metrics import SqlserverTempDBFileSpaceUsageMetrics
 from .xe_session_metrics import SQLServerXESessionMetrics
+from .table_size_metrics import SqlserverTableSizeMetrics

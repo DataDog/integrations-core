@@ -42,6 +42,13 @@ files:
         display_default: null
         example: http://argocd-notifications-controller:9001/metrics
         type: string
+    - name: commit_server_endpoint
+      description: |
+        Endpoint exposing Commit Server's Prometheus metrics.
+      value:
+        display_default: null
+        example: http://argocd-commit-server:8087/metrics
+        type: string
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false
