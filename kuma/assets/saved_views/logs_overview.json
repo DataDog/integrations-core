@@ -2,7 +2,7 @@
   "name": "Kuma Mesh Access Logs Overview",
   "type": "logs",
   "page": "stream",
-  "query": "(source:kuma OR source:kuma-dp) @kuma.destination_service:*",
+  "query": "source:kuma @kuma.destination_service:*",
   "timerange": {
     "interval_ms": 3600000
   },
