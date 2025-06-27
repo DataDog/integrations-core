@@ -24,8 +24,6 @@ tests:
       is part of the mesh	{"service":
       {"name":"datadog-admission-controller","namespace":"datadog-operator"},
       "annotation": "ingress.kubernetes.io/service-upstream=true"}
-
-      kuma_cp_structured_log %{isoTimestamp:date}\t%{word:level}\t%{notSpace:logger.name}\t%{notTab:message}(\t%{data::json})?
     result: null
   - sample: I0526 20:44:41.456499       1 leaderelection.go:257] attempting to
       acquire leader lease kuma-system/cp-leader-lease...
