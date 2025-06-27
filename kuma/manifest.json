@@ -46,6 +46,9 @@
         "kuma-cp run",
         "kuma-dp run"
       ]
+    },
+    "logs": {
+      "source": "kuma"
     }
   },
   "author": {
