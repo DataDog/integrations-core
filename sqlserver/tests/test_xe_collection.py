@@ -1275,17 +1275,17 @@ class TestRunJob:
 
 
 @pytest.mark.unit
-def test_collect_xe_config(dbm_instance):
-    dbm_instance['collect_xe'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+def test_collect_xe_config(instance_docker):
+    instance_docker['collect_xe'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
     assert check._config.xe_collection_config == {
         "query_completions": {"enabled": True},
         "query_errors": {"enabled": True},
     }
 
-    dbm_instance.pop('collect_xe')
-    dbm_instance['xe_collection'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    instance_docker.pop('collect_xe')
+    instance_docker['xe_collection'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
     assert check._config.xe_collection_config == {
         "query_completions": {"enabled": True},
         "query_errors": {"enabled": True},
