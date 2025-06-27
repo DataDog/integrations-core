@@ -142,6 +142,11 @@ instances:
     #
     disable_legacy_service_tag: true
 
+    ## @param health_check_metric - boolean - optional - default: false
+    ## Whether to enable new node health checks from this instance.
+    #
+    # health_check_metric: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
