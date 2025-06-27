@@ -4,8 +4,6 @@
 
 import pytest
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-
 
 @pytest.mark.e2e
 def test_api_down(dd_agent_check, aggregator, instance):
