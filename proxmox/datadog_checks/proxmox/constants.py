@@ -5,6 +5,7 @@
 RESOURCE_TYPE_MAP = {
     'qemu': 'vm',
     'lxc': 'container',
+    'openvz': 'container',
     'storage': 'storage',
     'node': 'node',
     'pool': 'pool',
