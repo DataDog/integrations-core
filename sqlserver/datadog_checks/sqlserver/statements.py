@@ -626,7 +626,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
-                obfuscated_plan, collection_errors = None, None
+                obfuscated_plan = None
+                collection_errors = []
 
                 try:
                     if raw_plan:
@@ -639,7 +640,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
-                    collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
+                    collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
@@ -685,7 +686,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "plan": {
                             "definition": obfuscated_plan,
                             "signature": row['query_plan_hash'],
-                            "collection_errors": collection_errors,
+                            "collection_errors": collection_errors if collection_errors else None,
                         },
                         "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),
