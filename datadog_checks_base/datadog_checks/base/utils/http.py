@@ -456,12 +456,9 @@ class RequestsWrapper(object):
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
-            new_tls_config = self._get_new_tls_config(url, new_options)
-            if persist:
-                session = self.session
-                self._mount_https_adapter(session, new_tls_config)
-            else:
-                session = self._create_session(tls_config=new_tls_config)
+            session = self.session if persist else self._create_session()
+            if url.startswith('https'):
+                self._mount_https_adapter(session, ChainMap(get_tls_config_from_options(new_options), self.tls_config))
             request_method = getattr(session, method)
 
             if self.auth_token_handler:
@@ -503,14 +500,9 @@ class RequestsWrapper(object):
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
                 raise e
-            new_ca_certs = {'tls_intermediate_ca_certs': certs}
-            new_tls_config = self.tls_config.copy()
-            new_tls_config.update(new_ca_certs)
-            if not persist:
-                session = self._create_session(new_tls_config)
-            else:
-                session = self.session
-                self._mount_https_adapter(session, new_tls_config)
+            session = self.session if persist else self._create_session()
+            if parsed_url.scheme == "https":
+                self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
             request_method = getattr(session, method)
             response = request_method(url, **new_options)
         return response
