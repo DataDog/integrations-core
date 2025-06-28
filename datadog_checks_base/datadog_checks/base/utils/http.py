@@ -474,21 +474,6 @@ class RequestsWrapper(object):
 
             return ResponseWrapper(response, self.request_size)
 
-    def _get_new_tls_config(self, url, new_options):
-        """
-        Creates a new TLS config if the new request options differ from the default ones.
-        """
-        # If `verify` or `cert` options differ from the defaults, a new adapter is created.
-        if new_options.get('verify') == self.options['verify'] and new_options.get('cert') == self.options['cert']:
-            return self.tls_config
-        if not url.startswith('https'):
-            return self.tls_config
-        requested_tls_config = get_tls_config_from_options(new_options)
-        self.logger.debug('Overrides for new context config: %s', requested_tls_config)
-        new_tls_config = self.tls_config.copy()
-        new_tls_config.update(requested_tls_config)
-        return new_tls_config
-
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
             response = request_method(url, **new_options)
@@ -578,12 +563,13 @@ class RequestsWrapper(object):
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
 
-    def _create_session(self, tls_config=None):
+    def _create_session(self):
+        """
+        Initializes requests.Session and configures it with a UDS Adapter and options coming from user's config.
+
+        We leave it to callers to mount any HTTPS adapters if necessary.
+        """
         session = requests.Session()
-        config = self.tls_config if tls_config is None else tls_config
-
-        self._mount_https_adapter(session, config)
-
         # Enable Unix Domain Socket (UDS) support.
         # See: https://github.com/msabramo/requests-unixsocket
         session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
