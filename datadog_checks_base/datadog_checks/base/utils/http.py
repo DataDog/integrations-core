@@ -583,8 +583,9 @@ class RequestsWrapper(object):
     @property
     def session(self):
         if self._session is None:
-            # Create a new session if it doesn't exist
+            # Create a new session if it doesn't exist and mount default HTTPS adapter.
             self._session = self._create_session()
+            self._mount_https_adapter(self._session, self.tls_config)
         return self._session
 
     def handle_auth_token(self, **request):
