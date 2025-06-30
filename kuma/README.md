@@ -50,7 +50,7 @@ controlPlane:
 The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
 If your control plane has a different name, change the line accordingly.
 
-**Configuration File**
+**Configuration file**
 
 Alternatively, you can configure the integration by editing the `kuma.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory:
 
