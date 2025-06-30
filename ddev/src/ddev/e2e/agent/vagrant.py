@@ -184,7 +184,7 @@ class VagrantAgent(AgentInterface):
 
         # Handle sudo for non-Windows guests if metadata suggests it's needed for the command.
         # This is a basic approach. More complex sudo needs might require specific command metadata.
-        if not self._is_windows_vm and self.metadata.get("vagrant_command_needs_sudo", True):
+        if not self._is_windows_vm and self.metadata.get("vagrant_command_needs_sudo", False):
             if not inner_cmd_list or inner_cmd_list[0] != "sudo":
                 inner_cmd_list.insert(0, "sudo -E")
 
@@ -464,7 +464,7 @@ class VagrantAgent(AgentInterface):
         # Runs an 'agent <command>' inside the VM
         agent_bin = "/opt/datadog-agent/bin/agent/agent" if not self._is_windows_vm else "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe"
 
-        guest_cmd_parts = [agent_bin] + args
+        guest_cmd_parts = ["sudo",agent_bin] + args
         host_cmd = self._format_command(guest_cmd_parts)
 
         print(f"Invoking agent command in VM `{self._vm_name}`: {' '.join(host_cmd)}")

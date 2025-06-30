@@ -28,6 +28,7 @@ class GlusterfsCheck(AgentCheck):
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
     def check(self, _):
+        raise Exception("LOL")
         gstatus = json.loads(self.get_gstatus_data())
         if 'data' in gstatus:
             data = gstatus['data']
@@ -161,7 +162,7 @@ class GlusterfsCheck(AgentCheck):
         options.units = "g"
         options.output_mode = "json"
 
-        cluster = Cluster(options, None)
+        cluster = Cluster(options, self.log, self.use_sudo)
         # check_version(cluster)
         cluster.gather_data()
 

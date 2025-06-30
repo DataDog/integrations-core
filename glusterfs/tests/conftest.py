@@ -21,6 +21,8 @@ E2E_METADATA = {
         "sudo apt install -y glusterfs-server glusterfs-client",
         "sudo systemctl start glusterd",
         "sudo systemctl enable glusterd",
+        # "sudo echo \"dd-agent ALL=(ALL) NOPASSWD:/usr/sbin/gluster\" >> /etc/sudoers.d/dd-agent",
+        # "sudo chmod 440 /etc/sudoers.d/dd-agent",
         "sudo mkdir -p /gluster/brick1",
         "sudo gluster volume create volume1 172.30.1.5:/gluster/brick1 force",
         "sudo gluster volume start volume1",
