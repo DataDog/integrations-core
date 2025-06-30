@@ -23,7 +23,7 @@ The Kuma check is included in the [Datadog Agent][3] package. No additional inst
 
 Metrics are collected from the Kuma control plane and the Envoy data planes.
 
-##### Control Plane
+##### Control plane
 
 **Autodiscovery (Kubernetes)**
 
