@@ -155,8 +155,3 @@ pipeline:
       enabled: true
       sources:
         - date
-    - type: service-remapper
-      name: Set "source" as the official service
-      enabled: true
-      sources:
-        - source
