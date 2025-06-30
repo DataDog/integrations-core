@@ -8,7 +8,7 @@
     ],
     "description": "Each Kuma zone must have exactly one leader instance for proper operation. This monitor alerts when multiple leaders are detected, which can cause split-brain scenarios and conflicting policy decisions.",
     "definition": {
-        "message": "{{#is_alert}}\n\nMultiple Kuma leaders detected in zone {{zone.name}}.\n\nLeader count: {{value}}\n\nMultiple leaders cause split-brain scenarios where:\n- Conflicting policy decisions may be made\n- Resource updates may be inconsistent\n- Data plane proxies receive conflicting configurations\n\nThis is a critical issue that requires immediate attention.\n\nPossible causes:\n- Network partition has been resolved\n- Clock synchronization issues\n- Leader election timeout misconfiguration\n- Bug in leader election logic\n\nInvestigate immediately and ensure only one instance holds the leader lock.\n\n{{/is_alert}}",
+        "message": "{{#is_alert}}\n\nMultiple Kuma leaders detected in zone {{zone.name}}.\n\nLeader count: {{value}}\n\nMultiple leaders can cause split-brain scenarios.{{/is_alert}}",
         "name": "[Kuma] Multiple Leaders Detected",
         "options": {
             "thresholds": {
