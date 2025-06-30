@@ -870,6 +870,8 @@ def test_statement_samples_collect(
 
         expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
 
+        print(expected_query)
+        print(dbm_samples)
         # Find matching events by checking if the expected query starts with the event statement. Using this
         # instead of a direct equality check covers cases of truncated statements
         matching = [

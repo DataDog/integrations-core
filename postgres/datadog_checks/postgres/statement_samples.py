@@ -356,7 +356,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 encoding = conn.info.encoding if conn.info.encoding != "SQLASCII" else 'utf-8'
 
             for key, value in raw_row.items():
-                if type(value) is not bytes:
+                if type(value) is not bytes or value is None:
                     row[key] = value
                 elif key == "query":
                     try:
@@ -377,14 +377,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                     except Exception as e:
                         self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
                         row[key] = "unknown"
-            # We later on fallback to having the statement be set to the backend_type so it's important to only
-            # set it if it is not None
-            if row.get("backend_type") is not None:
-                # backend_type is always a bytea type because it can contain non-UTF8 characters
-                try:
-                    row["backend_type"] = row.get("backend_type").tobytes().decode('utf-8', 'backslashreplace')
-                except Exception:
-                    row["backend_type"] = "unknown"
             if not row.get('query'):
                 continue
             if (not row.get('datname')) and row.get('backend_type', 'client backend') == 'client backend':
