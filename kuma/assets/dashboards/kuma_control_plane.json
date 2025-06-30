@@ -29,7 +29,7 @@
             "id": 2807283505732892,
             "definition": {
               "type": "note",
-              "content": "## Kuma Service Mesh Control Plane\n\nThis dashboard provides comprehensive monitoring for your Kuma service mesh infrastructure. Track the health and performance of control plane components to ensure reliable service-to-service communication.\n\n Use the template variables to filter by control plane instance, mesh zone or cluster.\n\n**Further reading:**\n- [Datadog Kuma Integration Documentation](https://docs.datadoghq.com/integrations/kuma/)\n- [Kuma Documentation](https://kuma.io/docs/latest/)\n- [Kuma Production Guide](https://kuma.io/docs/latest/production/)\n- [Kuma Metrics Reference](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Performance Tuning Guide](https://kuma.io/docs/latest/production/upgrades-tuning/fine-tuning/)",
+              "content": "## Kuma Service Mesh Control Plane\n\nThis dashboard provides comprehensive monitoring for your Kuma service mesh infrastructure. Track the health and performance of control plane components to ensure reliable service-to-service communication.\n\n Use the template variables to filter by control plane instance, mesh zone, or cluster.\n\n**Further reading:**\n- [Datadog Kuma Integration Documentation](https://docs.datadoghq.com/integrations/kuma/)\n- [Kuma Documentation](https://kuma.io/docs/latest/)\n- [Kuma Production Guide](https://kuma.io/docs/latest/production/)\n- [Kuma Metrics Reference](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Performance Tuning Guide](https://kuma.io/docs/latest/production/upgrades-tuning/fine-tuning/)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
