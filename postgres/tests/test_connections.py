@@ -97,6 +97,7 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
             dbname = 'dogs_{}'.format(i)
             db = pool._get_connection_raw(dbname, 10 * 1000)
             with db.cursor() as cursor:
+                cursor.execute("SET client_encoding TO 'UTF8'")
                 cursor.execute("select current_database()")
                 rows = cursor.fetchall()
                 assert len(rows) == 1
@@ -164,6 +165,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
             dbname = 'dogs_{}'.format(i)
             db = pool._get_connection_raw(dbname, ttl)
             with db.cursor() as cursor:
+                cursor.execute("SET client_encoding TO 'UTF8'")
                 cursor.execute("select current_database()")
                 rows = cursor.fetchall()
                 assert len(rows) == 1
