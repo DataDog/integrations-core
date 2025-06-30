@@ -7,12 +7,12 @@ Barracuda Secure Edge is a unified Secure Access Service Edge (SASE) platform th
 ## Setup
 ### Prerequisites
 
-1. Administrative access to Barracuda Secure Edge installed on your server.
-2. The Datadog Agent installed and running (on a server or container that can receive syslog messages).
-3. Network Access between the firewall and the Datadog Agent (usually port 514, but may be a custom value).
-4. Syslog support enabled in the Datadog Agent (with a TCP or UDP  listener configured).
+- Administrative access to Barracuda Secure Edge installed on your server.
+- The Datadog Agent installed and running (on a server or container that can receive syslog messages).
+- Network Access between the firewall and the Datadog Agent (usually port 514, but may be a custom value).
+- Syslog support enabled in the Datadog Agent (with a TCP or UDP  listener configured).
 
-### Setup Configurations
+### Setup configurations
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` with:
 
     ```yaml
@@ -51,11 +51,6 @@ After running this command, you should see traffic from the Secure Edge IP addre
 4. Check the Datadog [Live Tail][5] in Datadog for logs from the source and service you defined in the `conf.yaml` file.
 5. After following these steps, you can create a test log on the firewall by triggering an event.
 6. Check for tags or facets to use them for better filtering based on the required data.
-
-### Metrics
-
-Barracuda_Secure_Edge does not include any metrics.
-
 
 ## Data Collected
 ### Metrics
