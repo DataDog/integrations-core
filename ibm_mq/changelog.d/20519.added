@@ -1,2 +1,1 @@
-Add metric ibm_mq.channel.conn_status to ibm mq integration, add channel and connection metric tests
-Add metric ibm_mq.channel.connections_active to report the total number of active channel connections (instances) per channel
+Add ibm_mq.channel.conn_status and ibm_mq.channel.connections_active metrics with channel and connection metric tests
