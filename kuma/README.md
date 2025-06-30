@@ -217,7 +217,7 @@ Need help? Contact [Datadog support][9].
 
 [1]: https://kuma.io/
 [2]: https://konghq.com/products/kong-mesh
-[3]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [5]: https://github.com/DataDog/integrations-core/blob/master/kuma/datadog_checks/kuma/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
