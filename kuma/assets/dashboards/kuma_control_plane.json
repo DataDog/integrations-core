@@ -1526,7 +1526,7 @@
             "id": 5874571351328261,
             "definition": {
               "type": "note",
-              "content": "The Dataplane Server provides boostrap configuration to data plane proxies during startup. ",
+              "content": "The Dataplane Server provides bootstrap configuration to data plane proxies during startup. ",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
