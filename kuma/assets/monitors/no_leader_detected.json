@@ -8,7 +8,7 @@
     ],
     "description": "Each Kuma zone must have exactly one leader instance for proper operation. This monitor alerts when no leader is detected, which prevents policy updates and proper control plane operation.",
     "definition": {
-        "message": "{{#is_alert}}\n\nNo Kuma leader detected in zone {{zone.name}}.\n\nLeader count: {{value}}\n\nWithout a leader, the control plane cannot:\n- Process policy updates\n- Manage dataplane configurations\n- Coordinate cluster operations\n\nPossible causes:\n- All control plane instances are down\n- Leader election process is failing\n- Network partition preventing election\n- Configuration issues with leader election\n\nCheck control plane logs and ensure at least one healthy instance is running.\n\n{{/is_alert}}",
+        "message": "{{#is_alert}}\n\nNo Kuma leader detected in zone {{zone.name}}.\n\nLeader count: {{value}}{{/is_alert}}",
         "name": "[Kuma] No Leader Detected",
         "options": {
             "thresholds": {
