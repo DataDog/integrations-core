@@ -8,6 +8,7 @@ import subprocess
 import yaml
 from dataclasses import dataclass
 import re
+import time
 
 OSS_JOBSTATS_PARAM_REGEX = r'obdfilter.*.job_stats'
 MDS_JOBSTATS_PARAM_REGEX = r'mdt.*.job_stats'
@@ -27,9 +28,6 @@ class LustreParam:
 
 DEFAULT_PARAMS = [
     LustreParam(regex='llite.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='filesystem'),
-]
-
-EXTRA_PARAMS = [
     LustreParam(regex='mds.MDS.mdt.stats', node_types=('mds',), prefix='mds.mdt'),
     LustreParam(regex='mdt.*.exports.*.stats', node_types=('mds',), wildcards=('device_name','nid'), prefix='mds.mdt.exports'),
     LustreParam(regex='mdc.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='mdc'),
@@ -40,6 +38,9 @@ EXTRA_PARAMS = [
     LustreParam(regex='osc.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='osc'),
     LustreParam(regex='obdfilter.*.exports.*.stats', node_types=('oss',), wildcards=('device_name', 'nid'), prefix='obdfilter.exports'),
     LustreParam(regex='obdfilter.*.stats', node_types=('oss',), wildcards=('device_name',), prefix='obdfilter'),
+]
+
+EXTRA_PARAMS = [
 ]
 
 class LustreCheck(AgentCheck):
@@ -95,7 +96,7 @@ class LustreCheck(AgentCheck):
 
         self.submit_device_health()
         self.submit_general_stats()
-        self.submit_lnet_metrics()
+        self.submit_lnet_stats_metrics()
         self.submit_lnet_local_ni_metrics()
         self.submit_lnet_peer_ni_metrics()
 
@@ -170,9 +171,14 @@ class LustreCheck(AgentCheck):
         '''
         Run a command using the given binary.
         '''
-        cmd = f' {"sudo " if sudo else ""}{bin}{" ".join(args)}'
+        cmd = f'{"sudo " if sudo else ""}{bin} {" ".join(args)}'
         try:
-            return subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True).stdout
+            self.log.debug(f'Running command: {cmd}')
+            output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
+            if output.stdout is None:
+                self.log.debug(f'Command {cmd} returned no output, check if dd-agent is running with sufficient permissions. Captured stderr: {output.stderr}')
+                return ''
+            return output.stdout
         except Exception as e:
             self.log.error(f'Failed to run command {cmd}: {e}')
             return ''
@@ -187,6 +193,9 @@ class LustreCheck(AgentCheck):
             if self.filesystems and not any(device_name.startswith(filesystem) for filesystem in self.filesystems):
                 continue
             jobstats_metrics = self.get_jobstats_metrics(jobstats_param)['job_stats']
+            if jobstats_metrics is None:
+                self.log.debug(f'No jobstats metrics found for {jobstats_param}')
+                continue
             for job in jobstats_metrics:
                 job_id = job['job_id']
                 for metric_name, metric_values in job.items():
@@ -198,7 +207,6 @@ class LustreCheck(AgentCheck):
                         if metric_type == 'hist':
                             # TODO: Handle histogram metrics if needed
                             continue 
-                        self.log.warning(f'Jobstats metric {metric_name} with type {metric_type} has value {metric_value}')
                         self.gauge(f'job_stats.{metric_name}.{metric_type}', metric_value, tags=[f'device_type:{self.node_type}', f'device_name:{device_name}', f'job_id:{job_id}'])
 
 
@@ -243,7 +251,7 @@ class LustreCheck(AgentCheck):
         '''
         Get the lnet stats from the command line.
         '''
-        lnet_stats = self.run_command(self.lnetctl_path, stats_type, 'show', '-v', '3', sudo=True)
+        lnet_stats = self.run_command(self.lnetctl_path, stats_type, 'show', sudo=True)
         try:
             return yaml.safe_load(lnet_stats)
         except (KeyError, ValueError):
@@ -259,7 +267,7 @@ class LustreCheck(AgentCheck):
             net_type = net.get('net type')
             for ni in net.get('local NI(s)', []):
                 nid = ni.get('nid')
-                tags = [f'net_type:{net_type}', f'nid:{nid}']
+                tags = [f'net_type:{net_type}', f'nid:{nid}', f'node_type:{self.node_type}']
                 for stats_group_name, stats_group in ni.items():
                     if not isinstance(stats_group, dict):
                         continue
@@ -276,7 +284,7 @@ class LustreCheck(AgentCheck):
             nid = peer.get('primary nid')
             for ni in peer.get('peer ni', []):
                 peer_nid = ni.get('nid')
-                tags = [f'nid:{nid}', f'peer_nid:{peer_nid}']
+                tags = [f'nid:{nid}', f'peer_nid:{peer_nid}', f'node_type:{self.node_type}']
                 for stats_group_name, stats_group in ni.items():
                     if not isinstance(stats_group, dict):
                         continue
@@ -289,6 +297,9 @@ class LustreCheck(AgentCheck):
         Submit general stats.
         '''
         for param in self.param_list: 
+            if self.node_type not in param.node_types:
+                self.log.debug(f'Skipping param {param.regex} for node type {self.node_type}')
+                continue
             if not param.regex.endswith('.stats'):
                 continue
             raw_stats = self.run_command(self.lctl_path, "get_param", "-ny", param.regex, sudo=True)
@@ -302,7 +313,7 @@ class LustreCheck(AgentCheck):
                     continue
                 for metric_type, metric_value in stat_value.items():
                     if isinstance(metric_value, int):
-                        self.gauge(f'general.{stat_name}.{metric_type}', metric_value, tags=[f'node_type:{self.node_type}'])
+                        self.gauge(f'general.{param.prefix}.{stat_name}.{metric_type}', metric_value, tags=[f'node_type:{self.node_type}'])
                     else:
                         self.log.debug(f'Unexpected metric value for {stat_name}.{metric_type}: {metric_value}')
 
@@ -326,7 +337,8 @@ class LustreCheck(AgentCheck):
             if stat_name in IGNORED_STATS:
                 continue
             try:
-                stat_value = {"count": int(parts[1]), "unit": parts[3].strip('[]')}
+                stat_value = {"count": int(parts[1])}
+                # unit =  parts[3].strip('[]')
                 stat_types = ('min', 'max', 'sum', 'sumsq')
                 for i, value in enumerate(parts[4:]):
                     stat_value[stat_types[i]] = int(value)
@@ -373,10 +385,12 @@ class LustreCheck(AgentCheck):
                     continue
                 parts = line.split()
                 try:
+                    date_time = parts[3] + ' ' + parts[2]
+                    # The time has nanoseconds, so we need to truncate the last three digits
+                    timestamp = time.mktime(time.strptime(date_time[:-3], '%Y.%m.%d %H:%M:%S.%f'))
                     data = {
                         'operation_type': parts[1],
-                        'timestamp': parts[2],
-                        'datestamp': parts[3],
+                        'timestamp': timestamp,
                         'flags': parts[4],
                         'message': ' '.join(parts[5:])
                     }
@@ -387,7 +401,8 @@ class LustreCheck(AgentCheck):
 
     def get_changelog(self, target):
         self.log.info(f'Collecting changelogs for: {target}')
-        index_from_memory = self.get_log_cursor(stream=target) 
-        start_index = '0' if index_from_memory is None else index_from_memory
+        cursor = self.get_log_cursor(stream=target) 
+        start_index = '0' if cursor is None else cursor['index']
         end_index = str(int(start_index) + int(self.changelog_lines_per_run))
+        self.log.debug(f'Fetching changelog from index {start_index} to {end_index} for target {target}')
         return self.run_command(self.lfs_path, 'changelog', target, start_index, end_index, sudo=True)
