@@ -132,7 +132,7 @@ controlPlane:
 The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.logs:`. 
 If your control plane has a different name, change the line accordingly.
 
-##### Data Plane Logs
+##### Data plane logs
 
 Configure the Datadog Agent to collect logs from the Envoy sidecar containers by applying the following annotations to your application pods:
 
