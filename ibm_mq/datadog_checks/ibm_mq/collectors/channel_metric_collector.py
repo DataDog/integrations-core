@@ -188,6 +188,8 @@ class ChannelMetricCollector(object):
 
             # Special handling for connection metric
             if metric_name == 'conn_status':
+                if not self.config.collect_connection_metrics:
+                    continue
                 connection_name = to_string(channel_info[pymqi_type]).strip()
                 if not connection_name:
                     continue
