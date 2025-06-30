@@ -58,6 +58,7 @@ from .util import (
     QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
+    QUERY_PG_WAIT_EVENT_METRICS,
     REPLICATION_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
@@ -347,6 +348,7 @@ class PostgreSql(AgentCheck):
             queries.append(QUERY_PG_REPLICATION_STATS_METRICS)
             queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
             queries.append(STAT_SUBSCRIPTION_METRICS)
+            queries.append(QUERY_PG_WAIT_EVENT_METRICS)
 
         if self.version >= V12:
             queries.append(CLUSTER_VACUUM_PROGRESS_METRICS)
