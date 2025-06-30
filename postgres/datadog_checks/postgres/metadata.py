@@ -318,7 +318,7 @@ class PostgresMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=dict_row) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 self._time_since_last_extension_query = time.time()
 
                 # Get loaded extensions
@@ -773,6 +773,7 @@ class PostgresMetadata(DBMAsyncJob):
                 # Get loaded extensions
                 cursor.execute(PG_EXTENSIONS_QUERY)
                 rows = cursor.fetchall()
+                print(rows)
                 query = PG_SETTINGS_QUERY
                 for row in rows:
                     extension = row['extname']
@@ -786,17 +787,24 @@ class PostgresMetadata(DBMAsyncJob):
                     else:
                         self._log.warning("unable to collect settings for unknown extension %s", extension)
 
-                    if self.pg_settings_ignored_patterns:
-                        query = query + " WHERE name NOT LIKE ALL(%s)"
+                if self.pg_settings_ignored_patterns:
+                    query = query + " WHERE name NOT LIKE ALL(%s)"
 
-                    self._log.debug(
-                        "Running query [%s] and patterns are %s",
-                        query,
-                        self.pg_settings_ignored_patterns,
-                    )
-                    self._time_since_last_settings_query = time.time()
-                    cursor.execute(query, (self.pg_settings_ignored_patterns,))
-                    rows = cursor.fetchall()
-                    self._log.warning("Loaded %s rows from pg_settings", rows)
-                    self._log.debug("Loaded %s rows from pg_settings", len(rows))
-                    return rows
+                self._log.debug(
+                    "Running query [%s] and patterns are %s",
+                    query,
+                    self.pg_settings_ignored_patterns,
+                )
+                self._time_since_last_settings_query = time.time()
+                cursor.execute(query, (self.pg_settings_ignored_patterns,))
+                # pg3 returns a set of results for each statement in the multiple statement query
+                # We want to retrieve the last one that actually has the settings results
+                rows = []
+                has_more_results = True
+                while has_more_results:
+                    if cursor.pgresult.status == psycopg.pq.ExecStatus.TUPLES_OK:
+                        rows = cursor.fetchall()
+                    has_more_results = cursor.nextset()
+                self._log.warning("Loaded %s rows from pg_settings", rows)
+                self._log.debug("Loaded %s rows from pg_settings", len(rows))
+                return rows

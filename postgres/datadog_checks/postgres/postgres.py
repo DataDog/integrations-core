@@ -489,7 +489,7 @@ class PostgreSql(AgentCheck):
 
     def _get_wal_level(self):
         with self.db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SHOW wal_level;')
                 wal_level = cursor.fetchone()[0]
                 return wal_level

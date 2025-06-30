@@ -16,7 +16,7 @@ class BaseCommenterCursor:
         self.__attributes = DD_QUERY_ATTRIBUTES
         super().__init__(*args, **kwargs)
 
-    def execute(self, query, vars=None, ignore_query_metric=False):
+    def execute(self, query, params=None, ignore_query_metric=False, binary=False):
         '''
         When ignore is True, a /* DDIGNORE */ comment will be added to the query.
         This comment indicates that the query should be ignored in query metrics.
@@ -24,7 +24,7 @@ class BaseCommenterCursor:
         query = add_sql_comment(query, prepand=True, **self.__attributes)
         if ignore_query_metric:
             query = '{} {}'.format('/* DDIGNORE */', query)
-        return super().execute(query, vars)
+        return super().execute(query, params, binary=binary)
 
 
 class CommenterCursor(BaseCommenterCursor, psycopg.ClientCursor):

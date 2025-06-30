@@ -291,13 +291,9 @@ def test_statement_metrics(
     assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-    print(event)
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
-        print(query)
         expected_query = query % obfuscated_param
-        print(expected_query)
         query_signature = compute_sql_signature(expected_query)
-        print("query_signature: ", query_signature)
         matching_rows = [r for r in event['postgres_rows'] if r['query_signature'] == query_signature]
         if not _should_catch_query(dbname):
             assert len(matching_rows) == 0
@@ -855,8 +851,10 @@ def test_statement_samples_collect(
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
-    conn.set_client_encoding('utf8')
+    conn = psycopg.connect(
+        host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor
+)
+    conn.execute("SET client_encoding TO UTF8")
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as
@@ -931,7 +929,6 @@ def test_statement_samples_collect(
                 assert event['db']['plan']['raw_signature'] is not None, "missing raw plan signature"
         else:
             assert len(raw_plan_events) == 0
-
     finally:
         conn.close()
 
@@ -2229,7 +2226,7 @@ def test_metrics_encoding(
 
     with psycopg.connect(host=HOST, dbname=DB_NAME, user='bob', password='bob') as conn:
         with conn.cursor() as cursor:
-            conn.set_client_encoding('latin1')
+            conn.execute("SET client_encoding TO LATIN1")
             # This should be funké in latin1
             query = b"select 'funk\xe9' as funk\xe9;"
             cursor.execute(query)
@@ -2265,7 +2262,7 @@ def test_samples_encoding(
 
     with psycopg.connect(host=HOST, dbname=DB_NAME, user='bob', password='bob') as conn:
         with conn.cursor() as cursor:
-            conn.set_client_encoding('latin1')
+            conn.execute("SET client_encoding TO LATIN1")
             # This should be funké in latin1
             query = b"select 'funk\xe9' as funk\xe9;"
             cursor.execute(query)

@@ -202,10 +202,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
 
-    def _execute_query(self, cursor, query, params=()):
+    def _execute_query(self, cursor, query, params=(), binary=False):
         try:
             self._log.warning("Running query [%s] %s", query, params)
-            cursor.execute(query, params)
+            cursor.execute(query, params=params, binary=binary)
             return cursor.fetchall()
         except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
@@ -404,10 +404,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 params = params + tuple(self._config.ignore_databases)
             with self._check._get_main_db() as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
-                    if conn.encoding == "SQLASCII":
-                        # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
-                        # so we need to read in the data as bytes and then decode as best we can
-                        psycopg.extensions.register_type(psycopg.extensions.BYTES, cursor)
+                    binary=False
+                    if conn.info.encoding == "SQLASCII":
+                        # # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
+                        # # so we need to read in the data as bytes and then decode as best we can
+                        # psycopg.extensions.register_type(psycopg.extensions.BYTES, cursor)
+                        binary=True
                     if len(self._query_calls_cache.cache) > 0:
                         return self._execute_query(
                             cursor,
@@ -418,6 +420,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                                 called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
                             ),
                             params=params,
+                            binary=binary,
                         )
                     else:
                         return self._execute_query(
@@ -428,6 +431,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                                 filters=filters,
                             ),
                             params=params,
+                            binary=binary,
                         )
         except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
@@ -633,7 +637,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         with self._check._get_main_db() as conn:
-            encoding = conn.encoding if conn.encoding != "SQLASCII" else 'utf-8'
+            encoding = conn.info.encoding if conn.info.encoding != "SQLASCII" else 'utf-8'
 
         normalized_rows = []
         for row in rows:
