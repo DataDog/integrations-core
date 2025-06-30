@@ -129,20 +129,30 @@ class KafkaConfig:
             )
 
         self._validate_consumer_groups()
+        self._validate_live_messages_configs()
 
+    def _validate_live_messages_configs(self):
         live_messages_configs = []
-        print("config to validate is: ", self.live_messages_configs)
         for config in self.live_messages_configs:
             if 'id' not in config:
                 self.log.warning('Data Streams live messages configuration has no ID')
+                continue
             kafka = config.get('kafka', None)
-            print("kafka is", kafka, config)
             if not kafka:
                 self.log.warning('Data Streams live messages configuration has no kafka configuration')
                 continue
             if not ('cluster' in kafka and 'topic' in kafka and 'partition' in kafka and 'start_offset' in kafka and 'n_messages' in kafka):
                 self.log.warning('Data Streams live messages configuration missing required kafka parameters.', kafka)
                 continue
+            # Only json format is supported for Data Streams live messages
+            if kafka.get('value_format', '') == '':
+                kafka['value_format'] = 'json'
+            if kafka['value_format'] != 'json':
+                self.log.warning('Only json format is supported for Data Streams live messages, got %s', kafka['value_format'])
+            if kafka.get('key_format', '') == '':
+                kafka['key_format'] = 'json'
+            if kafka['key_format'] != 'json':
+                self.log.warning('Only json format is supported for Data Streams live messages, got %s', kafka['key_format'])
             live_messages_configs.append(config)
         self.live_messages_configs = live_messages_configs
 

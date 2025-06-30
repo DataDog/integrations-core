@@ -18,6 +18,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 MAX_TIMESTAMPS = 1000
+SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
 
 
 class KafkaCheck(AgentCheck):
@@ -34,43 +35,19 @@ class KafkaCheck(AgentCheck):
         self.check_initializations.insert(0, self.config.validate_config)
 
     def log_message(self):
-        print("logging message")
         for cfg in self.config.live_messages_configs:
-            print("config is ", cfg)
             kafka = cfg['kafka']
             topic = kafka["topic"]
             partition = kafka["partition"]
             start_offset = kafka["start_offset"]
             n_messages = kafka["n_messages"]
             cluster = kafka["cluster"]
-            print("topic is ", topic, "partition is ", partition, "offset is ", start_offset, "n_messages is ", n_messages, "cluster is ", cluster)
             config_id = cfg["id"]
             if self._messages_have_been_retrieved(config_id):
-                print("messages already retrieved for config_id {}".format(config_id))
                 continue
             for offset in range(start_offset, start_offset + n_messages):
-                print("getting message for topic {}, partition {}, offset {}".format(topic, partition, offset))
                 message = self.client.get_message(topic, partition, offset)
-                # self.send_event(
-                #     "Kafka message",
-                #     message,
-                #     ["topic:{}".format(topic), "partition:{}".format(partition), "offset:{}".format(offset)],
-                #     'kafka',
-                #     "",
-                #     severity="info",
-                # )
-                # proto_schema = """
-                #         syntax = "proto3";
-                #
-                #         message Person {
-                #             string name = 1;
-                #             int32 age = 2;
-                #             double transaction_amount = 3;
-                #             string currency = 4;
-                #         }
-                #         """
                 try :
-                    # decoded_message = self.deserialize_message(message, 'protobuf', proto_schema)
                     decoded_message, schema_id = self.deserialize_message_maybe_schema_registry(message, 'json')
                     data = {
                         'timestamp': int(time()),
@@ -93,7 +70,8 @@ class KafkaCheck(AgentCheck):
                         'topic': str(topic),
                         'partition': str(partition),
                         'offset': str(offset),
-                        'message': "Message format not supported" + str(message),
+                        'decoding_error': 'Message format not supported',
+                        'message': "Message format not supported",
                     }
                 print("data is ", data)
                 self.send_log(data)
@@ -109,14 +87,13 @@ class KafkaCheck(AgentCheck):
             return self.deserialize_message(message, format, schema), None
         except Exception as e:
             # maybe schema registry is being used
-            if len(message) < 5 or message[0] != 0x00:
+            if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
                 raise e
-            # If the message starts with 0x00, schema is probably controlled by a schema registry
             schema_id = int.from_bytes(message[:4], 'big')
-            message = message[5:]  # Skip the schema ID byte
+            message = message[5:]  # Skip the schema ID bytes
             return self.deserialize_message(message, format, schema), schema_id
 
-    def deserialize_message(self, message, format='json', schema=None):
+    def deserialize_message(self, message, format, schema=None):
         """Deserialize a message from Kafka. Supports JSON and Protobuf formats.
         
         Args:
