@@ -22,7 +22,7 @@ The TIBCO EMS check is included in the [Datadog Agent][2] package. No additional
 
 ##### Create your Tibco EMS command script
 
-The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. To reduce the number of calls to the `$sys.admin` queue, Datadog uses a script to batch the queries made to Tibco. To collect your Tibco EMS metrics, pass the the script path and the absolute path of the `tibemsadmin` binary to the integration configuration.
+The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. To reduce the number of calls to the `$sys.admin` queue, Datadog uses a script to batch the queries made to Tibco. To collect your Tibco EMS metrics, pass the script path and the absolute path of the `tibemsadmin` binary to the integration configuration.
 
 *Note*: The `dd-agent` user needs execute permissions on the `tibemsadmin` binary.
 1. Create a file named `show_commands` with the following contents:
@@ -107,7 +107,7 @@ Need help? Contact [Datadog support][8].
 
 
 [1]: https://docs.tibco.com/products/tibco-enterprise-message-service
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/tibco_ems/datadog_checks/tibco_ems/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

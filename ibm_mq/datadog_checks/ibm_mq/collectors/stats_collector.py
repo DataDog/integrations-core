@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from dateutil.tz import UTC
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_Q
 
 from datadog_checks.ibm_mq.stats.base_stats import BaseStats
@@ -47,14 +48,14 @@ class StatsCollector(object):
                 message, header = pymqi.PCFExecute.unpack(bin_message)
                 self.log.trace('Stats unpacked message: %s, Stats unpacked header: %s', message, header)
 
-                stats = self._get_stats(message, header)
+                stats = self._get_stats(message, header, self.config.qm_stats_tz)
 
                 # We only collect metrics generated after the check instance creation.
                 if stats.start_datetime < self.config.instance_creation_datetime:
                     self.log.debug(
                         "Skipping messages created before agent startup. "
                         "Message time: %s / Check instance creation time: %s",
-                        stats.start_datetime,
+                        stats.start_datetime.astimezone(UTC),
                         self.config.instance_creation_datetime,
                     )
                     continue
@@ -106,11 +107,11 @@ class StatsCollector(object):
             )
 
     @staticmethod
-    def _get_stats(message, header):
+    def _get_stats(message, header, timezone=None):
         if header.Command == MQCMD_STATISTICS_CHANNEL:
-            stats = ChannelStats(message)
+            stats = ChannelStats(message, timezone)
         elif header.Command == MQCMD_STATISTICS_Q:
-            stats = QueueStats(message)
+            stats = QueueStats(message, timezone)
         else:
-            stats = BaseStats(message)
+            stats = BaseStats(message, timezone)
         return stats

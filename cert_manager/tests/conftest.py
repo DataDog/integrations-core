@@ -27,7 +27,7 @@ def setup_cert_manager():
             "kubectl",
             "apply",
             "-f",
-            "https://github.com/jetstack/cert-manager/releases/download/v1.5.0/cert-manager.yaml",
+            "https://github.com/jetstack/cert-manager/releases/download/v1.6.0/cert-manager.yaml",
         ]
     )
     run_command(

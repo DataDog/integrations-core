@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-from uptime import uptime
+import psutil
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
@@ -92,10 +92,11 @@ class Win32EventLogWMI(WinWMICheck):
         # Store the last timestamp by instance
         if instance_key not in self.last_ts:
             # If system boot was within 600s of dd agent start then use boottime as last_ts
-            if uptime() <= 600:
-                self.last_ts[instance_key] = datetime.utcnow() - timedelta(seconds=uptime())
+            uptime = datetime.now(timezone.utc) - datetime.fromtimestamp(psutil.boot_time(), timezone.utc)
+            if uptime.total_seconds() <= 600:
+                self.last_ts[instance_key] = datetime.now(timezone.utc) - uptime
             else:
-                self.last_ts[instance_key] = datetime.utcnow()
+                self.last_ts[instance_key] = datetime.now(timezone.utc)
             return
 
         # Event properties
@@ -180,7 +181,7 @@ class Win32EventLogWMI(WinWMICheck):
                     self.log.debug('Skipping event after %s. ts=%s', last_ts, log_ev.timestamp)
 
             # Update the last time checked
-            self.last_ts[instance_key] = datetime.utcnow()
+            self.last_ts[instance_key] = datetime.now(timezone.utc)
 
     def _dt_to_wmi(self, dt):
         """A wrapper around wmi.from_time to get a WMI-formatted time from a

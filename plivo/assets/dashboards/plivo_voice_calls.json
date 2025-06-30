@@ -1,0 +1,1240 @@
+{
+    "title": "Plivo Voice Calls",
+    "description": "The Plivo Voice Calls dashboard offers a comprehensive view of call data, including total call duration, call volume, and average call duration. It visualizes call patterns over time, provides insights into call directions and hangup causes, and displays the top caller and recipient numbers. The dashboard also tracks billed call duration and charges, analyzes STIR verification for caller identity, and shows geographic IP information.",
+    "widgets": [
+      {
+        "id": 2285518333153340,
+        "definition": {
+          "type": "image",
+          "url": "https://cdn.prod.website-files.com/6565737286e587567248583f/65c074c83684ac48c3c5bdb2_plivo-logo-copy.svg",
+          "url_dark_theme": "https://cdn.prod.website-files.com/6565737286e587567248583f/65c078c160754415ff91f02e_plivo-logo-copy-white.svg",
+          "sizing": "cover",
+          "has_background": false,
+          "has_border": false,
+          "vertical_align": "center",
+          "horizontal_align": "center"
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 2
+        }
+      },
+      {
+        "id": 1768528723946856,
+        "definition": {
+          "title": "Monitors Overview",
+          "background_color": "vivid_green",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 5592039235756690,
+              "definition": {
+                "title": "Voice Call Monitors Summary",
+                "type": "manage_status",
+                "display_format": "countsAndList",
+                "color_preference": "text",
+                "hide_zero_counts": true,
+                "show_status": true,
+                "last_triggered_format": "relative",
+                "query": "tag:(source:plivo AND service:voice)",
+                "sort": "status,asc",
+                "count": 50,
+                "start": 0,
+                "summary_type": "monitors",
+                "show_priority": false,
+                "show_last_triggered": false
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 5
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 6,
+          "y": 0,
+          "width": 6,
+          "height": 6
+        }
+      },
+      {
+        "id": 421743545140594,
+        "definition": {
+          "type": "note",
+          "content": "**Overview**\n\nThe Plivo Voice Calls dashboard offers a comprehensive view of call data, including total call duration, call volume, and average call duration. It visualizes call patterns over time, provides insights into call directions and hangup causes, and displays the top caller and recipient numbers. The dashboard also tracks billed call duration and charges, analyzes STIR verification for caller identity, and shows geographic IP information. \n\nFor more information, see the [Plivo Integration Documentation](https://docs.datadoghq.com/integrations/plivo/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+          "background_color": "white",
+          "font_size": "14",
+          "text_align": "left",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 2,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 4117537688199780,
+        "definition": {
+          "title": "Call Overview",
+          "background_color": "vivid_green",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 2579275904776268,
+              "definition": {
+                "title": "Total Calls",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">=",
+                        "value": 0,
+                        "palette": "custom_bg",
+                        "custom_bg_color": "#cff0f7"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+              }
+            },
+            {
+              "id": 3875143726326160,
+              "definition": {
+                "title": "Total Call Duration",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "sum",
+                          "metric": "@plivo.call_duration"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">=",
+                        "value": 0,
+                        "palette": "black_on_light_yellow"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1",
+                        "number_format": {
+                          "unit": {
+                            "type": "custom_unit_label",
+                            "label": "seconds"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 3
+              }
+            },
+            {
+              "id": 6776796958695198,
+              "definition": {
+                "title": "Average Call Duration",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "sum",
+                          "metric": "@plivo.call_duration"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      },
+                      {
+                        "data_source": "logs",
+                        "name": "query2",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">=",
+                        "value": 0,
+                        "palette": "black_on_light_green"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "number_format": {
+                          "unit": {
+                            "type": "custom_unit_label",
+                            "label": "seconds"
+                          }
+                        },
+                        "formula": "query1 / query2"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 3
+              }
+            },
+            {
+              "id": 5853023565345338,
+              "definition": {
+                "title": "Call Logs over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "alias": "Voice Call Logs",
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "timeseries",
+                    "style": {
+                      "palette": "dog_classic",
+                      "order_by": "values",
+                      "line_type": "solid",
+                      "line_width": "normal"
+                    },
+                    "display_type": "line"
+                  }
+                ]
+              },
+              "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 4
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 6,
+          "width": 12,
+          "height": 8
+        }
+      },
+      {
+        "id": 6669622354170350,
+        "definition": {
+          "title": "Call Cost Breakdown",
+          "background_color": "vivid_green",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 4188702700153624,
+              "definition": {
+                "title": "Total Billed Duration",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "sum",
+                          "metric": "@plivo.billed_duration"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1",
+                        "number_format": {
+                          "unit": {
+                            "type": "custom_unit_label",
+                            "label": "seconds"
+                          }
+                        }
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">=",
+                        "value": 0,
+                        "palette": "black_on_light_red"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+              }
+            },
+            {
+              "id": 1503384026653972,
+              "definition": {
+                "title": "Total Cost",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "sum",
+                          "metric": "@plivo.total_amount"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">=",
+                        "value": 0,
+                        "palette": "black_on_light_green"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1",
+                        "number_format": {
+                          "unit": {
+                            "type": "canonical_unit",
+                            "unit_name": "dollar"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 3
+              }
+            },
+            {
+              "id": 7821872039312674,
+              "definition": {
+                "title": "Average Cost per Call",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "sum",
+                          "metric": "@plivo.total_amount"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      },
+                      {
+                        "data_source": "logs",
+                        "name": "query2",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">=",
+                        "value": 0,
+                        "palette": "black_on_light_green"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "number_format": {
+                          "unit": {
+                            "type": "canonical_unit",
+                            "unit_name": "dollar"
+                          }
+                        },
+                        "formula": "query1 / query2"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 3
+              }
+            },
+            {
+              "id": 7522444511955566,
+              "definition": {
+                "title": "Calls Cost over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "alias": "Total Cost",
+                        "formula": "query1",
+                        "number_format": {
+                          "unit": {
+                            "type": "canonical_unit",
+                            "unit_name": "dollar"
+                          }
+                        }
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "sum",
+                          "metric": "@plivo.total_amount"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:plivo service:voice $Country_Code $To_Number $From_Number"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "timeseries",
+                    "style": {
+                      "palette": "dog_classic",
+                      "order_by": "values",
+                      "line_type": "solid",
+                      "line_width": "normal"
+                    },
+                    "display_type": "line"
+                  }
+                ]
+              },
+              "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 4
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 14,
+          "width": 12,
+          "height": 8
+        }
+      },
+      {
+        "id": 5530951398222842,
+        "definition": {
+          "title": "Geolocation & Call Insights",
+          "background_color": "vivid_green",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 1017218726122246,
+              "definition": {
+                "title": "Source Number by Location",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@network.client.geoip.country.iso_code",
+                            "limit": 250,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "cardinality",
+                              "metric": "@call_uuid"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:plivo service:voice $From_Number $To_Number $Direction $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 250,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "palette": "hostmap_blues",
+                  "palette_flip": false
+                },
+                "view": {
+                  "focus": "WORLD"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 5
+              }
+            },
+            {
+              "id": 5250483961972638,
+              "definition": {
+                "title": "Top Source Numbers ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "name": "query1",
+                        "data_source": "logs",
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "indexes": [
+                          "*"
+                        ],
+                        "group_by": [
+                          {
+                            "facet": "@from_number",
+                            "limit": 10,
+                            "sort": {
+                              "aggregation": "cardinality",
+                              "order": "desc",
+                              "metric": "@call_uuid"
+                            },
+                            "should_exclude_missing": true
+                          }
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  }
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 6,
+                "height": 4
+              }
+            },
+            {
+              "id": 8483678277049476,
+              "definition": {
+                "title": "Top Destination Numbers",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "name": "query1",
+                        "data_source": "logs",
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "indexes": [
+                          "*"
+                        ],
+                        "group_by": [
+                          {
+                            "facet": "@to_number",
+                            "limit": 10,
+                            "sort": {
+                              "aggregation": "cardinality",
+                              "order": "desc",
+                              "metric": "@call_uuid"
+                            },
+                            "should_exclude_missing": true
+                          }
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  }
+                }
+              },
+              "layout": {
+                "x": 6,
+                "y": 5,
+                "width": 6,
+                "height": 4
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 22,
+          "width": 12,
+          "height": 10
+        }
+      },
+      {
+        "id": 4948724615432756,
+        "definition": {
+          "title": "Call Quality Analysis",
+          "background_color": "vivid_green",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 1295100123074924,
+              "definition": {
+                "type": "note",
+                "content": "For more information on Plivo Hangup Causes, refer [here](https://www.plivo.com/docs/voice/troubleshooting/hangup-causes/).",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "center",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom",
+                "has_padding": false
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 1
+              }
+            },
+            {
+              "id": 1625848950085020,
+              "definition": {
+                "title": "Calls by Hangup Cause",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@plivo.error.message",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "cardinality",
+                              "metric": "@call_uuid"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "style": {
+                      "palette": "datadog16"
+                    },
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "table"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 1,
+                "width": 12,
+                "height": 5
+              }
+            },
+            {
+              "id": 2671501299618432,
+              "definition": {
+                "title": "Calls by Hangup Source",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@hangup_source",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "cardinality",
+                              "metric": "@call_uuid"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "style": {
+                      "palette": "datadog16"
+                    },
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "table"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 7,
+                "height": 6
+              }
+            },
+            {
+              "id": 7318268128303702,
+              "definition": {
+                "title": "Calls by Direction",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@call_direction",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "cardinality",
+                              "metric": "@call_uuid"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "style": {
+                      "palette": "datadog16"
+                    },
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "inline"
+                }
+              },
+              "layout": {
+                "x": 7,
+                "y": 6,
+                "width": 5,
+                "height": 3
+              }
+            },
+            {
+              "id": 2646784836259224,
+              "definition": {
+                "title": "Calls by Stir Verification ",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "cardinality",
+                          "metric": "@call_uuid"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@stir_verification",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "cardinality",
+                              "metric": "@call_uuid"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "style": {
+                      "palette": "datadog16"
+                    },
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "inline"
+                }
+              },
+              "layout": {
+                "x": 7,
+                "y": 9,
+                "width": 5,
+                "height": 3
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 32,
+          "width": 12,
+          "height": 13
+        }
+      },
+      {
+        "id": 7637705261124706,
+        "definition": {
+          "title": "Voice Call Logs",
+          "title_size": "16",
+          "title_align": "left",
+          "requests": [
+            {
+              "response_format": "event_list",
+              "query": {
+                "data_source": "logs_stream",
+                "query_string": "source:plivo service:voice $Direction $From_Number $To_Number $Country_Code",
+                "indexes": [],
+                "storage": "hot",
+                "sort": {
+                  "order": "desc",
+                  "column": "timestamp"
+                }
+              },
+              "columns": [
+                {
+                  "field": "status_line",
+                  "width": "auto"
+                },
+                {
+                  "field": "timestamp",
+                  "width": "auto"
+                },
+                {
+                  "field": "content",
+                  "width": "auto"
+                }
+              ]
+            }
+          ],
+          "type": "list_stream"
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 12,
+          "height": 4
+        }
+      }
+    ],
+    "template_variables": [
+      {
+        "name": "Direction",
+        "prefix": "@call_direction",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "From_Number",
+        "prefix": "@from_number",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "To_Number",
+        "prefix": "@to_number",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Country_Code",
+        "prefix": "@network.client.geoip.country.iso_code",
+        "available_values": [],
+        "default": "*"
+      }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+  }

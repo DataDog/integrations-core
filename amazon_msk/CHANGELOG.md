@@ -2,6 +2,44 @@
 
 <!-- towncrier release notes start -->
 
+## 6.7.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399)), ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+
+## 6.6.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 6.5.0 / 2025-04-17 / Agent 7.66.0
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+## 6.4.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+
+## 6.3.0 / 2025-02-20 / Agent 7.64.0
+
+***Added***:
+
+* Allow for check to skip over nodes with empty `BrokerNodeInfo` fields ([#19552](https://github.com/DataDog/integrations-core/pull/19552))
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 6.2.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Reduced the volume of logging from the `botocore` library ([#19376](https://github.com/DataDog/integrations-core/pull/19376))
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
 ## 6.1.0 / 2025-01-16
 
 ***Added***:

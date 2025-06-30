@@ -1,28 +1,27 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import logging
 import os
 import re
 import ssl
-from contextlib import contextmanager
+import warnings
+from contextlib import ExitStack, contextmanager
 from copy import deepcopy
-from io import open
-from ipaddress import ip_address, ip_network
 from urllib.parse import quote, urlparse, urlunparse
 
+import lazy_loader
 import requests
-import requests_unixsocket
 from binary import KIBIBYTE
-from cryptography.x509 import load_der_x509_certificate
-from cryptography.x509.extensions import ExtensionNotFound
-from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from requests import auth as requests_auth
 from requests.exceptions import SSLError
-from requests_toolbelt.adapters import host_header_ssl
+from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.utils import _http_utils
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
@@ -31,19 +30,16 @@ from .headers import get_default_headers, update_headers
 from .network import CertAdapter, create_socket_connection
 from .time import get_timestamp
 
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
+# See Performance Optimizations in this package's README.md.
+requests_kerberos = lazy_loader.load('requests_kerberos')
+requests_ntlm = lazy_loader.load('requests_ntlm')
+requests_oauthlib = lazy_loader.load('requests_oauthlib')
+requests_unixsocket = lazy_loader.load('requests_unixsocket')
+jwt = lazy_loader.load('jwt')
+ipaddress = lazy_loader.load('ipaddress')
 
-# Import lazily to reduce memory footprint and ease installation for development
-requests_aws = None
-requests_kerberos = None
-requests_ntlm = None
-requests_oauthlib = None
-oauth2 = None
-jwt = None
-serialization = None
+# We log instead of emit warnings for unintentionally insecure HTTPS requests
+warnings.simplefilter('ignore', InsecureRequestWarning)
 
 LOGGER = logging.getLogger(__file__)
 
@@ -51,6 +47,8 @@ LOGGER = logging.getLogger(__file__)
 # which is the default TCP packet retransmission window. See:
 # https://tools.ietf.org/html/rfc2988
 DEFAULT_TIMEOUT = 10
+
+DEFAULT_EXPIRATION = 300
 
 # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
 # https://www.bittorrent.org/beps/bep_0003.html
@@ -92,6 +90,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_protocols_allowed': DEFAULT_PROTOCOL_VERSIONS,
     'tls_verify': True,
+    'tls_ciphers': 'ALL',
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
     'username': None,
@@ -153,6 +152,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'tls_ciphers_allowed',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
@@ -347,6 +347,14 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
+        ciphers = config.get('tls_ciphers')
+        if ciphers:
+            if 'ALL' in ciphers:
+                updated_ciphers = "ALL"
+            else:
+                updated_ciphers = ":".join(ciphers)
+        self.tls_ciphers_allowed = updated_ciphers
+
     def get(self, url, **options):
         return self._request('get', url, options)
 
@@ -382,7 +390,7 @@ class RequestsWrapper(object):
         new_options = self.populate_options(options)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.warning(u'An unverified HTTPS request is being made to %s', url)
+            self.logger.debug(u'An unverified HTTPS request is being made to %s', url)
 
         extra_headers = options.pop('extra_headers', None)
         if extra_headers is not None:
@@ -465,6 +473,7 @@ class RequestsWrapper(object):
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
                 context.verify_mode = ssl.CERT_NONE
+                context.set_ciphers(self.tls_ciphers_allowed)
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -486,23 +495,26 @@ class RequestsWrapper(object):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
         try:
-            cert = load_der_x509_certificate(der_cert)
+            cert = _http_utils.cryptography_x509_load_certificate(der_cert)
         except Exception as e:
             self.logger.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
             return
 
         try:
             authority_information_access = cert.extensions.get_extension_for_oid(
-                ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+                _http_utils.cryptography_x509_ExtensionOID.AUTHORITY_INFORMATION_ACCESS
             )
-        except ExtensionNotFound:
+        except _http_utils.cryptography_x509_ExtensionNotFound:
             self.logger.debug(
                 'No Authority Information Access extension found, skipping discovery of intermediate certificates'
             )
             return
 
         for access_description in authority_information_access.value:
-            if access_description.access_method != AuthorityInformationAccessOID.CA_ISSUERS:
+            if (
+                access_description.access_method
+                != _http_utils.cryptography_x509_AuthorityInformationAccessOID.CA_ISSUERS
+            ):
                 continue
 
             uri = access_description.access_location.value
@@ -528,7 +540,7 @@ class RequestsWrapper(object):
             # Enables HostHeaderSSLAdapter
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
-                self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
+                self._session.mount('https://', _http_utils.HostHeaderSSLAdapter())
             # Enable Unix Domain Socket (UDS) support.
             # See: https://github.com/msabramo/requests-unixsocket
             self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
@@ -606,9 +618,9 @@ def should_bypass_proxy(url, no_proxy_uris):
         try:
             # If no_proxy_uri is an IP or IP CIDR.
             # A ValueError is raised if address does not represent a valid IPv4 or IPv6 address.
-            ipnetwork = ip_network(ensure_unicode(no_proxy_uri))
-            ipaddress = ip_address(ensure_unicode(parsed_uri))
-            if ipaddress in ipnetwork:
+            ip_network = ipaddress.ip_network(ensure_unicode(no_proxy_uri))
+            ip_address = ipaddress.ip_address(ensure_unicode(parsed_uri))
+            if ip_address in ip_network:
                 return True
         except ValueError:
             # Treat no_proxy_uri as a domain name
@@ -642,21 +654,13 @@ def create_digest_auth(config):
 
 
 def create_ntlm_auth(config):
-    global requests_ntlm
-    if requests_ntlm is None:
-        import requests_ntlm
-
     return requests_ntlm.HttpNtlmAuth(config['ntlm_domain'], config['password'])
 
 
 def create_kerberos_auth(config):
-    global requests_kerberos
-    if requests_kerberos is None:
-        import requests_kerberos
-
-        KERBEROS_STRATEGIES['required'] = requests_kerberos.REQUIRED
-        KERBEROS_STRATEGIES['optional'] = requests_kerberos.OPTIONAL
-        KERBEROS_STRATEGIES['disabled'] = requests_kerberos.DISABLED
+    KERBEROS_STRATEGIES['required'] = requests_kerberos.REQUIRED
+    KERBEROS_STRATEGIES['optional'] = requests_kerberos.OPTIONAL
+    KERBEROS_STRATEGIES['disabled'] = requests_kerberos.DISABLED
 
     # For convenience
     if config['kerberos_auth'] is None or is_affirmative(config['kerberos_auth']):
@@ -679,15 +683,11 @@ def create_kerberos_auth(config):
 
 
 def create_aws_auth(config):
-    global requests_aws
-    if requests_aws is None:
-        from aws_requests_auth import boto_utils as requests_aws
-
     for setting in ('aws_host', 'aws_region', 'aws_service'):
         if not config[setting]:
             raise ConfigurationError('AWS auth requires the setting `{}`'.format(setting))
 
-    return requests_aws.BotoAWSRequestsAuth(
+    return _http_utils.BotoAWSRequestsAuth(
         aws_host=config['aws_host'], aws_region=config['aws_region'], aws_service=config['aws_service']
     )
 
@@ -838,15 +838,7 @@ class AuthTokenOAuthReader(object):
 
     def read(self, **request):
         if self._token is None or get_timestamp() >= self._expiration or 'error' in request:
-            global oauth2
-            if oauth2 is None:
-                from oauthlib import oauth2
-
-            global requests_oauthlib
-            if requests_oauthlib is None:
-                import requests_oauthlib
-
-            client = oauth2.BackendApplicationClient(client_id=self._client_id)
+            client = _http_utils.oauth2.BackendApplicationClient(client_id=self._client_id)
             oauth = requests_oauthlib.OAuth2Session(client=client)
             response = oauth.fetch_token(**self._fetch_options)
 
@@ -856,8 +848,16 @@ class AuthTokenOAuthReader(object):
 
             # https://www.rfc-editor.org/rfc/rfc6749#section-4.4.3
             self._token = response['access_token']
-            self._expiration = get_timestamp() + response['expires_in']
-
+            self._expiration = get_timestamp()
+            try:
+                # According to https://www.rfc-editor.org/rfc/rfc6749#section-5.1, the `expires_in` field is optional
+                self._expiration += _parse_expires_in(response.get('expires_in'))
+            except TypeError:
+                LOGGER.debug(
+                    'The `expires_in` field of the OAuth2 response is not a number, defaulting to %s',
+                    DEFAULT_EXPIRATION,
+                )
+                self._expiration += DEFAULT_EXPIRATION
             return self._token
 
 
@@ -890,20 +890,12 @@ class DCOSAuthTokenReader(object):
     def read(self, **request):
         if self._token is None or 'error' in request:
             with open(self._private_key_path, 'rb') as f:
-                global serialization
-                if serialization is None:
-                    from cryptography.hazmat.primitives import serialization
-
-                global jwt
-                if jwt is None:
-                    import jwt
-
-                private_key = serialization.load_pem_private_key(f.read(), password=None)
+                private_key = _http_utils.cryptography_serialization.load_pem_private_key(f.read(), password=None)
 
                 serialized_private = private_key.private_bytes(
-                    encoding=serialization.Encoding.PEM,
-                    format=serialization.PrivateFormat.PKCS8,
-                    encryption_algorithm=serialization.NoEncryption(),
+                    encoding=_http_utils.cryptography_serialization.Encoding.PEM,
+                    format=_http_utils.cryptography_serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=_http_utils.cryptography_serialization.NoEncryption(),
                 )
 
                 exp = int(get_timestamp() + self._expiration)
@@ -989,6 +981,21 @@ def quote_uds_url(url):
     parsed = parsed._replace(netloc=netloc, path=path)
 
     return urlunparse(parsed)
+
+
+def _parse_expires_in(token_expiration):
+    if isinstance(token_expiration, int) or isinstance(token_expiration, float):
+        return token_expiration
+    if isinstance(token_expiration, str):
+        try:
+            token_expiration = int(token_expiration)
+        except ValueError:
+            LOGGER.debug('Could not convert %s to an integer', token_expiration)
+    else:
+        LOGGER.debug('Unexpected type for `expires_in`: %s.', type(token_expiration))
+        token_expiration = None
+
+    return token_expiration
 
 
 # For documentation generation

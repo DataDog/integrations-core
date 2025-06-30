@@ -26,7 +26,7 @@ def seed_mock_client():
     client.list_consumer_groups.return_value = ["consumer_group1"]
     client.get_partitions_for_topic.return_value = ['partition1']
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
-    client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
+    client.describe_consumer_group.return_value = 'STABLE'
     client.consumer_get_cluster_id_and_list_topics.return_value = (
         "cluster_id",
         # topics
@@ -451,3 +451,18 @@ def test_load_broker_timestamps_empty(
     assert expected_warning in caplog.text
     aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
     assert check.read_persistent_cache.mock_calls == [mock.call("broker_timestamps_")]
+
+
+def test_client_init(kafka_instance, check, dd_run_check):
+    """
+    We only open a connection to a consumer once per consumer group.
+
+    Doing so more often degrades performance, as described in this issue:
+    https://github.com/DataDog/integrations-core/issues/19564
+    """
+    mock_client = seed_mock_client()
+    check = check(kafka_instance)
+    check.client = mock_client
+    dd_run_check(check)
+
+    assert check.client.open_consumer.mock_calls == [mock.call("consumer_group1")]

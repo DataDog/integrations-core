@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "cacc2ad1-f88b-4306-af8e-90c76e0478a0",
   "app_id": "intercom",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

@@ -340,6 +340,7 @@ EXPECTED_INTERFACE_METADATA = [InterfaceMetadata(**im) for im in INTERFACE_METAD
 
 EXPECTED_METADATA_EVENTS = [
     NetworkDevicesMetadata(
+        integration='cisco-aci',
         namespace='default',
         devices=DEVICE_METADATA,
         interfaces=INTERFACE_METADATA,

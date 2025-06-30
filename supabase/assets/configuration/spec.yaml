@@ -7,7 +7,7 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - name: priviledged_metrics_endpoint
+    - name: privileged_metrics_endpoint
       description: |
         Endpoint exposing Supabase customer metrics
         https://supabase.com/docs/guides/monitoring-troubleshooting/metrics#accessing-the-metrics-endpoint

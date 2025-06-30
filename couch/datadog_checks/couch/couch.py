@@ -247,12 +247,18 @@ class CouchDB2:
                     queue_tags = list(tags)
                     queue_tags.append("queue:{0}".format(queue))
                     if isinstance(val, dict):
-                        if 'count' in val:
-                            self.gauge("{0}.{1}.size".format(prefix, key), val['count'], queue_tags)
+                        if 'max' in val:
+                            self.gauge("{0}.{1}.max".format(prefix, key), val['max'], queue_tags)
+                        if 'min' in val:
+                            self.gauge("{0}.{1}.min".format(prefix, key), val['min'], queue_tags)
+                        if '50' in val:
+                            self.gauge("{0}.{1}.50".format(prefix, key), val['50'], queue_tags)
+                        if '90' in val:
+                            self.gauge("{0}.{1}.90".format(prefix, key), val['90'], queue_tags)
+                        if '99' in val:
+                            self.gauge("{0}.{1}.99".format(prefix, key), val['99'], queue_tags)
                         else:
-                            self.agent_check.log.debug(
-                                "Queue %s does not have a key 'count'. It will be ignored.", queue
-                            )
+                            self.agent_check.log.debug("Queue %s does not have any keys. It will be ignored.", queue)
                     else:
                         self.gauge("{0}.{1}.size".format(prefix, key), val, queue_tags)
             elif key == "distribution":

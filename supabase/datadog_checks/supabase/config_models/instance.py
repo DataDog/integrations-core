@@ -126,7 +126,7 @@ class InstanceConfig(BaseModel):
     openmetrics_endpoint: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
-    priviledged_metrics_endpoint: Optional[str] = None
+    privileged_metrics_endpoint: Optional[str] = None
     proxy: Optional[Proxy] = None
     raw_line_filters: Optional[tuple[str, ...]] = None
     raw_metric_prefix: Optional[str] = None

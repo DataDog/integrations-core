@@ -318,6 +318,17 @@ class Ceph(AgentCheck):
                 self.rate(self.NAMESPACE + '.read_bytes', stats['rd_bytes'], local_tags)
                 self.rate(self.NAMESPACE + '.write_bytes', stats['wr_bytes'], local_tags)
 
+            try:
+                l_classes = raw['df_detail']['stats_by_class']
+                for deviceclass, stats in l_classes.items():
+                    local_tags = tags + ['ceph_osd_device_class:%s' % deviceclass]
+                    if float(stats['total_bytes']) > 0:
+                        self.gauge(
+                            self.NAMESPACE + '.class_pct_used', 100.0 * float(stats['total_used_raw_ratio']), local_tags
+                        )
+            except (KeyError, ValueError):
+                self.log.debug('Error retrieving metrics by class')
+
         except (KeyError, ValueError):
             self.log.debug('Error retrieving df_detail metrics')
 

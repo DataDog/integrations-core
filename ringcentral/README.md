@@ -21,7 +21,7 @@ The RingCentral integration collects voice and audit logs, as well as Voice (Ana
    | Do you intend to promote this app in the RingCentral App Gallery? | **No** |
    | Auth type | **JWT auth flow** |
    | Issue refresh tokens | **Yes** |
-   | Application scopes | Select the following:<br><ul><li>Analytics</li><li>Read Audit Trail</li><li>Read Call Log</li><li>A2P SMS</li></ul>|
+   | Application scopes | Select the following: Analytics, Read Audit Trail, Read Call Log, A2P SMS|
 6. Click on Create App.
 7. After creating the application, find the `clientId` and `clientSecret` in the application settings.
 8. To get the JWT Token, locate the **Credentials** by clicking your username in the top-right corner.

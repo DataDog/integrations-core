@@ -18,6 +18,75 @@ from datadog_checks.dev.http import MockResponse
 
 from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
 
+PARAMS_TO_FILENAME_MAPPING = {
+    # project 2 tasks
+    'name=Deploy/project=Projects-1/states=Queued,Executing/skip=0/take=2': 'project_1_in_progress_low_limit_pg1',
+    'name=Deploy/project=Projects-1/states=Queued,Executing/skip=0/take=30': 'project_1_in_progress_high_limit_pg1',
+    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_1_none_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_1_none_completed_high_limit_pg1',
+    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_1_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_1_completed_high_limit_pg1',
+    # project 2 tasks
+    'name=Deploy/project=Projects-2/states=Queued,Executing/skip=0/take=2': 'project_2_in_progress_low_limit_pg1',
+    'name=Deploy/project=Projects-2/states=Queued,Executing/skip=0/take=30': 'project_2_in_progress_high_limit_pg1',
+    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_2_none_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_2_none_completed_high_limit_pg1',
+    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_2_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_2_completed_high_limit_pg1',
+    # project 3 tasks
+    'name=Deploy/project=Projects-3/states=Queued,Executing/skip=0/take=2': 'project_3_in_progress_low_limit_pg1',
+    'name=Deploy/project=Projects-3/states=Queued,Executing/skip=0/take=30': 'project_3_in_progress_high_limit_pg1',
+    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_3_none_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_3_none_completed_high_limit_pg1',
+    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_3_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=2/take=2': 'project_3_completed_low_limit_pg2',
+    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_3_completed_high_limit_pg1',
+    # project 4 tasks
+    'name=Deploy/project=Projects-4/states=Queued,Executing/skip=0/take=2': 'project_4_in_progress_low_limit_pg1',
+    'name=Deploy/project=Projects-4/states=Queued,Executing/skip=0/take=30': 'project_4_in_progress_high_limit_pg1',
+    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_4_none_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_4_none_completed_high_limit_pg1',
+    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_4_completed_low_limit_pg1',
+    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_4_completed_high_limit_pg1',
+    # events
+    'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:15.123000+00:00/'
+    'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
+    'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=0/take=2': 'events_low_limit_pg1',
+    'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:15.123000+00:00/'
+    'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
+    'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=2/take=2': 'events_low_limit_pg2',
+    'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:15.123000+00:00/'
+    'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
+    'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=0/take=30': 'events_high_limit_pg1',
+    'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:00.123000+00:00/'
+    'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
+    'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=0/take=2': 'no_events_low_limit_pg1',
+    'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:00.123000+00:00/'
+    'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
+    'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=0/take=30': 'no_events_high_limit_pg1',
+    # the rest of the paginated endpoints
+    'skip=0/take=2': 'low_limit_pg1',
+    'skip=2/take=2': 'low_limit_pg2',
+    'skip=0/take=30': 'high_limit_pg1',
+}
+
 
 # https://docs.python.org/3/library/unittest.mock-examples.html#coping-with-mutable-arguments
 class CopyingMock(mock.MagicMock):
@@ -90,19 +159,15 @@ def mock_responses():
             param_string = ""
             for key, val in params.items():
                 if type(val) is list:
-                    if len(val) < 5:
-                        val_string = ','.join(f'{str(val_item)}' for val_item in val)
-                    else:
-                        # don't use full list as the path is too long
-                        val_string = '[]'
+                    val_string = ','.join(f'{str(val_item)}' for val_item in val)
                 else:
                     val_string = str(val)
                 param_string += ("/" if param_string else "") + f'{key}={val_string}'
-                param_string = param_string.replace(':', '_')
-                param_string = param_string.replace('+00_00', '')
-                param_string = param_string.replace('2024-09-23 ', '')
-            request_path = '{}/{}'.format(url, param_string)
-        print(request_path)
+
+            filename = PARAMS_TO_FILENAME_MAPPING.get(param_string)
+            print(f"param string: {param_string}")
+
+        print(f"request path: {request_path}/{filename}")
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
 

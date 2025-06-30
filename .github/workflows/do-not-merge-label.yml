@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Get PR labels
         id: pr-labels
-        uses: joerick/pr-labels-action@v1.0.9
+        uses: joerick/pr-labels-action@0543b277721e852d821c6738d449f2f4dea03d5f # v1.0.9
 
       - run: |
           echo "A 'do-not-merge/*' label has been found in this PR."

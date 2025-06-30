@@ -31,33 +31,18 @@ platforms = ["linux", "windows"]
 [overrides.ci.dns_check]
 platforms = ["linux", "windows"]
 
-[overrides.ci.glusterfs]
-runners = { linux = ["ubuntu-20.04"] }
-
 [overrides.ci.hyperv]
 exclude = true
 
 [overrides.ci.ibm_mq]
 platforms = ["linux", "windows"]
 
-[overrides.ci.mesos_slave]
-runners = { linux = ["ubuntu-20.04"] }
-
-[overrides.ci.mysql]
-runners = { linux = ["ubuntu-20.04"] }
-
 [overrides.ci.network]
 platforms = ["linux", "windows"]
 
-[overrides.ci.spark]
-runners = { linux = ["ubuntu-20.04"] }
-
-[overrides.ci.ssh]
-runners = { linux = ["ubuntu-20.04"] }
-
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2019"], linux = ["ubuntu-20.04"] }
+runners = { windows = ["windows-2019"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
@@ -73,6 +58,8 @@ cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
 # https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
+# https://github.com/scientific-python/lazy-loader/blob/main/LICENSE.md
+lazy-loader = ['BSD-3-Clause']
 # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
 ldap3 = ['LGPL-3.0-only']
 # https://cloudera.github.io/cm_api/
@@ -102,12 +89,14 @@ requests-ntlm = ['ISC']
 requests-unixsocket2 = ['ISC']
 # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
 rethinkdb = ['Apache-2.0']
+# https://github.com/python-semver/python-semver/blob/master/LICENSE.txt
+semver = ['BSD-3-Clause']
 # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
 simplejson = ['MIT']
 # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
 supervisor = ['BSD-3-Clause-Modification']
-# https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
-uptime = ['BSD-2-Clause']
+# https://github.com/prometheus/client_python/issues/1110
+prometheus-client = ['Apache-2.0']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
@@ -145,6 +134,7 @@ exclude = [
     'go-metro',
     'http_check',
     'kubelet',
+    'kubevirt',
     'kubernetes_state',
     'network',
     'ntp',
@@ -163,8 +153,6 @@ unsorted = [
 
 [overrides.dep.updates]
 exclude = [
-    'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
-    'foundationdb',  # Breaking datadog_checks_base tests
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
@@ -175,6 +163,9 @@ exclude = [
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
     'psutil',
+    'pyvmomi', # 9+ has breaking changes
+    'pymongo', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'foundationdb', # 7+ has a breaking changes
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

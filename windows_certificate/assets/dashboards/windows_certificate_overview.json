@@ -1,0 +1,170 @@
+{
+    "author_name": "Datadog",
+    "description": "## Windows Certificate Store Integration Dashboard\n\nThis is an example Windows Certificate Store dashboard demonstrating the information that the integration collects.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "certificate_store",
+            "prefix": "certificate_store"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "subject_common_name",
+            "prefix": "subject_cn"
+        }
+    ],
+    "title": "Windows Certificate Store Overview",
+    "widgets": [
+        {
+            "definition": {
+                "has_background": true,
+                "has_border": true,
+                "horizontal_align": "center",
+                "sizing": "contain",
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/windows-certificate_large.svg",
+                "vertical_align": "center"
+            },
+            "id": 4652925140828556,
+            "layout": {
+                "height": 5,
+                "width": 4,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Certificate Expiration",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "check": "windows_certificate.cert_expiration",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [
+                                "$certificate_store",
+                                "$subject_common_name"
+                            ],
+                            "title": "Certificate Expiration",
+                            "title_align": "center",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 5168903633321084,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Included service check:\n\n* `windows_certificate.cert_expiration` - Returns CRITICAL if the certificate has expired or expires in less than `days_critical`, returns WARNING if the certificate expires in less than `days_warning`, otherwise returns OK.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6717423497232037,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:windows_certificate.days_remaining{$certificate_store, $subject_common_name} by {subject_cn}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Days Till Expiration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4514519614660249,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Days until certificate(s) expire",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3226539913664578,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 4,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 3432759619201891,
+            "layout": {
+                "height": 5,
+                "width": 7,
+                "x": 4,
+                "y": 0
+            }
+        }
+    ]
+}

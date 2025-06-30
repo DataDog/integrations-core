@@ -1,1 +1,0 @@
-Added an optional optimization to MySQL statement metrics collection to only query for queries that have run since the last check collection.

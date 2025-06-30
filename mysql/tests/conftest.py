@@ -8,12 +8,13 @@ import os
 import mock
 import pymysql
 import pytest
+from packaging.version import parse as parse_version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
-from .common import MYSQL_REPLICATION
+from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ def instance_basic():
         'username': common.USER,
         'password': common.PASS,
         'port': common.PORT,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
     }
 
 
@@ -92,7 +93,7 @@ def instance_complex():
         'username': common.USER,
         'password': common.PASS,
         'port': common.PORT,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -130,7 +131,7 @@ def instance_additional_status():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "Innodb_rows_read",
@@ -178,7 +179,7 @@ def instance_status_already_queried():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "Open_files",
@@ -197,7 +198,7 @@ def instance_var_already_queried():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_variable': [
             {
                 'name': "Key_buffer_size",
@@ -216,7 +217,7 @@ def instance_invalid_var():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "longer_query_time",
@@ -240,7 +241,7 @@ def instance_custom_queries():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'custom_queries': [
             {
                 'query': "SELECT name,age from testdb.users where name='Alice' limit 1;",
@@ -472,6 +473,8 @@ def add_schema_test_databases(cursor):
     cursor.execute("CREATE DATABASE datadog_test_schemas;")
     cursor.execute("USE datadog_test_schemas;")
     cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
+    # needed to query INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS in mariadb 10.5 and above
+    cursor.execute("GRANT REFERENCES ON datadog_test_schemas.* TO 'dog'@'%';")
     cursor.execute(
         """CREATE TABLE cities (
            id INT NOT NULL DEFAULT 0,
@@ -497,14 +500,18 @@ def add_schema_test_databases(cursor):
 
     # create one column index
     cursor.execute("CREATE INDEX single_column_index ON cities (population);")
-    # create two column index
-    cursor.execute("CREATE INDEX two_columns_index ON cities (id, name);")
+    # create two column index, one with subpart and descending
+    cursor.execute("CREATE INDEX two_columns_index ON cities (id, name(3) DESC);")
+    # create functional key part index - available after MySQL 8.0.13
+    if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and MYSQL_FLAVOR == 'mysql':
+        cursor.execute("CREATE INDEX functional_key_part_index ON cities ((population + 1) DESC);")
 
     cursor.execute(
         """CREATE TABLE landmarks (
            name VARCHAR(255),
            city_id INT DEFAULT 0,
-           CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));
+           CONSTRAINT FK_CityId FOREIGN KEY (city_id)
+           REFERENCES cities(id) ON DELETE SET NULL ON UPDATE RESTRICT);
         """
     )
 
@@ -523,7 +530,7 @@ def add_schema_test_databases(cursor):
             District VARCHAR(255),
             Review TEXT,
             CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
-            REFERENCES Restaurants(RestaurantName, District));
+            REFERENCES Restaurants(RestaurantName, District) ON DELETE CASCADE ON UPDATE NO ACTION);
         """
     )
     # Second DB

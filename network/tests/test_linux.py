@@ -21,6 +21,7 @@ LINUX_SYS_NET_STATS = {
     'system.net.iface.tx_queue_len': (1000, 1000),
     'system.net.iface.num_rx_queues': (1, 2),
     'system.net.iface.num_tx_queues': (1, 3),
+    'system.net.iface.up': (1, 1),
 }
 
 CX_STATE_GAUGES_VALUES = {
@@ -162,13 +163,19 @@ def read_int_file_mock(location):
         return 65536
     elif location == '/sys/class/net/lo/tx_queue_len':
         return 1000
+    elif location == '/sys/class/net/lo/carrier':
+        return 1
     elif location == '/sys/class/net/ens5/mtu':
         return 9001
     elif location == '/sys/class/net/ens5/tx_queue_len':
         return 1000
+    elif location == '/sys/class/net/ens5/carrier':
+        return 1
     elif location == '/sys/class/net/invalid/mtu':
         return None
     elif location == '/sys/class/net/invalid/tx_queue_len':
+        return None
+    elif location == '/sys/class/net/invalid/carrier':
         return None
 
 

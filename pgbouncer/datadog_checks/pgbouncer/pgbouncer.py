@@ -19,7 +19,7 @@ from datadog_checks.pgbouncer.metrics import (
 )
 
 
-class ShouldRestartException(Exception):
+class ShouldReconnectException(Exception):
     pass
 
 
@@ -118,7 +118,7 @@ class PgBouncer(AgentCheck):
         except pg.Error:
             self.log.exception("Connection error")
 
-            raise ShouldRestartException
+            raise ShouldReconnectException
 
     def iter_rows(self, cursor):
         row_num = 0
@@ -159,16 +159,20 @@ class PgBouncer(AgentCheck):
 
         return args
 
-    def _get_connection(self, use_cached=None):
-        """Get and memoize connections to instances"""
-        use_cached = use_cached if use_cached is not None else self.use_cached
-        if self.connection and use_cached:
-            return self.connection
+    def _new_connection(self):
+        """Create a new connection to PgBouncer"""
+        connection = None
         try:
             connect_kwargs = self._get_connect_kwargs()
             connection = pg.connect(**connect_kwargs)
             connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            return connection
         except Exception:
+            if connection:
+                try:
+                    connection.close()
+                except Exception:
+                    self.log.debug("Error closing connection after failed creation", exc_info=True)
             redacted_url = self._get_redacted_dsn()
             message = u'Cannot establish connection to {}'.format(redacted_url)
 
@@ -177,8 +181,10 @@ class PgBouncer(AgentCheck):
             )
             raise
 
-        self.connection = connection
-        return connection
+    def _ensure_connection(self):
+        """Create a connection the the instance if it doesn't exist."""
+        if not self.connection:
+            self.connection = self._new_connection()
 
     def _get_redacted_dsn(self):
         if not self.database_url:
@@ -189,26 +195,53 @@ class PgBouncer(AgentCheck):
             return self.database_url.replace(parsed_url.password, '******')
         return self.database_url
 
+    def _close_connection(self):
+        if self.connection:
+            try:
+                self.connection.close()
+            except Exception:
+                self.log.debug("Error closing connection", exc_info=True)
+            finally:
+                self.connection = None
+
+    def _try_collect_data(self, allow_reconnect=True):
+        try:
+            self._ensure_connection()
+            self._collect_stats(self.connection)
+            self._collect_metadata(self.connection)
+        except ShouldReconnectException:
+            self.log.info("Resetting the connection")
+            self._close_connection()
+            if allow_reconnect:
+                self._try_collect_data(allow_reconnect=False)
+            else:
+                redacted_url = self._get_redacted_dsn()
+                message = u'Connection error while collecting data from: {}'.format(redacted_url)
+                self.log.error(message)
+                self.service_check(
+                    self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message
+                )
+                raise
+
     def check(self, instance):
         try:
-            db = self._get_connection()
-            self._collect_stats(db)
-        except ShouldRestartException:
-            self.log.info("Resetting the connection")
-            db = self._get_connection(use_cached=False)
-            self._collect_stats(db)
+            self._try_collect_data()
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags())
+        finally:
+            if not self.use_cached:
+                self._close_connection()
 
-        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags())
-        self._set_metadata()
-
-    def _set_metadata(self):
+    def _collect_metadata(self, db):
         if self.is_metadata_collection_enabled():
-            pgbouncer_version = self.get_version()
+            pgbouncer_version = self.get_version(db)
             if pgbouncer_version:
                 self.set_metadata('version', pgbouncer_version)
 
-    def get_version(self):
-        db = self._get_connection()
+    def get_version(self, db):
+        if not db:
+            self.log.warning("Cannot get version: no active connection")
+            return None
+
         regex = r'\d+\.\d+\.\d+'
         with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
             cursor.execute('SHOW VERSION;')

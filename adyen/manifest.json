@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fbf81df6-a556-4ee7-9c50-764bf129b0ec",
   "app_id": "adyen",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -51,9 +51,9 @@
       }
     },
     "dashboards": {
-        "Adyen Transactions": "assets/dashboards/adyen_transactions.json",
-        "Adyen Payouts": "assets/dashboards/adyen_payouts.json",
-        "Adyen Disputes": "assets/dashboards/adyen_disputes.json"
+      "Adyen Transactions": "assets/dashboards/adyen_transactions.json",
+      "Adyen Payouts": "assets/dashboards/adyen_payouts.json",
+      "Adyen Disputes": "assets/dashboards/adyen_disputes.json"
     },
     "monitors": {
       "Failed refund detected due to a rejection by the card scheme": "assets/monitors/failed_refund_detected_due_to_a_rejection_by_the_card_scheme.json",

@@ -33,6 +33,7 @@ The Mailchimp integration collects metrics from campaigns and lists, directing t
 
 2. Click the Save button to save your settings.
 
+By using this integration, you grant your permission to Datadog to access your Mailchimp account.
 
 ## Data Collected
 

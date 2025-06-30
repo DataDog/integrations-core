@@ -70,7 +70,6 @@ tests:
       "correlationId" : "d47198c3-f726-47b8-b683-3f6244c9ceb5",
       "Level" : 4,
       "location" : "US",
-      "time" : "2020-05-13T12:35:19.6363979Z",
       "category" : "SignInLogs",
       "resultType" : "0",
       "durationMs" : 0,
@@ -220,7 +219,6 @@ tests:
       resultType: "0"
       service: "azure"
       tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
-      time: "2020-05-13T12:35:19.6363979Z"
       title: "'Sign-in activity' resulted in success initiated by testtest@datadoghq.com "
       usr:
         email: "testtest@datadoghq.com"

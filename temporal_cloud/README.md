@@ -1,7 +1,6 @@
 ## Overview
 
-[Temporal Cloud][1] is a scalable platform for orchestrating complex workflows, with built-in reliability, resilience, and timing controls. Temporal Cloud enables developers to focus on application logic without worrying about fault tolerance and consistency.
-
+[Temporal Cloud][1] is a scalable platform for orchestrating complex workflows which enables developers to focus on building applications, without worrying about fault tolerance and consistency.
 
 This integration gathers Temporal Cloud metrics into Datadog, offering insights into system health, workflow efficiency, task execution, and performance bottlenecks.
 
@@ -24,7 +23,7 @@ This integration gathers Temporal Cloud metrics into Datadog, offering insights 
     |Parameters|Description|
     |--------------------|--------------------|
     |Account ID|Temporal Cloud account ID to be used as part of the metrics endpoint URL: `https://<account_id>.tmprl.cloud/prometheus`.|
-    |End-entity certificate file content|Contents of the end-entity certificate for secure access and communication with the Metrics endpoint.|
+    |End-entity certificate file content|Content of the end-entity certificate for secure access and communication with the Metrics endpoint.|
     |End-entity certificate key file content|Content of the end-entity certificate key for secure access and communication with the Metrics endpoint.|
 
 2. Click the **Save** button to save your settings.

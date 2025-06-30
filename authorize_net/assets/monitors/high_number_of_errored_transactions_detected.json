@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-12-05",
+	"last_updated_at": "2024-12-05",
+	"title": "High number of errored transactions detected",
+	"description": "An errored transaction in Authorize.Net represents a failure occurring at any stage of the payment process, such as authorization, capture, or settlement. This monitor tracks such errors to ensure prompt resolution, maintaining smooth operations and preventing customer dissatisfaction.",
+	"definition": {
+		"id": 156177853,
+		"name": "High number of errored transactions detected",
+		"type": "log alert",
+		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:(generalError OR settlementError OR communicationError)\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 25",
+		"message": "{{#is_alert}}\nAn errored transaction in Authorize.Net indicates a problem during payment processing at any stage, including but not limited to authorization, capture, or settlement.\n\nA high number of errored transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
+		"tags": [
+			"integration:authorize-net"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 25
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:authorize-net"
+	]
+}

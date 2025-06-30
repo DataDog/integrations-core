@@ -6,6 +6,7 @@
 import json
 import logging
 import os
+import re
 from typing import Any  # noqa: F401
 
 import mock
@@ -38,10 +39,6 @@ def test_check_version():
     check = AgentCheck()
 
     assert check.check_version == base_package_version
-
-
-def test_load_config():
-    assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
 
 
 def test_persistent_cache(datadog_agent):
@@ -111,7 +108,7 @@ class TestSecretsSanitization:
         secret = 'p@$$w0rd'
         check = AgentCheck()
         check.register_secret(secret)
-        sanitized = check.sanitize(secret)
+        sanitized = re.escape(check.sanitize(secret))
 
         check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
 
@@ -1310,3 +1307,24 @@ def test_env_var_logic_preset():
         AgentCheck()
         assert os.getenv('OPENSSL_CONF', None) == preset_conf
         assert os.getenv('OPENSSL_MODULES', None) == preset_modules
+
+
+@pytest.mark.parametrize(
+    "should_profile_value, expected_calls",
+    [
+        (True, 1),
+        (False, 0),
+    ],
+)
+def test_profile_memory(should_profile_value, expected_calls):
+    """
+    Test that profile_memory is called when should_profile_memory is True
+    """
+    check = AgentCheck('test', {}, [{}])
+    check.should_profile_memory = mock.MagicMock(return_value=should_profile_value)
+    check.profile_memory = mock.MagicMock()
+
+    check.run()
+
+    assert check.should_profile_memory.call_count == 1
+    assert check.profile_memory.call_count == expected_calls

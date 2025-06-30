@@ -68,6 +68,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     try_basic_auth: Optional[bool] = None
+    use_qm_tz_for_metrics: Optional[bool] = None
     username: Optional[str] = Field(None, min_length=1)
 
     @model_validator(mode='before')

@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-12-05",
+	"last_updated_at": "2024-12-05",
+	"title": "High number of declined transactions detected",
+	"description": "The declined transactions in Authorize.Net are rejected before authorization due to FDS rules, credit card declines, or pending reviews. This monitor tracks these declines to promptly address issues, ensuring smooth processing and reducing customer dissatisfaction.",
+	"definition": {
+		"id": 156178235,
+		"name": "High number of declined transactions detected",
+		"type": "log alert",
+		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:declined\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 10",
+		"message": "{{#is_alert}}\nA declined transaction in Authorize.Net is one that has been rejected and not sent for authorization. Common reasons include fraud detection suite (FDS) or Advanced FDS rules, general credit card declines, or pending review transactions.\n\nA high number of declined transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
+		"tags": [
+			"integration:authorize-net"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:authorize-net"
+	]
+}

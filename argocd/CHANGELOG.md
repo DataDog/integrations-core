@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.3.0 / 2025-01-16
+## 3.4.0 / 2025-06-12
+
+***Added***:
+
+* Add functionality to collect metrics from [commit server](https://argo-cd.readthedocs.io/en/latest/operator-manual/metrics/#commit-server-metrics) ([#20412](https://github.com/DataDog/integrations-core/pull/20412))
+
+## 3.3.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:
 

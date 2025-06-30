@@ -14,11 +14,11 @@ init_config:
 instances:
 
   -
-    ## @param priviledged_metrics_endpoint - string - optional
+    ## @param privileged_metrics_endpoint - string - optional
     ## Endpoint exposing Supabase customer metrics
     ## https://supabase.com/docs/guides/monitoring-troubleshooting/metrics#accessing-the-metrics-endpoint
     #
-    # priviledged_metrics_endpoint: https://<project-ref>.supabase.co/customer/v1/privileged/metrics
+    # privileged_metrics_endpoint: https://<project-ref>.supabase.co/customer/v1/privileged/metrics
 
     ## @param storage_api_endpoint - string - optional
     ## Endpoint exposing the S3 Storage API Prometheus metrics.

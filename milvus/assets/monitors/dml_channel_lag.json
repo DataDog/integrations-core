@@ -1,0 +1,23 @@
+{
+	"version": 2,
+	"created_at": "2025-01-03",
+	"last_updated_at": "2025-01-03",
+	"title": "DML channel lag",
+	"description": "This monitor measures the lag in the DML channels. High lag indicates synchronization issues, which can affect real-time data consistency and query freshness.",
+	"definition": {
+		"name": "Significant lag in DML channel",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:milvus.datacoord.consume_datanode_tt_lag_ms{*} > 5000",
+		"message": "{{#is_alert}}DML channel lag exceeds {{threshold}}.{{/is_alert}}\n{{#is_recovery}}DML channel lag has returned to normal levels.{{/is_recovery}}",
+		"tags": ["integration:milvus"],
+		"options": {
+			"thresholds": {
+				"critical": 5000
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false
+		}
+	},
+	"tags": ["integration:milvus"]
+}

@@ -54,6 +54,28 @@
                 }
             }
         },
+        "transaction": {
+            "parameters": {
+                "txnNumber": 392,
+                "txnRetryCounter": 0,
+                "autocommit": false,
+                "readConcern": {
+                    "level": "local",
+                    "provenance": "implicitDefault"
+                }
+            },
+            "readTimestamp": {
+                "$timestamp": {
+                    "t": 0,
+                    "i": 0
+                }
+            },
+            "startWallClockTime": "2025-02-04T18:45:22.915+00:00",
+            "timeOpenMicros": 1750,
+            "timeActiveMicros": 435,
+            "timeInactiveMicros": 1315,
+            "expiryTime": "2025-02-04T18:46:22.915+00:00"
+        },
         "secs_running": 0,
         "microsecs_running": 29232,
         "op": "query",

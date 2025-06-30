@@ -200,7 +200,7 @@ files:
               Works on Linux only.
             value:
               example: false
-              type: boolean          
+              type: boolean
           - name: device_tag_re
             description: |
               Instruct the check to apply additional tags to matching
@@ -263,3 +263,13 @@ files:
                   type: string
                 - name: type
                   type: string
+
+          - name:  lowercase_device_tag
+            description: |
+              Enable this to lowercase the "device" tags for both partition and disk metrics.
+              This is useful only in very specific circumstances:
+                1. Your "device" tag value is uppercase and your host is running on Linux.
+                2. You cannot use the "device_name" tag.
+            value:
+              type: boolean
+              example: false

@@ -24,6 +24,10 @@ def instance_include_all_devices():
     return True
 
 
+def instance_lowercase_device_tag():
+    return False
+
+
 def instance_min_collection_interval():
     return 15
 

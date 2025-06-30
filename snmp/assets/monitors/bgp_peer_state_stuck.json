@@ -19,8 +19,7 @@
 			"notify_audit": false,
 			"include_tags": true,
 			"new_group_delay": 60,
-			"notify_no_data": true,
-			"no_data_timeframe": 10
+			"on_missing_data": "show_and_notify_no_data"
 		}
 	},
 	"tags": [

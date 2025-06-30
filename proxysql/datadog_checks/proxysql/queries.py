@@ -244,6 +244,33 @@ STATS_MYSQL_BACKENDS = {
     ],
 }
 
+STATS_MYSQL_ALL_BACKENDS = {
+    'name': 'stats_mysql_all_backends',
+    # Note: this query seems a bit complex, but it's basically:
+    #       SELECT  hostgroup, status, COUNT(*) FROM stats_mysql_connection_pool GROUP BY hostgroup, status
+    #       The complexity (JOIN, subquery) is only here to always generate a metric (at 0) for all combinations of
+    #       status&hostgroup, even when no server exists at the moment in that status & hostgroup.
+    'query': """
+             SELECT refpairs.hostgroup, refpairs.status, count(stats.srv_host) as count
+             FROM (
+                 SELECT DISTINCT(hostgroup), refstatuses.status
+                 FROM stats_mysql_connection_pool
+                 JOIN (
+                     select 'ONLINE' as status union all select 'SHUNNED' as status union all
+                     select 'OFFLINE_SOFT' as status union all select 'OFFLINE_HARD' as status
+                 ) refstatuses
+             ) refpairs
+             LEFT JOIN stats_mysql_connection_pool stats
+             ON stats.hostgroup=refpairs.hostgroup and stats.status=refpairs.status
+             GROUP BY refpairs.hostgroup, refpairs.status;
+             """,
+    'columns': [
+        {'name': 'hostgroup', 'type': 'tag'},
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'all_backends.count', 'type': 'gauge'},
+    ],
+}
+
 STATS_MYSQL_QUERY_RULES = {
     'name': 'stats_mysql_query_rules',
     'query': 'SELECT rule_id, hits FROM stats_mysql_query_rules',

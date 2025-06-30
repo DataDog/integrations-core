@@ -96,7 +96,11 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         scrapers = {}
 
         for node_info in response['NodeInfoList']:
-            broker_info = node_info['BrokerNodeInfo']
+            broker_info = node_info.get('BrokerNodeInfo')
+            if not broker_info:
+                self.log.debug('NodeInfo does not contain BrokerNodeInfo, skipping')
+                continue
+
             broker_id_tag = f'broker_id:{broker_info["BrokerId"]}'
 
             for endpoint in broker_info['Endpoints']:
