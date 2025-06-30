@@ -47,8 +47,8 @@ controlPlane:
       }
 ```
 
-The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
-If your control plane has a different name, change the line accordingly.
+**Note:** The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
+If your control plane has a different name, change the line accordingly. For more information, see the [Datadog documentation][18].
 
 **Configuration file**
 
@@ -101,8 +101,8 @@ Metrics from the data planes are collected using the [Envoy integration][10].
       }
     ```
 
-    The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
-    If your sidecar has a different name, change the line accordingly.
+    **Note:** The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
+    If your sidecar has a different name, change the line accordingly. For more information, see the [Datadog documentation][18].
 
 #### Log collection
 
@@ -129,8 +129,8 @@ controlPlane:
       ]
 ```
 
-The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.logs:`. 
-If your control plane has a different name, change the line accordingly.
+**Note:** The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.logs:`. 
+If your control plane has a different name, change the line accordingly. For more information, see the [Datadog documentation][18].
 
 ##### Data plane logs
 
@@ -147,8 +147,8 @@ ad.datadoghq.com/kuma-sidecar.logs: |
   ]
 ```
 
-The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.logs:`. 
-If your sidecar has a different name, change the line accordingly.
+**Note:** The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.logs:`. 
+If your sidecar has a different name, change the line accordingly. For more information, see the [Datadog documentation][18].
 
 Replace `<MY_SERVICE>` with the name of your service.
 
@@ -232,3 +232,4 @@ Need help? Contact [Datadog support][9].
 [15]: https://kuma.io/docs/latest/policies/meshtrafficpermission/
 [16]: https://kuma.io/docs/latest/policies/meshtrafficpermission/
 [17]: https://docs.datadoghq.com/containers/guide/auto_conf/?tab=datadogoperator#disable-auto-configuration
+[18]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=annotations
