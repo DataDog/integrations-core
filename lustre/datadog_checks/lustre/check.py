@@ -9,8 +9,8 @@ import yaml
 from dataclasses import dataclass
 import re
 
-OSS_JOBSTATS_PARAM_REGEX = r'ost.*.job_stats'
-MDS_JOBSTATS_PARAM_REGEX = r'obdfilter.*.job_stats'
+OSS_JOBSTATS_PARAM_REGEX = r'obdfilter.*.job_stats'
+MDS_JOBSTATS_PARAM_REGEX = r'mdt.*.job_stats'
 
 IGNORED_STATS = {
     'snapshot_time',
@@ -68,15 +68,6 @@ class LustreCheck(AgentCheck):
         if self.instance.get("enable_extra_params", False):
             self.param_list += EXTRA_PARAMS
 
-
-
-
-    def check(self, _):
-        self.submit_jobstats_metrics()
-        # self.submit_lnet_metrics()
-        # self.submit_lnet_local_ni_metrics()
-        # self.submit_lnet_peer_ni_metrics()
-
     def _find_node_type(self):
         '''
         Determine the host type from the command line.
@@ -96,6 +87,20 @@ class LustreCheck(AgentCheck):
         except Exception as e:
             self.log.error(f'Failed to determine node type: {e}')
             return 'client'
+
+    def check(self, _):
+        self.update()
+        if self.node_type == 'client':
+            self.submit_changelogs()
+
+        self.submit_device_health()
+        self.submit_general_stats()
+        self.submit_lnet_metrics()
+        self.submit_lnet_local_ni_metrics()
+        self.submit_lnet_peer_ni_metrics()
+
+        if self.node_type in ('mds', 'oss'):
+            self.submit_jobstats_metrics()
 
     def update(self):
         '''
@@ -121,12 +126,15 @@ class LustreCheck(AgentCheck):
         self.log.debug('Finding filesystems...')
         if self.node_type.lower() == 'mds':
             param_regex = MDS_JOBSTATS_PARAM_REGEX
+            # obdfilter.<filesystem>-OST0000.job_stats
             filesystem_regex = r'(?<=obdfilter\.).*(?=-OST)'
         elif self.node_type.lower() == 'oss':
             param_regex = OSS_JOBSTATS_PARAM_REGEX
+            # mdt.<filesystem>-MDT0000.job_stats
             filesystem_regex = r'(?<=mds\.).*(?=-MDT)'
         elif self.node_type.lower() == 'client':
             param_regex = 'llite.*.stats'
+            # llite.<filesystem>-<device_uuid>.stats
             filesystem_regex = r'(?<=llite\.).*(?=-[^-]*\.stats)'
         else:
             self.log.debug(f'Invalid node_type: {self.node_type}')
@@ -376,7 +384,6 @@ class LustreCheck(AgentCheck):
                     self.log.debug(f'Unexpected changelog format: {line}')
                     continue
                 self.send_log(data, {'index': parts[0]}, stream=target)
-
 
     def get_changelog(self, target):
         self.log.info(f'Collecting changelogs for: {target}')
