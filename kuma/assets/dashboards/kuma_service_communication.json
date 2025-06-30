@@ -1,5 +1,5 @@
 {
-  "title": "Kuma Service Communication",
+  "title": "Kuma Service Communication (Development)",
   "description": "## Service Communication Insights\n\nThis dashboard tracks communication between services in your Kuma mesh, helping you:\n\n**Identify issues:**\n- Connection failures and timeouts\n- Increased latency between services\n- Traffic imbalances and hotspots\n\n**Further Reading:**\n- [Traffic Metrics Policy](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Observability Guide](https://kuma.io/docs/latest/explore/observability/)\n\n[[suggested_dashboards]]",
   "widgets": [
     {
@@ -208,18 +208,19 @@
               "title": "Latency (Average)",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1 + query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
                           "unit_name": "millisecond"
                         }
-                      }
+                      },
+                      "formula": "query1 / query2"
                     }
                   ],
                   "queries": [
@@ -242,8 +243,8 @@
               "autoscale": true,
               "precision": 0,
               "timeseries_background": {
-                "type": "area",
-                "yaxis": { "include_zero": true }
+                "yaxis": { "include_zero": true },
+                "type": "area"
               }
             },
             "layout": { "x": 3, "y": 2, "width": 3, "height": 1 }
@@ -684,7 +685,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
