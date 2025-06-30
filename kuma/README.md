@@ -62,7 +62,7 @@ instances:
 
 See the [sample kuma.d/conf.yaml][5] for all available configuration options.
 
-##### Data Planes (Envoy Proxies)
+##### Data planes (Envoy proxies)
 
 Metrics from the data planes are collected using the [Envoy integration][10].
 
