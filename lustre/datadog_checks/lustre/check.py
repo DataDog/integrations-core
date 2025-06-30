@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
 import subprocess
 import yaml
 from dataclasses import dataclass
@@ -28,6 +28,9 @@ class LustreParam:
 
 DEFAULT_PARAMS = [
     LustreParam(regex='llite.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='filesystem'),
+]
+
+EXTRA_PARAMS = [
     LustreParam(regex='mds.MDS.mdt.stats', node_types=('mds',), prefix='mds.mdt'),
     LustreParam(regex='mdt.*.exports.*.stats', node_types=('mds',), wildcards=('device_name','nid'), prefix='mds.mdt.exports'),
     LustreParam(regex='mdc.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='mdc'),
@@ -38,9 +41,6 @@ DEFAULT_PARAMS = [
     LustreParam(regex='osc.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='osc'),
     LustreParam(regex='obdfilter.*.exports.*.stats', node_types=('oss',), wildcards=('device_name', 'nid'), prefix='obdfilter.exports'),
     LustreParam(regex='obdfilter.*.stats', node_types=('oss',), wildcards=('device_name',), prefix='obdfilter'),
-]
-
-EXTRA_PARAMS = [
 ]
 
 class LustreCheck(AgentCheck):
@@ -55,19 +55,23 @@ class LustreCheck(AgentCheck):
         self.lnetctl_path = self.instance.get("lnetctl_path", "/usr/sbin/lnetctl")
         self.lfs_path = self.instance.get("lfs_path", "/usr/bin/lfs")
         # Enable or disable specific metrics
-        self.lnetctl_detailed = self.instance.get("enable_lnetctl_detailed", False)
-        self.lnetctl_health = self.instance.get("enable_lnetctl_health", False)
+        self.enable_changelogs = is_affirmative(self.instance.get("enable_changelogs", False))
+        self.lnetctl_verbosity = '3' if is_affirmative(self.instance.get("enable_lnetctl_detailed", False)) else '1'
+        self.param_list = DEFAULT_PARAMS
+        if self.instance.get("enable_extra_params", False):
+            self.param_list += EXTRA_PARAMS
 
-        self.changelog_lines_per_run = self.instance.get("changelog_lines_per_check", 1000)
+        self.changelog_lines_per_check = int(self.instance.get("changelog_lines_per_check", 1000))
 
         self.devices = []
         self.changelog_targets = []
         self.filesystems = self.instance.get("filesystems", [])
         self.node_type = self.instance.get("node_type", self._find_node_type())
 
-        self.param_list = DEFAULT_PARAMS
-        if self.instance.get("enable_extra_params", False):
-            self.param_list += EXTRA_PARAMS
+        self.tags = self.instance.get('tags', [])
+        self.tags.append(f'node_type:{self.node_type}')
+        version = self.run_command(self.lctl_path, "get_param", "-ny", "version").strip()
+        self.tags.append(f'lustre_version:{version}')
 
     def _find_node_type(self):
         '''
@@ -91,7 +95,7 @@ class LustreCheck(AgentCheck):
 
     def check(self, _):
         self.update()
-        if self.node_type == 'client':
+        if self.node_type == 'client' and self.enable_changelogs:
             self.submit_changelogs()
 
         self.submit_device_health()
@@ -251,7 +255,7 @@ class LustreCheck(AgentCheck):
         '''
         Get the lnet stats from the command line.
         '''
-        lnet_stats = self.run_command(self.lnetctl_path, stats_type, 'show', sudo=True)
+        lnet_stats = self.run_command(self.lnetctl_path, stats_type, 'show', '-v', self.lnetctl_verbosity, sudo=True)
         try:
             return yaml.safe_load(lnet_stats)
         except (KeyError, ValueError):
@@ -267,13 +271,16 @@ class LustreCheck(AgentCheck):
             net_type = net.get('net type')
             for ni in net.get('local NI(s)', []):
                 nid = ni.get('nid')
-                tags = [f'net_type:{net_type}', f'nid:{nid}', f'node_type:{self.node_type}']
+                status = 1 if ni.get('status') == 'up' else 0
+                tags = self.tags + [f'net_type:{net_type}', f'nid:{nid}']
+                self.gauge(f'net.local.status', status, tags=tags)
                 for stats_group_name, stats_group in ni.items():
                     if not isinstance(stats_group, dict):
                         continue
                     for metric_name, metric_value in stats_group.items():
                         if isinstance(metric_value, int):
                             self.gauge(f'net.local.{stats_group_name.replace(" ", "_")}.{metric_name.replace(" ", "_")}', metric_value, tags=tags)
+
 
     def submit_lnet_peer_ni_metrics(self):
         '''
@@ -284,7 +291,7 @@ class LustreCheck(AgentCheck):
             nid = peer.get('primary nid')
             for ni in peer.get('peer ni', []):
                 peer_nid = ni.get('nid')
-                tags = [f'nid:{nid}', f'peer_nid:{peer_nid}', f'node_type:{self.node_type}']
+                tags = self.tags + [f'nid:{nid}', f'peer_nid:{peer_nid}']
                 for stats_group_name, stats_group in ni.items():
                     if not isinstance(stats_group, dict):
                         continue
@@ -302,20 +309,44 @@ class LustreCheck(AgentCheck):
                 continue
             if not param.regex.endswith('.stats'):
                 continue
-            raw_stats = self.run_command(self.lctl_path, "get_param", "-ny", param.regex, sudo=True)
-            parsed_stats = self.parse_stats(raw_stats)
-            for stat_name, stat_value in parsed_stats.items():
-                if isinstance(stat_value, int):
-                    self.gauge(f'general.{stat_name}', stat_value, tags=[f'node_type:{self.node_type}'])
-                    continue
-                if not isinstance(stat_value, dict):
-                    self.log.debug(f'Unexpected stat value for {stat_name}: {stat_value}')
-                    continue
-                for metric_type, metric_value in stat_value.items():
-                    if isinstance(metric_value, int):
-                        self.gauge(f'general.{param.prefix}.{stat_name}.{metric_type}', metric_value, tags=[f'node_type:{self.node_type}'])
-                    else:
-                        self.log.debug(f'Unexpected metric value for {stat_name}.{metric_type}: {metric_value}')
+            param_list = self.run_command(self.lctl_path, "list_param", param.regex, sudo=True)
+            for param_name in param_list.splitlines():
+                tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
+                raw_stats = self.run_command(self.lctl_path, "get_param", "-ny", param.regex, sudo=True)
+                parsed_stats = self.parse_stats(raw_stats)
+                for stat_name, stat_value in parsed_stats.items():
+                    if isinstance(stat_value, int):
+                        self.gauge(f'general.{stat_name}', stat_value, tags=tags)
+                        continue
+                    if not isinstance(stat_value, dict):
+                        self.log.debug(f'Unexpected stat value for {stat_name}: {stat_value}')
+                        continue
+                    for metric_type, metric_value in stat_value.items():
+                        if isinstance(metric_value, int):
+                            self.gauge(f'general.{param.prefix}.{stat_name}.{metric_type}', metric_value, tags=tags)
+                        else:
+                            self.log.debug(f'Unexpected metric value for {stat_name}.{metric_type}: {metric_value}')
+
+    def _extract_tags_from_param(self, param_regex, param_name, wildcards):
+        '''
+        Extract tags from the parameter name based on the regex and wildcard meanings.
+        '''
+        tags = []
+        if wildcards:
+            regex_parts = param_regex.split('.')
+            param_parts = param_name.split('.')
+            wildcard_number = 0
+            if not len(regex_parts) == len(param_parts):
+                self.log.debug(f'Parameter name {param_name} does not match regex {regex}')
+                return tags
+            for part_number, part in enumerate(regex_parts):
+                if part == '*':
+                    if wildcard_number >= len(wildcards):
+                        self.log.debug(f'Found {wildcard_number} wildcards, which exceeds available wildcard tags {wildcards}')
+                        return tags
+                    tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
+                    wildcard_number += 1
+        return tags
 
     def parse_stats(self, raw_stats):
         '''
@@ -363,8 +394,8 @@ class LustreCheck(AgentCheck):
                     f'device_type:{device.get("type", "unknown")}',
                     f'device_name:{device.get("name", "unknown")}',
                     f'device_uuid:{device.get("uuid", "unknown")}',
-                    f'node_type:{self.node_type}'
                 ]
+                tags += self.tags
                 
                 self.gauge('device.health', device_status, tags=tags)
                 self.gauge('device.refcount', device['refcount'], tags=tags)
@@ -403,6 +434,6 @@ class LustreCheck(AgentCheck):
         self.log.info(f'Collecting changelogs for: {target}')
         cursor = self.get_log_cursor(stream=target) 
         start_index = '0' if cursor is None else cursor['index']
-        end_index = str(int(start_index) + int(self.changelog_lines_per_run))
+        end_index = str(int(start_index) + self.changelog_lines_per_check)
         self.log.debug(f'Fetching changelog from index {start_index} to {end_index} for target {target}')
         return self.run_command(self.lfs_path, 'changelog', target, start_index, end_index, sudo=True)

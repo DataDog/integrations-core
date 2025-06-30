@@ -8,12 +8,40 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_changelog_lines_per_check():
+    return 1000
+
+
 def instance_disable_generic_tags():
     return False
 
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_enable_changelogs():
+    return False
+
+
+def instance_enable_extra_params():
+    return False
+
+
+def instance_enable_lnetctl_detailed():
+    return False
+
+
+def instance_lctl_path():
+    return '/usr/sbin/lctl'
+
+
+def instance_lfs_path():
+    return '/usr/bin/lfs'
+
+
+def instance_lnetctl_path():
+    return '/usr/sbin/lnetctl'
 
 
 def instance_min_collection_interval():
