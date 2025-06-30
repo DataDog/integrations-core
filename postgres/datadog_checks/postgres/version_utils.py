@@ -6,7 +6,6 @@ import re
 from semver import VersionInfo
 
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.postgres.cursor import CommenterCursor
 
 V8_3 = VersionInfo.parse("8.3.0")
 V9 = VersionInfo.parse("9.0.0")
@@ -32,7 +31,7 @@ class VersionUtils(object):
     @staticmethod
     def get_raw_version(db):
         with db as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SHOW SERVER_VERSION;')
                 raw_version = cursor.fetchone()[0]
                 return raw_version
@@ -41,7 +40,7 @@ class VersionUtils(object):
         if self._is_aurora is not None:
             return self._is_aurora
         with db as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute(
                     "SELECT 1 FROM pg_available_extension_versions "
                     "WHERE name ILIKE '%aurora%' OR comment ILIKE '%aurora%' "

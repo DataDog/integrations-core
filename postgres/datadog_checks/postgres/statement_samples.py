@@ -8,10 +8,9 @@ import time
 from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
 
-import psycopg2
+import psycopg
 from cachetools import TTLCache
-
-from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+from psycopg.rows import dict_row
 
 try:
     import datadog_agent
@@ -167,7 +166,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             ),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
+            expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
             shutdown_callback=shutdown_callback,
         )
@@ -245,7 +244,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -279,13 +278,15 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
-                if conn.encoding == "SQLASCII":
+                if conn.info.encoding == "SQLASCII":
                     # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
                     # so we need to read in the data as bytes and then decode as best we can
-                    psycopg2.extensions.register_type(psycopg2.extensions.BYTES, cursor)
-                cursor.execute(query, params)
+                    # psycopg.extensions.register_type(psycopg.extensions.BYTES, cursor)
+                    cursor.execute(query, params, binary=True)
+                else:
+                    cursor.execute(query, params)
                 rows = cursor.fetchall()
 
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
@@ -302,7 +303,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 try:
                     cursor.execute(
                         "select * from {pg_stat_activity_view} LIMIT 0".format(
@@ -317,12 +318,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                             "missing the following expected columns from pg_stat_activity: %s", missing_columns
                         )
                     self._log.debug("found available pg_stat_activity columns: %s", available_columns)
-                except psycopg2.errors.InvalidSchemaName as e:
+                except psycopg.errors.InvalidSchemaName as e:
                     self._log.warning(
                         "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)
                     )
                     return None
-                except psycopg2.DatabaseError as e:
+                except psycopg.DatabaseError as e:
                     # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
                     # incorrect definition)
                     self._check.record_warning(
@@ -352,10 +353,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             total_count += 1
             row = {}
             with self._check._get_main_db() as conn:
-                encoding = conn.encoding if conn.encoding != "SQLASCII" else 'utf-8'
+                encoding = conn.info.encoding if conn.info.encoding != "SQLASCII" else 'utf-8'
 
             for key, value in raw_row.items():
-                if type(value) is not bytes:
+                if type(value) is not bytes or value is None:
                     row[key] = value
                 elif key == "query":
                     try:
@@ -376,14 +377,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                     except Exception as e:
                         self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
                         row[key] = "unknown"
-            # We later on fallback to having the statement be set to the backend_type so it's important to only
-            # set it if it is not None
-            if row.get("backend_type") is not None:
-                # backend_type is always a bytea type because it can contain non-UTF8 characters
-                try:
-                    row["backend_type"] = row.get("backend_type").tobytes().decode('utf-8', 'backslashreplace')
-                except Exception:
-                    row["backend_type"] = "unknown"
             if not row.get('query'):
                 continue
             if (not row.get('datname')) and row.get('backend_type', 'client backend') == 'client backend':
@@ -676,12 +669,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
             self.db_pool.get_connection(dbname, self._conn_ttl_ms)
-        except psycopg2.OperationalError as e:
+        except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.connection_error, e
-        except psycopg2.DatabaseError as e:
+        except psycopg.DatabaseError as e:
             self._log.warning(
                 "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
@@ -689,14 +682,14 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
-        except psycopg2.errors.InvalidSchemaName as e:
+        except psycopg.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
             return DBExplainError.invalid_schema, e
-        except psycopg2.errors.DatatypeMismatch as e:
+        except psycopg.errors.DatatypeMismatch as e:
             self._emit_run_explain_error(dbname, DBExplainError.datatype_mismatch, e)
             return DBExplainError.datatype_mismatch, e
-        except psycopg2.DatabaseError as e:
+        except psycopg.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._emit_run_explain_error(dbname, DBExplainError.failed_function, e)
@@ -742,12 +735,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
             # When sending potentially non-ascii data, e.g. UTF8, we need to force
             # the client encoding to UTF-8 to match Python string encoding
-            if conn.encoding == 'SQLASCII':
+            if conn.info.encoding == 'SQLASCII':
                 self._log.debug(
                     "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
                 )
-                conn.set_client_encoding('utf-8')
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                conn.execute("SET client_encoding TO UTF8")
+            with conn.cursor() as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
@@ -829,7 +822,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     return self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement, query_signature
                     )
-                e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
+                e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
                     " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
@@ -840,30 +833,30 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
                 return error_response
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg2.errors.UndefinedTable as e:
+        except psycopg.errors.UndefinedTable as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
             return error_response
-        except psycopg2.errors.UndefinedFunction as e:
+        except psycopg.errors.UndefinedFunction as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.undefined_function, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.undefined_function, e)
             return error_response
-        except psycopg2.errors.IndeterminateDatatype as e:
+        except psycopg.errors.IndeterminateDatatype as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.indeterminate_datatype, e)
             return error_response
-        except psycopg2.errors.DatabaseError as e:
+        except psycopg.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
             self._emit_run_explain_error(dbname, DBExplainError.database_error, e)
-            if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
-                e, psycopg2.errors.InsufficientPrivilege
+            if isinstance(e, psycopg.errors.ProgrammingError) and not isinstance(
+                e, psycopg.errors.InsufficientPrivilege
             ):
                 # ProgrammingError is things like InvalidName, InvalidSchema, SyntaxError
                 # we don't want to cache things like permission errors for a very long time because they can be fixed
