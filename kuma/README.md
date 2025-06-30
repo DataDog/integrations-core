@@ -47,6 +47,9 @@ controlPlane:
       }
 ```
 
+The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
+If your control plane has a different name, change the line accordingly.
+
 **Configuration File**
 
 Alternatively, you can configure the integration by editing the `kuma.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory:
@@ -98,6 +101,9 @@ Metrics from the data planes are collected using the [Envoy integration][10].
       }
     ```
 
+    The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
+    If your sidecar has a different name, change the line accordingly.
+
 #### Log collection
 
 Enable log collection in your `datadog.yaml` file:
@@ -123,6 +129,9 @@ controlPlane:
       ]
 ```
 
+The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.logs:`. 
+If your control plane has a different name, change the line accordingly.
+
 ##### Data Plane Logs
 
 Configure the Datadog Agent to collect logs from the Envoy sidecar containers by applying the following annotations to your application pods:
@@ -137,6 +146,10 @@ ad.datadoghq.com/kuma-sidecar.logs: |
     }
   ]
 ```
+
+The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.logs:`. 
+If your sidecar has a different name, change the line accordingly.
+
 Replace `<MY_SERVICE>` with the name of your service.
 
 **Optional: Enable mesh access logs**
