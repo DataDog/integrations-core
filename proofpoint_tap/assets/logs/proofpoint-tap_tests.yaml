@@ -1,0 +1,704 @@
+id: "proofpoint-tap"
+tests:
+ -
+  sample: |-
+    {
+      "threatID" : "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+      "clickIP" : "10.0.0.0",
+      "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+      "threatTime" : "2016-06-24T19:17:46.000Z",
+      "GUID" : "b27dbea0-87d5-463b-b93c-4e8b708289ce",
+      "messageID" : "8c6cfedd-3050-4d65-8c09-c5f65c38da81",
+      "clickTime" : "2016-06-24T19:17:44.000Z",
+      "userAgent" : "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0",
+      "classification" : "malware",
+      "url" : "http://badguy.zz/",
+      "sender" : "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz",
+      "eventTime" : "2025-06-24T19:17:46.000Z",
+      "recipient" : "bruce.wayne@pharmtech.zz",
+      "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+      "threatURL" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+      "senderIP" : "192.0.2.255",
+      "threatStatus" : "active"
+    }
+  service: "click-blocked"
+  result:
+    custom:
+      GUID: "b27dbea0-87d5-463b-b93c-4e8b708289ce"
+      campaignId: "46e01b8a-c899-404d-bcd9-189bb393d1a7"
+      classification: "malware"
+      clickTime: "2016-06-24T19:17:44.000Z"
+      eventTime: "2025-06-24T19:17:46.000Z"
+      geoSenderIP: {}
+      http:
+        url: "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50"
+        useragent: "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "27"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "NT"
+      id: "8c8b4895-a277-449f-r797-547e3c89b25a"
+      messageID: "8c6cfedd-3050-4d65-8c09-c5f65c38da81"
+      network:
+        client:
+          geoip: {}
+          ip: "10.0.0.0"
+      sender: "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz"
+      senderDomain: "badguy.zz"
+      senderIP: "192.0.2.255"
+      status: "critical"
+      threatID: "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50"
+      threatStatus: "active"
+      threatTime: "2016-06-24T19:17:46.000Z"
+      url: "http://badguy.zz/"
+      usr:
+        email: "bruce.wayne@pharmtech.zz"
+    message: |-
+      {
+        "threatID" : "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+        "clickIP" : "10.0.0.0",
+        "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+        "threatTime" : "2016-06-24T19:17:46.000Z",
+        "GUID" : "b27dbea0-87d5-463b-b93c-4e8b708289ce",
+        "messageID" : "8c6cfedd-3050-4d65-8c09-c5f65c38da81",
+        "clickTime" : "2016-06-24T19:17:44.000Z",
+        "userAgent" : "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0",
+        "classification" : "malware",
+        "url" : "http://badguy.zz/",
+        "sender" : "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz",
+        "eventTime" : "2025-06-24T19:17:46.000Z",
+        "recipient" : "bruce.wayne@pharmtech.zz",
+        "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+        "threatURL" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+        "senderIP" : "192.0.2.255",
+        "threatStatus" : "active"
+      }
+    service: "click-blocked"
+    status: "critical"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750792666000
+ -
+  sample: |-
+    {
+      "threatID" : "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+      "clickIP" : "10.0.0.0",
+      "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+      "threatTime" : "2016-06-24T19:17:46.000Z",
+      "GUID" : "b27dbea0-87d5-463b-b93c-4e8b708289ce",
+      "messageID" : "8c6cfedd-3050-4d65-8c09-c5f65c38da81",
+      "clickTime" : "2016-06-24T19:17:44.000Z",
+      "userAgent" : "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0",
+      "classification" : "spam",
+      "url" : "http://badguy.zz/",
+      "sender" : "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz",
+      "eventTime" : "2025-06-24T19:17:46.000Z",
+      "recipient" : "bruce.wayne@pharmtech.zz",
+      "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+      "threatURL" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+      "senderIP" : "192.0.2.255",
+      "threatStatus" : "active"
+    }
+  service: "click-blocked"
+  result:
+    custom:
+      GUID: "b27dbea0-87d5-463b-b93c-4e8b708289ce"
+      campaignId: "46e01b8a-c899-404d-bcd9-189bb393d1a7"
+      classification: "spam"
+      clickTime: "2016-06-24T19:17:44.000Z"
+      eventTime: "2025-06-24T19:17:46.000Z"
+      geoSenderIP: {}
+      http:
+        url: "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50"
+        useragent: "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "27"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "NT"
+      id: "8c8b4895-a277-449f-r797-547e3c89b25a"
+      messageID: "8c6cfedd-3050-4d65-8c09-c5f65c38da81"
+      network:
+        client:
+          geoip: {}
+          ip: "10.0.0.0"
+      sender: "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz"
+      senderDomain: "badguy.zz"
+      senderIP: "192.0.2.255"
+      status: "warning"
+      threatID: "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50"
+      threatStatus: "active"
+      threatTime: "2016-06-24T19:17:46.000Z"
+      url: "http://badguy.zz/"
+      usr:
+        email: "bruce.wayne@pharmtech.zz"
+    message: |-
+      {
+        "threatID" : "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+        "clickIP" : "10.0.0.0",
+        "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+        "threatTime" : "2016-06-24T19:17:46.000Z",
+        "GUID" : "b27dbea0-87d5-463b-b93c-4e8b708289ce",
+        "messageID" : "8c6cfedd-3050-4d65-8c09-c5f65c38da81",
+        "clickTime" : "2016-06-24T19:17:44.000Z",
+        "userAgent" : "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0",
+        "classification" : "spam",
+        "url" : "http://badguy.zz/",
+        "sender" : "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz",
+        "eventTime" : "2025-06-24T19:17:46.000Z",
+        "recipient" : "bruce.wayne@pharmtech.zz",
+        "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+        "threatURL" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+        "senderIP" : "192.0.2.255",
+        "threatStatus" : "active"
+      }
+    service: "click-blocked"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750792666000
+ -
+  sample: |-
+    {
+      "threatID" : "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+      "clickIP" : "10.0.0.0",
+      "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+      "threatTime" : "2016-06-24T19:17:46.000Z",
+      "GUID" : "b27dbea0-87d5-463b-b93c-4e8b708289ce",
+      "messageID" : "8c6cfedd-3050-4d65-8c09-c5f65c38da81",
+      "clickTime" : "2016-06-24T19:17:44.000Z",
+      "userAgent" : "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0",
+      "classification" : "spam",
+      "url" : "http://badguy.zz/",
+      "sender" : "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz",
+      "eventTime" : "2025-06-24T19:17:46.000Z",
+      "recipient" : "bruce.wayne@pharmtech.zz",
+      "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+      "threatURL" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+      "senderIP" : "192.0.2.255",
+      "threatStatus" : "falsepositive"
+    }
+  service: "click-permitted"
+  result:
+    custom:
+      GUID: "b27dbea0-87d5-463b-b93c-4e8b708289ce"
+      campaignId: "46e01b8a-c899-404d-bcd9-189bb393d1a7"
+      classification: "spam"
+      clickTime: "2016-06-24T19:17:44.000Z"
+      eventTime: "2025-06-24T19:17:46.000Z"
+      geoSenderIP: {}
+      http:
+        url: "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50"
+        useragent: "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "27"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "NT"
+      id: "8c8b4895-a277-449f-r797-547e3c89b25a"
+      messageID: "8c6cfedd-3050-4d65-8c09-c5f65c38da81"
+      network:
+        client:
+          geoip: {}
+          ip: "10.0.0.0"
+      sender: "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz"
+      senderDomain: "badguy.zz"
+      senderIP: "192.0.2.255"
+      status: "info"
+      threatID: "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50"
+      threatStatus: "falsepositive"
+      threatTime: "2016-06-24T19:17:46.000Z"
+      url: "http://badguy.zz/"
+      usr:
+        email: "bruce.wayne@pharmtech.zz"
+    message: |-
+      {
+        "threatID" : "61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+        "clickIP" : "10.0.0.0",
+        "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+        "threatTime" : "2016-06-24T19:17:46.000Z",
+        "GUID" : "b27dbea0-87d5-463b-b93c-4e8b708289ce",
+        "messageID" : "8c6cfedd-3050-4d65-8c09-c5f65c38da81",
+        "clickTime" : "2016-06-24T19:17:44.000Z",
+        "userAgent" : "Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0",
+        "classification" : "spam",
+        "url" : "http://badguy.zz/",
+        "sender" : "9facbf452def2d7efc5b5c48cdb837fa@badguy.zz",
+        "eventTime" : "2025-06-24T19:17:46.000Z",
+        "recipient" : "bruce.wayne@pharmtech.zz",
+        "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+        "threatURL" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50",
+        "senderIP" : "192.0.2.255",
+        "threatStatus" : "falsepositive"
+      }
+    service: "click-permitted"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750792666000
+ -
+  sample: |-
+    {
+      "messageTime" : "2016-06-24T21:18:38.000Z",
+      "impostorScore" : 0,
+      "phishScore" : 46,
+      "quarantineRule" : "module.sandbox.threat",
+      "subject" : "Please find a totally safe invoice attached.",
+      "ccAddresses" : [ "bruce.wayne@university-of-education.zz" ],
+      "messageID" : "20160624211145.62086.mail@evil.zz",
+      "policyRoutes" : [ "default_inbound", "executives" ],
+      "clusterId" : "pharmtech_hosted",
+      "completelyRewritten" : "true",
+      "headerFrom" : "\"A. Badguy\" <badguy@evil.zz>",
+      "threatsInfoMap" : [ {
+        "threatId" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "actors" : [ {
+          "name" : "dash_actor_05cbc5",
+          "id" : "000090ac-71c4-4060-9154-c590664b6739",
+          "type" : "ACTOR"
+        } ],
+        "threatType" : "attachment",
+        "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+        "threatTime" : "2016-06-24T21:18:38.000Z",
+        "threat" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "classification" : "malware",
+        "threatUrl" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "threatStatus" : "active"
+      }, {
+        "threatID" : "d57d32f7ad46db1c233eb586da7fa39bafba67ec0f8d1a4eae03b3df65e2c60e",
+        "actors" : [ {
+          "name" : "dash_actor_05cbc5",
+          "id" : "000090ac-71c4-4060-9154-c590664b6739",
+          "type" : "ACTOR"
+        } ],
+        "detectionType" : "NONE",
+        "threatType" : "url",
+        "threatTime" : "2024-11-20T12:01:07.000Z",
+        "threat" : "http://rohan.org/willis",
+        "classification" : "malware",
+        "threatUrl" : "https://tap-dashboard-staging.lab.ppops.net/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/email/d57d32f7ad46db1c233eb586da7fa39bafba67ec0f8d1a4eae03b3df65e2c60e",
+        "threatStatus" : "active"
+      } ],
+      "eventTime" : "2025-06-24T19:17:46.000Z",
+      "fromAddress" : "badguy@evil.zz",
+      "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+      "messageParts" : [ {
+        "disposition" : "inline",
+        "filename" : "text.txt",
+        "sha256" : "85738f8f9a7f1b04b5329c590ebcb9e425925c6d0984089c43a022de4f19c281",
+        "oContentType" : "text/plain",
+        "contentType" : "text/plain",
+        "sandboxStatus" : "unsupported",
+        "md5" : "008c5926ca861023c1d2a36653fd88e2"
+      }, {
+        "disposition" : "attached",
+        "filename" : "Invoice for Pharmtech.pdf",
+        "sha256" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "oContentType" : "application/pdf",
+        "contentType" : "application/pdf",
+        "sandboxStatus" : "threat",
+        "md5" : "5873c7d37608e0d49bcaa6f32b6c731f"
+      } ],
+      "GUID" : "c26dbea0-80d5-463b-b93c-4e8b708219ce",
+      "headerCC" : "\"Bruce Wayne\" <bruce.wayne@university-of-education.zz>",
+      "QID" : "r2FNwRHF004109",
+      "headerTo" : "\"Clark Kent\" <clark.kent@pharmtech.zz>; \"Diana Prince\" <diana.prince@pharmtech.zz>",
+      "quarantineFolder" : "Attachment Defense",
+      "modulesRun" : [ "pdr", "sandbox", "spam", "urldefense" ],
+      "malwareScore" : 100,
+      "sender" : "e99d7ed5580193f36a51f597bc2c0210@evil.zz",
+      "spamScore" : 4,
+      "recipient" : [ "clark.kent@pharmtech.zz", "diana.prince@pharmtech.zz" ],
+      "senderIP" : "10.0.0.0"
+    }
+  service: "message-blocked"
+  result:
+    custom:
+      GUID: "c26dbea0-80d5-463b-b93c-4e8b708219ce"
+      QID: "r2FNwRHF004109"
+      ccAddresses:
+       - "bruce.wayne@university-of-education.zz"
+      clusterId: "pharmtech_hosted"
+      completelyRewritten: "true"
+      eventTime: "2025-06-24T19:17:46.000Z"
+      fromAddress: "badguy@evil.zz"
+      geoSenderIP: {}
+      headerCC: "\"Bruce Wayne\" <bruce.wayne@university-of-education.zz>"
+      headerFrom: "\"A. Badguy\" <badguy@evil.zz>"
+      headerTo: "\"Clark Kent\" <clark.kent@pharmtech.zz>; \"Diana Prince\" <diana.prince@pharmtech.zz>"
+      http:
+        url:
+         - "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+         - "https://tap-dashboard-staging.lab.ppops.net/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/email/d57d32f7ad46"
+      id: "8c8b4895-a277-449f-r797-547e3c89b25a"
+      impostorScore: 0
+      malwareScore: 100
+      messageID: "20160624211145.62086.mail@evil.zz"
+      messageParts:
+       -
+        disposition: "inline"
+        filename: "text.txt"
+        sha256: "85738f8f9a7f1b04b5329c590ebcb9e425925c6d0984089c43a022de4f19c281"
+        oContentType: "text/plain"
+        contentType: "text/plain"
+        sandboxStatus: "unsupported"
+        md5: "008c5926ca861023c1d2a36653fd88e2"
+       -
+        disposition: "attached"
+        filename: "Invoice for Pharmtech.pdf"
+        sha256: "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        oContentType: "application/pdf"
+        contentType: "application/pdf"
+        sandboxStatus: "threat"
+        md5: "5873c7d37608e0d49bcaa6f32b6c731f"
+      messageTime: "2016-06-24T21:18:38.000Z"
+      modulesRun:
+       - "pdr"
+       - "sandbox"
+       - "spam"
+       - "urldefense"
+      phishScore: 46
+      policyRoutes:
+       - "default_inbound"
+       - "executives"
+      quarantineFolder: "Attachment Defense"
+      quarantineRule: "module.sandbox.threat"
+      recipient:
+       - "clark.kent@pharmtech.zz"
+       - "diana.prince@pharmtech.zz"
+      sender: "e99d7ed5580193f36a51f597bc2c0210@evil.zz"
+      senderDomain: "evil.zz"
+      senderIP: "10.0.0.0"
+      spamScore: 4
+      status: "warning"
+      subject: "Please find a totally safe invoice attached."
+      threatUrl: "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca,https://tap-dashboard-staging.lab.ppops.net/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/email/d57d32f7ad46"
+      threatsInfoMap:
+       -
+        threatId: "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        actors:
+         -
+          name: "dash_actor_05cbc5"
+          id: "000090ac-71c4-4060-9154-c590664b6739"
+          type: "ACTOR"
+        threatType: "attachment"
+        campaignId: "46e01b8a-c899-404d-bcd9-189bb393d1a7"
+        threatTime: "2016-06-24T21:18:38.000Z"
+        threat: "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        classification: "malware"
+        threatUrl: "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        threatStatus: "active"
+       -
+        threatID: "d57d32f7ad46db1c233eb586da7fa39bafba67ec0f8d1a4eae03b3df65e2c60e"
+        actors:
+         -
+          name: "dash_actor_05cbc5"
+          id: "000090ac-71c4-4060-9154-c590664b6739"
+          type: "ACTOR"
+        detectionType: "NONE"
+        threatType: "url"
+        threatTime: "2024-11-20T12:01:07.000Z"
+        threat: "http://rohan.org/willis"
+        classification: "malware"
+        threatUrl: "https://tap-dashboard-staging.lab.ppops.net/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/email/d57d32f7ad46db1c233eb586da7fa39bafba67ec0f8d1a4eae03b3df65e2c60e"
+        threatStatus: "active"
+    message: |-
+      {
+        "messageTime" : "2016-06-24T21:18:38.000Z",
+        "impostorScore" : 0,
+        "phishScore" : 46,
+        "quarantineRule" : "module.sandbox.threat",
+        "subject" : "Please find a totally safe invoice attached.",
+        "ccAddresses" : [ "bruce.wayne@university-of-education.zz" ],
+        "messageID" : "20160624211145.62086.mail@evil.zz",
+        "policyRoutes" : [ "default_inbound", "executives" ],
+        "clusterId" : "pharmtech_hosted",
+        "completelyRewritten" : "true",
+        "headerFrom" : "\"A. Badguy\" <badguy@evil.zz>",
+        "threatsInfoMap" : [ {
+          "threatId" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "actors" : [ {
+            "name" : "dash_actor_05cbc5",
+            "id" : "000090ac-71c4-4060-9154-c590664b6739",
+            "type" : "ACTOR"
+          } ],
+          "threatType" : "attachment",
+          "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+          "threatTime" : "2016-06-24T21:18:38.000Z",
+          "threat" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "classification" : "malware",
+          "threatUrl" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "threatStatus" : "active"
+        }, {
+          "threatID" : "d57d32f7ad46db1c233eb586da7fa39bafba67ec0f8d1a4eae03b3df65e2c60e",
+          "actors" : [ {
+            "name" : "dash_actor_05cbc5",
+            "id" : "000090ac-71c4-4060-9154-c590664b6739",
+            "type" : "ACTOR"
+          } ],
+          "detectionType" : "NONE",
+          "threatType" : "url",
+          "threatTime" : "2024-11-20T12:01:07.000Z",
+          "threat" : "http://rohan.org/willis",
+          "classification" : "malware",
+          "threatUrl" : "https://tap-dashboard-staging.lab.ppops.net/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/email/d57d32f7ad46db1c233eb586da7fa39bafba67ec0f8d1a4eae03b3df65e2c60e",
+          "threatStatus" : "active"
+        } ],
+        "eventTime" : "2025-06-24T19:17:46.000Z",
+        "fromAddress" : "badguy@evil.zz",
+        "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+        "messageParts" : [ {
+          "disposition" : "inline",
+          "filename" : "text.txt",
+          "sha256" : "85738f8f9a7f1b04b5329c590ebcb9e425925c6d0984089c43a022de4f19c281",
+          "oContentType" : "text/plain",
+          "contentType" : "text/plain",
+          "sandboxStatus" : "unsupported",
+          "md5" : "008c5926ca861023c1d2a36653fd88e2"
+        }, {
+          "disposition" : "attached",
+          "filename" : "Invoice for Pharmtech.pdf",
+          "sha256" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "oContentType" : "application/pdf",
+          "contentType" : "application/pdf",
+          "sandboxStatus" : "threat",
+          "md5" : "5873c7d37608e0d49bcaa6f32b6c731f"
+        } ],
+        "GUID" : "c26dbea0-80d5-463b-b93c-4e8b708219ce",
+        "headerCC" : "\"Bruce Wayne\" <bruce.wayne@university-of-education.zz>",
+        "QID" : "r2FNwRHF004109",
+        "headerTo" : "\"Clark Kent\" <clark.kent@pharmtech.zz>; \"Diana Prince\" <diana.prince@pharmtech.zz>",
+        "quarantineFolder" : "Attachment Defense",
+        "modulesRun" : [ "pdr", "sandbox", "spam", "urldefense" ],
+        "malwareScore" : 100,
+        "sender" : "e99d7ed5580193f36a51f597bc2c0210@evil.zz",
+        "spamScore" : 4,
+        "recipient" : [ "clark.kent@pharmtech.zz", "diana.prince@pharmtech.zz" ],
+        "senderIP" : "10.0.0.0"
+      }
+    service: "message-blocked"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750792666000
+ -
+  sample: |-
+    {
+      "messageTime" : "2016-06-24T21:18:38.000Z",
+      "impostorScore" : 0,
+      "phishScore" : 46,
+      "quarantineRule" : "module.sandbox.threat",
+      "subject" : "Please find a totally safe invoice attached.",
+      "ccAddresses" : [ "bruce.wayne@university-of-education.zz" ],
+      "messageID" : "20160624211145.62086.mail@evil.zz",
+      "policyRoutes" : [ "default_inbound", "executives" ],
+      "clusterId" : "pharmtech_hosted",
+      "completelyRewritten" : "true",
+      "headerFrom" : "\"A. Badguy\" <badguy@evil.zz>",
+      "threatsInfoMap" : [ {
+        "threatId" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "actors" : [ {
+          "name" : "dash_actor_05cbc5",
+          "id" : "000090ac-71c4-4060-9154-c590664b6739",
+          "type" : "ACTOR"
+        } ],
+        "threatType" : "attachment",
+        "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+        "threatTime" : "2016-06-24T21:18:38.000Z",
+        "threat" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "classification" : "malware",
+        "threatUrl" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "threatStatus" : "falsepositive"
+      } ],
+      "eventTime" : "2025-06-24T19:17:46.000Z",
+      "fromAddress" : "badguy@evil.zz",
+      "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+      "messageParts" : [ {
+        "disposition" : "inline",
+        "filename" : "text.txt",
+        "sha256" : "85738f8f9a7f1b04b5329c590ebcb9e425925c6d0984089c43a022de4f19c281",
+        "oContentType" : "text/plain",
+        "contentType" : "text/plain",
+        "sandboxStatus" : "unsupported",
+        "md5" : "008c5926ca861023c1d2a36653fd88e2"
+      }, {
+        "disposition" : "attached",
+        "filename" : "Invoice for Pharmtech.pdf",
+        "sha256" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+        "oContentType" : "application/pdf",
+        "contentType" : "application/pdf",
+        "sandboxStatus" : "threat",
+        "md5" : "5873c7d37608e0d49bcaa6f32b6c731f"
+      } ],
+      "GUID" : "c26dbea0-80d5-463b-b93c-4e8b708219ce",
+      "headerCC" : "\"Bruce Wayne\" <bruce.wayne@university-of-education.zz>",
+      "QID" : "r2FNwRHF004109",
+      "headerTo" : "\"Clark Kent\" <clark.kent@pharmtech.zz>; \"Diana Prince\" <diana.prince@pharmtech.zz>",
+      "quarantineFolder" : "Attachment Defense",
+      "modulesRun" : [ "pdr", "sandbox", "spam", "urldefense" ],
+      "malwareScore" : 100,
+      "sender" : "e99d7ed5580193f36a51f597bc2c0210@evil.zz",
+      "spamScore" : 4,
+      "recipient" : [ "clark.kent@pharmtech.zz", "diana.prince@pharmtech.zz" ],
+      "senderIP" : "10.0.0.0"
+    }
+  service: "message-delivered"
+  result:
+    custom:
+      GUID: "c26dbea0-80d5-463b-b93c-4e8b708219ce"
+      QID: "r2FNwRHF004109"
+      ccAddresses:
+       - "bruce.wayne@university-of-education.zz"
+      clusterId: "pharmtech_hosted"
+      completelyRewritten: "true"
+      eventTime: "2025-06-24T19:17:46.000Z"
+      fromAddress: "badguy@evil.zz"
+      geoSenderIP: {}
+      headerCC: "\"Bruce Wayne\" <bruce.wayne@university-of-education.zz>"
+      headerFrom: "\"A. Badguy\" <badguy@evil.zz>"
+      headerTo: "\"Clark Kent\" <clark.kent@pharmtech.zz>; \"Diana Prince\" <diana.prince@pharmtech.zz>"
+      http:
+        url:
+         - "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+      id: "8c8b4895-a277-449f-r797-547e3c89b25a"
+      impostorScore: 0
+      malwareScore: 100
+      messageID: "20160624211145.62086.mail@evil.zz"
+      messageParts:
+       -
+        disposition: "inline"
+        filename: "text.txt"
+        sha256: "85738f8f9a7f1b04b5329c590ebcb9e425925c6d0984089c43a022de4f19c281"
+        oContentType: "text/plain"
+        contentType: "text/plain"
+        sandboxStatus: "unsupported"
+        md5: "008c5926ca861023c1d2a36653fd88e2"
+       -
+        disposition: "attached"
+        filename: "Invoice for Pharmtech.pdf"
+        sha256: "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        oContentType: "application/pdf"
+        contentType: "application/pdf"
+        sandboxStatus: "threat"
+        md5: "5873c7d37608e0d49bcaa6f32b6c731f"
+      messageTime: "2016-06-24T21:18:38.000Z"
+      modulesRun:
+       - "pdr"
+       - "sandbox"
+       - "spam"
+       - "urldefense"
+      phishScore: 46
+      policyRoutes:
+       - "default_inbound"
+       - "executives"
+      quarantineFolder: "Attachment Defense"
+      quarantineRule: "module.sandbox.threat"
+      recipient:
+       - "clark.kent@pharmtech.zz"
+       - "diana.prince@pharmtech.zz"
+      sender: "e99d7ed5580193f36a51f597bc2c0210@evil.zz"
+      senderDomain: "evil.zz"
+      senderIP: "10.0.0.0"
+      spamScore: 4
+      status: "info"
+      subject: "Please find a totally safe invoice attached."
+      threatUrl: "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+      threatsInfoMap:
+       -
+        threatId: "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        actors:
+         -
+          name: "dash_actor_05cbc5"
+          id: "000090ac-71c4-4060-9154-c590664b6739"
+          type: "ACTOR"
+        threatType: "attachment"
+        campaignId: "46e01b8a-c899-404d-bcd9-189bb393d1a7"
+        threatTime: "2016-06-24T21:18:38.000Z"
+        threat: "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        classification: "malware"
+        threatUrl: "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca"
+        threatStatus: "falsepositive"
+    message: |-
+      {
+        "messageTime" : "2016-06-24T21:18:38.000Z",
+        "impostorScore" : 0,
+        "phishScore" : 46,
+        "quarantineRule" : "module.sandbox.threat",
+        "subject" : "Please find a totally safe invoice attached.",
+        "ccAddresses" : [ "bruce.wayne@university-of-education.zz" ],
+        "messageID" : "20160624211145.62086.mail@evil.zz",
+        "policyRoutes" : [ "default_inbound", "executives" ],
+        "clusterId" : "pharmtech_hosted",
+        "completelyRewritten" : "true",
+        "headerFrom" : "\"A. Badguy\" <badguy@evil.zz>",
+        "threatsInfoMap" : [ {
+          "threatId" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "actors" : [ {
+            "name" : "dash_actor_05cbc5",
+            "id" : "000090ac-71c4-4060-9154-c590664b6739",
+            "type" : "ACTOR"
+          } ],
+          "threatType" : "attachment",
+          "campaignId" : "46e01b8a-c899-404d-bcd9-189bb393d1a7",
+          "threatTime" : "2016-06-24T21:18:38.000Z",
+          "threat" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "classification" : "malware",
+          "threatUrl" : "https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "threatStatus" : "falsepositive"
+        } ],
+        "eventTime" : "2025-06-24T19:17:46.000Z",
+        "fromAddress" : "badguy@evil.zz",
+        "id" : "8c8b4895-a277-449f-r797-547e3c89b25a",
+        "messageParts" : [ {
+          "disposition" : "inline",
+          "filename" : "text.txt",
+          "sha256" : "85738f8f9a7f1b04b5329c590ebcb9e425925c6d0984089c43a022de4f19c281",
+          "oContentType" : "text/plain",
+          "contentType" : "text/plain",
+          "sandboxStatus" : "unsupported",
+          "md5" : "008c5926ca861023c1d2a36653fd88e2"
+        }, {
+          "disposition" : "attached",
+          "filename" : "Invoice for Pharmtech.pdf",
+          "sha256" : "2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca",
+          "oContentType" : "application/pdf",
+          "contentType" : "application/pdf",
+          "sandboxStatus" : "threat",
+          "md5" : "5873c7d37608e0d49bcaa6f32b6c731f"
+        } ],
+        "GUID" : "c26dbea0-80d5-463b-b93c-4e8b708219ce",
+        "headerCC" : "\"Bruce Wayne\" <bruce.wayne@university-of-education.zz>",
+        "QID" : "r2FNwRHF004109",
+        "headerTo" : "\"Clark Kent\" <clark.kent@pharmtech.zz>; \"Diana Prince\" <diana.prince@pharmtech.zz>",
+        "quarantineFolder" : "Attachment Defense",
+        "modulesRun" : [ "pdr", "sandbox", "spam", "urldefense" ],
+        "malwareScore" : 100,
+        "sender" : "e99d7ed5580193f36a51f597bc2c0210@evil.zz",
+        "spamScore" : 4,
+        "recipient" : [ "clark.kent@pharmtech.zz", "diana.prince@pharmtech.zz" ],
+        "senderIP" : "10.0.0.0"
+      }
+    service: "message-delivered"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750792666000
