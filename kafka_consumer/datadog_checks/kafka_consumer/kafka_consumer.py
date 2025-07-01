@@ -109,7 +109,6 @@ class KafkaCheck(AgentCheck):
         self.log.debug('%s futures to be waited on', len(offsets))
 
         for consumer_group, topic_partitions in offsets:
-
             self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
 
             for topic, partition, offset in topic_partitions:

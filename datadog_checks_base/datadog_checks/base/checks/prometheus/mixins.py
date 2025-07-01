@@ -561,7 +561,7 @@ class PrometheusScraperMixin(object):
             headers['Accept-Encoding'] = 'gzip'
         if pFormat == PrometheusFormat.PROTOBUF:
             headers['accept'] = (
-                'application/vnd.google.protobuf; ' 'proto=io.prometheus.client.MetricFamily; ' 'encoding=delimited'
+                'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
             )
         handler = self.get_http_handler(endpoint, instance)
         if (
@@ -569,7 +569,7 @@ class PrometheusScraperMixin(object):
             and not handler.ignore_tls_warning
             and not is_affirmative(handler.options.get('ssl_verify', True))
         ):
-            self.log.debug(u'An unverified HTTPS request is being made to %s', endpoint)
+            self.log.debug('An unverified HTTPS request is being made to %s', endpoint)
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)

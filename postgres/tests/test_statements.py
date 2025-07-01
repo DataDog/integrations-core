@@ -787,7 +787,7 @@ def test_failed_explain_handling(
             "bob",
             "bob",
             "datadog_test",
-            u"SELECT city as city0, city as city1, city as city2, city as city3, "
+            "SELECT city as city0, city as city1, city as city2, city as city3, "
             "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
             "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
             "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
@@ -801,7 +801,7 @@ def test_failed_explain_handling(
             "FROM persons WHERE city = %s",
             # Use some multi-byte characters (the euro symbol) so we can validate that the code is correctly
             # looking at the length in bytes when testing for truncated statements
-            u"€€€€€€€€€€€€€€€€€€€€€€€€€€",
+            "€€€€€€€€€€€€€€€€€€€€€€€€€€",
             "error:explain-query_truncated-track_activity_query_size=1024",
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
@@ -1309,7 +1309,6 @@ def test_activity_snapshot_collection(
 
 
 def test_activity_raw_statement_collection(aggregator, integration_check, dbm_instance, datadog_agent):
-
     if POSTGRES_VERSION.split('.')[0] == "9":
         # cannot catch any queries from other users
         # only can see own queries
@@ -1673,9 +1672,9 @@ def test_pg_settings_caching(integration_check, dbm_instance):
     check._connect()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    assert (
-        "test_key" in check.pg_settings
-    ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
+    assert "test_key" in check.pg_settings, (
+        "key should not have been blown away. If it was then pg_settings was not cached correctly"
+    )
 
 
 def _check_until_time(check, dbm_instance, sleep_time, check_interval):
