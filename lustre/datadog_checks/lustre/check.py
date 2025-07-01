@@ -19,30 +19,6 @@ IGNORED_STATS = {
     'elapsed_time',
 }
 
-@dataclass
-class LustreParam:
-    regex: str
-    node_types: tuple[str, ...]
-    wildcards: tuple[str, ...] = ()
-    prefix: str = ''
-
-DEFAULT_PARAMS = [
-    LustreParam(regex='llite.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='filesystem'),
-]
-
-EXTRA_PARAMS = [
-    LustreParam(regex='mds.MDS.mdt.stats', node_types=('mds',), prefix='mds.mdt'),
-    LustreParam(regex='mdt.*.exports.*.stats', node_types=('mds',), wildcards=('device_name','nid'), prefix='mds.mdt.exports'),
-    LustreParam(regex='mdc.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='mdc'),
-    LustreParam(regex='ldlm.services.*.stats', node_types=('client', 'mds', 'oss'), wildcards=('ldlm_service',), prefix='ldlm.services'),
-    LustreParam(regex='ldlm.namespaces.*.pool.stats', node_types=('client', 'mds', 'oss'), wildcards=('device_uuid',), prefix='ldlm.namespaces.pool'),
-    LustreParam(regex='mgs.MGS.exports.*.stats', node_types=('mds',), wildcards=('device_name', 'nid'), prefix='mgs.exports'),
-    LustreParam(regex='ost.OSS.oss.stats', node_types=('oss',), prefix='ost.oss'),
-    LustreParam(regex='osc.*.stats', node_types=('client',), wildcards=('device_uuid',), prefix='osc'),
-    LustreParam(regex='obdfilter.*.exports.*.stats', node_types=('oss',), wildcards=('device_name', 'nid'), prefix='obdfilter.exports'),
-    LustreParam(regex='obdfilter.*.stats', node_types=('oss',), wildcards=('device_name',), prefix='obdfilter'),
-]
-
 class LustreCheck(AgentCheck):
 
     __NAMESPACE__ = 'lustre'
