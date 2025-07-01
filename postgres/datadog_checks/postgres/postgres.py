@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_res
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
-from datadog_checks.postgres.cursor import CommenterCursor
+from datadog_checks.postgres.cursor import CommenterCursor, DBMConnection, SQLASCIIBytesLoader, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
@@ -921,6 +921,23 @@ class PostgreSql(AgentCheck):
             # Set the statement_timeout for the session
             with conn.cursor() as cursor:
                 cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
+        if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
+            bytes_loader = SQLASCIIBytesLoader
+            text_loader = SQLASCIITextLoader
+            bytes_loader.encodings = self._config.query_encodings
+            text_loader.encodings = self._config.query_encodings
+            conn.adapters.register_loader("text", text_loader)
+            conn.adapters.register_loader("varchar", text_loader)
+            conn.adapters.register_loader("name", text_loader)
+            # conn.adapters.register_loader("bytea", bytes_loader)
+        # connection = DBMConnection(conn)
+        # if connection.is_ascii():
+        #     # Force UTF8 encoding so psycopg doesn't return everything as bytes
+        #     # When we need bytes we force binary mode on a per cursor basis
+        #     # We keep a reference to the original encoding so we know when to switch back
+        #     connection.execute("SET client_encoding TO 'UTF8'")
+        #     # Server cursor is required for binary mode
+        #     connection.cursor_factory = psycopg.ServerCursor
         return conn
 
     def _connect(self):
@@ -963,12 +980,14 @@ class PostgreSql(AgentCheck):
         :return: a psycopg connection
         """
         # reload settings for the main DB only once every time the connection is reestablished
-        return self.db_pool.get_connection(
+        conn = self.db_pool.get_connection(
             self._config.dbname,
             self._config.idle_connection_timeout,
             startup_fn=self._load_pg_settings,
             persistent=True,
         )
+
+        return conn
 
     def _close_db_pool(self):
         self.db_pool.close_all_connections()

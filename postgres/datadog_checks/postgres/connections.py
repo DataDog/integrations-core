@@ -130,6 +130,7 @@ class MultiDatabaseConnectionPool(object):
                 thread=threading.current_thread(),
                 persistent=persistent,
             )
+
             return db
 
     @contextlib.contextmanager

@@ -280,13 +280,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
-                if conn.info.encoding == "SQLASCII":
-                    # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
-                    # so we need to read in the data as bytes and then decode as best we can
-                    # psycopg.extensions.register_type(psycopg.extensions.BYTES, cursor)
-                    cursor.execute(query, params, binary=True)
-                else:
-                    cursor.execute(query, params)
+                # if conn.is_ascii():
+                #     # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
+                #     # so we need to read in the data as bytes and then decode as best we can
+                #     # psycopg.extensions.register_type(psycopg.extensions.BYTES, cursor)
+                #     cursor.execute(query, params, binary=True)
+                # else:
+                cursor.execute(query, params)
                 rows = cursor.fetchall()
 
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
@@ -735,7 +735,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
             # When sending potentially non-ascii data, e.g. UTF8, we need to force
             # the client encoding to UTF-8 to match Python string encoding
-            if conn.info.encoding == 'SQLASCII':
+            if conn.info.encoding == "ascii":
                 self._log.debug(
                     "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
                 )

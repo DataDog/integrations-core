@@ -60,7 +60,8 @@ FROM pg_settings
 """
 
 PG_EXTENSIONS_QUERY = """
-SELECT extname, nspname schemaname FROM pg_extension left join pg_namespace on extnamespace = pg_namespace.oid;
+SELECT extname, nspname schemaname
+FROM pg_extension left join pg_namespace on extnamespace = pg_namespace.oid;
 """
 
 PG_EXTENSION_LOADER_QUERY = {
@@ -773,7 +774,6 @@ class PostgresMetadata(DBMAsyncJob):
                 # Get loaded extensions
                 cursor.execute(PG_EXTENSIONS_QUERY)
                 rows = cursor.fetchall()
-                print(rows)
                 query = PG_SETTINGS_QUERY
                 for row in rows:
                     extension = row['extname']
@@ -805,6 +805,6 @@ class PostgresMetadata(DBMAsyncJob):
                     if cursor.pgresult.status == psycopg.pq.ExecStatus.TUPLES_OK:
                         rows = cursor.fetchall()
                     has_more_results = cursor.nextset()
-                self._log.warning("Loaded %s rows from pg_settings", rows)
+                self._log.debug("Loaded %s rows from pg_settings", rows)
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
                 return rows

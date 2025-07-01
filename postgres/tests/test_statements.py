@@ -2238,6 +2238,9 @@ def test_metrics_encoding(
 
     expected_query = "select $1 as funké"
 
+    print(dbm_samples)
+    print(expected_query)
+
     # Find matching events by checking if the expected query starts with the event statement. Using this
     # instead of a direct equality check covers cases of truncated statements
     matching = [row for e in dbm_samples for row in e['postgres_rows'] if row['query'] == expected_query]

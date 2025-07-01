@@ -204,7 +204,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def _execute_query(self, cursor, query, params=(), binary=False):
         try:
-            self._log.warning("Running query [%s] %s", query, params)
+            self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params=params, binary=binary)
             return cursor.fetchall()
         except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
@@ -236,7 +236,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._execute_query(cursor, query)
                 col_names = [desc[0] for desc in cursor.description] if cursor.description else []
                 self._stat_column_cache = col_names
-                self._log.warning("Fetched columns %s", col_names)
+                self._log.debug("Fetched columns %s", col_names)
                 return col_names
 
     def _check_called_queries(self):
@@ -271,6 +271,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
+        self._log.warning("METRICS")
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
@@ -404,12 +405,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 params = params + tuple(self._config.ignore_databases)
             with self._check._get_main_db() as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
-                    binary=False
-                    if conn.info.encoding == "SQLASCII":
-                        # # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
-                        # # so we need to read in the data as bytes and then decode as best we can
-                        # psycopg.extensions.register_type(psycopg.extensions.BYTES, cursor)
-                        binary=True
                     if len(self._query_calls_cache.cache) > 0:
                         return self._execute_query(
                             cursor,
@@ -420,7 +415,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                                 called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
                             ),
                             params=params,
-                            binary=binary,
                         )
                     else:
                         return self._execute_query(
@@ -431,7 +425,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                                 filters=filters,
                             ),
                             params=params,
-                            binary=binary,
                         )
         except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
