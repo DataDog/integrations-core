@@ -1,7 +1,7 @@
 {
     "slug": "scaffold-new-project-in-gitlab",
     "name": "Scaffold New Project in GitLab",
-    "description": "Scaffolder app can be used for creating new software components from template repositories. It takes inputs from developers and generates a new repository or a PR based on the provided data and the template.",
+    "description": "Scaffolder app is used to create new software components from template repositories. It takes inputs from developers and generates a new repository or a PR based on the provided data and the template.",
     "definition": {
         "components": [
             {
@@ -1059,7 +1059,7 @@
                                                                 "events": [],
                                                                 "name": "information_description",
                                                                 "properties": {
-                                                                    "content": "*This is a Scaffolding template than can be used to instantiate new repositories or create PRs from templates*\n\n>It comes with a pre-built integration that gets triggered whenever a user clicks **“Generate”**. Click on **\"Connection\"** to configure your credentials with your source code provider.\n\n>To customize the form, click **“Save”** and edit it. You can add your own input types to match your template repository.\n\n>Set your template repository (ie. org_name/repo_name) and path in the **\"Workflow Inputs\"**. Set your generated project repository name in the **\"Workflow Inputs\"** based on the inputs to the App.\n\n> If you set create_repo to true, the workflow will create the new project repository and upload the template files. Otherwise, it will upload the template files to a branch and create a Pull Request for review.\n\n>After updating your app with the desired fields, make sure they are passed to **\"Template Variables\"** in the Workflow Inputs as key value pairs.\n\n>If you need to customize the Scaffolding Workflow, navigate to the **\"Actions\"** section to locate the workflow and customize it to suit your needs.",
+                                                                    "content": "*This is a Scaffolding template than can be used to instantiate new repositories or create PRs from templates*\n\n>It comes with a pre-built integration that gets triggered whenever a user clicks **"Generate"**. Click **\"Connection\"** to configure your credentials with your source code provider.\n\n>To customize the form, click **"Save"** and edit it. You can add your own input types to match your template repository.\n\n>Set your template repository (org_name/repo_name) and path in the **\"Workflow Inputs\"**. Set your generated project repository name in the **\"Workflow Inputs\"** based on the inputs to the App.\n\n> If you set create_repo to true, the workflow will create the new project repository and upload the template files. Otherwise, it will upload the template files to a branch and create a Pull Request for review.\n\n>After updating your app with the desired fields, make sure they are passed to **\"Template Variables\"** in the Workflow Inputs as key value pairs.\n\n>If you need to customize the Scaffolding Workflow, navigate to the **\"Actions\"** section to locate the workflow and customize it to suit your needs.",
                                                                     "contentType": "markdown",
                                                                     "isVisible": true,
                                                                     "textAlign": "left",
@@ -1205,7 +1205,7 @@
             }
         ],
         "name": "Scaffold New Project in GitLab",
-        "description": "Scaffolder app can be used for creating new software components from template repositories. It takes inputs from developers and generates a new repository or a PR based on the provided data and the template.",
+        "description": "Scaffolder app is used to create new software components from template repositories. It takes inputs from developers and generates a new repository or a PR based on the provided data and the template.",
         "rootInstanceName": "grid0"
     },
     "mocked_outputs": {
