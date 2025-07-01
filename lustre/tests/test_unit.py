@@ -143,8 +143,7 @@ def test_submit_changelogs(aggregator, instance):
         first_call = mock_send_log.call_args_list[0]
         expected_data = {
             'operation_type': '07RMDIR',
-            'timestamp': '12:47:32.913242547',
-            'datestamp': '2025.06.02',
+            'timestamp': 1748861252.0,
             'flags': '0x1',
             'message': 't=[0x200000bd1:0x3:0x0] bacillus'
         }
@@ -160,7 +159,7 @@ def test_get_changelog(instance):
         check = LustreCheck('lustre', {}, [instance])
         
         # Mock get_log_cursor to return a starting index
-        with mock.patch.object(check, 'get_log_cursor', return_value='100'):
+        with mock.patch.object(check, 'get_log_cursor', return_value={'index':'100'}):
             result = check.get_changelog('lustre-MDT0000')
             
             # Verify the command was called with correct arguments

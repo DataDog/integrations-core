@@ -337,7 +337,7 @@ class LustreCheck(AgentCheck):
             param_parts = param_name.split('.')
             wildcard_number = 0
             if not len(regex_parts) == len(param_parts):
-                self.log.debug(f'Parameter name {param_name} does not match regex {regex}')
+                self.log.debug(f'Parameter name {param_name} does not match regex {param_regex}')
                 return tags
             for part_number, part in enumerate(regex_parts):
                 if part == '*':
@@ -403,7 +403,6 @@ class LustreCheck(AgentCheck):
         except Exception as e:
             self.log.error(f'Failed to submit device health metrics: {e}')
     
-    # Only on client nodes
     def submit_changelogs(self):
         '''
         Get changelogs from the command line.
