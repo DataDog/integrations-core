@@ -22,7 +22,37 @@ This integration collects the following metrics:
 - **Threat**: Provides visibility into detected and prevented threats across users, assets, IPs, and geolocations, enabling threat trend analysis and risk monitoring.
 - **Zero Trust**: Provides visibility into users, devices, resources, and traffic, enabling continuous monitoring, trust evaluation, and policy enforcement within the Zero Trust framework.
 
+**Note:** All metrics except for `Gateway Performance` are collected once per day, only after the complete daily iboss report is available.
+
 Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to alert you to any potential issues.
+
+## Dashboards
+
+### Logs
+
+Here is the list of dashboards populated using logs:
+
+- iboss - Overview
+- iboss - Web & DLP Events
+- iboss - Audit events
+- iboss - Real-Time Digital Experience Analytics
+- iboss - Real-Time Web Analytics
+- iboss - Real-Time Bandwidth Analytics
+- iboss - Real-Time Zero Trust Analytics
+- iboss - Real-Time Threat Analytics
+- iboss - Real-Time CASB Analytics
+
+### Metrics
+
+Here is the list of dashboards populated using metrics:
+
+- iboss - Gateway Performance
+- iboss - Digital Experience Report
+- iboss - Web Analytics Report
+- iboss - Bandwidth Report
+- iboss - Zero Trust Report
+- iboss - Threat Report
+- iboss - CASB Report
 
 ## Setup
 
