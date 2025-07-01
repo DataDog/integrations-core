@@ -32,7 +32,7 @@ def mock_requests_get(url, *args, **kwargs):
 
 @pytest.fixture
 def mock_data():
-    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+    with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
         yield
 
 
