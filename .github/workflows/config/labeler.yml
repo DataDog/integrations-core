@@ -87,6 +87,8 @@ integration/azure_iot_edge:
 - azure_iot_edge/**/*
 integration/bitdefender:
 - bitdefender/**/*
+integration/bitwarden:
+- bitwarden/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
@@ -101,6 +103,8 @@ integration/cacti:
 - cacti/**/*
 integration/calico:
 - calico/**/*
+integration/carbon_black_cloud:
+- carbon_black_cloud/**/*
 integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
@@ -395,6 +399,8 @@ integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/litellm:
 - litellm/**/*
+integration/mac_audit_logs:
+- mac_audit_logs/**/*
 integration/mailchimp:
 - mailchimp/**/*
 integration/mapr:
@@ -583,6 +589,8 @@ integration/snmp_netapp:
 - snmp_netapp/**/*
 integration/snowflake:
 - snowflake/**/*
+integration/solarwinds:
+- solarwinds/**/*
 integration/solr:
 - solr/**/*
 integration/sonarqube:
@@ -715,6 +723,8 @@ integration/wlan:
 - wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
+integration/workato:
+- workato/**/*
 integration/yarn:
 - yarn/**/*
 integration/zeek:

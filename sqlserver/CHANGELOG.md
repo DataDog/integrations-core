@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 22.6.0 / 2025-05-19
+## 22.7.0 / 2025-06-12
+
+***Added***:
+
+* Add $full_server_name support as template variable to sqlserver template config key ([#20342](https://github.com/DataDog/integrations-core/pull/20342))
+* Add size and row count collection for tables in SQLServer ([#20367](https://github.com/DataDog/integrations-core/pull/20367))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+* Add `sys.dm_exec_sessions.client_interface_name` to activity samples payload. ([#20463](https://github.com/DataDog/integrations-core/pull/20463))
+
+***Fixed***:
+
+* Update SQL server to TagManager and fix race conditions in tag values dependent on server queries ([#20424](https://github.com/DataDog/integrations-core/pull/20424))
+
+## 22.6.0 / 2025-05-19 / Agent 7.67.0
 
 ***Added***:
 
