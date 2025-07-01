@@ -2,22 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-RESOURCE_METRICS = [
-    'netin',
-    'maxmem',
-    'mem',
-    'maxdisk',
-    'maxcpu',
-    'disk',
-    'netout',
-    'uptime',
-    'diskread',
-    'cpu',
-    'diskwrite',
-]
 RESOURCE_TYPE_MAP = {
     'qemu': 'vm',
     'lxc': 'container',
+    'openvz': 'container',
     'storage': 'storage',
     'node': 'node',
     'pool': 'pool',
@@ -28,11 +16,11 @@ VM_RESOURCE = 'vm'
 
 OK_STATUS = ['ok', 'available', 'running', 'online']
 
-METRIC_NAME = {
-    'netout': 'net.out',
+PERF_METRIC_NAME = {
+    'net_out': 'net.out',
     'uptime': 'uptime',
     'net_in': 'net.in',
-    'cpu_aavg1': 'cpu.avg1',
+    'cpu_avg1': 'cpu.avg1',
     'cpu_avg5': 'cpu.avg5',
     'cpu_avg15': 'cpu.avg15',
     'cpu_max': 'cpu.max',
@@ -44,4 +32,17 @@ METRIC_NAME = {
     'swap_used': 'swap.used',
     'disk_total': 'disk.total',
     'disk_used': 'disk.used',
+    'disk_read': 'disk.read',
+    'disk_write': 'disk.write',
 }
+
+RESOURCE_METRIC_NAME = {
+    'cpu': 'cpu',
+    'maxmem': 'mem.max',
+    'mem': 'mem',
+    'maxdisk': 'disk.max',
+    'maxcpu': 'cpu.max',
+    'disk': 'disk',
+}
+
+RESOURCE_COUNT_METRICS = ['uptime']

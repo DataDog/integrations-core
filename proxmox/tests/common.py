@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 INSTANCE = {'proxmox_server': 'http://localhost:8006/api2/json', 'tags': ['testing']}
 
 BASE_METRICS = [
@@ -19,37 +18,63 @@ BASE_METRICS = [
 ]
 
 RESOURCE_METRICS = [
-    'proxmox.container.cpu',
-    'proxmox.container.disk',
-    'proxmox.container.diskread',
-    'proxmox.container.diskwrite',
-    'proxmox.container.maxcpu',
-    'proxmox.container.maxdisk',
-    'proxmox.container.maxmem',
-    'proxmox.container.mem',
-    'proxmox.container.netin',
-    'proxmox.container.netout',
-    'proxmox.container.uptime',
-    'proxmox.node.cpu',
-    'proxmox.node.disk',
-    'proxmox.node.maxcpu',
-    'proxmox.node.maxdisk',
-    'proxmox.node.maxmem',
-    'proxmox.node.mem',
-    'proxmox.node.uptime',
-    'proxmox.storage.disk',
-    'proxmox.storage.maxdisk',
-    'proxmox.vm.cpu',
-    'proxmox.vm.disk',
-    'proxmox.vm.diskread',
-    'proxmox.vm.diskwrite',
-    'proxmox.vm.maxcpu',
-    'proxmox.vm.maxdisk',
-    'proxmox.vm.maxmem',
-    'proxmox.vm.mem',
-    'proxmox.vm.netin',
-    'proxmox.vm.netout',
-    'proxmox.vm.uptime',
+    'proxmox.cpu',
+    'proxmox.disk',
+    'proxmox.cpu.max',
+    'proxmox.disk.max',
+    'proxmox.mem.max',
+    'proxmox.mem',
+    'proxmox.uptime',
 ]
 
-ALL_METRICS = BASE_METRICS + RESOURCE_METRICS
+PERF_METRICS = [
+    'proxmox.cpu.avg1',
+    'proxmox.cpu.avg15',
+    'proxmox.cpu.avg5',
+    'proxmox.cpu.current',
+    'proxmox.cpu.iowait',
+    'proxmox.cpu.max',
+    'proxmox.disk.total',
+    'proxmox.disk.used',
+    'proxmox.disk.read',
+    'proxmox.disk.write',
+    'proxmox.mem.total',
+    'proxmox.mem.used',
+    'proxmox.net.in',
+    'proxmox.net.out',
+    'proxmox.swap.total',
+    'proxmox.swap.used',
+]
+
+NODE_RESOURCE_METRICS = set(RESOURCE_METRICS) - {
+    'proxmox.diskread',
+    'proxmox.diskwrite',
+    'proxmox.netout',
+    'proxmox.netin',
+}
+
+STORAGE_RESOURCE_METRICS = {'proxmox.disk.max', 'proxmox.disk'}
+
+VM_PERF_METRICS = set(PERF_METRICS) - {
+    'proxmox.cpu.avg1',
+    'proxmox.cpu.avg15',
+    'proxmox.cpu.avg5',
+    'proxmox.cpu.iowait',
+    'proxmox.disk.used',
+    'proxmox.swap.total',
+    'proxmox.swap.used',
+}
+NODE_PERF_METRICS = set(PERF_METRICS) - {'proxmox.disk.read', 'proxmox.disk.write'}
+
+CONTAINER_PERF_METRICS = set(PERF_METRICS) - {
+    'proxmox.cpu.avg1',
+    'proxmox.cpu.avg5',
+    'proxmox.cpu.avg15',
+    'proxmox.swap.total',
+    'proxmox.swap.used',
+    'proxmox.cpu.iowait',
+}
+
+STORAGE_PERF_METRICS = {'proxmox.disk.total', 'proxmox.disk.used'}
+
+ALL_METRICS = BASE_METRICS + RESOURCE_METRICS + PERF_METRICS

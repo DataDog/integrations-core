@@ -6,8 +6,15 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDeco
 from datadog_checks.base import AgentCheck
 from datadog_checks.proxmox.config_models import ConfigMixin
 
-from .constants import METRIC_NAME, NODE_RESOURCE, OK_STATUS, RESOURCE_METRICS, RESOURCE_TYPE_MAP, VM_RESOURCE
-
+from .constants import (
+    NODE_RESOURCE,
+    OK_STATUS,
+    PERF_METRIC_NAME,
+    RESOURCE_COUNT_METRICS,
+    RESOURCE_METRIC_NAME,
+    RESOURCE_TYPE_MAP,
+    VM_RESOURCE,
+)
 
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
@@ -22,16 +29,16 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         if self.config.tags:
             self.base_tags.extend(self.config.tags)
 
-    def _submit_resource_metrics(self, resource, resource_type, tags, hostname):
-        for metric_name in RESOURCE_METRICS:
+    def _submit_resource_metrics(self, resource, tags, hostname):
+        for metric_name, metric_name_remapped in RESOURCE_METRIC_NAME.items():
             metric_value = resource.get(metric_name)
+            metric_method = self.count if metric_name in RESOURCE_COUNT_METRICS else self.gauge
             if metric_value is not None:
-                self.gauge(f'{resource_type}.{metric_name}', metric_value, tags=tags, hostname=hostname)
+                metric_method(f'{metric_name_remapped}', metric_value, tags=tags, hostname=hostname)
 
     def check(self, _):
         try:
             response = self.http.get(f"{self.config.proxmox_server}/version")
-            self.log.error(self.http.options['headers'])
             response.raise_for_status()
 
             response_json = response.json()
@@ -39,7 +46,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.set_metadata('version', version)
             self.gauge("api.up", 1, tags=self.base_tags)
 
-        except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
             self.log.error(
                 "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
             )
@@ -63,8 +70,40 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 # some resource types don't have a name attribute
                 resource_name = resource.get(resource.get('type', ''))
 
+            resource_tags = {
+                f'proxmox_type:{resource_type_remapped}',
+                f'proxmox_name:{resource_name}',
+                f'proxmox_id:{resource_id}',
+            }
+
+            proxmox_tags = resource.get('tags')
+            if proxmox_tags:
+                proxmox_tags = proxmox_tags.split(';')
+                resource_tags.update(proxmox_tags)
+
+            if node and resource_type_remapped != 'node':
+                resource_tags.add(f'proxmox_node:{node}')
+
+            pool = resource.get('pool')
+            if pool and resource_type_remapped != 'pool':
+                resource_tags.add(f'proxmox_pool:{pool}')
+
+            self.gauge(
+                f'{resource_type_remapped}.count',
+                1,
+                tags=self.base_tags + list(resource_tags),
+            )
+
+            status = resource.get("status")
+
+            status = 1 if status in OK_STATUS else 0
+
             hostname = None
-            if resource_type_remapped == VM_RESOURCE:
+
+            if (resource_type_remapped == VM_RESOURCE or resource_type_remapped == NODE_RESOURCE) and status == 0:
+                # don't collect information about powered off VMs and nodes
+                continue
+            elif resource_type_remapped == VM_RESOURCE and status == 1:
                 vmid = resource.get('vmid')
                 try:
                     url = f"{self.config.proxmox_server}/nodes/{node}/qemu/{vmid}/agent/get-host-name"
@@ -83,73 +122,44 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             elif resource_type_remapped == NODE_RESOURCE:
                 hostname = node
 
-            resource_tags = {
-                f'proxmox_type:{resource_type_remapped}',
-                f'proxmox_{resource_type_remapped}:{resource_name}',
-                f'proxmox_id:{resource_id}',
-            }
-
-            proxmox_tags = resource.get('tags')
-            if proxmox_tags:
-                proxmox_tags = proxmox_tags.split(';')
-                resource_tags.update(proxmox_tags)
-
-            if node:
-                resource_tags.add(f'proxmox_node:{node}')
-
-            pool = resource.get('pool')
-            if pool:
-                resource_tags.add(f'proxmox_pool:{pool}')
-
-            self.gauge(
-                f'{resource_type_remapped}.count',
-                1,
-                tags=self.base_tags + list(resource_tags),
-            )
-
-            status = resource.get("status")
-            if status is None:
-                # pools don't have a status attribute
-                continue
-
-            status = 1 if status in OK_STATUS else 0
             tags = []
-            if not hostname:
+            if hostname is None:
                 tags = self.base_tags + list(resource_tags)
-            elif status == 1:
+            elif hostname:
                 external_tags.append((hostname, {self.__NAMESPACE__: self.base_tags + list(resource_tags)}))
-            elif hostname and status == 0:
-                # don't collect data about vms and nodes that are powered off
-                continue
 
             all_resources[resource_id] = {'resource_type': resource_type_remapped, 'tags': tags, 'hostname': hostname}
 
-            self.gauge(
-                f'{resource_type_remapped}.up',
-                status,
-                tags,
-                hostname=hostname,
-            )
-            self._submit_resource_metrics(resource, resource_type_remapped, tags, hostname)
+            if resource_type_remapped != "pool":
+                # pools don't have a status attribute
+                self.gauge(
+                    f'{resource_type_remapped}.up',
+                    status,
+                    tags,
+                    hostname=hostname,
+                )
+            self._submit_resource_metrics(resource, tags, hostname)
 
-        metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export/")
+        metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
         metrics_response_json = metrics_response.json()
         metrics = metrics_response_json.get('data', {}).get('data', [])
 
         for metric in metrics:
             resource_id = metric.get('id')
+            resource = all_resources.get(resource_id, {})
             metric_value = metric.get('value')
             metric_name = metric.get('metric')
             metric_type = metric.get('type')
-            metric_name_remapped = METRIC_NAME.get(metric_name)
-            resource = all_resources.get(resource_id)
+            metric_name_remapped = PERF_METRIC_NAME.get(metric_name)
             hostname = resource.get('hostname')
             tags = resource.get('tags', [])
-            if resource is None or metric_name_remapped is None:
-                self.log.debug("HEYYY")
+            if not resource or metric_name_remapped is None:
+                self.log.debug(
+                    "Invalid metric entry found; metric name: %s, resource id: %s", metric_name_remapped, resource_id
+                )
                 continue
 
-            metric_method = self.gauge if 'metric_type' == 'gauge' else self.count
+            metric_method = self.count if metric_type == 'derive' else self.gauge
             metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
 
         self.set_external_tags(external_tags)
