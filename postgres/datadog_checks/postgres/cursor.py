@@ -100,7 +100,6 @@ class SQLASCIITextLoader(psycopg.adapt.Loader):
         if type(data) is memoryview:
             # Convert memoryview to bytes
             data = data.tobytes()
-        print("loading text data", data)
         if type(data) is not bytes or data is None:
             return data
         try:

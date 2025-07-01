@@ -14,6 +14,7 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
     check = integration_check(pg_instance)
 
     with check.db() as conn:
+        conn.execute("SET client_encoding TO 'UTF8'")
         with conn.cursor() as cursor:
             cursor.execute(
                 'SELECT generate_series(1, 10) AS number',
@@ -39,6 +40,7 @@ def __check_prepand_sql_comment(pg_instance, ignore):
     # collect query_text from pg_stat_activity
     # assert /* service='datadog-agent' */ is present in the query
     super_conn = _get_superconn(pg_instance)
+    super_conn.execute("SET client_encoding TO 'UTF8'")
     with super_conn.cursor() as cursor:
         cursor.execute(
             (
