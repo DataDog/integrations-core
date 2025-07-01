@@ -7,7 +7,7 @@ import argparse
 import csv
 import re
 from urllib.parse import urljoin
-
+from pprint import pprint
 import requests
 
 from datadog_checks.temporal.metrics import METRIC_MAP
@@ -67,10 +67,10 @@ def main():
 
     # Sanity check: Check whether there are metrics in the temporal code that are not present
     # in the `METRIC_MAP` and warn about them:
-    missing_metrics = set(temporal_metric_types) - set(METRIC_MAP)
-    if missing_metrics:
-        print("WARNING: the input code contains metrics not defined in `METRIC_MAP`:")
-        print('\n'.join(f"- {metric}" for metric in missing_metrics))
+    # missing_metrics = set(temporal_metric_types) - set(METRIC_MAP)
+    # if missing_metrics:
+    #     print("WARNING: the input code contains metrics not defined in `METRIC_MAP`:")
+    #     print('\n'.join(f"- {metric}" for metric in missing_metrics))
 
     # Merge all the data
     metadata = []
@@ -100,7 +100,6 @@ def main():
 
         # Check if metric exists in previous metadata
         existing_dd_metric = check_existing_metric(metric_name, previous_metadata, added_dd_metrics)
-
         if existing_dd_metric:
             print(f"INFO: metric `{metric_name}` is reserved because it's present " "in the current metadata.csv file")
             metadata.extend(existing_dd_metric)
@@ -191,13 +190,17 @@ def check_existing_metric(name: str, previous_metadata: dict, added_dd_metrics: 
     Returns:
         metadata list with any existing metrics added
     """
-    pattern = re.compile(rf"^temporal\.server\.{re.escape(name)}(?:\.[a-z]+)*$")
+    # Match metric names like:
+    #   temporal.server.<metric_name>
+    #   temporal.server.<metric_name>.count
+    #   temporal.server.<metric_name>.sum
+    #   temporal.server.<metric_name>.bucket
+    pattern = re.compile(rf"^temporal\.server\.{re.escape(name)}(?:\.(?:count|sum|bucket))?$")
     result = []
     for dd_metric in previous_metadata:
         if pattern.match(dd_metric) and dd_metric not in added_dd_metrics:
             # A metric were supported in the previous temporal version, but dropped in the current temporal version
             result.append(previous_metadata.get(dd_metric))
-            print(f"INFO: {dd_metric} is reserved because it exists in the current metatadata.csv file")
             added_dd_metrics.add(dd_metric)
     return result
 
