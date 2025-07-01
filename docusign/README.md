@@ -8,49 +8,19 @@ Docusign integration provides real-time insights into Docusign activities, such 
 
 ## Setup
 
+To integrate Docusign with Datadog, Datadog connects to Docusign using OAuth. The authenticated user must have owner permissions in the organizations that want to be integrated.
 
-### Prerequisites
+### Installation
 
-- Docusign Developer Account
-- Docusign account with a plan that includes Docusign Monitor
+1. Navigate to the [Integrations Page][2] and search for the "Docusign" integration.
+2. Click the tile.
+3. To add an account to install the integration, click the **Add Docusign Account** button.
+4. After reading the instructions in the modal, click the **Authorize** button, which redirects you to the Docusign login page.
+5. After logging in, you are prompted to select which Docusign organizations you want to grant access to, based on the organizations that your user account has access to.
+6. Click **Authorize**.
+7. You're redirected back to Datadog's Docusign tile with a new account. Datadog recommends changing the account name to something that is easier to remember. You can add multiple accounts with access to different organizations.
 
-
-### Generate API credentials in Docusign
-
-1. Log in to [Developer Admin Console][2].
-2. Get your **Account Name** from the **Account Profile** page.
-3. Access the **Apps and Keys** page under the **Integrations** section.
-4. Obtain the **User ID** from the **My Account Information** section.
-5. Click on **Add App and Integration Key** button.
-6. Provide an App Name and click **Create App**.
-7. Get your **Integration Key** from the General Info section.
-8. Click on **Generate RSA**, to get **RSA Private Key**.
-9. Click on **ADD URI**, set Redirect URI to `http://localhost/`.
-10. Click on **Save** button.
-11. Perform application consent by opening the accompanying Sample URL after replacing the placeholders 
-    - URL: `<BASE_URI>/oauth/auth?response_type=code&scope=signature impersonation organization_read&client_id=<YOUR_INTEGRATION_KEY>&redirect_uri=<YOUR_REDIRECT_URI>`
-        - `<BASE_URI>`: Use `https://account-d.docusign.com` for Developer or `https://account.docusign.com` for Production.
-        - `<YOUR_INTEGRATION_KEY>`: Replace with your Integration Key (Client ID) obtained previously.
-        - `<YOUR_REDIRECT_URI>`: Replace with your redirect URI, e.g., `http://localhost/`.
-    - Sign in to your account if prompted to
-    - Click on **Allow Access** 
-    - Note: _After selecting Accept, the browser will display a message saying that it can't load the page. You can safely ignore this page and close the tab._
-12. To test the integration with Developer account, select `Developer` option for the **Account Type** configuration parameter of the integration.
-13. Perform the [Go-Live][3] process for the App to access the [Production Account][4].
-14. Navigate to the Admin console and perform steps 2 to 10 and update the respective configuration parameters for the integration.
-
-
-### Connect your Docusign Account to Datadog
-
-1. Add your Account Type, Docusign Account Name, User Id, Integration Key, and RSA Private Key
-    |Parameters|Description|
-    |--------------------|--------------------|
-    |Account Type|Dropdown to select the type of Docusign account (e.g., Developer or Production).|
-    |Docusign Account Name|The name associated with the Docusign account (case sensitive).|
-    |User ID |A GUID value that uniquely identifies a Docusign user.|
-    |Integration Key|A unique GUID that identifies a Docusign integration.|
-    |RSA Private Key|A cryptographic key for signing JWT tokens for secure API authentication.|
-2. Click the Save button to save your settings.
+Note: Docusign saves this authorization selection. To be prompted again or add new organizations, revoke app access on Docusign (`Organization > Connected Apps > Datadog - Docusign OAuth App`), then restart the setup process.
 
 ## Data Collected
 
@@ -68,10 +38,8 @@ The Docusign integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support][5].
+For further assistance, contact [Datadog Support][3].
 
 [1]: https://www.docusign.com/
-[2]: https://apps-d.docusign.com/admin/admin-dashboard
-[3]: https://developers.docusign.com/platform/go-live/
-[4]: https://apps.docusign.com/admin/admin-dashboard
-[5]: https://docs.datadoghq.com/help/
+[2]: https://app.datadoghq.com/integrations
+[3]: /help
