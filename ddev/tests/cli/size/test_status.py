@@ -62,9 +62,6 @@ def mock_size_status():
         patch("ddev.cli.size.utils.common_funcs.os.walk", return_value=mock_walk),
         patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["fake_dep.whl"]),
         patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.size.utils.common_funcs.plt.show"),
-        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
-        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield mock_app

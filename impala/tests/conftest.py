@@ -34,7 +34,6 @@ def dd_environment():
         wrappers=[create_log_volumes()],
         sleep=10,
     ):
-
         yield {
             'instances': [
                 {

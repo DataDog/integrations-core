@@ -377,7 +377,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
-
         assert db_name in databases_to_find
         # id's are env dependant
         normalize_ids(actual_payload)
