@@ -83,9 +83,7 @@ begin transaction;
 {};
 {};
 commit;
-""".format(
-        update_sql, update_sql
-    )
+""".format(update_sql, update_sql)
     # ... now execute the test query in a separate thread
     lock_task = threading.Thread(target=execute_in_thread, args=(query, args))
     lock_task.start()
