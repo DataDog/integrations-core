@@ -99,6 +99,7 @@ def test_relations_metrics_access_exclusive_lock(aggregator, integration_check, 
     check = integration_check(pg_instance)
 
     conn = _get_superconn(pg_instance)
+    conn.execute("SET client_encoding TO 'UTF8'")
     cursor = conn.cursor()
     # Lock the persons table with an AccessExclusiveLock
     cursor.execute("BEGIN")  # must be in a transaction to lock a table
