@@ -37,6 +37,9 @@ def test_get_valid_platforms():
         "linux-x86_64_3.12.txt",
         "linux-x86_64_py2.txt",
         "linux-x86_64_py3.txt",
+        "macos-aarch64_3.12.txt",
+        "macos-aarch64_py2.txt",
+        "macos-aarch64_py3.txt",
         "macos-x86_64_3.12.txt",
         "macos-x86_64_py2.txt",
         "macos-x86_64_py3.txt",
@@ -45,7 +48,7 @@ def test_get_valid_platforms():
         "windows-x86_64_py3.txt",
     ]
 
-    expected_platforms = {"linux-aarch64", "linux-x86_64", "macos-x86_64", "windows-x86_64"}
+    expected_platforms = {"linux-aarch64", "linux-x86_64", "macos-aarch64", "macos-x86_64", "windows-x86_64"}
     with patch("os.listdir", return_value=filenames):
         platforms = get_valid_platforms("fake_repo", {"3.12"})
         assert platforms == expected_platforms
@@ -59,6 +62,9 @@ def test_get_valid_versions():
         "linux-x86_64_3.12.txt",
         "linux-x86_64_py2.txt",
         "linux-x86_64_py3.txt",
+        "macos-aarch64_3.12.txt",
+        "macos-aarch64_py2.txt",
+        "macos-aarch64_py3.txt",
         "macos-x86_64_3.12.txt",
         "macos-x86_64_py2.txt",
         "macos-x86_64_py3.txt",

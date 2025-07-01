@@ -76,6 +76,8 @@ include = ["src"]
 [tool.hatch.build.targets.app]
 scripts = ["ddev"]
 
+# Keep Black configuration to generate models through validate
+# Switch to Ruff after it provides a Python API
 [tool.black]
 include = '\.pyi?$'
 line-length = 120
@@ -114,6 +116,12 @@ ignore = [
 unfixable = [
   # Don't touch unused imports
   "F401",
+]
+
+[tool.ruff.format]
+quote-style = "preserve"
+exclude = [
+  "src/ddev/_version.py"
 ]
 
 [tool.ruff.lint.isort]

@@ -75,7 +75,6 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_metadata_collection_interval_and_enabled(dbm_instance):
-
     dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
     dbm_instance['collect_settings'] = {"enabled": False, "collection_interval": 100}
 
@@ -696,7 +695,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
 @pytest.mark.integration
 def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
-
     dbm_instance['dbm'] = True
     dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
     expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
@@ -712,3 +710,15 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
             ):
                 found = True
     assert found
+
+
+@pytest.mark.unit
+def test_schemas_collection_config(dbm_instance):
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert check._config.schemas_config == {"enabled": True, "max_execution_time": 0}
+
+    dbm_instance.pop('schemas_collection')
+    dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert check._config.schemas_config == {"enabled": True, "max_execution_time": 0}

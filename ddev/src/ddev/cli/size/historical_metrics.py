@@ -68,7 +68,6 @@ def upload_historical_metrics(date_from_str: str, org: str) -> None:
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description='Upload historical metrics to Datadog')
     parser.add_argument('--date-from', help='Start date in YYYY-MM-DD format')
     parser.add_argument('--org', default='default', help='Organization name')
