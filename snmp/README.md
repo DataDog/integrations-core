@@ -36,4 +36,4 @@ Need help? Contact [Datadog support][4].
 [2]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [3]: https://datadoghq.dev/integrations-core/tutorials/snmp/introduction/
 [4]: https://docs.datadoghq.com/help/
-[5]: 
+[5]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
