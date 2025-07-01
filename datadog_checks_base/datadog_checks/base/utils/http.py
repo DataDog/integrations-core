@@ -141,8 +141,6 @@ class SSLContextAdapter(requests.adapters.HTTPAdapter):
 
     def __init__(self, ssl_context, **kwargs):
         self.ssl_context = ssl_context
-        # This is used to determine if the adapter was created with a custom context
-        # for the purpose of reverting to the default context when needed.
         super(SSLContextAdapter, self).__init__()
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
