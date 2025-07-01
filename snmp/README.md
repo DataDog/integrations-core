@@ -21,6 +21,10 @@ To install and configure the SNMP integration, see the [Network Device Monitorin
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
+### Service Checks
+
+See [service_checks.json][6] for a list of service checks provided by this integration.
+
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
@@ -37,3 +41,4 @@ Need help? Contact [Datadog support][4].
 [3]: https://datadoghq.dev/integrations-core/tutorials/snmp/introduction/
 [4]: https://docs.datadoghq.com/help/
 [5]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
+[6]: https://github.com/DataDog/integrations-core/blob/master/snmp/assets/service_checks.json
