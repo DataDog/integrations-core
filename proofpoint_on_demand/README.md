@@ -8,7 +8,7 @@ This check monitors [proofpoint_on_demand][1].
 
 ### Installation
 
-The Proofpoint On Demand check is included in the [Datadog Agent][2] package.
+The Proofpoint On-Demand check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -23,11 +23,11 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-Proofpoint On Demand does not include any metrics.
+Proofpoint On-Demand does not include any metrics.
 
 ### Events
 
-Proofpoint On Demand does not include any events.
+Proofpoint On-Demand does not include any events.
 
 ## Troubleshooting
 
