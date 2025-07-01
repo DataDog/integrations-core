@@ -1160,7 +1160,6 @@ def test_activity_snapshot_collection(
     expected_keys,
     expected_conn_out,
 ):
-
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
         # cannot catch any queries from other users
         # only can see own queries
