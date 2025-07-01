@@ -136,7 +136,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             tags = []
             if hostname is None:
                 tags = self.base_tags + list(resource_tags)
-            elif hostname:
+            else:
                 external_tags.append((hostname, {self.__NAMESPACE__: self.base_tags + list(resource_tags)}))
 
             all_resources[resource_id] = {'resource_type': resource_type_remapped, 'tags': tags, 'hostname': hostname}
