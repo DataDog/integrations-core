@@ -400,7 +400,6 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
-        # Create TLS context for consistent TLS configuration
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
 
@@ -603,10 +602,8 @@ class RequestsWrapper(object):
     def _mount_https_adapter(self, session, tls_config):
         # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)
-        https_adapter = self._https_adapters.get(tls_config_key)
-
-        if https_adapter is not None:
-            session.mount('https://', https_adapter)
+        if tls_config_key in self._https_adapters:
+            session.mount('https://', self._https_adapters[tls_config_key])
             return
 
         context = create_ssl_context(tls_config)
@@ -628,7 +625,6 @@ class RequestsWrapper(object):
 
             https_adapter = SSLContextHostHeaderAdapter(context)
         else:
-            # Use SSLContextHTTPSAdapter for consistent TLS configuration
             https_adapter = SSLContextAdapter(context)
 
         # Cache the adapter for reuse
