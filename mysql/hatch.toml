@@ -40,7 +40,8 @@ version = [
 python = ["3.12"]
 flavor = ["percona"]
 version = [
-  "8.0.34",
+  "8.0.42",
+  "8.4",
 ]
 
 [envs.default.overrides]
