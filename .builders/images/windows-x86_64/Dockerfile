@@ -125,7 +125,7 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 # openssl
-ENV OPENSSL_VERSION="3.3.2"
+ENV OPENSSL_VERSION="3.4.1"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
@@ -151,7 +151,6 @@ RUN Get-RemoteFile `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe build.pl' && `
     RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
     Add-ToPath -Append "C:\postgresql\bin"
-ENV OPENSSL_VERSION="3.4.1"
 
 ENV CURL_VERSION="8.14.0"
 
