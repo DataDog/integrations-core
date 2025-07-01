@@ -49,6 +49,6 @@ The HubSpot Content Hub integration does not include any events.
 Need help? Contact [Datadog support][3].
 
 [1]: https://www.hubspot.com/products/content
-[2]: https://app.datadoghq.com/integrations
+[2]: /integrations
 [3]: https://app.hubspot.com/login
 [4]: https://docs.datadoghq.com/help/
