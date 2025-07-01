@@ -43,8 +43,8 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "kuma-cp run",
-        "kuma-dp run"
+        "kuma-cp",
+        "kuma-dp"
       ]
     },
     "saved_views": {

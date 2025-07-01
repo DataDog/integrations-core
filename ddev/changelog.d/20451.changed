@@ -1,0 +1,1 @@
+Remove Black dependency from the hatch environment collector in favor of Ruff
