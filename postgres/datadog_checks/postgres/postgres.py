@@ -645,8 +645,7 @@ class PostgreSql(AgentCheck):
             expected_number_of_columns = len(descriptors) + len(cols)
             if len(row) != expected_number_of_columns:
                 raise RuntimeError(
-                    'Row does not contain enough values: '
-                    'expected {} ({} descriptors + {} columns), got {}'.format(
+                    'Row does not contain enough values: expected {} ({} descriptors + {} columns), got {}'.format(
                         expected_number_of_columns, len(descriptors), len(cols), len(row)
                     )
                 )
@@ -1085,7 +1084,7 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
+            message = 'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
             )
             self.service_check(

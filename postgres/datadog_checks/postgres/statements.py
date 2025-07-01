@@ -321,7 +321,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             else:
                 if len(current) == 1:
                     self._log.warning(
-                        "A single query is too large to send to Datadog. This query will be dropped. " "size=%d",
+                        "A single query is too large to send to Datadog. This query will be dropped. size=%d",
                         size,
                     )
                     continue

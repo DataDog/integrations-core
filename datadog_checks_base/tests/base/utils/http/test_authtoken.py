@@ -463,8 +463,10 @@ class TestAuthTokenOAuth:
             def fetch_token(self, *args, **kwargs):
                 return {'error': 'unauthorized_client'}
 
-        with mock.patch('requests.get'), mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
-            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        with (
+            mock.patch('requests.get'),
+            mock.patch('oauthlib.oauth2.BackendApplicationClient'),
+            mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
         ):
             with pytest.raises(Exception, match='OAuth2 client credentials grant error: unauthorized_client'):
                 http.get('https://www.google.com')
@@ -503,9 +505,12 @@ class TestAuthTokenOAuth:
             def fetch_token(self, *args, **kwargs):
                 return token_response
 
-        with mock.patch('requests.get') as get, mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
-            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
-        ), mock.patch('datadog_checks.base.utils.http.get_timestamp', return_value=0):
+        with (
+            mock.patch('requests.get') as get,
+            mock.patch('oauthlib.oauth2.BackendApplicationClient'),
+            mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
+            mock.patch('datadog_checks.base.utils.http.get_timestamp', return_value=0),
+        ):
             http.get('https://www.google.com')
 
             get.assert_called_with(
@@ -550,8 +555,10 @@ class TestAuthTokenOAuth:
                 assert kwargs['audience'] == 'http://example.com'
                 return {'access_token': 'foo', 'expires_in': 9000}
 
-        with mock.patch('requests.get') as get, mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
-            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        with (
+            mock.patch('requests.get') as get,
+            mock.patch('oauthlib.oauth2.BackendApplicationClient'),
+            mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
         ):
             http.get('https://www.google.com')
 

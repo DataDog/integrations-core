@@ -11,7 +11,6 @@ from .metrics import IB_COUNTERS, RDMA_COUNTERS, STATUS_COUNTERS
 
 
 class InfinibandCheck(AgentCheck):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'infiniband'
 
