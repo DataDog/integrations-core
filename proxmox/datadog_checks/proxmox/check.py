@@ -23,6 +23,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(ProxmoxCheck, self).__init__(name, init_config, instances)
         self.check_initializations.append(self._parse_config)
+        self.all_resources = {}
 
     def _parse_config(self):
         self.base_tags = [f"proxmox_server:{self.config.proxmox_server}"]
@@ -36,23 +37,47 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             if metric_value is not None:
                 metric_method(f'{metric_name_remapped}', metric_value, tags=tags, hostname=hostname)
 
-    def check(self, _):
+    def _get_vm_hostname(self, vm_id, vm_name, node):
         try:
-            response = self.http.get(f"{self.config.proxmox_server}/version")
-            response.raise_for_status()
-
-            response_json = response.json()
-            version = response_json.get("data", {}).get("version")
-            self.set_metadata('version', version)
-            self.gauge("api.up", 1, tags=self.base_tags)
-
+            url = f"{self.config.proxmox_server}/nodes/{node}/qemu/{vm_id}/agent/get-host-name"
+            hostname_response = self.http.get(url)
+            hostname_json = hostname_response.json()
         except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.error(
-                "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
+            self.log.info(
+                "Failed to get hostname for vm %s on node %s; endpoint: %s; %s",
+                vm_id,
+                node,
+                self.config.proxmox_server,
+                e,
             )
-            self.gauge("api.up", 0, tags=self.base_tags)
-            raise
+            hostname_json = {}
+        hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
+        return hostname
 
+    def _collect_performance_metrics(self):
+        metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
+        metrics_response_json = metrics_response.json()
+        metrics = metrics_response_json.get('data', {}).get('data', [])
+
+        for metric in metrics:
+            resource_id = metric.get('id')
+            resource = self.all_resources.get(resource_id, {})
+            metric_value = metric.get('value')
+            metric_name = metric.get('metric')
+            metric_type = metric.get('type')
+            metric_name_remapped = PERF_METRIC_NAME.get(metric_name)
+            hostname = resource.get('hostname')
+            tags = resource.get('tags', [])
+            if not resource or metric_name_remapped is None:
+                self.log.debug(
+                    "Invalid metric entry found; metric name: %s, resource id: %s", metric_name_remapped, resource_id
+                )
+                continue
+
+            metric_method = self.count if metric_type == 'derive' else self.gauge
+            metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
+
+    def _collect_resource_metrics(self):
         resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
         resources_response_json = resources_response.json()
         resources = resources_response_json.get("data", [])
@@ -95,7 +120,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             )
 
             status = resource.get("status")
-
             status = 1 if status in OK_STATUS else 0
 
             hostname = None
@@ -104,21 +128,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 # don't collect information about powered off VMs and nodes
                 continue
             elif resource_type_remapped == VM_RESOURCE and status == 1:
-                vmid = resource.get('vmid')
-                try:
-                    url = f"{self.config.proxmox_server}/nodes/{node}/qemu/{vmid}/agent/get-host-name"
-                    hostname_response = self.http.get(url)
-                    hostname_json = hostname_response.json()
-                except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-                    self.log.info(
-                        "Failed to get hostname for vm %s on node %s; endpoint: %s; %s",
-                        vmid,
-                        node,
-                        self.config.proxmox_server,
-                        e,
-                    )
-                    hostname_json = {}
-                hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", resource_name)
+                vm_id = resource.get('vmid')
+                hostname = self._get_vm_hostname(vm_id, resource_name, node)
             elif resource_type_remapped == NODE_RESOURCE:
                 hostname = node
 
@@ -140,26 +151,25 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 )
             self._submit_resource_metrics(resource, tags, hostname)
 
-        metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
-        metrics_response_json = metrics_response.json()
-        metrics = metrics_response_json.get('data', {}).get('data', [])
-
-        for metric in metrics:
-            resource_id = metric.get('id')
-            resource = all_resources.get(resource_id, {})
-            metric_value = metric.get('value')
-            metric_name = metric.get('metric')
-            metric_type = metric.get('type')
-            metric_name_remapped = PERF_METRIC_NAME.get(metric_name)
-            hostname = resource.get('hostname')
-            tags = resource.get('tags', [])
-            if not resource or metric_name_remapped is None:
-                self.log.debug(
-                    "Invalid metric entry found; metric name: %s, resource id: %s", metric_name_remapped, resource_id
-                )
-                continue
-
-            metric_method = self.count if metric_type == 'derive' else self.gauge
-            metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
-
+        self.all_resources = all_resources
         self.set_external_tags(external_tags)
+
+    def check(self, _):
+        try:
+            response = self.http.get(f"{self.config.proxmox_server}/version")
+            response.raise_for_status()
+
+            response_json = response.json()
+            version = response_json.get("data", {}).get("version")
+            self.set_metadata('version', version)
+            self.gauge("api.up", 1, tags=self.base_tags)
+
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.log.error(
+                "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
+            )
+            self.gauge("api.up", 0, tags=self.base_tags)
+            raise
+
+        self._collect_resource_metrics()
+        self._collect_performance_metrics()
