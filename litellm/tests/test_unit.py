@@ -48,10 +48,11 @@ def test_litellm_health_endpoint(aggregator, mock_http_response):
 
     for metric in ENDPOINT_METRICS:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, 'health_endpoint:http://litellm:4000/health')
 
 
 def test__build_tags_basic():
-    check = LitellmCheck('litellm', {}, [{}])
+    check = LitellmCheck('litellm', {}, [{'foo': 'bar'}])
     endpoint = {'model': 'foo', 'custom_llm_provider': 'bar'}
     tags = check._build_tags(endpoint)
     assert 'llm_model:foo' in tags
@@ -65,6 +66,17 @@ def test__build_tags_with_extra():
     assert 'llm_model:foo' in tags
     assert 'custom_llm_provider:bar' in tags
     assert 'extra:tag' in tags
+
+
+def test__build_tags_with_multiple_extra():
+    check = LitellmCheck('litellm', {}, [{}])
+    endpoint = {'model': 'foo', 'custom_llm_provider': 'bar'}
+    extra_tags = ['extra:tag', 'health_endpoint:http://localhost']
+    tags = check._build_tags(endpoint, extra_tags)
+    assert 'llm_model:foo' in tags
+    assert 'custom_llm_provider:bar' in tags
+    for t in extra_tags:
+        assert t in tags
 
 
 def test__extract_error_type_found():

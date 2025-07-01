@@ -50,15 +50,19 @@ class LitellmCheck(OpenMetricsBaseCheckV2):
         response.raise_for_status()
         data = response.json()
 
+        base_tags = list(self.tags) + [f"health_endpoint:{self.health_endpoint}"]
+
         for endpoint in data.get('healthy_endpoints', []):
             health_tag = "endpoint_health:healthy"
-            self.gauge(self.METRIC_ENDPOINT_INFO, 1, tags=self._build_tags(endpoint, [health_tag]))
+            self.gauge(self.METRIC_ENDPOINT_INFO, 1, tags=self._build_tags(endpoint, [health_tag] + base_tags))
 
         for endpoint in data.get('unhealthy_endpoints', []):
             error_type = self._extract_error_type(endpoint.get('error', ''))
             error_tag = f"endpoint_error:{error_type}"
             health_tag = "endpoint_health:unhealthy"
-            self.gauge(self.METRIC_ENDPOINT_INFO, 1, tags=self._build_tags(endpoint, [error_tag, health_tag]))
+            self.gauge(
+                self.METRIC_ENDPOINT_INFO, 1, tags=self._build_tags(endpoint, [error_tag, health_tag] + base_tags)
+            )
 
-        self.gauge(self.METRIC_HEALTHY_COUNT, data.get('healthy_count', 0), tags=self.tags)
-        self.gauge(self.METRIC_UNHEALTHY_COUNT, data.get('unhealthy_count', 0), tags=self.tags)
+        self.gauge(self.METRIC_HEALTHY_COUNT, data.get('healthy_count', 0), tags=base_tags)
+        self.gauge(self.METRIC_UNHEALTHY_COUNT, data.get('unhealthy_count', 0), tags=base_tags)
