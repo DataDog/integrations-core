@@ -171,7 +171,7 @@ instances:
     ## Collect connection-related metrics. Metrics collected are:
     ##   - connection status metrics (ibm_mq.channel.conn_status)
     ##
-    ## Note: Enabling this option will increase tag cardinality as the ibm_mq.channel.conn_status
+    ## Note: Enabling this option increases tag cardinality, as the ibm_mq.channel.conn_status
     ## metric creates a new `connection` tag for each unique connection. This can lead to high
     ## cardinality if you have many active connections.
     #
