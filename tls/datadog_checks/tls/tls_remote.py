@@ -32,8 +32,7 @@ class TLSRemoteCheck(object):
         )
         self._intermediate_cert_refresh_interval = (
             # Convert minutes to seconds
-            float(self.agent_check.instance.get('intermediate_cert_refresh_interval', 60))
-            * 60
+            float(self.agent_check.instance.get('intermediate_cert_refresh_interval', 60)) * 60
         )
 
     def check(self):

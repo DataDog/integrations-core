@@ -91,9 +91,7 @@ begin transaction;
 {};
 {};
 commit;
-""".format(
-            update_sql, update_sql
-        ),
+""".format(update_sql, update_sql),
         (appname2, 2, 1),
     )
 

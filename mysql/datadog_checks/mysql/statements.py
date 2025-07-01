@@ -246,9 +246,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
             {}
-            """.format(
-            condition
-        )
+            """.format(condition)
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             args = [self._last_seen] if only_query_recent_statements else None
