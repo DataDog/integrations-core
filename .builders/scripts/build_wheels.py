@@ -119,7 +119,6 @@ def main():
 
         check_process(command_args, env=env_vars)
 
-        # Remove test files
         
 
         # Repair wheels
