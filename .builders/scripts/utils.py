@@ -34,3 +34,72 @@ def extract_metadata(wheel: Path) -> email.Message:
 
     return email.message_from_string(metadata_file_contents)
 
+def remove_test_files(wheel: Path) -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_wheel = Path(tmpdir) / wheel.name
+
+        # Copy files except those excluded
+        with ZipFile(wheel, "r") as zin, ZipFile(temp_wheel, "w") as zout:
+            for item in zin.infolist():
+                if not is_excluded_from_wheel(item.filename):
+                    zout.writestr(item, zin.read(item.filename))
+
+        shutil.move(str(temp_wheel), str(wheel))
+
+
+
+def is_excluded_from_wheel(path: str) -> bool:
+    """
+    These files are excluded from the wheel in the agent build:
+    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
+    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
+    the wheels still include them.
+    """
+    excluded_test_paths = [
+        os.path.normpath(path)
+        for path in [
+            "idlelib/idle_test",
+            "bs4/tests",
+            "Cryptodome/SelfTest",
+            "gssapi/tests",
+            "keystoneauth1/tests",
+            "openstack/tests",
+            "os_service_types/tests",
+            "pbr/tests",
+            "pkg_resources/tests",
+            "psutil/tests",
+            "securesystemslib/_vendor/ed25519/test_data",
+            "setuptools/_distutils/tests",
+            "setuptools/tests",
+            "simplejson/tests",
+            "stevedore/tests",
+            "supervisor/tests",
+            "test",  # cm-client
+            "vertica_python/tests",
+            "websocket/tests",
+        ]
+    ]
+
+    type_annot_libraries = [
+        "krb5",
+        "Cryptodome",
+        "ddtrace",
+        "pyVmomi",
+        "gssapi",
+    ]
+    rel_path = Path(path).as_posix()
+
+    # Test folders
+    for test_folder in excluded_test_paths:
+        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
+            return True
+
+    # Python type annotations
+    path_parts = Path(rel_path).parts
+    if path_parts:
+        dependency_name = path_parts[0]
+        if dependency_name in type_annot_libraries:
+            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
+                return True
+
+    return False
