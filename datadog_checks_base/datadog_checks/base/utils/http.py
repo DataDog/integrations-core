@@ -116,17 +116,24 @@ def get_tls_config_from_options(new_options):
         tls_config["tls_ca_cert"] = verify
     elif isinstance(verify, bool):
         tls_config["tls_verify"] = verify
-    else:
-        LOGGER.warning(
-            'Unexpected type for `verify` option. Expected bool or str, got %s.',
-            type(verify).__name__,
+    elif verify is not None:
+        raise TypeError(
+            'Unexpected type for `verify` option. Expected bool or str, got {}.'.format(type(verify).__name__)
         )
 
     if isinstance(cert, str):
         tls_config["tls_cert"] = cert
-    elif isinstance(cert, tuple) or isinstance(cert, list) and len(cert) == 2:
+    elif isinstance(cert, tuple) or isinstance(cert, list):
+        if len(cert) != 2:
+            raise TypeError(
+                'Unexpected length for `cert` option. Expected a tuple of length 2, got {}.'.format(len(cert))
+            )
         tls_config["tls_cert"] = cert[0]
         tls_config["tls_private_key"] = cert[1]
+    elif cert is not None:
+        raise TypeError(
+            'Unexpected type for `cert` option. Expected str or tuple, got {}.'.format(type(cert).__name__)
+        )
     return tls_config
 
 
