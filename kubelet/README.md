@@ -79,4 +79,4 @@ Need help? Contact [Datadog support][6].
 [6]: https://docs.datadoghq.com/help/
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubelet/datadog_checks/kubelet/data/conf.yaml.default
 [8]: https://docs.datadoghq.com/agent/guide/autodiscovery-management/?tab=containerizedagent
-[9]: https://github.com/DataDog/integrations-core/blob/master/kubeflow/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/kubelet/metadata.csv
