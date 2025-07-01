@@ -853,7 +853,7 @@ def test_statement_samples_collect(
 
     conn = psycopg.connect(
         host=HOST, dbname=dbname, user=user, password=password, autocommit=True, cursor_factory=ClientCursor
-)
+    )
     conn.execute("SET client_encoding TO UTF8")
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
@@ -1653,9 +1653,9 @@ def test_pg_settings_caching(integration_check, dbm_instance):
     check._connect()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    assert "test_key" in check.pg_settings, (
-        "key should not have been blown away. If it was then pg_settings was not cached correctly"
-    )
+    assert (
+        "test_key" in check.pg_settings
+    ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
 
 
 def _check_until_time(check, dbm_instance, sleep_time, check_interval):

@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_res
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
-from datadog_checks.postgres.cursor import CommenterCursor, DBMConnection, SQLASCIIBytesLoader, SQLASCIITextLoader
+from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIIBytesLoader, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache

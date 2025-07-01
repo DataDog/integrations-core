@@ -68,10 +68,12 @@ class DBMConnection(psycopg.Connection):
         """
         return self.original_encoding in ('SQLASCII', 'ascii')
 
+
 class SQLASCIIBytesLoader(psycopg.adapt.Loader):
     """
-    Custom loader for SQLASCII encoding.    
+    Custom loader for SQLASCII encoding.
     """
+
     encodings = ['utf-8']
     format = psycopg.pq.Format.BINARY
 
@@ -91,8 +93,9 @@ class SQLASCIIBytesLoader(psycopg.adapt.Loader):
 
 class SQLASCIITextLoader(psycopg.adapt.Loader):
     """
-    Custom loader for SQLASCII encoding.    
+    Custom loader for SQLASCII encoding.
     """
+
     encodings = ['utf-8']
     format = psycopg.pq.Format.TEXT
 
@@ -107,4 +110,3 @@ class SQLASCIITextLoader(psycopg.adapt.Loader):
         except:
             # Fallback to utf8 with replacement
             return data.decode('utf-8', errors='backslashreplace')
-
