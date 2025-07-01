@@ -347,6 +347,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /postmark/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /postmark/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/proofpoint_on_demand/                                              @DataDog/saas-integrations
+/proofpoint_on_demand/*.md                                          @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_on_demand/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_on_demand/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /sanity/                                                            @DataDog/saas-integrations
 /sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /sanity/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
