@@ -26,9 +26,9 @@ This integration collects the following metrics:
 
 Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to alert you to any potential issues.
 
-## Dashboards
+### Dashboards
 
-### Logs
+#### Logs
 
 Here is the list of dashboards populated using logs:
 
@@ -42,7 +42,7 @@ Here is the list of dashboards populated using logs:
 - iboss - Real-Time Threat Analytics
 - iboss - Real-Time CASB Analytics
 
-### Metrics
+#### Metrics
 
 Here is the list of dashboards populated using metrics:
 
@@ -56,7 +56,7 @@ Here is the list of dashboards populated using metrics:
 
 ## Setup
 
-**Note**: The following steps are required only for collecting metrics. For log collection, see the [Log collection](#log-collection) section below.
+**Note**: The following steps are required only for collecting metrics. For log collection, see the `Log collection` section below.
 
 ### Generate API credentials in iboss
 
@@ -94,7 +94,7 @@ To collect metrics, you can either use an existing user with **Full Administrato
    | Password                          | The password of your iboss account.                                                  |
    | Get gateway performance metrics   | Enable to collect gateway performance metrics from iboss. The default value is `true`. |
    | Get bandwidth metrics             | Enable to collect bandwidth metrics from iboss. The default value is `true`.           |
-   | Get Digital Experience metrics    | Enable to collect Digital Experience metrics from iboss. The default value is `true`.  |
+   | Get digital experience metrics    | Enable to collect digital experience metrics from iboss. The default value is `true`.  |
    | Get web metrics                   | Enable to collect web metrics from iboss. The default value is `true`.                 |
    | Get CASB metrics                  | Enable to collect CASB metrics from iboss. The default value is `true`.                |
    | Get threat metrics                | Enable to collect threat metrics from iboss. The default value is `true`.              |
