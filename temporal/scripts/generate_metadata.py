@@ -67,10 +67,10 @@ def main():
 
     # Sanity check: Check whether there are metrics in the temporal code that are not present
     # in the `METRIC_MAP` and warn about them:
-    # missing_metrics = set(temporal_metric_types) - set(METRIC_MAP)
-    # if missing_metrics:
-    #     print("WARNING: the input code contains metrics not defined in `METRIC_MAP`:")
-    #     print('\n'.join(f"- {metric}" for metric in missing_metrics))
+    missing_metrics = set(temporal_metric_types) - set(METRIC_MAP)
+    if missing_metrics:
+        print("WARNING: the input code contains metrics not defined in `METRIC_MAP`:")
+        print('\n'.join(f"- {metric}" for metric in missing_metrics))
 
     # Merge all the data
     metadata = []
