@@ -35,7 +35,7 @@ DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 # spective catalog tables.
 PG_EXTENSION_INFO_QUERY = """
 SELECT
-e.oid AS id,
+e.oid::text AS id,
 e.extname AS name,
 r.rolname AS owner,
 ns.nspname AS schema_name,
