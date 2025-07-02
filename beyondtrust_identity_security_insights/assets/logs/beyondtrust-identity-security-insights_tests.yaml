@@ -1,0 +1,4 @@
+id: beyondtrust-identity-security-insights
+tests:
+  - sample: '{"severity":"Critical","entityType":"account","incidentType":"Detection","link":"https://app.beyondtrust.io/insights/dfrijfr/detections/details/f17987fed-81c9-46f2-8157-67ca3ca2a6b8/instance/1c77442c780bfb068550f6e8c35bec6e","source":"okta/https://trial-1345678.okta.com","entityName":"john.briley@gmail.com","tenantId":"7945s164-2f4b-45a7-8eca-44d36144f061","location":"okta/https://trial-1345678.okta.com","incidentId":"1c77442b840bfb068550f6e8c35bec6e","definitionId":"f1201fed-46c9-46f2-8157-67ca3ca2a6b8"}'
+    result: null
