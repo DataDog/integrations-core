@@ -73,9 +73,10 @@
           {
             "id": 7654321098765432,
             "definition": {
-              "title": "Request Volume",
+              "title": "Request Rate",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -147,9 +148,10 @@
           {
             "id": 6543210987654321,
             "definition": {
-              "title": "Success Rate",
+              "title": "Success Percentage",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
