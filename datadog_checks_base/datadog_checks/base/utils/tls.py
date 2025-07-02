@@ -116,7 +116,7 @@ def create_ssl_context(config):
             context.load_cert_chain(client_cert, keyfile=client_key, password=client_key_pass)
     except FileNotFoundError:
         LOGGER.warning(
-            'TLS client certificate file not found: %s. ' 'Please check the `tls_cert` configuration option.',
+            'TLS client certificate file not found: %s. Please check the `tls_cert` configuration option.',
             client_cert,
         )
 
