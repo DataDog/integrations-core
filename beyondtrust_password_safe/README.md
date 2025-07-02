@@ -32,7 +32,7 @@ To install the BeyondTrust Password Safe integration, run the following Agent in
 **Note**: This step is not necessary for Agent version >= 7.69.0.
 
 ```shell
-sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust-password-safe==1.0.0
+sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_password_safe==1.0.0
 ```
 
 ### Configuration
@@ -83,7 +83,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust-passwo
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `beyondtrust-password-safe` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `beyondtrust_password_safe` under the Checks section.
 
 ## Setup
 
