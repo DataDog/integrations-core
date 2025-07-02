@@ -4,12 +4,11 @@ import argparse
 import os
 import subprocess
 import sys
-import zipfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from dotenv import dotenv_values
-from utils import extract_metadata, normalize_project_name, remove_test_files
+from utils import extract_metadata, normalize_project_name
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'

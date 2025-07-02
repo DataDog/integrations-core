@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import email
-import os
 import re
 from pathlib import Path
-
 from zipfile import ZipFile
 
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
