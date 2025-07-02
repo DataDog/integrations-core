@@ -13,7 +13,7 @@ Follow the instructions below to configure this integration for Klaviyo Marketin
 ### Configuration
 
 #### Install Datadog Integration in Klaviyo
-Within your Klaviyo account, first add the Datadog Integration.
+Within your Klaviyo account, first add the Datadog integration.
 
 1. Log in to your [Klaviyo account][2].
 2. In the left-side panel, navigate to **Integrations**.
@@ -22,8 +22,8 @@ Within your Klaviyo account, first add the Datadog Integration.
 5. Click **Install**. The process involves simply logging into Datadog.
 
 #### Install Klaviyo Integration in Datadog
-Once the above installation within Klaviyo is performed, complete the Datadog integration by clicking 
-**Install Integration** which will guide you through an authorization process with Klaviyo.
+After the above installation within Klaviyo is performed, complete the Datadog integration by clicking 
+**Install Integration** which guides you through an authorization process with Klaviyo.
 
 ## Data Collected
 
