@@ -162,13 +162,13 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             response_json = response.json()
             version = response_json.get("data", {}).get("version")
             self.set_metadata('version', version)
-            self.gauge("api.up", 1, tags=self.base_tags)
+            self.gauge("api.up", 1, tags=self.base_tags + ['proxmox_status:up'])
 
         except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
             self.log.error(
                 "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
             )
-            self.gauge("api.up", 0, tags=self.base_tags)
+            self.gauge("api.up", 0, tags=self.base_tags + ['proxmox_status:down'])
             raise
 
         self._collect_resource_metrics()

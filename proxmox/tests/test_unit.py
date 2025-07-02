@@ -29,7 +29,9 @@ from .common import (
 def test_api_up(dd_run_check, datadog_agent, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_metric("proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'testing'])
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up', 'testing']
+    )
     for metric in ALL_METRICS:
         aggregator.assert_metric(metric, at_least=1)
 
@@ -43,7 +45,9 @@ def test_no_tags(dd_run_check, datadog_agent, aggregator, instance):
     del new_instance['tags']
     check = ProxmoxCheck('proxmox', {}, [new_instance])
     dd_run_check(check)
-    aggregator.assert_metric("proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json'])
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up']
+    )
 
 
 @pytest.mark.parametrize(
@@ -66,7 +70,9 @@ def test_api_down(dd_run_check, datadog_agent, aggregator, instance):
     with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
         dd_run_check(check)
 
-    aggregator.assert_metric("proxmox.api.up", 0, tags=['proxmox_server:http://localhost:8006/api2/json', 'testing'])
+    aggregator.assert_metric(
+        "proxmox.api.up", 0, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:down', 'testing']
+    )
 
 
 @pytest.mark.usefixtures('mock_http_get')
