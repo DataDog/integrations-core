@@ -65,6 +65,7 @@ from .queries import (
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
+    SQL_BINLOG_ENABLED,
     SQL_GROUP_REPLICATION_MEMBER,
     SQL_GROUP_REPLICATION_MEMBER_8_0_2,
     SQL_GROUP_REPLICATION_METRICS,
@@ -80,7 +81,6 @@ from .queries import (
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
     SQL_SERVER_UUID,
-    show_primary_replication_status_query,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -1217,17 +1217,15 @@ class MySql(AgentCheck):
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                cursor.execute(show_primary_replication_status_query(self.version, self.is_mariadb))
+                cursor.execute(SQL_BINLOG_ENABLED)
 
-                binlog_results = cursor.fetchone()
-                if binlog_results:
-                    self._binlog_enabled = True
+                result = cursor.fetchone()
+
+                self._binlog_enabled = self._get_variable_enabled(result, 'binlog_enabled')
+                self.log.debug("Binlog results: %s, is_affirmative: %s", result, self._binlog_enabled)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            if "You are not using binary logging" in str(e):
-                self._binlog_enabled = False
-            else:
-                self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
-                self._binlog_enabled = False
+            self.warning("Error while checking if binlog is enabled. Defaulting to False: %s", e)
+            self._binlog_enabled = False
 
         return self._binlog_enabled
 
