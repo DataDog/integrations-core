@@ -388,6 +388,7 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -416,7 +417,7 @@
                     }
                   ],
                   "style": {
-                    "palette": "warm",
+                    "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
