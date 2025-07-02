@@ -574,7 +574,7 @@ def test_kubelet_credentials_update(monkeypatch, aggregator):
     )
     kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
     with (
-        mock.patch('requests.Sesison.get', return_value=get),
+        mock.patch('requests.Session.get', return_value=get),
         mock.patch('datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info),
     ):
         check.check(instance)
