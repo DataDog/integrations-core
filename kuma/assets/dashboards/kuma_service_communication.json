@@ -73,9 +73,10 @@
           {
             "id": 7654321098765432,
             "definition": {
-              "title": "Total Request Volume",
+              "title": "Request Volume",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -208,7 +209,6 @@
               "title": "Latency (Average)",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
