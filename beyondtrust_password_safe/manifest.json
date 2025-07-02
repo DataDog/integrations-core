@@ -35,7 +35,7 @@
     },
     "dashboards": {
       "BeyondTrust Password Safe - Overview": "assets/dashboards/beyondtrust_password_safe_overview.json",
-      "BeyondTrust Password Safe - Password Retrieval and Session Insights": "assets/dashboards/beyondtrust_password_safe_password_retrieval_and_session_insights.json",
+      "BeyondTrust Password Safe - Password and Session Insights": "assets/dashboards/beyondtrust_password_safe_password_and_session_insights.json",
       "BeyondTrust Password Safe - Management and Secret Safe Insights": "assets/dashboards/beyondtrust_password_safe_management_and_secret_safe_insights.json",
       "BeyondTrust Password Safe - Audit Insights": "assets/dashboards/beyondtrust_password_safe_audit_insights.json"
     },
