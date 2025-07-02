@@ -93,16 +93,12 @@ def test_convert_to_human_readable_size():
 
 
 def test_is_valid_integration():
-    included_folder = "datadog_checks" + os.sep
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = [".git", "__pycache__"]
-
-    assert is_valid_integration(to_native_path("datadog_checks/example.py"), included_folder, ignored_files, git_ignore)
-    assert not is_valid_integration(to_native_path("__pycache__/file.py"), included_folder, ignored_files, git_ignore)
-    assert not is_valid_integration(
-        to_native_path("datadog_checks_dev/example.py"), included_folder, ignored_files, git_ignore
-    )
-    assert not is_valid_integration(to_native_path(".git/config"), included_folder, ignored_files, git_ignore)
+    repo_path = "fake_repo"
+    with patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()):
+        assert is_valid_integration(to_native_path("datadog_checks/example.py"), repo_path)
+        assert not is_valid_integration(to_native_path("__pycache__/file.py"), repo_path)
+        assert not is_valid_integration(to_native_path("datadog_checks_dev/example.py"), repo_path)
+        assert not is_valid_integration(to_native_path(".git/config"), repo_path)
 
 
 def test_get_dependencies_list():
@@ -183,7 +179,7 @@ def test_get_files_grouped_and_with_versions():
         (repo_path / "integration2" / "datadog_checks", [], ["__about__.py"]),
     ]
 
-    def mock_is_valid_integration(path, included_folder, ignored, ignored_files):
+    def mock_is_valid_integration(path, repo_path):
         return True
 
     def mock_getsize(path):

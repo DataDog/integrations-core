@@ -21,6 +21,7 @@ from datadog import api, initialize
 from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
+from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
 
@@ -115,7 +116,14 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform in name and version in name
 
 
-def is_valid_integration(path: str, included_folder: str, ignored_files: set[str], git_ignore: list[str]) -> bool:
+def is_valid_integration(path: str, repo_path: str) -> bool:
+    ignored_files = {
+        "datadog_checks_dev",
+        "datadog_checks_tests_helper",
+        "tokumx",
+    }  # tokumx is not shipped in the agent for py3
+    git_ignore = get_gitignore_files(repo_path)
+    included_folder = "datadog_checks"
     # It is not an integration
     if path.startswith("."):
         return False
@@ -162,13 +170,10 @@ def compress(file_path: str) -> int:
     return compressed_size
 
 
-def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
+def get_files(repo_path: str | Path, compressed: bool, version: str) -> list[FileDataEntry]:
     """
     Calculates integration file sizes and versions from a repository.
     """
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
 
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
@@ -177,8 +182,10 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
-
-            if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
+            integration_name = relative_path.split(os.sep)[0]
+            if not check_version(integration_name, version):
+                break
+            if not is_valid_integration(relative_path, str(repo_path)):
                 continue
             path = Path(relative_path)
             parts = path.parts
@@ -202,6 +209,21 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
         }
         for name, size in integration_sizes.items()
     ]
+
+
+def check_version(integration_name: str, version: str) -> bool:
+    pyproject_path = integration_name + os.sep + "pyproject.toml"
+    if os.path.exists(pyproject_path):
+        pyproject = load_toml_file(pyproject_path)
+        classifiers = pyproject["project"]["classifiers"]
+        integration_version = ""
+        for classifier in classifiers:
+            match = re.match(r"Programming Language :: Python :: (\d+\.\d+)", classifier)
+            if match:
+                integration_version = match.group(1)
+                break
+        return integration_version == version
+    return False
 
 
 def extract_version_from_about_py(path: str) -> str:
