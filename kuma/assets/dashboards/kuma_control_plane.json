@@ -79,7 +79,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -88,7 +87,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id AND $zone AND code_class in (1xx, 2xx, 3xx)} by {code}.as_count()"
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id AND $zone AND code_class IN (1xx,2xx,3xx) AND $cluster_name} by {code}.as_count()"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -121,12 +120,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.sum{$zone,$instance_id} by {handler}.as_count()"
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.sum{$zone,$instance_id,$cluster_name} by {handler}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$zone,$instance_id} by {handler}.as_count()"
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$zone,$instance_id,$cluster_name} by {handler}.as_count()"
                     }
                   ],
                   "formulas": [
@@ -161,7 +160,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -170,12 +168,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id AND $zone AND code_class IN (4xx,5xx)} by {code}.as_count()"
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id AND $zone AND code_class IN (4xx,5xx) AND $cluster_name} by {code}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id , $zone}.as_count()"
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id,$zone,$cluster_name}.as_count()"
                     }
                   ],
                   "formulas": [
@@ -219,7 +217,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -228,7 +225,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id AND $zone AND code_class in (4xx, 5xx)} by {code}.as_count()"
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id AND $zone AND code_class IN (4xx,5xx) AND $cluster_name} by {code}.as_count()"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -256,7 +253,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id, $zone} by {code}.as_count()",
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$instance_id,$zone,$cluster_name} by {code}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -290,13 +287,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.sum{$zone,$instance_id} by {handler}.as_count()",
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.sum{$zone,$instance_id,$cluster_name} by {handler}.as_count()",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$zone,$instance_id} by {handler}.as_count()",
+                      "query": "sum:kuma.api_server.http_request_duration_seconds.count{$zone,$instance_id,$cluster_name} by {handler}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -365,7 +362,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -374,7 +370,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.go.goroutines{$zone,$instance_id}"
+                      "query": "sum:kuma.go.goroutines{$zone,$instance_id,$cluster_name}"
                     }
                   ],
                   "formulas": [{ "number_format": {}, "formula": "query1" }],
@@ -399,7 +395,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -408,7 +403,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.go.threads{$zone,$instance_id}"
+                      "query": "sum:kuma.go.threads{$zone,$instance_id,$cluster_name}"
                     }
                   ],
                   "formulas": [{ "number_format": {}, "formula": "query1" }],
@@ -441,7 +436,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.go.memstats.alloc_bytes{$zone,$instance_id}.rollup(avg, 15)"
+                      "query": "sum:kuma.go.memstats.alloc_bytes{$zone,$instance_id,$cluster_name}.rollup(avg, 15)"
                     }
                   ],
                   "formulas": [
@@ -484,7 +479,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.go.gc.duration_seconds.quantile{$zone, $instance_id, quantile:0.75}.rollup(avg, 15)"
+                      "query": "sum:kuma.go.gc.duration_seconds.quantile{$zone,$instance_id,quantile:0.75,$cluster_name}.rollup(avg, 15)"
                     }
                   ],
                   "formulas": [
@@ -554,7 +549,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.leader{$zone,$instance_id}"
+                      "query": "sum:kuma.leader{$zone,$instance_id,$cluster_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -590,7 +585,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.leader{$zone,$instance_id} by {cluster_name,zone,kube_service}"
+                      "query": "avg:kuma.leader{$zone,$instance_id,$cluster_name} by {cluster_name,zone,kube_service}"
                     }
                   ],
                   "response_format": "scalar",
@@ -630,7 +625,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.leader_election.master_status{$instance_id} by {name,kube_service,host}"
+                      "query": "avg:kuma.leader_election.master_status{$instance_id,$cluster_name} by {name,kube_service,host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -703,7 +698,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.resources_count{$zone,$instance_id, resource_type:mesh}"
+                      "query": "sum:kuma.resources_count{$zone,$instance_id,resource_type:mesh,$cluster_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -740,7 +735,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.cp_info{$zone,$instance_id}"
+                      "query": "sum:kuma.cp_info{$zone,$instance_id,$cluster_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -777,7 +772,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.resources_count{$zone,$instance_id, resource_type:zone}"
+                      "query": "sum:kuma.resources_count{$zone,$instance_id,resource_type:zone,$cluster_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -814,7 +809,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.resources_count{$zone,$instance_id, resource_type:dataplane}"
+                      "query": "sum:kuma.resources_count{$zone,$instance_id,resource_type:dataplane,$cluster_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -850,7 +845,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.cp_info{$zone,$instance_id} by {zone,cluster_name,instance_id,kube_service,kuma_version}"
+                      "query": "avg:kuma.cp_info{$zone,$instance_id,$cluster_name} by {zone,cluster_name,instance_id,kube_service,kuma_version}"
                     }
                   ],
                   "response_format": "scalar",
@@ -885,7 +880,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.resources_count{$zone, $instance_id} by {resource_type}",
+                      "query": "avg:kuma.resources_count{$zone,$instance_id,$cluster_name} by {resource_type}",
                       "aggregator": "avg"
                     }
                   ],
@@ -949,7 +944,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -958,7 +952,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.xds.streams_active{$zone,$instance_id}"
+                      "query": "avg:kuma.xds.streams_active{$zone,$instance_id,$cluster_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -983,7 +977,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1015,12 +1008,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.xds.generation_errors.count{$zone,$instance_id}.as_rate().rollup(avg, 15)"
+                      "query": "sum:kuma.xds.generation_errors.count{$zone,$instance_id,$cluster_name}.as_rate().rollup(avg, 15)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.xds.generation.count{$zone,$instance_id}.as_rate().rollup(avg, 15)"
+                      "query": "sum:kuma.xds.generation.count{$zone,$instance_id,$cluster_name}.as_rate().rollup(avg, 15)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1045,7 +1038,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1065,7 +1057,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.xds.responses_sent.count{$zone,$instance_id}.as_rate().rollup(avg, 15)"
+                      "query": "sum:kuma.xds.responses_sent.count{$zone,$instance_id,$cluster_name}.as_rate().rollup(avg, 15)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1098,7 +1090,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.xds.delivery.quantile{$zone,quantile:0.99,$instance_id}"
+                      "query": "avg:kuma.xds.delivery.quantile{$zone,quantile:0.99,$instance_id,$cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1141,7 +1133,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.xds.generation.quantile{$zone,quantile:0.99,proxy_type:dataplane,$instance_id}"
+                      "query": "avg:kuma.xds.generation.quantile{$zone,quantile:0.99,proxy_type:dataplane,$instance_id,$cluster_name}"
                     }
                   ],
                   "formulas": [
@@ -1176,7 +1168,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1196,7 +1187,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.xds.requests_received.count{$zone,$instance_id} by {confirmation}.as_count().rollup(avg, 15)"
+                      "query": "sum:kuma.xds.requests_received.count{$zone,$instance_id,$cluster_name} by {confirmation}.as_count().rollup(avg, 15)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1229,17 +1220,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:kuma.cla_cache{$instance_id,$zone, result:miss}.rollup(avg, 15)"
+                      "query": "avg:kuma.cla_cache{$instance_id,$zone,result:miss,$cluster_name}.rollup(avg, 15)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.cla_cache{$instance_id , $zone}.rollup(avg, 15)"
+                      "query": "avg:kuma.cla_cache{$instance_id,$zone,$cluster_name}.rollup(avg, 15)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:kuma.cla_cache{$instance_id,$zone, result:hit-wait}.rollup(avg, 15)"
+                      "query": "avg:kuma.cla_cache{$instance_id,$zone,result:hit-wait,$cluster_name}.rollup(avg, 15)"
                     }
                   ],
                   "formulas": [
@@ -1343,12 +1334,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.store.sum{$zone,$instance_id} by {operation}.as_count()"
+                      "query": "sum:kuma.store.sum{$zone,$instance_id,$cluster_name} by {operation}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.store.count{$zone,$instance_id} by {operation}.as_count()"
+                      "query": "sum:kuma.store.count{$zone,$instance_id,$cluster_name} by {operation}.as_count()"
                     }
                   ],
                   "formulas": [
@@ -1391,17 +1382,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.store_cache.count{$instance_id,$zone, result:miss}.as_rate().rollup(avg, 15)"
+                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,result:miss,$cluster_name}.as_rate().rollup(avg, 15)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.store_cache.count{$instance_id , $zone}.as_rate().rollup(avg, 15)"
+                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,$cluster_name}.as_rate().rollup(avg, 15)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:kuma.store_cache.count{$instance_id,$zone, result:hit-wait}.as_rate().rollup(avg, 15)"
+                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,result:hit-wait,$cluster_name}.as_rate().rollup(avg, 15)"
                     }
                   ],
                   "formulas": [
@@ -1460,7 +1451,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.store.count{$instance_id,$zone} by {resource_type,operation}.as_rate()"
+                      "query": "sum:kuma.store.count{$instance_id,$zone,$cluster_name} by {resource_type,operation}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1489,7 +1480,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.store.count{$instance_id,$zone} by {resource_type,operation}.as_count()",
+                      "query": "sum:kuma.store.count{$instance_id,$zone,$cluster_name} by {resource_type,operation}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -1555,12 +1546,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.dp_server.http_request_duration_seconds.sum{$zone,$instance_id} by {handler}.as_count()"
+                      "query": "sum:kuma.dp_server.http_request_duration_seconds.sum{$zone,$instance_id,$cluster_name} by {handler}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:kuma.dp_server.http_request_duration_seconds.count{$zone,$instance_id} by {handler}.as_count()"
+                      "query": "sum:kuma.dp_server.http_request_duration_seconds.count{$zone,$instance_id,$cluster_name} by {handler}.as_count()"
                     }
                   ],
                   "formulas": [
@@ -1595,7 +1586,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1604,7 +1594,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.resources_count{$zone,$instance_id, resource_type:dataplane}.rollup(avg, 15)"
+                      "query": "avg:kuma.resources_count{$zone,$instance_id,resource_type:dataplane,$cluster_name}.rollup(avg, 15)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1655,7 +1645,6 @@
               "title": "All Control Plane Logs",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "columns": [
@@ -1675,7 +1664,7 @@
                       { "facet": "service" }
                     ],
                     "indexes": [],
-                    "query_string": "source:kuma service:kuma-control-plane"
+                    "query_string": "source:kuma service:kuma-control-plane $cluster_name"
                   },
                   "response_format": "event_list"
                 }
@@ -1690,7 +1679,6 @@
               "title": "Control Plane Error Logs",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "columns": [
@@ -1710,7 +1698,7 @@
                       { "facet": "service" }
                     ],
                     "indexes": [],
-                    "query_string": "source:kuma service:kuma-control-plane status:error"
+                    "query_string": "source:kuma service:kuma-control-plane status:error $cluster_name"
                   },
                   "response_format": "event_list"
                 }
@@ -1738,8 +1726,8 @@
       "default": "*"
     },
     {
-      "name": "kube_cluster_name",
-      "prefix": "kube_cluster_name",
+      "name": "cluster_name",
+      "prefix": "cluster_name",
       "available_values": [],
       "default": "*"
     }
