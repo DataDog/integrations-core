@@ -1318,7 +1318,7 @@ def test_env_var_logic_preset():
 )
 def test_profile_memory(should_profile_value, expected_calls):
     """
-    Test that profile_memory is called when should_profile_memory is True
+    We profile memory usage when we should.
     """
     check = AgentCheck('test', {}, [{}])
     check.should_profile_memory = mock.MagicMock(return_value=should_profile_value)
