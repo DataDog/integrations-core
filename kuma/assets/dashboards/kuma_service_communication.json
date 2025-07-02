@@ -29,7 +29,7 @@
             "id": 1097825529901868,
             "definition": {
               "type": "note",
-              "content": "## Service Communication Insights\n\nThis dashboard tracks communication between services in your Kuma mesh, helping you:\n\n**Identify issues:**\n- Connection failures and timeouts\n- Increased latency between services\n- Traffic imbalances and hotspots\n\n**Further Reading:**\n- [Traffic Metrics Policy](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Observability Guide](https://kuma.io/docs/latest/explore/observability/)",
+              "content": "## Service Communication Insights\n\nThis dashboard tracks communication between services in your Kuma mesh, helping you:\n\n**Identify issues:**\n- Connection failures and timeouts\n- Increased latency between services\n- Traffic imbalances and hotspots\n\n**Further Reading:**\n- [Traffic Metrics Policy](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Observability Guide](https://kuma.io/docs/latest/explore/observability/)\\\\\n  \n**Note:** If your environment also runs Envoy proxies that **aren’t** managed by Kuma, you can set a mesh [template variable](https://docs.datadoghq.com/dashboards/template_variables/) in this dashboard to filter them out.\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
