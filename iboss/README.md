@@ -54,6 +54,26 @@ Here is the list of dashboards populated using metrics:
 - iboss - Threat Report
 - iboss - CASB Report
 
+
+### Monitors
+
+#### Logs
+
+Here is the list of monitors for logs:
+
+- Excessive bandwidth usage detected
+- High average application peer time detected
+- High rate of unprevented threats detected
+
+#### Metrics
+
+Here is the list of monitors for metrics:
+
+- Anomalous increase in gateway requests per second detected
+- High gateway load detected
+- High proxy error rate detected
+- High proxy response time detected
+
 ## Setup
 
 **Note**: The following steps are required only for collecting metrics. For log collection, see the `Log collection` section below.
