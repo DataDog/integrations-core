@@ -212,9 +212,9 @@ def test_collect_connection_metrics_config_option(instance, collect_connection_m
             # Verify the connection metric was NOT submitted when disabled
             for call in collector.gauge.call_args_list:
                 metric_name = call[0][0] if call[0] else None
-                assert (
-                    metric_name != 'ibm_mq.channel.conn_status'
-                ), "conn_status metric should not be collected when collect_connection_metrics is False"
+                assert metric_name != 'ibm_mq.channel.conn_status', (
+                    "conn_status metric should not be collected when collect_connection_metrics is False"
+                )
 
 
 def _get_mocked_instance(instance):
