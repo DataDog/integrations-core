@@ -45,9 +45,9 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust-passwo
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `beyondtrust-password-safe.d/conf.yaml` file to start collecting your logs.
+2. Add this configuration block to your `beyondtrust_password_safe.d/conf.yaml` file to start collecting your logs.
 
-   See the sample [beyondtrust-password-safe.d/conf.yaml][4] for available configuration options.
+   See the sample [beyondtrust_password_safe.d/conf.yaml][4] for available configuration options.
 
    ```yaml
    logs:
@@ -205,7 +205,7 @@ To resolve:
 
 ### Error related to unidentified CIDR Range
 
-If you encounter an error indicating that the request is originating from an unidentified CIDR range, it may be due to a change in Datadog’s outbound IP ranges. Follow the steps from **Retrieve Datadog CIDR Range** section to retrieve and update the allowed CIDR ranges.
+If you encounter an error indicating that the request is originating from an unidentified CIDR range, it may be due to a change in Datadog's outbound IP ranges. Follow the steps from **Retrieve Datadog CIDR Range** section to retrieve and update the allowed CIDR ranges.
 
 For further assistance, contact [Datadog support][3].
 
