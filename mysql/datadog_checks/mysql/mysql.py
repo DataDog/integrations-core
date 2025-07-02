@@ -1222,7 +1222,6 @@ class MySql(AgentCheck):
                 result = cursor.fetchone()
 
                 self._binlog_enabled = self._get_variable_enabled(result, 'binlog_enabled')
-                self.log.debug("Binlog results: %s, is_affirmative: %s", result, self._binlog_enabled)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Error while checking if binlog is enabled. Defaulting to False: %s", e)
             self._binlog_enabled = False
