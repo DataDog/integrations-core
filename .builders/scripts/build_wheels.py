@@ -120,22 +120,6 @@ def main():
 
         check_process(command_args, env=env_vars)
 
-        # Remove test files
-        print(f"[INFO] Removing test files from wheels in {staged_wheel_dir}")
-        for wheel_file in staged_wheel_dir.glob("*.whl"):
-            print(f"[INFO] Processing wheel: {wheel_file.name}")
-            with zipfile.ZipFile(wheel_file, "r") as z:
-                before_files = z.namelist()
-            # print(f"[INFO] Files before removing test files: {before_files}")
-            remove_test_files(wheel_file)
-            with zipfile.ZipFile(wheel_file, "r") as z:
-                after_files = z.namelist()
-            # print(f"[INFO] Files after removing test files: {after_files}")
-            removed = set(before_files) - set(after_files)
-            if removed:
-                print(f"[INFO] Removed files: {sorted(removed)}")
-            else:
-                print(f"[INFO] No files were removed from: {wheel_file.name}")
 
         # Repair wheels
         check_process([
