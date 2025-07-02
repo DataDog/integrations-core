@@ -928,6 +928,7 @@ class PostgreSql(AgentCheck):
             conn.adapters.register_loader("text", text_loader)
             conn.adapters.register_loader("varchar", text_loader)
             conn.adapters.register_loader("name", text_loader)
+            conn.adapters.register_loader("regclass", text_loader)
             # conn.adapters.register_loader("bytea", bytes_loader)
         # connection = DBMConnection(conn)
         # if connection.is_ascii():
