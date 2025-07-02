@@ -270,7 +270,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
-        self._log.warning("METRICS")
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
