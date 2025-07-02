@@ -1,8 +1,17 @@
 diff --git a/scripts/build_wheels.py b/scripts/build_wheels.py
-index 09c9bcc0d3..983998011e 100644
+index 0c76a93f48..93278ebe1a 100644
 --- a/scripts/build_wheels.py
 --- b/scripts/build_wheels.py
-@@ -120,6 +120,10 @@ def main():
+@@ -8,7 +8,7 @@ from pathlib import Path
+ from tempfile import TemporaryDirectory
+ 
+ from dotenv import dotenv_values
+-from utils import extract_metadata, normalize_project_name
++from utils import extract_metadata, normalize_project_name, remove_test_files
+ 
+ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
+ CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
+@@ -119,6 +119,10 @@ def main():
  
          check_process(command_args, env=env_vars)
  
@@ -14,20 +23,21 @@ index 09c9bcc0d3..983998011e 100644
          # Repair wheels
          check_process([
 diff --git a/scripts/utils.py b/scripts/utils.py
-index fbcdcb590b..ce3fdbf7ec 100644
+index 63772a277d..1a140b0d7b 100644
 --- a/scripts/utils.py
 --- b/scripts/utils.py
-@@ -4,7 +4,8 @@ import email
- import os
+@@ -1,7 +1,10 @@
+ from __future__ import annotations
+ 
+ import email
++import os
  import re
- from pathlib import Path
--
 +import shutil
 +import tempfile
+ from pathlib import Path
  from zipfile import ZipFile
  
- UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
-@@ -35,3 +36,74 @@ def extract_metadata(wheel: Path) -> email.Message:
+@@ -33,3 +36,74 @@ def extract_metadata(wheel: Path) -> email.Message:
  
      return email.message_from_string(metadata_file_contents)
  
