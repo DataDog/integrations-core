@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.14.2 / 2025-07-02
+
+***Fixed***:
+
+* Ensure extension IDs are sent as text, not integer ([#20605](https://github.com/DataDog/integrations-core/pull/20605))
+
 ## 22.14.1 / 2025-06-26
 
 ***Fixed***:
