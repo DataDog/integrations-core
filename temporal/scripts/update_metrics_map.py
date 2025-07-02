@@ -64,7 +64,7 @@ def append_version_dict(tag: str, missing: list[str]) -> None:
 
     header = f"\n{var_name} = {{\n"
     body = [f"    '{m}': '{m}',  # TODO: verify mapping\n" for m in sorted(missing)]
-    footer = "}\n\n" f"METRIC_MAP.update({var_name})\n"
+    footer = f"}}\n\nMETRIC_MAP.update({var_name})\n"
 
     block = header + "".join(body) + footer
 
