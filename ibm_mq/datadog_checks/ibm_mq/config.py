@@ -81,7 +81,9 @@ class IBMMQConfig:
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
-        self.collect_statistics_metrics = is_affirmative(instance.get('collect_statistics_metrics', False))  # type: bool
+        self.collect_statistics_metrics = is_affirmative(
+            instance.get('collect_statistics_metrics', False)
+        )  # type: bool
         self.collect_reset_queue_metrics = is_affirmative(instance.get('collect_reset_queue_metrics', True))
         self.collect_connection_metrics = is_affirmative(instance.get('collect_connection_metrics', True))
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
@@ -92,7 +94,9 @@ class IBMMQConfig:
 
         self.channels = instance.get('channels', [])  # type: List[str]
 
-        self.channel_status_mapping = self.get_channel_status_mapping(instance.get('channel_status_mapping'))  # type: Dict[str, str]
+        self.channel_status_mapping = self.get_channel_status_mapping(
+            instance.get('channel_status_mapping')
+        )  # type: Dict[str, str]
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str

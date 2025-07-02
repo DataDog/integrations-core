@@ -38,7 +38,9 @@ class QueueMetricCollector(object):
         self.service_check = service_check  # type: Callable[[str, ServiceCheck, List[str]], None]
         self.warning = warning  # type: Callable
         self.send_metric = send_metric  # type: Callable[[str, str, Any, List[str]], None]
-        self.send_metrics_from_properties = send_metrics_from_properties  # type: Callable[[Dict, Dict, str, List[str]], None]
+        self.send_metrics_from_properties = (
+            send_metrics_from_properties
+        )  # type: Callable[[Dict, Dict, str, List[str]], None]
         self.log = log  # type: logging.LoggerAdapter
         self.user_provided_queues = set(self.config.queues)  # type: Set[str]
 
