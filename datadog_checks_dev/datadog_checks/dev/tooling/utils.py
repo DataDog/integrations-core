@@ -170,13 +170,7 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
     repo_choice = (
         'core'
         if core
-        else 'extras'
-        if extras
-        else 'agent'
-        if agent
-        else 'marketplace'
-        if marketplace
-        else config.get('repo', 'core')
+        else 'extras' if extras else 'agent' if agent else 'marketplace' if marketplace else config.get('repo', 'core')
     )
     config['repo_choice'] = repo_choice
     message = None
@@ -188,9 +182,7 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
             repo = (
                 'datadog-agent'
                 if repo_choice == 'agent'
-                else 'marketplace'
-                if repo_choice == 'marketplace'
-                else f'integrations-{repo_choice}'
+                else 'marketplace' if repo_choice == 'marketplace' else f'integrations-{repo_choice}'
             )
             message = f'`{repo}` directory `{root}` does not exist, defaulting to the current location.'
 

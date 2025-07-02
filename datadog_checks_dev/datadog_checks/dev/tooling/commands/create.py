@@ -234,7 +234,9 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             # Fill in all common non Marketplace fields
             template_fields['pricing_plan'] = ''
             if repo_choice in ['core', 'integrations-internal-core']:
-                template_fields['author_info'] = """
+                template_fields[
+                    'author_info'
+                ] = """
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
@@ -244,7 +246,9 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             else:
                 prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
                 prompt_and_update_if_missing(template_fields, 'author', 'Your name')
-                template_fields['author_info'] = f"""
+                template_fields[
+                    'author_info'
+                ] = f"""
   "author": {{
     "support_email": "{template_fields['email']}",
     "name": "{template_fields['author']}",

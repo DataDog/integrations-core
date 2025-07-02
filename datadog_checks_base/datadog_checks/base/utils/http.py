@@ -131,9 +131,7 @@ def get_tls_config_from_options(new_options):
         tls_config["tls_cert"] = cert[0]
         tls_config["tls_private_key"] = cert[1]
     elif cert is not None:
-        raise TypeError(
-            'Unexpected type for `cert` option. Expected str or tuple, got {}.'.format(type(cert).__name__)
-        )
+        raise TypeError('Unexpected type for `cert` option. Expected str or tuple, got {}.'.format(type(cert).__name__))
     return tls_config
 
 

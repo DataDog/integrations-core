@@ -109,7 +109,9 @@ def test_err_response(aggregator, instance):
     check = TwistlockCheck('twistlock', {}, [instance])
 
     with pytest.raises(Exception, match='^Error in response'):
-        with mock.patch('requests.Session.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
+        with mock.patch(
+            'requests.Session.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True
+        ):
             check.check(instance)
 
 

@@ -1111,9 +1111,9 @@ class TestSubmission:
         query_manager2 = QueryManager(check2, mock_executor(), [dummy_query])
         query_manager1.compile_queries()
         query_manager2.compile_queries()
-        assert not id(query_manager1.queries[0]) == id(query_manager2.queries[0]), (
-            "QueryManager does not copy the queries"
-        )
+        assert not id(query_manager1.queries[0]) == id(
+            query_manager2.queries[0]
+        ), "QueryManager does not copy the queries"
 
     def test_query_execution_error(self, caplog, aggregator):
         class Result(object):
