@@ -8,7 +8,6 @@ from __future__ import annotations
 import argparse
 import pathlib
 import sys
-from typing import List
 
 # We need access to METRIC_MAP and to helper functions from generate_metadata.py
 # ``scripts`` is **not** a package, so add its parent (repository root) to sys.path
@@ -28,52 +27,53 @@ except ImportError as exc:  # pragma: no cover – should never happen inside re
 # flake8: noqa: E402
 from datadog_checks.temporal.metrics import METRIC_MAP
 
+# Path to metrics.py that we will modify
 METRICS_FILE = REPO_ROOT / "datadog_checks" / "temporal" / "metrics.py"
 
 
-def locate_insertion_index(lines: List[str]) -> int:
-    """Return the index *before* the closing brace of METRIC_MAP."""
-    end_index = None
-    brace_level = 0
-    inside_map = False
+def build_version_var(tag: str) -> str:
+    """Return the variable name for a given Temporal version tag.
 
-    for idx, line in enumerate(lines):
-        if not inside_map and line.lstrip().startswith("METRIC_MAP") and "{" in line:
-            inside_map = True
-            brace_level = line.count("{") - line.count("}")
-            continue
-
-        if inside_map:
-            brace_level += line.count("{") - line.count("}")
-            if brace_level == 0:
-                # `idx` points to the line containing the closing brace '}'
-                end_index = idx
-                break
-
-    if end_index is None:
-        raise RuntimeError("Could not locate end of METRIC_MAP in metrics.py")
-    return end_index
+    Example: ``v1.29.0`` -> ``TEMPORAL_V1_29_0_METRICS``.
+    """
+    cleaned = tag.lstrip("vV")  # strip leading 'v'
+    var_suffix = cleaned.replace(".", "_")
+    return f"TEMPORAL_V{var_suffix}_METRICS"
 
 
-def append_missing_metrics(missing: List[str]) -> None:
-    """Append mapping placeholders for *missing* metrics to metrics.py."""
+def append_version_dict(tag: str, missing: list[str]) -> None:
+    """Append a new *version-specific* metric mapping dictionary to metrics.py.
+
+    The generated block has the following structure::
+
+        TEMPORAL_VX_YY_ZZ_METRICS = {
+            'metric_a': 'metric_a', # TODO: verify mapping
+            ...
+        }
+
+        METRIC_MAP.update(TEMPORAL_VX_YY_ZZ_METRICS)
+    """
+
+    var_name = build_version_var(tag)
+
+    # Skip if dictionary already exists – prevents accidental duplication
     with METRICS_FILE.open("r", encoding="utf-8") as fp:
-        lines = fp.readlines()
+        if var_name in fp.read():
+            print(f"⚠️  {var_name} already exists in metrics.py – nothing to do.")
+            return
 
-    insert_at = locate_insertion_index(lines)
+    header = f"\n{var_name} = {{\n"
+    body = [f"    '{m}': '{m}',  # TODO: verify mapping\n" for m in sorted(missing)]
+    footer = "}\n\n" f"METRIC_MAP.update({var_name})\n"
 
-    # Prepare new lines – 4-space indentation to match existing file style.
-    # We also record the Temporal version we pulled these from to aid future audits.
-    version_comment = f"added in temporal version {ARGS_TAG}" if ARGS_TAG else "added automatically"
-    new_lines = [f"    '{m}': '{m}',  # TODO: verify mapping, {version_comment}\n" for m in sorted(missing)]
+    block = header + "".join(body) + footer
 
-    # Insert before the closing brace
-    updated_lines = lines[:insert_at] + new_lines + lines[insert_at:]
+    # Append to the end of the file. All existing version dicts are currently
+    # declared at the end, so this keeps chronological order.
+    with METRICS_FILE.open("a", encoding="utf-8") as fp:
+        fp.write(block)
 
-    with METRICS_FILE.open("w", encoding="utf-8") as fp:
-        fp.writelines(updated_lines)
-
-    print("Appended", len(new_lines), "new entries to METRIC_MAP.")
+    print(f"Appended {len(missing)} new entries to {var_name} and updated METRIC_MAP.")
 
 
 def main() -> None:
@@ -88,7 +88,8 @@ def main() -> None:
     3. Compute the set difference between those identifiers and the keys already
     present in ``METRIC_MAP``.
     4. Append entries for the missing metrics to ``datadog_checks/temporal/metrics.py``
-    right before the closing "}" of the dictionary.
+    as a new dictionary.
+    5. Update the ``METRIC_MAP`` variable to include the new dictionary.
 
     For every newly-added metric we default the Datadog metric name to be identical to
     Temporal's.
@@ -115,8 +116,8 @@ def main() -> None:
         print("✅ No missing metrics – METRIC_MAP is up to date!")
         return
 
-    # update metrics.py
-    append_missing_metrics(missing_metrics)
+    # update metrics.py by adding a new version-specific dictionary
+    append_version_dict(args.tag, missing_metrics)
 
     print("💡 Please review the TODO comments and adjust metric names/types where necessary.")
 
