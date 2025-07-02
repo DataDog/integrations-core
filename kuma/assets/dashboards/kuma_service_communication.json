@@ -1,5 +1,5 @@
 {
-  "title": "Kuma Service Communication (Development)",
+  "title": "Kuma Service Communication",
   "description": "## Service Communication Insights\n\nThis dashboard tracks communication between services in your Kuma mesh, helping you:\n\n**Identify issues:**\n- Connection failures and timeouts\n- Increased latency between services\n- Traffic imbalances and hotspots\n\n**Further Reading:**\n- [Traffic Metrics Policy](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Observability Guide](https://kuma.io/docs/latest/explore/observability/)\n\n[[suggested_dashboards]]",
   "widgets": [
     {
