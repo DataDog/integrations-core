@@ -20,6 +20,10 @@ IGNORED_STATS = {
     'elapsed_time',
 }
 
+IGNORED_LNET_GROUPS = {
+    'interfaces',
+}
+
 @dataclass(frozen=True)
 class LustreParam:
     regex: str

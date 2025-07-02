@@ -8,7 +8,7 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
-from datadog_checks.lustre.metrics import LNET_LOCAL_METRICS, LNET_PEER_METRICS, LNET_STATS_METRICS, JOBSTATS_MDS_METRICS, JOBSTATS_OSS_METRICS
+from .metrics import LNET_LOCAL_METRICS, LNET_PEER_METRICS, LNET_STATS_METRICS, JOBSTATS_MDS_METRICS, JOBSTATS_OSS_METRICS
 from datadog_checks.dev import get_here
 import os
 import mock
@@ -21,6 +21,19 @@ FIXTURES_DIR = os.path.join(HERE, 'fixtures')
 def disable_subprocess():
     with mock.patch('datadog_checks.lustre.check.subprocess.run'):
         yield
+
+def mock_run_command(command_fixture_mapping):
+    def run_command(bin, *args, **kwargs):
+        requested_command = f"{bin} {' '.join(args)}"
+        for cmd, fixture_file in command_fixture_mapping.items():
+            if requested_command.startswith(cmd):
+                fixture_file = command_fixture_mapping.get(cmd)
+                if fixture_file:
+                    with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
+                        return f.read()
+        raise ValueError(f"Unexpected command: {requested_command}")
+    return run_command
+
 
 def test_check(dd_run_check, aggregator, instance):
     check = LustreCheck('lustre', {}, [instance])
@@ -39,13 +52,14 @@ def test_check(dd_run_check, aggregator, instance):
 )
 def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expected_metrics):
     instance = {'node_type': node_type}
-    def mock_run_command(bin, *args, **kwargs):
-        if args[0] == 'list_param':
-            return 'some.job_stats.param'
-        elif args[0] == 'get_param':
-            with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
-                return f.read()
-    with mock.patch.object(LustreCheck, 'run_command', side_effect=mock_run_command) as mock_run:
+    mapping = {
+            'lctl get_param -ny version': 'all_version.txt',
+            'lctl dl': f'{node_type}_dl_yaml.txt',
+            'lctl list_param': "all_list_param.txt",
+            'lctl get_param': fixture_file,
+    }
+    new_run_command = mock_run_command(mapping)
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=new_run_command):
         check = LustreCheck('lustre', {}, [instance])
         check.submit_jobstats_metrics()
     for metric in expected_metrics:
@@ -61,9 +75,13 @@ def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expec
         ],
 )
 def test_lnet(aggregator, instance, method, fixture_file, expected_metrics):
-    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
-        with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
-            mock_run.return_value = f.read()
+    mapping = {
+            'lctl get_param -ny version': 'all_version.txt',
+            'lctl dl': 'client_dl_yaml.txt',
+            'lnetctl': fixture_file,
+    }
+    new_run_command = mock_run_command(mapping)
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=new_run_command):
         check = LustreCheck('lustre', {}, [instance])
         getattr(check, method)()
     for metric in expected_metrics:
@@ -71,11 +89,14 @@ def test_lnet(aggregator, instance, method, fixture_file, expected_metrics):
 
 
 def test_device_health(aggregator, instance):
-    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
-        with open(os.path.join(FIXTURES_DIR, 'client_dl_yaml.txt'), 'r') as f:
-            mock_run.return_value = f.read()
+    mapping = {
+            'lctl get_param -ny version': 'all_version.txt',
+            'lctl dl': 'client_dl_yaml.txt',
+    }
+    new_run_command = mock_run_command(mapping)
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=new_run_command):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_device_health()
+        check.submit_device_health(check.devices)
     
     expected_metrics = [
         'lustre.device.health',
@@ -90,14 +111,16 @@ def test_device_health(aggregator, instance):
         'device_type:mgc',
         'device_name:MGC172.31.16.218@tcp',
         'device_uuid:7d3988a7-145f-444e-9953-58e3e6d97385',
-        'node_type:client'
+        'node_type:client',
+        'lustre_version:2.16.1'
     ])
     
     aggregator.assert_metric('lustre.device.refcount', value=5, tags=[
         'device_type:mgc',
         'device_name:MGC172.31.16.218@tcp',
         'device_uuid:7d3988a7-145f-444e-9953-58e3e6d97385',
-        'node_type:client'
+        'node_type:client',
+        'lustre_version:2.16.1'
     ])
 
 
@@ -110,34 +133,33 @@ def test_device_health(aggregator, instance):
     ],
 )
 def test_node_type(fixture_file, expected_node_type):
-    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
-        with open(os.path.join(FIXTURES_DIR, fixture_file), 'r') as f:
-            mock_run.return_value = f.read()
+    mapping = {
+            'lctl get_param -ny version': 'all_version.txt',
+            'lctl dl': fixture_file,
+    }
+    new_run_command = mock_run_command(mapping)
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=new_run_command):
         check = LustreCheck('lustre', {}, [{}])
         node_type = check._find_node_type()
         assert node_type == expected_node_type
 
 
 def test_submit_changelogs(aggregator, instance):
-    with mock.patch.object(LustreCheck, 'run_command') as mock_run:
-        with open(os.path.join(FIXTURES_DIR, 'client_dl_yaml.txt'), 'r') as f:
-            mock_run.return_value = f.read()
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lfs changelog': 'client_changelogs.txt',
+    }
+    new_run_command = mock_run_command(mapping)
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=new_run_command):
         check = LustreCheck('lustre', {}, [instance])
-        check.filesystems = ['lustre']
-        check._update_changelog_targets()
+        check._update_changelog_targets(check.devices, ["lustre"])
         
-        # Mock the get_changelog method to return test data
-        test_changelog_data = (
-            "4 07RMDIR 12:47:32.913242547 2025.06.02 0x1 t=[0x200000bd1:0x3:0x0] bacillus\n"
-            "5 02MKDIR 12:48:25.401684027 2025.06.02 0x0 t=[0x200000bd1:0x4:0x0] bacillus\n" 
-            "6 01CREAT 12:50:50.996256280 2025.06.02 0x0 t=[0x200000bd1:0x5:0x0] bulgaricus.txt\n"
-        )
-        with mock.patch.object(check, 'get_changelog', return_value=test_changelog_data):
-            with mock.patch.object(check, 'send_log') as mock_send_log:
-                check.submit_changelogs()
+        with mock.patch.object(check, 'send_log') as mock_send_log:
+            check.submit_changelogs(1000)
         
         # Verify send_log was called for each changelog entry
-        assert mock_send_log.call_count == 3
+        assert mock_send_log.call_count == 304
         
         # Verify the first call arguments
         first_call = mock_send_log.call_args_list[0]
@@ -145,26 +167,30 @@ def test_submit_changelogs(aggregator, instance):
             'operation_type': '07RMDIR',
             'timestamp': 1748861252.0,
             'flags': '0x1',
-            'message': 't=[0x200000bd1:0x3:0x0] bacillus'
+            'message': 't=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus'
         }
         assert first_call[0][0] == expected_data
         assert first_call[0][1] == {'index': '4'}
 
 
 def test_get_changelog(instance):
-    with mock.patch.object(LustreCheck, 'run_command') as mock_run_command:
-        with open(os.path.join(FIXTURES_DIR, 'client_changelogs.txt'), 'r') as f:
-            mock_run_command.return_value = f.read()
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lfs changelog': 'client_changelogs.txt',
+    }
+    new_run_command = mock_run_command(mapping)
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=new_run_command) as mock_run:
         
         check = LustreCheck('lustre', {}, [instance])
         
         # Mock get_log_cursor to return a starting index
         with mock.patch.object(check, 'get_log_cursor', return_value={'index':'100'}):
-            result = check.get_changelog('lustre-MDT0000')
+            result = check._get_changelog('lustre-MDT0000', 1000)
             
             # Verify the command was called with correct arguments
-            mock_run_command.assert_called_with(
-                '/usr/bin/lfs', 'changelog', 'lustre-MDT0000', '100', '1100', sudo=True
+            mock_run.assert_called_with(
+                'lfs', 'changelog', 'lustre-MDT0000', '100', '1100', sudo=True
             )
             
             # Verify the result contains changelog data
@@ -173,8 +199,8 @@ def test_get_changelog(instance):
         
         # Test with no previous cursor (start from 0)
         with mock.patch.object(check, 'get_log_cursor', return_value=None):
-            result = check.get_changelog('lustre-MDT0000')
+            result = check._get_changelog('lustre-MDT0000', 1000)
             
-            mock_run_command.assert_called_with(
-                '/usr/bin/lfs', 'changelog', 'lustre-MDT0000', '0', '1000', sudo=True
+            mock_run.assert_called_with(
+                'lfs', 'changelog', 'lustre-MDT0000', '0', '1000', sudo=True
             )

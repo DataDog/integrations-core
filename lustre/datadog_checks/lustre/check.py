@@ -4,7 +4,7 @@
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
-from .constants import DEFAULT_PARAMS, EXTRA_PARAMS, FILESYSTEM_DISCOVERY_PARAM_MAPPING, JOBSTATS_PARAM_MAPPING, IGNORED_STATS
+from .constants import DEFAULT_PARAMS, EXTRA_PARAMS, FILESYSTEM_DISCOVERY_PARAM_MAPPING, JOBSTATS_PARAM_MAPPING, IGNORED_STATS, IGNORED_LNET_GROUPS
 import subprocess
 import yaml
 import re
@@ -45,7 +45,7 @@ class LustreCheck(AgentCheck):
 
         self.tags = self.instance.get('tags', [])
         self.tags.append(f'node_type:{self.node_type}')
-        version = self.run_command(self.lctl_path, 'get_param', '-ny', 'version').strip()
+        version = self._run_command("lctl", 'get_param', '-ny', 'version').strip()
         self.tags.append(f'lustre_version:{version}')
 
     def _find_node_type(self):
@@ -184,17 +184,17 @@ class LustreCheck(AgentCheck):
             return
         for metric_type, value in values.items():
             if metric_type == 'unit':
-                return
+                continue
             if metric_type == 'hist':
                 # TODO: Handle histogram metrics if needed
-                return
+                continue
             self.gauge(f'job_stats.{name}.{metric_type}', value, tags=tags)
 
     def _get_jobstats_params_list(self):
         '''
         Get the jobstats params from the command line.
         '''
-        if not self.node_typ in JOBSTATS_PARAM_MAPPING:
+        if not self.node_type in JOBSTATS_PARAM_MAPPING:
             self.log.debug(f'Invalid jobstats device_type: {self.node_type}')
             return []
         param_regex = JOBSTATS_PARAM_MAPPING[self.node_type]
@@ -225,7 +225,7 @@ class LustreCheck(AgentCheck):
         '''
         Submit the lnet local ni metrics.
         '''
-        lnet_local_stats = self.get_lnet_metrics('net')['net']
+        lnet_local_stats = self._get_lnet_metrics('net')['net']
         for net in lnet_local_stats:
             net_type = net.get('net type')
             for ni in net.get('local NI(s)', []):
@@ -240,7 +240,7 @@ class LustreCheck(AgentCheck):
         '''
         Submit the lnet peer ni metrics.
         '''
-        lnet_peer_stats = self.get_lnet_metrics('peer')['peer']
+        lnet_peer_stats = self._get_lnet_metrics('peer')['peer']
         for peer in lnet_peer_stats:
             nid = peer.get('primary nid')
             for ni in peer.get('peer ni', []):
@@ -263,11 +263,14 @@ class LustreCheck(AgentCheck):
                   ping_count: 0
                   next_ping: 0
         '''
+        group_name = group_name.replace(' ', '_')
         if not isinstance(group, dict):
             return
+        if group_name in IGNORED_LNET_GROUPS:
+            self.log.debug(f'Ignoring lnet group {group_name}')
+            return
         for metric_name, metric_value in group.items():
-            group_name.replace(' ', '_')
-            metric_name.replace(' ', '_')
+            metric_name = metric_name.replace(' ', '_')
             if isinstance(metric_value, int):
                 self.gauge(f'net.{prefix}.{group_name}.{metric_name}', metric_value, tags=tags)
 
