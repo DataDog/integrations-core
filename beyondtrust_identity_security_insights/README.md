@@ -2,7 +2,7 @@
 
 ## Overview
 
-[BeyondTrust Identity Security Insights][1] is a web-based application designed to enhance identity protection. It connects BeyondTrust products and third-party services to automatically scan for associated accounts and track your organization’s identities.
+[BeyondTrust Identity Security Insights][1] is a web-based application designed to enhance identity protection. It connects BeyondTrust products and third-party services to automatically scan for associated accounts and track your organization's identities.
 
 Integrate BeyondTrust Identity Security Insights with Datadog to gain insights into Detections Logs using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security which in turn can also be used with [Datadog Workflow Automation][5] leveraging OOTB Workflow Blueprints to orchestrate and automate your end-to-end processes.
 
