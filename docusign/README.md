@@ -20,7 +20,7 @@ To integrate Docusign with Datadog, Datadog connects to Docusign using OAuth. Th
 6. Click **Authorize**.
 7. You're redirected back to Datadog's Docusign tile with a new account. Datadog recommends changing the account name to something that is easier to remember. You can add multiple accounts with access to different organizations.
 
-Note: Docusign saves this authorization selection. To be prompted again or add new organizations, revoke app access on Docusign (`Organization > Connected Apps > Datadog - Docusign OAuth App`), then restart the setup process.
+**Note**: Docusign saves this authorization selection. To be prompted again or add new organizations, revoke app access on Docusign (`Organization > Connected Apps > Datadog - Docusign OAuth App`), then restart the setup process.
 
 ## Data Collected
 
