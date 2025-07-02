@@ -34,8 +34,8 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "certsrv",
-        "iissvcs"
+        "iissvcs",
+        "CERTLM.MSC"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
