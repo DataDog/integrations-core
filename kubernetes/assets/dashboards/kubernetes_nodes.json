@@ -1969,7 +1969,7 @@
             "default": "*"
         },
         {
-            "name": "kube_node",
+            "name": "node",
             "prefix": "kube_node",
             "available_values": [],
             "default": "*"
