@@ -1,3 +1,21 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""
+IBM MQ Connection Simulation Script
+
+This script simulates an active connection to an IBM MQ queue manager for manual testing purposes.
+It connects to a specified queue manager, puts a message to a queue, and maintains the connection
+for 120 seconds to simulate an active channel connection.
+
+This script was used for manual testing of the IBM MQ integration PR that adds connection-related
+metrics (ibm_mq.channel.conn_status and ibm_mq.channel.connections_active). By creating active
+connections, we can verify that the new metrics properly detect and count channel connections.
+
+Usage: python simulate_mq_conn.py <QMGR> <CHANNEL> <HOST> <PORT> <QUEUE> [<MESSAGE>] [<USER>] [<PASSWORD>]
+Example: python simulate_mq_conn.py QM1 GCP.A localhost 11414 APP.QUEUE.1 "Hello from script" admin passw0rd
+"""
+
 import sys
 import time
 
