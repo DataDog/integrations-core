@@ -45,10 +45,10 @@ class SQLASCIITextLoader(psycopg.adapt.Loader):
     format = psycopg.pq.Format.TEXT
 
     def load(self, data):
-        if type(data) is memoryview:
+        if isinstance(data, memoryview):
             # Convert memoryview to bytes
             data = data.tobytes()
-        if type(data) is not bytes or data is None:
+        if not isinstance(data, bytes) or data is None:
             return data
         try:
             return decode_with_encodings(data, self.encodings)

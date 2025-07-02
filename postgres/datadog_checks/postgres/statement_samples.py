@@ -348,8 +348,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             # Manually decode backend_type to handle bad encodings in Azure
             row['backend_type'] = (
                 row.get['backend_type'].decode('utf-8', errors='backslashreplace')
-                if type(row.get('backend_type')) is bytes
-                else row['backend_type']
+                if isinstance(row.get('backend_type'), bytes)
+                else row.get('backend_type')
             )
 
             if not row.get('query'):
