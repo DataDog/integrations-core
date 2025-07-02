@@ -93,6 +93,8 @@ semver = ['BSD-3-Clause']
 simplejson = ['MIT']
 # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
 supervisor = ['BSD-3-Clause-Modification']
+# https://github.com/prometheus/client_python/issues/1110
+prometheus-client = ['Apache-2.0']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
@@ -149,7 +151,6 @@ unsorted = [
 
 [overrides.dep.updates]
 exclude = [
-    'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
@@ -160,7 +161,9 @@ exclude = [
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
     'psutil',
+    'pyvmomi', # 9+ has breaking changes
     'pymongo', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'foundationdb', # 7+ has a breaking changes
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

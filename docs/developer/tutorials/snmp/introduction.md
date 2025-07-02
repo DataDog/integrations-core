@@ -80,7 +80,7 @@ The full list of vendor sub-trees can be found here: [SNMP OID 1.3.6.1.4.1](http
 
 | OID               | Label               | Description                                                                                    |
 | ----------------- | ------------------- | ---------------------------------------------------------------------------------------------- |
-| `1.3.6.1.2.1.2`   | `sysObjectId`       | An OID whose value is an OID that represents the device make and model (yes, it's a bit meta). |
+| `1.3.6.1.2.1.1.2` | `sysObjectId`       | An OID whose value is an OID that represents the device make and model (yes, it's a bit meta). |
 | `1.3.6.1.2.1.1.1` | `sysDescr`          | A human-readable, free-form description of the device.                                         |
 | `1.3.6.1.2.1.1.3` | `sysUpTimeInstance` | The device uptime.                                                                             |
 

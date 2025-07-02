@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 4.5.0 / 2025-04-17
+## 4.7.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+***Fixed***:
+
+* skip topology link resolution for cisco-aci when remote port index is None ([#20418](https://github.com/DataDog/integrations-core/pull/20418))
+
+## 4.6.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 4.5.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
 

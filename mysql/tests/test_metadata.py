@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
-from os import environ
 
 import pytest
 from packaging.version import parse as parse_version
@@ -11,7 +10,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.mysql import MySql
 
 from . import common
-from .common import MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 from .utils import deep_compare
 
 
@@ -76,7 +75,6 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_metadata_collection_interval_and_enabled(dbm_instance):
-
     dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
     dbm_instance['collect_settings'] = {"enabled": False, "collection_interval": 100}
 
@@ -107,7 +105,7 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
-    is_maria_db = environ.get('MYSQL_FLAVOR') == 'mariadb'
+    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
         "default_character_set_name": "normalized_value",
@@ -653,6 +651,20 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     actual_payloads = {}
 
+    expected_tags = (
+        'database_hostname:stubbed.hostname',
+        'database_instance:stubbed.hostname',
+        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+        'port:13306',
+        'tag1:value1',
+        'tag2:value2',
+    )
+    if MYSQL_FLAVOR.lower() == 'mysql':
+        expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
+
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
@@ -661,15 +673,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
         assert (schema_event.get("flavor") == "MariaDB") or (schema_event.get("flavor") == "MySQL")
-        assert sorted(schema_event["tags"]) == [
-            'database_hostname:stubbed.hostname',
-            'database_instance:stubbed.hostname',
-            'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-            'dd.internal.resource:database_instance:stubbed.hostname',
-            'port:13306',
-            'tag1:value1',
-            'tag2:value2',
-        ]
+        assert sorted(schema_event["tags"]) == sorted(expected_tags)
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']
@@ -691,7 +695,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
 @pytest.mark.integration
 def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
-
     dbm_instance['dbm'] = True
     dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
     expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
@@ -707,3 +710,15 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
             ):
                 found = True
     assert found
+
+
+@pytest.mark.unit
+def test_schemas_collection_config(dbm_instance):
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert check._config.schemas_config == {"enabled": True, "max_execution_time": 0}
+
+    dbm_instance.pop('schemas_collection')
+    dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert check._config.schemas_config == {"enabled": True, "max_execution_time": 0}

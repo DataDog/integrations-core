@@ -397,8 +397,8 @@ jobs:
       if: always()
       run: |-
         mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-        if [[ -d ${{ inputs.target }}/.junit ]]; then
-          mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d ${{ inputs.target }}/junit ]]; then
+          mv ${{ inputs.target }}/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
         fi
 
     - name: Upload test results
@@ -415,7 +415,7 @@ jobs:
         always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
-      uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d
+      uses: codecov/codecov-action@15559ed290fa727036809b67ab0f646ffa6c5158
       with:
         use_oidc: true
         files: "${{ inputs.target }}/coverage.xml"

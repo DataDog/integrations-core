@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.1 / 2025-06-12
+
+***Fixed***:
+
+* Fix collection of metrics from sinfo on `collection_level` 2 ([#20456](https://github.com/DataDog/integrations-core/pull/20456))
+
+## 2.0.0 / 2025-05-15 / Agent 7.67.0
+
+***Changed***:
+
+* Change tagging logic for node and partition metrics ([#20257](https://github.com/DataDog/integrations-core/pull/20257))
+* Bump datadog-checks-base to 37.10.1 ([#20271](https://github.com/DataDog/integrations-core/pull/20271))
+
+***Added***:
+
+* Collect post job efficiency data from seff output ([#20255](https://github.com/DataDog/integrations-core/pull/20255))
+
+***Fixed***:
+
+* Changed metric to `slurm.sdiag.backfill.last_cycle_seconds_ago` for consistency ([#20256](https://github.com/DataDog/integrations-core/pull/20256))
+
 ## 1.2.0 / 2025-05-08
 
 ***Added***:

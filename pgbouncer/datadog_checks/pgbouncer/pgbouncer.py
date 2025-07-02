@@ -174,7 +174,7 @@ class PgBouncer(AgentCheck):
                 except Exception:
                     self.log.debug("Error closing connection after failed creation", exc_info=True)
             redacted_url = self._get_redacted_dsn()
-            message = u'Cannot establish connection to {}'.format(redacted_url)
+            message = 'Cannot establish connection to {}'.format(redacted_url)
 
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message
@@ -188,7 +188,7 @@ class PgBouncer(AgentCheck):
 
     def _get_redacted_dsn(self):
         if not self.database_url:
-            return u'pgbouncer://%s:******@%s:%s/%s' % (self.user, self.host, self.port, self.DB_NAME)
+            return 'pgbouncer://%s:******@%s:%s/%s' % (self.user, self.host, self.port, self.DB_NAME)
 
         parsed_url = urlparse(self.database_url)
         if parsed_url.password:
@@ -216,7 +216,7 @@ class PgBouncer(AgentCheck):
                 self._try_collect_data(allow_reconnect=False)
             else:
                 redacted_url = self._get_redacted_dsn()
-                message = u'Connection error while collecting data from: {}'.format(redacted_url)
+                message = 'Connection error while collecting data from: {}'.format(redacted_url)
                 self.log.error(message)
                 self.service_check(
                     self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message

@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c6a4b38e-c5c1-4e5a-9290-54e89bb3b35f",
   "app_id": "kaspersky",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

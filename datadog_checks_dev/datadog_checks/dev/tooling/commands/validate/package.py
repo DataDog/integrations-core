@@ -93,7 +93,7 @@ def package(check):
                 display_queue.append(
                     (
                         echo_failure,
-                        f'   Invalid email(s) found in {check}/pyproject.toml: ' f'{", ".join(invalid_emails)}.',
+                        f'   Invalid email(s) found in {check}/pyproject.toml: {", ".join(invalid_emails)}.',
                     )
                 )
 

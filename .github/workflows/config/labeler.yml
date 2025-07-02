@@ -87,10 +87,14 @@ integration/azure_iot_edge:
 - azure_iot_edge/**/*
 integration/bitdefender:
 - bitdefender/**/*
+integration/bitwarden:
+- bitwarden/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
 - boundary/**/*
+integration/box:
+- box/**/*
 integration/brevo:
 - brevo/**/*
 integration/btrfs:
@@ -99,6 +103,8 @@ integration/cacti:
 - cacti/**/*
 integration/calico:
 - calico/**/*
+integration/carbon_black_cloud:
+- carbon_black_cloud/**/*
 integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
@@ -159,6 +165,8 @@ integration/couch:
 - couch/**/*
 integration/couchbase:
 - couchbase/**/*
+integration/crewai:
+- crewai/**/*
 integration/cri:
 - cri/**/*
 integration/crio:
@@ -183,6 +191,8 @@ integration/disk:
 - disk/**/*
 integration/dns_check:
 - dns_check/**/*
+integration/dnsfilter:
+- dnsfilter/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
 integration/docusign:
@@ -203,6 +213,8 @@ integration/elastic:
 - elastic/**/*
 integration/envoy:
 - envoy/**/*
+integration/eset_protect:
+- eset_protect/**/*
 integration/esxi:
 - esxi/**/*
 integration/etcd:
@@ -291,6 +303,8 @@ integration/ibm_mq:
 - ibm_mq/**/*
 integration/ibm_was:
 - ibm_was/**/*
+integration/iboss:
+- iboss/**/*
 integration/ignite:
 - ignite/**/*
 integration/iis:
@@ -365,6 +379,8 @@ integration/kubevirt_controller:
 - kubevirt_controller/**/*
 integration/kubevirt_handler:
 - kubevirt_handler/**/*
+integration/kuma:
+- kuma/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
@@ -381,6 +397,10 @@ integration/linux_audit_logs:
 - linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/litellm:
+- litellm/**/*
+integration/mac_audit_logs:
+- mac_audit_logs/**/*
 integration/mailchimp:
 - mailchimp/**/*
 integration/mapr:
@@ -399,6 +419,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_dns:
+- microsoft_dns/**/*
 integration/microsoft_sysmon:
 - microsoft_sysmon/**/*
 integration/milvus:
@@ -567,6 +589,8 @@ integration/snmp_netapp:
 - snmp_netapp/**/*
 integration/snowflake:
 - snowflake/**/*
+integration/solarwinds:
+- solarwinds/**/*
 integration/solr:
 - solr/**/*
 integration/sonarqube:
@@ -673,6 +697,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/watchguard_firebox:
+- watchguard_firebox/**/*
 integration/wazuh:
 - wazuh/**/*
 integration/weaviate:
@@ -683,6 +709,8 @@ integration/win32_event_log:
 - win32_event_log/**/*
 integration/wincrashdetect:
 - wincrashdetect/**/*
+integration/windows_certificate:
+- windows_certificate/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
 integration/windows_registry:
@@ -691,8 +719,12 @@ integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
 - winkmem/**/*
+integration/wlan:
+- wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
+integration/workato:
+- workato/**/*
 integration/yarn:
 - yarn/**/*
 integration/zeek:
