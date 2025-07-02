@@ -305,6 +305,25 @@ def test_health_checks(aggregator, health_check_metric, expected_metric_count, e
 
     aggregator.assert_metric('consul.check.up', count=expected_metric_total)
 
+    event = {
+        "event_type": "consul.check_failed",
+        "source_type_name": "consul",
+        "msg_title": "Service 'server-loadbalancer' check Failed",
+        "msg_text": "Check server-loadbalancer for service id server-loadbalancer, id: server-loadbalancerfailed "
+        "on node node-1: CheckHttp CRITICAL: Request error: Connection refused - connect(2) "
+        "for \"localhost\" port 80\n",
+        "aggregation_key": "consul.status_check",
+        "tags": [
+            'check:server-loadbalancer',
+            'consul_service:server-loadbalancer',
+            'consul_service_id:server-loadbalancer',
+            'consul_node:node-1',
+            'consul_status:critical',
+        ],
+    }
+
+    aggregator.assert_event(exact_match=False, count=expected_metric_count, **event)
+
 
 def test_service_checks_disable_service_tag(aggregator):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG])

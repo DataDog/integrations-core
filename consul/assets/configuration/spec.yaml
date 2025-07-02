@@ -135,7 +135,8 @@ files:
 
     - name: health_check_metric
       description: |
-        Whether to enable new node health checks from this instance.
+        Whether to enable new service health checks from this instance. Enabling this will
+        also emit an event for every failed service check.
       value:
         type: boolean
         display_default: false

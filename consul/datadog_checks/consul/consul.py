@@ -366,27 +366,47 @@ class ConsulCheck(OpenMetricsBaseCheck):
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
                 sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
-                status = STATUS_SC.get(check['Status'])
+                check_status = check.get('Status')
+                status = STATUS_SC.get(check_status)
                 if status is None:
                     status = self.UNKNOWN
 
                 if self.health_check_metric or sc_id not in service_checks:
-                    tags = ["check:{}".format(check["CheckID"])]
-                    if check["ServiceName"]:
-                        tags.append('consul_service:{}'.format(check['ServiceName']))
+                    check_id = check.get("CheckID")
+                    service_id = check.get("ServiceID")
+                    service_name = check.get("ServiceName")
+                    node_name = check.get("Node")
+                    tags = ["check:{}".format(check_id)]
+                    if service_name:
+                        tags.append('consul_service:{}'.format(service_name))
                         if not self.disable_legacy_service_tag:
                             self._log_deprecation('service_tag', 'consul_service')
-                            tags.append('service:{}'.format(check['ServiceName']))
-                    if check["ServiceID"]:
-                        tags.append("consul_service_id:{}".format(check["ServiceID"]))
-                    if check["Node"]:
-                        tags.append("consul_node:{}".format(check["Node"]))
+                            tags.append('service:{}'.format(service_name))
+                    if service_id:
+                        tags.append("consul_service_id:{}".format(service_id))
+                    if node_name:
+                        tags.append("consul_node:{}".format(node_name))
 
                     if self.health_check_metric:
                         status_value = STATUS_SEVERITY.get(status)
                         node_tags = copy.deepcopy(tags)
-                        node_tags.append(f"consul_status:{check['Status']}")
+                        node_tags.append(f"consul_status:{check_status}")
                         self.gauge(HEALTH_CHECK_METRIC, status_value, tags=main_tags + node_tags)
+                        if status_value == 3:
+                            check_name = check.get("Name", "Consul Status Check")
+                            check_output = check.get("Output", "")
+                            self.event(
+                                {
+                                    "timestamp": timestamp(),
+                                    "event_type": "consul.check_failed",
+                                    "source_type_name": SOURCE_TYPE_NAME,
+                                    "msg_title": f"{check_name} Failed",
+                                    "aggregation_key": "consul.status_check",
+                                    "msg_text": f"Check {check_id} for service id {service_name}, id: {service_id}"
+                                    f"failed on node {node_name}: {check_output}",
+                                    "tags": node_tags,
+                                }
+                            )
 
                     if sc_id not in service_checks:
                         service_checks[sc_id] = {'status': status, 'tags': tags}
