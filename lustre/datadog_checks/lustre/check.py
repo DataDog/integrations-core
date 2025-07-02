@@ -4,20 +4,27 @@
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
+from .params import DEFAULT_PARAMS, EXTRA_PARAMS
 import subprocess
 import yaml
 from dataclasses import dataclass
 import re
 import time
 
-OSS_JOBSTATS_PARAM_REGEX = r'obdfilter.*.job_stats'
-MDS_JOBSTATS_PARAM_REGEX = r'mdt.*.job_stats'
+JOBSTATS_PARAM_MAPPING = {
+        'oss': r'obdfilter.*.job_stats',
+        'mds': r'mdt.*.job_stats',
+}
+
 
 IGNORED_STATS = {
     'snapshot_time',
     'start_time',
     'elapsed_time',
 }
+
+# TODO: Make most "get" functions private, only keep the functions called in check public (at most)
+# TODO: Make smaller "_submit" functions to flatten the logic
 
 class LustreCheck(AgentCheck):
 
@@ -42,6 +49,8 @@ class LustreCheck(AgentCheck):
         self.devices = []
         self.changelog_targets = []
         self.filesystems = self.instance.get("filesystems", [])
+        # If filesystems were provided by the instance, do not update the filesystem list
+        self.filesystem_discovery = False if self.filesystems else True
         self.node_type = self.instance.get("node_type", self._find_node_type())
 
         self.tags = self.instance.get('tags', [])
@@ -74,7 +83,7 @@ class LustreCheck(AgentCheck):
         if self.node_type == 'client' and self.enable_changelogs:
             self.submit_changelogs()
 
-        self.submit_device_health()
+        self.submit_device_health(self.devices)
         self.submit_general_stats()
         self.submit_lnet_stats_metrics()
         self.submit_lnet_local_ni_metrics()
@@ -89,13 +98,15 @@ class LustreCheck(AgentCheck):
         '''
         self.log.debug('Updating Lustre check...')
         self._update_devices()
-        self._update_filesystems()
-        self._update_changelog_targets()
+        if self.filesystem_discovery:
+            self._update_filesystems()
+        self._update_changelog_targets(self.devices, self.filesystems)
 
     def _update_devices(self):
         '''
         Find devices using the lctl dl command.
         '''
+        self.log.debug('Updating device list...')
         output = self.run_command(self.lctl_path, 'dl', '-y')
         device_data = yaml.safe_load(output)
         self.devices = device_data.get('devices', [])
@@ -105,21 +116,15 @@ class LustreCheck(AgentCheck):
         Find filesystems using the lctl list_param command.
         '''
         self.log.debug('Finding filesystems...')
-        if self.node_type.lower() == 'mds':
-            param_regex = MDS_JOBSTATS_PARAM_REGEX
-            # obdfilter.<filesystem>-OST0000.job_stats
-            filesystem_regex = r'(?<=obdfilter\.).*(?=-OST)'
-        elif self.node_type.lower() == 'oss':
-            param_regex = OSS_JOBSTATS_PARAM_REGEX
-            # mdt.<filesystem>-MDT0000.job_stats
-            filesystem_regex = r'(?<=mds\.).*(?=-MDT)'
-        elif self.node_type.lower() == 'client':
-            param_regex = 'llite.*.stats'
-            # llite.<filesystem>-<device_uuid>.stats
-            filesystem_regex = r'(?<=llite\.).*(?=-[^-]*\.stats)'
-        else:
+        param_mapping = {
+                'mds': (r'mdt.*.job_stats', r'(?<=mds\.).*(?=-MDT)'),
+                'oss': (r'obdfilter.*.job_stats', r'(?<=obdfilter\.).*(?=-OST)'),
+                'client': (r'llite.*.stats', r'(?<=llite\.).*(?=-[^-]*\.stats)')
+        }
+        if self.node_type not in param_mapping:
             self.log.debug(f'Invalid node_type: {self.node_type}')
             return
+        param_regex, filesystem_regex = param_mapping[self.node_type]
         try:
             raw_output = self.run_command(self.lctl_path, "list_param", param_regex, sudo=True)
             lines = raw_output.splitlines()
@@ -133,14 +138,16 @@ class LustreCheck(AgentCheck):
                     filesystem = match.group(0)
                     filesystems.append(filesystem)
             self.filesystems = list(set(filesystems))  # Remove duplicates
+            self.log.debug(f'Found filesystem(s): {self.filesystems}')
         except Exception as e:
             self.log.error(f'Failed to find filesystems: {e}')
             return
 
-    def _update_changelog_targets(self):
-        target_regex = [filesystem+r'-MDT\d\d\d\d' for filesystem in self.filesystems]
+    def _update_changelog_targets(self, devices, filesystems):
+        self.log.debug('Determining changelog targets...')
+        target_regex = [filesystem+r'-MDT\d\d\d\d' for filesystem in filesystems]
         targets = []
-        for device in self.devices:
+        for device in devices:
             for regex in target_regex:
                 match = re.search(regex, device['name'])
                 if match:
@@ -167,48 +174,45 @@ class LustreCheck(AgentCheck):
         '''
         Submit the jobstats metrics to Datadog.
         '''
-        jobstats_params = self.get_jobstats_params_list()
+        jobstats_params = self._get_jobstats_params_list()
         for jobstats_param in jobstats_params:
             device_name = jobstats_param.split('.')[1]  # For example: lustre-MDT0000
             if self.filesystems and not any(device_name.startswith(filesystem) for filesystem in self.filesystems):
                 continue
-            jobstats_metrics = self.get_jobstats_metrics(jobstats_param)['job_stats']
+            jobstats_metrics = self._get_jobstats_metrics(jobstats_param)['job_stats']
             if jobstats_metrics is None:
                 self.log.debug(f'No jobstats metrics found for {jobstats_param}')
                 continue
             for job in jobstats_metrics:
                 job_id = job['job_id']
+                tags = [f'device_name:{device_name}', f'job_id:{job_id}']
                 for metric_name, metric_values in job.items():
-                    if not isinstance(metric_values, dict):
-                        continue
-                    for metric_type, metric_value in metric_values.items():
-                        if metric_type == 'unit':
-                            continue
-                        if metric_type == 'hist':
-                            # TODO: Handle histogram metrics if needed
-                            continue 
-                        self.gauge(f'job_stats.{metric_name}.{metric_type}', metric_value, tags=[f'device_type:{self.node_type}', f'device_name:{device_name}', f'job_id:{job_id}'])
+                    self._submit_jobstat(metric_name, metric_values, tags)
+    
+    def _submit_jobstat(self, name, values, tags):
+        if not isinstance(values, dict):
+            return
+        for metric_type, value in values.items():
+            if metric_type == 'unit':
+                return
+            if metric_type == 'hist':
+                # TODO: Handle histogram metrics if needed
+                return
+            self.gauge(f'job_stats.{name}.{metric_type}', value, tags=tags)
 
-
-    def get_jobstats_params_list(self):
+    def _get_jobstats_params_list(self):
         '''
         Get the jobstats params from the command line.
         '''
-        if self.node_type.lower() == 'mds':
-            param_regex = MDS_JOBSTATS_PARAM_REGEX
-        elif self.node_type.lower() == 'oss':
-            param_regex = OSS_JOBSTATS_PARAM_REGEX
-        elif self.node_type.lower() == 'client':
-            self.log.debug(f'Client device_type has no jobstats parameters.')
+        if not self.node_typ in JOBSTATS_PARAM_MAPPING:
+            self.log.debug(f'Invalid jobstats device_type: {self.node_type}')
             return []
-        else:
-            self.log.debug(f'Invalid device_type: {self.node_type}')
-            return []
+        param_regex = JOBSTATS_PARAM_MAPPING[self.node_type]
         raw_params = self.run_command(self.lctl_path, "list_param", param_regex, sudo=True)
         return [line.strip() for line in raw_params.splitlines() if line.strip()]
 
 
-    def get_jobstats_metrics(self, jobstats_param):
+    def _get_jobstats_metrics(self, jobstats_param):
         '''
         Get the jobstats metrics for a given jobstats param.
         '''
@@ -291,17 +295,20 @@ class LustreCheck(AgentCheck):
                 raw_stats = self.run_command(self.lctl_path, "get_param", "-ny", param.regex, sudo=True)
                 parsed_stats = self.parse_stats(raw_stats)
                 for stat_name, stat_value in parsed_stats.items():
-                    if isinstance(stat_value, int):
-                        self.gauge(f'general.{stat_name}', stat_value, tags=tags)
-                        continue
-                    if not isinstance(stat_value, dict):
-                        self.log.debug(f'Unexpected stat value for {stat_name}: {stat_value}')
-                        continue
-                    for metric_type, metric_value in stat_value.items():
-                        if isinstance(metric_value, int):
-                            self.gauge(f'general.{param.prefix}.{stat_name}.{metric_type}', metric_value, tags=tags)
-                        else:
-                            self.log.debug(f'Unexpected metric value for {stat_name}.{metric_type}: {metric_value}')
+                    self._submit_stat(stat_name, stat_value, param.prefix, tags)
+
+    def _submit_stat(self, name, value, prefix, tags):
+        if isinstance(value, int):
+            self.gauge(f'general.{name}', value, tags=tags)
+            return
+        if not isinstance(value, dict):
+            self.log.debug(f'Unexpected stat value for {name}: {value}')
+            return
+        for metric_type, metric_value in value.items():
+            if isinstance(metric_value, int):
+                self.gauge(f'general.{prefix}.{name}.{metric_type}', metric_value, tags=tags)
+            else:
+                self.log.debug(f'Unexpected metric value for {name}.{metric_type}: {metric_value}')
 
     def _extract_tags_from_param(self, param_regex, param_name, wildcards):
         '''
@@ -327,14 +334,16 @@ class LustreCheck(AgentCheck):
     def parse_stats(self, raw_stats):
         '''
         Parse the raw stats into a dictionary.
+
+        Expected format:
+            elapsed_time              2068792.478877751 secs.nsecs
+            req_waittime              83 samples [usecs] 11 40 1493 32135
+            req_qdepth                83 samples [reqs] 0 0 0 0
+            cancel                    253 samples [locks] 1 1 253
+            tgtreg                    2 samples [reqs]
         '''
         stats = {}
         for line in raw_stats.splitlines():
-            # elapsed_time              2068792.478877751 secs.nsecs
-            # req_waittime              83 samples [usecs] 11 40 1493 32135
-            # req_qdepth                83 samples [reqs] 0 0 0 0
-            # cancel                    253 samples [locks] 1 1 253
-            # tgtreg                    2 samples [reqs]
             if not line.strip():
                 continue
             parts = line.split()
@@ -345,7 +354,6 @@ class LustreCheck(AgentCheck):
                 continue
             try:
                 stat_value = {"count": int(parts[1])}
-                # unit =  parts[3].strip('[]')
                 stat_types = ('min', 'max', 'sum', 'sumsq')
                 for i, value in enumerate(parts[4:]):
                     stat_value[stat_types[i]] = int(value)
@@ -357,14 +365,12 @@ class LustreCheck(AgentCheck):
             stats[stat_name] = stat_value
         return stats
 
-    def submit_device_health(self):
+    def submit_device_health(self, devices):
         '''
         Submit device health metrics based on device status from lctl dl command.
         '''
         try:
-            self._update_devices()
-            
-            for device in self.devices:
+            for device in devices:
                 device_status = 1 if device['status'] == 'UP' else 0
                 tags = [
                     f'device_type:{device.get("type", "unknown")}',
@@ -375,7 +381,6 @@ class LustreCheck(AgentCheck):
                 
                 self.gauge('device.health', device_status, tags=tags)
                 self.gauge('device.refcount', device['refcount'], tags=tags)
-                
         except Exception as e:
             self.log.error(f'Failed to submit device health metrics: {e}')
     
