@@ -329,19 +329,19 @@
       "layout": { "x": 6, "y": 0, "width": 6, "height": 10 }
     },
     {
-      "id": 8781148049763819,
+      "id": 70369271856783,
       "definition": {
-        "title": "Go Runtime",
+        "title": "Store",
         "background_color": "vivid_purple",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 5710359456796066,
+            "id": 7474291901161303,
             "definition": {
               "type": "note",
-              "content": "Go runtime metrics provide insights into the resource utilization and performance characteristics of Kuma control plane components.",
+              "content": "The Store component provides persistent storage for all Kuma resources including meshes, policies, and data plane configurations.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
@@ -351,12 +351,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
           },
           {
-            "id": 5151573599414004,
+            "id": 7258737497088913,
             "definition": {
-              "title": "Goroutines",
+              "title": "Store Latency",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -370,248 +370,41 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.go.goroutines{$zone,$instance_id,$cluster_name}"
+                      "query": "sum:kuma.store.sum{$zone,$instance_id,$cluster_name} by {operation}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kuma.store.count{$zone,$instance_id,$cluster_name} by {operation}.as_count()"
                     }
                   ],
-                  "formulas": [{ "number_format": {}, "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "bars"
+                  "display_type": "line"
                 }
               ]
             },
             "layout": { "x": 0, "y": 1, "width": 3, "height": 2 }
           },
           {
-            "id": 7354433772896516,
+            "id": 4488770992649380,
             "definition": {
-              "title": "Threads",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kuma.go.threads{$zone,$instance_id,$cluster_name}"
-                    }
-                  ],
-                  "formulas": [{ "number_format": {}, "formula": "query1" }],
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": { "x": 3, "y": 1, "width": 3, "height": 2 }
-          },
-          {
-            "id": 5669383081664033,
-            "definition": {
-              "title": "Memory Allocated",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kuma.go.memstats.alloc_bytes{$zone,$instance_id,$cluster_name}.rollup(avg, 15)"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte_in_binary_bytes_family"
-                        }
-                      },
-                      "formula": "per_second(query1)"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
-          },
-          {
-            "id": 7170770919490113,
-            "definition": {
-              "title": "GC Latency (p75)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kuma.go.gc.duration_seconds.quantile{$zone,$instance_id,quantile:0.75,$cluster_name}.rollup(avg, 15)"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
-          }
-        ]
-      },
-      "layout": { "x": 0, "y": 0, "width": 6, "height": 6 }
-    },
-    {
-      "id": 2708736787343333,
-      "definition": {
-        "title": "Leader",
-        "background_color": "vivid_purple",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 3741078862595649,
-            "definition": {
-              "type": "note",
-              "content": "Each Kuma zone must have exactly one leader instance for proper operation.",
-              "background_color": "purple",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "center",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
-          },
-          {
-            "id": 8661086842802331,
-            "definition": {
-              "title": "Leaders",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [{ "formula": "count_nonzero(query1)" }],
-                  "queries": [
-                    {
-                      "aggregator": "last",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kuma.leader{$zone,$instance_id,$cluster_name}"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "value": 0,
-                      "palette": "white_on_green"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 0,
-              "timeseries_background": {
-                "yaxis": { "include_zero": true },
-                "type": "area"
-              }
-            },
-            "layout": { "x": 0, "y": 1, "width": 2, "height": 2 }
-          },
-          {
-            "id": 2698193577791332,
-            "definition": {
-              "title": "Leader Instances",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "aggregator": "last",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:kuma.leader{$zone,$instance_id,$cluster_name} by {cluster_name,zone,kube_service}"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "sort": {
-                    "count": 500,
-                    "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
-                    ]
-                  },
-                  "formulas": [
-                    {
-                      "cell_display_mode": "number",
-                      "alias": "Leader",
-                      "formula": "query1"
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": { "x": 2, "y": 1, "width": 4, "height": 2 }
-          },
-          {
-            "id": 8614340111303112,
-            "definition": {
-              "title": "Leader Election Status",
+              "title": "Store Operations",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -625,7 +418,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.leader_election.master_status{$instance_id,$cluster_name} by {name,kube_service,host}"
+                      "query": "sum:kuma.store.count{$instance_id,$zone,$cluster_name} by {resource_type,operation}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -635,28 +428,117 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": { "include_zero": true, "min": "0", "max": "1.5" },
-              "markers": [
-                {
-                  "label": " Backup ",
-                  "value": "-0.5 < y < 0.5",
-                  "display_type": "info dashed"
-                },
-                {
-                  "label": " Leader ",
-                  "value": "0.5 < y < 1.5",
-                  "display_type": "ok dashed"
+                  "display_type": "bars"
                 }
               ]
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+            "layout": { "x": 3, "y": 1, "width": 3, "height": 4 }
+          },
+          {
+            "id": 8266214355863501,
+            "definition": {
+              "title": "Top Store Operations",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kuma.store.count{$instance_id,$zone,$cluster_name} by {resource_type,operation}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked", "legend": "automatic" }
+              }
+            },
+            "layout": { "x": 6, "y": 1, "width": 6, "height": 4 }
+          },
+          {
+            "id": 5156393943933849,
+            "definition": {
+              "title": "Store Cache Performance",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,result:miss,$cluster_name}.as_rate().rollup(avg, 15)"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,$cluster_name}.as_rate().rollup(avg, 15)"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,result:hit-wait,$cluster_name}.as_rate().rollup(avg, 15)"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "miss",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query2 / query1 * 100"
+                    },
+                    {
+                      "alias": "hit-wait",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query3 / query1 * 100"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": { "include_zero": true, "min": "0", "max": "100" },
+              "markers": [
+                { "value": "0 < y < 20", "display_type": "ok dashed" },
+                { "value": "20 < y < 100", "display_type": "warning dashed" }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
           }
         ]
       },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 6 }
+      "layout": { "x": 0, "y": 10, "width": 12, "height": 6 }
     },
     {
       "id": 511652203180117,
@@ -1179,7 +1061,7 @@
                           "unit_name": "operation"
                         }
                       },
-                      "alias": "recieved",
+                      "alias": "received",
                       "formula": "query2"
                     }
                   ],
@@ -1293,22 +1175,22 @@
       "layout": { "x": 6, "y": 0, "width": 6, "height": 10 }
     },
     {
-      "id": 70369271856783,
+      "id": 2708736787343333,
       "definition": {
-        "title": "Store",
+        "title": "Leader",
         "background_color": "vivid_purple",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 7474291901161303,
+            "id": 3741078862595649,
             "definition": {
               "type": "note",
-              "content": "The Store component provides persistent storage for all Kuma resources including meshes, policies, and data plane configurations.",
+              "content": "Each Kuma zone must have exactly one leader instance for proper operation.",
               "background_color": "purple",
               "font_size": "14",
-              "text_align": "center",
+              "text_align": "left",
               "vertical_align": "center",
               "show_tick": false,
               "tick_pos": "50%",
@@ -1318,206 +1200,143 @@
             "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
           },
           {
-            "id": 7258737497088913,
+            "id": 8661086842802331,
             "definition": {
-              "title": "Store Latency",
+              "title": "Leaders",
               "title_size": "16",
               "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
+              "type": "query_value",
               "requests": [
                 {
-                  "response_format": "timeseries",
+                  "formulas": [{ "formula": "count_nonzero(query1)" }],
                   "queries": [
                     {
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.store.sum{$zone,$instance_id,$cluster_name} by {operation}.as_count()"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:kuma.store.count{$zone,$instance_id,$cluster_name} by {operation}.as_count()"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1 / query2",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": { "x": 0, "y": 1, "width": 3, "height": 2 }
-          },
-          {
-            "id": 5156393943933849,
-            "definition": {
-              "title": "Store Cache Performance",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,result:miss,$cluster_name}.as_rate().rollup(avg, 15)"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,$cluster_name}.as_rate().rollup(avg, 15)"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "sum:kuma.store_cache.count{$instance_id,$zone,result:hit-wait,$cluster_name}.as_rate().rollup(avg, 15)"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "alias": "miss",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "percent"
-                        }
-                      },
-                      "formula": "query2 / query1 * 100"
-                    },
-                    {
-                      "alias": "hit-wait",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "percent"
-                        }
-                      },
-                      "formula": "query3 / query1 * 100"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": { "include_zero": true, "min": "0", "max": "100" },
-              "markers": [
-                { "value": "0 < y < 20", "display_type": "ok dashed" },
-                { "value": "20 < y < 100", "display_type": "warning dashed" }
-              ]
-            },
-            "layout": { "x": 3, "y": 1, "width": 3, "height": 2 }
-          },
-          {
-            "id": 4488770992649380,
-            "definition": {
-              "title": "Store Operations",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [{ "formula": "query1" }],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kuma.store.count{$instance_id,$zone,$cluster_name} by {resource_type,operation}.as_rate()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
-          },
-          {
-            "id": 8266214355863501,
-            "definition": {
-              "title": "Top Store Operations",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "toplist",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:kuma.store.count{$instance_id,$zone,$cluster_name} by {resource_type,operation}.as_count()",
-                      "aggregator": "sum"
+                      "query": "sum:kuma.leader{$zone,$instance_id,$cluster_name}"
                     }
                   ],
                   "response_format": "scalar",
-                  "formulas": [{ "formula": "query1" }],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": { "include_zero": true },
+                "type": "area"
+              }
+            },
+            "layout": { "x": 0, "y": 1, "width": 2, "height": 2 }
+          },
+          {
+            "id": 2698193577791332,
+            "definition": {
+              "title": "Leader Instances",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kuma.leader{$zone,$instance_id,$cluster_name} by {cluster_name,zone,kube_service}"
+                    }
+                  ],
+                  "response_format": "scalar",
                   "sort": {
-                    "count": 10,
+                    "count": 500,
                     "order_by": [
                       { "type": "formula", "index": 0, "order": "desc" }
                     ]
-                  }
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Leader",
+                      "formula": "query1"
+                    }
+                  ]
                 }
               ],
-              "style": {
-                "display": { "type": "stacked", "legend": "automatic" }
-              }
+              "has_search_bar": "auto"
             },
-            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
+            "layout": { "x": 2, "y": 1, "width": 4, "height": 2 }
+          },
+          {
+            "id": 8614340111303112,
+            "definition": {
+              "title": "Leader Election Status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kuma.leader_election.master_status{$instance_id,$cluster_name} by {name,kube_service,host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": { "include_zero": true, "min": "0", "max": "1.5" },
+              "markers": [
+                {
+                  "label": " Backup ",
+                  "value": "-0.5 < y < 0.5",
+                  "display_type": "info dashed"
+                },
+                {
+                  "label": " Leader ",
+                  "value": "0.5 < y < 1.5",
+                  "display_type": "ok dashed"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
           }
         ]
       },
       "layout": { "x": 0, "y": 10, "width": 6, "height": 6 }
     },
     {
-      "id": 236852122524030,
+      "id": 8781148049763819,
       "definition": {
-        "title": "Dataplane Server",
+        "title": "Go Runtime",
         "background_color": "vivid_purple",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 5874571351328261,
+            "id": 5710359456796066,
             "definition": {
               "type": "note",
-              "content": "The Dataplane Server provides bootstrap configuration to data plane proxies during startup. ",
+              "content": "Go runtime metrics provide insights into the resource utilization and performance characteristics of Kuma control plane components.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
@@ -1530,9 +1349,9 @@
             "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
           },
           {
-            "id": 4079848347820660,
+            "id": 5151573599414004,
             "definition": {
-              "title": "HTTP Request Duration (Average)",
+              "title": "Goroutines",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1546,23 +1365,84 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kuma.dp_server.http_request_duration_seconds.sum{$zone,$instance_id,$cluster_name} by {handler}.as_count()"
-                    },
+                      "query": "sum:kuma.go.goroutines{$zone,$instance_id,$cluster_name}"
+                    }
+                  ],
+                  "formulas": [{ "number_format": {}, "formula": "query1" }],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 3, "height": 2 }
+          },
+          {
+            "id": 7354433772896516,
+            "definition": {
+              "title": "Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:kuma.dp_server.http_request_duration_seconds.count{$zone,$instance_id,$cluster_name} by {handler}.as_count()"
+                      "name": "query1",
+                      "query": "sum:kuma.go.threads{$zone,$instance_id,$cluster_name}"
+                    }
+                  ],
+                  "formulas": [{ "number_format": {}, "formula": "query1" }],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 1, "width": 3, "height": 2 }
+          },
+          {
+            "id": 5669383081664033,
+            "definition": {
+              "title": "Memory Allocated",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kuma.go.memstats.alloc_bytes{$zone,$instance_id,$cluster_name}.rollup(avg, 15)"
                     }
                   ],
                   "formulas": [
                     {
-                      "formula": "query1 / query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
-                          "unit_name": "second"
+                          "unit_name": "byte_in_binary_bytes_family"
                         }
-                      }
+                      },
+                      "formula": "per_second(query1)"
                     }
                   ],
                   "style": {
@@ -1575,12 +1455,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 3, "height": 4 }
+            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
           },
           {
-            "id": 2549420191990675,
+            "id": 7170770919490113,
             "definition": {
-              "title": "Dataplane Count",
+              "title": "GC Latency (p75)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1589,26 +1469,36 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "response_format": "timeseries",
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kuma.resources_count{$zone,$instance_id,resource_type:dataplane,$cluster_name}.rollup(avg, 15)"
+                      "query": "sum:kuma.go.gc.duration_seconds.quantile{$zone,$instance_id,quantile:0.75,$cluster_name}.rollup(avg, 15)"
                     }
                   ],
-                  "response_format": "timeseries",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "order_by": "values",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "bars"
+                  "display_type": "line"
                 }
               ]
             },
-            "layout": { "x": 3, "y": 1, "width": 3, "height": 4 }
+            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
           }
         ]
       },
