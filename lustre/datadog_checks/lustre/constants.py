@@ -3,6 +3,23 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from dataclasses import dataclass
 
+JOBSTATS_PARAM_MAPPING = {
+        'oss': r'obdfilter.*.job_stats',
+        'mds': r'mdt.*.job_stats',
+}
+
+FILESYSTEM_DISCOVERY_PARAM_MAPPING = {
+        'mds': (r'mdt.*.job_stats', r'(?<=mds\.).*(?=-MDT)'),
+        'oss': (r'obdfilter.*.job_stats', r'(?<=obdfilter\.).*(?=-OST)'),
+        'client': (r'llite.*.stats', r'(?<=llite\.).*(?=-[^-]*\.stats)')
+}
+
+IGNORED_STATS = {
+    'snapshot_time',
+    'start_time',
+    'elapsed_time',
+}
+
 @dataclass(frozen=True)
 class LustreParam:
     regex: str

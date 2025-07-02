@@ -4,27 +4,12 @@
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
-from .params import DEFAULT_PARAMS, EXTRA_PARAMS
+from .constants import DEFAULT_PARAMS, EXTRA_PARAMS, FILESYSTEM_DISCOVERY_PARAM_MAPPING, JOBSTATS_PARAM_MAPPING, IGNORED_STATS
 import subprocess
 import yaml
-from dataclasses import dataclass
 import re
 import time
 
-JOBSTATS_PARAM_MAPPING = {
-        'oss': r'obdfilter.*.job_stats',
-        'mds': r'mdt.*.job_stats',
-}
-
-
-IGNORED_STATS = {
-    'snapshot_time',
-    'start_time',
-    'elapsed_time',
-}
-
-# TODO: Make most "get" functions private, only keep the functions called in check public (at most)
-# TODO: Make smaller "_submit" functions to flatten the logic
 
 class LustreCheck(AgentCheck):
 
@@ -34,28 +19,33 @@ class LustreCheck(AgentCheck):
         super(LustreCheck, self).__init__(name, init_config, instances)
 
         # Paths to Lustre binaries
-        self.lctl_path = self.instance.get("lctl_path", "/usr/sbin/lctl")
-        self.lnetctl_path = self.instance.get("lnetctl_path", "/usr/sbin/lnetctl")
-        self.lfs_path = self.instance.get("lfs_path", "/usr/bin/lfs")
+        lctl_path = self.instance.get('lctl_path', '/usr/sbin/lctl')
+        lnetctl_path = self.instance.get('lnetctl_path', '/usr/sbin/lnetctl')
+        lfs_path = self.instance.get('lfs_path', '/usr/bin/lfs')
+        self._bin_mapping = {
+            'lctl': lctl_path,
+            'lnetctl': lnetctl_path,
+            'lfs': lfs_path
+        }
         # Enable or disable specific metrics
-        self.enable_changelogs = is_affirmative(self.instance.get("enable_changelogs", False))
-        self.lnetctl_verbosity = '3' if is_affirmative(self.instance.get("enable_lnetctl_detailed", False)) else '1'
+        self.enable_changelogs = is_affirmative(self.instance.get('enable_changelogs', False))
+        self.lnetctl_verbosity = '3' if is_affirmative(self.instance.get('enable_lnetctl_detailed', False)) else '1'
         self.param_list = DEFAULT_PARAMS
-        if self.instance.get("enable_extra_params", False):
+        if self.instance.get('enable_extra_params', False):
             self.param_list += EXTRA_PARAMS
 
-        self.changelog_lines_per_check = int(self.instance.get("changelog_lines_per_check", 1000))
+        self.changelog_lines_per_check = int(self.instance.get('changelog_lines_per_check', 1000))
 
         self.devices = []
         self.changelog_targets = []
-        self.filesystems = self.instance.get("filesystems", [])
+        self.filesystems = self.instance.get('filesystems', [])
         # If filesystems were provided by the instance, do not update the filesystem list
         self.filesystem_discovery = False if self.filesystems else True
-        self.node_type = self.instance.get("node_type", self._find_node_type())
+        self.node_type = self.instance.get('node_type', self._find_node_type())
 
         self.tags = self.instance.get('tags', [])
         self.tags.append(f'node_type:{self.node_type}')
-        version = self.run_command(self.lctl_path, "get_param", "-ny", "version").strip()
+        version = self.run_command(self.lctl_path, 'get_param', '-ny', 'version').strip()
         self.tags.append(f'lustre_version:{version}')
 
     def _find_node_type(self):
@@ -81,10 +71,10 @@ class LustreCheck(AgentCheck):
     def check(self, _):
         self.update()
         if self.node_type == 'client' and self.enable_changelogs:
-            self.submit_changelogs()
+            self.submit_changelogs(self.changelog_lines_per_check)
 
         self.submit_device_health(self.devices)
-        self.submit_general_stats()
+        self.submit_general_stats(self.param_list)
         self.submit_lnet_stats_metrics()
         self.submit_lnet_local_ni_metrics()
         self.submit_lnet_peer_ni_metrics()
@@ -107,7 +97,7 @@ class LustreCheck(AgentCheck):
         Find devices using the lctl dl command.
         '''
         self.log.debug('Updating device list...')
-        output = self.run_command(self.lctl_path, 'dl', '-y')
+        output = self._run_command('lctl', 'dl', '-y')
         device_data = yaml.safe_load(output)
         self.devices = device_data.get('devices', [])
 
@@ -116,17 +106,12 @@ class LustreCheck(AgentCheck):
         Find filesystems using the lctl list_param command.
         '''
         self.log.debug('Finding filesystems...')
-        param_mapping = {
-                'mds': (r'mdt.*.job_stats', r'(?<=mds\.).*(?=-MDT)'),
-                'oss': (r'obdfilter.*.job_stats', r'(?<=obdfilter\.).*(?=-OST)'),
-                'client': (r'llite.*.stats', r'(?<=llite\.).*(?=-[^-]*\.stats)')
-        }
-        if self.node_type not in param_mapping:
+        if self.node_type not in FILESYSTEM_DISCOVERY_PARAM_MAPPING:
             self.log.debug(f'Invalid node_type: {self.node_type}')
             return
-        param_regex, filesystem_regex = param_mapping[self.node_type]
+        param_regex, filesystem_regex = FILESYSTEM_DISCOVERY_PARAM_MAPPING[self.node_type]
         try:
-            raw_output = self.run_command(self.lctl_path, "list_param", param_regex, sudo=True)
+            raw_output = self._run_command('lctl', 'list_param', param_regex, sudo=True)
             lines = raw_output.splitlines()
             filesystems = []
             for line in lines:
@@ -154,11 +139,14 @@ class LustreCheck(AgentCheck):
                     targets.append(match.group(0))
         self.changelog_targets = list(set(targets)) # Remove duplicates
 
-    def run_command(self, bin, *args, sudo=False):
+    def _run_command(self, bin, *args, sudo=False):
         '''
         Run a command using the given binary.
         '''
-        cmd = f'{"sudo " if sudo else ""}{bin} {" ".join(args)}'
+        if bin not in self._bin_mapping:
+            raise ValueError(f'Unknown binary: {bin}')
+        bin_path = self._bin_mapping[bin]
+        cmd = f'{"sudo " if sudo else ""}{bin_path} {" ".join(args)}'
         try:
             self.log.debug(f'Running command: {cmd}')
             output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
@@ -173,6 +161,8 @@ class LustreCheck(AgentCheck):
     def submit_jobstats_metrics(self):
         '''
         Submit the jobstats metrics to Datadog.
+
+        For more information, see: https://doc.lustre.org/lustre_manual.xhtml#jobstats
         '''
         jobstats_params = self._get_jobstats_params_list()
         for jobstats_param in jobstats_params:
@@ -208,7 +198,7 @@ class LustreCheck(AgentCheck):
             self.log.debug(f'Invalid jobstats device_type: {self.node_type}')
             return []
         param_regex = JOBSTATS_PARAM_MAPPING[self.node_type]
-        raw_params = self.run_command(self.lctl_path, "list_param", param_regex, sudo=True)
+        raw_params = self._run_command('lctl', 'list_param', param_regex, sudo=True)
         return [line.strip() for line in raw_params.splitlines() if line.strip()]
 
 
@@ -216,7 +206,7 @@ class LustreCheck(AgentCheck):
         '''
         Get the jobstats metrics for a given jobstats param.
         '''
-        jobstats_output = self.run_command(self.lctl_path, "get_param", "-ny", jobstats_param, sudo=True)
+        jobstats_output = self._run_command('lctl', 'get_param', '-ny', jobstats_param, sudo=True)
         try:
             return yaml.safe_load(jobstats_output)
         except KeyError:
@@ -225,23 +215,12 @@ class LustreCheck(AgentCheck):
     
     def submit_lnet_stats_metrics(self):
         '''
-        Submit the lnet metrics.
+        Submit the lnet stats metrics.
         '''
-        lnet_metrics = self.get_lnet_metrics('stats')['statistics']
+        lnet_metrics = self._get_lnet_metrics('stats')['statistics']
         for metric in lnet_metrics:
             self.gauge(f'net.{metric}', lnet_metrics[metric], tags=[f'node_type:{self.node_type}'])
 
-    def get_lnet_metrics(self, stats_type='stats'):
-        '''
-        Get the lnet stats from the command line.
-        '''
-        lnet_stats = self.run_command(self.lnetctl_path, stats_type, 'show', '-v', self.lnetctl_verbosity, sudo=True)
-        try:
-            return yaml.safe_load(lnet_stats)
-        except (KeyError, ValueError):
-            self.log.debug(f'No lnet stats found')
-            return {}
-    
     def submit_lnet_local_ni_metrics(self):
         '''
         Submit the lnet local ni metrics.
@@ -250,17 +229,12 @@ class LustreCheck(AgentCheck):
         for net in lnet_local_stats:
             net_type = net.get('net type')
             for ni in net.get('local NI(s)', []):
-                nid = ni.get('nid')
+                local_nid = ni.get('nid')
                 status = 1 if ni.get('status') == 'up' else 0
-                tags = self.tags + [f'net_type:{net_type}', f'nid:{nid}']
+                tags = self.tags + [f'net_type:{net_type}', f'local_nid:{local_nid}']
                 self.gauge(f'net.local.status', status, tags=tags)
                 for stats_group_name, stats_group in ni.items():
-                    if not isinstance(stats_group, dict):
-                        continue
-                    for metric_name, metric_value in stats_group.items():
-                        if isinstance(metric_value, int):
-                            self.gauge(f'net.local.{stats_group_name.replace(" ", "_")}.{metric_name.replace(" ", "_")}', metric_value, tags=tags)
-
+                    self._submit_lnet_metric_group('local', stats_group_name, stats_group, tags)
 
     def submit_lnet_peer_ni_metrics(self):
         '''
@@ -273,31 +247,64 @@ class LustreCheck(AgentCheck):
                 peer_nid = ni.get('nid')
                 tags = self.tags + [f'nid:{nid}', f'peer_nid:{peer_nid}']
                 for stats_group_name, stats_group in ni.items():
-                    if not isinstance(stats_group, dict):
-                        continue
-                    for metric_name, metric_value in stats_group.items():
-                        if isinstance(metric_value, int):
-                            self.gauge(f'net.peer.{stats_group_name.replace(" ", "_")}.{metric_name.replace(" ", "_")}', metric_value, tags=tags)
+                    self._submit_lnet_metric_group('peer', stats_group_name, stats_group, tags)
 
-    def submit_general_stats(self):
+    def _submit_lnet_metric_group(self, prefix, group_name, group, tags):
+        '''
+        Submit a group of lnet metrics.
+
+        Groups represent a set of metrics, for example:
+            health stats:
+                  health value: 1000
+                  dropped: 0
+                  timeout: 0
+                  error: 0
+                  network timeout: 4
+                  ping_count: 0
+                  next_ping: 0
+        '''
+        if not isinstance(group, dict):
+            return
+        for metric_name, metric_value in group.items():
+            group_name.replace(' ', '_')
+            metric_name.replace(' ', '_')
+            if isinstance(metric_value, int):
+                self.gauge(f'net.{prefix}.{group_name}.{metric_name}', metric_value, tags=tags)
+
+    def _get_lnet_metrics(self, stats_type='stats'):
+        '''
+        Get the lnet stats from the command line.
+        '''
+        lnet_stats = self._run_command('lnetctl', stats_type, 'show', '-v', self.lnetctl_verbosity, sudo=True)
+        try:
+            return yaml.safe_load(lnet_stats)
+        except (KeyError, ValueError):
+            self.log.debug(f'No lnet stats found')
+            return {}
+    
+    def submit_general_stats(self, param_list):
         '''
         Submit general stats.
         '''
-        for param in self.param_list: 
+        for param in param_list: 
             if self.node_type not in param.node_types:
                 self.log.debug(f'Skipping param {param.regex} for node type {self.node_type}')
                 continue
             if not param.regex.endswith('.stats'):
                 continue
-            param_list = self.run_command(self.lctl_path, "list_param", param.regex, sudo=True)
-            for param_name in param_list.splitlines():
+            matched_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
+            for param_name in matched_params.splitlines():
                 tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
-                raw_stats = self.run_command(self.lctl_path, "get_param", "-ny", param.regex, sudo=True)
+                raw_stats = self._run_command('lctl', 'get_param', '-ny', param.regex, sudo=True)
                 parsed_stats = self.parse_stats(raw_stats)
                 for stat_name, stat_value in parsed_stats.items():
-                    self._submit_stat(stat_name, stat_value, param.prefix, tags)
+                    self._submit_stat(param.prefix, stat_name, stat_value, tags)
 
-    def _submit_stat(self, name, value, prefix, tags):
+    def _submit_stat(self, prefix, name, value, tags):
+        '''
+        Submit a single stat metric.
+        Usually the value is a dictionaty with a count, min, max, sum, and sumsq.
+        '''
         if isinstance(value, int):
             self.gauge(f'general.{name}', value, tags=tags)
             return
@@ -331,7 +338,7 @@ class LustreCheck(AgentCheck):
                     wildcard_number += 1
         return tags
 
-    def parse_stats(self, raw_stats):
+    def _parse_stats(self, raw_stats):
         '''
         Parse the raw stats into a dictionary.
 
@@ -353,16 +360,16 @@ class LustreCheck(AgentCheck):
             if stat_name in IGNORED_STATS:
                 continue
             try:
-                stat_value = {"count": int(parts[1])}
+                stat_dict = {'count': int(parts[1])}
                 stat_types = ('min', 'max', 'sum', 'sumsq')
                 for i, value in enumerate(parts[4:]):
-                    stat_value[stat_types[i]] = int(value)
+                    stat_dict[stat_types[i]] = int(value)
                 if len(parts) > 8:
                     self.log.debug(f'Unexpected format for stat "{line}"')
             except ValueError:
                 self.log.debug(f'Could not parse stat value for "{line}"')
                 continue
-            stats[stat_name] = stat_value
+            stats[stat_name] = stat_dict
         return stats
 
     def submit_device_health(self, devices):
@@ -384,12 +391,14 @@ class LustreCheck(AgentCheck):
         except Exception as e:
             self.log.error(f'Failed to submit device health metrics: {e}')
     
-    def submit_changelogs(self):
+    def submit_changelogs(self, lines):
         '''
         Get changelogs from the command line.
+
+        For more information, see: https://doc.lustre.org/lustre_manual.xhtml#lustre_changelogs
         '''
         for target in self.changelog_targets:
-            changelog = self.get_changelog(target)
+            changelog = self._get_changelog(target, lines)
             changelog_lines = changelog.splitlines()
             for line in changelog_lines:
                 if not line.strip():
@@ -410,10 +419,17 @@ class LustreCheck(AgentCheck):
                     continue
                 self.send_log(data, {'index': parts[0]}, stream=target)
 
-    def get_changelog(self, target):
+    def _get_changelog(self, target, lines):
+        '''
+        Get the changelog for a given target.
+
+        Expected format:
+            22 14SATTR 12:51:02.232953392 2025.06.02 0x14 t=[0x200000bd1:0x8:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp
+            23 11CLOSE 12:51:02.238364514 2025.06.02 0x1 t=[0x200000bd1:0x5:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp
+        '''
         self.log.info(f'Collecting changelogs for: {target}')
         cursor = self.get_log_cursor(stream=target) 
         start_index = '0' if cursor is None else cursor['index']
-        end_index = str(int(start_index) + self.changelog_lines_per_check)
+        end_index = str(int(start_index) + lines)
         self.log.debug(f'Fetching changelog from index {start_index} to {end_index} for target {target}')
-        return self.run_command(self.lfs_path, 'changelog', target, start_index, end_index, sudo=True)
+        return self._run_command('lfs', 'changelog', target, start_index, end_index, sudo=True)
