@@ -25,9 +25,11 @@ def test_no_msg_errors_are_caught(get_check, instance, caplog, dd_run_check):
 
     caplog.set_level(logging.WARNING)
     m = mock.MagicMock()
-    with mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m), mock.patch(
-        'datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m
-    ), mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m):
+    with (
+        mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m),
+        mock.patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m),
+        mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m),
+    ):
         error = MQMIError(MQCC_FAILED, MQRC_NO_MSG_AVAILABLE)
         m.side_effect = error
         m.unpack = PCFExecute.unpack
@@ -43,9 +45,11 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog, dd_run_c
     from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
 
     m = mock.MagicMock()
-    with mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m), mock.patch(
-        'datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m
-    ), mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m):
+    with (
+        mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m),
+        mock.patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m),
+        mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m),
+    ):
         error = MQMIError(MQCC_FAILED, MQRC_NO_MSG_AVAILABLE)
         m.side_effect = error
         m.unpack = PCFExecute.unpack
@@ -109,9 +113,11 @@ def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
 
     caplog.set_level(logging.WARNING)
     m = mock.MagicMock()
-    with mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m), mock.patch(
-        'datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m
-    ), mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m):
+    with (
+        mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m),
+        mock.patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m),
+        mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m),
+    ):
         error = MQMIError(MQCC_FAILED, MQRC_BUFFER_ERROR)
         m.side_effect = error
         m.unpack = PCFExecute.unpack
@@ -361,9 +367,10 @@ def test_stats_metrics(aggregator, get_check, instance, dd_run_check):
     # make sure time is before fixture messages start time
     check._config.instance_creation_datetime = ensure_aware_datetime(dt.datetime(year=2000, month=1, day=1))
 
-    with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as channel_file, open(
-        os.path.join(common.HERE, 'fixtures', 'statistics_queue.data'), 'rb'
-    ) as queue_file:
+    with (
+        open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as channel_file,
+        open(os.path.join(common.HERE, 'fixtures', 'statistics_queue.data'), 'rb') as queue_file,
+    ):
         channel_data = channel_file.read()
         queue_data = queue_file.read()
         with mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.Queue') as queue:

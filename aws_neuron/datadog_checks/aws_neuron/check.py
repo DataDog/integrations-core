@@ -11,7 +11,6 @@ class AwsNeuronCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances=None):
-
         super(AwsNeuronCheck, self).__init__(
             name,
             init_config,

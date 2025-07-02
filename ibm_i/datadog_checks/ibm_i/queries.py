@@ -260,7 +260,6 @@ def get_job_queue_info(timeout):
 
 
 def get_message_queue_info(timeout, sev, message_queue_info):
-
     # Getting the selected message queues if some were passed in the config file
     message_queues_list = []
     if hasattr(message_queue_info, 'selected_message_queues') and message_queue_info.selected_message_queues:

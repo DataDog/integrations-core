@@ -40,7 +40,6 @@ def test_check(dd_run_check, aggregator, check, management_instance):
 
 
 def test_check_unknown_url(dd_run_check, aggregator, check, management_instance):
-
     management_instance["management_api_url"] = "http://unknown_host:12345"
     management_instance["timeout"] = 1  # speedup the test
 
