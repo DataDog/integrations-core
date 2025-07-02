@@ -17,7 +17,6 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.postgres.encoding import decode_with_encodings
 
 from .query_calls_cache import QueryCallsCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
@@ -629,18 +628,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
         return rows
 
     def _normalize_queries(self, rows):
-        with self._check._get_main_db() as conn:
-            encoding = conn.info.encoding if conn.info.encoding != "SQLASCII" else 'utf-8'
-
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                query_text = (
-                    decode_with_encodings(row['query'], self._config.query_encodings)
-                    if type(row['query']) is bytes
-                    else row['query']
-                )
+                query_text = row['query']
                 statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
@@ -652,21 +644,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            for key in ['datname', 'rolname']:
-                value = row[key]
-                if type(value) is not bytes:
-                    normalized_row[key] = value
-                    continue
-                try:
-                    # Decode other columns as database encoding, or default to utf-8
-                    try:
-                        normalized_row[key] = value.decode(encoding)
-                    except Exception:
-                        # Fallback to trying utf-8
-                        normalized_row[key] = value.decode('utf-8', 'backslashreplace')
-                except Exception as e:
-                    self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
-                    normalized_row[key] = "unknown"
 
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)

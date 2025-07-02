@@ -29,7 +29,6 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.postgres.encoding import decode_with_encodings
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, DBExplainError, trim_leading_set_stmts, warning_with_tags
@@ -280,15 +279,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
-                # if conn.is_ascii():
-                #     # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
-                #     # so we need to read in the data as bytes and then decode as best we can
-                #     # psycopg.extensions.register_type(psycopg.extensions.BYTES, cursor)
-                #     cursor.execute(query, params, binary=True)
-                # else:
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
 
+        print(rows)
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
@@ -349,34 +343,16 @@ class PostgresStatementSamples(DBMAsyncJob):
         insufficient_privilege_count = 0
         total_count = 0
         normalized_rows = []
-        for raw_row in rows:
+        for row in rows:
             total_count += 1
-            row = {}
-            with self._check._get_main_db() as conn:
-                encoding = conn.info.encoding if conn.info.encoding != "SQLASCII" else 'utf-8'
 
-            for key, value in raw_row.items():
-                if type(value) is not bytes or value is None:
-                    row[key] = value
-                elif key == "query":
-                    try:
-                        # Attempt decoding query in potential encodings
-                        row[key] = decode_with_encodings(value, self._config.query_encodings)
-                    except Exception as e:
-                        # Log the unable to decode query error
-                        self._log.warning("Unable to decode query: %s | Error: %s", value, e)
-                        break
-                else:
-                    try:
-                        # Decode other columns as database encoding, or default to utf-8
-                        try:
-                            row[key] = value.decode(encoding)
-                        except Exception:
-                            # Fallback to trying utf-8
-                            row[key] = value.decode('utf-8', 'backslashreplace')
-                    except Exception as e:
-                        self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
-                        row[key] = "unknown"
+            # Manually decode backend_type to handle bad encodings in Azure
+            row['backend_type'] = (
+                row['backend_type'].decode('utf-8', errors='backslashreplace')
+                if type(row['backend_type']) is bytes
+                else row['backend_type']
+            )
+
             if not row.get('query'):
                 continue
             if (not row.get('datname')) and row.get('backend_type', 'client backend') == 'client backend':
@@ -735,7 +711,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
             # When sending potentially non-ascii data, e.g. UTF8, we need to force
             # the client encoding to UTF-8 to match Python string encoding
-            if conn.info.encoding == "ascii":
+            if conn.info.encoding.lower() in ["ascii", "sqlascii", "sql_ascii"]:
                 self._log.debug(
                     "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
                 )

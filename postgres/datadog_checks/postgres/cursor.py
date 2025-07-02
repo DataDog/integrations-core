@@ -36,61 +36,6 @@ class CommenterDictCursor(BaseCommenterCursor, psycopg.ClientCursor):
     pass
 
 
-class DBMConnection(psycopg.Connection):
-    """
-    Extension of psycopg.Connection to keep a record of the original encoding.
-    """
-
-    def __init__(self, connection):
-        self.__connection = connection
-        self._original_encoding = self.__connection.info.encoding
-
-    def __getattr__(self, attr):
-        return getattr(self.__connection, attr)
-
-    def __setattr__(self, attr, val):
-        if attr == '_DBMConnection__connection':
-            object.__setattr__(self, attr, val)
-
-        return setattr(self.__connection, attr, val)
-
-    @property
-    def original_encoding(self):
-        return self._original_encoding
-
-    @original_encoding.setter
-    def original_encoding(self, value):
-        self._original_encoding = value
-
-    def is_ascii(self):
-        """
-        Check if the original encoding is SQLASCII or ascii.
-        """
-        return self.original_encoding in ('SQLASCII', 'ascii')
-
-
-class SQLASCIIBytesLoader(psycopg.adapt.Loader):
-    """
-    Custom loader for SQLASCII encoding.
-    """
-
-    encodings = ['utf-8']
-    format = psycopg.pq.Format.BINARY
-
-    def load(self, data):
-        if type(data) is memoryview:
-            # Convert memoryview to bytes
-            data = data.tobytes()
-        if type(data) is not bytes or data is None:
-            return data
-        print("loading bytes data", data)
-        try:
-            return decode_with_encodings(data, self.encodings)
-        except:
-            # Fallback to utf8 with replacement
-            return data.decode('utf-8', errors='backslashreplace')
-
-
 class SQLASCIITextLoader(psycopg.adapt.Loader):
     """
     Custom loader for SQLASCII encoding.

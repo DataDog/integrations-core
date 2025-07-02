@@ -531,8 +531,6 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     assert len(events) == 1
     event = events[0]
 
-    print(event)
-
     matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
     assert len(matching) == 1
     row = matching[0]
@@ -869,6 +867,9 @@ def test_statement_samples_collect(
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
         expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
+
+        print(expected_query)
+        print(dbm_samples)
 
         # Find matching events by checking if the expected query starts with the event statement. Using this
         # instead of a direct equality check covers cases of truncated statements
@@ -2235,9 +2236,6 @@ def test_metrics_encoding(
     dbm_samples = aggregator.get_event_platform_events("dbm-metrics")
 
     expected_query = "select $1 as funké"
-
-    print(dbm_samples)
-    print(expected_query)
 
     # Find matching events by checking if the expected query starts with the event statement. Using this
     # instead of a direct equality check covers cases of truncated statements
