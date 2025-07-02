@@ -15,7 +15,7 @@ To integrate Docusign with Datadog, Datadog connects to Docusign using OAuth. Th
 1. Navigate to the [Integrations Page][2] and search for the "Docusign" integration.
 2. Click the tile.
 3. To add an account to install the integration, click the **Add Docusign Account** button.
-4. After reading the instructions in the modal, click the **Authorize** button, which redirects you to the Docusign login page.
+4. After reading the instructions in the modal, click **Authorize**, which redirects you to the Docusign login page.
 5. After logging in, you are prompted to select which Docusign organizations you want to grant access to, based on the organizations that your user account has access to.
 6. Click **Authorize**.
 7. You're redirected back to Datadog's Docusign tile with a new account. Datadog recommends changing the account name to something that is easier to remember. You can add multiple accounts with access to different organizations.
