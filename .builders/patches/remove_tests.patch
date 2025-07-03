@@ -1,7 +1,7 @@
-diff --git a/scripts/build_wheels.py b/scripts/build_wheels.py
+diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
 index 0c76a93f48..93278ebe1a 100644
 --- a/scripts/build_wheels.py
---- b/scripts/build_wheels.py
++++ b/scripts/build_wheels.py
 @@ -8,7 +8,7 @@ from pathlib import Path
  from tempfile import TemporaryDirectory
  
@@ -23,7 +23,7 @@ index 0c76a93f48..93278ebe1a 100644
          # Repair wheels
          check_process([
 diff --git a/scripts/utils.py b/scripts/utils.py
-index 63772a277d..1a140b0d7b 100644
+index 63772a277d..32dfdd3f72 100644
 --- a/scripts/utils.py
 --- b/scripts/utils.py
 @@ -1,7 +1,10 @@
@@ -37,7 +37,7 @@ index 63772a277d..1a140b0d7b 100644
  from pathlib import Path
  from zipfile import ZipFile
  
-@@ -33,3 +36,74 @@ def extract_metadata(wheel: Path) -> email.Message:
+@@ -33,3 +36,77 @@ def extract_metadata(wheel: Path) -> email.Message:
  
      return email.message_from_string(metadata_file_contents)
  
@@ -45,14 +45,17 @@ index 63772a277d..1a140b0d7b 100644
 +def remove_test_files(wheel: Path) -> None:
 +    with tempfile.TemporaryDirectory() as tmpdir:
 +        temp_wheel = Path(tmpdir) / wheel.name
-+
++        count = 0
 +        # Copy files except those excluded
 +        with ZipFile(wheel, "r") as zin, ZipFile(temp_wheel, "w") as zout:
 +            for item in zin.infolist():
 +                if not is_excluded_from_wheel(item.filename):
 +                    zout.writestr(item, zin.read(item.filename))
-+
++                else:
++                    count += 1
 +        shutil.move(str(temp_wheel), str(wheel))
++    if count > 0:
++        print(f"Removed {count} test files from {wheel.name}")
 +
 +
 +
