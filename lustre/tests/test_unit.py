@@ -13,7 +13,7 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev import get_here
 from datadog_checks.lustre import LustreCheck
-from datadog_checks.lustre.constants import DEFAULT_PARAMS, EXTRA_PARAMS, JOBSTATS_PARAMS
+from datadog_checks.lustre.constants import DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS
 
 from .metrics import (
     CLIENT_METRICS,
@@ -84,7 +84,7 @@ def test_check(dd_run_check, aggregator, node_type, dl_fixture, expected_metrics
         'lnetctl net show': 'all_lnet_net.txt',
         'lnetctl peer show': 'all_lnet_peer.txt',
     }
-    for param in DEFAULT_PARAMS + EXTRA_PARAMS + JOBSTATS_PARAMS:
+    for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS:
         mapping[f'lctl list_param {param.regex}'] = param.regex
         mapping[f'lctl get_param -ny {param.regex}'] = param.fixture
 
@@ -263,7 +263,7 @@ def test_submit_general_stats(aggregator, instance):
     }
     with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_general_stats(DEFAULT_PARAMS)
+        check.submit_general_stats(DEFAULT_STATS)
 
     # Verify some general stats metrics are submitted
     expected_metrics = [

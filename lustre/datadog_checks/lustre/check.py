@@ -11,8 +11,8 @@ import yaml
 from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
 
 from .constants import (
-    DEFAULT_PARAMS,
-    EXTRA_PARAMS,
+    DEFAULT_STATS,
+    EXTRA_STATS,
     FILESYSTEM_DISCOVERY_PARAM_MAPPING,
     IGNORED_LNET_GROUPS,
     IGNORED_STATS,
@@ -55,9 +55,9 @@ class LustreCheck(AgentCheck):
         # Enable or disable specific metrics
         self.enable_changelogs = is_affirmative(self.instance.get('enable_changelogs', False))
         self.lnetctl_verbosity = '3' if is_affirmative(self.instance.get('enable_lnetctl_detailed', False)) else '1'
-        self.param_list = set(DEFAULT_PARAMS)
+        self.param_list = set(DEFAULT_STATS)
         if is_affirmative(self.instance.get('enable_extra_params', False)):
-            self.param_list.update(set(EXTRA_PARAMS))
+            self.param_list.update(set(EXTRA_STATS))
 
         self.changelog_lines_per_check = int(self.instance.get('changelog_lines_per_check', 1000))
 
@@ -311,7 +311,7 @@ class LustreCheck(AgentCheck):
         for metric_name, metric_value in group.items():
             metric_name = metric_name.replace(' ', '_')
             if isinstance(metric_value, int):
-                if group_name == 'tunables' or metric_name == 'health_stats':
+                if group_name == 'tunables' or metric_name in ('health_value', 'next_ping'):
                     metric_type = 'gauge'
                 else:
                     metric_type = 'count'

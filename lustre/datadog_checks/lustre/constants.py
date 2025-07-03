@@ -47,7 +47,7 @@ JOBSTATS_PARAMS = [
 ]
 
 
-DEFAULT_PARAMS = [
+DEFAULT_STATS= [
     LustreParam(
         regex='llite.*.stats',
         node_types=('client',),
@@ -57,7 +57,7 @@ DEFAULT_PARAMS = [
     ),
 ]
 
-EXTRA_PARAMS = [
+EXTRA_STATS = [
     # MDS (Metadata Server) params
     LustreParam(regex='mds.MDS.mdt.stats', node_types=('mds',), prefix='mds.mdt', fixture='mds_mdt_stats.txt'),
     LustreParam(
@@ -99,7 +99,7 @@ EXTRA_PARAMS = [
         fixture='mds_mgs_export_stats.txt',
     ),
     # OSS (Object Storage Server) params
-    LustreParam(regex='ost.OSS.oss.stats', node_types=('oss',), prefix='ost.oss', fixture='oss_ost_stats.txt'),
+    LustreParam(regex='ost.OSS.oss.stats', node_types=('oss',), prefix='oss', fixture='oss_ost_stats.txt'),
     LustreParam(
         regex='osc.*.stats',
         node_types=('client',),
