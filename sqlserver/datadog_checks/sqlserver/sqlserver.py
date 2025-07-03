@@ -129,6 +129,7 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+        self.log.info("hello world!")
 
         self._resolved_hostname = None
         self._agent_hostname = None
