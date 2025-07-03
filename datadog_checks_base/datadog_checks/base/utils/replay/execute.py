@@ -5,10 +5,10 @@ import os
 import subprocess
 import sys
 
+from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.platform import Platform
 
-from ..common import ensure_bytes, to_native_string
-from ..platform import Platform
 from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
 
 
