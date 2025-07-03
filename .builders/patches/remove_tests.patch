@@ -1,7 +1,7 @@
 diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
-index 0c76a93f48..13d46e52e0 100644
---- a/scripts/build_wheels.py
-+++ b/scripts/build_wheels.py
+index 0c76a93f48..61fd144e9c 100644
+--- a/.builders/scripts/build_wheels.py
++++ b/.builders/scripts/build_wheels.py
 @@ -8,7 +8,7 @@ from pathlib import Path
  from tempfile import TemporaryDirectory
  
@@ -20,7 +20,7 @@ index 0c76a93f48..13d46e52e0 100644
          # Fetch or build wheels
          command_args = [
              str(python_path), '-m', 'pip', 'wheel',
-@@ -114,11 +116,16 @@ def main():
+@@ -114,11 +116,14 @@ def main():
              '--wheel-dir', str(staged_wheel_dir),
              '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
          ]
@@ -31,16 +31,25 @@ index 0c76a93f48..13d46e52e0 100644
  
          check_process(command_args, env=env_vars)
  
-+        # Remove test files
-+        for wheel_file in staged_wheel_dir.glob("*.whl"):
-+            remove_test_files(wheel_file)
++        
  
          # Repair wheels
          check_process([
+@@ -128,6 +133,10 @@ def main():
+             '--external-dir', str(external_wheels_dir),
+         ])
+ 
++        # Remove test files
++        for wheel_file in staged_wheel_dir.glob("*.whl"):
++            remove_test_files(wheel_file)
++
+     dependencies: dict[str, tuple[str, str]] = {}
+     for wheel_dir in wheels_dir.iterdir():
+         for entry in wheel_dir.iterdir():
 diff --git a/.builders/scripts/utils.py b/.builders/scripts/utils.py
-index 63772a277d..54178e25eb 100644
---- a/scripts/utils.py
-+++ b/scripts/utils.py
+index 63772a277d..f763b08f24 100644
+--- a/.builders/scripts/utils.py
++++ b/.builders/scripts/utils.py
 @@ -1,10 +1,16 @@
  from __future__ import annotations
  
