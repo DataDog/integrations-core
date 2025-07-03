@@ -1,7 +1,7 @@
 diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
-index 0c76a93f48..93278ebe1a 100644
---- a/scripts/build_wheels.py
-+++ b/scripts/build_wheels.py
+index 0c76a93f48..13d46e52e0 100644
+--- a/.builders/scripts/build_wheels.py
++++ b/.builders/scripts/build_wheels.py
 @@ -8,7 +8,7 @@ from pathlib import Path
  from tempfile import TemporaryDirectory
  
@@ -11,22 +11,37 @@ index 0c76a93f48..93278ebe1a 100644
  
  INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
  CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
-@@ -119,6 +119,10 @@ def main():
+@@ -107,6 +107,8 @@ def main():
+         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
+             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
+ 
++           
++
+         # Fetch or build wheels
+         command_args = [
+             str(python_path), '-m', 'pip', 'wheel',
+@@ -114,11 +116,16 @@ def main():
+             '--wheel-dir', str(staged_wheel_dir),
+             '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+         ]
++      
++
+         if args.use_built_index:
+             command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
  
          check_process(command_args, env=env_vars)
  
 +        # Remove test files
 +        for wheel_file in staged_wheel_dir.glob("*.whl"):
 +            remove_test_files(wheel_file)
-+
  
          # Repair wheels
          check_process([
-diff --git a/scripts/utils.py b/scripts/utils.py
-index 63772a277d..32dfdd3f72 100644
---- a/scripts/utils.py
---- b/scripts/utils.py
-@@ -1,7 +1,10 @@
+diff --git a/.builders/scripts/utils.py b/.builders/scripts/utils.py
+index 63772a277d..54178e25eb 100644
+--- a/.builders/scripts/utils.py
++++ b/.builders/scripts/utils.py
+@@ -1,10 +1,16 @@
  from __future__ import annotations
  
  import email
@@ -37,25 +52,50 @@ index 63772a277d..32dfdd3f72 100644
  from pathlib import Path
  from zipfile import ZipFile
  
-@@ -33,3 +36,77 @@ def extract_metadata(wheel: Path) -> email.Message:
++from wheel.cli.pack import pack
++from wheel.cli.unpack import unpack
++
+ UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
+ 
+ 
+@@ -33,3 +39,96 @@ def extract_metadata(wheel: Path) -> email.Message:
  
      return email.message_from_string(metadata_file_contents)
  
 +
-+def remove_test_files(wheel: Path) -> None:
-+    with tempfile.TemporaryDirectory() as tmpdir:
-+        temp_wheel = Path(tmpdir) / wheel.name
-+        count = 0
-+        # Copy files except those excluded
-+        with ZipFile(wheel, "r") as zin, ZipFile(temp_wheel, "w") as zout:
-+            for item in zin.infolist():
-+                if not is_excluded_from_wheel(item.filename):
-+                    zout.writestr(item, zin.read(item.filename))
-+                else:
-+                    count += 1
-+        shutil.move(str(temp_wheel), str(wheel))
-+    if count > 0:
-+        print(f"Removed {count} test files from {wheel.name}")
++def remove_test_files(wheel_path: Path) -> None:
++    """
++    Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
++    """
++    removed = False
++    with tempfile.TemporaryDirectory() as td:
++        td_path = Path(td)
++
++        # Unpack the wheel into temp dir
++        unpack(wheel_path, dest=td_path)
++        unpacked_dir = next(td_path.iterdir())
++
++        # Remove excluded files/folders
++        for root, dirs, files in os.walk(td, topdown=False):
++            for d in list(dirs):
++
++                full_dir = Path(root) / d
++                rel = full_dir.relative_to(td_path).as_posix()
++                if is_excluded_from_wheel(rel):
++                    shutil.rmtree(full_dir)
++                    removed = True
++                    dirs.remove(d)
++            for f in files:
++                rel = Path(root).joinpath(f).relative_to(td_path).as_posix()
++                if is_excluded_from_wheel(rel):
++                    os.remove(Path(root) / f)
++                    removed = True
++        if removed:
++            print(f"Tests removed from {wheel_path.name}")
++
++        # Repack to same directory, regenerating RECORD
++        pack(unpacked_dir, dest_dir=wheel_path.parent, build_number=None)
++
 +
 +
 +
