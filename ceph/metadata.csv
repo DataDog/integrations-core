@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-ceph.aggregate_pct_used,gauge,,percent,,Overall capacity usage metric,0,ceph,pct used,
+ceph.aggregate_pct_used,gauge,,percent,,Overall capacity usage metric,0,cepdsaddadadwah,pct used,
 ceph.apply_latency_ms,gauge,,millisecond,,Time taken to flush an update to disks,-1,ceph,apply lat,
 ceph.class_pct_used,gauge,,percent,,Per-class percentage of raw storage used,0,ceph,class pct used,
 ceph.commit_latency_ms,gauge,,millisecond,,Time taken to commit an operation to the journal,-1,ceph,commit lat,
