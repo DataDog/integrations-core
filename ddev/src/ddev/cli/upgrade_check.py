@@ -54,7 +54,7 @@ def upgrade_check(app, version, cache_file=CACHE_FILE, pypi_url=PYPI_URL, check_
                 )
                 atexit.register(exit_handler, app, msg)
         except requests.RequestException as e:
-            logging.debug(f"Upgrade check failed: {e}")
+            logging.debug("Upgrade check failed: %s", e)
     else:
         if last_version > current_version:
             msg = (
