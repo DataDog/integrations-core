@@ -368,7 +368,7 @@ def test_use_current_workflow_id(
     assert f'built/existing/existing-1.1.1-{workflow_id}WID-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
 
 
-def test_lockfile_generation_in_temp_dir(tmp_path, setup_targets_dir, setup_fake_bucket, setup_fake_hash, workflow_id):
+def test_lockfile_generation(tmp_path, setup_targets_dir, setup_fake_bucket, workflow_id):
     original_hash = 'first-hash'
     new_hash = 'second-hash'
     previous_workflow_id = '1234567891' # this workflow_id is already uploaded to the bucket even though it has a later workflow id
@@ -390,11 +390,6 @@ def test_lockfile_generation_in_temp_dir(tmp_path, setup_targets_dir, setup_fake
 
     bucket, uploads = setup_fake_bucket(bucket_files)
 
-    setup_fake_hash({
-        'existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl': new_hash,
-    })
-
-    # 2. Patch output paths in the lock module
     fake_deps_dir = tmp_path / ".deps"
     fake_resolved_dir = fake_deps_dir / "resolved"
     fake_deps_dir.mkdir()
@@ -402,10 +397,157 @@ def test_lockfile_generation_in_temp_dir(tmp_path, setup_targets_dir, setup_fake
 
     with mock.patch.object(generate_lock, "RESOLUTION_DIR", fake_deps_dir), \
          mock.patch.object(generate_lock, "LOCK_FILE_DIR", fake_resolved_dir):
-
+        
         generate_lock.lock(str(targets_dir), workflow_id)
 
         lock_files = list(fake_resolved_dir.glob("*.txt"))
         assert lock_files, "No lock files generated"
-        contents = lock_files[0].read_text()
-        assert f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl#sha256={new_hash}' in contents
+        contents = lock_files[0].read_text().strip()
+        assert f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl#sha256={new_hash}' == contents
+
+
+# Test when there are built and external packages for a dependency and the built wheel is the prefered dependency i.e it's workflow_id is the current build number
+def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_bucket, workflow_id):
+    original_hash = 'first-hash'
+    new_hash = 'second-hash'
+    previous_workflow_id = '1234567891' # this workflow_id is already uploaded to the bucket even though it has a later workflow id
+
+    wheels = {
+        'built': [
+            ('existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
+        ]   
+    }
+    
+    targets_dir = setup_targets_dir(wheels)
+
+    bucket_files = {
+        f'built/existing/existing-1.1.1-{workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': new_hash},
+        f'built/existing/existing-1.1.1-{previous_workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': original_hash},
+        'external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': ''},
+    }
+
+    bucket, uploads = setup_fake_bucket(bucket_files)
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+
+    with mock.patch.object(generate_lock, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(generate_lock, "LOCK_FILE_DIR", fake_resolved_dir):
+        
+        generate_lock.lock(str(targets_dir), workflow_id)
+        lock_files = list(fake_resolved_dir.glob("*.txt"))
+        contents = lock_files[0].read_text().strip()
+        assert f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl#sha256={new_hash}' == contents
+
+# Test when there are built and external packages for a dependency and the external wheel is the prefered dependency i.e no workflow_id matches
+def test_external_wheel_priority(tmp_path, setup_targets_dir, setup_fake_bucket, workflow_id):
+    original_hash = 'first-hash'
+    external_hash = 'external-hash'
+    previous_workflow_id = '1234567891' # this workflow_id is already uploaded to the bucket even though it has a later workflow id
+
+    wheels = {
+        'built': [
+            ('existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
+        ]   
+    }
+    
+    targets_dir = setup_targets_dir(wheels)
+
+    bucket_files = {
+        f'built/existing/existing-1.1.1-{previous_workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': original_hash},
+        'external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': external_hash},
+    }
+
+    bucket, uploads = setup_fake_bucket(bucket_files)
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+
+    with mock.patch.object(generate_lock, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(generate_lock, "LOCK_FILE_DIR", fake_resolved_dir):
+        
+        generate_lock.lock(str(targets_dir), workflow_id)
+        lock_files = list(fake_resolved_dir.glob("*.txt"))
+        contents = lock_files[0].read_text().strip()
+        assert f'existing @ https://agent-int-packages.datadoghq.com/external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl#sha256={external_hash}' == contents
+
+
+# Test if nothing matches, we raise an error: RuntimeError(f'Could not find any wheels for target {target}: {project}=={version}')
+def test_no_wheel_match(tmp_path, setup_targets_dir, setup_fake_bucket, workflow_id):
+    original_hash = 'first-hash'
+    new_hash = 'second-hash'
+    previous_workflow_id = '1234567891' # this workflow_id is already uploaded to the bucket even though it has a later workflow id
+    other_workflow_id = '1234567892'
+
+    wheels = {
+        'built': [
+            ('existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
+        ]   
+    }
+    
+    targets_dir = setup_targets_dir(wheels)
+
+    bucket_files = {
+        f'built/existing/existing-1.1.1-{previous_workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': original_hash},
+        f'built/existing/existing-1.1.1-{other_workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': new_hash},
+    }
+
+    bucket, uploads = setup_fake_bucket(bucket_files)
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+
+    with mock.patch.object(generate_lock, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(generate_lock, "LOCK_FILE_DIR", fake_resolved_dir):
+        
+        with pytest.raises(RuntimeError, match=f'Could not find any wheels for target linux-x86_64: existing==1.1.1'):
+            generate_lock.lock(str(targets_dir), workflow_id)
+
+# Test the old format of the built wheel i.e build number is a timestamp (int) with no workflow_id
+def test_old_format_built_wheel(tmp_path, setup_targets_dir, setup_fake_bucket, workflow_id):
+    original_hash = 'first-hash'
+    new_hash = 'second-hash'
+    previous_workflow_id = '1234567891' # this workflow_id is already uploaded to the bucket even though it has a later workflow id
+
+    wheels = {
+        'built': [
+            ('existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
+        ]   
+    }
+    
+    targets_dir = setup_targets_dir(wheels)
+
+    bucket_files = {
+        f'built/existing/existing-1.1.1-{workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': new_hash},
+        f'built/existing/existing-1.1.1-2024132600000-cp312-cp312-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': original_hash},
+    }
+
+    bucket, uploads = setup_fake_bucket(bucket_files)
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+
+    with mock.patch.object(generate_lock, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(generate_lock, "LOCK_FILE_DIR", fake_resolved_dir):
+        
+        generate_lock.lock(str(targets_dir), workflow_id)
+        lock_files = list(fake_resolved_dir.glob("*.txt"))
+        contents = lock_files[0].read_text().strip()
+        assert f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{workflow_id}WID-cp312-cp312-manylinux2010_x86_64.whl#sha256={new_hash}' == contents
