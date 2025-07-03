@@ -239,6 +239,30 @@ COMMON_METRICS = [
 ]
 
 CLIENT_METRICS = [
+    'lustre.filesystem.file_heat',
+    'lustre.filesystem.enable_setstripe_gid',
+    'lustre.filesystem.max_read_ahead_whole_mb',
+    'lustre.filesystem.blocksize',
+    'lustre.filesystem.intent_mkdir',
+    'lustre.filesystem.enable_statahead_fname',
+    'lustre.filesystem.inode_cache',
+    'lustre.filesystem.filename_enc_use_old_base64',
+    'lustre.filesystem.checksum_pages',
+    'lustre.filesystem.statahead_max',
+    'lustre.filesystem.statahead_agl',
+    'lustre.filesystem.max_easize',
+    'lustre.filesystem.hybrid_io_read_threshold_bytes',
+    'lustre.filesystem.max_read_ahead_mb',
+    'lustre.filesystem.enable_filename_encryption',
+    'lustre.filesystem.kbytesfree',
+    'lustre.filesystem.default_easize',
+    'lustre.filesystem.kbytesavail',
+    'lustre.filesystem.filestotal',
+    'lustre.filesystem.filesfree',
+    'lustre.filesystem.kbytestotal',
+    'lustre.filesystem.lazystatfs',
+    'lustre.filesystem.fast_read',
+    'lustre.filesystem.hybrid_io_write_threshold_bytes',
     'lustre.osc.req_waittime.count',
     'lustre.osc.req_waittime.min',
     'lustre.osc.req_waittime.max',
@@ -727,6 +751,11 @@ MDS_METRICS = [
 ]
 
 OSS_METRICS = [
+    'lustre.osd.kbytesfree',
+    'lustre.osd.blocksize',
+    'lustre.osd.filesfree',
+    'lustre.osd.kbytesavail',
+    'lustre.osd.kbytestotal',
     'lustre.obdfilter.read_bytes.count',
     'lustre.obdfilter.read_bytes.min',
     'lustre.obdfilter.read_bytes.max',

@@ -11,6 +11,7 @@ import yaml
 from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
 
 from .constants import (
+    CURATED_PARAMS,
     DEFAULT_STATS,
     EXTRA_STATS,
     FILESYSTEM_DISCOVERY_PARAM_MAPPING,
@@ -20,6 +21,7 @@ from .constants import (
 )
 
 RATE_UNITS = {'locks/s'}
+
 
 def _get_stat_type(suffix, unit):
     """
@@ -32,13 +34,15 @@ def _get_stat_type(suffix, unit):
     else:
         return 'gauge'
 
+
 def _handle_ip_in_param(parts):
     match_index = 0
     for i, part in enumerate(parts):
         if '@' in part:
             match_index = i
-    new_part = ".".join(parts[match_index-3:match_index+1])
-    return [*parts[:match_index-3], new_part, *parts[match_index+1:]]
+    new_part = ".".join(parts[match_index - 3 : match_index + 1])
+    return [*parts[: match_index - 3], new_part, *parts[match_index + 1 :]]
+
 
 class LustreCheck(AgentCheck):
 
@@ -55,7 +59,7 @@ class LustreCheck(AgentCheck):
         # Enable or disable specific metrics
         self.enable_changelogs = is_affirmative(self.instance.get('enable_changelogs', False))
         self.lnetctl_verbosity = '3' if is_affirmative(self.instance.get('enable_lnetctl_detailed', False)) else '1'
-        self.param_list = set(DEFAULT_STATS)
+        self.param_list = set(DEFAULT_STATS + CURATED_PARAMS)
         if is_affirmative(self.instance.get('enable_extra_params', False)):
             self.param_list.update(set(EXTRA_STATS))
 
@@ -99,7 +103,7 @@ class LustreCheck(AgentCheck):
             self.submit_changelogs(self.changelog_lines_per_check)
 
         self.submit_device_health(self.devices)
-        self.submit_general_stats(self.param_list)
+        self.submit_param_data(self.param_list)
         self.submit_lnet_stats_metrics()
         self.submit_lnet_local_ni_metrics()
         self.submit_lnet_peer_ni_metrics()
@@ -221,7 +225,6 @@ class LustreCheck(AgentCheck):
             metric_type = _get_stat_type(suffix, values['unit'])
             self._submit(f'job_stats.{name}.{suffix}', value, metric_type, tags=tags)
 
-
     def _get_jobstats_params_list(self):
         '''
         Get the jobstats params from the command line.
@@ -328,23 +331,36 @@ class LustreCheck(AgentCheck):
             self.log.debug('No lnet stats found')
             return {}
 
-    def submit_general_stats(self, param_list):
+    def submit_param_data(self, param_list):
         '''
-        Submit general stats.
+        Submit general stats and metrics from Lustre parameters.
         '''
         for param in param_list:
             if self.node_type not in param.node_types:
                 self.log.debug('Skipping param %s for node type %s', param.regex, self.node_type)
                 continue
-            if not param.regex.endswith('.stats'):
-                continue
             matched_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
             for param_name in matched_params.splitlines():
                 tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
                 raw_stats = self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True)
+                if not param.regex.endswith('.stats'):
+                    self._submit_param(param.prefix, param_name, tags)
+                    continue
                 parsed_stats = self._parse_stats(raw_stats)
                 for stat_name, stat_value in parsed_stats.items():
                     self._submit_stat(param.prefix, stat_name, stat_value, tags)
+
+    def _submit_param(self, prefix, param_name, tags):
+        '''
+        Submit a single parameter.
+        '''
+        try:
+            output = int(self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True))
+            suffix = param_name.split('.')[-1]
+        except (ValueError, TypeError):
+            self.log.debug('No output found for %s', param_name)
+            return
+        self._submit(f'{prefix}.{suffix}', output, 'gauge', tags=tags)
 
     def _submit_stat(self, prefix, name, value, tags):
         '''
@@ -390,7 +406,7 @@ class LustreCheck(AgentCheck):
                     tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
                     wildcard_number += 1
         return tags
-    
+
     def _parse_stats(self, raw_stats):
         '''
         Parse the raw stats into a dictionary.
@@ -443,7 +459,7 @@ class LustreCheck(AgentCheck):
                 ]
                 tags += self.tags
 
-                self._submit('device.health', device_status, 'gauge',  tags=tags)
+                self._submit('device.health', device_status, 'gauge', tags=tags)
                 self._submit('device.refcount', device['refcount'], 'count', tags=tags)
         except Exception as e:
             self.log.error('Failed to submit device health metrics: %s', e)
