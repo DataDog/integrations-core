@@ -9,6 +9,7 @@ from datadog_checks.dev.tooling.commands.create import create
 from datadog_checks.dev.tooling.commands.run import run
 
 from ddev._version import __version__
+from ddev.cli import upgrade_check
 from ddev.cli.application import Application
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
@@ -129,6 +130,12 @@ def ddev(
         app.config_file.load()
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
+    if app.config.upgrade_check:
+        upgrade_check.upgrade_check(app, __version__)
+
+    if not ctx.invoked_subcommand:
+        app.display_info(ctx.get_help(), highlight=False)
+        return
 
     app.config.terminal.styles.parse_fields()
     errors = app.initialize_styles(app.config.terminal.styles.raw_data)
