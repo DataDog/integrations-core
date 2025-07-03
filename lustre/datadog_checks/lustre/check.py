@@ -19,6 +19,19 @@ from .constants import (
     JOBSTATS_PARAMS,
 )
 
+RATE_UNITS = {'locks/s'}
+
+def _get_stat_type(suffix, unit):
+    """
+    Returns the metric type for a given stat suffix and unit.
+    """
+    if suffix == 'samples':
+        return 'count'
+    elif unit in RATE_UNITS:
+        return 'rate'
+    else:
+        return 'gauge'
+
 
 class LustreCheck(AgentCheck):
 
@@ -192,13 +205,15 @@ class LustreCheck(AgentCheck):
     def _submit_jobstat(self, name, values, tags):
         if not isinstance(values, dict):
             return
-        for metric_type, value in values.items():
-            if metric_type == 'unit':
+        for suffix, value in values.items():
+            if suffix == 'unit':
                 continue
-            if metric_type == 'hist':
+            if suffix == 'hist':
                 # TODO: Handle histogram metrics if needed
                 continue
-            self.gauge(f'job_stats.{name}.{metric_type}', value, tags=tags)
+            metric_type = _get_stat_type(suffix, values['unit'])
+            self._submit(f'job_stats.{name}.{suffix}', value, metric_type, tags=tags)
+
 
     def _get_jobstats_params_list(self):
         '''
@@ -232,7 +247,11 @@ class LustreCheck(AgentCheck):
         '''
         lnet_metrics = self._get_lnet_metrics('stats')['statistics']
         for metric in lnet_metrics:
-            self.gauge(f'net.{metric}', lnet_metrics[metric], tags=[f'node_type:{self.node_type}'])
+            if metric.endswith('_count') or metric == 'errors':
+                metric_type = 'count'
+            else:
+                metric_type = 'gauge'
+            self._submit(f'net.{metric}', lnet_metrics[metric], metric_type, tags=[f'node_type:{self.node_type}'])
 
     def submit_lnet_local_ni_metrics(self):
         '''
@@ -245,7 +264,7 @@ class LustreCheck(AgentCheck):
                 local_nid = ni.get('nid')
                 status = 1 if ni.get('status') == 'up' else 0
                 tags = self.tags + [f'net_type:{net_type}', f'local_nid:{local_nid}']
-                self.gauge('net.local.status', status, tags=tags)
+                self._submit('net.local.status', status, 'gauge', tags=tags)
                 for stats_group_name, stats_group in ni.items():
                     self._submit_lnet_metric_group('local', stats_group_name, stats_group, tags)
 
@@ -285,7 +304,11 @@ class LustreCheck(AgentCheck):
         for metric_name, metric_value in group.items():
             metric_name = metric_name.replace(' ', '_')
             if isinstance(metric_value, int):
-                self.gauge(f'net.{prefix}.{group_name}.{metric_name}', metric_value, tags=tags)
+                if group_name == 'tunables' or metric_name == 'health_stats':
+                    metric_type = 'gauge'
+                else:
+                    metric_type = 'count'
+                self._submit(f'net.{prefix}.{group_name}.{metric_name}', metric_value, metric_type, tags=tags)
 
     def _get_lnet_metrics(self, stats_type='stats'):
         '''
@@ -321,17 +344,17 @@ class LustreCheck(AgentCheck):
         Submit a single stat metric.
         Usually the value is a dictionaty with a count, min, max, sum, and sumsq.
         '''
-        if isinstance(value, int):
-            self.gauge(f'{name}', value, tags=tags)
-            return
         if not isinstance(value, dict):
             self.log.debug('Unexpected stat value for %s: %s', name, value)
             return
-        for metric_type, metric_value in value.items():
+        for suffix, metric_value in value.items():
+            if suffix == 'unit':
+                continue
             if isinstance(metric_value, int):
-                self.gauge(f'{prefix}.{name}.{metric_type}', metric_value, tags=tags)
+                metric_type = _get_stat_type(suffix, value['unit'])
+                self._submit(f'{prefix}.{name}.{suffix}', metric_value, metric_type, tags=tags)
             else:
-                self.log.debug('Unexpected metric value for %s.%s: %s', name, metric_type, metric_value)
+                self.log.debug('Unexpected metric value for %s.%s: %s', name, suffix, metric_value)
 
     def _extract_tags_from_param(self, param_regex, param_name, wildcards):
         '''
@@ -380,6 +403,7 @@ class LustreCheck(AgentCheck):
             try:
                 stat_dict = {'count': int(parts[1])}
                 stat_types = ('min', 'max', 'sum', 'sumsq')
+                stat_dict['unit'] = parts[3]
                 for i, value in enumerate(parts[4:]):
                     stat_dict[stat_types[i]] = int(value)
                 if len(parts) > 8:
@@ -404,8 +428,8 @@ class LustreCheck(AgentCheck):
                 ]
                 tags += self.tags
 
-                self.gauge('device.health', device_status, tags=tags)
-                self.gauge('device.refcount', device['refcount'], tags=tags)
+                self._submit('device.health', device_status, 'gauge',  tags=tags)
+                self._submit('device.refcount', device['refcount'], 'count', tags=tags)
         except Exception as e:
             self.log.error('Failed to submit device health metrics: %s', e)
 
@@ -451,3 +475,17 @@ class LustreCheck(AgentCheck):
         end_index = str(int(start_index) + lines)
         self.log.debug('Fetching changelog from index %s to %s for target %s', start_index, end_index, target)
         return self._run_command('lfs', 'changelog', target, start_index, end_index, sudo=True)
+
+    def _submit(self, name, value, metric_type, tags):
+        """
+        Submits a single metric.
+        """
+        if metric_type == 'gauge':
+            self.gauge(name, value, tags=tags)
+        elif metric_type == 'rate':
+            self.rate(name, value, tags=tags)
+        elif metric_type == 'count':
+            self.count(name, value, tags=tags)
+        elif metric_type == 'histogram':
+            # TODO: handle this case
+            return
