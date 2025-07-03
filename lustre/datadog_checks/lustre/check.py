@@ -322,14 +322,14 @@ class LustreCheck(AgentCheck):
         Usually the value is a dictionaty with a count, min, max, sum, and sumsq.
         '''
         if isinstance(value, int):
-            self.gauge(f'general.{name}', value, tags=tags)
+            self.gauge(f'{name}', value, tags=tags)
             return
         if not isinstance(value, dict):
             self.log.debug('Unexpected stat value for %s: %s', name, value)
             return
         for metric_type, metric_value in value.items():
             if isinstance(metric_value, int):
-                self.gauge(f'general.{prefix}.{name}.{metric_type}', metric_value, tags=tags)
+                self.gauge(f'{prefix}.{name}.{metric_type}', metric_value, tags=tags)
             else:
                 self.log.debug('Unexpected metric value for %s.%s: %s', name, metric_type, metric_value)
 
