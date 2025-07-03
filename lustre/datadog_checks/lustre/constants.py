@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 
 FILESYSTEM_DISCOVERY_PARAM_MAPPING = {
-    'mds': (r'mdt.*.job_stats', r'(?<=mds\.).*(?=-MDT)'),
+    'mds': (r'mdt.*.job_stats', r'(?<=mdt\.).*(?=-MDT)'),
     'oss': (r'obdfilter.*.job_stats', r'(?<=obdfilter\.).*(?=-OST)'),
     'client': (r'llite.*.stats', r'(?<=llite\.).*(?=-[^-]*\.stats)'),
 }

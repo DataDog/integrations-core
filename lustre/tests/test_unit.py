@@ -40,15 +40,13 @@ def disable_subprocess():
 def mock_run_command(command_fixture_mapping):
     def run_command(bin, *args, **kwargs):
         requested_command = f"{bin} {' '.join(args)}"
-        for cmd, fixture_file in command_fixture_mapping.items():
+        for cmd, fixture in command_fixture_mapping.items():
             if requested_command.startswith(cmd):
-                fixture = command_fixture_mapping.get(cmd)
-                if fixture:
-                    path = os.path.join(FIXTURES_DIR, fixture_file)
-                    if not isfile(path):
-                        return fixture
-                    with open(path, 'r') as f:
-                        return f.read()
+                path = os.path.join(FIXTURES_DIR, fixture)
+                if not isfile(path):
+                    return fixture
+                with open(path, 'r') as f:
+                    return f.read()
         raise ValueError(f"Unexpected command: {requested_command}")
 
     return run_command
@@ -254,3 +252,204 @@ def test_get_changelog(instance):
             result = check._get_changelog('lustre-MDT0000', 1000)
 
             mock_run.assert_called_with('lfs', 'changelog', 'lustre-MDT0000', '0', '1000', sudo=True)
+
+
+def test_submit_general_stats(aggregator, instance):
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lctl list_param llite.*.stats': 'llite',
+        'lctl get_param -ny llite': 'client_llite_stats.txt',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [instance])
+        check.submit_general_stats(DEFAULT_PARAMS)
+
+    # Verify some general stats metrics are submitted
+    expected_metrics = [
+        'lustre.filesystem.read_bytes.count',
+        'lustre.filesystem.write_bytes.count',
+        'lustre.filesystem.read.count',
+        'lustre.filesystem.write.count',
+    ]
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+
+
+def test_extract_tags_from_param():
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [{}])
+        
+        # Test with wildcards
+        tags = check._extract_tags_from_param(
+            'mdc.*.stats',
+            'mdc.lustre-MDT0000-mdc-ffff8803f0d41000.stats',
+            ('device_uuid',)
+        )
+        assert tags == ['device_uuid:lustre-MDT0000-mdc-ffff8803f0d41000']
+        
+        # Test with multiple wildcards
+        tags = check._extract_tags_from_param(
+            'mdt.*.exports.*.stats',
+            'mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats',
+            ('device_name', 'nid')
+        )
+        assert tags == ['device_name:lustre-MDT0000', 'nid:172.31.16.218@tcp']
+        
+        # Test with no wildcards
+        tags = check._extract_tags_from_param(
+            'mds.MDS.mdt.stats',
+            'mds.MDS.mdt.stats',
+            ()
+        )
+        assert tags == []
+        
+        # Test with mismatched parts
+        tags = check._extract_tags_from_param(
+            'mdc.*.stats',
+            'mdc.too.many.parts.stats',
+            ('device_uuid',)
+        )
+        assert tags == []
+
+
+def test_parse_stats():
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [{}])
+        
+        # Test valid stats parsing
+        raw_stats = '''req_waittime              83 samples [usecs] 11 40 1493 32135
+req_qdepth                83 samples [reqs] 0 0 0 0
+cancel                    253 samples [locks] 1 1 253
+'''
+        
+        parsed = check._parse_stats(raw_stats)
+        
+        assert 'req_waittime' in parsed
+        assert parsed['req_waittime']['count'] == 83
+        assert parsed['req_waittime']['unit'] == 'usecs'
+        assert parsed['req_waittime']['min'] == 11
+        assert parsed['req_waittime']['max'] == 40
+        assert parsed['req_waittime']['sum'] == 1493
+        assert parsed['req_waittime']['sumsq'] == 32135
+        
+        # Test ignored stats
+        raw_stats_with_ignored = '''elapsed_time              2068792.478877751 secs.nsecs
+req_waittime              83 samples [usecs] 11 40 1493 32135
+'''
+        
+        parsed = check._parse_stats(raw_stats_with_ignored)
+        assert 'elapsed_time' not in parsed
+        assert 'req_waittime' in parsed
+        
+        # Test malformed lines
+        raw_stats_malformed = '''invalid_line
+req_waittime              83 samples [usecs] 11 40 1493 32135
+short_line 1
+'''
+        
+        parsed = check._parse_stats(raw_stats_malformed)
+        assert len(parsed) == 1
+        assert 'req_waittime' in parsed
+
+
+def test_update_filesystems():
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'mds_dl_yaml.txt',
+        'lctl list_param mdt.*.job_stats': 'mdt.lustre-MDT0000.job_stats\nmdt.lustre2-MDT0000.job_stats',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [{'node_type': 'mds'}])
+        check._update_filesystems()
+        
+        # Should extract filesystems from the parameter names
+        assert 'lustre' in check.filesystems
+        assert 'lustre2' in check.filesystems
+
+
+def test_update_changelog_targets():
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [{}])
+        
+        devices = [
+            {'name': 'lustre-MDT0000', 'type': 'mdt'},
+            {'name': 'lustre-MDT0001', 'type': 'mdt'},
+            {'name': 'lustre2-MDT0000', 'type': 'mdt'},
+            {'name': 'lustre-OST0000', 'type': 'ost'},
+        ]
+        filesystems = ['lustre', 'lustre2']
+        
+        check._update_changelog_targets(devices, filesystems)
+        
+        expected_targets = ['lustre-MDT0000', 'lustre-MDT0001', 'lustre2-MDT0000']
+        assert set(check.changelog_targets) == set(expected_targets)
+
+
+def test_lnet_group_filtering(aggregator, instance):
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lnetctl net show': 'all_lnet_net.txt',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [instance])
+        
+        # Test that ignored groups are not submitted
+        test_group = {'test_metric': 123}
+        tags = ['test_tag:value']
+        
+        check._submit_lnet_metric_group('local', 'statistics', test_group, tags)
+        
+        aggregator.assert_metric('lustre.net.local.statistics.test_metric')
+        aggregator.assert_metric_has_tag('lustre.net.local.statistics.test_metric', 'test_tag:value')
+
+
+def test_metric_type_assignment(aggregator, instance):
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [instance])
+        
+        # Test gauge metric
+        check._submit('test.gauge', 100, 'gauge', tags=[])
+        aggregator.assert_metric('lustre.test.gauge', value=100, metric_type=aggregator.GAUGE)
+        
+        # Test count metric
+        check._submit('test.count', 50, 'count', tags=[])
+        aggregator.assert_metric('lustre.test.count', value=50, metric_type=aggregator.COUNT)
+        
+        # Test rate metric
+        check._submit('test.rate', 25, 'rate', tags=[])
+        aggregator.assert_metric('lustre.test.rate', value=25, metric_type=aggregator.RATE)
+
+
+def test_empty_command_outputs(instance):
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -ny mdt': '',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+    with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
+        check = LustreCheck('lustre', {}, [instance])
+        
+        # Should handle empty outputs gracefully
+        result = check._parse_stats('')
+        assert result == {}
+        
+        result = check._get_jobstats_metrics('mdt.lustre-MDT0000.job_stats')
+        assert result == {}

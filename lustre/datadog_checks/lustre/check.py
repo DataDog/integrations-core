@@ -32,6 +32,13 @@ def _get_stat_type(suffix, unit):
     else:
         return 'gauge'
 
+def _handle_ip_in_param(parts):
+    match_index = 0
+    for i, part in enumerate(parts):
+        if '@' in part:
+            match_index = i
+    new_part = ".".join(parts[match_index-3:match_index+1])
+    return [*parts[:match_index-3], new_part, *parts[match_index+1:]]
 
 class LustreCheck(AgentCheck):
 
@@ -236,7 +243,7 @@ class LustreCheck(AgentCheck):
         '''
         jobstats_output = self._run_command('lctl', 'get_param', '-ny', jobstats_param, sudo=True)
         try:
-            return yaml.safe_load(jobstats_output)
+            return yaml.safe_load(jobstats_output) or {}
         except KeyError:
             self.log.debug('No jobstats metrics found for %s', jobstats_param)
             return {}
@@ -366,8 +373,13 @@ class LustreCheck(AgentCheck):
             param_parts = param_name.split('.')
             wildcard_number = 0
             if not len(regex_parts) == len(param_parts):
-                self.log.debug('Parameter name %s does not match regex %s', param_name, param_regex)
-                return tags
+                # Edge case: mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats
+                if any("@" in part for part in param_parts):
+                    # We need to reconstruct the address
+                    param_parts = _handle_ip_in_param(param_parts)
+                else:
+                    self.log.debug('Parameter name %s does not match regex %s', param_name, param_regex)
+                    return tags
             for part_number, part in enumerate(regex_parts):
                 if part == '*':
                     if wildcard_number >= len(wildcards):
@@ -378,7 +390,7 @@ class LustreCheck(AgentCheck):
                     tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
                     wildcard_number += 1
         return tags
-
+    
     def _parse_stats(self, raw_stats):
         '''
         Parse the raw stats into a dictionary.
@@ -403,7 +415,10 @@ class LustreCheck(AgentCheck):
             try:
                 stat_dict = {'count': int(parts[1])}
                 stat_types = ('min', 'max', 'sum', 'sumsq')
-                stat_dict['unit'] = parts[3]
+                if len(parts) < 3:
+                    self.log.debug('Unexpected format for stat "%s"', line)
+                    continue
+                stat_dict['unit'] = parts[3].strip('[]')
                 for i, value in enumerate(parts[4:]):
                     stat_dict[stat_types[i]] = int(value)
                 if len(parts) > 8:
