@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-zookeeper.add_dead_watcher_stall_time,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,add dead watcher stall time,
+zookeeper.add_dead_watcher_stall_time,gauge,,,,[zookeeper version 3.6+ only],0,zk,add dead watcher stall time,
 zookeeper.approximate_data_size,gauge,,,,,0,zookeeper,approx data size,
 zookeeper.avg_latency,gauge,,millisecond,,The amount of time it takes for the server to respond to a client request.,0,zookeeper,avg latency,
 zookeeper.bytes_received,gauge,,,,Number of bytes received,0,zookeeper,,
