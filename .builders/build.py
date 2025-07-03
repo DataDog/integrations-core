@@ -216,7 +216,7 @@ def build_image():
 
             # Apply the remove_tests patch
             test_patch = mount_dir / 'patches' / 'remove_tests.patch'
-            check_process(['patch', '--batch', '-p1', '-i', str(test_patch)], cwd=mount_dir / 'scripts')
+            check_process(['patch', '--batch', '-p1', '-i', str(test_patch)], cwd=mount_dir)
 
             # Create outputs on the host so they can be removed
             wheels_dir = mount_dir / 'wheels'
