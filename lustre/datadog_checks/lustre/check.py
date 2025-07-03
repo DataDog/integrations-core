@@ -45,7 +45,6 @@ def _handle_ip_in_param(parts):
 
 
 class LustreCheck(AgentCheck):
-
     __NAMESPACE__ = 'lustre'
 
     def __init__(self, name, init_config, instances):

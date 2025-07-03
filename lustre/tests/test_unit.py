@@ -233,7 +233,6 @@ def test_get_changelog(instance):
         'lfs changelog': 'client_changelogs.txt',
     }
     with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)) as mock_run:
-
         check = LustreCheck('lustre', {}, [instance])
 
         # Mock get_log_cursor to return a starting index
