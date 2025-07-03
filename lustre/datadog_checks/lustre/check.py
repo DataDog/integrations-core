@@ -27,7 +27,7 @@ def _get_stat_type(suffix, unit):
     """
     Returns the metric type for a given stat suffix and unit.
     """
-    if suffix == 'samples':
+    if suffix == 'count':
         return 'count'
     elif unit in RATE_UNITS:
         return 'rate'
@@ -217,6 +217,8 @@ class LustreCheck(AgentCheck):
         if not isinstance(values, dict):
             return
         for suffix, value in values.items():
+            if suffix == 'samples':
+                suffix = 'count'
             if suffix == 'unit':
                 continue
             if suffix == 'hist':
