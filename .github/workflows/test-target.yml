@@ -190,7 +190,12 @@ jobs:
         ddev config set repo ${{ inputs.repo }}
 
     - name: Lint
-      run: ddev test --lint ${{ inputs.target }}
+      run: |
+        ddev test --lint ${{ inputs.target }} || {
+          echo "::error::Lint failed! ddev has been updated to version 12.0.0."
+          echo "::error::Please update to the latest version of ddev and then run 'ddev test --fmt ${{ inputs.target }}' to fix formatting issues."
+          exit 1
+        }
 
     - name: Prepare for testing
       env: >-
