@@ -12,20 +12,24 @@ This integration parses and ingest the following types of logs:
 
 Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
 
-## Data Collection Overview
+## Setup
+
+### Log Collection Overview
 
 **Note**: For complete data collection, please configure both data collection methods.
 
 The table below shows the breakdown of data types, the required configuration for both collection methods, and the dashboards populated for both methods.
 
-| Data Type                                                                 | Configuration Required                             | Dashboards Populated |
-|---------------------------------------------------------------------------|----------------------------------------------------|------------------------------|
-|<li> Password and Session Activities<br><li> Managed Systems and Managed Accounts<br><li> Secret Safe Activities | Agent and Universal Event Forwarder                | <li>BeyondTrust Password Safe - Overview<br><li>BeyondTrust Password Safe - Password Retrieval and Session Insights<br><li>BeyondTrust Password Safe - Management and Secret Safe Insights |
-| <li>Audit Logs                                                                | API Base Endpoint, Client ID, and Client Secret | <li>BeyondTrust Password Safe - Audit Insights |
+| Data Type                                                                 | Configuration Required                  | Dashboards Populated |
+|---------------------------------------------------------------------------|-----------------------------------------|------------------------------|
+|<li> Password and Session Activities<br><li> Managed Systems and Managed Accounts<br><li> Secret Safe Activities | Agent and Event Forwarder Configuration | <li>BeyondTrust Password Safe - Overview<br><li>BeyondTrust Password Safe - Password and Session Insights<br><li>BeyondTrust Password Safe - Management and Secret Safe Insights |
+| <li>Audit Logs                                                                | Audit API Configuration                 | <li>BeyondTrust Password Safe - Audit Insights |
 
-### Installation
+### Agent and Event Forwarder Configuration
 
-**Note**: These steps are only required for collecting logs via Agent and Universal Event Forwarder.
+**Note**: These steps are only required for collecting logs via Agent and Event Forwarder. Refer the above Log Collection Overview table for more details.
+
+#### Installation
 
 To install the BeyondTrust Password Safe integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 
@@ -35,7 +39,6 @@ To install the BeyondTrust Password Safe integration, run the following Agent in
 sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_password_safe==1.0.0
 ```
 
-### Configuration
 
 #### Log collection
 
@@ -47,7 +50,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
 
 2. Add this configuration block to your `beyondtrust_password_safe.d/conf.yaml` file to start collecting your logs.
 
-   See the sample [beyondtrust_password_safe.d/conf.yaml][4] for available configuration options.
+   See the sample [beyondtrust_password_safe.d/conf.yaml][8] for available configuration options.
 
    ```yaml
    logs:
@@ -81,15 +84,15 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
 13. Expand Event Filters, and then enable **BeyondInsight Application Audit** and **Password Safe** options.
 14. Click on the **Create Connector** button.
 
-### Validation
+#### Validation
 
-[Run the Agent's status subcommand][5] and look for `beyondtrust_password_safe` under the Checks section.
+   [Run the Agent's status subcommand][5] and look for `beyondtrust_password_safe` under the Checks section.
 
-## Setup
+### Audit API Configuration
 
-**Note**: These steps are only required for collecting Audit Logs.
+**Note**: These steps are only required for collecting Audit Logs. Refer the above Log Collection Overview table for more details.
 
-### Generate Client ID and Client Secret
+#### Generate Client ID and Client Secret
 
 1. Login to the BeyondTrust Password Safe using Administrator account.
 2. Go to **Configuration > Role Based Access > User Management**.
@@ -105,7 +108,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
     - From the User Details pane, click **Groups**.
     - Locate the group, select it, and click **Assign Group** above the grid.
 
-### Configure API Access Policy and retrieve API Base Endpoint
+#### Configure API Access Policy and retrieve API Base Endpoint
 
 1. Login to the BeyondTrust Password Safe using Administrator account.
 2. Go to **Configuration > General > API Registrations**.
@@ -118,7 +121,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
 7. Click **Create Rule** and then click **Create Registration**.
 8. Copy **API Base Endpoint**.
 
-### Retrieve Datadog CIDR Range
+#### Retrieve Datadog CIDR Range
 
 1. Use an API platform such as Postman, or curl to make a GET request to the Datadog API endpoint provided [here][7].
 2. Once you receive the response, locate the **webhooks** section in the JSON. It will look something like this:
@@ -133,7 +136,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
    ```
 3. From the **prefixes_ipv4** list under the Webhooks section, copy each CIDR entry and create an authentication rule for it.
 
-### Connect your BeyondTrust Password Safe Account to Datadog
+#### Connect your BeyondTrust Password Safe Account to Datadog
 
 1. Add the application user's BeyondTrust Password Safe Client ID, Client Secret, and API Base Endpoint.
 
@@ -207,6 +210,8 @@ To resolve:
 
 If you encounter an error indicating that the request is originating from an unidentified CIDR range, it may be due to a change in Datadog's outbound IP ranges. Follow the steps from **Retrieve Datadog CIDR Range** section to retrieve and update the allowed CIDR ranges.
 
+## Support
+
 For further assistance, contact [Datadog support][3].
 
 [1]: https://www.beyondtrust.com/sem/password-safe
@@ -216,3 +221,4 @@ For further assistance, contact [Datadog support][3].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/api/latest/ip-ranges/
+[8]: https://github.com/DataDog/integrations-core/blob/master/beyondtrust_password_safe/datadog_checks/beyondtrust_password_safe/data/conf.yaml.example
