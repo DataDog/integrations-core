@@ -309,7 +309,7 @@ def test_health_checks(aggregator, health_check_metric, expected_metric_count, e
         "event_type": "consul.check_failed",
         "source_type_name": "consul",
         "msg_title": "Service 'server-loadbalancer' check Failed",
-        "msg_text": "Check server-loadbalancer for service id server-loadbalancer, id: server-loadbalancerfailed "
+        "msg_text": "Check server-loadbalancer for service server-loadbalancer, id: server-loadbalancerfailed "
         "on node node-1: CheckHttp CRITICAL: Request error: Connection refused - connect(2) "
         "for \"localhost\" port 80\n",
         "aggregation_key": "consul.status_check",

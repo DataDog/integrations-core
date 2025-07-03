@@ -10,7 +10,7 @@ from itertools import islice
 from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 from urllib.parse import urljoin
-
+from cachetools import TTLCache
 import requests
 from requests import HTTPError
 
@@ -131,6 +131,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         if 'acl_token' in self.instance:
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+
+        self.health_checks = TTLCache(ttl=3600, maxsize=5000)
 
     def _is_dogstatsd_configured(self):
         """Check if the agent has a consul dogstatsd profile configured"""
@@ -365,16 +367,16 @@ class ConsulCheck(OpenMetricsBaseCheck):
             service_checks = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
-                sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
+                check_id = check.get("CheckID")
+                service_id = check.get("ServiceID")
+                service_name = check.get("ServiceName")
+                sc_id = '{}/{}/{}'.format(check_id, service_id, service_name)
                 check_status = check.get('Status')
                 status = STATUS_SC.get(check_status)
                 if status is None:
                     status = self.UNKNOWN
 
                 if self.health_check_metric or sc_id not in service_checks:
-                    check_id = check.get("CheckID")
-                    service_id = check.get("ServiceID")
-                    service_name = check.get("ServiceName")
                     node_name = check.get("Node")
                     tags = ["check:{}".format(check_id)]
                     if service_name:
@@ -388,21 +390,27 @@ class ConsulCheck(OpenMetricsBaseCheck):
                         tags.append("consul_node:{}".format(node_name))
 
                     if self.health_check_metric:
+                        hc_id = f"{sc_id}/{node_name}"
                         status_value = STATUS_SEVERITY.get(status)
+                        last_hc_value = self.health_checks.get(hc_id)
+
                         node_tags = copy.deepcopy(tags)
                         node_tags.append(f"consul_status:{check_status}")
                         self.gauge(HEALTH_CHECK_METRIC, status_value, tags=main_tags + node_tags)
-                        if status_value == 3:
-                            check_name = check.get("Name", "Consul Status Check")
+                        self.health_checks[hc_id] = status_value
+
+                        if last_hc_value != status_value and status_value == 3:
+                            check_name = check.get("Name", "Consul Health Check")
                             check_output = check.get("Output", "")
                             self.event(
                                 {
                                     "timestamp": timestamp(),
                                     "event_type": "consul.check_failed",
+                                    "alert_type": "error",
                                     "source_type_name": SOURCE_TYPE_NAME,
                                     "msg_title": f"{check_name} Failed",
                                     "aggregation_key": "consul.status_check",
-                                    "msg_text": f"Check {check_id} for service id {service_name}, id: {service_id}"
+                                    "msg_text": f"Check {check_id} for service {service_name}, id: {service_id}"
                                     f"failed on node {node_name}: {check_output}",
                                     "tags": node_tags,
                                 }
