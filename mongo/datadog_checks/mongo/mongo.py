@@ -83,6 +83,8 @@ class MongoDb(AgentCheck):
       Connectivity health to the instance.
     """
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances=None):
         super(MongoDb, self).__init__(name, init_config, instances)
         self._config = MongoConfig(self.instance, self.log, self.init_config)
@@ -216,15 +218,15 @@ class MongoDb(AgentCheck):
             if option not in metrics.AVAILABLE_METRICS:
                 if option in metrics.DEFAULT_METRICS:
                     self.log.warning(
-                        u"`%s` option is deprecated. The corresponding metrics are collected by default.", option
+                        "`%s` option is deprecated. The corresponding metrics are collected by default.", option
                     )
                 else:
                     self.log.warning(
-                        u"Failed to extend the list of metrics to collect: unrecognized `%s` option", option
+                        "Failed to extend the list of metrics to collect: unrecognized `%s` option", option
                     )
                 continue
             additional_metrics = metrics.AVAILABLE_METRICS[option]
-            self.log.debug(u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
+            self.log.debug("Adding `%s` corresponding metrics to the list of metrics to collect.", option)
             metrics_to_collect.update(additional_metrics)
 
         return metrics_to_collect

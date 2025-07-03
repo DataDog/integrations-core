@@ -16,7 +16,6 @@ from ....fs import (
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
-from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import (
     CUSTOM_FILES,
@@ -108,12 +107,9 @@ def models(ctx, check, sync, verbose):
             source = 'test'
             version = '0.0.1'
         else:
-            manifest = Manifest.load_manifest(check)
-            if not manifest:
-                echo_debug(f"Skipping validation for check: {check}; can't process manifest")
-                continue
-            spec_path = manifest.get_config_spec()
+            spec_path = path_join(root, check, 'assets', 'configuration', 'spec.yaml')
             if not file_exists(spec_path):
+                echo_debug(f"Skipping validation for check: {check}; 'spec.yaml' file doesn't exist")
                 continue
 
             source = check

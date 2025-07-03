@@ -79,7 +79,7 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
-**Note:** To set an alert on these service checks, create a [Network Monitor][11].
+**Note:** To monitor HTTP error codes (such as 404) or view the first 400 characters of an HTTP response, create a [Network Monitor][11] based on these service checks.
 
 ## Troubleshooting
 

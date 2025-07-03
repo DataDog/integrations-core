@@ -7,7 +7,7 @@ import copy
 import random
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin
 
 import requests
@@ -888,7 +888,6 @@ class OpenStackCheck(AgentCheck):
 
             # Don't collect Deleted or Shut off VMs on the first run:
             if i_key in self.changes_since_time:
-
                 # Get a list of deleted serversTimestamp used to filter the call to get the list
                 # Need to have admin perms for this to take affect
                 query_params['deleted'] = 'true'
@@ -903,7 +902,7 @@ class OpenStackCheck(AgentCheck):
                 resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
                 servers.extend(resp['servers'])
 
-            self.changes_since_time[i_key] = datetime.utcnow().isoformat()
+            self.changes_since_time[i_key] = datetime.now(timezone.utc).isoformat()
 
         except Exception as e:
             self.warning('Unable to get the list of all servers: %s', e)
@@ -1036,12 +1035,12 @@ class OpenStackCheck(AgentCheck):
         assert entry in ["aggregates", "physical_hosts", "hypervisors"]
         ttl = self.CACHE_TTL.get(entry)
         last_fetch_time = getattr(self, self.FETCH_TIME_ACCESSORS.get(entry))
-        return datetime.utcnow() - last_fetch_time > timedelta(seconds=ttl)
+        return datetime.now(timezone.utc) - last_fetch_time > timedelta(seconds=ttl)
 
     def _get_and_set_aggregate_list(self):
         if not self._aggregate_list or self._is_expired("aggregates"):
             self._aggregate_list = self.get_all_aggregate_hypervisors()
-            self._last_aggregate_fetch_time = datetime.utcnow()
+            self._last_aggregate_fetch_time = datetime.now(timezone.utc)
 
         return self._aggregate_list
 
@@ -1105,7 +1104,6 @@ class OpenStackCheck(AgentCheck):
         try:
             instance_scope = self.get_scope_for_instance(instance)
         except KeyError:
-
             # We're missing a project scope for this instance
             # Let's populate it now
             try:

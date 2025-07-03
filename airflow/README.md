@@ -328,11 +328,17 @@ metadata:
     ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks: |
       {
         "airflow": {
-          "instances": ["url": "http://airflow-ui.%%kube_namespace%%.svc.cluster.local:8080"]
+          "instances": [
+            {
+              "url": "http://airflow-ui.%%kube_namespace%%.svc.cluster.local:8080"
+            }
+          ]
         }
       }
     # (...)
 ```
+
+Replace `<CONTAINER_IDENTIFIER>` with the container's name within the pod (the value returned by `.name`).
 
 ##### Connect Airflow to DogStatsD
 

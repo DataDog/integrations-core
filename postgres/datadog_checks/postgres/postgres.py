@@ -55,8 +55,10 @@ from .util import (
     QUERY_PG_REPLICATION_STATS_METRICS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
+    QUERY_PG_WAIT_EVENT_METRICS,
     REPLICATION_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
@@ -97,6 +99,8 @@ class PostgreSql(AgentCheck):
     SERVICE_CHECK_NAME = 'postgres.can_connect'
     METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
+    HA_SUPPORTED = True
+
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None
@@ -109,6 +113,7 @@ class PostgreSql(AgentCheck):
         self.system_identifier = None
         self.cluster_name = None
         self.is_aurora = None
+        self.wal_level = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
@@ -316,10 +321,17 @@ class PostgreSql(AgentCheck):
                 ]
             )
 
-        if self.version < V10:
-            queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
+        if self.is_aurora and self.wal_level != 'logical':
+            self.log.debug("logical wal_level is required to use pg_current_wal_lsn() on Aurora")
+
         else:
-            queries.append(QUERY_PG_CONTROL_CHECKPOINT)
+            self.log.debug("Adding control checkpoint metrics")
+
+            if self.version >= V10:
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT)
+
+            else:
+                queries.append(QUERY_PG_CONTROL_CHECKPOINT_LT_10)
 
         if self.version >= V10:
             # Wal receiver is not supported on aurora
@@ -336,6 +348,7 @@ class PostgreSql(AgentCheck):
             queries.append(QUERY_PG_REPLICATION_STATS_METRICS)
             queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
             queries.append(STAT_SUBSCRIPTION_METRICS)
+            queries.append(QUERY_PG_WAIT_EVENT_METRICS)
 
         if self.version >= V12:
             queries.append(CLUSTER_VACUUM_PROGRESS_METRICS)
@@ -353,6 +366,7 @@ class PostgreSql(AgentCheck):
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
+            queries.append(QUERY_PG_STAT_RECOVERY_PREFETCH)
         if self.version >= V16:
             if self._config.dbm_enabled:
                 queries.append(STAT_IO_METRICS)
@@ -472,6 +486,13 @@ class PostgreSql(AgentCheck):
         if self.is_aurora is None:
             self.is_aurora = self._version_utils.is_aurora(self.db())
         return self.is_aurora
+
+    def _get_wal_level(self):
+        with self.db() as conn:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                cursor.execute('SHOW wal_level;')
+                wal_level = cursor.fetchone()[0]
+                return wal_level
 
     @property
     def reported_hostname(self):
@@ -624,8 +645,7 @@ class PostgreSql(AgentCheck):
             expected_number_of_columns = len(descriptors) + len(cols)
             if len(row) != expected_number_of_columns:
                 raise RuntimeError(
-                    'Row does not contain enough values: '
-                    'expected {} ({} descriptors + {} columns), got {}'.format(
+                    'Row does not contain enough values: expected {} ({} descriptors + {} columns), got {}'.format(
                         expected_number_of_columns, len(descriptors), len(cols), len(row)
                     )
                 )
@@ -1006,6 +1026,9 @@ class PostgreSql(AgentCheck):
             # We don't want to cache versions between runs to capture minor updates for metadata
             self.load_version()
 
+            # Check wal_level
+            self.wal_level = self._get_wal_level()
+
             # Add raw version as a tag
             tags.append(f'postgresql_version:{self.raw_version}')
             tags_to_add.append(f'postgresql_version:{self.raw_version}')
@@ -1043,7 +1066,7 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
+            message = 'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
             )
             self.service_check(

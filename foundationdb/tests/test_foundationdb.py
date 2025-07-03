@@ -63,6 +63,18 @@ def test_full(aggregator, instance):
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())
         aggregator.assert_service_check("foundationdb.can_connect", AgentCheck.OK)
 
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_process_class:unset")
+
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:master")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:cluster_controller")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:data_distributor")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:ratekeeper")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:coordinator")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:proxy")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:log")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:storage")
+        aggregator.assert_metric_has_tag("foundationdb.processes_per_role", "fdb_role:resolver")
+
 
 @pytest.mark.skipif(PROTOCOL == 'tls', reason="Non-TLS FoundationDB cluster only.")
 @pytest.mark.usefixtures("dd_environment")

@@ -257,10 +257,12 @@ class InstanceConfig(BaseModel):
     dbstrict: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: str
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
+    ignore_schemas_owned_by: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None
@@ -275,6 +277,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int] = None
     propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
+    query_encodings: Optional[tuple[str, ...]] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     query_timeout: Optional[int] = None

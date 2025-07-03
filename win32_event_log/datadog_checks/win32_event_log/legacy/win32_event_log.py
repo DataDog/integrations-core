@@ -94,9 +94,9 @@ class Win32EventLogWMI(WinWMICheck):
             # If system boot was within 600s of dd agent start then use boottime as last_ts
             uptime = datetime.now(timezone.utc) - datetime.fromtimestamp(psutil.boot_time(), timezone.utc)
             if uptime.total_seconds() <= 600:
-                self.last_ts[instance_key] = datetime.utcnow() - uptime
+                self.last_ts[instance_key] = datetime.now(timezone.utc) - uptime
             else:
-                self.last_ts[instance_key] = datetime.utcnow()
+                self.last_ts[instance_key] = datetime.now(timezone.utc)
             return
 
         # Event properties
@@ -181,7 +181,7 @@ class Win32EventLogWMI(WinWMICheck):
                     self.log.debug('Skipping event after %s. ts=%s', last_ts, log_ev.timestamp)
 
             # Update the last time checked
-            self.last_ts[instance_key] = datetime.utcnow()
+            self.last_ts[instance_key] = datetime.now(timezone.utc)
 
     def _dt_to_wmi(self, dt):
         """A wrapper around wmi.from_time to get a WMI-formatted time from a
@@ -230,7 +230,7 @@ class LogEvent(object):
         * Only use the specified list of event properties.
         * If unspecified, default to the EventLog's `Message` or `InsertionStrings`.
         """
-        msg_text = u""
+        msg_text = ""
 
         if self._format:
             msg_text_fields = ["%%%\n```"]
@@ -238,26 +238,26 @@ class LogEvent(object):
             for event_property in self._format:
                 property_value = self.event.get(event_property)
                 if property_value is None:
-                    self.log.warning(u"Unrecognized `%s` event property.", event_property)
+                    self.log.warning("Unrecognized `%s` event property.", event_property)
                     continue
                 msg_text_fields.append(
-                    u"{property_name}: {property_value}".format(
+                    "{property_name}: {property_value}".format(
                         property_name=event_property, property_value=property_value
                     )
                 )
 
             msg_text_fields.append("```\n%%%")
 
-            msg_text = u"\n".join(msg_text_fields)
+            msg_text = "\n".join(msg_text_fields)
         else:
             # Override when verbosity
             if self.event.get('Message'):
-                msg_text = u"{message}\n".format(message=self.event['Message'])
+                msg_text = "{message}\n".format(message=self.event['Message'])
             elif self.event.get('InsertionStrings'):
-                msg_text = u"\n".join([i_str for i_str in self.event['InsertionStrings'] if i_str.strip()])
+                msg_text = "\n".join([i_str for i_str in self.event['InsertionStrings'] if i_str.strip()])
 
         if self.notify_list:
-            msg_text += u"\n{notify_list}".format(notify_list=' '.join([" @" + n for n in self.notify_list]))
+            msg_text += "\n{notify_list}".format(notify_list=' '.join([" @" + n for n in self.notify_list]))
 
         return msg_text
 

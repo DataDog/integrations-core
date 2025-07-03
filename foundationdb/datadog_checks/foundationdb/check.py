@@ -24,8 +24,12 @@ class FoundationdbCheck(AgentCheck):
             return self._db
 
         # TLS options. Each option has a different function name, so we cannot be smart with it without ugly code
+        if 'tls_ca_file' in self.instance:
+            fdb.options.set_tls_ca_path(self.instance.get('tls_ca_file'))
         if 'tls_certificate_file' in self.instance:
             fdb.options.set_tls_cert_path(self.instance.get('tls_certificate_file'))
+        if 'tls_password' in self.instance:
+            fdb.options.set_tls_password(self.instance.get('tls_password'))
         if 'tls_key_file' in self.instance:
             fdb.options.set_tls_key_path(self.instance.get('tls_key_file'))
         if 'tls_verify_peers' in self.instance:
@@ -38,7 +42,7 @@ class FoundationdbCheck(AgentCheck):
 
     def fdb_status_data(self):
         self.construct_database()
-        return self._db[u'\xff\xff/status/json'.encode(u'latin-1')]
+        return self._db['\xff\xff/status/json'.encode('latin-1')]
 
     def check(self, _):
         status_data = self.fdb_status_data()
@@ -233,19 +237,46 @@ class FoundationdbCheck(AgentCheck):
             )
 
             role_counts = {}
+            process_counts_by_tag_set = {}
 
             for process_key in processes:
                 process = processes[process_key]
 
                 self.report_process(process)
+
+                process_tags = tags.copy()
+
+                if "class_type" in process:
+                    process_tags.append("fdb_process_class:" + process["class_type"])
+
                 if "roles" in process:
                     for role in process["roles"]:
                         if "role" in role:
                             rolename = role["role"]
+                            process_tags.append("fdb_role:" + rolename)
                             if rolename in role_counts:
                                 role_counts[rolename] += 1
                             else:
                                 role_counts[rolename] = 1
+
+                process_tags.sort()
+
+                # Packing and unpacking tags into sorted, comma-separated strings is a little hacky, but allows us to
+                # keep a map of role sets to counts; lists/sets aren't hashable and won't work as dictionary keys.
+                tags_string = ",".join(process_tags)
+
+                if tags_string in process_counts_by_tag_set:
+                    process_counts_by_tag_set[tags_string] += 1
+                else:
+                    process_counts_by_tag_set[tags_string] = 1
+
+            for tags_string in process_counts_by_tag_set:
+                process_tags = tags_string.split(",")
+                self.gauge(
+                    "processes_per_role",
+                    process_counts_by_tag_set[tags_string],
+                    process_tags if process_tags else None,
+                )
 
             for role in role_counts:
                 self.gauge("processes_per_role." + role, role_counts[role], tags)

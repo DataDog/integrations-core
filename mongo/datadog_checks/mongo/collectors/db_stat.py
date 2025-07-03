@@ -18,6 +18,7 @@ class DbStatCollector(MongoCollector):
         self.db_name = db_name
         self.dbstats_tag_dbname = dbstats_tag_dbname
         self._collection_interval = check._config.metrics_collection_interval['db_stats']
+        self.free_storage_metrics = check._config.free_storage_metrics
         self._collector_key = (self.__class__.__name__, db_name)  # db_name is part of collector key
 
     def compatible_with(self, deployment):
@@ -43,10 +44,12 @@ class DbStatCollector(MongoCollector):
         # Check if parameter dbstats_tag_dbname is true to include dbname as a tag
         if self.dbstats_tag_dbname:
             additional_tags = [
-                u"cluster:db:{0}".format(self.db_name),  # FIXME: 8.x, was kept for backward compatibility
-                u"db:{0}".format(self.db_name),
+                "cluster:db:{0}".format(self.db_name),  # FIXME: 8.x, was kept for backward compatibility
+                "db:{0}".format(self.db_name),
             ]
         else:
             additional_tags = None
-        stats = {'stats': db.command({'dbStats': 1, 'freeStorage': 1})}
+
+        collect_free_storage_metrics = 1 if self.free_storage_metrics else 0
+        stats = {'stats': db.command({'dbStats': 1, 'freeStorage': collect_free_storage_metrics})}
         return self._submit_payload(stats, additional_tags)

@@ -97,6 +97,7 @@ class MongoConfig(object):
         self.custom_queries = instance.get("custom_queries", [])
         self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
         self.system_database_stats = is_affirmative(instance.get('system_database_stats', True))
+        self.free_storage_metrics = is_affirmative(instance.get('free_storage_metrics', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
 
@@ -107,7 +108,8 @@ class MongoConfig(object):
         self.cloud_metadata = self._compute_cloud_metadata(instance)
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
-        self._schemas_config = instance.get('schemas', {})
+        # Backward compatibility: check new names first, then fall back to old names
+        self._schemas_config = instance.get('collect_schemas', instance.get('schemas', {}))
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')

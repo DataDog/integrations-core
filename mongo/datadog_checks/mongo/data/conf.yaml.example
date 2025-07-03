@@ -225,7 +225,7 @@ instances:
 
     ## Configure collection of MongoDB schemas (inferred) by sampling documents.
     #
-    # schemas:
+    # collect_schemas:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of schemas. Requires `dbm: true`.
@@ -358,6 +358,17 @@ instances:
     ## Set to `false` to disable collection of stats for all system databases.
     #
     # system_database_stats: true
+
+    ## @param free_storage_metrics - boolean - optional - default: true
+    ## Enabled or disable the collection of free storage metrics.
+    ## By default, this option is enabled (`true`), meaning free storage metrics are collected. 
+    ## Set to `false` to disable collection of free storage metrics.
+    ##
+    ## Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause 
+    ## processing delays and high CPU usage on the instance.
+    ## https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
+    #
+    # free_storage_metrics: true
 
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo

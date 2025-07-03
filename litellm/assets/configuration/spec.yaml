@@ -1,0 +1,24 @@
+name: LiteLLM
+files:
+- name: litellm.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:4000/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing the LiteLLM Proxy's Prometheus metrics. For more information refer to:
+          https://docs.litellm.ai/docs/proxy/prometheus
+        openmetrics_endpoint.required: false
+    - name: litellm_health_endpoint
+      display_priority: 1
+      description: |
+        Endpoint of the LiteLLM Health Check. For more information see: https://docs.litellm.ai/docs/proxy/health
+      value:
+        display_default: null
+        example: http://localhost:4000/health
+        type: string

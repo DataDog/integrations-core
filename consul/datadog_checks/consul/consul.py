@@ -4,7 +4,7 @@
 from __future__ import division
 
 from collections import defaultdict, namedtuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from itertools import islice
 from multiprocessing.pool import ThreadPool
 from time import time as timestamp
@@ -166,10 +166,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
     def _get_local_config(self):
         time_window = 0
         if self._last_config_fetch_time:
-            time_window = datetime.utcnow() - self._last_config_fetch_time
+            time_window = datetime.now(timezone.utc) - self._last_config_fetch_time
         if not self._local_config or time_window > timedelta(seconds=MAX_CONFIG_TTL):
             self._local_config = self.consul_request('/v1/agent/self')
-            self._last_config_fetch_time = datetime.utcnow()
+            self._last_config_fetch_time = datetime.now(timezone.utc)
 
         return self._local_config
 
@@ -207,7 +207,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
             return False
 
     def _check_for_leader_change(self):
-
         if self.perform_new_leader_checks and self.perform_self_leader_check:
             self.log.warning(
                 'Both perform_self_leader_check and perform_new_leader_checks are set, '
@@ -274,7 +273,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
         return self.consul_request(consul_request_url)
 
     def _cull_services_list(self, services):
-
         if self.services_include and self.services_exclude:
             self.warning(
                 'Detected that both services_include and services_exclude options are set.'
@@ -343,8 +341,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:follower"])
             if not self.single_node_install:
                 self.log.debug(
-                    "This consul agent is not the cluster leader. "
-                    "Skipping service and catalog checks for this instance"
+                    "This consul agent is not the cluster leader. Skipping service and catalog checks for this instance"
                 )
                 return
         else:
@@ -561,7 +558,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
         return self.consul_request('v1/coordinate/nodes')
 
     def check_network_latency(self, agent_dc, main_tags):
-
         datacenters = self._get_coord_datacenters()
         for datacenter in datacenters:
             name = datacenter['Datacenter']

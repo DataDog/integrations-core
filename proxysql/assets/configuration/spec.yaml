@@ -70,4 +70,5 @@ files:
           - memory_metrics
           - backends_metrics
           - query_rules_metrics
+          - all_backends_metrics
     - template: instances/default

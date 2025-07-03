@@ -268,7 +268,6 @@ def select_hatch_envs(
     latest,
     env_filter_re,
 ):
-
     available_envs = get_available_hatch_envs(check, sort, e2e_tests_only=e2e_tests_only)
 
     if style or format_style:
@@ -553,7 +552,7 @@ def construct_pytest_options(
             # junit report file must contain the env name to handle multiple envs
             # $HATCH_ENV_ACTIVE is a Hatch injected variable
             # See https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars  # noqa
-            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE.xml'
+            f' --junit-xml=junit/test-{test_group}-$HATCH_ENV_ACTIVE.xml'
             # Junit test results class prefix
             f' --junit-prefix={check}'
         )
