@@ -36,6 +36,13 @@ def _get_stat_type(suffix, unit):
 
 
 def _handle_ip_in_param(parts):
+    """
+    Merge parameter parts corresponding to an IP address.
+
+    Example:
+        ['some','172','0','0','12@tcp','param']
+    =>  ['some','172.0.0.12@tcp', 'param']
+    """
     match_index = 0
     for i, part in enumerate(parts):
         if '@' in part:
