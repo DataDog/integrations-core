@@ -1,4 +1,3 @@
-mds.MDS.mdt.stats=
 snapshot_time             1749629617.718152867 secs.nsecs
 start_time                1748613451.988751654 secs.nsecs
 elapsed_time              1016165.729401213 secs.nsecs

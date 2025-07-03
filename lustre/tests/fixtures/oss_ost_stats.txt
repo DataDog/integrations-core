@@ -1,4 +1,3 @@
-ost.OSS.ost.stats=
 snapshot_time             1749630276.188447162 secs.nsecs
 start_time                1748858714.584822088 secs.nsecs
 elapsed_time              771561.603625074 secs.nsecs

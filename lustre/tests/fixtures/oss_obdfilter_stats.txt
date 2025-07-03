@@ -1,4 +1,3 @@
-obdfilter.lustre-OST0001.stats=
 snapshot_time             1749630552.994884593 secs.nsecs
 start_time                1749563992.192278692 secs.nsecs
 elapsed_time              66560.802605901 secs.nsecs

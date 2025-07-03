@@ -1,12 +1,3 @@
-mdt.lustre-MDT0000.exports.0@lo.stats=
-snapshot_time             1749629228.342344230 secs.nsecs
-start_time                1748613477.537264833 secs.nsecs
-elapsed_time              1015750.805079397 secs.nsecs
-mdt.lustre-MDT0000.exports.172.31.17.140@tcp.stats=
-snapshot_time             1749629228.342377290 secs.nsecs
-start_time                1748858715.634459619 secs.nsecs
-elapsed_time              770512.707917671 secs.nsecs
-mdt.lustre-MDT0000.exports.172.31.38.176@tcp.stats=
 snapshot_time             1749629228.342406610 secs.nsecs
 start_time                1748858813.005595222 secs.nsecs
 elapsed_time              770415.336811388 secs.nsecs

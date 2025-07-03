@@ -1,14 +1,23 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+import subprocess
+import time
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
-from .constants import DEFAULT_PARAMS, EXTRA_PARAMS, FILESYSTEM_DISCOVERY_PARAM_MAPPING, JOBSTATS_PARAM_MAPPING, IGNORED_STATS, IGNORED_LNET_GROUPS
-import subprocess
 import yaml
-import re
-import time
+
+from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
+
+from .constants import (
+    DEFAULT_PARAMS,
+    EXTRA_PARAMS,
+    FILESYSTEM_DISCOVERY_PARAM_MAPPING,
+    IGNORED_LNET_GROUPS,
+    IGNORED_STATS,
+    JOBSTATS_PARAMS,
+)
 
 
 class LustreCheck(AgentCheck):
@@ -22,17 +31,13 @@ class LustreCheck(AgentCheck):
         lctl_path = self.instance.get('lctl_path', '/usr/sbin/lctl')
         lnetctl_path = self.instance.get('lnetctl_path', '/usr/sbin/lnetctl')
         lfs_path = self.instance.get('lfs_path', '/usr/bin/lfs')
-        self._bin_mapping = {
-            'lctl': lctl_path,
-            'lnetctl': lnetctl_path,
-            'lfs': lfs_path
-        }
+        self._bin_mapping = {'lctl': lctl_path, 'lnetctl': lnetctl_path, 'lfs': lfs_path}
         # Enable or disable specific metrics
         self.enable_changelogs = is_affirmative(self.instance.get('enable_changelogs', False))
         self.lnetctl_verbosity = '3' if is_affirmative(self.instance.get('enable_lnetctl_detailed', False)) else '1'
-        self.param_list = DEFAULT_PARAMS
-        if self.instance.get('enable_extra_params', False):
-            self.param_list += EXTRA_PARAMS
+        self.param_list = set(DEFAULT_PARAMS)
+        if is_affirmative(self.instance.get('enable_extra_params', False)):
+            self.param_list.update(set(EXTRA_PARAMS))
 
         self.changelog_lines_per_check = int(self.instance.get('changelog_lines_per_check', 1000))
 
@@ -57,7 +62,7 @@ class LustreCheck(AgentCheck):
             if not self.devices:
                 self._update_devices()
             device_types = [device['type'] for device in self.devices]
-            
+
             if 'mdt' in device_types:
                 return 'mds'
             elif 'ost' in device_types:
@@ -130,14 +135,14 @@ class LustreCheck(AgentCheck):
 
     def _update_changelog_targets(self, devices, filesystems):
         self.log.debug('Determining changelog targets...')
-        target_regex = [filesystem+r'-MDT\d\d\d\d' for filesystem in filesystems]
+        target_regex = [filesystem + r'-MDT\d\d\d\d' for filesystem in filesystems]
         targets = []
         for device in devices:
             for regex in target_regex:
                 match = re.search(regex, device['name'])
                 if match:
                     targets.append(match.group(0))
-        self.changelog_targets = list(set(targets)) # Remove duplicates
+        self.changelog_targets = list(set(targets))  # Remove duplicates
 
     def _run_command(self, bin, *args, sudo=False):
         '''
@@ -151,7 +156,9 @@ class LustreCheck(AgentCheck):
             self.log.debug(f'Running command: {cmd}')
             output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
             if output.stdout is None:
-                self.log.debug(f'Command {cmd} returned no output, check if dd-agent is running with sufficient permissions. Captured stderr: {output.stderr}')
+                self.log.debug(
+                    f'Command {cmd} returned no output, check if dd-agent is running with sufficient permissions. Captured stderr: {output.stderr}'
+                )
                 return ''
             return output.stdout
         except Exception as e:
@@ -178,7 +185,7 @@ class LustreCheck(AgentCheck):
                 tags = [f'device_name:{device_name}', f'job_id:{job_id}']
                 for metric_name, metric_values in job.items():
                     self._submit_jobstat(metric_name, metric_values, tags)
-    
+
     def _submit_jobstat(self, name, values, tags):
         if not isinstance(values, dict):
             return
@@ -194,13 +201,16 @@ class LustreCheck(AgentCheck):
         '''
         Get the jobstats params from the command line.
         '''
-        if not self.node_type in JOBSTATS_PARAM_MAPPING:
+        param = None
+        for jobstat_param in JOBSTATS_PARAMS:
+            if self.node_type in jobstat_param.node_types:
+                param = jobstat_param
+                break
+        if param is None:
             self.log.debug(f'Invalid jobstats device_type: {self.node_type}')
             return []
-        param_regex = JOBSTATS_PARAM_MAPPING[self.node_type]
-        raw_params = self._run_command('lctl', 'list_param', param_regex, sudo=True)
+        raw_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
         return [line.strip() for line in raw_params.splitlines() if line.strip()]
-
 
     def _get_jobstats_metrics(self, jobstats_param):
         '''
@@ -212,7 +222,7 @@ class LustreCheck(AgentCheck):
         except KeyError:
             self.log.debug(f'No jobstats metrics found for {jobstats_param}')
             return {}
-    
+
     def submit_lnet_stats_metrics(self):
         '''
         Submit the lnet stats metrics.
@@ -232,7 +242,7 @@ class LustreCheck(AgentCheck):
                 local_nid = ni.get('nid')
                 status = 1 if ni.get('status') == 'up' else 0
                 tags = self.tags + [f'net_type:{net_type}', f'local_nid:{local_nid}']
-                self.gauge(f'net.local.status', status, tags=tags)
+                self.gauge('net.local.status', status, tags=tags)
                 for stats_group_name, stats_group in ni.items():
                     self._submit_lnet_metric_group('local', stats_group_name, stats_group, tags)
 
@@ -282,14 +292,14 @@ class LustreCheck(AgentCheck):
         try:
             return yaml.safe_load(lnet_stats)
         except (KeyError, ValueError):
-            self.log.debug(f'No lnet stats found')
+            self.log.debug('No lnet stats found')
             return {}
-    
+
     def submit_general_stats(self, param_list):
         '''
         Submit general stats.
         '''
-        for param in param_list: 
+        for param in param_list:
             if self.node_type not in param.node_types:
                 self.log.debug(f'Skipping param {param.regex} for node type {self.node_type}')
                 continue
@@ -298,8 +308,8 @@ class LustreCheck(AgentCheck):
             matched_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
             for param_name in matched_params.splitlines():
                 tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
-                raw_stats = self._run_command('lctl', 'get_param', '-ny', param.regex, sudo=True)
-                parsed_stats = self.parse_stats(raw_stats)
+                raw_stats = self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True)
+                parsed_stats = self._parse_stats(raw_stats)
                 for stat_name, stat_value in parsed_stats.items():
                     self._submit_stat(param.prefix, stat_name, stat_value, tags)
 
@@ -335,7 +345,9 @@ class LustreCheck(AgentCheck):
             for part_number, part in enumerate(regex_parts):
                 if part == '*':
                     if wildcard_number >= len(wildcards):
-                        self.log.debug(f'Found {wildcard_number} wildcards, which exceeds available wildcard tags {wildcards}')
+                        self.log.debug(
+                            f'Found {wildcard_number} wildcards, which exceeds available wildcard tags {wildcards}'
+                        )
                         return tags
                     tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
                     wildcard_number += 1
@@ -388,12 +400,12 @@ class LustreCheck(AgentCheck):
                     f'device_uuid:{device.get("uuid", "unknown")}',
                 ]
                 tags += self.tags
-                
+
                 self.gauge('device.health', device_status, tags=tags)
                 self.gauge('device.refcount', device['refcount'], tags=tags)
         except Exception as e:
             self.log.error(f'Failed to submit device health metrics: {e}')
-    
+
     def submit_changelogs(self, lines):
         '''
         Get changelogs from the command line.
@@ -415,7 +427,7 @@ class LustreCheck(AgentCheck):
                         'operation_type': parts[1],
                         'timestamp': timestamp,
                         'flags': parts[4],
-                        'message': ' '.join(parts[5:])
+                        'message': ' '.join(parts[5:]),
                     }
                 except IndexError:
                     self.log.debug(f'Unexpected changelog format: {line}')
@@ -431,7 +443,7 @@ class LustreCheck(AgentCheck):
             23 11CLOSE 12:51:02.238364514 2025.06.02 0x1 t=[0x200000bd1:0x5:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp
         '''
         self.log.info(f'Collecting changelogs for: {target}')
-        cursor = self.get_log_cursor(stream=target) 
+        cursor = self.get_log_cursor(stream=target)
         start_index = '0' if cursor is None else cursor['index']
         end_index = str(int(start_index) + lines)
         self.log.debug(f'Fetching changelog from index {start_index} to {end_index} for target {target}')

@@ -1,4 +1,3 @@
-osc.lustre-OST0001-osc-ffff8b904341d000.stats=
 snapshot_time             1749628896.485828991 secs.nsecs
 start_time                1748858812.990375805 secs.nsecs
 elapsed_time              770083.495453186 secs.nsecs
