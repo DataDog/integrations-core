@@ -172,6 +172,13 @@ class KafkaClient:
             offsets.append((response_offset_info.group_id, tpo))
         return offsets
 
+    def start_collecting_messages(self, start_offsets):
+        self.open_consumer('datadog_live_messages')
+        self._consumer.assign(start_offsets)
+
+    def get_next_message(self):
+        return self._consumer.poll(timeout=1)
+
     def describe_consumer_group(self, consumer_group):
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()
         return desc.state.name

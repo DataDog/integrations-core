@@ -6,10 +6,15 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka import TopicPartition
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
-from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
+from datadog_checks.kafka_consumer.kafka_consumer import (
+    _get_interpolated_timestamp,
+    deserialize_message_maybe_schema_registry,
+    resolve_start_offsets,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -466,3 +471,38 @@ def test_client_init(kafka_instance, check, dd_run_check):
     dd_run_check(check)
 
     assert check.client.open_consumer.mock_calls == [mock.call("consumer_group1")]
+
+
+def test_resolve_start_offsets():
+    highwater_offsets = {
+        ("topic1", 0): 100,
+        ("topic1", 1): 200,
+        ("topic2", 0): 150,
+    }
+    assert resolve_start_offsets(highwater_offsets, "topic1", 0, 80, 10) == [TopicPartition("topic1", 0, 80)]
+    assert resolve_start_offsets(highwater_offsets, "topic2", 0, -1, 10) == [TopicPartition("topic2", 0, 141)]
+    assert sorted(resolve_start_offsets(highwater_offsets, "topic1", -1, -1, 10)) == [
+        TopicPartition("topic1", 0, 81),
+        TopicPartition("topic1", 1, 191),
+    ]
+
+
+def test_deserialize_message_maybe_schema_registry():
+    message = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}'
+    # schema ID is 350, which is 0x015E in hex.
+    # A magic byte (0x00) is added and the schema ID (4-byte big-endian integer).
+    message_with_schema = (
+        b'\x00\x00\x00\x01\x5e{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}'
+    )
+    assert deserialize_message_maybe_schema_registry(message) == (
+        '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+        None,
+    )
+    assert deserialize_message_maybe_schema_registry(message_with_schema) == (
+        '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+        350,
+    )
+    # test with an invalid message that is not a valid JSON
+    invalid_message = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"'
+    with pytest.raises(Exception):
+        deserialize_message_maybe_schema_registry(invalid_message)
