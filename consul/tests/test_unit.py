@@ -230,15 +230,15 @@ def test_service_checks(aggregator):
 
 
 @pytest.mark.parametrize(
-    'health_check_metric, expected_metric_count, expected_metric_total',
+    'collect_health_checks, expected_metric_count, expected_metric_total',
     [
-        pytest.param(True, 1, 6, id="health_check_metric enabled"),
-        pytest.param(False, 0, 0, id="health_check_metric disabled"),
+        pytest.param(True, 1, 6, id="collect_health_checks enabled"),
+        pytest.param(False, 0, 0, id="collect_health_checks disabled"),
     ],
 )
-def test_health_checks(aggregator, health_check_metric, expected_metric_count, expected_metric_total):
+def test_health_checks(aggregator, collect_health_checks, expected_metric_count, expected_metric_total):
     config = consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG
-    config['health_check_metric'] = health_check_metric
+    config['collect_health_checks'] = collect_health_checks
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
@@ -322,6 +322,12 @@ def test_health_checks(aggregator, health_check_metric, expected_metric_count, e
         ],
     }
 
+    aggregator.assert_event(exact_match=False, count=expected_metric_count, **event)
+
+    # make sure event is only emitted once even though the check runs multiple times
+    consul_check.check(None)
+    consul_check.check(None)
+    consul_check.check(None)
     aggregator.assert_event(exact_match=False, count=expected_metric_count, **event)
 
 

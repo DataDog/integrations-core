@@ -111,8 +111,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
-        self.health_check_metric = self.instance.get(
-            'health_check_metric', self.init_config.get('health_check_metric', False)
+        self.collect_health_checks = self.instance.get(
+            'collect_health_checks', self.init_config.get('collect_health_checks', False)
         )
 
         if self.threads_count > 1:
@@ -377,7 +377,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 if status is None:
                     status = self.UNKNOWN
 
-                if self.health_check_metric or sc_id not in service_checks:
+                if self.collect_health_checks or sc_id not in service_checks:
                     node_name = check.get("Node")
                     tags = ["check:{}".format(check_id)]
                     if service_name:
@@ -390,7 +390,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                     if node_name:
                         tags.append("consul_node:{}".format(node_name))
 
-                    if self.health_check_metric:
+                    if self.collect_health_checks:
                         hc_id = f"{sc_id}/{node_name}"
                         status_value = STATUS_SEVERITY.get(status)
                         last_hc_value = self.health_checks.get(hc_id)
