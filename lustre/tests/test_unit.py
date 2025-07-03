@@ -12,20 +12,19 @@ import pytest
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev import get_here
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
 from datadog_checks.lustre.constants import DEFAULT_PARAMS, EXTRA_PARAMS, JOBSTATS_PARAMS
 
 from .metrics import (
+    CLIENT_METRICS,
+    COMMON_METRICS,
     JOBSTATS_MDS_METRICS,
     JOBSTATS_OSS_METRICS,
-    COMMON_METRICS,
-    CLIENT_METRICS,
-    OSS_METRICS,
-    MDS_METRICS,
     LNET_LOCAL_METRICS,
     LNET_PEER_METRICS,
-    LNET_STATS_METRICS
+    LNET_STATS_METRICS,
+    MDS_METRICS,
+    OSS_METRICS,
 )
 
 HERE = get_here()

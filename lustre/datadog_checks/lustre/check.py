@@ -70,7 +70,7 @@ class LustreCheck(AgentCheck):
             else:
                 return 'client'
         except Exception as e:
-            self.log.error(f'Failed to determine node type: {e}')
+            self.log.error('Failed to determine node type: %s', e)
             return 'client'
 
     def check(self, _):
@@ -112,7 +112,7 @@ class LustreCheck(AgentCheck):
         '''
         self.log.debug('Finding filesystems...')
         if self.node_type not in FILESYSTEM_DISCOVERY_PARAM_MAPPING:
-            self.log.debug(f'Invalid node_type: {self.node_type}')
+            self.log.debug('Invalid node_type: %s', self.node_type)
             return
         param_regex, filesystem_regex = FILESYSTEM_DISCOVERY_PARAM_MAPPING[self.node_type]
         try:
@@ -128,9 +128,9 @@ class LustreCheck(AgentCheck):
                     filesystem = match.group(0)
                     filesystems.append(filesystem)
             self.filesystems = list(set(filesystems))  # Remove duplicates
-            self.log.debug(f'Found filesystem(s): {self.filesystems}')
+            self.log.debug('Found filesystem(s): %s', self.filesystems)
         except Exception as e:
-            self.log.error(f'Failed to find filesystems: {e}')
+            self.log.error('Failed to find filesystems: %s', e)
             return
 
     def _update_changelog_targets(self, devices, filesystems):
@@ -149,20 +149,23 @@ class LustreCheck(AgentCheck):
         Run a command using the given binary.
         '''
         if bin not in self._bin_mapping:
-            raise ValueError(f'Unknown binary: {bin}')
+            raise ValueError('Unknown binary: {}'.format(bin))
         bin_path = self._bin_mapping[bin]
         cmd = f'{"sudo " if sudo else ""}{bin_path} {" ".join(args)}'
         try:
-            self.log.debug(f'Running command: {cmd}')
+            self.log.debug('Running command: %s', cmd)
             output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
             if output.stdout is None:
                 self.log.debug(
-                    f'Command {cmd} returned no output, check if dd-agent is running with sufficient permissions. Captured stderr: {output.stderr}'
+                    'Command %s returned no output, check if dd-agent is running\
+                    with sufficient permissions. Captured stderr: %s',
+                    cmd,
+                    output.stderr,
                 )
                 return ''
             return output.stdout
         except Exception as e:
-            self.log.error(f'Failed to run command {cmd}: {e}')
+            self.log.error('Failed to run command %s: %s', cmd, e)
             return ''
 
     def submit_jobstats_metrics(self):
@@ -178,7 +181,7 @@ class LustreCheck(AgentCheck):
                 continue
             jobstats_metrics = self._get_jobstats_metrics(jobstats_param)['job_stats']
             if jobstats_metrics is None:
-                self.log.debug(f'No jobstats metrics found for {jobstats_param}')
+                self.log.debug('No jobstats metrics found for %s', jobstats_param)
                 continue
             for job in jobstats_metrics:
                 job_id = job['job_id']
@@ -207,7 +210,7 @@ class LustreCheck(AgentCheck):
                 param = jobstat_param
                 break
         if param is None:
-            self.log.debug(f'Invalid jobstats device_type: {self.node_type}')
+            self.log.debug('Invalid jobstats device_type: %s', self.node_type)
             return []
         raw_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
         return [line.strip() for line in raw_params.splitlines() if line.strip()]
@@ -220,7 +223,7 @@ class LustreCheck(AgentCheck):
         try:
             return yaml.safe_load(jobstats_output)
         except KeyError:
-            self.log.debug(f'No jobstats metrics found for {jobstats_param}')
+            self.log.debug('No jobstats metrics found for %s', jobstats_param)
             return {}
 
     def submit_lnet_stats_metrics(self):
@@ -277,7 +280,7 @@ class LustreCheck(AgentCheck):
         if not isinstance(group, dict):
             return
         if group_name in IGNORED_LNET_GROUPS:
-            self.log.debug(f'Ignoring lnet group {group_name}')
+            self.log.debug('Ignoring lnet group %s', group_name)
             return
         for metric_name, metric_value in group.items():
             metric_name = metric_name.replace(' ', '_')
@@ -301,7 +304,7 @@ class LustreCheck(AgentCheck):
         '''
         for param in param_list:
             if self.node_type not in param.node_types:
-                self.log.debug(f'Skipping param {param.regex} for node type {self.node_type}')
+                self.log.debug('Skipping param %s for node type %s', param.regex, self.node_type)
                 continue
             if not param.regex.endswith('.stats'):
                 continue
@@ -322,13 +325,13 @@ class LustreCheck(AgentCheck):
             self.gauge(f'general.{name}', value, tags=tags)
             return
         if not isinstance(value, dict):
-            self.log.debug(f'Unexpected stat value for {name}: {value}')
+            self.log.debug('Unexpected stat value for %s: %s', name, value)
             return
         for metric_type, metric_value in value.items():
             if isinstance(metric_value, int):
                 self.gauge(f'general.{prefix}.{name}.{metric_type}', metric_value, tags=tags)
             else:
-                self.log.debug(f'Unexpected metric value for {name}.{metric_type}: {metric_value}')
+                self.log.debug('Unexpected metric value for %s.%s: %s', name, metric_type, metric_value)
 
     def _extract_tags_from_param(self, param_regex, param_name, wildcards):
         '''
@@ -340,13 +343,13 @@ class LustreCheck(AgentCheck):
             param_parts = param_name.split('.')
             wildcard_number = 0
             if not len(regex_parts) == len(param_parts):
-                self.log.debug(f'Parameter name {param_name} does not match regex {param_regex}')
+                self.log.debug('Parameter name %s does not match regex %s', param_name, param_regex)
                 return tags
             for part_number, part in enumerate(regex_parts):
                 if part == '*':
                     if wildcard_number >= len(wildcards):
                         self.log.debug(
-                            f'Found {wildcard_number} wildcards, which exceeds available wildcard tags {wildcards}'
+                            'Found %s wildcards, which exceeds available wildcard tags %s', wildcard_number, wildcards
                         )
                         return tags
                     tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
@@ -380,9 +383,9 @@ class LustreCheck(AgentCheck):
                 for i, value in enumerate(parts[4:]):
                     stat_dict[stat_types[i]] = int(value)
                 if len(parts) > 8:
-                    self.log.debug(f'Unexpected format for stat "{line}"')
+                    self.log.debug('Unexpected format for stat "%s"', line)
             except ValueError:
-                self.log.debug(f'Could not parse stat value for "{line}"')
+                self.log.debug('Could not parse stat value for "%s"', line)
                 continue
             stats[stat_name] = stat_dict
         return stats
@@ -404,7 +407,7 @@ class LustreCheck(AgentCheck):
                 self.gauge('device.health', device_status, tags=tags)
                 self.gauge('device.refcount', device['refcount'], tags=tags)
         except Exception as e:
-            self.log.error(f'Failed to submit device health metrics: {e}')
+            self.log.error('Failed to submit device health metrics: %s', e)
 
     def submit_changelogs(self, lines):
         '''
@@ -430,7 +433,7 @@ class LustreCheck(AgentCheck):
                         'message': ' '.join(parts[5:]),
                     }
                 except IndexError:
-                    self.log.debug(f'Unexpected changelog format: {line}')
+                    self.log.debug('Unexpected changelog format: %s', line)
                     continue
                 self.send_log(data, {'index': parts[0]}, stream=target)
 
@@ -442,9 +445,9 @@ class LustreCheck(AgentCheck):
             22 14SATTR 12:51:02.232953392 2025.06.02 0x14 t=[0x200000bd1:0x8:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp
             23 11CLOSE 12:51:02.238364514 2025.06.02 0x1 t=[0x200000bd1:0x5:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp
         '''
-        self.log.info(f'Collecting changelogs for: {target}')
+        self.log.info('Collecting changelogs for: %s', target)
         cursor = self.get_log_cursor(stream=target)
         start_index = '0' if cursor is None else cursor['index']
         end_index = str(int(start_index) + lines)
-        self.log.debug(f'Fetching changelog from index {start_index} to {end_index} for target {target}')
+        self.log.debug('Fetching changelog from index %s to %s for target %s', start_index, end_index, target)
         return self._run_command('lfs', 'changelog', target, start_index, end_index, sudo=True)
