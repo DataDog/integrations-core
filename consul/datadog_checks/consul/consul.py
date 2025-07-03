@@ -10,8 +10,9 @@ from itertools import islice
 from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 from urllib.parse import urljoin
-from cachetools import TTLCache
+
 import requests
+from cachetools import TTLCache
 from requests import HTTPError
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
