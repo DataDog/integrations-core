@@ -243,7 +243,7 @@ zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms_count,gauge,,,,[zo
 zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms_sum,gauge,,,,[zookeeper version 3.6+ only] Sum of time_waiting_empty_pool_in_commit_processor_read_ms,0,zookeeper,,
 zookeeper.timeouts,rate,,occurrence,,The rate of timeouts the Datadog Agent received when trying to collect stats.,-1,zookeeper,timeouts,
 zookeeper.tls_handshake_exceeded,gauge,,,,[zookeeper version 3.6+ only],0,zk,tls handshake exceeded,
-zookeeper.unrecoverable_error_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,unrecoverable error count,
+zookeeper.unrecoverable_error_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeepersss,unrecoverable error count,
 zookeeper.updatelatency,gauge,,,,[zookeeper version 3.6+ only] Histogram of updatelatency Update request latency,0,zookeeper,updatelatency,
 zookeeper.updatelatency_count,gauge,,,,[zookeeper version 3.6+ only] Total count of updatelatency Update request latency,0,zookeeper,updatelatency count,
 zookeeper.updatelatency_sum,gauge,,,,[zookeeper version 3.6+ only] Sum of updatelatency Update request latency,0,zookeeper,updatelatency sum,
