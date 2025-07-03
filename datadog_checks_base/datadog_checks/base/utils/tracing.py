@@ -122,9 +122,9 @@ def traced_class(cls):
         try:
             integration_tracing_exhaustive = is_affirmative(datadog_agent.get_config('integration_tracing_exhaustive'))
 
-            from ddtrace import patch_all, tracer
-
-            patch_all()
+            # https://ddtrace.readthedocs.io/en/stable/basic_usage.html#ddtrace-auto
+            import ddtrace.auto  # noqa: F401
+            from ddtrace import tracer
 
             def decorate(cls):
                 for attr in cls.__dict__:
