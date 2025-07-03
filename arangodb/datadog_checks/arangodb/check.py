@@ -21,7 +21,6 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     SERVER_TAGS = {'mode': SERVER_MODE_ENDPOINT, 'id': SERVER_ID_ENDPOINT}
 
     def __init__(self, name, init_config, instances):
-
         super(ArangodbCheck, self).__init__(name, init_config, instances)
         self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
         parsed_endpoint = urlparse(self.openmetrics_endpoint)

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -12,15 +14,19 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import Literal, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
 
-import matplotlib.pyplot as plt
 import requests
 import squarify
 from datadog import api, initialize
-from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
+
+METRIC_VERSION = 2
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.patches import Patch
 
 
 class FileDataEntry(TypedDict):
@@ -84,14 +90,15 @@ class InitialParametersTimelineDependency(CLIParametersTimeline):
     platform: str  # Target platform for dependency analysis
 
 
-def get_valid_platforms(repo_path: Path | str) -> set[str]:
+def get_valid_platforms(repo_path: Path | str, versions: set[str]) -> set[str]:
     """
     Extracts the platforms we support from the .deps/resolved file names.
     """
     resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
     platforms = []
     for file in os.listdir(resolved_path):
-        platforms.append("_".join(file.split("_")[:-1]))
+        if any(version in file for version in versions):
+            platforms.append("_".join(file.split("_")[:-1]))
     return set(platforms)
 
 
@@ -274,32 +281,38 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        if compressed:
-            response = requests.head(url)
+        with requests.get(url, stream=True) as response:
             response.raise_for_status()
-            size_str = response.headers.get("Content-Length")
-            if size_str is None:
-                raise ValueError(f"Missing size for {dep}")
-            size = int(size_str)
+            wheel_data = response.content
 
-        else:
-            with requests.get(url, stream=True) as response:
-                response.raise_for_status()
-                wheel_data = response.content
-
-            with tempfile.TemporaryDirectory() as tmpdir:
-                wheel_path = Path(tmpdir) / "package.whl"
-                with open(wheel_path, "wb") as f:
-                    f.write(wheel_data)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            wheel_path = Path(tmpdir) / "package"
+            with open(wheel_path, "wb") as f:
+                f.write(wheel_data)
+            if compressed:
+                with zipfile.ZipFile(wheel_path, "r") as zip_ref:
+                    size = sum(
+                        zinfo.compress_size
+                        for zinfo in zip_ref.infolist()
+                        if not is_excluded_from_wheel(zinfo.filename)
+                    )
+            else:
                 extract_path = Path(tmpdir) / "extracted"
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     zip_ref.extractall(extract_path)
 
                 size = 0
                 for dirpath, _, filenames in os.walk(extract_path):
+                    rel_dir = os.path.relpath(dirpath, extract_path)
+                    if is_excluded_from_wheel(rel_dir):
+                        continue
                     for name in filenames:
                         file_path = os.path.join(dirpath, name)
+                        rel_file = os.path.relpath(file_path, extract_path)
+                        if is_excluded_from_wheel(rel_file):
+                            continue
                         size += os.path.getsize(file_path)
+
         file_data.append(
             {
                 "Name": str(dep),
@@ -311,6 +324,63 @@ def get_dependencies_sizes(
         )
 
     return file_data
+
+
+def is_excluded_from_wheel(path: str) -> bool:
+    '''
+    These files are excluded from the wheel in the agent build:
+    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
+    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
+    the wheels still include them.
+    '''
+    excluded_test_paths = [
+        os.path.normpath(path)
+        for path in [
+            'idlelib/idle_test',
+            'bs4/tests',
+            'Cryptodome/SelfTest',
+            'gssapi/tests',
+            'keystoneauth1/tests',
+            'openstack/tests',
+            'os_service_types/tests',
+            'pbr/tests',
+            'pkg_resources/tests',
+            'psutil/tests',
+            'securesystemslib/_vendor/ed25519/test_data',
+            'setuptools/_distutils/tests',
+            'setuptools/tests',
+            'simplejson/tests',
+            'stevedore/tests',
+            'supervisor/tests',
+            'test',  # cm-client
+            'vertica_python/tests',
+            'websocket/tests',
+        ]
+    ]
+
+    type_annot_libraries = [
+        'krb5',
+        'Cryptodome',
+        'ddtrace',
+        'pyVmomi',
+        'gssapi',
+    ]
+    rel_path = Path(path).as_posix()
+
+    # Test folders
+    for test_folder in excluded_test_paths:
+        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
+            return True
+
+    # Python type annotations
+    path_parts = Path(rel_path).parts
+    if path_parts:
+        dependency_name = path_parts[0]
+        if dependency_name in type_annot_libraries:
+            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
+                return True
+
+    return False
 
 
 def format_modules(
@@ -456,7 +526,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.csv"
                     if version
-                    else f"{platform}_{size_type}_{mode}.csv" if platform else f"{size_type}_{mode}.csv"
+                    else f"{platform}_{size_type}_{mode}.csv"
+                    if platform
+                    else f"{size_type}_{mode}.csv"
                 )
             )
             save_csv(app, modules, csv_filename)
@@ -468,7 +540,9 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.json"
                     if version
-                    else f"{platform}_{size_type}_{mode}.json" if platform else f"{size_type}_{mode}.json"
+                    else f"{platform}_{size_type}_{mode}.json"
+                    if platform
+                    else f"{size_type}_{mode}.json"
                 )
             )
             save_json(app, json_filename, modules)
@@ -480,19 +554,24 @@ def export_format(
                 else (
                     f"{version}_{size_type}_{mode}.md"
                     if version
-                    else f"{platform}_{size_type}_{mode}.md" if platform else f"{size_type}_{mode}.md"
+                    else f"{platform}_{size_type}_{mode}.md"
+                    if platform
+                    else f"{size_type}_{mode}.md"
                 )
             )
             save_markdown(app, "Status", modules, markdown_filename)
 
 
 def plot_treemap(
+    app: Application,
     modules: list[FileDataEntryPlatformVersion],
     title: str,
     show: bool,
     mode: Literal["status", "diff"],
     path: Optional[str] = None,
 ) -> None:
+    import matplotlib.pyplot as plt
+
     if modules == []:
         return
 
@@ -521,7 +600,9 @@ def plot_treemap(
     plt.tight_layout()
 
     if path:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         plt.savefig(path, bbox_inches="tight", format="png")
+        app.display(f"Treemap saved to {path}")
     if show:
         plt.show()
 
@@ -529,6 +610,9 @@ def plot_treemap(
 def plot_status_treemap(
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
     # Calculate the area of the rectangles
     sizes = [mod["Size_Bytes"] for mod in modules]
     norm_sizes = squarify.normalize_sizes(sizes, 100, 100)
@@ -560,6 +644,9 @@ def plot_status_treemap(
 def plot_diff_treemap(
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
     # Define the colors for each type
     cmap_pos = plt.get_cmap("Oranges")
     cmap_neg = plt.get_cmap("Blues")
@@ -620,11 +707,13 @@ def scale_colors_treemap(area: float, max_area: float) -> float:
 
 
 def draw_treemap_rects_with_labels(
-    ax: plt.Axes,
+    ax: Axes,
     rects: list[dict],
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
     colors: list[tuple[float, float, float, float]],
 ) -> None:
+    from matplotlib.patches import Rectangle
+
     """
     Draw treemap rectangles with their assigned colors and optional text labels.
 
@@ -638,7 +727,7 @@ def draw_treemap_rects_with_labels(
         x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
 
         # Draw the rectangle with a white border
-        ax.add_patch(plt.Rectangle((x, y), dx, dy, color=color, ec="white"))
+        ax.add_patch(Rectangle((x, y), dx, dy, color=color, ec="white"))
 
         # Determine font size based on rectangle area
         MIN_FONT_SIZE = 6
@@ -692,38 +781,90 @@ def draw_treemap_rects_with_labels(
 
 
 def send_metrics_to_dd(
-    app: Application, modules: list[FileDataEntryPlatformVersion], org: str, compressed: bool
+    app: Application,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str,
+    key: str,
+    compressed: bool,
 ) -> None:
-    metric_name = (
-        "datadog.agent_integrations.size_analyzer.compressed"
-        if compressed
-        else "datadog.agent_integrations.size_analyzer.uncompressed"
-    )
-    config_file_info = get_org(app, org)
+    metric_name = "datadog.agent_integrations"
+    size_type = "compressed" if compressed else "uncompressed"
+
+    config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
     if not is_everything_committed():
         raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
-    if 'api_key' not in config_file_info:
+    if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
-    if 'site' not in config_file_info:
+    if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
+    message, tickets, prs = get_last_commit_data()
     timestamp = get_last_commit_timestamp()
 
     metrics = []
+    n_integrations_metrics = []
+    n_dependencies_metrics = []
+
+    n_integrations: dict[tuple[str, str], int] = {}
+    n_dependencies: dict[tuple[str, str], int] = {}
 
     for item in modules:
         metrics.append(
             {
-                "metric": metric_name,
+                "metric": f"{metric_name}.size",
                 "type": "gauge",
                 "points": [(timestamp, item["Size_Bytes"])],
                 "tags": [
                     f"name:{item['Name']}",
                     f"type:{item['Type']}",
                     f"name_type:{item['Type']}({item['Name']})",
-                    f"version:{item['Version']}",
+                    f"python_version:{item['Python_Version']}",
+                    f"module_version:{item['Version']}",
                     f"platform:{item['Platform']}",
                     "team:agent-integrations",
+                    f"compression:{size_type}",
+                    f"metrics_version:{METRIC_VERSION}",
+                    f"jira_ticket:{tickets[0]}",
+                    f"pr_number:{prs[-1]}",
+                    f"commit_message:{message}",
+                ],
+            }
+        )
+        key_count = (item['Platform'], item['Python_Version'])
+        if key_count not in n_integrations:
+            n_integrations[key_count] = 0
+        if key_count not in n_dependencies:
+            n_dependencies[key_count] = 0
+        if item['Type'] == 'Integration':
+            n_integrations[key_count] += 1
+        elif item['Type'] == 'Dependency':
+            n_dependencies[key_count] += 1
+
+    for (platform, py_version), count in n_integrations.items():
+        n_integrations_metrics.append(
+            {
+                "metric": f"{metric_name}.integration_count",
+                "type": "gauge",
+                "points": [(timestamp, count)],
+                "tags": [
+                    f"platform:{platform}",
+                    f"python_version:{py_version}",
+                    "team:agent-integrations",
+                    f"metrics_version:{METRIC_VERSION}",
+                ],
+            }
+        )
+    for (platform, py_version), count in n_dependencies.items():
+        n_dependencies_metrics.append(
+            {
+                "metric": f"{metric_name}.dependency_count",
+                "type": "gauge",
+                "points": [(timestamp, count)],
+                "tags": [
+                    f"platform:{platform}",
+                    f"python_version:{py_version}",
+                    "team:agent-integrations",
+                    f"metrics_version:{METRIC_VERSION}",
                 ],
             }
         )
@@ -734,6 +875,8 @@ def send_metrics_to_dd(
     )
 
     api.Metric.send(metrics=metrics)
+    api.Metric.send(metrics=n_integrations_metrics)
+    api.Metric.send(metrics=n_dependencies_metrics)
 
 
 def get_org(app: Application, org: str) -> dict[str, str]:
@@ -772,6 +915,22 @@ def is_everything_committed() -> bool:
 def get_last_commit_timestamp() -> int:
     result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
     return int(result.stdout.strip())
+
+
+def get_last_commit_data() -> tuple[str, list[str], list[str]]:
+    result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
+    ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
+    pr_pattern = r'#(\d+)'
+
+    message = result.stdout.strip()
+    tickets = re.findall(ticket_pattern, message)
+    prs = re.findall(pr_pattern, message)
+
+    if not tickets:
+        tickets = [""]
+    if not prs:
+        prs = [""]
+    return message, tickets, prs
 
 
 class WrongDependencyFormat(Exception):

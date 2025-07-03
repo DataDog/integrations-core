@@ -1785,19 +1785,21 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
         ],
         hostname='5102fbbf-7156-48dc-8355-af7ab992266f',
     )
-    aggregator.assert_metric(
-        'openstack.nova.server.count',
-        count=0,
-        tags=[
-            'domain_id:default',
-            'keystone_server:http://127.0.0.1:8080/identity',
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
-            'server_name:demo-1',
-            'server_status:ACTIVE',
-        ],
-    ),
+    (
+        aggregator.assert_metric(
+            'openstack.nova.server.count',
+            count=0,
+            tags=[
+                'domain_id:default',
+                'keystone_server:http://127.0.0.1:8080/identity',
+                'project_id:1e6e233e637d4d55a50a62b63398ad15',
+                'project_name:demo',
+                'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+                'server_name:demo-1',
+                'server_status:ACTIVE',
+            ],
+        ),
+    )
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_get.call_args_list:

@@ -123,7 +123,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self._check.gauge(
             "dd.mysql.statement_metrics.collect_metrics.elapsed_ms",
             (time.time() - start) * 1000,
-            tags=self._check.tags + self._check._get_debug_tags(),
+            tags=self._check.tag_manager.get_tags() + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
@@ -246,9 +246,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
             {}
-            """.format(
-            condition
-        )
+            """.format(condition)
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             args = [self._last_seen] if only_query_recent_statements else None
