@@ -16,10 +16,10 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 **/metadata.csv       @DataDog/documentation @DataDog/agent-integrations
 
 # Dependencies
-/.deps/                            @DataDog/agent-integrations @DataDog/agent-delivery
-/.builders/                        @DataDog/agent-delivery
-/.builders/images/                 @DataDog/agent-integrations @DataDog/agent-delivery
-/.builders/patches/                @DataDog/agent-integrations @DataDog/agent-delivery
+/.deps/                            @DataDog/agent-integrations @DataDog/agent-build
+/.builders/                        @DataDog/agent-build
+/.builders/images/                 @DataDog/agent-integrations @DataDog/agent-build
+/.builders/patches/                @DataDog/agent-integrations @DataDog/agent-build
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
@@ -255,15 +255,20 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /contentful/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
 /contentful/assets/logs/                                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/eset_protect/                                                       @DataDog/agent-integrations
+/eset_protect/*.md                                                   @DataDog/agent-integrations @DataDog/documentation
+/eset_protect/manifest.json                                          @DataDog/agent-integrations @DataDog/documentation
+/eset_protect/assets/logs/                                           @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+
 /extrahop/                                                          @DataDog/saas-integrations
 /extrahop/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /extrahop/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /extrahop/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/falco/                                                             @DataDog/saas-integrations
-/falco/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
-/falco/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
-/falco/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/falco/                                                             @DataDog/agent-integrations @DataDog/saas-integrations
+/falco/*.md                                                         @DataDog/agent-integrations @DataDog/saas-integrations @DataDog/documentation
+/falco/manifest.json                                                @DataDog/agent-integrations @DataDog/saas-integrations @DataDog/documentation
+/falco/assets/logs/                                                 @DataDog/agent-integrations @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /freshservice/                                                          @DataDog/saas-integrations
 /freshservice/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
@@ -528,10 +533,20 @@ plaid/assets/logs/                                                  @DataDog/saa
 /box/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /box/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/carbon_black_cloud/                                                               @DataDog/saas-integrations
+/carbon_black_cloud/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
+/carbon_black_cloud/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
+/carbon_black_cloud/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /forcepoint_security_service_edge/                                   @DataDog/saas-integrations
 /forcepoint_security_service_edge/*.md                               @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/assets/logs/                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/mac_audit_logs/                                                     @DataDog/agent-integrations
+/mac_audit_logs/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
+/mac_audit_logs/assets/logs/                                         @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 
 /gpu/                                                                @DataDog/ebpf-platform
 /gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
@@ -562,6 +577,16 @@ plaid/assets/logs/                                                  @DataDog/saa
 /dnsfilter/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /dnsfilter/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/workato/                                                            @DataDog/saas-integrations
+/workato/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/workato/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/workato/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/bitwarden/                                                          @DataDog/saas-integrations
+/bitwarden/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/bitwarden/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/bitwarden/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
@@ -569,7 +594,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 docs/developer/process/integration-release.md                         @DataDog/agent-integrations
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
-/.github/workflows/resolve-build-deps.yml                             @DataDog/agent-delivery
+/.github/workflows/resolve-build-deps.yml                             @DataDog/agent-build
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
 /.github/CODEOWNERS                                                   @DataDog/agent-integrations @DataDog/saas-integrations
 /.github/workflows/config/labeler.yml                                 @DataDog/agent-integrations @DataDog/saas-integrations

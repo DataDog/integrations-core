@@ -31,14 +31,11 @@ def test_flatten_json(check, instance):
 
 def test_flatten_json_timestamp(check, instance):
     check = check(instance)
-    assert (
-        check.parse_json(
-            """
+    assert check.parse_json(
+        """
     {"timestamp": "2018-10-23T12:12:23.123212Z"}
     """
-        )
-        == [('nginx.timestamp', 1540296743, [], 'gauge')]
-    )
+    ) == [('nginx.timestamp', 1540296743, [], 'gauge')]
 
 
 def test_nest_payload(check, instance):

@@ -40,3 +40,10 @@ SC_FAILURE_TAGS = (
     'port:unix_socket',
     *database_instance_resource_tags('stubbed.hostname'),
 )
+
+
+def metrics_tags_with_resource(mysql_check):
+    _tags = METRIC_TAGS_WITH_RESOURCE
+    if common.MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+        _tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
+    return _tags
