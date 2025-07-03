@@ -130,7 +130,7 @@ To override the runners for each platform, one can set the `overrides.ci.<TARGET
 
 ```toml
 [overrides.ci.sqlserver]
-runners = { windows = ["windows-2019"] }
+runners = { windows = ["windows-2025"] }
 ```
 
 ### Exclusion
