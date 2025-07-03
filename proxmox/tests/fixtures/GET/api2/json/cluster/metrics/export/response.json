@@ -310,6 +310,13 @@
                 "metric": "uptime"
             },
             {
+                "metric": "disk_used",
+                "id": "storage/ip-122-82-3-112",
+                "value": 14254243840,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
                 "value": 1,
                 "id": "lxc/101",
                 "metric": "cpu_max",

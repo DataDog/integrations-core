@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
-from .common import POSTGRES_VERSION
+from .common import POSTGRES_LOCALE, POSTGRES_VERSION
 from .utils import run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -32,6 +32,21 @@ def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
     DBMAsyncJob.executor.shutdown(wait=True)
     DBMAsyncJob.executor = ThreadPoolExecutor()
+
+
+def test_collect_extensions(integration_check, dbm_instance, aggregator):
+    check = integration_check(dbm_instance)
+    check.check(dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'pg_extension'), None)
+    assert event is not None
+    assert event['host'] == "stubbed.hostname"
+    assert event['dbms'] == "postgres"
+    assert event['kind'] == "pg_extension"
+    assert len(event["metadata"]) > 0
+    assert set(event["metadata"][0].keys()) == {'id', 'name', 'owner', 'relocatable', 'schema_name', 'version'}
+    assert type(event["metadata"][0]["id"]) is str
+    assert next((k for k in event['metadata'] if k['name'].startswith('plpgsql')), None) is not None
 
 
 def test_collect_metadata(integration_check, dbm_instance, aggregator):
@@ -130,7 +145,10 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                 if table['name'] == "persons":
                     # check that foreign keys, indexes get reported
                     keys = list(table.keys())
-                    assert_fields(keys, ["foreign_keys", "columns", "toast_table", "id", "name", "owner"])
+                    assert_fields(keys, ["foreign_keys", "columns", "id", "name", "owner"])
+                    # The toast table doesn't seem to be created in the C locale
+                    if POSTGRES_LOCALE != 'C':
+                        assert_fields(keys, ["toast_table"])
                     assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
                     assert_fields(
                         list(table['columns'][0].keys()),
@@ -143,7 +161,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                     )
                 if table['name'] == "cities":
                     keys = list(table.keys())
-                    assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name", "owner"])
+                    assert_fields(keys, ["indexes", "columns", "id", "name", "owner"])
+                    if POSTGRES_LOCALE != 'C':
+                        assert_fields(keys, ["toast_table"])
                     assert len(table['indexes']) == 1
                     assert_fields(
                         list(table['indexes'][0].keys()),

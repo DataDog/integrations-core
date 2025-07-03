@@ -64,7 +64,7 @@ def ready(ctx, quiet):
             if quiet:
                 msg = target
             else:
-                msg = 'Check {} has {} out of {} merged PRs that could be released' ''.format(
+                msg = 'Check {} has {} out of {} merged PRs that could be released'.format(
                     target, shippable_prs, len(pr_numbers)
                 )
             echo_info(msg)

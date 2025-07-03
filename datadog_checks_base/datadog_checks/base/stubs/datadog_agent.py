@@ -52,7 +52,7 @@ class DatadogAgentStub(object):
             key = (check_id, name)
             if key in self._metadata:
                 actual[name] = self._metadata[key]
-        assert data == actual
+        assert data == actual, f'Expected metadata: {data}; actual metadata: {actual}'
 
     def assert_metadata_count(self, count):
         metadata_items = len(self._metadata)
@@ -67,10 +67,10 @@ class DatadogAgentStub(object):
                     external_tags = {k: sorted(v) for (k, v) in external_tags.items()}
                     tags = {k: sorted(v) for (k, v) in tags.items()}
 
-                assert (
-                    external_tags == tags
-                ), 'Expected {} external tags for hostname {}, found {}. Submitted external tags: {}'.format(
-                    external_tags, hostname, tags, repr(self._external_tags)
+                assert external_tags == tags, (
+                    'Expected {} external tags for hostname {}, found {}. Submitted external tags: {}'.format(
+                        external_tags, hostname, tags, repr(self._external_tags)
+                    )
                 )
                 return
 

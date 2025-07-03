@@ -12,14 +12,26 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
 
-from .common import ALL_METRICS
+from .common import (
+    ALL_METRICS,
+    CONTAINER_PERF_METRICS,
+    NODE_PERF_METRICS,
+    NODE_RESOURCE_METRICS,
+    PERF_METRICS,
+    RESOURCE_METRICS,
+    STORAGE_PERF_METRICS,
+    STORAGE_RESOURCE_METRICS,
+    VM_PERF_METRICS,
+)
 
 
 @pytest.mark.usefixtures('mock_http_get')
 def test_api_up(dd_run_check, datadog_agent, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_metric("proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'testing'])
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up', 'testing']
+    )
     for metric in ALL_METRICS:
         aggregator.assert_metric(metric, at_least=1)
 
@@ -33,7 +45,9 @@ def test_no_tags(dd_run_check, datadog_agent, aggregator, instance):
     del new_instance['tags']
     check = ProxmoxCheck('proxmox', {}, [new_instance])
     dd_run_check(check)
-    aggregator.assert_metric("proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json'])
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up']
+    )
 
 
 @pytest.mark.parametrize(
@@ -53,8 +67,12 @@ def test_no_tags(dd_run_check, datadog_agent, aggregator, instance):
 @pytest.mark.usefixtures('mock_http_get')
 def test_api_down(dd_run_check, datadog_agent, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_metric("proxmox.api.up", 0, tags=['proxmox_server:http://localhost:8006/api2/json', 'testing'])
+    with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
+        dd_run_check(check)
+
+    aggregator.assert_metric(
+        "proxmox.api.up", 0, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:down', 'testing']
+    )
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -272,7 +290,7 @@ def test_get_hostname_error(dd_run_check, aggregator, instance, caplog):
 
     aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="VM 100")
     assert (
-        "Failed to get hostname for vm 101 on node ip-122-82-3-112; endpoint: http://localhost:8006/api2/json;"
+        "Failed to get hostname for vm 100 on node ip-122-82-3-112; endpoint: http://localhost:8006/api2/json;"
         in caplog.text
     )
 
@@ -309,3 +327,151 @@ def test_external_tags(dd_run_check, aggregator, instance, datadog_agent):
             ]
         },
     )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_resource_metrics(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    for metric in RESOURCE_METRICS:
+        aggregator.assert_metric(metric, hostname="debian", tags=[])
+
+    for metric in NODE_RESOURCE_METRICS:
+        aggregator.assert_metric(metric, hostname="ip-122-82-3-112", tags=[])
+
+    container1_tags = [
+        'proxmox_name:CT111',
+        'proxmox_id:lxc/111',
+        'proxmox_node:ip-122-82-3-112',
+        'proxmox_server:http://localhost:8006/api2/json',
+        'proxmox_type:container',
+        'tag1',
+        'test',
+        'testing',
+    ]
+    container2_tags = [
+        'proxmox_name:test-container',
+        'proxmox_id:lxc/101',
+        'proxmox_node:ip-122-82-3-112',
+        'proxmox_pool:pool-1',
+        'proxmox_server:http://localhost:8006/api2/json',
+        'proxmox_type:container',
+        'test',
+        'testing',
+        'testtag',
+    ]
+    for metric in RESOURCE_METRICS:
+        aggregator.assert_metric(metric, hostname="", tags=container1_tags)
+        aggregator.assert_metric(metric, hostname="", tags=container2_tags)
+
+    storage_tags = [
+        'proxmox_server:http://localhost:8006/api2/json',
+        'testing',
+        'proxmox_type:storage',
+        'proxmox_name:local',
+        'proxmox_node:ip-122-82-3-112',
+        'proxmox_id:storage/ip-122-82-3-112/local',
+    ]
+
+    for metric in STORAGE_RESOURCE_METRICS:
+        aggregator.assert_metric(metric, hostname="", tags=storage_tags)
+
+    sdn_tags = [
+        'proxmox_server:http://localhost:8006/api2/json',
+        'testing',
+        'proxmox_type:sdn',
+        'proxmox_name:localnetwork',
+        'proxmox_id:sdn/ip-122-82-3-112/localnetwork',
+        'proxmox_node:ip-122-82-3-112',
+    ]
+
+    pool_tags = [
+        'proxmox_server:http://localhost:8006/api2/json',
+        'testing',
+        'proxmox_type:pool',
+        'proxmox_name:pool-1',
+        'proxmox_id:/pool/pool-1',
+    ]
+
+    for metric in RESOURCE_METRICS:
+        aggregator.assert_metric(metric, count=0, tags=sdn_tags)
+        aggregator.assert_metric(metric, count=0, tags=pool_tags)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_perf_metrics(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    for metric in VM_PERF_METRICS:
+        aggregator.assert_metric(metric, hostname="debian", tags=[])
+
+    for metric in NODE_PERF_METRICS:
+        aggregator.assert_metric(metric, hostname="ip-122-82-3-112", tags=[])
+
+    container1_tags = [
+        'proxmox_name:CT111',
+        'proxmox_id:lxc/111',
+        'proxmox_node:ip-122-82-3-112',
+        'proxmox_server:http://localhost:8006/api2/json',
+        'proxmox_type:container',
+        'tag1',
+        'test',
+        'testing',
+    ]
+    container2_tags = [
+        'proxmox_name:test-container',
+        'proxmox_id:lxc/101',
+        'proxmox_node:ip-122-82-3-112',
+        'proxmox_pool:pool-1',
+        'proxmox_server:http://localhost:8006/api2/json',
+        'proxmox_type:container',
+        'test',
+        'testing',
+        'testtag',
+    ]
+
+    for metric in CONTAINER_PERF_METRICS:
+        aggregator.assert_metric(metric, hostname='', tags=container1_tags)
+        aggregator.assert_metric(metric, hostname='', tags=container2_tags)
+
+    storage_tags = [
+        'proxmox_server:http://localhost:8006/api2/json',
+        'testing',
+        'proxmox_type:storage',
+        'proxmox_name:local',
+        'proxmox_node:ip-122-82-3-112',
+        'proxmox_id:storage/ip-122-82-3-112/local',
+    ]
+
+    for metric in STORAGE_PERF_METRICS:
+        aggregator.assert_metric(metric, hostname="", tags=storage_tags)
+
+    sdn_tags = [
+        'proxmox_server:http://localhost:8006/api2/json',
+        'testing',
+        'proxmox_type:sdn',
+        'proxmox_name:localnetwork',
+        'proxmox_id:sdn/ip-122-82-3-112/localnetwork',
+        'proxmox_node:ip-122-82-3-112',
+    ]
+
+    pool_tags = [
+        'proxmox_server:http://localhost:8006/api2/json',
+        'testing',
+        'proxmox_type:pool',
+        'proxmox_name:pool-1',
+        'proxmox_id:/pool/pool-1',
+    ]
+
+    for metric in PERF_METRICS:
+        aggregator.assert_metric(metric, count=0, tags=sdn_tags)
+        aggregator.assert_metric(metric, count=0, tags=pool_tags)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_perf_metrics_error(dd_run_check, caplog, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+    assert "Invalid metric entry found; metric name: disk.used, resource id: storage/ip-122-82-3-112" in caplog.text
