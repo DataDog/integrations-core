@@ -749,6 +749,7 @@
                             "title": "Top Entity Name by Critical Detections",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -757,7 +758,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Critical @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyondtrust-identity-security-insights @severity:Critical @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -827,6 +828,7 @@
                             "title": "Top Entity Name by High Detections",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -835,7 +837,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:High @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyondtrust-identity-security-insights @severity:High @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -905,6 +907,7 @@
                             "title": "Top Entity Name by Moderate Detections",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -913,7 +916,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Moderate @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyondtrust-identity-security-insights @severity:Moderate @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -983,6 +986,7 @@
                             "title": "Top Entity Name by Low Detections",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -991,7 +995,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Low @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyondtrust-identity-security-insights @severity:Low @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1061,6 +1065,7 @@
                             "title": "Top Entity Name",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1069,7 +1074,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1131,6 +1136,7 @@
                             "title": "Detections by Entity Type",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -1138,7 +1144,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1171,6 +1177,7 @@
                                         }
                                     ],
                                     "sort": {
+                                        "count": 500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
