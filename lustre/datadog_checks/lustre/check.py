@@ -109,13 +109,13 @@ class LustreCheck(AgentCheck):
             self.submit_changelogs(self.changelog_lines_per_check)
 
         self.submit_device_health(self.devices)
-        self.submit_param_data(self.param_list)
+        self.submit_param_data(self.param_list, self.filesystems)
         self.submit_lnet_stats_metrics()
         self.submit_lnet_local_ni_metrics()
         self.submit_lnet_peer_ni_metrics()
 
         if self.node_type in ('mds', 'oss'):
-            self.submit_jobstats_metrics()
+            self.submit_jobstats_metrics(self.filesystems)
 
     def update(self):
         '''
@@ -198,7 +198,7 @@ class LustreCheck(AgentCheck):
             self.log.error('Failed to run command %s: %s', cmd, e)
             return ''
 
-    def submit_jobstats_metrics(self):
+    def submit_jobstats_metrics(self, filesystems):
         '''
         Submit the jobstats metrics to Datadog.
 
@@ -207,7 +207,7 @@ class LustreCheck(AgentCheck):
         jobstats_params = self._get_jobstats_params_list()
         for jobstats_param in jobstats_params:
             device_name = jobstats_param.split('.')[1]  # For example: lustre-MDT0000
-            if self.filesystems and not any(device_name.startswith(filesystem) for filesystem in self.filesystems):
+            if not any(device_name.startswith(fs) for fs in filesystems):
                 continue
             jobstats_metrics = self._get_jobstats_metrics(jobstats_param)['job_stats']
             if jobstats_metrics is None:
@@ -339,7 +339,7 @@ class LustreCheck(AgentCheck):
             self.log.debug('No lnet stats found')
             return {}
 
-    def submit_param_data(self, param_list):
+    def submit_param_data(self, param_list, filesystems):
         '''
         Submit general stats and metrics from Lustre parameters.
         '''
@@ -350,6 +350,10 @@ class LustreCheck(AgentCheck):
             matched_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
             for param_name in matched_params.splitlines():
                 tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
+                if any(fs_tag in param.wildcards for fs_tag in ('device_name', 'device_uuid')):
+                    if not any(fs in param_name for fs in filesystems):
+                        self.log.debug('Skipping param %s as it did not match any filesystem', param_name)
+                        continue
                 raw_stats = self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True)
                 if not param.regex.endswith('.stats'):
                     self._submit_param(param.prefix, param_name, tags)

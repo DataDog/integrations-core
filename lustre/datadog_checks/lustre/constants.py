@@ -306,7 +306,7 @@ EXTRA_STATS = [
     LustreParam(
         regex='ldlm.namespaces.*.pool.stats',
         node_types=('client', 'mds', 'oss'),
-        wildcards=('device_uuid',),
+        wildcards=('device_nid',),
         prefix='ldlm.namespaces.pool',
         fixture='all_ldlm_namespace_stats.txt',
     ),

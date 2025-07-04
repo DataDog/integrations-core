@@ -31,12 +31,6 @@ HERE = get_here()
 FIXTURES_DIR = os.path.join(HERE, 'fixtures')
 
 
-@pytest.fixture
-def disable_subprocess():
-    with mock.patch('datadog_checks.lustre.check.subprocess.run'):
-        yield
-
-
 def mock_run_command(command_fixture_mapping):
     def run_command(bin, *args, **kwargs):
         requested_command = f"{bin} {' '.join(args)}"
@@ -76,7 +70,7 @@ def mock_run_command(command_fixture_mapping):
     ],
 )
 def test_check(dd_run_check, aggregator, node_type, dl_fixture, expected_metrics):
-    instance = {'node_type': node_type, 'enable_extra_params': 'true', 'enable_lnetctl_detailed': 'true'}
+    instance = {'node_type': node_type, 'enable_extra_params': 'true', 'enable_lnetctl_detailed': 'true', 'filesystems':['']}
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': dl_fixture,
@@ -103,7 +97,7 @@ def test_check(dd_run_check, aggregator, node_type, dl_fixture, expected_metrics
         pytest.param('oss', 'oss_jobstats.txt', JOBSTATS_OSS_METRICS, id='oss'),
     ],
 )
-def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expected_metrics):
+def test_jobstats(aggregator, node_type, fixture_file, expected_metrics):
     instance = {'node_type': node_type}
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
@@ -113,7 +107,7 @@ def test_jobstats(aggregator, disable_subprocess, node_type, fixture_file, expec
     }
     with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_jobstats_metrics()
+        check.submit_jobstats_metrics(['lustre'])
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
 
@@ -257,12 +251,12 @@ def test_submit_param_data(aggregator, instance):
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
-        'lctl list_param llite.*.stats': 'llite',
+        'lctl list_param llite.*.stats': 'llite.lustre.stats',
         'lctl get_param -ny llite': 'client_llite_stats.txt',
     }
     with mock.patch.object(LustreCheck, '_run_command', side_effect=mock_run_command(mapping)):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_param_data(DEFAULT_STATS)
+        check.submit_param_data(DEFAULT_STATS, ['lustre'])
 
     # Verify some general stats metrics are submitted
     expected_metrics = [

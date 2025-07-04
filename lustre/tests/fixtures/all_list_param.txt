@@ -1,1 +1,1 @@
-some.job_stats.param
+some.lustre.param
