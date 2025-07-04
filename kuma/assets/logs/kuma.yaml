@@ -78,6 +78,7 @@ pipeline:
           goTimestamp      %{date("yyyy/MM/dd HH:mm:ss")}
           notTab           %{regex("[^\\t]*")}
           notQuote         %{regex("[^\"]*")}
+          notOpeningParens %{regex("[^\\(]*")}
           serviceName      %{regex("[a-zA-Z0-9_\\*-]*")}
           loggerName       %{regex("[a-zA-Z0-9_\\.-]+")}
           xForwardedFor    %{regex("[0-9\\., ]+")}
@@ -91,8 +92,7 @@ pipeline:
           # Sample:
           # [2025-06-26T21:29:21.535Z] - default 10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms, sent 6195 bytes, received: 194 bytes
 
-
-          kuma_dp_tcp_log (\[%{isoTimestamp:date}\])? (%{word:response.flags}|-) %{notSpace:kuma.mesh} %{ipOrHost:kuma.source_address_without_port}\((unknown|%{serviceName:kuma.source_service})\)\->(%{ip:kuma.upstream.ip}:%{port:kuma.upstream.port}|-)\((unknown|%{serviceName:kuma.destination_service})\) took %{integer:duration:scale(1000000)}ms, sent %{integer:network.bytes_written} bytes, received: %{integer:network.bytes_read} bytes
+          kuma_dp_tcp_log (\[%{isoTimestamp:date}\])? (%{word:response.flags}|-) %{notSpace:kuma.mesh} %{ipOrHost:kuma.source_address_without_port}\((unknown|%{serviceName:kuma.source_service})\)\->(-|%{notOpeningParens:kuma.upstream.host})\((unknown|%{serviceName:kuma.destination_service})\) took %{integer:duration:scale(1000000)}ms, sent %{integer:network.bytes_written} bytes, received: %{integer:network.bytes_read} bytes
 
           # HTTP Access log
           # Format: [%START_TIME%] %KUMA_MESH% "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%" "%REQ(X-B3-TRACEID?X-DATADOG-TRACEID)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%KUMA_SOURCE_SERVICE%" "%KUMA_DESTINATION_SERVICE%" "%KUMA_SOURCE_ADDRESS_WITHOUT_PORT%" "%UPSTREAM_HOST%"
