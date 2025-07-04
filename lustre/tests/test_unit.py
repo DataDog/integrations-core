@@ -70,7 +70,12 @@ def mock_run_command(command_fixture_mapping):
     ],
 )
 def test_check(dd_run_check, aggregator, node_type, dl_fixture, expected_metrics):
-    instance = {'node_type': node_type, 'enable_extra_params': 'true', 'enable_lnetctl_detailed': 'true', 'filesystems':['']}
+    instance = {
+        'node_type': node_type,
+        'enable_extra_params': 'true',
+        'enable_lnetctl_detailed': 'true',
+        'filesystems': [''],
+    }
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': dl_fixture,

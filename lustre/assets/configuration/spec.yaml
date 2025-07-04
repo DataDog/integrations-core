@@ -11,9 +11,9 @@ files:
       description: |
         Specify the type of Lustre node: client, mds, or oss.
         If not specified, the integration will attempt to auto-detect the node type.
+      required: false
       value:
         type: string
-        required: false
         enum:
         - client
         - mds
@@ -22,9 +22,9 @@ files:
       description: |
         List of specific filesystems to monitor.
         If not specified, all available filesystems will be monitored.
+      required: false
       value:
         type: array
-        required: false
         items:
           type: string
         example:
@@ -34,49 +34,49 @@ files:
       description: |
         Enable changelog collection on client nodes.
         Requires changelog users to be registered.
+      required: false
       value:
         type: boolean
-        required: false
         example: false
     - name: lctl_path
       description: Path to the lctl binary.
+      required: false
       value:
         type: string
-        required: false
         default: /usr/sbin/lctl
     - name: lnetctl_path
       description: Path to the lnetctl binary.
+      required: false
       value:
         type: string
-        required: false
         default: /usr/sbin/lnetctl
     - name: lfs_path
       description: Path to the lfs binary.
+      required: false
       value:
         type: string
-        required: false
         default: /usr/bin/lfs
     - name: enable_lnetctl_detailed
       description: Enable detailed LNET statistics collection.
+      required: false
       value:
         type: boolean
-        required: false
         example: false
     - name: enable_extra_params
       description: |
         Enable collection of additional Lustre parameters.
         This includes MDS, OSS, and client-specific advanced metrics.
+      required: false
       value:
         type: boolean
-        required: false
         example: false
     - name: changelog_lines_per_check
       description: |
         Number of changelog lines to process per check run (client nodes only).
         Higher values may impact performance.
+      required: false
       value:
         type: integer
-        required: false
         default: 1000
         minimum: 1
         maximum: 10000

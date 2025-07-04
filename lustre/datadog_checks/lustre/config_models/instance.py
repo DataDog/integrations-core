@@ -11,7 +11,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -34,10 +35,19 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    changelog_lines_per_check: Optional[int] = Field(None, ge=1, le=10000)
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_changelogs: Optional[bool] = None
+    enable_extra_params: Optional[bool] = None
+    enable_lnetctl_detailed: Optional[bool] = None
+    filesystems: Optional[tuple[str, ...]] = None
+    lctl_path: Optional[str] = None
+    lfs_path: Optional[str] = None
+    lnetctl_path: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    node_type: Optional[Literal['client', 'mds', 'oss']] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 
