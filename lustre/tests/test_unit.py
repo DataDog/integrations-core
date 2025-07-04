@@ -417,7 +417,7 @@ def test_metric_type_assignment(aggregator, instance):
 
         # Test count metric
         check._submit('test.count', 50, 'count', tags=[])
-        aggregator.assert_metric('lustre.test.count', value=50, metric_type=aggregator.COUNT)
+        aggregator.assert_metric('lustre.test.count', value=50, metric_type=aggregator.MONOTONIC_COUNT)
 
         # Test rate metric
         check._submit('test.rate', 25, 'rate', tags=[])
