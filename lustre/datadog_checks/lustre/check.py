@@ -492,7 +492,11 @@ class LustreCheck(AgentCheck):
                 try:
                     date_time = parts[3] + ' ' + parts[2]
                     # The time has nanoseconds, so we need to truncate the last three digits
-                    timestamp = datetime.strptime(date_time[:-3], '%Y.%m.%d %H:%M:%S.%f').replace(tzinfo=timezone.utc).timestamp()
+                    timestamp = (
+                        datetime.strptime(date_time[:-3], '%Y.%m.%d %H:%M:%S.%f')
+                        .replace(tzinfo=timezone.utc)
+                        .timestamp()
+                    )
                     data = {
                         'operation_type': parts[1],
                         'timestamp': timestamp,
