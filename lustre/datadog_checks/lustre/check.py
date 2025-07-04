@@ -215,7 +215,7 @@ class LustreCheck(AgentCheck):
                 continue
             for job in jobstats_metrics:
                 job_id = job['job_id']
-                tags = [f'device_name:{device_name}', f'job_id:{job_id}']
+                tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
                 for metric_name, metric_values in job.items():
                     self._submit_jobstat(metric_name, metric_values, tags)
 
