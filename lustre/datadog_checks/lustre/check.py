@@ -532,7 +532,7 @@ class LustreCheck(AgentCheck):
         elif metric_type == 'rate':
             self.rate(name, value, tags=tags)
         elif metric_type == 'count':
-            self.count(name, value, tags=tags)
+            self.monotonic_count(name, value, tags=tags)
         elif metric_type == 'histogram':
             # TODO: handle this case
             return
