@@ -466,3 +466,51 @@ def test_regex_consumer_groups(
     aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
 
     assert expected_warning in caplog.text
+
+
+@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
+def test_data_streams_live_messages(dd_run_check, check, kafka_instance, datadog_agent):
+    cluster_id = common.get_cluster_id()
+    kafka_instance['live_messages_configs'] = [
+        {
+            'kafka': {
+                'cluster': cluster_id,
+                'topic': 'marvel',
+                'partition': 0,
+                'start_offset': 0,
+                'n_messages': 2,
+                'value_format': 'json',
+            },
+            'id': 'config_1_id',
+        }
+    ]
+    kafka_check = check(kafka_instance)
+    dd_run_check(kafka_check)
+    expected_logs = [
+        {
+            'timestamp': 400 * 1000,
+            'technology': 'kafka',
+            'cluster': str(cluster_id),
+            'config_id': 'config_1_id',
+            'topic': 'marvel',
+            'partition': '0',
+            'offset': '0',
+            'message_value': '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+            'ddtags': 'optional:tag1',
+        },
+        {
+            'timestamp': 400 * 1000,
+            'technology': 'kafka',
+            'cluster': str(cluster_id),
+            'config_id': 'config_1_id',
+            'topic': 'marvel',
+            'partition': '0',
+            'offset': '1',
+            'message_value': '{"name": "Bruce Banner", "age": 45,\
+ "transaction_amount": 456, "currency": "dollar"}',
+            'value_schema_id': '350',
+            'message_key': '{"name": "Bruce Banner"}',
+            'ddtags': 'optional:tag1',
+        },
+    ]
+    datadog_agent.assert_logs(kafka_check.check_id, expected_logs)

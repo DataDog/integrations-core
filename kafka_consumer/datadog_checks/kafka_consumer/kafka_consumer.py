@@ -9,6 +9,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
+from datadog_checks.kafka_consumer.live_messages import deserialize_message_maybe_schema_registry, resolve_start_offsets
 
 MAX_TIMESTAMPS = 1000
 
@@ -96,6 +97,7 @@ class KafkaCheck(AgentCheck):
         )
         if self.config._close_admin_client:
             self.client.close_admin_client()
+        self.data_streams_live_message(highwater_offsets or {}, cluster_id)
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -174,6 +176,30 @@ class KafkaCheck(AgentCheck):
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
+
+    def _messages_have_been_retrieved(self, config_id):
+        """Check if messages have been retrieved for the given config ID."""
+        try:
+            content = self.read_persistent_cache("get_messages_cache")
+            if content:
+                config_ids = set(content.split(","))
+                return config_id in config_ids
+        except Exception as e:
+            self.log.warning('Could not read persistent cache: %s', str(e))
+        return False
+
+    def _mark_messages_retrieved(self, config_id):
+        """Mark that messages have been retrieved for the given config ID."""
+        try:
+            content = self.read_persistent_cache("get_messages_cache")
+            if content:
+                config_ids = set(content.split(","))
+            else:
+                config_ids = set()
+            config_ids.add(config_id)
+            self.write_persistent_cache("get_messages_cache", ",".join(config_ids))
+        except Exception as e:
+            self.log.warning('Could not write to persistent cache: %s', str(e))
 
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
         for (topic, partition), highwater_offset in highwater_offsets.items():
@@ -377,6 +403,92 @@ class KafkaCheck(AgentCheck):
             'aggregation_key': aggregation_key,
         }
         self.event(event_dict)
+
+    def data_streams_live_message(self, highwater_offsets, cluster_id):
+        for cfg in self.config.live_messages_configs:
+            kafka = cfg['kafka']
+            topic = kafka["topic"]
+            partition = kafka["partition"]
+            start_offset = kafka["start_offset"]
+            n_messages = kafka["n_messages"]
+            cluster = kafka["cluster"]
+            config_id = cfg["id"]
+            if self._messages_have_been_retrieved(config_id):
+                continue
+            # if cluster != cluster_id:
+            #     continue
+            start_offsets = resolve_start_offsets(highwater_offsets, topic, partition, start_offset, n_messages)
+
+            if len(start_offsets) == 0:
+                self.log.warning('Unable to get a list of partitions to read from for live messages')
+                self.send_log(
+                    {
+                        'timestamp': int(time()),
+                        'config_id': config_id,
+                        'technology': 'kafka',
+                        'cluster': str(cluster),
+                        'topic': str(topic),
+                        'live_messages_error': 'Unable to list partitions to read from',
+                        'message': "Unable to list partitions to read from",
+                    }
+                )
+                continue
+
+            self.client.start_collecting_messages(start_offsets)
+            for _ in range(n_messages):
+                message = self.client.get_next_message()
+                if message is None:
+                    self.log.warning('Live messages: no message to retrieve')
+                    self.send_log(
+                        {
+                            'timestamp': int(time()),
+                            'config_id': config_id,
+                            'technology': 'kafka',
+                            'cluster': str(cluster),
+                            'topic': str(topic),
+                            'live_messages_error': 'No more messages to retrieve',
+                            'message': "No more messages to retrieve",
+                        }
+                    )
+                    break
+                try:
+                    decoded_value, value_schema_id = deserialize_message_maybe_schema_registry(message.value())
+                    try:
+                        decoded_key, key_schema_id = deserialize_message_maybe_schema_registry(message.key())
+                    except Exception:
+                        decoded_key = None
+                        key_schema_id = None
+                    data = {
+                        'timestamp': int(time()),
+                        'technology': 'kafka',
+                        'cluster': str(cluster),
+                        'config_id': config_id,
+                        'topic': str(topic),
+                        'partition': str(message.partition()),
+                        'offset': str(message.offset()),
+                        'message_value': decoded_value,
+                    }
+                    if value_schema_id is not None:
+                        data['value_schema_id'] = str(value_schema_id)
+                    if decoded_key is not None:
+                        data['message_key'] = decoded_key
+                    if key_schema_id is not None:
+                        data['key_schema_id'] = str(key_schema_id)
+                except Exception:
+                    data = {
+                        'timestamp': int(time()),
+                        'config_id': config_id,
+                        'technology': 'kafka',
+                        'cluster': str(cluster),
+                        'topic': str(topic),
+                        'partition': str(message.partition()),
+                        'offset': str(message.offset()),
+                        'live_messages_error': 'Message format not supported',
+                        'message': "Message format not supported",
+                    }
+                self.send_log(data)
+            self.client.close_consumer()
+            self._mark_messages_retrieved(config_id)
 
 
 def _get_interpolated_timestamp(timestamps, offset):
