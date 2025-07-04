@@ -11,8 +11,7 @@ tests:
         mesh: "default"
         source_address_without_port: "10.42.1.5"
         upstream:
-          ip: "10.42.1.5"
-          port: "6379"
+          host: "10.42.1.5:6379"
       network:
         bytes_read: 194
         bytes_written: 6195

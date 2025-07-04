@@ -91,8 +91,8 @@ pipeline:
           # Sample:
           # [2025-06-26T21:29:21.535Z] - default 10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms, sent 6195 bytes, received: 194 bytes
 
-          kuma_dp_tcp_log (\[%{isoTimestamp:date}\])? (%{word:response.flags}|-) %{notSpace:kuma.mesh} %{ipOrHost:kuma.source_address_without_port}\((unknown|%{serviceName:kuma.source_service})\)\->(%{ip:kuma.upstream.ip}:%{port:kuma.upstream.port}|-)\((unknown|%{serviceName:kuma.destination_service})\) took %{integer:duration:scale(1000000)}ms, sent %{integer:network.bytes_written} bytes, received: %{integer:network.bytes_read} bytes
 
+          kuma_dp_tcp_log (\[%{isoTimestamp:date}\])? (%{word:response.flags}|-) %{notSpace:kuma.mesh} %{ipOrHost:kuma.source_address_without_port}\((unknown|%{serviceName:kuma.source_service})\)\->(%{ip:kuma.upstream.ip}:%{port:kuma.upstream.port}|-)\((unknown|%{serviceName:kuma.destination_service})\) took %{integer:duration:scale(1000000)}ms, sent %{integer:network.bytes_written} bytes, received: %{integer:network.bytes_read} bytes
 
           # HTTP Access log
           # Format: [%START_TIME%] %KUMA_MESH% "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%" "%REQ(X-B3-TRACEID?X-DATADOG-TRACEID)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%KUMA_SOURCE_SERVICE%" "%KUMA_DESTINATION_SERVICE%" "%KUMA_SOURCE_ADDRESS_WITHOUT_PORT%" "%UPSTREAM_HOST%"
@@ -101,8 +101,9 @@ pipeline:
           # Sample:
           # [2025-06-26T13:19:18.314Z] default "GET /api?timeout=32s HTTP/1.1" 404 NR 0 0 0 - "10.42.1.26" "kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd" "-" "0efbfa26-1e2d-9144-919a-e9985d0eab30" "localhost:8080" "unknown" "edge-gateway_kuma-demo_svc" "10.42.3.27" "-"
 
-          kuma_dp_http_access_log (\[%{isoTimestamp:date}\])? %{notSpace:kuma.mesh} "%{word:http.method} %{notSpace:http.url} %{httpVersion:http.version}" %{integer:http.status_code} %{word:response.flags} %{integer:network.bytes_read} %{integer:network.bytes_written} %{integer:duration:scale(1000000)} (%{integer:response.x_envoy_upstream_service_time}|-) "%{xForwardedFor:http._x_forwarded_for}" "%{notQuote:http.useragent}" "(-|%{traceId:kuma.trace_id})" "%{uuid:http.request_id}" "%{authority:kuma.http.request.authority}" "(unknown|%{serviceName:kuma.source_service})" "(unknown|%{serviceName:kuma.destination_service})" "(%{ipOrHost:kuma.source_address_without_port}|-)" "(%{ipOrHost:kuma.upstream.ip}:%{port:kuma.upstream.port}|-)"
 
+          kuma_dp_http_access_log (\[%{isoTimestamp:date}\])? %{notSpace:kuma.mesh} "%{word:http.method} %{notSpace:http.url} %{httpVersion:http.version}" %{integer:http.status_code} %{word:response.flags} %{integer:network.bytes_read} %{integer:network.bytes_written} %{integer:duration:scale(1000000)} (%{integer:response.x_envoy_upstream_service_time}|-) "%{xForwardedFor:http._x_forwarded_for}" "%{notQuote:http.useragent}" "(-|%{traceId:kuma.trace_id})" "%{uuid:http.request_id}" "%{authority:kuma.http.request.authority}" "(unknown|%{serviceName:kuma.source_service})" "(unknown|%{serviceName:kuma.destination_service})" "(%{ipOrHost:kuma.source_address_without_port}|-)" "(%{ipOrHost:kuma.upstream.host}|-)"
+          
           # Log message from a Kuma dataplane
           # Samples
           # [2025-06-03 18:44:06.650][31][info][upstream] [source/common/listener_manager/lds_api.cc:106] lds: add/update listener 'outbound:10.43.182.159:80'
