@@ -51,16 +51,11 @@ tests:
             authority: "localhost:8080"
         mesh: "default"
         source_address_without_port: "10.42.3.27"
-        source_service: "unknown"
-        trace_id: "-"
       network:
         bytes_read: 0
         bytes_written: 0
       response:
         flags: "NR"
-        x_envoy_upstream_service_time: "-"
-      upstream:
-        host: "-"
     message: "[2025-06-26T13:19:18.314Z] default \"GET /api?timeout=32s HTTP/1.1\" 404 NR 0 0 0 - \"10.42.1.26\" \"kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd\" \"-\" \"0efbfa26-1e2d-9144-919a-e9985d0eab30\" \"localhost:8080\" \"unknown\" \"edge-gateway_kuma-demo_svc\" \"10.42.3.27\" \"-\""
     tags:
      - "source:LOGS_SOURCE"
