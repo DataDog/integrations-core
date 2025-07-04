@@ -108,9 +108,9 @@ def build_macos():
         shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
         shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
-        # # Apply the remove_tests patch
-        # test_patch = mount_dir / 'patches' / 'remove_tests.patch'
-        # check_process(['patch', '--batch', '-p1', '-i', str(test_patch)], cwd=mount_dir)
+        # Apply the remove_tests patch
+        test_patch = mount_dir / 'patches' / 'remove_tests.patch'
+        check_process(['patch', '--batch', '-p1', '-i', str(test_patch)], cwd=mount_dir)
 
         prefix_path = builder_root / 'prefix'
         env = {
@@ -214,9 +214,9 @@ def build_image():
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
-            # # Apply the remove_tests patch
-            # test_patch = mount_dir / 'patches' / 'remove_tests.patch'
-            # check_process(['patch', '--batch', '-p1', '-i', str(test_patch)], cwd=mount_dir)
+            # Apply the remove_tests patch
+            test_patch = mount_dir / 'patches' / 'remove_tests.patch'
+            check_process(['patch', '--batch', '-p1', '-i', str(test_patch)], cwd=mount_dir)
 
             # Create outputs on the host so they can be removed
             wheels_dir = mount_dir / 'wheels'
