@@ -82,7 +82,7 @@ pipeline:
           loggerName       %{regex("[a-zA-Z0-9_\\.-]+")}
           xForwardedFor    %{regex("[0-9\\., ]+")}
           httpVersion      %{regex("HTTP/[0-9\\.]+")}
-          traceId          %{regex("[0-9a-f-]+")}
+          traceId          %{regex("[0-9a-f]+")}
           authority        %{regex("[0-9a-zA-Z@:\\._-]+")}
         matchRules: >
           # TCP access log
