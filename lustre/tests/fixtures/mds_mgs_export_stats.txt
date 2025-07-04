@@ -1,0 +1,4 @@
+snapshot_time             1751532088.060055734 secs.nsecs
+start_time                1748613451.988283796 secs.nsecs
+elapsed_time              2918636.071771938 secs.nsecs
+tgtreg                    2 samples [reqs]

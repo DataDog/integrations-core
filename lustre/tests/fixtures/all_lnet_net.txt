@@ -1,0 +1,95 @@
+net:
+-     net type: lo
+      local NI(s):
+      -     nid: 0@lo
+            status: up
+            statistics:
+                  send_count: 162584
+                  recv_count: 162584
+                  drop_count: 0
+            sent_stats:
+                  put: 162584
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            received_stats:
+                  put: 162579
+                  get: 0
+                  reply: 0
+                  ack: 5
+                  hello: 0
+            dropped_stats:
+                  put: 0
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            health stats:
+                  fatal_error: 0
+                  health value: 1000
+                  interrupts: 0
+                  dropped: 0
+                  aborted: 0
+                  no route: 0
+                  timeouts: 0
+                  error: 0
+                  ping_count: 0
+                  next_ping: 0
+            tunables:
+                  peer_timeout: 0
+                  peer_credits: 0
+                  peer_buffer_credits: 0
+                  credits: 0
+            dev cpt: 0
+            CPT: "[0]"
+-     net type: tcp
+      local NI(s):
+      -     nid: 172.31.16.218@tcp
+            status: up
+            interfaces:
+                  0: eth0
+            statistics:
+                  send_count: 253399
+                  recv_count: 253491
+                  drop_count: 0
+            sent_stats:
+                  put: 253394
+                  get: 5
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            received_stats:
+                  put: 253381
+                  get: 3
+                  reply: 2
+                  ack: 105
+                  hello: 0
+            dropped_stats:
+                  put: 0
+                  get: 0
+                  reply: 0
+                  ack: 0
+                  hello: 0
+            health stats:
+                  fatal_error: 0
+                  health value: 1000
+                  interrupts: 0
+                  dropped: 0
+                  aborted: 0
+                  no route: 0
+                  timeouts: 0
+                  error: 0
+                  ping_count: 0
+                  next_ping: 0
+            tunables:
+                  peer_timeout: 180
+                  peer_credits: 8
+                  peer_buffer_credits: 0
+                  credits: 256
+            lnd tunables:
+                  conns_per_peer: 1
+                  timeout: 49
+                  tos: -1
+            dev cpt: -1
+            CPT: "[0]"
