@@ -4,6 +4,7 @@
 import pytest
 
 from ddev.repo.core import Repository
+from ddev.utils.git import GitRepository
 
 # Whenenever we bump python version, we also need to bump the python
 # version in the conftest.py.
@@ -12,11 +13,13 @@ NEW_PYTHON_VERSION = "3.13"
 
 
 @pytest.fixture
-def fake_repo(tmp_path_factory, config_file, ddev):
+def fake_repo(tmp_path_factory, config_file, ddev, mocker):
     repo_path = tmp_path_factory.mktemp('integrations-core')
     repo = Repository('integrations-core', str(repo_path))
 
-    config_file.model.repos['core'] = str(repo.path)
+    mocker.patch.object(GitRepository, 'worktrees', return_value=[])
+
+    config_file.model.repos["core"] = str(repo.path)
     config_file.save()
 
     write_file(
