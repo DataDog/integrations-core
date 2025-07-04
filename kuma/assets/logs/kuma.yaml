@@ -83,6 +83,7 @@ pipeline:
           xForwardedFor    %{regex("[0-9\\., ]+")}
           httpVersion      %{regex("HTTP/[0-9\\.]+")}
           traceId          %{regex("[0-9a-f-]+")}
+          authority        %{regex("[0-9a-zA-Z@:\\._-]+")}
         matchRules: >
           # TCP access log
           # Format: [%START_TIME%] %RESPONSE_FLAGS% %KUMA_MESH% %KUMA_SOURCE_ADDRESS_WITHOUT_PORT%(%KUMA_SOURCE_SERVICE%)->%UPSTREAM_HOST%(%KUMA_DESTINATION_SERVICE%) took %DURATION%ms, sent %BYTES_SENT% bytes, received: %BYTES_RECEIVED% bytes
@@ -100,7 +101,7 @@ pipeline:
           # Sample:
           # [2025-06-26T13:19:18.314Z] default "GET /api?timeout=32s HTTP/1.1" 404 NR 0 0 0 - "10.42.1.26" "kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd" "-" "0efbfa26-1e2d-9144-919a-e9985d0eab30" "localhost:8080" "unknown" "edge-gateway_kuma-demo_svc" "10.42.3.27" "-"
 
-          kuma_dp_http_access_log (\[%{isoTimestamp:date}\])? %{notSpace:kuma.mesh} "%{word:http.method} %{notSpace:http.url} %{httpVersion:http.version}" %{integer:http.status_code} %{word:response.flags} %{integer:network.bytes_read} %{integer:network.bytes_written} %{integer:duration:scale(1000000)} (%{integer:response.x_envoy_upstream_service_time}|-) "%{xForwardedFor:http._x_forwarded_for}" "%{notQuote:http.useragent}" "(-|%{traceId:kuma.trace_id})" "%{uuid:http.request_id}" "%{notQuote:kuma.http.request.authority}" "(unknown|%{serviceName:kuma.source_service})" "(unknown|%{serviceName:kuma.destination_service})" "(%{ipOrHost:kuma.source_address_without_port}|-)" "(%{ipOrHost:kuma.upstream.ip}:%{port:kuma.upstream.port}|-)"
+          kuma_dp_http_access_log (\[%{isoTimestamp:date}\])? %{notSpace:kuma.mesh} "%{word:http.method} %{notSpace:http.url} %{httpVersion:http.version}" %{integer:http.status_code} %{word:response.flags} %{integer:network.bytes_read} %{integer:network.bytes_written} %{integer:duration:scale(1000000)} (%{integer:response.x_envoy_upstream_service_time}|-) "%{xForwardedFor:http._x_forwarded_for}" "%{notQuote:http.useragent}" "(-|%{traceId:kuma.trace_id})" "%{uuid:http.request_id}" "%{authority:kuma.http.request.authority}" "(unknown|%{serviceName:kuma.source_service})" "(unknown|%{serviceName:kuma.destination_service})" "(%{ipOrHost:kuma.source_address_without_port}|-)" "(%{ipOrHost:kuma.upstream.ip}:%{port:kuma.upstream.port}|-)"
 
           # Log message from a Kuma dataplane
           # Samples
