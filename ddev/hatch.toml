@@ -14,4 +14,5 @@ dependencies = [
 # TODO: remove this when the old CLI is gone
 pre-install-commands = [
   "python -m pip install --disable-pip-version-check {verbosity:flag:-1} -e ../datadog_checks_dev[cli]",
+  "python -m pip install --disable-pip-version-check {verbosity:flag:-1} -e ../datadog_checks_base[deps]",
 ]
