@@ -517,7 +517,11 @@ class LustreCheck(AgentCheck):
             23 11CLOSE 12:51:02.238364514 2025.06.02 0x1 t=[0x200000bd1:0x5:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp
         '''
         self.log.info('Collecting changelogs for: %s', target)
-        cursor = self.get_log_cursor(stream=target)
+        try:
+            cursor = self.get_log_cursor(stream=target)
+        except Exception as e:
+            self.log.info('Could not retrieve log cursor, assuming initialization. Captured error: %s', e)
+            cursor = {'index': '0'}
         start_index = '0' if cursor is None else cursor['index']
         end_index = str(int(start_index) + lines)
         self.log.debug('Fetching changelog from index %s to %s for target %s', start_index, end_index, target)
