@@ -217,7 +217,7 @@ def test_submit_changelogs(aggregator, instance):
         first_call = mock_send_log.call_args_list[0]
         expected_data = {
             'operation_type': '07RMDIR',
-            'timestamp': 1748861252.0,
+            'timestamp': 1748868452.913242,
             'flags': '0x1',
             'message': 't=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus',
         }
