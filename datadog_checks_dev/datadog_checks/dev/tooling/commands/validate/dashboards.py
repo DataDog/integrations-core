@@ -6,12 +6,8 @@ import os
 
 import click
 
-from ....fs import write_file
-from ....utils import read_file
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
-from ..console import (
+from datadog_checks.dev.fs import write_file
+from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
     annotate_display_queue,
@@ -21,6 +17,10 @@ from ..console import (
     echo_info,
     echo_success,
 )
+from datadog_checks.dev.tooling.manifest_utils import Manifest
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
+from datadog_checks.dev.utils import read_file
 
 REQUIRED_ATTRIBUTES = {"description", "template_variables", "widgets"}
 DASHBOARD_ONLY_FIELDS = {"layout_type", "title", "created_at"}
