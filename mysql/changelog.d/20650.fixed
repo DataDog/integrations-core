@@ -1,0 +1,1 @@
+Changes the binlog enabled check to a lightweight lockless query

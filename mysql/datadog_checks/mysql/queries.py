@@ -52,6 +52,9 @@ SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
 
+SQL_BINLOG_ENABLED = """\
+SELECT @@log_bin AS binlog_enabled"""
+
 SQL_SERVER_UUID = """\
 SELECT @@server_uuid"""
 
@@ -253,13 +256,6 @@ def show_replica_status_query(version, is_mariadb, channel=''):
         return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
     else:
         return "{0};".format(base_query)
-
-
-def show_primary_replication_status_query(version, is_mariadb):
-    if not is_mariadb and version.version_compatible((8, 4, 0)):
-        return "SHOW BINARY LOG STATUS;"
-    else:
-        return "SHOW MASTER STATUS;"
 
 
 def get_indexes_query(version, is_mariadb, table_names):
