@@ -187,6 +187,17 @@ files:
         value:
           example: true
           type: boolean
+      - name: collect_connection_metrics
+        description: |
+          Collect connection-related metrics. Metrics collected are:
+            - connection status metrics (ibm_mq.channel.conn_status)
+
+          Note: Enabling this option increases tag cardinality, as the ibm_mq.channel.conn_status
+          metric creates a new `connection` tag for each unique connection. This can lead to high
+          cardinality if you have many active connections.
+        value:
+          example: false
+          type: boolean
       - name: mqcd_version
         description: |
           Which channel definition version to use. Supported values are 1 to 9 including.

@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[MappingProxyType[str, Any]] = None
     channels: Optional[tuple[str, ...]] = None
+    collect_connection_metrics: Optional[bool] = None
     collect_reset_queue_metrics: Optional[bool] = None
     collect_statistics_metrics: Optional[bool] = None
     connection_name: Optional[str] = Field(None, min_length=1)
