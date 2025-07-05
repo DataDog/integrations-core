@@ -102,6 +102,7 @@ Each custom query has the following parameters:
    - `name` (required): The full metric name sent to Datadog. If you also set `type` to `tag`, then every metric collected by this query is tagged with this name.
    - `type` (optional): Designates the type of data sent. Possible values: `gauge`, `monotonic_count`, `rate`, `tag`. Defaults to `gauge`.
 - `payload` (optional): If declared, turns the GET request into a POST request. Use YAML formatting and a read-only user when writing custom queries with a payload.
+- `tags` (optional): The list of tags that should be included with each custom metric submitted.
 
 **Note:** When running custom queries, use a read only account to ensure that the Elasticsearch instance does not change.
 
