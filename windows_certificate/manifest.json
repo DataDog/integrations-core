@@ -33,6 +33,10 @@
         "check": "windows_certificate.days_remaining",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "iissvcs",
+        "CERTLM.MSC"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
