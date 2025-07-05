@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "created_at": "2025-06-09",
+  "last_updated_at": "2025-06-09",
+  "title": "Recipe has exceeded quota",
+  "description": "A recipe has exceeded quota.",
+  "definition": {
+	"id": 174331760,
+	"name": "Recipe has {{#is_alert_recovery}} no longer {{/is_alert_recovery}}exceeded quota",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:workato.recipes.failure{stop_cause:txn_quota_limit} by {name} > 0",
+	"message": "{{#is_alert}}The recipe {{name}} is offline due to exceeding quota{{/is_alert}}\n{{#is_alert_recovery}}The recipe {{name}} is online{{/is_alert_recovery}}\n@email@example.com",
+	"tags": [
+		"source:workato"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 0
+		},
+		"notify_audit": false,
+		"on_missing_data": "resolve",
+		"include_tags": false,
+		"new_group_delay": 0
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:workato"
+  ]
+}
