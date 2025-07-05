@@ -657,8 +657,8 @@ instances:
         # keep_identifier_quotation: false
 
     ## Configure the collection of raw query statements in query activity, and XE events.
-    ## To collect raw query statements from XE events, set `xe_collection.query_completions.enabled` and
-    ## `xe_collection.query_errors.enabled` to `true`.
+    ## To collect raw query statements from XE events, set `collect_xe.query_completions.enabled` and
+    ## `collect_xe.query_errors.enabled` to `true`.
     ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
     ## or personally identifiable information in query text.
     ## Enabling this option will allow the collection and ingestion of raw query statements and
@@ -783,11 +783,10 @@ instances:
     #
     # ignore_missing_database: false
 
-    ## Available for Agent 7.56 and newer.
     ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
     ## only for the database configured with `database` parameter.
     #
-    # schemas_collection:
+    # collect_schemas:
 
         ## @param enabled - boolean - optional - default: false
         ## Enable schema collection. Requires `dbm: true`. Defaults to false.
@@ -801,7 +800,7 @@ instances:
 
         ## @param max_execution_time - number - optional - default: 10
         ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
-        ## Capped by `schemas_collection.collection_interval`
+        ## Capped by `collect_schemas.collection_interval`
         #
         # max_execution_time: 10
 
@@ -816,7 +815,7 @@ instances:
     ##
     ## Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
     #
-    # xe_collection:
+    # collect_xe:
 
         ## @param query_completions - mapping - optional
         ## Configure the collection of completed queries from the `datadog_query_completions` XE session.
@@ -850,7 +849,7 @@ instances:
 
     ## Configure the collection of deadlock data.
     #
-    # deadlocks_collection:
+    # collect_deadlocks:
 
         ## @param enabled - boolean - optional - default: false
         ## Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
