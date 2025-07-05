@@ -1,0 +1,163 @@
+diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
+index 0c76a93f48..83fa5f8ca7 100644
+--- a/scripts/build_wheels.py
++++ b/scripts/build_wheels.py
+@@ -8,7 +8,7 @@ from pathlib import Path
+ from tempfile import TemporaryDirectory
+ 
+ from dotenv import dotenv_values
+-from utils import extract_metadata, normalize_project_name
++from utils import extract_metadata, normalize_project_name, remove_test_files
+ 
+ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
+ CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
+@@ -107,6 +107,8 @@ def main():
+         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
+             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
+ 
++           
++
+         # Fetch or build wheels
+         command_args = [
+             str(python_path), '-m', 'pip', 'wheel',
+@@ -114,11 +116,14 @@ def main():
+             '--wheel-dir', str(staged_wheel_dir),
+             '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+         ]
++      
++
+         if args.use_built_index:
+             command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
+ 
+         check_process(command_args, env=env_vars)
+ 
++        
+ 
+         # Repair wheels
+         check_process([
+@@ -131,6 +136,7 @@ def main():
+     dependencies: dict[str, tuple[str, str]] = {}
+     for wheel_dir in wheels_dir.iterdir():
+         for entry in wheel_dir.iterdir():
++            remove_test_files(entry)
+             project_metadata = extract_metadata(entry)
+             project_name = normalize_project_name(project_metadata['Name'])
+             project_version = project_metadata['Version']
+diff --git a/scripts/utils.py b/scripts/utils.py
+index 63772a277d..f763b08f24 100644
+--- a/scripts/utils.py
+--- b/scripts/utils.py
+@@ -1,10 +1,16 @@
+ from __future__ import annotations
+ 
+ import email
++import os
+ import re
++import shutil
++import tempfile
+ from pathlib import Path
+ from zipfile import ZipFile
+ 
++from wheel.cli.pack import pack
++from wheel.cli.unpack import unpack
++
+ UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
+ 
+ 
+@@ -33,3 +39,96 @@ def extract_metadata(wheel: Path) -> email.Message:
+ 
+     return email.message_from_string(metadata_file_contents)
+ 
++
++def remove_test_files(wheel_path: Path) -> None:
++    """
++    Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
++    """
++    removed = False
++    with tempfile.TemporaryDirectory() as td:
++        td_path = Path(td)
++
++        # Unpack the wheel into temp dir
++        unpack(wheel_path, dest=td_path)
++        unpacked_dir = next(td_path.iterdir())
++
++        # Remove excluded files/folders
++        for root, dirs, files in os.walk(td, topdown=False):
++            for d in list(dirs):
++
++                full_dir = Path(root) / d
++                rel = full_dir.relative_to(unpacked_dir).as_posix()
++                if is_excluded_from_wheel(rel):
++                    shutil.rmtree(full_dir)
++                    removed = True
++                    dirs.remove(d)
++            for f in files:
++                rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
++                if is_excluded_from_wheel(rel):
++                    os.remove(Path(root) / f)
++                    removed = True
++        if removed:
++            print(f"Tests removed from {wheel_path.name}")
++
++        # Repack to same directory, regenerating RECORD
++        pack(unpacked_dir, dest_dir=wheel_path.parent, build_number=None)
++
++
++
++
++def is_excluded_from_wheel(path: str) -> bool:
++    """
++    These files are excluded from the wheel in the agent build:
++    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
++    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
++    the wheels still include them.
++    """
++    excluded_test_paths = [
++        os.path.normpath(path)
++        for path in [
++            "idlelib/idle_test",
++            "bs4/tests",
++            "Cryptodome/SelfTest",
++            "gssapi/tests",
++            "keystoneauth1/tests",
++            "openstack/tests",
++            "os_service_types/tests",
++            "pbr/tests",
++            "pkg_resources/tests",
++            "psutil/tests",
++            "securesystemslib/_vendor/ed25519/test_data",
++            "setuptools/_distutils/tests",
++            "setuptools/tests",
++            "simplejson/tests",
++            "stevedore/tests",
++            "supervisor/tests",
++            "test",  # cm-client
++            "vertica_python/tests",
++            "websocket/tests",
++            "win32com/test"
++        ]
++    ]
++
++    type_annot_libraries = [
++        "krb5",
++        "Cryptodome",
++        "ddtrace",
++        "pyVmomi",
++        "gssapi",
++    ]
++    rel_path = Path(path).as_posix()
++
++    # Test folders
++    for test_folder in excluded_test_paths:
++        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
++            return True
++
++    # Python type annotations
++    path_parts = Path(rel_path).parts
++    if path_parts:
++        dependency_name = path_parts[0]
++        if dependency_name in type_annot_libraries:
++            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
++                return True
++
++    return False
