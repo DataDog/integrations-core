@@ -733,6 +733,8 @@ integration/zero_networks:
 - zero_networks/**/*
 integration/zk:
 - zk/**/*
+integration/cloudgen_firewall:
+- cloudgen_firewall/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt
