@@ -770,7 +770,7 @@ def test__make_request_failure(requests_wrapper):
         api = ApiFactory.create(log, instance, requests_wrapper)
 
     response_mock = mock.MagicMock()
-    with mock.patch("datadog_checks.openstack_controller.legacy.api.requests.get", return_value=response_mock):
+    with mock.patch("datadog_checks.openstack_controller.legacy.api.requests.Session.get", return_value=response_mock):
         response_mock.raise_for_status.side_effect = requests.exceptions.HTTPError
         response_mock.status_code = 401
         with pytest.raises(AuthenticationNeeded):

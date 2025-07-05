@@ -9,6 +9,7 @@ import pytest
 from mock import MagicMock, patch  # noqa: F401
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http import get_tls_config_from_options
 from datadog_checks.base.utils.tls import TlsContextWrapper
 from datadog_checks.dev import TempDir
 
@@ -356,6 +357,49 @@ class TestTLSContext:
         expected_ciphers_list = sorted(cipher['name'] for cipher in expected_context.get_ciphers())
 
         assert actual_ciphers == expected_ciphers_list
+
+    @pytest.mark.parametrize(
+        'options, expected_config',
+        [
+            pytest.param(
+                {'verify': False, 'cert': 'foo'},
+                {'tls_verify': False, 'tls_cert': 'foo'},
+                id='verify false and cert',
+            ),
+            pytest.param(
+                {'verify': True, 'cert': 'foo'},
+                {'tls_verify': True, 'tls_cert': 'foo'},
+                id='verify true and cert',
+            ),
+            pytest.param(
+                {'verify': 'bar', 'cert': 'foo'},
+                {'tls_verify': True, 'tls_cert': 'foo', 'tls_ca_cert': 'bar'},
+                id='verify string and cert',
+            ),
+            pytest.param(
+                {'verify': 'bar', 'cert': ('foo', 'key')},
+                {'tls_verify': True, 'tls_cert': 'foo', 'tls_ca_cert': 'bar', 'tls_private_key': 'key'},
+                id='verify string and cert with key',
+            ),
+            pytest.param(
+                {'cert': 'foo'},
+                {'tls_cert': 'foo'},
+                id='only cert',
+            ),
+            pytest.param(
+                {'verify': 'foo'},
+                {'tls_verify': True, 'tls_ca_cert': 'foo'},
+                id='only verify',
+            ),
+            pytest.param(
+                {},
+                {},
+                id='empty',
+            ),
+        ],
+    )
+    def test_tls_config_from_options(self, options, expected_config):
+        assert get_tls_config_from_options(options) == expected_config
 
 
 class TestTLSContextOverrides:

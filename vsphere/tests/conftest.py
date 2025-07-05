@@ -250,16 +250,28 @@ def mock_http_api(monkeypatch):
         http = MockHttpV7()
     else:
         http = MockHttpV6()
-    monkeypatch.setattr('requests.get', MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', MagicMock(side_effect=http.post))
+
+    def mock_get(*args, **kwargs):
+        return http.get(*args, **kwargs)
+
+    def mock_post(*args, **kwargs):
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.warning(args)
+
+        return http.post(*args, **kwargs)
+
+    monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=mock_get))
+    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=mock_post))
     yield http
 
 
 @pytest.fixture
 def mock_rest_api():
     if VSPHERE_VERSION.startswith('7.'):
-        with patch('requests.api.request', mock_http_rest_api_v7):
+        with patch('requests.Session.request', mock_http_rest_api_v7):
             yield
     else:
-        with patch('requests.api.request', mock_http_rest_api_v6):
+        with patch('requests.Session.request', mock_http_rest_api_v6):
             yield

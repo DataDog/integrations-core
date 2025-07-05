@@ -8,6 +8,7 @@ import shutil
 
 # How long ddev will wait for GPG to finish, especially when asking dev for signature.
 import securesystemslib.settings
+
 securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
 
 from securesystemslib.gpg.constants import gpg_command
@@ -32,7 +33,6 @@ class NeitherTrackedNorIgnoredFileException(Exception):
     def __init__(self, filename):
         self.filename = filename
 
-
     def __str__(self):
         return f'{self.filename} has neither been tracked nor ignored by git and in-toto!'
 
@@ -40,7 +40,6 @@ class NeitherTrackedNorIgnoredFileException(Exception):
 class UntrackedButIgnoredFileException(Exception):
     def __init__(self, filename):
         self.filename = filename
-
 
     def __str__(self):
         return f'{self.filename} has not been tracked, but it should be ignored by git and in-toto!'
