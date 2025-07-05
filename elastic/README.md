@@ -165,7 +165,7 @@ _Available for Agent versions >6.0_
    - To configure index slow logs for a given index `<INDEX>`:
 
      ```shell
-     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
+     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d '{
        "index.indexing.slowlog.threshold.index.warn": "0ms",
        "index.indexing.slowlog.threshold.index.info": "0ms",
        "index.indexing.slowlog.threshold.index.debug": "0ms",
@@ -178,7 +178,7 @@ _Available for Agent versions >6.0_
    - To configure search slow logs for a given index `<INDEX>`:
 
      ```shell
-     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
+     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d '{
        "index.search.slowlog.threshold.query.warn": "0ms",
        "index.search.slowlog.threshold.query.info": "0ms",
        "index.search.slowlog.threshold.query.debug": "0ms",
