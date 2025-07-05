@@ -126,7 +126,7 @@ custom_queries:
    tags:
    - custom_tag:1
 ```
-The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
+The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request.
 
 `value_path` may either be string keys or list indices. Example:
 ```json
