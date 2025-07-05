@@ -142,6 +142,12 @@ instances:
     #
     disable_legacy_service_tag: true
 
+    ## @param collect_health_checks - boolean - optional - default: false
+    ## Whether to enable new service health checks from this instance. Enabling this will
+    ## also emit an event for every failed service health check.
+    #
+    # collect_health_checks: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

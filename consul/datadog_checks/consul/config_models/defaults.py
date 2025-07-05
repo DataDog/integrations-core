@@ -28,6 +28,10 @@ def instance_catalog_checks():
     return False
 
 
+def instance_collect_health_checks():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 

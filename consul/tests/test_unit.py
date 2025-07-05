@@ -188,7 +188,7 @@ def test_service_checks(aggregator):
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
         "consul_service:server-loadbalancer",
-        "consul_node:node-1",
+        "consul_node:node-2",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -229,6 +229,108 @@ def test_service_checks(aggregator):
     aggregator.assert_service_check('consul.check', count=5)
 
 
+@pytest.mark.parametrize(
+    'collect_health_checks, expected_metric_count, expected_metric_total',
+    [
+        pytest.param(True, 1, 6, id="collect_health_checks enabled"),
+        pytest.param(False, 0, 0, id="collect_health_checks disabled"),
+    ],
+)
+def test_health_checks(aggregator, collect_health_checks, expected_metric_count, expected_metric_total):
+    config = consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG
+    config['collect_health_checks'] = collect_health_checks
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    my_mocks = consul_mocks._get_consul_mocks()
+    my_mocks['consul_request'] = consul_mocks.mock_get_health_check
+    consul_mocks.mock_check(consul_check, my_mocks)
+    consul_check.check(None)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-loadbalancer',
+        'consul_service_id:server-loadbalancer',
+        'consul_service:server-loadbalancer',
+        'consul_node:node-2',
+        'consul_status:passing',
+    ]
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
+
+    expected_tags = [
+        'check:server-api',
+        'consul_datacenter:dc1',
+        'consul_node:node-1',
+        'consul_service:server-loadbalancer',
+        'consul_status:passing',
+    ]
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
+
+    expected_tags = [
+        'check:server-api',
+        'consul_datacenter:dc1',
+        'consul_node:node-1',
+        'consul_service_id:server-loadbalancer',
+        'consul_status:passing',
+    ]
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
+
+    expected_tags = [
+        'check:server-api',
+        'consul_datacenter:dc1',
+        'consul_node:node-1',
+        'consul_service:server-loadbalancer',
+        'consul_service_id:server-loadbalancer',
+        'consul_status:passing',
+    ]
+    aggregator.assert_metric('consul.check.up', 1, tags=expected_tags, count=expected_metric_count)
+
+    expected_tags = [
+        'check:server-status-empty',
+        'consul_datacenter:dc1',
+        'consul_node:node-1',
+        'consul_service:server-empty',
+        'consul_service_id:server-empty',
+        'consul_status:',
+    ]
+    aggregator.assert_metric('consul.check.up', 0, tags=expected_tags, count=expected_metric_count)
+
+    expected_tags = [
+        'check:server-loadbalancer',
+        'consul_datacenter:dc1',
+        'consul_node:node-1',
+        'consul_service:server-loadbalancer',
+        'consul_service_id:server-loadbalancer',
+        'consul_status:critical',
+    ]
+    aggregator.assert_metric('consul.check.up', 3, tags=expected_tags, count=expected_metric_count)
+
+    aggregator.assert_metric('consul.check.up', count=expected_metric_total)
+
+    event = {
+        "event_type": "consul.check_failed",
+        "source_type_name": "consul",
+        "msg_title": "Service 'server-loadbalancer' check Failed",
+        "msg_text": "Check server-loadbalancer for service server-loadbalancer, id: server-loadbalancerfailed "
+        "on node node-1: CheckHttp CRITICAL: Request error: Connection refused - connect(2) "
+        "for \"localhost\" port 80\n",
+        "aggregation_key": "consul.status_check",
+        "tags": [
+            'check:server-loadbalancer',
+            'consul_service:server-loadbalancer',
+            'consul_service_id:server-loadbalancer',
+            'consul_node:node-1',
+            'consul_status:critical',
+        ],
+    }
+
+    aggregator.assert_event(exact_match=False, count=expected_metric_count, **event)
+
+    # make sure event is only emitted once even though the check runs multiple times
+    consul_check.check(None)
+    consul_check.check(None)
+    consul_check.check(None)
+    aggregator.assert_event(exact_match=False, count=expected_metric_count, **event)
+
+
 def test_service_checks_disable_service_tag(aggregator):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG])
     my_mocks = consul_mocks._get_consul_mocks()
@@ -241,7 +343,7 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-loadbalancer',
         'consul_service_id:server-loadbalancer',
         'consul_service:server-loadbalancer',
-        'consul_node:node-1',
+        'consul_node:node-2',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
