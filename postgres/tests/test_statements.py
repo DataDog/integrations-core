@@ -968,10 +968,11 @@ def test_statement_metadata(
     # Metrics will match to the normalized query signature
     normalized_query_signature = 'ca85e8d659051b3a'
 
-    def obfuscate_sql(query, options=None):
-        if query.startswith('SELECT city FROM persons WHERE city'):
+    def obfuscate_sql(query_in, options=None):
+        if query == query_in:
+            print("test query found")
             return json.dumps({'query': normalized_query, 'metadata': metadata})
-        return json.dumps({'query': query, 'metadata': metadata})
+        return json.dumps({'query': query_in, 'metadata': metadata})
 
     check = integration_check(dbm_instance)
     check._connect()
