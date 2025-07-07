@@ -120,10 +120,9 @@ def is_valid_integration(path: str, repo_path: str) -> bool:
     ignored_files = {
         "datadog_checks_dev",
         "datadog_checks_tests_helper",
-        "tokumx",
-    }  # tokumx is not shipped in the agent for py3
+    }
     git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks"
+    included_folder = "datadog_checks" + os.sep
     # It is not an integration
     if path.startswith("."):
         return False
@@ -170,28 +169,23 @@ def compress(file_path: str) -> int:
     return compressed_size
 
 
-def get_files(repo_path: str | Path, compressed: bool, version: str) -> list[FileDataEntry]:
+def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[FileDataEntry]:
     """
     Calculates integration file sizes and versions from a repository.
     """
-
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
+    py_version = py_version.split(".")[0]
 
     for root, _, files in os.walk(repo_path):
+        integration_name = str(os.path.relpath(root, repo_path).split(os.sep)[0])
+        if not check_version(str(repo_path), integration_name, py_version):
+            continue
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
-            integration_name = relative_path.split(os.sep)[0]
-            if not check_version(integration_name, version):
-                break
             if not is_valid_integration(relative_path, str(repo_path)):
                 continue
-            path = Path(relative_path)
-            parts = path.parts
-
-            integration_name = parts[0]
-
             size = compress(file_path) if compressed else os.path.getsize(file_path)
             integration_sizes[integration_name] = integration_sizes.get(integration_name, 0) + size
 
@@ -211,18 +205,19 @@ def get_files(repo_path: str | Path, compressed: bool, version: str) -> list[Fil
     ]
 
 
-def check_version(integration_name: str, version: str) -> bool:
-    pyproject_path = integration_name + os.sep + "pyproject.toml"
+def check_version(repo_path: str, integration_name: str, version: str) -> bool:
+    pyproject_path = os.path.join(repo_path, integration_name, "pyproject.toml")
     if os.path.exists(pyproject_path):
         pyproject = load_toml_file(pyproject_path)
+        if "project" not in pyproject or "classifiers" not in pyproject["project"]:
+            return False
         classifiers = pyproject["project"]["classifiers"]
         integration_version = ""
         for classifier in classifiers:
-            match = re.match(r"Programming Language :: Python :: (\d+\.\d+)", classifier)
+            match = re.match(r"Programming Language :: Python :: (\d+)", classifier)
             if match:
                 integration_version = match.group(1)
-                break
-        return integration_version == version
+                return integration_version == version
     return False
 
 
@@ -345,43 +340,43 @@ def get_dependencies_sizes(
 
 
 def is_excluded_from_wheel(path: str) -> bool:
-    '''
+    """
     These files are excluded from the wheel in the agent build:
     https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
     In order to have more accurate results, this files are excluded when computing the size of the dependencies while
     the wheels still include them.
-    '''
+    """
     excluded_test_paths = [
         os.path.normpath(path)
         for path in [
-            'idlelib/idle_test',
-            'bs4/tests',
-            'Cryptodome/SelfTest',
-            'gssapi/tests',
-            'keystoneauth1/tests',
-            'openstack/tests',
-            'os_service_types/tests',
-            'pbr/tests',
-            'pkg_resources/tests',
-            'psutil/tests',
-            'securesystemslib/_vendor/ed25519/test_data',
-            'setuptools/_distutils/tests',
-            'setuptools/tests',
-            'simplejson/tests',
-            'stevedore/tests',
-            'supervisor/tests',
-            'test',  # cm-client
-            'vertica_python/tests',
-            'websocket/tests',
+            "idlelib/idle_test",
+            "bs4/tests",
+            "Cryptodome/SelfTest",
+            "gssapi/tests",
+            "keystoneauth1/tests",
+            "openstack/tests",
+            "os_service_types/tests",
+            "pbr/tests",
+            "pkg_resources/tests",
+            "psutil/tests",
+            "securesystemslib/_vendor/ed25519/test_data",
+            "setuptools/_distutils/tests",
+            "setuptools/tests",
+            "simplejson/tests",
+            "stevedore/tests",
+            "supervisor/tests",
+            "test",  # cm-client
+            "vertica_python/tests",
+            "websocket/tests",
         ]
     ]
 
     type_annot_libraries = [
-        'krb5',
-        'Cryptodome',
-        'ddtrace',
-        'pyVmomi',
-        'gssapi',
+        "krb5",
+        "Cryptodome",
+        "ddtrace",
+        "pyVmomi",
+        "gssapi",
     ]
     rel_path = Path(path).as_posix()
 
@@ -395,7 +390,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     if path_parts:
         dependency_name = path_parts[0]
         if dependency_name in type_annot_libraries:
-            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
+            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
                 return True
 
     return False
@@ -832,14 +827,14 @@ def send_metrics_to_dd(
                 ],
             }
         )
-        key_count = (item['Platform'], item['Python_Version'])
+        key_count = (item["Platform"], item["Python_Version"])
         if key_count not in n_integrations:
             n_integrations[key_count] = 0
         if key_count not in n_dependencies:
             n_dependencies[key_count] = 0
-        if item['Type'] == 'Integration':
+        if item["Type"] == "Integration":
             n_integrations[key_count] += 1
-        elif item['Type'] == 'Dependency':
+        elif item["Type"] == "Dependency":
             n_dependencies[key_count] += 1
 
     for (platform, py_version), count in n_integrations.items():
@@ -921,8 +916,8 @@ def get_last_commit_timestamp() -> int:
 
 def get_last_commit_data() -> tuple[str, list[str], list[str]]:
     result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
-    ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
-    pr_pattern = r'#(\d+)'
+    ticket_pattern = r"\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b"
+    pr_pattern = r"#(\d+)"
 
     message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
