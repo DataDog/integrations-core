@@ -167,10 +167,6 @@ def get_tls_config_from_options(new_options):
     return tls_config
 
 
-def update_session_https_adapter(session, tls_config):
-    return session
-
-
 class SSLContextAdapter(requests.adapters.HTTPAdapter):
     """
     This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
