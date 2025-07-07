@@ -9,7 +9,6 @@ services:
       - PYTHONPATH=/app
     volumes:
       - ./api.py:/app/api.py
-    command: ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/valid/"]
       interval: 30s
