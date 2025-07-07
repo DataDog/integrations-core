@@ -1,9 +1,5 @@
 id: cp-harmony-ec
-# See app_id in your integration's manifest.json file to learn more:
-# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: cp-harmony-ec
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
   - groups:
@@ -34,7 +30,7 @@ pipeline:
   name: Checkpoint Harmony Email and Collaboration
   enabled: true
   filter:
-    query: source:s3
+    query: source:cp-harmony-ec
   processors:
     - type: attribute-remapper
       name: "Remapper : Map `event.security_event.entity_info.entity_sub_type` to
