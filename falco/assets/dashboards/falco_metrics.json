@@ -163,18 +163,13 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 + query2"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:falcosecurity_scap_n_drops{$endpoint}.as_count()"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
                                             "query": "sum:falco.scap.n.drops.count{$endpoint}.as_count()"
                                         }
                                     ],
