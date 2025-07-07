@@ -121,6 +121,10 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
 
 See [metadata.csv][3] for a list of metrics provided by this integration.
 
+### Logs
+
+The Falco integration collects and forwards Falco alert logs to Datadog.
+
 ### Events
 
 The Falco integration does not include any events.
