@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List, Optional, Tuple  # noqa: F401
 
-from ... import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+
 from .sampler import WMISampler
 from .types import TagQuery, WMIFilter, WMIMetric, WMIObject, WMIProperties  # noqa: F401
 
