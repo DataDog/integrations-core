@@ -54,7 +54,7 @@ instances:
 
 Replace `<FALCO_HOST>` with the hostname or IP address where Falco is running.
 
-For Kubernetes environments, you can use [Autodiscovery Integration Templates](https://docs.datadoghq.com/agent/kubernetes/integrations/) to configure the Agent to automatically discover and scrape Falco metrics endpoints.
+For Kubernetes environments, you can use [Autodiscovery Integration Templates][6] to configure the Agent to automatically discover and scrape Falco metrics endpoints.
 
 ##### 3. Validation
 
@@ -140,3 +140,4 @@ For further assistance, contact [Datadog Support][2].
 [3]: https://github.com/DataDog/integrations-core/blob/master/falco/metadata.csv
 [4]: https://github.com/DataDog/integrations-core/blob/master/falco/datadog_checks/falco/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
