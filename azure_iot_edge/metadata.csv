@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-azure.iot_edge.edge_agent.available_disk_space_bytes,gauge,,byte,,Amount of space left on the disk `disk_name.,0,azure_iot_edge,,
+azure.iot_edge.edge_agent.available_disk_space_bytes,gauge,,byte,,Amount of space left on the disk `disk_name.,-2,azure_iot_edge,,
 azure.iot_edge.edge_agent.command_latency_seconds.count,gauge,,,,"Count of how long it took for Docker to execute the given `command`. Possible commands are: create, update, remove, start, stop, restart.",0,azure_iot_edge,,
 azure.iot_edge.edge_agent.command_latency_seconds.quantile,gauge,,second,,"Quantile of how long it took for Docker to execute the given `command`. Possible commands are: create, update, remove, start, stop, restart.",0,azure_iot_edge,,
 azure.iot_edge.edge_agent.command_latency_seconds.sum,gauge,,second,,"Sum of how long it took for Docker to execute the given `command`. Possible commands are: create, update, remove, start, stop, restart.",0,azure_iot_edge,,
