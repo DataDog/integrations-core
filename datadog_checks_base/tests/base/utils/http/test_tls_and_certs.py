@@ -327,7 +327,7 @@ class TestSSLContext:
 
 class TestSSLContextAdapter:
     def test_adapter_caching(self):
-        """SSLContextAdapter should be recovered from cache when possible."""
+        """_SSLContextAdapter should be recovered from cache when possible."""
 
         with mock.patch('requests.Session.get'):
             with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
@@ -346,7 +346,7 @@ class TestSSLContextAdapter:
                 mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
     def test_adapter_caching_new_adapter(self):
-        """A new SSLContextAdapter should be created when a new TLS config is requested."""
+        """A new _SSLContextAdapter should be created when a new TLS config is requested."""
 
         with mock.patch('requests.Session.get'):
             with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:

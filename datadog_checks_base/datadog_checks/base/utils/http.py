@@ -167,18 +167,18 @@ def get_tls_config_from_options(new_options):
     return tls_config
 
 
-class SSLContextAdapter(requests.adapters.HTTPAdapter):
+class _SSLContextAdapter(requests.adapters.HTTPAdapter):
     """
     This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
     """
 
     def __init__(self, ssl_context, **kwargs):
         self.ssl_context = ssl_context
-        super(SSLContextAdapter, self).__init__()
+        super().__init__()
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         pool_kwargs['ssl_context'] = self.ssl_context
-        return super(SSLContextAdapter, self).init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
+        return super().init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
 
     def cert_verify(self, conn, url, verify, cert):
         """
@@ -193,7 +193,7 @@ class SSLContextAdapter(requests.adapters.HTTPAdapter):
         expectations to ensure that the custom SSL context is passed to urllib3.
         """
         # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
-        host_params, _ = super(SSLContextAdapter, self).build_connection_pool_key_attributes(request, verify, cert)
+        host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
         return host_params, {"ssl_context": self.ssl_context}
 
 
@@ -642,9 +642,9 @@ class RequestsWrapper(object):
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
         if self.tls_use_host_header:
             # Create a combined adapter that supports both TLS context and host headers
-            class SSLContextHostHeaderAdapter(SSLContextAdapter, _http_utils.HostHeaderSSLAdapter):
+            class SSLContextHostHeaderAdapter(_SSLContextAdapter, _http_utils.HostHeaderSSLAdapter):
                 def __init__(self, ssl_context, **kwargs):
-                    SSLContextAdapter.__init__(self, ssl_context, **kwargs)
+                    _SSLContextAdapter.__init__(self, ssl_context, **kwargs)
                     _http_utils.HostHeaderSSLAdapter.__init__(self, **kwargs)
 
                 def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
@@ -656,7 +656,7 @@ class RequestsWrapper(object):
 
             https_adapter = SSLContextHostHeaderAdapter(context)
         else:
-            https_adapter = SSLContextAdapter(context)
+            https_adapter = _SSLContextAdapter(context)
 
         # Cache the adapter for reuse
         self._https_adapters[tls_config_key] = https_adapter
