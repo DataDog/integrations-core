@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from operator import attrgetter
 from uuid import uuid4
 
-from ..fs import (
+from datadog_checks.dev.fs import (
     create_file,
     dir_exists,
     ensure_parent_dir_exists,
@@ -16,6 +16,7 @@ from ..fs import (
     write_file,
     write_file_binary,
 )
+
 from .constants import REPO_CHOICES, integration_type_links
 from .utils import (
     get_config_models_documentation,
