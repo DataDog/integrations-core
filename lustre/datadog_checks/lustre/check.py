@@ -322,7 +322,7 @@ class LustreCheck(AgentCheck):
         for metric_name, metric_value in group.items():
             metric_name = metric_name.replace(' ', '_')
             if isinstance(metric_value, int):
-                if group_name == 'tunables' or metric_name in ('health_value', 'next_ping'):
+                if 'tunables' in group_name or metric_name in ('health_value', 'next_ping'):
                     metric_type = 'gauge'
                 else:
                     metric_type = 'count'
