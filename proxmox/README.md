@@ -34,6 +34,33 @@ No additional installation is needed on your server.
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+### Logs
+
+To collect logs from all of your Proxmox services:
+
+1. Enable log collection in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `proxmox.d/conf.yaml` file. For example:
+
+   ```yaml
+   logs:
+    - type: journald
+      source: proxmox
+      include_units:
+        - pveproxy.service
+        - pvedaemon.service
+        - pve-firewall.service
+        - pve-ha-crm.service
+        - pve-ha-lrm.service
+        - pvescheduler.service
+        - pvestatd.service
+        - qmeventd.service
+   ```
+
 ### Events
 
 The Proxmox integration does not include any events.

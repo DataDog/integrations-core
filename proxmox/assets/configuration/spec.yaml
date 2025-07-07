@@ -29,3 +29,16 @@ files:
         headers.value.example:
           Authorization: "PVEAPIToken=<USER>@<REALM>!<TOKEN_ID>=<YOUR_TOKEN>"
         auth_token.display_priority: 3
+  - template: logs
+    example:
+    - type: journald
+      source: proxmox
+      include_units:
+        - pveproxy.service
+        - pvedaemon.service
+        - pve-firewall.service
+        - pve-ha-crm.service
+        - pve-ha-lrm.service
+        - pvescheduler.service
+        - pvestatd.service
+        - qmeventd.service

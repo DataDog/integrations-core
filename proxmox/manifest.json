@@ -19,7 +19,8 @@
       "Category::Cloud",
       "Category::Network",
       "Offering::Integration",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
@@ -48,7 +49,10 @@
         "pvescheduler",
         "pvestatd",
         "qmeventd"
-      ]
+      ],
+      "logs": {
+        "source": "proxmox"
+      }
     }
   },
   "author": {
