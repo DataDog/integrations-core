@@ -134,6 +134,9 @@ class MySql(AgentCheck):
         # Create a new connection on every check run
         self._conn = None
 
+        # Cache for global variables collected early in the check
+        self._global_variables = None
+
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
@@ -285,7 +288,13 @@ class MySql(AgentCheck):
         )
 
     def set_version(self, db):
-        self.version = get_version(db)
+        version_comment = None
+        version = None
+        if self._global_variables is not None:
+            version_comment = (self._get_global_variable('version_comment'),)
+            version = self._get_global_variable('version')
+
+        self.version = get_version(db, version_comment, version)
         self.is_mariadb = self.version.flavor == "MariaDB"
         self.tag_manager.set_tag("dbms_flavor", self.version.flavor.lower(), replace=True)
 
@@ -298,13 +307,18 @@ class MySql(AgentCheck):
             self.tag_manager.set_tag("server_uuid", self.server_uuid, replace=True)
 
     def _get_server_uuid(self, db):
-        with closing(db.cursor(CommenterCursor)) as cursor:
-            try:
-                cursor.execute(SQL_SERVER_UUID)
-                return cursor.fetchone()[0]
-            except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-                self.warning("Error getting server uuid: %s", e)
-                return None
+        if self._global_variables is None:
+            # Fallback to original method if global variables not yet collected
+            with closing(db.cursor(CommenterCursor)) as cursor:
+                try:
+                    cursor.execute(SQL_SERVER_UUID)
+                    return cursor.fetchone()[0]
+                except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+                    self.warning("Error getting server uuid: %s", e)
+                    return None
+        else:
+            # Use cached global variables
+            return self._get_global_variable('server_uuid')
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
@@ -313,18 +327,28 @@ class MySql(AgentCheck):
         self._is_group_replication_active(db)
 
     def _check_performance_schema_enabled(self, db):
-        with closing(db.cursor(CommenterCursor)) as cursor:
-            cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
-            results = dict(cursor.fetchall())
-            self._performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+        if self._global_variables is None:
+            # Fallback to original method if global variables not yet collected
+            with closing(db.cursor(CommenterCursor)) as cursor:
+                cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
+                results = dict(cursor.fetchall())
+                self._performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
+        else:
+            # Use cached global variables
+            self._performance_schema_enabled = self._get_global_variable_enabled('performance_schema')
 
         return self._performance_schema_enabled
 
     def check_userstat_enabled(self, db):
-        with closing(db.cursor(CommenterCursor)) as cursor:
-            cursor.execute("SHOW VARIABLES LIKE 'userstat'")
-            results = dict(cursor.fetchall())
-            self.userstat_enabled = self._get_variable_enabled(results, 'userstat')
+        if self._global_variables is None:
+            # Fallback to original method if global variables not yet collected
+            with closing(db.cursor(CommenterCursor)) as cursor:
+                cursor.execute("SHOW VARIABLES LIKE 'userstat'")
+                results = dict(cursor.fetchall())
+                self.userstat_enabled = self._get_variable_enabled(results, 'userstat')
+        else:
+            # Use cached global variables
+            self.userstat_enabled = self._get_global_variable_enabled('userstat')
 
         return self.userstat_enabled
 
@@ -384,6 +408,9 @@ class MySql(AgentCheck):
         try:
             with self._connect() as db:
                 self._conn = db
+
+                # Collect global variables early for use throughout the check
+                self._collect_global_variables(db)
 
                 # version collection
                 self.set_version(db)
@@ -573,7 +600,12 @@ class MySql(AgentCheck):
         with tracked_query(self, operation="status_metrics"):
             results = self._get_stats_from_status(db)
         with tracked_query(self, operation="variables_metrics"):
-            results.update(self._get_stats_from_variables(db))
+            # Use cached global variables instead of making a separate query
+            if self._global_variables is not None:
+                results.update(self._global_variables)
+            else:
+                # Fallback to original method if global variables not yet collected
+                results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(
             self._config.options.get('disable_innodb_metrics', False)
@@ -1057,15 +1089,19 @@ class MySql(AgentCheck):
         """
         Get the `pid_file` variable
         """
-        pid_file = None
-        try:
-            with closing(db.cursor(CommenterCursor)) as cursor:
-                cursor.execute("SHOW VARIABLES LIKE 'pid_file'")
-                pid_file = cursor.fetchone()[1]
-        except Exception:
-            self.warning("Error while fetching pid_file variable of MySQL.")
-
-        return pid_file
+        if self._global_variables is None:
+            # Fallback to original method if global variables not yet collected
+            pid_file = None
+            try:
+                with closing(db.cursor(CommenterCursor)) as cursor:
+                    cursor.execute("SHOW VARIABLES LIKE 'pid_file'")
+                    pid_file = cursor.fetchone()[1]
+            except Exception:
+                self.warning("Error while fetching pid_file variable of MySQL.")
+            return pid_file
+        else:
+            # Use cached global variables
+            return self._get_global_variable('pid_file')
 
     def _get_server_pid(self, db):
         pid = None
@@ -1104,21 +1140,26 @@ class MySql(AgentCheck):
         if self._is_aurora is not None:
             return self._is_aurora
 
-        try:
-            with closing(db.cursor(CommenterCursor)) as cursor:
-                cursor.execute(SQL_SERVER_ID_AWS_AURORA)
-                if len(cursor.fetchall()) > 0:
-                    self._is_aurora = True
-                else:
-                    self._is_aurora = False
-
-        except Exception:
-            self.warning(
-                "Unable to determine if server is Aurora. If this is an Aurora database, some "
-                "information may be unavailable: %s",
-                traceback.format_exc(),
-            )
-            return False
+        if self._global_variables is None:
+            # Fallback to original method if global variables not yet collected
+            try:
+                with closing(db.cursor(CommenterCursor)) as cursor:
+                    cursor.execute(SQL_SERVER_ID_AWS_AURORA)
+                    if len(cursor.fetchall()) > 0:
+                        self._is_aurora = True
+                    else:
+                        self._is_aurora = False
+            except Exception:
+                self.warning(
+                    "Unable to determine if server is Aurora. If this is an Aurora database, some "
+                    "information may be unavailable: %s",
+                    traceback.format_exc(),
+                )
+                return False
+        else:
+            # Use cached global variables
+            aurora_server_id = self._get_global_variable('aurora_server_id')
+            self._is_aurora = aurora_server_id is not None
 
         return self._is_aurora
 
@@ -1137,6 +1178,49 @@ class MySql(AgentCheck):
             results = dict(cursor.fetchall())
 
             return results
+
+    def _collect_global_variables(self, db):
+        """
+        Collect global variables early in the check and cache them for use throughout the check.
+        This consolidates multiple individual variable queries into a single query.
+        """
+        if self._global_variables is None:
+            with closing(db.cursor(CommenterCursor)) as cursor:
+                cursor.execute("SHOW GLOBAL VARIABLES;")
+                self._global_variables = dict(cursor.fetchall())
+                self.log.debug("Collected %d global variables", len(self._global_variables))
+        return self._global_variables
+
+    def _get_global_variable(self, variable_name, default=None):
+        """
+        Get a specific global variable value from the cached results.
+
+        Args:
+            variable_name (str): The name of the variable to retrieve
+            default: Default value if variable is not found
+
+        Returns:
+            The variable value or default if not found
+        """
+        if self._global_variables is None:
+            self.log.warning("Global variables not yet collected, returning default for %s", variable_name)
+            return default
+        return self._global_variables.get(variable_name, default)
+
+    def _get_global_variable_enabled(self, variable_name):
+        """
+        Check if a global variable is enabled (ON/YES/1).
+
+        Args:
+            variable_name (str): The name of the variable to check
+
+        Returns:
+            bool: True if variable is enabled, False otherwise
+        """
+        value = self._get_global_variable(variable_name)
+        return value and is_affirmative(value.lower().strip())
+
+
 
     def _get_binary_log_stats(self, db):
         try:

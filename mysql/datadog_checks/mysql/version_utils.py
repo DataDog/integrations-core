@@ -11,40 +11,45 @@ from datadog_checks.base.log import get_check_logger
 from .const import BUILDS
 
 
-def get_version(db):
-    with closing(db.cursor()) as cursor:
-        cursor.execute('SELECT VERSION()')
-        result = cursor.fetchone()
+def get_version(db, version_comment=None, version=None):
+    if version is None:
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION()')
+            result = cursor.fetchone()
+            raw_version = to_native_string(result[0])
+    else:
+        raw_version = to_native_string(version)
 
-        cursor.execute('SELECT @@version_comment')
-        version_comment = cursor.fetchone()
+    if version_comment is None:
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT @@version_comment')
+            version_comment = cursor.fetchone()
 
-        # Version might include a build, a flavor, or both
-        # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
-        # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-        # https://mariadb.com/kb/en/library/version/
-        # and https://mariadb.com/kb/en/library/server-system-variables/#version
-        raw_version = to_native_string(result[0])
-        parts = raw_version.split('-')
-        version, flavor, build = [parts[0], '', '']
+    # Version might include a build, a flavor, or both
+    # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
+    # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
+    # https://mariadb.com/kb/en/library/version/
+    # and https://mariadb.com/kb/en/library/server-system-variables/#version
+    parts = raw_version.split('-')
+    version, flavor, build = [parts[0], '', '']
 
-        for data in parts:
-            if data == "MariaDB":
-                flavor = "MariaDB"
-            if data != "MariaDB" and flavor == '':
-                flavor = "MySQL"
-            if data in BUILDS:
-                build = data
-        if (
-            version_comment
-            and len(version_comment) > 0
-            and to_native_string(version_comment[0]).lower().startswith('percona')
-        ):
-            flavor = 'Percona'
-        if build == '':
-            build = 'unspecified'
+    for data in parts:
+        if data == "MariaDB":
+            flavor = "MariaDB"
+        if data != "MariaDB" and flavor == '':
+            flavor = "MySQL"
+        if data in BUILDS:
+            build = data
+    if (
+        version_comment
+        and len(version_comment) > 0
+        and to_native_string(version_comment[0]).lower().startswith('percona')
+    ):
+        flavor = 'Percona'
+    if build == '':
+        build = 'unspecified'
 
-        return MySQLVersion(version, flavor, build)
+    return MySQLVersion(version, flavor, build)
 
 
 class MySQLVersion(namedtuple('MySQLVersion', ['version', 'flavor', 'build'])):
