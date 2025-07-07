@@ -499,7 +499,11 @@ tests:
               key: "nitesh@sacumentech.com"
             saas_spam_verdict: "1"
           time: "2025-06-17T10:56:06.289340"
+      evt:
+        name: "phishing"
       network:
+        client:
+          ip: "198.154.180.93"
         ip:
           attributes:
            -
@@ -509,6 +513,9 @@ tests:
           list:
            - "198.154.180.93"
       service: "s3"
+      timestamp: "2025-06-17T10:56:17.630279Z"
+      usr:
+        email: "nitesh@sacumentech.com"
     message: |-
       {
         "service" : "s3",
@@ -764,3 +771,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1750157777630
