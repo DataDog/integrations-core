@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.2.1-beta.1 / 2025-07-07
+
+***Added***:
+
+* Make queue discovery logic more resilient and add new metric to track broken queues ([#20549](https://github.com/DataDog/integrations-core/pull/20549))
+
 ## 8.2.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
