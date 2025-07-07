@@ -27,7 +27,6 @@ async def invalid_endpoint():
 @app.get("/timeout/")
 async def timeout_endpoint() -> Dict[str, Any]:
     """Takes more than 2 seconds to respond, causing a timeout."""
-    # Sleep for 3 seconds to ensure timeout
     await asyncio.sleep(2)
     return {"message": "This response took too long", "status": "timeout"}
 
@@ -55,9 +54,9 @@ async def no_content_length_endpoint() -> Response:
         The server doesn't know the total size in advance.
         """
         yield '{"message":'
-        await asyncio.sleep(0.1)  # Simulate some work
+        await asyncio.sleep(0.1)
         yield ' "Hello, '
-        await asyncio.sleep(0.1)  # Simulate more work
+        await asyncio.sleep(0.1)
         yield 'Streaming World!"}'
 
     # Return response without Content-Length header
