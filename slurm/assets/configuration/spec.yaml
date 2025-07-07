@@ -45,7 +45,7 @@ files:
         node to collect the list of running jobs along with their PIDs.
       value:
         type: boolean
-        example: True
+        example: False
     - name: collect_gpu_stats
       description: Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
       value:

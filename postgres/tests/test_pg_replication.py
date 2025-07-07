@@ -19,6 +19,7 @@ from .common import (
     check_file_wal_metrics,
     check_metrics_metadata,
     check_performance_metrics,
+    check_recovery_prefetch_metrics,
     check_replication_delay,
     check_slru_metrics,
     check_snapshot_txid_metrics,
@@ -53,6 +54,7 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_file_wal_metrics(aggregator, expected_tags=expected_tags)
+    check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'])
 

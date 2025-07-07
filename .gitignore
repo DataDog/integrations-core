@@ -128,3 +128,12 @@ benchmark_*.svg
 
 ## Local overrides for ddev
 .ddev.toml
+
+## Size metrics
+size-uncompressed.txt
+size-compressed.txt
+*compressed_status.csv
+*compressed_status.md
+*compressed_status.png
+*compressed_status.json
+treemap*.png

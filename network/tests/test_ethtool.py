@@ -677,6 +677,33 @@ def test_parse_queue_num():
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
+def test_parse_unprefixed_queue_num():
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('rx0_cnt')
+    assert queue_name == 'queue:0'
+    assert metric_name == 'rx_cnt'
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('tx10_doorbells')
+    assert queue_name == 'queue:10'
+    assert metric_name == 'tx_doorbells'
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('aqueue10_doorbells')
+    assert queue_name is None
+    assert metric_name is None
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('ametric_rx0')
+    assert queue_name == 'queue:0'
+    assert metric_name == 'ametric_rx'
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('ch0_packets')
+    assert queue_name is None
+    assert metric_name is None
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('rx_packets')
+    assert queue_name is None
+    assert metric_name is None
+
+
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 def test_parse_cpu_num():
     cpu_name, metric_name = ethtool._parse_ethtool_cpu_num('cpu0_rx_bytes')
     assert cpu_name == 'cpu:0'

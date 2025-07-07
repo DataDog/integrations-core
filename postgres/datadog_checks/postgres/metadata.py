@@ -268,6 +268,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
+        self._extensions_cached = None
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
