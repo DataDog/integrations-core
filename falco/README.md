@@ -114,6 +114,8 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
 3. [Restart the Agent][5].
 
 **Note**: Ensure the `datadog-agent` user has read and execute access to tail the log files you want to collect from.
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ## Data Collected
 

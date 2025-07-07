@@ -18,10 +18,9 @@
 				"critical": 0
 			},
 			"notify_audit": false,
+			"on_missing_data": "default",
 			"include_tags": true,
-			"new_group_delay": 60,
-			"silenced": {},
-			"on_missing_data": "default"
+			"silenced": {}
 		},
 		"priority": null,
 		"restriction_policy": {
