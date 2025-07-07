@@ -167,6 +167,7 @@ FILESYSTEM_CONFIG_METRICS = [
     'lustre.filesystem.file_heat',
     'lustre.filesystem.enable_setstripe_gid',
     'lustre.filesystem.max_read_ahead_whole_mb',
+    'lustre.filesystem.max_read_ahead_per_file_mb',
     'lustre.filesystem.blocksize',
     'lustre.filesystem.intent_mkdir',
     'lustre.filesystem.enable_statahead_fname',
@@ -335,6 +336,7 @@ OSD_CONFIG_METRICS = [
     'lustre.osd.kbytesfree',
     'lustre.osd.blocksize',
     'lustre.osd.filesfree',
+    'lustre.osd.filestotal',
     'lustre.osd.kbytesavail',
     'lustre.osd.kbytestotal',
 ]

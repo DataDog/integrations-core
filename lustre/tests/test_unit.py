@@ -93,6 +93,7 @@ def test_check(dd_run_check, aggregator, node_type, dl_fixture, expected_metrics
 
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.parametrize(
