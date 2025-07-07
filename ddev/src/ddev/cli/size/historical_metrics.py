@@ -21,8 +21,10 @@ def upload_historical_metrics(date_from_str: str, org: str) -> None:
         raise ValueError(f"Date ({date_from}) must be after 2024-09-18")
     try:
         console.print(f"[green]Processing repository: {repo_path}")
+
         with GitRepo(repo_path) as gitRepo:
-            commits = gitRepo._run(f"git log --pretty=format:%H --since='{date_from}'")
+            gitRepo._run("git checkout master")
+            commits = gitRepo._run(f"git log --reverse --pretty=format:%H --since='{date_from}'")
             console.print(f"Found {len(commits)} commits to process")
             with Progress(
                 SpinnerColumn(),
@@ -32,14 +34,13 @@ def upload_historical_metrics(date_from_str: str, org: str) -> None:
             ) as progress:
                 commit_task = progress.add_task("[cyan]Processing commits...")
 
-                for i, commit in enumerate(commits, 1):
+                for i, commit in enumerate(commits, 0):
                     date, _, _ = gitRepo.get_commit_metadata(commit)
                     progress.update(
-                        commit_task, description=f"Processing commit {i}/{len(commits)}: {commit[:8]} ({date})"
+                        commit_task, description=f"Processing commit {i+1}/{len(commits)}: {commit[:8]} ({date})"
                     )
-                    print(f"Processing commit {i}/{len(commits)}: {commit[:8]} ({date})", flush=True)
-                    gitRepo.checkout_commit(commit)
-                    if i > 1:
+                    print(f"Processing commit {i+1}/{len(commits)}: {commit[:8]} ({date})", flush=True)
+                    if i > 0:
                         result = subprocess.run(
                             ["ddev", "--here", "size", "diff", "--to-dd-org", org, commits[i - 1], commit],
                             cwd=gitRepo.repo_dir,
@@ -68,7 +69,7 @@ def upload_historical_metrics(date_from_str: str, org: str) -> None:
                         if result.returncode != 0:
                             console.print(f"[red]Error in commit {commit}: {result.stderr}")
                             continue
-
+                    gitRepo.checkout_commit(commit)
                     result = subprocess.run(
                         ["ddev", "--here", "size", "status", "--to-dd-org", org],
                         cwd=gitRepo.repo_dir,

@@ -61,16 +61,16 @@ class CLIParameters(TypedDict):
     platform: str  # Target platform for analysis (e.g. linux-aarch64)
     version: str  # Target Python version for analysis
     compressed: bool  # Whether to analyze compressed file sizes
-    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    format: list[str] | None  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
 
 
 class CLIParametersTimeline(TypedDict):
     app: Application  # Main application instance for CLI operations
     module: str  # Name of module to analyze
-    threshold: Optional[int]  # Minimum size threshold for filtering
+    threshold: int | None  # Minimum size threshold for filtering
     compressed: bool  # Whether to analyze compressed file sizes
-    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    format: list[str] | None  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
 
 
@@ -793,6 +793,8 @@ def send_metrics_to_dd(
     mode: Literal["status", "diff"],
     commits: list[str] | None,
 ) -> None:
+    if not modules:
+        return
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
@@ -824,7 +826,7 @@ def send_metrics_to_dd(
     for item in modules:
         metrics.append(
             {
-                "metric": f"{metric_name}.{mode}",
+                "metric": f"{metric_name}.size_{mode}",
                 "type": "gauge",
                 "points": [(timestamp, item["Size_Bytes"])],
                 "tags": [
@@ -928,7 +930,7 @@ def is_everything_committed() -> bool:
     return result.stdout.strip() == ""
 
 
-def get_last_commit_timestamp(commit: Optional[str] = None) -> int:
+def get_last_commit_timestamp(commit: str | None = None) -> int:
     if commit:
         result = subprocess.run(
             ["git", "log", "-1", "--format=%ct", commit], capture_output=True, text=True, check=True
@@ -938,7 +940,7 @@ def get_last_commit_timestamp(commit: Optional[str] = None) -> int:
     return int(result.stdout.strip())
 
 
-def get_last_commit_data(commit: Optional[str] = None) -> tuple[str, list[str], list[str]]:
+def get_last_commit_data(commit: str | None = None) -> tuple[str, list[str], list[str]]:
     if commit:
         result = subprocess.run(["git", "log", "-1", "--format=%s", commit], capture_output=True, text=True, check=True)
     else:
@@ -973,7 +975,7 @@ def check_commits(commits: list[str]) -> bool:
     )
     parent_commit = result.stdout.strip()
 
-    if parent_commit != commits[1]:
+    if parent_commit != commits[0]:
         raise ValueError("Second commit must be the direct parent of first commit. Metrics cannot be uploaded.")
 
     return True
@@ -1007,7 +1009,7 @@ class GitRepo:
         return result.stdout.strip().split("\n")
 
     def get_module_commits(
-        self, module_path: str, initial: Optional[str], final: Optional[str], time: Optional[str]
+        self, module_path: str, initial: str | None, final: str | None, time: str | None
     ) -> list[str]:
         """
         Returns the list of commits (SHA) that modified a given module, filtered by time or commit range.
@@ -1078,9 +1080,9 @@ class GitRepo:
 
     def __exit__(
         self,
-        exception_type: Optional[Type[BaseException]],
-        exception_value: Optional[BaseException],
-        exception_traceback: Optional[TracebackType],
+        exception_type: Type[BaseException] | None,
+        exception_value: BaseException | None,
+        exception_traceback: TracebackType | None,
     ) -> None:
         if self.repo_dir and os.path.exists(self.repo_dir):
             shutil.rmtree(self.repo_dir)

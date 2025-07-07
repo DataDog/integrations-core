@@ -49,7 +49,7 @@ jobs:
       run: | 
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
-        ddev size diff $BEFORE $AFTER > diff-uncompressed.txt
+        ddev size diff $BEFORE $AFTER --to-dd-key ${{secrets.DD_API_KEY}} > diff-uncompressed.txt
         ddev size diff $BEFORE $AFTER  --format png,csv,markdown
         cat diff-uncompressed.txt
         echo "# Size diff (uncompressed)" >> $GITHUB_STEP_SUMMARY
@@ -61,7 +61,7 @@ jobs:
       run: | 
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
-        ddev size diff $BEFORE $AFTER --compressed > diff-compressed.txt
+        ddev size diff $BEFORE $AFTER --compressed --to-dd-key ${{secrets.DD_API_KEY}} > diff-compressed.txt
         ddev size diff $BEFORE $AFTER --compressed  --format png,csv,markdown
         cat diff-compressed.txt
         echo "# Size diff (compressed)" >> $GITHUB_STEP_SUMMARY
