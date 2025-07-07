@@ -40,6 +40,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set} by {kube_replica_set}",
                         "display_type": "area",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "green",
                             "line_type": "solid",
@@ -75,6 +76,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set}",
                         "aggregator": "last",
+                        "semantic_mode": "combined",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -106,6 +108,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set} by {kube_replica_set}",
                         "display_type": "area",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -141,6 +144,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set}",
                         "aggregator": "last",
+                        "semantic_mode": "combined",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -171,6 +175,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set} by {kube_replica_set}",
                         "display_type": "area",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "cool",
                             "line_type": "solid",
@@ -206,6 +211,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set}",
                         "display_type": "area",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "warm",
                             "line_type": "solid",
@@ -260,6 +266,7 @@
                     {
                         "q": "count_nonzero(avg:kubernetes_state.replicaset.replicas{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -295,6 +302,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set}",
                         "display_type": "area",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -355,6 +363,7 @@
                     {
                         "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set}",
                         "display_type": "area",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -428,6 +437,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -463,6 +473,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.memory.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_deployment,kube_namespace,kube_replica_set})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -496,7 +507,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most memory-intensive ReplicaSet",
@@ -519,7 +531,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most CPU-intensive ReplicaSet",
@@ -544,6 +557,7 @@
                     {
                         "q": "sum:kubernetes.cpu.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set}, sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set}, sum:kubernetes.cpu.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set}",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -579,6 +593,7 @@
                     {
                         "q": "sum:kubernetes.memory.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set}, sum:kubernetes.memory.rss{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set}, sum:kubernetes.memory.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set}",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -690,6 +705,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.network.rx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_namespace,kube_cluster_name,kube_replica_set}), exclude_null(sum:kubernetes.network.tx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_namespace,kube_cluster_name,kube_replica_set})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -725,6 +741,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.network.rx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_namespace,kube_cluster_name,kube_replica_set}), exclude_null(sum:kubernetes.network.tx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_namespace,kube_cluster_name,kube_replica_set})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -767,6 +784,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.filesystem.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_namespace,kube_cluster_name,kube_replica_set})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -802,6 +820,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.filesystem.usage_pct{$kube_namespace,$scope,$kube_cluster_name,$kube_replica_set} by {kube_namespace,kube_cluster_name,kube_replica_set})*100",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -842,7 +861,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most Disk-intensive ReplicaSets",
@@ -865,7 +885,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set,!pod_name:no_pod} by {kube_namespace,kube_cluster_name,kube_replica_set}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most Network-intensive ReplicaSets",
@@ -890,6 +911,7 @@
                     {
                         "q": "count_nonzero(sum:kubernetes_state.replicaset.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_replica_set} by {kube_replica_set})",
                         "aggregator": "last",
+                        "semantic_mode": "combined",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -919,6 +941,7 @@
                     {
                         "q": "count_not_null(avg:kubernetes_state.replicaset.replicas{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set})-count_nonzero(avg:kubernetes_state.replicaset.replicas{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -952,7 +975,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(avg:kubernetes_state.replicaset.replicas{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')"
+                        "q": "top(avg:kubernetes_state.replicaset.replicas{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "ReplicaSets By Size",

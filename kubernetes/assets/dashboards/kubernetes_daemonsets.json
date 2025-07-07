@@ -20,6 +20,7 @@
           {
             "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
             "aggregator": "last",
+            "semantic_mode": "combined",
             "conditional_formats": [
               {
                 "comparator": ">",
@@ -52,6 +53,7 @@
         "requests": [
           {
             "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
+            "semantic_mode": "combined",
             "style": {
               "palette": "green",
               "line_type": "solid",
@@ -87,6 +89,7 @@
         "requests": [
           {
             "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+            "semantic_mode": "combined",
             "aggregator": "last",
             "conditional_formats": [
               {
@@ -120,6 +123,7 @@
         "requests": [
           {
             "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
+            "semantic_mode": "combined",
             "style": {
               "palette": "cool",
               "line_type": "solid",
@@ -157,6 +161,7 @@
         "requests": [
           {
             "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}-sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}",
+            "semantic_mode": "combined",
             "style": {
               "palette": "warm",
               "line_type": "solid",
@@ -213,6 +218,7 @@
         "requests": [
           {
             "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -252,7 +258,8 @@
             "increase_good": true,
             "order_by": "change",
             "change_type": "absolute",
-            "order_dir": "desc"
+            "order_dir": "desc",
+            "semantic_mode": "combined"
           }
         ]
       }
@@ -276,6 +283,7 @@
         "requests": [
           {
             "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}-sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -351,6 +359,7 @@
         "requests": [
           {
             "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set})",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -388,6 +397,7 @@
         "requests": [
           {
             "q": "exclude_null(sum:kubernetes.memory.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_daemon_set})",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -424,7 +434,8 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')",
+            "semantic_mode": "combined"
           }
         ]
       }
@@ -447,7 +458,8 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')",
+            "semantic_mode": "combined"
           }
         ]
       }
@@ -470,6 +482,7 @@
         "requests": [
           {
             "q": "sum:kubernetes.cpu.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.cpu.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -505,6 +518,7 @@
         "requests": [
           {
             "q": "sum:kubernetes.memory.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.memory.rss{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.memory.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -617,6 +631,7 @@
         "requests": [
           {
             "q": "exclude_null(sum:kubernetes.network.rx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), exclude_null(sum:kubernetes.network.tx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -654,6 +669,7 @@
         "requests": [
           {
             "q": "exclude_null(sum:kubernetes.network.rx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), exclude_null(sum:kubernetes.network.tx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -697,6 +713,7 @@
         "requests": [
           {
             "q": "exclude_null(sum:kubernetes.filesystem.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -734,6 +751,7 @@
         "requests": [
           {
             "q": "exclude_null(sum:kubernetes.filesystem.usage_pct{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})*100",
+            "semantic_mode": "combined",
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -776,7 +794,8 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')",
+            "semantic_mode": "combined"
           }
         ]
       }
@@ -799,7 +818,8 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')",
+            "semantic_mode": "combined"
           }
         ]
       }
@@ -821,6 +841,7 @@
         "requests": [
           {
             "q": "count_nonzero(sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set})",
+            "semantic_mode": "combined",
             "aggregator": "last",
             "conditional_formats": [
               {
@@ -850,7 +871,8 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(max:kubernetes_state.daemonset.desired{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name}, 10, 'mean', 'desc')"
+            "q": "top(max:kubernetes_state.daemonset.desired{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name}, 10, 'mean', 'desc')",
+            "semantic_mode": "combined"
           }
         ]
       }
@@ -873,6 +895,7 @@
           {
             "q": "sum:kubernetes_state.daemonset.scheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
             "aggregator": "last",
+            "semantic_mode": "combined",
             "conditional_formats": [
               {
                 "comparator": ">",
@@ -903,6 +926,7 @@
           {
             "q": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
             "aggregator": "last",
+            "semantic_mode": "combined",
             "conditional_formats": [
               {
                 "comparator": ">",
@@ -940,7 +964,8 @@
               "line_type": "solid",
               "line_width": "normal"
             },
-            "display_type": "area"
+            "display_type": "area",
+            "semantic_mode": "combined"
           }
         ],
         "yaxis": {

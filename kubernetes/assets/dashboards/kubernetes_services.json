@@ -29,6 +29,7 @@
                     {
                         "q": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name} by {type}",
                         "display_type": "area",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -84,6 +85,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -119,6 +121,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.memory.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -152,7 +155,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most memory-intensive Services",
@@ -175,7 +179,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most CPU-intensive Services",
@@ -276,6 +281,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}), exclude_null(sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -311,6 +317,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.network.rx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}), exclude_null(sum:kubernetes.network.tx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -353,6 +360,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.filesystem.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -388,6 +396,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})*100",
                         "display_type": "line",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -428,7 +437,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most Disk-intensive Services",
@@ -451,7 +461,8 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')",
+                        "semantic_mode": "combined"
                     }
                 ],
                 "title": "Most Network-intensive Services",
@@ -476,6 +487,7 @@
                     {
                         "q": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name}",
                         "aggregator": "last",
+                        "semantic_mode": "combined",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -505,6 +517,7 @@
                     {
                         "q": "exclude_null(sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service})",
                         "display_type": "bars",
+                        "semantic_mode": "combined",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
@@ -540,6 +553,7 @@
                 "requests": [
                     {
                         "q": "exclude_null(sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service,kube_namespace,kube_cluster_name})",
+                        "semantic_mode": "combined",
                         "aggregator": "max",
                         "limit": 10,
                         "order": "desc",

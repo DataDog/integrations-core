@@ -137,17 +137,20 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$scope}"
+                                            "query": "sum:kubernetes_state.node.cpu_capacity{$cluster,$scope}",
+                                            "semantic_mode": "combined"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:kubernetes_state.node.cpu_allocatable{$cluster,$scope}"
+                                            "query": "sum:kubernetes_state.node.cpu_allocatable{$cluster,$scope}",
+                                            "semantic_mode": "combined"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope}"
+                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope}",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -252,17 +255,20 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:kubernetes_state.node.memory_capacity{$cluster,$scope}"
+                                            "query": "sum:kubernetes_state.node.memory_capacity{$cluster,$scope}",
+                                            "semantic_mode": "combined"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query6",
-                                            "query": "sum:kubernetes_state.node.memory_allocatable{$cluster,$scope}"
+                                            "query": "sum:kubernetes_state.node.memory_allocatable{$cluster,$scope}",
+                                            "semantic_mode": "combined"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope}"
+                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope}",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -802,7 +808,8 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:kubernetes_state.crd.count{$scope,$cluster}",
-                                            "aggregator": "last"
+                                            "aggregator": "last",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "formulas": [
@@ -1187,7 +1194,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.cpu.requests{$scope,$cluster} by {host}"
+                                            "query": "sum:kubernetes.cpu.requests{$scope,$cluster} by {host}",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2480,7 +2488,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.count{$cluster,$scope}"
+                                            "query": "sum:kubernetes_state.job.count{$cluster,$scope}",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2566,7 +2575,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.succeeded{$cluster,$scope}.as_count()"
+                                            "query": "sum:kubernetes_state.job.succeeded{$cluster,$scope}.as_count()",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2652,7 +2662,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.failed{$cluster,$scope}.as_count()"
+                                            "query": "sum:kubernetes_state.job.failed{$cluster,$scope}.as_count()",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2708,7 +2719,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.count{$cluster,owner_kind:cronjob} by {owner_name}"
+                                            "query": "sum:kubernetes_state.job.count{$cluster,owner_kind:cronjob} by {owner_name}",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3650,7 +3662,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,reason:crashloopbackoff,$scope} by {pod_name}"
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,reason:crashloopbackoff,$scope} by {pod_name}",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3713,7 +3726,8 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.containers.state.terminated{$cluster,reason:oomkilled,$scope} by {pod_name}"
+                                            "query": "sum:kubernetes.containers.state.terminated{$cluster,reason:oomkilled,$scope} by {pod_name}",
+                                            "semantic_mode": "combined"
                                         }
                                     ],
                                     "response_format": "timeseries",

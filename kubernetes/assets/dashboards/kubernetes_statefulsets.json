@@ -592,6 +592,7 @@
                   {
                       "display_type": "line",
                       "q": "sum:kubernetes.cpu.requests{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value}, sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value}, sum:kubernetes.cpu.limits{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value}",
+                      "semantic_mode": "combined",
                       "style": {
                           "line_type": "solid",
                           "line_width": "normal",
@@ -627,6 +628,7 @@
                   {
                       "display_type": "line",
                       "q": "sum:kubernetes.memory.requests{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value}, sum:kubernetes.memory.rss{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value}, sum:kubernetes.memory.limits{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value}",
+                      "semantic_mode": "combined",
                       "style": {
                           "line_type": "solid",
                           "line_width": "normal",
@@ -739,6 +741,7 @@
                   {
                       "display_type": "line",
                       "q": "exclude_null(sum:kubernetes.network.rx_bytes{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set}), exclude_null(sum:kubernetes.network.tx_bytes{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set})",
+                      "semantic_mode": "combined",
                       "style": {
                           "line_type": "solid",
                           "line_width": "normal",
@@ -781,6 +784,7 @@
                   {
                       "display_type": "line",
                       "q": "exclude_null(sum:kubernetes.network.rx_errors{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set}), exclude_null(sum:kubernetes.network.tx_errors{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set})",
+                      "semantic_mode": "combined",
                       "style": {
                           "line_type": "solid",
                           "line_width": "normal",
@@ -817,6 +821,7 @@
                   {
                       "display_type": "line",
                       "q": "exclude_null(sum:kubernetes.filesystem.usage{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set})",
+                      "semantic_mode": "combined",
                       "style": {
                           "line_type": "solid",
                           "line_width": "normal",
@@ -859,6 +864,7 @@
                   {
                       "display_type": "line",
                       "q": "exclude_null(sum:kubernetes.filesystem.usage_pct{$kube_namespace,$scope,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set})*100",
+                      "semantic_mode": "combined",
                       "style": {
                           "line_type": "solid",
                           "line_width": "normal",
@@ -891,7 +897,8 @@
           "definition": {
               "requests": [
                   {
-                      "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set}), 10, 'mean', 'desc')"
+                      "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set}), 10, 'mean', 'desc')",
+                      "semantic_mode": "combined"
                   }
               ],
               "time": {
@@ -914,7 +921,8 @@
           "definition": {
               "requests": [
                   {
-                      "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set}), 10, 'mean', 'desc')"
+                      "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,kube_stateful_set:$kube_stateful_set.value} by {kube_namespace,kube_cluster_name,kube_stateful_set}), 10, 'mean', 'desc')",
+                      "semantic_mode": "combined"
                   }
               ],
               "time": {
@@ -1109,7 +1117,8 @@
                       "increase_good": true,
                       "order_by": "change",
                       "order_dir": "desc",
-                      "q": "top(avg:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')"
+                      "q": "top(avg:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')",
+                      "semantic_mode": "combined"
                   }
               ],
               "time": {},
