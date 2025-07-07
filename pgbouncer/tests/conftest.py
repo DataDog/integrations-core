@@ -53,7 +53,6 @@ def dd_environment():
             WaitFor(container_up, args=("PgBouncer", common.PORT)),
         ],
     ):
-
         yield common.DEFAULT_INSTANCE
 
 

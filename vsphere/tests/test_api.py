@@ -24,9 +24,10 @@ def mock_vsan_stub():
 def test_ssl_verify_false(realtime_instance):
     realtime_instance['ssl_verify'] = False
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())
@@ -43,9 +44,10 @@ def test_ssl_cert(realtime_instance):
     realtime_instance['ssl_cafile'] = '/dummy/path/cafile.pem'
     realtime_instance['ssl_capath'] = '/dummy/path'
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())
@@ -62,9 +64,10 @@ def test_ssl_cafile(realtime_instance):
     realtime_instance['ssl_verify'] = True
     realtime_instance['ssl_capath'] = '/dummy/path'
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())
@@ -81,9 +84,10 @@ def test_ssl_capath(realtime_instance):
     realtime_instance['ssl_verify'] = True
     realtime_instance['ssl_cafile'] = '/dummy/path/cafile.pem'
 
-    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+    ):
         smart_connect = connect.SmartConnect
 
         config = VSphereConfig(realtime_instance, {}, MagicMock())

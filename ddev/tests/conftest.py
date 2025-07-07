@@ -25,6 +25,9 @@ from .helpers import PLATFORM
 from .helpers.git import ClonedRepo
 from .helpers.runner import CliRunner
 
+# Rewrite assertions on the assertions helper module
+pytest.register_assert_rewrite('tests.helpers.assertions')
+
 
 @pytest.fixture(scope='session')
 def ddev():

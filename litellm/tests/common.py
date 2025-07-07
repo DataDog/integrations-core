@@ -113,3 +113,9 @@ METRICS = [
     'litellm.total.tokens.count',
     "litellm.process.uptime.seconds",
 ]
+
+ENDPOINT_METRICS = [
+    'litellm.endpoint.info',
+    'litellm.endpoint.healthy_count',
+    'litellm.endpoint.unhealthy_count',
+]
