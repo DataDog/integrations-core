@@ -6,9 +6,9 @@ import sys
 
 import click
 
-from ...ci import running_on_gh_actions
-from ...subprocess import run_command
-from ...tooling.constants import INTEGRATION_REPOS, set_root
+from datadog_checks.dev.ci import running_on_gh_actions
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.constants import INTEGRATION_REPOS, set_root
 
 try:
     from textwrap import indent as __indent_text
