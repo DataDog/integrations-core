@@ -221,7 +221,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         be upgraded without upgrading extensions, even when the extension is included by default.
         """
         if self._stat_column_cache:
-            self._log.warning("Returning cached columns %s", self._stat_column_cache)
             return self._stat_column_cache
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data

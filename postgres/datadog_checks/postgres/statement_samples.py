@@ -403,7 +403,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
             else:
-                self._log.warning("Failed to obfuscate query | err=[%s]", e)
+                self._log.debug("Failed to obfuscate query | err=[%s]", e)
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
