@@ -347,7 +347,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
             # Manually decode backend_type to handle bad encodings in Azure
             row['backend_type'] = (
-                row.get['backend_type'].decode('utf-8', errors='backslashreplace')
+                row['backend_type'].decode('utf-8', errors='backslashreplace')
                 if isinstance(row.get('backend_type'), bytes)
                 else row.get('backend_type')
             )
@@ -386,7 +386,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _normalize_row(self, row):
         normalized_row = dict(copy.copy(row))
         obfuscated_query = None
-        backend_type = normalized_row.get('backend_type', 'client backend')
+        backend_type = normalized_row.get('backend_type', 'client backend') or 'client backend'
         try:
             if backend_type != 'client backend':
                 obfuscated_query = backend_type
@@ -403,7 +403,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
             else:
-                self._log.debug("Failed to obfuscate query | err=[%s]", e)
+                self._log.warning("Failed to obfuscate query | err=[%s]", e)
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
@@ -956,7 +956,10 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_plans(self, rows):
         for row in rows:
             try:
-                if row['statement'] is None or row.get('backend_type', 'client backend') != 'client backend':
+                if (
+                    row['statement'] is None
+                    or (row.get('backend_type', 'client backend') or 'client backend') != 'client backend'
+                ):
                     continue
                 yield from self._collect_plan_for_statement(row)
             except Exception:
