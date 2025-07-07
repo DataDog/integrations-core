@@ -26,7 +26,7 @@ This setup provides a complete [KrakenD](https://www.krakend.io/) testing enviro
 - **Features**:
   - OpenTelemetry metrics export on port 9090
   - Request routing and transformation
-  - Timeout handling (2 seconds)
+  - Timeout handling (1 seconds)
   - Health checks at `/__health`
 
 ### 2. FastAPI Backend (Port 8000)
@@ -51,8 +51,8 @@ All endpoints are prefixed with `/api/` when accessed through KrakenD:
 - **Example**: `{"detail": "This endpoint always fails", "status_code": 500}`
 
 ### 3. `/api/timeout` (GET)
-- **Purpose**: Takes more than 2 seconds to respond, causing timeout
-- **Response**: 504 Gateway Timeout (from KrakenD after 2s timeout)
+- **Purpose**: Takes more than 1 seconds to respond, causing timeout
+- **Response**: 504 Gateway Timeout (from KrakenD after 1s timeout)
 - **Backend**: Would return 200 OK after 3 seconds if not timed out
 
 ### 4. `/api/cancelled` (GET)
