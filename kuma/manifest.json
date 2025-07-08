@@ -47,6 +47,12 @@
         "kuma-dp"
       ]
     },
+    "saved_views": {
+      "Kuma Mesh Access Logs Overview": "assets/saved_views/logs_overview.json"
+    },
+    "logs": {
+      "source": "kuma"
+    },
     "dashboards": {
       "Kuma Control Plane": "assets/dashboards/kuma_control_plane.json",
       "Kuma Service Communication": "assets/dashboards/kuma_service_communication.json"
