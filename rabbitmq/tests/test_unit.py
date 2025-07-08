@@ -25,7 +25,8 @@ pytestmark = [pytest.mark.unit, common.requires_management]
 
 
 def test__get_data(check):
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
         with pytest.raises(RabbitMQException) as e:
             check._get_data('')
@@ -138,7 +139,8 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
     config.update(extra_config)
     check = RabbitMQ('rabbitmq', {}, instances=[config])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         check.check(config)
