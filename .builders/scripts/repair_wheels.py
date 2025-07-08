@@ -186,6 +186,21 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
 def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
     import subprocess
 
+    # If the wheel is ddtrace, print all files in that wheel
+    import zipfile
+
+    def is_ddtrace_wheel(wheel):
+        # wheel can be a Path or str
+        name = str(wheel)
+        return 'ddtrace' in name
+
+    for wheel in iter_wheels(source_dir):
+        if is_ddtrace_wheel(wheel):
+            print(f"All files in wheel: {wheel}")
+            with zipfile.ZipFile(wheel, 'r') as zf:
+                for file in zf.namelist():
+                    print(file)
+                    
     exclusions = ['mqic.dll']
 
     external_invalid_file_patterns = [
