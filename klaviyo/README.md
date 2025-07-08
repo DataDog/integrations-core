@@ -19,7 +19,8 @@ Within your Klaviyo account, first add the Datadog integration.
 2. In the left-side panel, navigate to **Integrations**.
 3. Click **Add integrations**.
 4. Search for Datadog and click on the tile.
-5. Click **Install**. The process involves simply logging into Datadog.
+5. Click **Install**. 
+6. Navigate to Datadog, then log in.
 
 #### Install Klaviyo Integration in Datadog
 After the above installation within Klaviyo is performed, complete the Datadog integration by clicking 
