@@ -22,7 +22,7 @@ The Falco integration seamlessly ingests the data of Falco logs using the webhoo
     url: <DATADOG_WEBHOOK_URL> 
   ```
   
-  **Note:** Replace `<DATADOG_WEBHOOK_URL>` with the correct intake URL for your [Datadog site][3], such as `https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco` for US1. 
+  **Note:** Replace `<DATADOG_WEBHOOK_URL>` with the correct intake URL for your [Datadog site][3], such as `https://http-intake.logs.us3.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco` for US3. 
 
   - Restart the Falco using below command:
 
@@ -40,7 +40,7 @@ The Falco integration seamlessly ingests the data of Falco logs using the webhoo
   --set json_include_output_property=true
   ```
 
-  **Note:** Replace `<DATADOG_WEBHOOK_URL>` with the correct intake URL for your [Datadog site][3], such as `https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco` for US1. 
+  **Note:** Replace `<DATADOG_WEBHOOK_URL>` with the correct intake URL for your [Datadog site][3], such as `https://http-intake.logs.us3.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco` for US3. 
 
 ## Data Collected
 
