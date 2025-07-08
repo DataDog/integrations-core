@@ -7,9 +7,9 @@ import shutil
 
 import click
 
-from ...constants import get_root
-from ...git import get_current_branch, git_commit
-from ..console import CONTEXT_SETTINGS, abort, echo_info
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.git import get_current_branch, git_commit
 
 """
 This script will create sequential commits on a branch in the specified repo,

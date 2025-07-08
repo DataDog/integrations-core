@@ -3,13 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import sys
 
-from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
-from ...ci import get_ci_env_vars
-from ...fs import chdir, file_exists, path_join
-from ...subprocess import run_command
-from ..commands.console import echo_debug
-from ..constants import get_root
-from ..utils import get_hatch_file
+from datadog_checks.dev._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
+from datadog_checks.dev.ci import get_ci_env_vars
+from datadog_checks.dev.fs import chdir, file_exists, path_join
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import echo_debug
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.utils import get_hatch_file
+
 from .format import parse_config_from_result
 
 _hatch = [sys.executable, "-m", "hatch", "env", "run", "--env"]

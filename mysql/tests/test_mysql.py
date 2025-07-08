@@ -101,7 +101,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     dd_run_check(mysql_check)
 
     expected_metric_tags = tags.metrics_tags_with_resource(mysql_check)
-    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+    if (MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic') or MYSQL_FLAVOR.lower() == 'percona':
         expected_metric_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
 
     _assert_complex_config(
@@ -136,7 +136,7 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
         f'database_instance:{dd_default_hostname}',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR == 'mysql':
+    if MYSQL_FLAVOR in ('mysql', 'percona'):
         with root_conn.cursor() as cursor:
             cursor.execute("SELECT @@server_uuid")
             server_uuid = cursor.fetchone()[0]
@@ -195,7 +195,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
     if MYSQL_REPLICATION == 'group':
-
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         additional_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
         if MYSQL_VERSION_PARSED >= parse_version('8.0'):
@@ -352,11 +351,11 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         )
 
     expected_tags = tags.metrics_tags_with_resource(mysql_check)
-    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
         expected_tags += ("cluster_uuid:{}".format(mysql_check.cluster_uuid), "replication_role:replica")
-        assert (
-            mysql_check.server_uuid != mysql_check.cluster_uuid
-        ), "Server UUID and cluster UUID should not be the same for replica"
+        assert mysql_check.server_uuid != mysql_check.cluster_uuid, (
+            "Server UUID and cluster UUID should not be the same for replica"
+        )
 
     # Test metrics
     for mname in testable_metrics:
@@ -834,7 +833,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
 
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
         if MYSQL_REPLICATION == 'classic':
             expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')

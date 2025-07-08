@@ -17,7 +17,7 @@ from .common import HEAD_METRICS, MOCKED_HEAD_INSTANCE, MOCKED_WORKER_INSTANCE, 
     ],
 )
 def test_check(dd_run_check, aggregator, mocker, check, instance, metrics):
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
     dd_run_check(check(instance))
 
     for expected_metric in metrics:
@@ -33,7 +33,7 @@ def test_check(dd_run_check, aggregator, mocker, check, instance, metrics):
 def test_invalid_url(dd_run_check, aggregator, check, mocked_head_instance, mocker):
     mocked_head_instance["openmetrics_endpoint"] = "http://unknowwn"
 
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
     with pytest.raises(Exception):
         dd_run_check(check(mocked_head_instance))
 

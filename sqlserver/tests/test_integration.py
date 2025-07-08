@@ -515,7 +515,6 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
     for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
-
         # These require extra setup to test
         if mname not in DATABASE_INDEX_METRICS and mname not in [m[0] for m in TABLE_SIZE_METRICS]:
             aggregator.assert_metric(mname)
