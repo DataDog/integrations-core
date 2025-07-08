@@ -24,8 +24,8 @@ from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.base.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.vsphere.event import VSphereEvent
 
-from ..event import VSphereEvent
 from .cache_config import CacheConfig
 from .common import REALTIME_RESOURCES, SOURCE_TYPE
 from .errors import BadConfigError, ConnectionError

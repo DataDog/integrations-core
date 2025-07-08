@@ -13,11 +13,6 @@ METRIC_MAP = {
     'falcosecurity_falco_duration_seconds': 'duration.seconds',
     # TYPE falcosecurity_falco_evt_source_info gauge
     'falcosecurity_falco_evt_source_info': 'evt.source',
-    # TYPE falcosecurity_falco_host_boot_timestamp_nanoseconds gauge
-    'falcosecurity_falco_host_boot_timestamp_nanoseconds': {
-        'name': 'host.boot.timestamp',
-        'type': 'time_elapsed',
-    },
     # TYPE falcosecurity_falco_host_cpu_usage_ratio gauge
     'falcosecurity_falco_host_cpu_usage_ratio': 'host.cpu.usage.ratio',
     # TYPE falcosecurity_falco_host_memory_used_bytes gauge
@@ -60,11 +55,6 @@ METRIC_MAP = {
     'falcosecurity_falco_sha256_config_files_info': 'sha256.config.files',
     # TYPE falcosecurity_falco_sha256_rules_files_info gauge
     'falcosecurity_falco_sha256_rules_files_info': 'sha256.rules.files',
-    # TYPE falcosecurity_falco_start_timestamp_nanoseconds gauge
-    'falcosecurity_falco_start_timestamp_nanoseconds': {
-        'name': 'start.timestamp',
-        'type': 'time_elapsed',
-    },
     # TYPE falcosecurity_scap_engine_name_info gauge
     'falcosecurity_scap_engine_name_info': 'scap.engine.name',
     # TYPE falcosecurity_scap_n_added_fds_total counter

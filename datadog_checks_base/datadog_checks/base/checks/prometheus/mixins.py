@@ -11,11 +11,11 @@ from math import isinf, isnan
 import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 
-from ...config import is_affirmative
-from ...utils.http import RequestsWrapper
-from ...utils.prometheus import metrics_pb2
-from .. import AgentCheck
-from ..libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.prometheus import metrics_pb2
 
 
 class PrometheusFormat:

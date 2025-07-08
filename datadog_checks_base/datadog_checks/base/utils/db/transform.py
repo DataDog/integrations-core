@@ -8,14 +8,14 @@ import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
+from datadog_checks.base import is_affirmative
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
+from datadog_checks.base.utils import constants
+from datadog_checks.base.utils.common import compute_percent, total_time_to_temporal_percent
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
+from datadog_checks.base.utils.time import ensure_aware_datetime
 
-from ... import is_affirmative
-from ...constants import ServiceCheck
-from .. import constants
-from ..common import compute_percent, total_time_to_temporal_percent
-from ..time import ensure_aware_datetime
 from .utils import create_extra_transformer
 
 # Used for the user-defined `expression`s

@@ -22,10 +22,10 @@ from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils import _http_utils
 
-from ..config import is_affirmative
-from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .time import get_timestamp
