@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 lustre.device.health,gauge,,,,Health status of Lustre device,0,lustre,device health,,
-lustre.device.refcount,monotonic_count,,,,Reference count for Lustre device,0,lustre,device refcount,,
+lustre.device.refcount,count,,,,Reference count for Lustre device,0,lustre,device refcount,,
 lustre.filesystem.blocksize,gauge,,byte,,Filesystem block size in bytes,0,lustre,filesystem blocksize,,
 lustre.filesystem.checksum_pages,gauge,,,,Returns '1' if data checksumming is enabled for the client,0,lustre,filesystem checksum pages,,
 lustre.filesystem.close.count,count,,,,Number of file close operations,0,lustre,fs close count,,
