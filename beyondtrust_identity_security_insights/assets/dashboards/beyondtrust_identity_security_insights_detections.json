@@ -26,7 +26,7 @@
             "id": 4446171428078009,
             "definition": {
                 "type": "note",
-                "content": "**Overview**\n\nThis dashboard offers a comprehensive summary of detection details triggered from beyond trust identity security insights.\n\nFor more information, see the [BeyondTrust Identity Security Insights Integration Documentation](https://docs.datadoghq.com/integrations/beyondtrust_identity_security_insights/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Overview**\n\nThis dashboard offers a comprehensive summary of detection details triggered from BeyondTrust Identity Security Insights.\n\nFor more information, see the [BeyondTrust Identity Security Insights Integration Documentation](https://docs.datadoghq.com/integrations/beyondtrust_identity_security_insights/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
