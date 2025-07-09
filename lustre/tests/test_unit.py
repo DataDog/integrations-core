@@ -418,24 +418,24 @@ def test_empty_command_outputs(instance, mock_lustre_commands):
 def test_update_time_delta_behavior(mock_lustre_commands):
     """Test that update respects the time delta."""
     import time
-    
+
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [{'update_time_delta': 1.0}])
-        
+
         # First update should always run
         assert check._last_update_time is None
         check.update()
         assert check._last_update_time is not None
         first_update_time = check._last_update_time
-        
+
         # Immediate second update should be skipped
         check.update()
         assert check._last_update_time == first_update_time
-        
+
         # After waiting, update should run again
         time.sleep(1.1)
         check.update()
@@ -448,37 +448,37 @@ def test_exception_handling(mock_lustre_commands):
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
-    
+
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [{}])
-        
+
         # Test _find_node_type exception handling
         with mock.patch.object(check, '_update_devices', side_effect=Exception("Test error")):
             assert check._find_node_type() == 'client'
-        
+
         # Test YAML parsing exceptions
         with mock.patch.object(check, '_run_command', return_value="valid yaml"):
             with mock.patch('yaml.safe_load', side_effect=KeyError("YAML error")):
                 assert check._get_jobstats_metrics('test') == {}
                 assert check._get_lnet_metrics('stats') == {}
-            
+
             with mock.patch('yaml.safe_load', side_effect=ValueError("YAML value error")):
                 assert check._get_lnet_metrics('stats') == {}
-        
+
         # Test _parse_stats with invalid data
         invalid_stats = "invalid_stat not_a_number samples [usecs] 11 40"
         parsed = check._parse_stats(invalid_stats)
         assert 'invalid_stat' not in parsed
-        
+
         # Test submit_device_health with malformed data
         check.submit_device_health([{'status': 'UP'}])  # Missing required fields
-        
+
         # Test changelog IndexError handling with malformed lines
-        malformed_changelog = '''4 07RMDIR 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus
-malformed_line_with_insufficient_parts
-incomplete 07RMDIR
-5 08CREATE 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x4:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] test'''
-        
+        malformed_changelog = '''4 07RMDIR 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 \
+nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus malformed_line_with_insufficient_parts incomplete 07RMDIR
+5 08CREATE 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x4:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp \
+p=[0x200000007:0x1:0x0] test'''
+
         with mock.patch.object(check, '_run_command', return_value=malformed_changelog):
             check._update_changelog_targets(check.devices, ["lustre"])
             with mock.patch.object(check, 'send_log') as mock_send_log:
@@ -490,11 +490,11 @@ incomplete 07RMDIR
 def test_run_command_exceptions():
     """Test _run_command exception scenarios without mocks."""
     check = LustreCheck('lustre', {}, [{'node_type': 'client'}])
-    
+
     # Test unknown binary
     with pytest.raises(ValueError, match="Unknown binary"):
         check._run_command('unknown_bin', 'test')
-    
+
     # Test subprocess exception
     with mock.patch('subprocess.run', side_effect=Exception("Command failed")):
         assert check._run_command('lctl', 'test') == ''
