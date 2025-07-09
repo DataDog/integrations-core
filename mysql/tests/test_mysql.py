@@ -185,7 +185,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
-        + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
         + variables.INDEX_SIZE_VARS
@@ -194,6 +193,8 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
 
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
+    # Initialize additional_tags for group replication
+    additional_tags = ()
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         additional_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
@@ -208,7 +209,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         )
         operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
     else:
-        testable_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
+        operation_time_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
@@ -224,24 +225,48 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             continue
         if mname == 'mysql.performance.kernel_time' and not Platform.is_linux():
             continue
-        if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
+        if mname == 'mysql.performance.cpu_time' and not Platform.is_linux():
             continue
-        # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
-        if (
-            mname == 'mysql.innodb.os_log_fsyncs'
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.8')
-        ):
-            continue
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
+
+        # Skip metrics that are not available for certain flavors/versions
+        if MYSQL_FLAVOR.lower() == 'mariadb':
+            # MariaDB 10.8+: os_log_fsyncs removed
+            if MYSQL_VERSION_PARSED >= parse_version('10.8'):
+                if mname == 'mysql.innodb.os_log_fsyncs':
+                    continue
+            # MariaDB 10.2+: mutex_spin metrics removed
+            if MYSQL_VERSION_PARSED >= parse_version('10.2'):
+                if mname in (
+                    'mysql.innodb.mutex_spin_waits',
+                    'mysql.innodb.mutex_os_waits',
+                    'mysql.innodb.mutex_spin_rounds',
+                ):
+                    continue
+            # MariaDB doesn't have qcache.utilization.instant metric
+            if mname == 'mysql.performance.qcache.utilization.instant':
+                continue
+        elif MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+            # MySQL/Percona 8.0+: Query Cache metrics removed
+            if MYSQL_VERSION_PARSED >= parse_version('8.0'):
+                if mname in (
+                    'mysql.performance.qcache_hits',
+                    'mysql.performance.qcache_inserts',
+                    'mysql.performance.qcache_lowmem_prunes',
+                    'mysql.performance.qcache_size',
+                    'mysql.performance.qcache.utilization',
+                ):
+                    continue
+            # MySQL/Percona 5.7+: mutex_spin metrics replaced with x_lock/s_lock metrics,
+            # qcache.utilization.instant not available
+            if MYSQL_VERSION_PARSED >= parse_version('5.7'):
+                if mname in (
+                    'mysql.innodb.mutex_spin_waits',
+                    'mysql.innodb.mutex_os_waits',
+                    'mysql.innodb.mutex_spin_rounds',
+                ):
+                    continue
+                if mname == 'mysql.performance.qcache.utilization.instant':
+                    continue
         if mname == 'mysql.performance.query_run_time.avg':
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:mysql',), count=1)
@@ -249,8 +274,31 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=1)
+        elif mname in ('mysql.info.table.index_size', 'mysql.info.table.data_size'):
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), count=1)
+        elif mname in ('mysql.info.table.rows.read', 'mysql.info.table.rows.changed'):
+            # Table rows stats metrics are only available on MariaDB and Percona (require userstat support)
+            if MYSQL_FLAVOR.lower() == 'mysql':
+                # MySQL doesn't support userstat, so these metrics should not be collected
+                aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), count=0)
+            else:
+                # Table rows stats metrics are collected with schema and table tags
+                aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), count=1)
+        elif mname in ('mysql.index.size', 'mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes'):
+            # Index metrics are collected with db, table, and index tags
+            aggregator.assert_metric(mname, tags=metric_tags + ('db:testdb', 'table:users', 'index:id'), count=1)
+        elif mname == 'mysql.performance.user_connections':
+            # Assert the metric exists regardless of tags, since processlist_* tags are dynamic
+            aggregator.assert_metric(mname, at_least=1)
+        elif mname in variables.GROUP_REPLICATION_VARS or mname in variables.GROUP_REPLICATION_VARS_8_0_2:
+            if mname == 'mysql.replication.group.member_status':
+                aggregator.assert_metric(mname, tags=metric_tags + additional_tags, at_least=1)
+            else:
+                aggregator.assert_metric(
+                    mname, tags=metric_tags + ('channel_name:group_replication_applier',), at_least=1
+                )
         else:
-            aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
+            aggregator.assert_metric(mname, tags=metric_tags, at_least=1)
 
     # TODO: test this if it is implemented
     # Assert service metadata
