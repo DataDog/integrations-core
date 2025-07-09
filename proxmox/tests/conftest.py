@@ -71,6 +71,7 @@ def mock_responses():
             param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
             request_path = f'{url}/{param_string}'
 
+        print(responses_map)
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
 
@@ -101,6 +102,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
+        print(url)
         if http_error and url in http_error:
             return http_error[url]
         mock_status_code = mock.MagicMock(return_value=200)
