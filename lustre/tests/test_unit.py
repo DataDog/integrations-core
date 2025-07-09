@@ -139,7 +139,6 @@ def test_device_health(aggregator, instance, mock_lustre_commands):
             'device_name:MGC172.31.16.218@tcp',
             'device_uuid:7d3988a7-145f-444e-9953-58e3e6d97385',
             'node_type:client',
-            'lustre_version:2.16.1',
         ],
     )
 
@@ -151,7 +150,6 @@ def test_device_health(aggregator, instance, mock_lustre_commands):
             'device_name:MGC172.31.16.218@tcp',
             'device_uuid:7d3988a7-145f-444e-9953-58e3e6d97385',
             'node_type:client',
-            'lustre_version:2.16.1',
         ],
     )
 
