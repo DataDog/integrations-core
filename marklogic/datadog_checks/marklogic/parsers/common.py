@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, List, Optional, Tuple  # noqa: F401
 
-from ..constants import GAUGE_UNITS
+from datadog_checks.marklogic.constants import GAUGE_UNITS
 
 
 class MarkLogicParserException(RuntimeError):

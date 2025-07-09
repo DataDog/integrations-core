@@ -343,8 +343,12 @@ integration/keda:
 - keda/**/*
 integration/keycloak:
 - keycloak/**/*
+integration/klaviyo:
+- klaviyo/**/*
 integration/kong:
 - kong/**/*
+integration/krakend:
+- krakend/**/*
 integration/kube_apiserver_metrics:
 - kube_apiserver_metrics/**/*
 integration/kube_controller_manager:

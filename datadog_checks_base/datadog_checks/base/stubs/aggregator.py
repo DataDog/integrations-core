@@ -8,8 +8,9 @@ import os
 import re
 from collections import OrderedDict, defaultdict
 
-from ..constants import ServiceCheck
-from ..utils.common import ensure_unicode, to_native_string
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.common import ensure_unicode, to_native_string
+
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
 
