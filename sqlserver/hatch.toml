@@ -5,7 +5,7 @@ base-package-features = ["deps", "db", "json"]
 python = ["3.12"]
 os = ["linux"]
 driver = ["FreeTDS", "odbc"]
-version = ["2022"]
+version = ["2019", "2022"]
 setup = ["single", "ha"]
 
 # test the compatibility of sqlserver running on non-utc timezone
@@ -23,7 +23,7 @@ tz = ["newyork", "tokyo"]
 python = ["3.12"]
 os = ["windows"]
 driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
-version = ["2022"]
+version = ["2019", "2022"]
 setup = ["single"]
 
 # The high cardinality environment is meant to be used for local dev/testing
@@ -34,7 +34,7 @@ setup = ["single"]
 #python = ["3.9"]
 #os = ["linux"]
 #driver = ["odbc"]
-#version = ["2022"]
+#version = ["2019", "2022"]
 #case = ["high-cardinality"]
 
 [envs.default.env-vars]
@@ -60,6 +60,7 @@ matrix.version.env-vars = [
   { key = "SQLSERVER_MAJOR_VERSION" },
   { key = "SQLSERVER_ENGINE_EDITION" },
   { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU31-GDR2-ubuntu-18.04", if = ["2017"], platform = ["linux"] },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU28-GDR1-ubuntu-20.04", if = ["2019"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2022-CU12-GDR1-ubuntu-20.04", if = ["2022"], platform = ["linux"] },
   { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },
 ]
@@ -73,3 +74,4 @@ matrix.tz.env-vars = [
 ]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
+name.windows-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality-windows"
