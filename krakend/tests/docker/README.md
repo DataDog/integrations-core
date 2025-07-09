@@ -1,6 +1,6 @@
 # KrakenD Test Environment
 
-This setup provides a complete [KrakenD](https://www.krakend.io/) testing environment with a FastAPI backend and OpenTelemetry metrics collection.
+This setup provides a complete [KrakenD][1] testing environment with a FastAPI backend.
 
 ## Architecture
 
@@ -102,3 +102,6 @@ This command automates the entire testing process:
 - **`docker-compose.yml`**: The docker-compose file that spins up both the backend API and the KrakenD Gateway.
 - **`api.py`**: FastAPI backend implementation
 - **`Dockerfile`**: Dockerfile for the FastAPI backend.
+
+
+[1]: https://www.krakend.io/

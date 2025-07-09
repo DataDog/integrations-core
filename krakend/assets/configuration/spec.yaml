@@ -10,7 +10,7 @@ files:
         Collect Go runtime metrics exposed by KrakenD's Prometheus endpoint.
 
         Set to `false` to prevent Datadog from collecting these metrics, even if
-        KrakenD is configured to expose them (e.g., for use with other monitoring tools).
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
         Defaults to `true`, meaning Datadog will collect these metrics if available.
         This setting in `init_config` provides a default for all instances; it can be overridden per instance.
       value:
@@ -21,7 +21,7 @@ files:
         Collect process metrics exposed by KrakenD's Prometheus endpoint.
 
         Set to `false` to prevent Datadog from collecting these metrics, even if
-        KrakenD is configured to expose them (e.g., for use with other monitoring tools).
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
         Defaults to `true`, meaning Datadog will collect these metrics if available.
         This setting in `init_config` provides a default for all instances; it can be overridden per instance.
       value:
@@ -36,7 +36,7 @@ files:
         Collect Go runtime metrics exposed by KrakenD's Prometheus endpoint.
 
         Set to `false` to prevent Datadog from collecting these metrics, even if
-        KrakenD is configured to expose them (e.g., for use with other monitoring tools).
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
         Defaults to `true`, meaning Datadog will collect these metrics if available.
         This setting overrides the default provided in `init_config` for this specific instance.
 
@@ -49,7 +49,7 @@ files:
         Collect process metrics exposed by KrakenD's Prometheus endpoint.
 
         Set to `false` to prevent Datadog from collecting these metrics, even if
-        KrakenD is configured to expose them (e.g., for use with other monitoring tools).
+        KrakenD is configured to expose them (for example, for use with other monitoring tools).
         Defaults to `true`, meaning Datadog will collect these metrics if available.
         This setting overrides the default provided in `init_config` for this specific instance.
 
