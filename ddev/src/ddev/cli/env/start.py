@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import click
+from datadog_checks.dev.ci import running_on_ci
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -136,6 +137,10 @@ def start(
     env_data.write_config(config)
 
     agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
+
+    if agent_type == "vagrant" and running_on_ci:
+        app.abort(text="Vagrant is not supported on CI", code=0)
+
     agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
 
     if not agent_build:
