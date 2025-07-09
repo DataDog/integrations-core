@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -12,12 +12,21 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class AuthToken(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
 
 
 class MetricPatterns(BaseModel):
@@ -29,48 +38,64 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class Proxy(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    auto_discover_channels: Optional[bool] = None
-    auto_discover_queues: Optional[bool] = None
-    channel: str = Field(..., min_length=1)
-    channel_status_mapping: Optional[MappingProxyType[str, Any]] = None
-    channels: Optional[tuple[str, ...]] = None
-    collect_connection_metrics: Optional[bool] = None
-    collect_reset_queue_metrics: Optional[bool] = None
-    collect_statistics_metrics: Optional[bool] = None
-    connection_name: Optional[str] = Field(None, min_length=1)
-    convert_endianness: Optional[bool] = None
+    allow_redirects: Optional[bool] = None
+    auth_token: Optional[AuthToken] = None
+    auth_type: Optional[str] = None
+    aws_host: Optional[str] = None
+    aws_region: Optional[str] = None
+    aws_service: Optional[str] = None
+    connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    host: Optional[str] = Field(None, min_length=1)
+    extra_headers: Optional[MappingProxyType[str, Any]] = None
+    headers: Optional[MappingProxyType[str, Any]] = None
+    kerberos_auth: Optional[str] = None
+    kerberos_cache: Optional[str] = None
+    kerberos_delegate: Optional[bool] = None
+    kerberos_force_initiate: Optional[bool] = None
+    kerberos_hostname: Optional[str] = None
+    kerberos_keytab: Optional[str] = None
+    kerberos_principal: Optional[str] = None
+    log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
-    mqcd_version: Optional[float] = Field(None, ge=1.0)
-    override_hostname: Optional[bool] = None
-    password: Optional[str] = Field(None, min_length=1)
-    port: Optional[int] = None
-    queue_manager: str = Field(..., min_length=1)
-    queue_manager_process: Optional[str] = None
-    queue_manager_timezone: Optional[str] = Field(None, min_length=1)
-    queue_patterns: Optional[tuple[str, ...]] = None
-    queue_regex: Optional[tuple[str, ...]] = None
-    queue_tag_re: Optional[MappingProxyType[str, Any]] = None
-    queues: Optional[tuple[str, ...]] = None
+    ntlm_domain: Optional[str] = None
+    password: Optional[str] = None
+    persist_connections: Optional[bool] = None
+    proxmox_server: str
+    proxy: Optional[Proxy] = None
+    read_timeout: Optional[float] = None
+    request_size: Optional[float] = None
     service: Optional[str] = None
-    ssl_auth: Optional[bool] = None
-    ssl_certificate_label: Optional[str] = None
-    ssl_cipher_spec: Optional[str] = None
-    ssl_key_repository_location: Optional[str] = Field(None, min_length=1)
+    skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
-    timeout: Optional[int] = None
-    try_basic_auth: Optional[bool] = None
-    use_qm_tz_for_metrics: Optional[bool] = None
-    username: Optional[str] = Field(None, min_length=1)
+    timeout: Optional[float] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
+    tls_ignore_warning: Optional[bool] = None
+    tls_private_key: Optional[str] = None
+    tls_protocols_allowed: Optional[tuple[str, ...]] = None
+    tls_use_host_header: Optional[bool] = None
+    tls_verify: Optional[bool] = None
+    use_legacy_auth_encoding: Optional[bool] = None
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

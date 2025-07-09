@@ -1,21 +1,23 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "db598784-537a-4e3f-921a-7965f80ed7a8",
-  "app_id": "krakend",
+  "app_uuid": "39909ffc-71f0-4c0c-b75e-9951f1ff7d10",
+  "app_id": "proxmox",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "A lightweight and flexible API Gateway providing a unified entry point for all your microservices.",
-    "title": "KrakenD",
+    "description": "View performance information about all of your Proxmox resources ",
+    "title": "Proxmox",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Orchestration",
+      "Category::OS & System",
+      "Category::Cloud",
+      "Category::Network",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
@@ -24,8 +26,8 @@
   "assets": {
     "integration": {
       "auto_install": true,
-      "source_type_id": 45562493,
-      "source_type_name": "KrakenD",
+      "source_type_id": 48633189,
+      "source_type_name": "Proxmox",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -33,16 +35,24 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "krakend.",
-        "check": "",
+        "prefix": "proxmox.",
+        "check": "proxmox.api.up",
         "metadata_path": "metadata.csv"
       },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
-      },
       "process_signatures": [
-        "krakend"
+        "pmxcfs",
+        "pve-firewall",
+        "pve-ha-crm",
+        "pve-ha-lrm",
+        "pveproxy",
+        "pvedaemon",
+        "pvescheduler",
+        "pvestatd",
+        "qmeventd"
       ]
+    },
+    "logs": {
+      "source": "proxmox"
     }
   },
   "author": {

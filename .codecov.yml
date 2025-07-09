@@ -538,6 +538,10 @@ coverage:
         target: 75
         flags:
         - prometheus
+      Proxmox:
+        target: 75
+        flags:
+        - proxmox
       ProxySQL:
         target: 75
         flags:
@@ -1491,6 +1495,11 @@ flags:
     paths:
     - prometheus/datadog_checks/prometheus
     - prometheus/tests
+  proxmox:
+    carryforward: true
+    paths:
+    - proxmox/datadog_checks/proxmox
+    - proxmox/tests
   proxysql:
     carryforward: true
     paths:
