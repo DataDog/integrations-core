@@ -32,4 +32,3 @@ def extract_metadata(wheel: Path) -> email.Message:
             raise RuntimeError(message) from None
 
     return email.message_from_string(metadata_file_contents)
-

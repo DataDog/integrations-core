@@ -1,7 +1,7 @@
 diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
-index 0c76a93f48..0198d2241b 100644
---- a/scripts/build_wheels.py
-+++ b/scripts/build_wheels.py
+index 0c76a93f48..7c6b86e553 100644
+--- a/.builders/scripts/build_wheels.py
++++ b/.builders/scripts/build_wheels.py
 @@ -8,7 +8,7 @@ from pathlib import Path
  from tempfile import TemporaryDirectory
  
@@ -11,35 +11,18 @@ index 0c76a93f48..0198d2241b 100644
  
  INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
  CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
-@@ -107,6 +107,8 @@ def main():
-         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
-             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
- 
-+           
-+
-         # Fetch or build wheels
-         command_args = [
-             str(python_path), '-m', 'pip', 'wheel',
-@@ -114,11 +116,15 @@ def main():
-             '--wheel-dir', str(staged_wheel_dir),
-             '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
-         ]
-+      
-+
-         if args.use_built_index:
-             command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
- 
-         check_process(command_args, env=env_vars)
- 
-+        for entry in staged_wheel_dir.iterdir():
+@@ -131,6 +131,7 @@ def main():
+     dependencies: dict[str, tuple[str, str]] = {}
+     for wheel_dir in wheels_dir.iterdir():
+         for entry in wheel_dir.iterdir():
 +            remove_test_files(entry)
- 
-         # Repair wheels
-         check_process([
+             project_metadata = extract_metadata(entry)
+             project_name = normalize_project_name(project_metadata['Name'])
+             project_version = project_metadata['Version']
 diff --git a/.builders/scripts/utils.py b/.builders/scripts/utils.py
-index 63772a277d..e1f680728f 100644
---- a/scripts/utils.py
---- b/scripts/utils.py
+index 63772a277d..310a04c798 100644
+--- a/.builders/scripts/utils.py
++++ b/.builders/scripts/utils.py
 @@ -1,10 +1,17 @@
  from __future__ import annotations
  
@@ -58,7 +41,7 @@ index 63772a277d..e1f680728f 100644
  UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
  
  
-@@ -33,3 +40,113 @@ def extract_metadata(wheel: Path) -> email.Message:
+@@ -33,3 +40,101 @@ def extract_metadata(wheel: Path) -> email.Message:
  
      return email.message_from_string(metadata_file_contents)
  
@@ -74,13 +57,7 @@ index 63772a277d..e1f680728f 100644
 +    if not excluded_members:
 +        # Nothing to strip, so skip rewriting the wheel
 +        return
-+    print(f"[FILES] Before removing tests: {wheel_path}")
-+    if "ddtrace" in wheel_path.name:
-+        print(f"All files in wheel: {wheel_path}")
-+        with zipfile.ZipFile(wheel_path, 'r') as zf:
-+            for file in zf.namelist():
-+                print(file)
-+
++    
 +    removed = False
 +    with tempfile.TemporaryDirectory() as td:
 +        td_path = Path(td)
@@ -92,7 +69,6 @@ index 63772a277d..e1f680728f 100644
 +        # Remove excluded files/folders
 +        for root, dirs, files in os.walk(td, topdown=False):
 +            for d in list(dirs):
-+
 +                full_dir = Path(root) / d
 +                rel = full_dir.relative_to(unpacked_dir).as_posix()
 +                if is_excluded_from_wheel(rel):
@@ -109,11 +85,6 @@ index 63772a277d..e1f680728f 100644
 +
 +        # Repack to same directory, regenerating RECORD
 +        pack(unpacked_dir, dest_dir=wheel_path.parent, build_number=None)
-+
-+    print(f"[FILES] After removing tests: {wheel_path}")
-+    with zipfile.ZipFile(wheel_path, 'r') as zf:
-+        for file in zf.namelist():
-+            print(file)
 +
 +
 +def is_excluded_from_wheel(path: str) -> bool:
