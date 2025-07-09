@@ -9,11 +9,10 @@ import shlex
 import shutil
 import subprocess
 import sys
-from contextlib import AbstractContextManager, closing, contextmanager, nullcontext
+from contextlib import AbstractContextManager, contextmanager, nullcontext
 from functools import cached_property, partial
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-import paramiko
 from jinja2 import Template
 
 from ddev.e2e.agent.constants import AgentEnvVars
@@ -509,55 +508,6 @@ class VagrantAgent(AgentInterface):
         # but usually, it's what's desired.
         self._run_command(host_cmd, check=True)
 
-    def _get_vagrant_ssh_config(self) -> dict[str, str]:
-        """Parse vagrant ssh-config output to get SSH connection details."""
-        ssh_config_cmd = ["vagrant", "ssh-config", self._vm_name]
-        process = self._captured_process(ssh_config_cmd)
-
-        if process.returncode != 0:
-            raise RuntimeError(
-                f"Failed to get SSH config for VM {self._vm_name}. "
-                f"Stderr: {process.stderr.decode('utf-8', errors='replace') if process.stderr else 'N/A'}"
-            )
-
-        ssh_config = {}
-        output = process.stdout.decode("utf-8", errors="replace").strip()
-
-        for line in output.split('\n'):
-            line = line.strip()
-            if line and not line.startswith('#'):
-                parts = line.split(None, 1)
-                if len(parts) == 2:
-                    key, value = parts
-                    ssh_config[key] = value.strip('"')
-
-        return ssh_config
-
-    def _get_ssh_client(self) -> paramiko.SSHClient:
-        """Create and return a connected SSH client using vagrant ssh-config."""
-        ssh_config = self._get_vagrant_ssh_config()
-
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        # Extract connection parameters
-        hostname = ssh_config.get("HostName", "127.0.0.1")
-        port = int(ssh_config.get("Port", "22"))
-        username = ssh_config.get("User", "vagrant")
-        key_filename = ssh_config.get("IdentityFile", None)
-
-        # Connect using the private key
-        client.connect(
-            hostname=hostname,
-            port=port,
-            username=username,
-            key_filename=key_filename,
-            look_for_keys=False,
-            allow_agent=False,
-        )
-
-        return client
-
     def _configure_sudoers(self, sudoers_content: str) -> None:
         """Configure sudoers to allow dd-agent to run sudo commands without password."""
         if self._is_windows_vm:
@@ -566,33 +516,37 @@ class VagrantAgent(AgentInterface):
 
         print(f"Configuring sudoers for dd-agent in VM: {self._vm_name}")
 
-        # Use integration name and env for the sudoers file name
         sudoers_file = "/etc/sudoers.d/dd-agent"
 
-        try:
-            with closing(self._get_ssh_client()) as ssh:
-                # Create the sudoers file with proper permissions
-                commands = [
-                    f"echo '{sudoers_content}' | sudo tee {sudoers_file}",
-                    f"sudo chmod 0440 {sudoers_file}",
-                    f"sudo chown root:root {sudoers_file}",
-                    # Validate the sudoers file
-                    f"sudo visudo -c -f {sudoers_file}",
-                ]
+        # Create commands to configure sudoers
+        # Use a here-document to write the sudoers file content
+        # This avoids shell escaping issues with multi-line content
+        write_sudoers_cmd = f"""sudo bash -c 'cat > {sudoers_file} << EOF
+{sudoers_content}
+EOF'"""
 
-                for cmd in commands:
-                    stdin, stdout, stderr = ssh.exec_command(cmd)
-                    exit_status = stdout.channel.recv_exit_status()
+        commands = [
+            "sudo mkdir -p /etc/sudoers.d",
+            write_sudoers_cmd,
+            f"sudo chmod 0440 {sudoers_file}",
+            f"sudo chown root:root {sudoers_file}",
+            f"sudo visudo -c -f {sudoers_file}",
+        ]
 
-                    if exit_status != 0:
-                        error_output = stderr.read().decode('utf-8', errors='replace')
-                        raise RuntimeError(
-                            f"Failed to execute command '{cmd}' on VM {self._vm_name}. "
-                            f"Exit status: {exit_status}, Error: {error_output}"
-                        )
+        # Execute commands using existing vagrant ssh approach
+        for cmd in commands:
+            # For complex shell commands with pipes, we need to pass them as a single string
+            host_cmd = ["vagrant", "ssh", self._vm_name, "-c", cmd]
+            process = self._captured_process(host_cmd)
 
-                print(f"Successfully configured sudoers for dd-agent in VM: {self._vm_name}")
+            if process.returncode != 0:
+                stdout = process.stdout.decode('utf-8', errors='replace') if process.stdout else ''
+                stderr = process.stderr.decode('utf-8', errors='replace') if process.stderr else ''
+                # For visudo, the error messages often go to stdout
+                error_output = stderr or stdout or 'No error output captured'
+                raise RuntimeError(
+                    f"Failed to execute command '{cmd}' on VM {self._vm_name}. "
+                    f"Exit status: {process.returncode}, Error: {error_output}"
+                )
 
-        except Exception as e:
-            print(f"Error configuring sudoers: {e}")
-            raise
+        print(f"Successfully configured sudoers for dd-agent in VM: {self._vm_name}")
