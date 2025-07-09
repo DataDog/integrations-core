@@ -513,7 +513,7 @@ class LustreCheck(AgentCheck):
                         'message': ' '.join(parts[5:]),
                     }
                 except IndexError:
-                    self.log.warning('Skipping changelog due to unexpected format: %s', line)
+                    self.log.debug('Skipping changelog due to unexpected format: %s', line)
                     continue
                 next_index = int(parts[0]) + 1
                 self.send_log(data, {'index': str(next_index)}, stream=target)
@@ -548,6 +548,5 @@ class LustreCheck(AgentCheck):
         elif metric_type == 'count':
             self.monotonic_count(name, value, tags=tags)
         elif metric_type == 'histogram':
-            # TODO: handle this case
             self.log.debug("Histograms are currently not supported. Ignoring %s", f"{name}")
             return
