@@ -7,13 +7,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.dev.ci import running_on_ci
-
 from .common import CONFIG, INSTANCE
-
-ON_CI = running_on_ci()
-skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test requires Vagrant and is not supported on CI")
-
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

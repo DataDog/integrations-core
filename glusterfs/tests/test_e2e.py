@@ -4,11 +4,16 @@
 
 import pytest
 
+from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.glusterfs import GlusterfsCheck
 
 from .common import EXPECTED_METRICS, GLUSTER_VERSION
 
-pytestmark = pytest.mark.e2e
+ON_CI = running_on_ci()
+skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test requires Vagrant and is not supported on CI")
+
+
+pytestmark = [skip_on_ci, pytest.mark.e2e]
 
 
 def test_e2e(dd_agent_check, config):
