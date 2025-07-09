@@ -82,11 +82,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.12.9"
+ENV PYTHON_VERSION="3.12.10"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '2a52993092a19cfdffe126e2eeac46a4265e25705614546604ad44988e040c0f'; `
+      -Hash '67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -116,7 +116,7 @@ RUN Get-RemoteFile `
 
 ENV OPENSSL_VERSION="3.4.1"
 
-ENV CURL_VERSION="8.12.1"
+ENV CURL_VERSION="8.14.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

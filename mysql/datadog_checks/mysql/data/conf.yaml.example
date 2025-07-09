@@ -402,7 +402,7 @@ instances:
     ## Configure collection of schemas (databases).
     ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
     #
-    # schemas_collection:
+    # collect_schemas:
 
         ## @param enabled - boolean - optional - default: false
         ## Enable schema collection. Requires `dbm: true`. Defaults to false.
@@ -416,7 +416,7 @@ instances:
 
         ## @param max_execution_time - number - optional - default: 60
         ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
-        ## Capped by `schemas_collection.collection_interval`
+        ## Capped by `collect_schemas.collection_interval`
         #
         # max_execution_time: 60
 

@@ -208,10 +208,7 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
                 },
             },
             True,
-            (
-                "Azure Managed Identity Authentication is not properly configured "
-                "missing required property, client_id"
-            ),
+            ("Azure Managed Identity Authentication is not properly configured missing required property, client_id"),
         ),
     ],
 )
@@ -397,8 +394,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             {
                 "odbc-linux": "TCP-connection\\(OK\\).*"
                 "Can't open lib .* file not found .* configured odbc driver .* not in list of installed drivers",
-                "odbc-windows": "TCP-connection\\(OK\\).*"
-                "Data source name not found.* and no default driver specified",
+                "odbc-windows": "TCP-connection\\(OK\\).*Data source name not found.* and no default driver specified",
             },
             ConnectionErrorCode.driver_not_found,
         ),

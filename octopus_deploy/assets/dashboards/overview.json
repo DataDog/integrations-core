@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**Octopus Deploy**\n\nThis dashboard provides an overview of your [Octopus Deploy](https://octopus.com/) environment. Track key deployment metrics like success and failure rates, deployment frequency per project, and more. \n\n**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/octopus_deploy)\n*[Octopus Deploy Docs](https://octopus.com/docs)",
+    "description": "**Octopus Deploy**\n\nThis dashboard provides an overview of your [Octopus Deploy](https://octopus.com/) environment. Track key deployment metrics like success and failure rates, deployment frequency per project, and more. \n\n**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/octopus_deploy)\n* [Octopus Deploy Docs](https://octopus.com/docs)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -270,7 +270,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "View the current status of deployments in your environment- are there many projects in the queue? Are there any deployments waiting for manual intervention? ",
+                            "content": "View the current status of deployments in your environment, such as which projects are in the queue or which deployments are waiting for manual intervention.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -453,7 +453,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Get an overview of overall deployment health and trend across projects. Use the project_name template variable to see current values per project ",
+                            "content": "Get an overview of deployment health and trends across projects. Use the project_name template variable to see current values per project.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -506,7 +506,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Average Execution Time ",
+                            "title": "Average Execution Time",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"

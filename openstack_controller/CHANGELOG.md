@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.5.0 / 2025-05-15
+## 8.6.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+
+## 8.5.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:
 
@@ -12,7 +18,7 @@
 
 * Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
 
-## 8.4.0 / 2025-04-17
+## 8.4.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
 

@@ -10,12 +10,12 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 
-from .util import connect_with_autocommit
+from .util import connect_with_session_variables
 
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
@@ -94,7 +94,7 @@ class MySQLMetadata(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = connect_with_autocommit(**self._connection_args)
+            self._db = connect_with_session_variables(**self._connection_args)
         else:
             # Metadata checks runs far less frequently than other checks, and there are reports
             # that unused pymysql connections sometimes end up being closed unexpectedly.
@@ -138,9 +138,7 @@ class MySQLMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting database settings.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
@@ -151,9 +149,7 @@ class MySQLMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
     def shut_down(self):
@@ -177,6 +173,7 @@ class MySQLMetadata(DBMAsyncJob):
             settings = [dict(row) for row in rows]
         event = {
             "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
             "dbms": "mysql",
             "kind": "mysql_variables",
