@@ -576,10 +576,9 @@ class MySql(AgentCheck):
             results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(self._config.options.get('disable_innodb_metrics', False)):
-            if self._get_is_aurora(db) and not self._is_aurora_writer(db):
+            if not self._is_aurora_writer(db):
                 self.log.debug("Skipping innodb metrics collection for Aurora reader")
-                return
-            if self._check_innodb_engine_enabled(db):
+            elif self._check_innodb_engine_enabled(db):
                 with tracked_query(self, operation="innodb_metrics"):
                     results.update(self.innodb_stats.get_stats_from_innodb_status(db))
                 self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
