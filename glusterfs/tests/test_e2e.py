@@ -9,8 +9,7 @@ from datadog_checks.glusterfs import GlusterfsCheck
 
 from .common import EXPECTED_METRICS, GLUSTER_VERSION
 
-ON_CI = running_on_ci()
-skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test requires Vagrant and is not supported on CI")
+skip_on_ci = pytest.mark.skipif(running_on_ci(), reason="This test requires Vagrant and is not supported on CI")
 
 
 pytestmark = [skip_on_ci, pytest.mark.e2e]

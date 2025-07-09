@@ -7,6 +7,8 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.dev.ci import running_on_ci
+
 from .common import CONFIG, INSTANCE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -34,8 +36,9 @@ E2E_METADATA = {
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    vm_config = copy.deepcopy(CONFIG)
-    yield vm_config, E2E_METADATA
+    if not running_on_ci():
+        vm_config = copy.deepcopy(CONFIG)
+        yield vm_config, E2E_METADATA
 
 
 @pytest.fixture
