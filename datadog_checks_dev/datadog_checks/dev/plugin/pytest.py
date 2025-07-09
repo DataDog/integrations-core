@@ -292,7 +292,7 @@ def mock_http_response(mocker):
         from datadog_checks.dev.http import MockResponse
 
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.get'), return_value=MockResponse(*args, **kwargs)
+        kwargs.pop('method', 'requests.Session.get'), return_value=MockResponse(*args, **kwargs)
     )
 
 

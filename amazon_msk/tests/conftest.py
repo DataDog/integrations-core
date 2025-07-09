@@ -32,7 +32,11 @@ def mock_requests_get(url, *args, **kwargs):
 
 @pytest.fixture
 def mock_data():
-    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+    # Mock requests.get because it is used internally within boto3
+    with (
+        mock.patch('requests.get', side_effect=mock_requests_get, autospec=True),
+        mock.patch('requests.Session.get', side_effect=mock_requests_get),
+    ):
         yield
 
 
