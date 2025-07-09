@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import subprocess
-import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
@@ -74,7 +73,6 @@ class LustreCheck(AgentCheck):
             self.params.update(set(EXTRA_STATS))
 
         self.changelog_lines_per_check: int = int(self.instance.get('changelog_lines_per_check', 1000))
-        self.update_time_delta: int = int(self.instance.get('update_time_delta', 3600))
 
         self.devices: List[Dict[str, Any]] = []
         self.changelog_targets: List[str] = []
@@ -82,9 +80,6 @@ class LustreCheck(AgentCheck):
         # If filesystems were provided by the instance, do not update the filesystem list
         self.filesystem_discovery: bool = False if self.filesystems else True
         self.node_type: str = self.instance.get('node_type', self._find_node_type())
-
-        # Track last update time for device and filesystem updates
-        self._last_update_time: Optional[float] = None
 
         self.tags: List[str] = self.instance.get('tags', [])
         self.tags.append(f'node_type:{self.node_type}')
@@ -126,15 +121,7 @@ class LustreCheck(AgentCheck):
     def update(self) -> None:
         '''
         Update the check by finding devices and filesystems.
-        Only updates if enough time has passed since the last update.
         '''
-        current_time = time.monotonic()
-
-        # Check if enough time has passed since last update
-        if self._last_update_time is not None and current_time - self._last_update_time < self.update_time_delta:
-            self.log.debug('Skipping update - not enough time passed since last update')
-            return
-
         self.log.debug('Updating Lustre check...')
         self._update_devices()
         if self.filesystem_discovery:
@@ -142,8 +129,6 @@ class LustreCheck(AgentCheck):
         self._update_changelog_targets(self.devices, self.filesystems)
         self._update_metadata()
 
-        # Update the last update time
-        self._last_update_time = current_time
 
     def _update_devices(self) -> None:
         '''

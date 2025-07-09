@@ -46,7 +46,3 @@ def instance_lnetctl_path():
 
 def instance_min_collection_interval():
     return 15
-
-
-def instance_update_time_delta():
-    return 3600
