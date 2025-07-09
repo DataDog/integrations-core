@@ -575,12 +575,14 @@ class MySql(AgentCheck):
         with tracked_query(self, operation="variables_metrics"):
             results.update(self._get_stats_from_variables(db))
 
-        if not is_affirmative(
-            self._config.options.get('disable_innodb_metrics', False)
-        ) and self._check_innodb_engine_enabled(db):
-            with tracked_query(self, operation="innodb_metrics"):
-                results.update(self.innodb_stats.get_stats_from_innodb_status(db))
-            self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
+        if not is_affirmative(self._config.options.get('disable_innodb_metrics', False)):
+            if self._get_is_aurora(db) and not self._is_aurora_writer(db):
+                self.log.debug("Skipping innodb metrics collection for Aurora reader")
+                return
+            if self._check_innodb_engine_enabled(db):
+                with tracked_query(self, operation="innodb_metrics"):
+                    results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+                self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
@@ -1479,3 +1481,12 @@ class MySql(AgentCheck):
                 self.cluster_uuid = self.server_uuid
                 self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
                 self.tag_manager.set_tag('replication_role', "primary", replace=True)
+
+    def _is_aurora_writer(self, db):
+        if not self._get_is_aurora(db):
+            return False
+        aurora_tags = self._get_runtime_aurora_tags(db)
+        for tag in aurora_tags:
+            if tag == 'replication_role:writer':
+                return True
+        return False
