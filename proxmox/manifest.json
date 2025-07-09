@@ -49,10 +49,10 @@
         "pvescheduler",
         "pvestatd",
         "qmeventd"
-      ],
-      "logs": {
-        "source": "proxmox"
-      }
+      ]
+    },
+    "logs": {
+      "source": "proxmox"
     }
   },
   "author": {
