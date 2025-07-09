@@ -60,11 +60,17 @@ instances:
     #
     # enable_extra_params: false
 
-    ## @param changelog_lines_per_check - integer - optional
+    ## @param changelog_lines_per_check - integer - optional - default: 1000
     ## Number of changelog lines to process per check run (client nodes only).
     ## Higher values may impact performance.
     #
-    # changelog_lines_per_check: <CHANGELOG_LINES_PER_CHECK>
+    # changelog_lines_per_check: 1000
+
+    ## @param update_time_delta - integer - optional - default: 3600
+    ## Seconds between consecutive updates of the device list and filesystems if 
+    ## none were provided.
+    #
+    # update_time_delta: 3600
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

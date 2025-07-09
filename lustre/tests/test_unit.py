@@ -415,3 +415,30 @@ def test_empty_command_outputs(instance, mock_lustre_commands):
 
         result = check._get_jobstats_metrics('mdt.lustre-MDT0000.job_stats')
         assert result == {}
+
+
+def test_update_time_delta_behavior(mock_lustre_commands):
+    """Test that update respects the time delta."""
+    import time
+    
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+    with mock_lustre_commands(mapping):
+        check = LustreCheck('lustre', {}, [{'update_time_delta': 1.0}])
+        
+        # First update should always run
+        assert check._last_update_time is None
+        check.update()
+        assert check._last_update_time is not None
+        first_update_time = check._last_update_time
+        
+        # Immediate second update should be skipped
+        check.update()
+        assert check._last_update_time == first_update_time
+        
+        # After waiting, update should run again
+        time.sleep(1.1)
+        check.update()
+        assert check._last_update_time > first_update_time
