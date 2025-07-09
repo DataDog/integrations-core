@@ -253,4 +253,4 @@ class Cluster(object):
                         self.logger.warning("Failed to get heal info for volume %s: %s", _volume['name'], e)
                     pass
         if heal_fail:
-            print("Note: Unable to get self-heal status for one or more " "volumes", file=sys.stderr)
+            print("Note: Unable to get self-heal status for one or more volumes", file=sys.stderr)
