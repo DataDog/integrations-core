@@ -52,6 +52,71 @@ facets:
     name: User Name
     path: usr.name
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Email Address
+    path: ocsf.actor.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Target Name
+    path: ocsf.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
 pipeline:
   type: pipeline
   name: LastPass
@@ -67,7 +132,7 @@ pipeline:
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `Username` to `usr.name`
@@ -77,7 +142,7 @@ pipeline:
       sourceType: attribute
       target: usr.name
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `Action` to `evt.name`
@@ -87,7 +152,7 @@ pipeline:
       sourceType: attribute
       target: evt.name
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: geo-ip-parser
       name: Define `network.client.ip` as default geoip attribute for source
@@ -295,7 +360,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: '@ocsf.metadata.event_code:("Created LastPass account" OR "Master password changed" OR "Disabled Google Authenticator" OR "Disabled Microsoft Authenticated" OR "Disabled Multifactor Authentication" OR "Disabled Toopher" OR "Disabled YubiKey" OR "Multifactor enabled" OR "Username changed" OR "Change password failed" OR "Change password success" OR "Created pending user" OR "Creating user" OR "Deactivated user" OR "Deactivating user" OR "Deleting user" OR "Employee account created" OR "Employee account deleted" OR "Employee account disabled" OR "Employee account requires activation" OR "Employee invited" OR "master password reset by super admin" OR "master password reuse" OR "Reactivated user" OR "Reactivating user" OR "Remove user from company" OR "Removing user from LastPass Business" OR "Reset master password" OR "Set user name" OR "User deprovisioned" OR "User provisioned") -@Username:""'
+        query: '@ocsf.metadata.event_code:("Created LastPass account" OR "Master password changed" OR "Disabled Google Authenticator" OR "Disabled Microsoft Authenticated" OR "Disabled Multifactor Authentication" OR "Disabled Toopher" OR "Disabled YubiKey" OR "Multifactor enabled" OR "Username changed" OR "Change password failed" OR "Change password success" OR "Created pending user" OR "Creating user" OR "Deactivated user" OR "Deactivating user" OR "Deleting user" OR "Employee account created" OR "Employee account deleted" OR "Employee account disabled" OR "Employee account requires activation" OR "Employee invited" OR "master password reset by super admin" OR "master password reuse" OR "Reactivated user" OR "Reactivating user" OR "Remove user from company" OR "Removing user from LastPass Business" OR "Reset master password" OR "Set user name" OR "User deprovisioned" OR "User provisioned" OR "Account lockout") -@Username:""'
       processors:
         - type: attribute-remapper
           name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
@@ -330,6 +395,9 @@ pipeline:
                 query: '@ocsf.metadata.event_code:("Deleting user" OR "Employee account deleted" OR "Remove user from company" OR "Removing user from LastPass Business")'
               name: "6"
             - filter:
+                query: '@ocsf.metadata.event_code:("Account lockout")'
+              name: "9"
+            - filter:
                 query: '@ocsf.metadata.event_code:("Multifactor enabled")'
               name: "10"
             - filter:
@@ -355,28 +423,31 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: 'ocsf.activity_id:1'
+                query: '@ocsf.activity_id:1'
               name: "Create"
             - filter:
-                query: 'ocsf.activity_id:2'
+                query: '@ocsf.activity_id:2'
               name: "Enable"
             - filter:
-                query: 'ocsf.activity_id:3'
+                query: '@ocsf.activity_id:3'
               name: "Password Change"
             - filter:
-                query: 'ocsf.activity_id:4'
+                query: '@ocsf.activity_id:4'
               name: "Password Reset"
             - filter:
-                query: 'ocsf.activity_id:5'
+                query: '@ocsf.activity_id:5'
               name: "Disable"
             - filter:
-                query: 'ocsf.activity_id:6'
+                query: '@ocsf.activity_id:6'
               name: "Delete"
             - filter:
-                query: 'ocsf.activity_id:10'
+                query: '@ocsf.activity_id:9'
+              name: "Lock"
+            - filter:
+                query: '@ocsf.activity_id:10'
               name: "MFA Factor Enable"
             - filter:
-                query: 'ocsf.activity_id:11'
+                query: '@ocsf.activity_id:11'
               name: "MFA Factor Disable"
           target: ocsf.activity_name
         - type: string-builder-processor
@@ -455,7 +526,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: '@ocsf.metadata.event_code:("Failed login attempt" OR "Logged in" OR "Login verification email sent" OR "SAML login" OR "Authentication failed" OR "Login to admin console" OR "Successful authentication") -@Username:""'
+        query: '@ocsf.metadata.event_code:("Failed login attempt" OR "Log in" OR "Login verification email sent" OR "SAML login" OR "Authentication failed" OR "Login to admin console" OR "Successful authentication") -@Username:""'
       processors:
         - type: attribute-remapper
           name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
@@ -548,7 +619,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: '@ocsf.metadata.event_code:("Logged in" OR "SAML login" OR "Login to admin console" OR "Successful authentication")'
+                query: '@ocsf.metadata.event_code:("Log in" OR "SAML login" OR "Login to admin console" OR "Successful authentication")'
               name: "Success"
             - filter:
                 query: '@ocsf.metadata.event_code:("Failed login attempt" OR "Authentication failed")'
@@ -559,7 +630,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: '@ocsf.metadata.event_code:("Logged in" OR "SAML login" OR "Login to admin console" OR "Successful authentication")'
+                query: '@ocsf.metadata.event_code:("Log in" OR "SAML login" OR "Login to admin console" OR "Successful authentication")'
               name: "1"
             - filter:
                 query: '@ocsf.metadata.event_code:("Failed login attempt" OR "Authentication failed")'
@@ -593,7 +664,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: '@ocsf.metadata.event_code:("Make admin" OR "Remove admin") -@Username:""'
+        query: '@ocsf.metadata.event_code:("Made admin" OR "Make admin" OR "Remove admin") -@Username:""'
       processors:
         - type: attribute-remapper
           name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
@@ -610,7 +681,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: '@ocsf.metadata.event_code:("Make admin")'
+                query: '@ocsf.metadata.event_code:("Made admin" OR "Make admin")'
               name: "1"
             - filter:
                 query: '@ocsf.metadata.event_code:("Remove admin")'
@@ -632,10 +703,10 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: 'ocsf.activity_id:1'
+                query: '@ocsf.activity_id:1'
               name: "Assign Privileges"
             - filter:
-                query: 'ocsf.activity_id:2'
+                query: '@ocsf.activity_id:2'
               name: "Revoke Privileges"
           target: ocsf.activity_name
         - type: string-builder-processor
@@ -665,6 +736,16 @@ pipeline:
             - Username
           sourceType: attribute
           target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Username` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - Username
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
@@ -703,7 +784,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: '@ocsf.metadata.event_code:("Make admin") -@Username:""'
+        query: '@ocsf.metadata.event_code:("Made admin" OR "Make admin") -@Username:""'
       processors:
         - type: string-builder-processor
           name: Add privileges
@@ -726,7 +807,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: '@ocsf.metadata.event_code:("Add to group" OR "Adding user to group" OR "Create group" OR "Delete group" OR "Group addition" OR "Group removal" OR "Removing user from group" OR "Rename group") -@Username:""'
+        query: '@ocsf.metadata.event_code:("Add to group" OR "Adding user to group" OR "Create group" OR "Delete group" OR "Group addition" OR "Group removal" OR "Removing user from group" OR "Remove from group" OR "Rename group") -@Username:""'
       processors:
         - type: attribute-remapper
           name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
@@ -746,7 +827,7 @@ pipeline:
                 query: '@ocsf.metadata.event_code:("Add to group" OR "Adding user to group" OR "Group addition")'
               name: "3"
             - filter:
-                query: '@ocsf.metadata.event_code:("Group removal" OR "Removing user from group")'
+                query: '@ocsf.metadata.event_code:("Group removal" OR "Removing user from group" OR "Remove from group")'
               name: "4"
             - filter:
                 query: '@ocsf.metadata.event_code:("Create group")'
@@ -774,16 +855,16 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: 'ocsf.activity_id:3'
+                query: '@ocsf.activity_id:3'
               name: "Add User"
             - filter:
-                query: 'ocsf.activity_id:4'
+                query: '@ocsf.activity_id:4'
               name: "Remove User"
             - filter:
-                query: 'ocsf.activity_id:5'
+                query: '@ocsf.activity_id:5'
               name: "Create"
             - filter:
-                query: 'ocsf.activity_id:6'
+                query: '@ocsf.activity_id:6'
               name: "Delete"
           target: ocsf.activity_name
         - type: string-builder-processor
@@ -892,7 +973,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: 'ocsf.activity_id:7'
+                query: '@ocsf.activity_id:7'
               name: "Export"
           target: ocsf.activity_name
         - type: string-builder-processor
@@ -1012,16 +1093,16 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: 'ocsf.activity_id:1'
+                query: '@ocsf.activity_id:1'
               name: "Create"
             - filter:
-                query: 'ocsf.activity_id:2'
+                query: '@ocsf.activity_id:2'
               name: "Read"
             - filter:
-                query: 'ocsf.activity_id:3'
+                query: '@ocsf.activity_id:3'
               name: "Update"
             - filter:
-                query: 'ocsf.activity_id:4'
+                query: '@ocsf.activity_id:4'
               name: "Delete"
           target: ocsf.activity_name
         - type: string-builder-processor
