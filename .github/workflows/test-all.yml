@@ -52,7 +52,7 @@ on:
         required: false
         type: string
         default: ""
-      skip-ddev-jobs:
+      skip-ddev-tests:
         required: false
         default: false
         type: boolean
@@ -78,7 +78,7 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    if: ${{ inputs.skip-ddev-jobs == false }}
+    if: ${{ inputs.skip-ddev-tests == false }}
   j6712d43:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -99,7 +99,7 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    if: ${{ inputs.skip-ddev-jobs == false }}
+    if: ${{ inputs.skip-ddev-tests == false }}
   jb232c8c:
     uses: ./.github/workflows/test-target.yml
     with:
