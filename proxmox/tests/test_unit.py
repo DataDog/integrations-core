@@ -7,7 +7,6 @@ import logging
 
 import pytest
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
@@ -26,7 +25,7 @@ from .common import (
 
 
 @pytest.mark.usefixtures('mock_http_get')
-def test_api_up(dd_run_check, datadog_agent, aggregator, instance):
+def test_api_up(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric(
@@ -40,7 +39,7 @@ def test_api_up(dd_run_check, datadog_agent, aggregator, instance):
 
 
 @pytest.mark.usefixtures('mock_http_get')
-def test_no_tags(dd_run_check, datadog_agent, aggregator, instance):
+def test_no_tags(dd_run_check, aggregator, instance):
     new_instance = copy.deepcopy(instance)
     del new_instance['tags']
     check = ProxmoxCheck('proxmox', {}, [new_instance])
@@ -65,7 +64,7 @@ def test_no_tags(dd_run_check, datadog_agent, aggregator, instance):
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_api_down(dd_run_check, datadog_agent, aggregator, instance):
+def test_api_down(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
         dd_run_check(check)
