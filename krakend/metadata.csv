@@ -78,4 +78,3 @@ krakend.api.process.virtual_memory_max_bytes,gauge,,byte,,Maximum amount of virt
 krakend.api.proxy_duration.bucket,count,,,,The number of proxy requests within a duration bucket defined by the `upper_bound` tag.,0,krakend,,,
 krakend.api.proxy_duration.count,count,,,,The total number of proxy requests.,0,krakend,,,
 krakend.api.proxy_duration.sum,count,,second,,The sum of durations for all proxy requests.,0,krakend,,,
-krakend.api.telemetry.metrics.processed.count,count,,,,Number of metrics processed by the integration.,0,krakend,,,
