@@ -4,11 +4,11 @@
 import re
 import subprocess
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Set, Union  # noqa: F401
+from typing import Any, Dict, List, Set, Union
 
 import yaml
 
-from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
+from datadog_checks.base import AgentCheck, is_affirmative 
 
 from .constants import (
     CURATED_PARAMS,
