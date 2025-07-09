@@ -24,23 +24,26 @@
             "name": "kube_job",
             "prefix": "kube_job"
         }
-    ],
+    ],    
     "title": "Kubernetes Jobs and CronJobs Overview",
     "widgets": [
         {
+            "id": 1458895847794888,
             "definition": {
-                "background_color": "blue",
-                "layout_type": "ordered",
                 "title": "Overview",
+                "background_color": "blue",
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 495495303234449,
                         "definition": {
-                            "custom_unit": "jobs",
-                            "precision": 0,
+                            "title": "Current Jobs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
-                                    "aggregator": "last",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -48,24 +51,36 @@
                                             "value": 0
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.job.count{$kube_cluster_name}"
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name}",
+                                            "aggregator": "last",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ]
                                 }
                             ],
-                            "title": "Current Jobs",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            "custom_unit": "jobs",
+                            "precision": 0
                         },
-                        "id": 495495303234449,
                         "layout": {
-                            "height": 3,
-                            "width": 2,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 4633946546415220,
                         "definition": {
+                            "title": "Number of distinct Jobs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -73,11 +88,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Jobs",
@@ -94,41 +107,38 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": false,
-                            "title": "Number of distinct Jobs",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 4633946546415220,
                         "layout": {
-                            "height": 3,
-                            "width": 10,
                             "x": 2,
-                            "y": 0
+                            "y": 0,
+                            "width": 10,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 3697942345670966,
                         "definition": {
-                            "autoscale": true,
-                            "custom_unit": "pods",
-                            "precision": 0,
+                            "title": "Successful Job Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
-                                    "aggregator": "avg",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -136,24 +146,37 @@
                                             "value": 0
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.job.succeeded{$kube_cluster_name}.as_count()"
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.succeeded{$kube_cluster_name}.as_count()",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ]
                                 }
                             ],
-                            "title": "Successful Job Pods",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            "autoscale": true,
+                            "custom_unit": "pods",
+                            "precision": 0
                         },
-                        "id": 3697942345670966,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 0,
-                            "y": 3
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 6081756008356946,
                         "definition": {
+                            "title": "Number of successful Job Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -161,11 +184,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Succeeded Pods",
@@ -183,41 +204,38 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "green",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "green"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Number of successful Job Pods",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 6081756008356946,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 2,
-                            "y": 3
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 8095652452993779,
                         "definition": {
-                            "autoscale": true,
-                            "custom_unit": "pods",
-                            "precision": 0,
+                            "title": "Failed Job Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
-                                    "aggregator": "avg",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -225,24 +243,37 @@
                                             "value": 0
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.job.failed{$kube_cluster_name}.as_count()"
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.failed{$kube_cluster_name}.as_count()",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ]
                                 }
                             ],
-                            "title": "Failed Job Pods",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            "autoscale": true,
+                            "custom_unit": "pods",
+                            "precision": 0
                         },
-                        "id": 8095652452993779,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 6,
-                            "y": 3
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 2489289306317092,
                         "definition": {
+                            "title": "Number of failed Job Pods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -250,11 +281,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Failed Pods",
@@ -272,35 +301,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "warm",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "warm"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Number of failed Job Pods",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 2489289306317092,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
                             "x": 8,
-                            "y": 3
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 5976272967560328,
                         "definition": {
+                            "title": "CPU requests, limits, and usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -308,11 +339,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "CPU requests",
@@ -349,35 +378,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "CPU requests, limits, and usage",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 5976272967560328,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 5
+                            "y": 5,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 3689528099455169,
                         "definition": {
+                            "title": "Memory requests, limits, and usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -385,11 +416,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Memory requests",
@@ -426,69 +455,104 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Memory requests, limits, and usage",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 3689528099455169,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 6,
-                            "y": 5
+                            "y": 5,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 7493103153404182,
                         "definition": {
+                            "title": "Number of Jobs per cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "aggregator": "avg",
-                                    "alias": "Average number of Jobs",
-                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cluster_name}, 25, 'last', 'desc')"
-                                },
-                                {
-                                    "aggregator": "sum",
-                                    "alias": "# of successful Job Pods",
-                                    "q": "top(sum:kubernetes_state.job.succeeded{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
-                                },
-                                {
-                                    "aggregator": "sum",
-                                    "alias": "# of failed job Pods",
-                                    "limit": 10,
-                                    "order": "desc",
-                                    "q": "top(sum:kubernetes_state.job.failed{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cluster_name}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.job.succeeded{$kube_cluster_name} by {kube_cluster_name}.as_count()",
+                                            "aggregator": "sum",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes_state.job.failed{$kube_cluster_name} by {kube_cluster_name}.as_count()",
+                                            "aggregator": "sum",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Average number of Jobs"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "# of successful Job Pods"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "# of failed job Pods"
+                                        }
+                                    ]
                                 }
-                            ],
-                            "title": "Number of Jobs per cluster",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            ]
                         },
-                        "id": 7493103153404182,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 8
+                            "y": 8,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 3115489599066434,
                         "definition": {
+                            "title": "Number of Jobs per cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -496,11 +560,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Jobs",
@@ -517,64 +579,93 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Number of Jobs per cluster",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 3115489599066434,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 6,
-                            "y": 8
+                            "y": 8,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 1511746031025034,
                         "definition": {
+                            "title": "Top Cronjobs by Job count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "aggregator": "last",
-                                    "alias": "Last number of Jobs",
-                                    "limit": 10,
-                                    "order": "desc",
-                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cronjob}, 50, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Average number of Jobs",
-                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cronjob}, 50, 'mean', 'desc')"
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cronjob}",
+                                            "aggregator": "last",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cronjob}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Last number of Jobs"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Average number of Jobs"
+                                        }
+                                    ]
                                 }
-                            ],
-                            "title": "Top Cronjobs by Job count",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            ]
                         },
-                        "id": 1511746031025034,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 11
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 7620774346478920,
                         "definition": {
+                            "title": "Cronjobs by Job count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -582,11 +673,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Jobs",
@@ -603,113 +692,160 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Cronjobs by Job count",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 7620774346478920,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 6,
-                            "y": 11
+                            "y": 11,
+                            "width": 6,
+                            "height": 3
                         }
                     }
                 ]
             },
-            "id": 1458895847794888
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 15
+            }
         },
         {
+            "id": 5983520079327052,
             "definition": {
-                "background_color": "pink",
-                "layout_type": "ordered",
                 "title": "Jobs overview",
+                "background_color": "pink",
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 5568031515431654,
                         "definition": {
+                            "title": "Jobs resources consumption",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "aggregator": "avg",
-                                    "alias": "CPU usage",
-                                    "cell_display_mode": [
-                                        "bar"
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        }
                                     ],
-                                    "limit": 5,
-                                    "order": "desc",
-                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Memory usage",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Network read bytes",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Network transmitted bytes",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Disk read",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Disk write",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                    "sort": {
+                                        "count": 5,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)",
+                                            "alias": "CPU usage",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query2)",
+                                            "alias": "Memory usage",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query3)",
+                                            "alias": "Network read bytes",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query4)",
+                                            "alias": "Network transmitted bytes",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query5)",
+                                            "alias": "Disk read",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query6)",
+                                            "alias": "Disk write",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
                                 }
-                            ],
-                            "title": "Jobs resources consumption",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            ]
                         },
-                        "id": 5568031515431654,
                         "layout": {
-                            "height": 3,
-                            "width": 12,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 513833055520238,
                         "definition": {
+                            "title": "CPU usage by Job",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -717,11 +853,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "CPU usage",
@@ -738,31 +872,33 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "CPU usage by Job",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": false
-                            }
+                            },
+                            "markers": []
                         },
-                        "id": 513833055520238,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 3
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 2022201690431970,
                         "definition": {
+                            "title": "Memory usage by Job",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -770,11 +906,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Memory usage",
@@ -791,35 +925,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Memory usage by Job",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 2022201690431970,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 6,
-                            "y": 3
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 4502071610879346,
                         "definition": {
+                            "title": "Disk usage by Job",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -827,11 +963,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Read bytes",
@@ -849,13 +983,13 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "cool",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "cool"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 },
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Write bytes",
@@ -873,35 +1007,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "warm",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "warm"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Disk usage by Job",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 4502071610879346,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 6
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 6825427277535870,
                         "definition": {
+                            "title": "Network usage (Rx / Tx rate) by Job",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -909,11 +1045,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Received bytes",
@@ -931,13 +1065,13 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "cool",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "cool"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 },
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Transmitted bytes",
@@ -955,35 +1089,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "warm",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "warm"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Network usage (Rx / Tx rate) by Job",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 6825427277535870,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 6,
-                            "y": 6
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 7240988677557072,
                         "definition": {
+                            "title": "Network errors by Job",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -991,17 +1127,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [
-                                {
-                                    "display_type": "ok dashed",
-                                    "label": "y = 0",
-                                    "value": "y = 0"
-                                }
-                            ],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "RX errors",
@@ -1029,114 +1157,167 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "warm",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "warm"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Network errors by Job",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": "y = 0",
+                                    "value": "y = 0",
+                                    "display_type": "ok dashed"
+                                }
+                            ]
                         },
-                        "id": 7240988677557072,
                         "layout": {
-                            "height": 3,
-                            "width": 12,
                             "x": 0,
-                            "y": 9
+                            "y": 9,
+                            "width": 12,
+                            "height": 3
                         }
                     }
                 ]
             },
-            "id": 5983520079327052
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 13
+            }
         },
         {
+            "id": 1991208644233094,
             "definition": {
-                "background_color": "purple",
-                "layout_type": "ordered",
-                "show_title": true,
                 "title": "CronJob overview",
+                "background_color": "purple",
+                "show_title": true,
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
+                        "id": 4331347145875336,
                         "definition": {
+                            "title": "CronJobs resources consumption",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
                             "requests": [
                                 {
-                                    "aggregator": "avg",
-                                    "alias": "CPU usage",
-                                    "cell_display_mode": [
-                                        "bar"
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}",
+                                            "aggregator": "avg",
+                                            "semantic_mode": "combined"
+                                        }
                                     ],
-                                    "limit": 10,
-                                    "order": "desc",
-                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Memory usage",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Network read bytes",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Network transmitted bytes",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Disk read",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
-                                },
-                                {
-                                    "aggregator": "avg",
-                                    "alias": "Disk write",
-                                    "cell_display_mode": [
-                                        "bar"
-                                    ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)",
+                                            "alias": "CPU usage",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query2)",
+                                            "alias": "Memory usage",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query3)",
+                                            "alias": "Network read bytes",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query4)",
+                                            "alias": "Network transmitted bytes",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query5)",
+                                            "alias": "Disk read",
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "exclude_null(query6)",
+                                            "alias": "Disk write",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
                                 }
-                            ],
-                            "title": "CronJobs resources consumption",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_table"
+                            ]
                         },
-                        "id": 4331347145875336,
                         "layout": {
-                            "height": 4,
-                            "width": 12,
                             "x": 0,
-                            "y": 0
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
                         }
                     },
                     {
+                        "id": 6707953278415024,
                         "definition": {
+                            "title": "CPU usage by CronJob",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1144,11 +1325,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "CPU usage",
@@ -1165,31 +1344,33 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "CPU usage by CronJob",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": false
-                            }
+                            },
+                            "markers": []
                         },
-                        "id": 6707953278415024,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 4
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 8213158952686726,
                         "definition": {
+                            "title": "Memory usage by CronJob",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1197,11 +1378,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
                                             "alias": "Memory usage",
@@ -1218,35 +1397,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Memory usage by CronJob",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 8213158952686726,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 6,
-                            "y": 4
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 8375686906918214,
                         "definition": {
+                            "title": "Disk usage by CronJob",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1254,11 +1435,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Read bytes",
@@ -1276,13 +1455,13 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "cool",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "cool"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 },
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Write bytes",
@@ -1300,35 +1479,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "warm",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "warm"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Disk usage by CronJob",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 8375686906918214,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 0,
-                            "y": 7
+                            "y": 7,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 8486397881003725,
                         "definition": {
+                            "title": "Network usage (Rx / Tx rate) by CronJob",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1336,11 +1517,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Received bytes",
@@ -1358,13 +1537,13 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "cool",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "cool"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 },
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Transmitted bytes",
@@ -1382,35 +1561,37 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "warm",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "warm"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Network usage (Rx / Tx rate) by CronJob",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": []
                         },
-                        "id": 8486397881003725,
                         "layout": {
-                            "height": 3,
-                            "width": 6,
                             "x": 6,
-                            "y": 7
+                            "y": 7,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
+                        "id": 3942798973980899,
                         "definition": {
+                            "title": "Network errors by CronJob",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1418,17 +1599,9 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
-                            "markers": [
-                                {
-                                    "display_type": "ok dashed",
-                                    "label": "y = 0",
-                                    "value": "y = 0"
-                                }
-                            ],
+                            "type": "timeseries",
                             "requests": [
                                 {
-                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "RX errors",
@@ -1456,43 +1629,44 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
+                                        "palette": "warm",
                                         "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "warm"
-                                    }
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Network errors by CronJob",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
                             "yaxis": {
                                 "include_zero": true,
                                 "label": "",
-                                "max": "auto",
+                                "scale": "linear",
                                 "min": "auto",
-                                "scale": "linear"
-                            }
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "label": "y = 0",
+                                    "value": "y = 0",
+                                    "display_type": "ok dashed"
+                                }
+                            ]
                         },
-                        "id": 3942798973980899,
                         "layout": {
-                            "height": 3,
-                            "width": 12,
                             "x": 0,
-                            "y": 10
+                            "y": 10,
+                            "width": 12,
+                            "height": 3
                         }
                     }
                 ]
             },
-            "id": 1991208644233094,
             "layout": {
                 "x": 0,
-                "y": 28,
+                "y": 0,
                 "width": 12,
                 "height": 14,
                 "is_column_break": true
-              }
+            }
         }
     ]
 }
