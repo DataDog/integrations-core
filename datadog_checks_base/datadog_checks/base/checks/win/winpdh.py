@@ -121,7 +121,7 @@ class WinPDHCounter(object):
 
         try:
             val, t = winreg.QueryValueEx(winreg.HKEY_PERFORMANCE_DATA, "Counter 009")
-        except:  # noqa: E722, B001
+        except:  # noqa: E722
             self.logger.error("Windows error; performance counters not found in registry")
             self.logger.error("Performance counters may need to be rebuilt.")
             raise
@@ -166,7 +166,7 @@ class WinPDHCounter(object):
                     (machine_name, self.class_name, instance_name, None, 0, en_counter_name)
                 )
                 self.logger.debug("Successfully created English-only path")
-            except Exception as e:  # noqa: E722, B001
+            except Exception as e:  # noqa: E722
                 self.logger.warning("Unable to create English-only path %s", e)
                 raise
             return path
@@ -183,7 +183,7 @@ class WinPDHCounter(object):
             if c not in counters:
                 try:
                     self.logger.debug("Index %s counter %s not in counter list", index, str(c))
-                except:  # noqa: E722, B001
+                except:  # noqa: E722
                     # some unicode characters are not translatable here.  Don't fail just
                     # because we couldn't log
                     self.logger.debug("Index %s not in counter list", index)
@@ -194,10 +194,10 @@ class WinPDHCounter(object):
             try:
                 path = win32pdh.MakeCounterPath((machine_name, self.class_name, instance_name, None, 0, c))
                 break
-            except:  # noqa: E722, B001
+            except:  # noqa: E722
                 try:
                     self.logger.info("Unable to make path with counter %s, trying next available", str(c))
-                except:  # noqa: E722, B001
+                except:  # noqa: E722
                     self.logger.info("Unable to make path with counter index %s, trying next available", index)
         return path
 
@@ -217,7 +217,7 @@ class WinPDHCounter(object):
                     if inst not in self.counterdict:
                         self.logger.debug('Adding instance `%s`', inst)
                         self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
-                except:  # noqa: E722, B001
+                except:  # noqa: E722
                     self.logger.fatal(
                         "Failed to create counter.  No instances of %s\\%s" % (self.class_name, self._counter_name)
                     )
@@ -251,7 +251,7 @@ class WinPDHCounter(object):
                     if SINGLE_INSTANCE_KEY not in self.counterdict:
                         self.logger.debug('Adding single instance for path `%s`', path)
                         self.counterdict[SINGLE_INSTANCE_KEY] = win32pdh.AddCounter(self.hq, path)
-                except:  # noqa: E722, B001
+                except:  # noqa: E722
                     self.logger.fatal(
                         "Failed to create counter.  No instances of %s\\%s" % (self.class_name, self._counter_name)
                     )
