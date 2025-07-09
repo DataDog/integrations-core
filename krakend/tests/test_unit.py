@@ -24,9 +24,9 @@ def ready_check(check: KrakendCheck, dd_run_check: Callable, mock_http_response:
 
 def go_and_process_expected_metrics(go: bool, process: bool) -> list[tuple[str, bool]]:
     metadata_metrics = get_metrics_from_metadata()
-    go_metrics = [(metric, go) for metric in metadata_metrics if metric.startswith("krakend.go")]
+    go_metrics = [(metric, go) for metric in metadata_metrics if metric.startswith("krakend.api.go")]
 
-    process_metrics = [(metric, process) for metric in metadata_metrics if metric.startswith("krakend.process")]
+    process_metrics = [(metric, process) for metric in metadata_metrics if metric.startswith("krakend.api.process")]
 
     return go_metrics + process_metrics
 
@@ -104,9 +104,9 @@ def test_check_filters_metrics(aggregator: AggregatorStub, expected_metrics: lis
 @pytest.mark.parametrize(
     "metric, tag",
     [
-        ("krakend.http_client.request_timedout.count", "krakend.service_version:1.0.0"),
-        ("krakend.http_client.request_timedout.count", "krakend.service_name:krakend-gateway"),
-        ("krakend.go.info", "go_version:go1.24.4"),
+        ("krakend.api.http_client.request_timedout.count", "krakend.service_version:1.0.0"),
+        ("krakend.api.http_client.request_timedout.count", "krakend.service_name:krakend-gateway"),
+        ("krakend.api.go.info", "go_version:go1.24.4"),
     ],
     ids=["target_info_version", "target_info_service_name", "go_info_version"],
 )
@@ -116,4 +116,4 @@ def test_labels_renaming(ready_check: KrakendCheck, aggregator: AggregatorStub, 
 
 
 def test_service_check_emitted(ready_check: KrakendCheck, aggregator: AggregatorStub):
-    aggregator.assert_service_check("krakend.openmetrics.health", status=AgentCheck.OK)
+    aggregator.assert_service_check("krakend.api.openmetrics.health", status=AgentCheck.OK)

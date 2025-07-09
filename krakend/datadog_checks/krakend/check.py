@@ -14,7 +14,7 @@ HTTP_STATUS_CODE_TAG = "http_response_status_code"
 
 class KrakendCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = "krakend"
+    __NAMESPACE__ = "krakend.api"
     DEFAULT_METRIC_LIMIT = 0
 
     def create_scraper(self, config: InstanceType):

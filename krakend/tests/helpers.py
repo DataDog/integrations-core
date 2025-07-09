@@ -14,7 +14,7 @@ WARM_UP_REQUESTS = 3
 OPEN_METRICS_ENDPOINT = "http://localhost:9090/metrics"
 BAKEND_API_ENDPOINT = "http://localhost:8000"
 GATEWAY_ENDPOINT = "http://localhost:8080"
-METADATA_METRICS_TO_EXCLUDE = ["krakend.http_client.request_read_errors.count"]
+METADATA_METRICS_TO_EXCLUDE = ["krakend.api.http_client.request_read_errors.count"]
 
 
 async def generate_sample_traffic(number_of_requests: int = WARM_UP_REQUESTS):

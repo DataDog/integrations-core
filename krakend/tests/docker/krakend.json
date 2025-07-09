@@ -14,12 +14,6 @@
         "telemetry/opentelemetry": {
             "service_name": "krakend-gateway",
             "service_version": "1.0.0",
-            "skip_paths": [
-                "/__health",
-                "/__debug/",
-                "/__echo/",
-                "/__stats/"
-            ],
             "exporters": {
                 "prometheus": [
                     {

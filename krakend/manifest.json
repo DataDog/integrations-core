@@ -33,7 +33,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "krakend.",
+        "prefix": "krakend.api.",
         "check": "",
         "metadata_path": "metadata.csv"
       },
