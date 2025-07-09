@@ -16,11 +16,9 @@ Targeted User Analysis: Identify and track the most frequently targeted users.
 
 ## Setup
 
-**Setting up Datadog Forwarder**
-- Refer to this link to know on how to setup [Datadog Forwarder][2]
+Set up the [Datadog Forwarder][2].
 
-**Configuring AWS S3 to Receive Harmony Email & Collaboration Logs**
-- Refer to this link to know on how to send logs to AWS S3 bucket. [link][3]
+Configure an [AWS S3 bucket to receive logs][3].
 
 ### Installation
 
