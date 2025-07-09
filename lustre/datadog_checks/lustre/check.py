@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Set, Union
 
 import yaml
 
-from datadog_checks.base import AgentCheck, is_affirmative 
+from datadog_checks.base import AgentCheck, is_affirmative
 
 from .constants import (
     CURATED_PARAMS,
@@ -65,7 +65,9 @@ class LustreCheck(AgentCheck):
         self._bin_mapping: Dict[str, str] = {'lctl': lctl_path, 'lnetctl': lnetctl_path, 'lfs': lfs_path}
         # Enable or disable specific metrics
         self.enable_changelogs: bool = is_affirmative(self.instance.get('enable_changelogs', False))
-        self.lnetctl_verbosity: str = '3' if is_affirmative(self.instance.get('enable_lnetctl_detailed', False)) else '1'
+        self.lnetctl_verbosity: str = (
+            '3' if is_affirmative(self.instance.get('enable_lnetctl_detailed', False)) else '1'
+        )
         self.params: Set[LustreParam] = set(DEFAULT_STATS + CURATED_PARAMS)
         if is_affirmative(self.instance.get('enable_extra_params', False)):
             self.params.update(set(EXTRA_STATS))

@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 import os
 from os.path import isfile
-from datadog_checks.dev import get_here
 
+import pytest
+
+from datadog_checks.dev import get_here
 
 HERE = get_here()
 FIXTURES_DIR = os.path.join(HERE, 'fixtures')

@@ -2,19 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-from typing import Any, Callable, Dict  # noqa: F401
-
 import mock
 import pytest
 
-from .conftest import mock_run_command
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
 from datadog_checks.lustre.constants import CURATED_PARAMS, DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS
 
+from .conftest import mock_run_command
 from .metrics import (
     CLIENT_METRICS,
     COMMON_METRICS,
@@ -26,7 +21,6 @@ from .metrics import (
     MDS_METRICS,
     OSS_METRICS,
 )
-
 
 
 @pytest.mark.parametrize(
