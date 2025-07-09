@@ -597,25 +597,27 @@ def test_data_streams_messages(
     dd_run_check,
     check,
 ):
-    kafka_instance.update(
-        {
-            'consumer_groups': {},
-            'monitor_unlisted_consumer_groups': True,
-            'live_messages_configs': [
-                {
-                    'kafka': {
-                        'cluster': 'cluster_id',
-                        'topic': 'marvel',
-                        'partition': 0,
-                        'start_offset': 0,
-                        'n_messages': 3,
-                        'value_format': 'json',
-                    },
-                    'id': 'config_1_id',
-                }
-            ],
-        }
-    ),
+    (
+        kafka_instance.update(
+            {
+                'consumer_groups': {},
+                'monitor_unlisted_consumer_groups': True,
+                'live_messages_configs': [
+                    {
+                        'kafka': {
+                            'cluster': 'cluster_id',
+                            'topic': 'marvel',
+                            'partition': 0,
+                            'start_offset': 0,
+                            'n_messages': 3,
+                            'value_format': 'json',
+                        },
+                        'id': 'config_1_id',
+                    }
+                ],
+            }
+        ),
+    )
     mock_client = seed_mock_client()
     mock_client.get_next_message.side_effect = [
         MockedMessage(
