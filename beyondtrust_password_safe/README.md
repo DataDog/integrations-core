@@ -2,7 +2,7 @@
 
 ## Overview
 
-[BeyondTrust Password Safe][1] is a privileged access management solution that focuses on securely storing, managing, and rotating privileged credentials (like administrative or root passwords) used to access critical systems. It automates password rotation, and provides comprehensive session monitoring and recording, helping organizations maintain strict control over privileged credentials.
+[BeyondTrust Password Safe][1] is a privileged access management solution designed to securely store, manage, and rotate privileged credentials (like administrative or root passwords) used to access critical systems. It automates password rotation and provides comprehensive session monitoring and recording to help organizations maintain strict control over privileged credentials.
 
 This integration parses and ingest the following types of logs:
 - **Password and Session Activities**: Captures events related to password retrievals, password rotations, session requests, approvals, and denials.
@@ -10,28 +10,25 @@ This integration parses and ingest the following types of logs:
 - **Secret Safe Activities**: Tracks the creation, retrieval, and deletion of secrets stored in the secret safe.
 - **Audit Logs**: Tracks activities performed by platform users.
 
-Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
+Visualize detailed insights into these logs through out-of-the-box dashboards. Cloud SIEM also provides detection rules to help you monitor and respond to potential security threats effectively.
 
 ## Setup
 
 ### Log Collection Overview
 
-**Note**: For complete data collection, please configure both data collection methods.
+**Note**: To collect all the log types, configure both log collection methods.
 
-The table below shows the breakdown of data types, the required configuration for both collection methods, and the dashboards populated for both methods.
-
-| Data Type                                                                 | Configuration Required                  | Dashboards Populated |
-|---------------------------------------------------------------------------|-----------------------------------------|------------------------------|
-|<li> Password and Session Activities<br><li> Managed Systems and Managed Accounts<br><li> Secret Safe Activities | Agent and Event Forwarder Configuration | <li>BeyondTrust Password Safe - Overview<br><li>BeyondTrust Password Safe - Password and Session Insights<br><li>BeyondTrust Password Safe - Management and Secret Safe Insights |
-| <li>Audit Logs                                                                | Audit API Configuration                 | <li>BeyondTrust Password Safe - Audit Insights |
+The following table shows the log collection methods, the logs collected, and the dashboards populated for each methods.
+| Log Collection Method                  | Logs Collected                                                                | Dashboards Populated |
+|-----------------------------------------|---------------------------------------------------------------------------|------------------------------|
+| [Agent and Event Forwarder Configuration](#agent-and-event-forwarder-configuration) | <li> Password and Session Activities<br><li> Managed Systems and Managed Accounts<br><li> Secret Safe Activities | <li>BeyondTrust Password Safe - Overview<br><li>BeyondTrust Password Safe - Password and Session Insights<br><li>BeyondTrust Password Safe - Management and Secret Safe Insights |
+| [Audit API Configuration](#audit-api-configuration)                 | <li>Audit Logs                                                                | <li>BeyondTrust Password Safe - Audit Insights |
 
 ### Agent and Event Forwarder Configuration
 
-**Note**: These steps are only required for collecting logs via Agent and Event Forwarder. Refer the above Log Collection Overview table for more details.
-
 #### Installation
 
-To install the BeyondTrust Password Safe integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
+To install the BeyondTrust Password Safe integration, run the following Agent installation command in your terminal, then complete the configuration steps. For more information, see the [Integration Management][4] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.69.0.
 
@@ -67,63 +64,32 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
 
 3. [Restart the Agent][6].
 
-#### Configure log forwarding from BeyondTrust Password Safe via Universal Event Forwarder
+#### Configure log forwarding from BeyondTrust Password Safe through the Universal Event Forwarder
 
-1. Login to BeyondTrust Password Safe using Administrator account.
+1. Log in to BeyondTrust Password Safe with an Administrator account.
 2. In BeyondTrust Password Safe, go to **Configuration > General > Connectors**.
-3. From the Connectors panel, click on the **Create New Connector** button.
+3. From the Connectors panel, click **Create New Connector**.
 4. Enter a name for the connector.
 5. Select **Universal Event Forwarder** from the list.
-6. Click on the **Create Connector** button.
+6. Click **Create Connector**.
 7. Leave Active (yes) enabled.
-8. Select **TCP** in **Available Output Pipelines** dropdown.
-9. Enter the IP address where your datadog agent is running in the **Host Name** field.
-10. Enter the Port on which the datadog agent is listening.
+8. Select **TCP** in the **Available Output Pipelines** dropdown.
+9. Enter the IP address where your Datadog Agent is running in the **Host Name** field.
+10. Enter the Port on which the Datadog Agent is listening.
 11. Select **JSON** in **Available Formatters** dropdown.
 12. Select Local0 in **Facility** dropdown.
 13. Expand Event Filters, and then enable **BeyondInsight Application Audit** and **Password Safe** options.
-14. Click on the **Create Connector** button.
+14. Click **Create Connector**.
 
 #### Validation
 
-   [Run the Agent's status subcommand][5] and look for `beyondtrust_password_safe` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `beyondtrust_password_safe` under the Checks section.
 
 ### Audit API Configuration
 
-**Note**: These steps are only required for collecting Audit Logs. Refer the above Log Collection Overview table for more details.
-
-#### Generate Client ID and Client Secret
-
-1. Login to the BeyondTrust Password Safe using Administrator account.
-2. Go to **Configuration > Role Based Access > User Management**.
-3. Click the **Users** tab to display the list of users in the grid.
-4. Click **Create New User**.
-5. Select **Add an Application User** from the dropdown list.
-6. Add a Username.
-7. Under API Access Policy, select the policy created. Refer to the section "Configure API Access Policy and Retrieve API Base Endpoint" to create a policy.
-8. Copy the information from the **Client ID** and **Client Secret** fields for later use.
-9. Click **Create User**.
-10. Assign the user to a group that has the **User Audits (Read-Only)** permission. To create a group, refer to the instructions provided [here][2].
-    - Click the vertical ellipsis for the user, and then select **View User Details**.
-    - From the User Details pane, click **Groups**.
-    - Locate the group, select it, and click **Assign Group** above the grid.
-
-#### Configure API Access Policy and retrieve API Base Endpoint
-
-1. Login to the BeyondTrust Password Safe using Administrator account.
-2. Go to **Configuration > General > API Registrations**.
-3. Click **Create API Registration**.
-4. Select **API Access Policy** from the dropdown list.
-5. Fill out the new API registration details, and set the **Access Token Duration** to 30 minutes.
-6. Click **Add Authentication Rule** for each of the CIDR entries retrieved in step "Retrieve Datadog CIDR Range". 
-   - For Type, select **CIDR** from the dropdown list.
-   - Enter the **CIDR** entry in the CIDR field.
-7. Click **Create Rule** and then click **Create Registration**.
-8. Copy **API Base Endpoint**.
-
 #### Retrieve Datadog CIDR Range
 
-1. Use an API platform such as Postman, or curl to make a GET request to the Datadog API endpoint provided [here][7].
+1. Use an API platform such as Postman, or curl to make a GET request to the [Datadog API endpoint][7].
 2. Once you receive the response, locate the **webhooks** section in the JSON. It will look something like this:
    ```json
       "webhooks": {
@@ -134,7 +100,36 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
          "prefixes_ipv6": []
          }
    ```
-3. From the **prefixes_ipv4** list under the Webhooks section, copy each CIDR entry and create an authentication rule for it.
+3. From the **prefixes_ipv4** list under the Webhooks section, copy each CIDR entry.
+
+#### Configure API Access Policy and retrieve API Base Endpoint
+
+1. Log in to the BeyondTrust Password Safe using Administrator account.
+2. Go to **Configuration > General > API Registrations**.
+3. Click **Create API Registration**.
+4. Select **API Access Policy** from the dropdown list.
+5. Fill out the new API registration details, and set the **Access Token Duration** to 30 minutes.
+6. Click **Add Authentication Rule** for each of the CIDR entries retrieved in step "Retrieve Datadog CIDR Range". 
+   - For Type, select **CIDR** from the dropdown list.
+   - Enter the **CIDR** entry in the CIDR field.
+7. Click **Create Rule** and then click **Create Registration**.
+8. Copy **API Base Endpoint**.
+
+#### Generate Client ID and Client Secret
+
+1. Log in to the BeyondTrust Password Safe with an Administrator account.
+2. Go to **Configuration > Role Based Access > User Management**.
+3. Click the **Users** tab to display the list of users in the grid.
+4. Click **Create New User**.
+5. Select **Add an Application User** from the dropdown list.
+6. Add a Username.
+7. Under API Access Policy, select the policy created. To create a policy, see [Configure API Access Policy and Retrieve API Base Endpoint](#configure-api-access-policy-and-retrieve-api-base-endpoint).
+8. Copy the information from the **Client ID** and **Client Secret** fields for later use.
+9. Click **Create User**.
+10. Assign the user to a group that has the **User Audits (Read-Only)** permission. To create a group, see the [BeyondTrust documentation][2].
+    - Click the vertical ellipsis for the user, and then select **View User Details**.
+    - From the User Details pane, click **Groups**.
+    - Locate the group, select it, and click **Assign Group** above the grid.
 
 #### Connect your BeyondTrust Password Safe Account to Datadog
 
@@ -208,7 +203,7 @@ To resolve:
 
 ### Error related to unidentified CIDR Range
 
-If you encounter an error indicating that the request is originating from an unidentified CIDR range, it may be due to a change in Datadog's outbound IP ranges. Follow the steps from **Retrieve Datadog CIDR Range** section to retrieve and update the allowed CIDR ranges.
+If you encounter an error indicating that the request is originating from an unidentified CIDR range, it may be due to a change in Datadog's outbound IP ranges. To retrieve and update the allowed CIDR ranges, follow the steps in [Retrieve Datadog CIDR Range](#retrieve-datadog-cidr-range).
 
 ## Support
 
