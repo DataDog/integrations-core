@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from dataclasses import dataclass
+from typing import Tuple
 
 FILESYSTEM_DISCOVERY_PARAM_MAPPING = {
     'mds': (r'mdt.*.job_stats', r'(?<=mdt\.).*(?=-MDT)'),
@@ -23,8 +24,8 @@ IGNORED_LNET_GROUPS = {
 @dataclass(frozen=True)
 class LustreParam:
     regex: str
-    node_types: tuple[str, ...]
-    wildcards: tuple[str, ...] = ()
+    node_types: Tuple[str]
+    wildcards: Tuple[str] = ()
     prefix: str = ''
     fixture: str = ''
 

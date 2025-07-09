@@ -5,7 +5,7 @@ import re
 import subprocess
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import yaml
 
@@ -363,7 +363,7 @@ class LustreCheck(AgentCheck):
         '''
         lnet_stats = self._run_command('lnetctl', stats_type, 'show', '-v', self.lnetctl_verbosity, sudo=True)
         try:
-            return yaml.safe_load(lnet_stats)
+            return yaml.safe_load(lnet_stats) or {}
         except (KeyError, ValueError):
             self.log.debug('No lnet stats found')
             return {}
@@ -417,7 +417,7 @@ class LustreCheck(AgentCheck):
             else:
                 self.log.debug('Unexpected metric value for %s.%s: %s', name, suffix, metric_value)
 
-    def _extract_tags_from_param(self, param_regex: str, param_name: str, wildcards: List[str]) -> List[str]:
+    def _extract_tags_from_param(self, param_regex: str, param_name: str, wildcards: Tuple[str]) -> List[str]:
         '''
         Extract tags from the parameter name based on the regex and wildcard meanings.
         '''
