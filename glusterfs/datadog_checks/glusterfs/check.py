@@ -28,7 +28,6 @@ class GlusterfsCheck(AgentCheck):
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
     def check(self, _):
-        raise Exception("LOL")
         gstatus = json.loads(self.get_gstatus_data())
         if 'data' in gstatus:
             data = gstatus['data']

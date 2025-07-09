@@ -22,7 +22,7 @@ def test_e2e(dd_agent_check, config):
 
 
 def test_version_metadata(dd_agent_check, datadog_agent, config):
-    aggregator = dd_agent_check(config)
+    dd_agent_check(config)
     if GLUSTER_VERSION == "7.1":
         version_metadata = {
             'version.raw': "7.1",
@@ -32,7 +32,6 @@ def test_version_metadata(dd_agent_check, datadog_agent, config):
         }
         datadog_agent.assert_metadata('', version_metadata)
         datadog_agent.assert_metadata_count(4)
-
 
     else:
         pytest.skip("Unsupported glusterfs version: {}".format(GLUSTER_VERSION))

@@ -4,10 +4,10 @@ import sys
 from glustercli.cli import glusterfs_version, heal, peer, quota, snapshot, volume
 from glustercli.cli.utils import GlusterCmdException
 
-
 # Global variables for monkey patching
 _USE_SUDO = True
 _LOGGER = None
+
 
 # Monkey patch glustercli to add sudo support and logging
 # We'll patch it dynamically after import to avoid import errors
@@ -16,25 +16,26 @@ def _apply_glustercli_patch():
     try:
         # Try to find and patch the execute function in glustercli
         import glustercli.cli.utils as utils_module
+
         if hasattr(utils_module, 'execute'):
             original_execute = utils_module.execute
-            
+
             def patched_execute(cmd, **kwargs):
                 """Patched execute function that adds sudo support and logging"""
                 global _USE_SUDO, _LOGGER
-                
+
                 # Prepend sudo if needed
                 if _USE_SUDO and not cmd.startswith('sudo'):
                     cmd = 'sudo ' + cmd
-                
+
                 # Log the command being executed
                 if _LOGGER:
                     _LOGGER.debug("Executing GlusterFS command: %s", cmd)
-                
+
                 try:
                     # Call the original execute function
-                    result = original_execute(cmd, **kwargs)
-                    
+                    result = utils_module.execute(cmd, **kwargs)
+
                     # Log the output
                     if _LOGGER and result:
                         output_lines = str(result).strip().split('\n')
@@ -44,13 +45,13 @@ def _apply_glustercli_patch():
                                 _LOGGER.debug("  %s", line)
                             if len(output_lines) > 5:
                                 _LOGGER.debug("  ... (%d more lines)", len(output_lines) - 5)
-                    
+
                     return result
                 except Exception as e:
                     if _LOGGER:
                         _LOGGER.error("GlusterFS command failed: %s", str(e))
                     raise
-            
+
             # Apply the patch
             utils_module.execute = patched_execute
             return True
@@ -58,6 +59,7 @@ def _apply_glustercli_patch():
         # If we can't find the execute function, try alternative locations
         try:
             import glustercli
+
             # Look for execute in various possible locations
             for module_path in ['utils', 'cli.utils', 'cli']:
                 try:
@@ -67,46 +69,51 @@ def _apply_glustercli_patch():
                     if hasattr(module, 'execute'):
                         # Found it, apply patch here
                         original_execute = module.execute
-                        
-                        def patched_execute(cmd, **kwargs):
-                            """Patched execute function that adds sudo support and logging"""
-                            global _USE_SUDO, _LOGGER
-                            
-                            # Prepend sudo if needed
-                            if _USE_SUDO and not cmd.startswith('sudo'):
-                                cmd = 'sudo ' + cmd
-                            
-                            # Log the command being executed
-                            if _LOGGER:
-                                _LOGGER.debug("Executing GlusterFS command: %s", cmd)
-                            
-                            try:
-                                # Call the original execute function
-                                result = original_execute(cmd, **kwargs)
-                                
-                                # Log the output
-                                if _LOGGER and result:
-                                    output_lines = str(result).strip().split('\n')
-                                    if output_lines:
-                                        _LOGGER.debug("Command output (first 5 lines):")
-                                        for line in output_lines[:5]:
-                                            _LOGGER.debug("  %s", line)
-                                        if len(output_lines) > 5:
-                                            _LOGGER.debug("  ... (%d more lines)", len(output_lines) - 5)
-                                
-                                return result
-                            except Exception as e:
+
+                        def make_patched_execute(original_func):
+                            """Create a patched execute function with proper closure"""
+
+                            def patched_execute(cmd, **kwargs):
+                                """Patched execute function that adds sudo support and logging"""
+                                global _USE_SUDO, _LOGGER
+
+                                # Prepend sudo if needed
+                                if _USE_SUDO and not cmd.startswith('sudo'):
+                                    cmd = 'sudo ' + cmd
+
+                                # Log the command being executed
                                 if _LOGGER:
-                                    _LOGGER.error("GlusterFS command failed: %s", str(e))
-                                raise
-                        
-                        module.execute = patched_execute
+                                    _LOGGER.debug("Executing GlusterFS command: %s", cmd)
+
+                                try:
+                                    # Call the original execute function
+                                    result = original_func(cmd, **kwargs)
+
+                                    # Log the output
+                                    if _LOGGER and result:
+                                        output_lines = str(result).strip().split('\n')
+                                        if output_lines:
+                                            _LOGGER.debug("Command output (first 5 lines):")
+                                            for line in output_lines[:5]:
+                                                _LOGGER.debug("  %s", line)
+                                            if len(output_lines) > 5:
+                                                _LOGGER.debug("  ... (%d more lines)", len(output_lines) - 5)
+
+                                    return result
+                                except Exception as e:
+                                    if _LOGGER:
+                                        _LOGGER.error("GlusterFS command failed: %s", str(e))
+                                    raise
+
+                            return patched_execute
+
+                        module.execute = make_patched_execute(original_execute)
                         return True
                 except AttributeError:
                     continue
         except ImportError:
             pass
-    
+
     return False
 
 
@@ -118,14 +125,14 @@ class Cluster(object):
         global _USE_SUDO, _LOGGER
         _USE_SUDO = use_sudo
         _LOGGER = logger
-        
+
         # Apply the monkey patch on first initialization
         _apply_glustercli_patch()
-        
+
         # Store as instance attributes as well
         self.logger = logger
         self.use_sudo = use_sudo
-        
+
         self.cluster_status = "Healthy"
         self.nodes = 0  # Number of nodes
         self.nodes_reachable = 0
@@ -139,7 +146,7 @@ class Cluster(object):
         self.brickinfo = options.brickinfo
         self.displayquota = options.displayquota
         self.displaysnap = options.displaysnap
-        self.output_mode = options.output_mode.lower() if options.output_mode else 'console' 
+        self.output_mode = options.output_mode.lower() if options.output_mode else 'console'
 
     def gather_data(self):
         try:
