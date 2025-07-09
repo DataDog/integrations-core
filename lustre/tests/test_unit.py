@@ -472,6 +472,19 @@ def test_exception_handling(mock_lustre_commands):
         
         # Test submit_device_health with malformed data
         check.submit_device_health([{'status': 'UP'}])  # Missing required fields
+        
+        # Test changelog IndexError handling with malformed lines
+        malformed_changelog = '''4 07RMDIR 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus
+malformed_line_with_insufficient_parts
+incomplete 07RMDIR
+5 08CREATE 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x4:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] test'''
+        
+        with mock.patch.object(check, '_run_command', return_value=malformed_changelog):
+            check._update_changelog_targets(check.devices, ["lustre"])
+            with mock.patch.object(check, 'send_log') as mock_send_log:
+                check.submit_changelogs(1000)
+                # Should only send logs for valid lines (2 calls), skipping malformed ones
+                assert mock_send_log.call_count == 2
 
 
 def test_run_command_exceptions():
