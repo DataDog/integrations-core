@@ -3,15 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-from os.path import isfile
 from typing import Any, Callable, Dict  # noqa: F401
 
 import mock
 import pytest
 
+from .conftest import mock_run_command
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
 from datadog_checks.lustre.constants import CURATED_PARAMS, DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS
@@ -28,23 +27,6 @@ from .metrics import (
     OSS_METRICS,
 )
 
-HERE = get_here()
-FIXTURES_DIR = os.path.join(HERE, 'fixtures')
-
-
-def mock_run_command(command_fixture_mapping):
-    def run_command(bin, *args, **kwargs):
-        requested_command = f"{bin} {' '.join(args)}"
-        for cmd, fixture in command_fixture_mapping.items():
-            if requested_command.startswith(cmd):
-                path = os.path.join(FIXTURES_DIR, fixture)
-                if not isfile(path):
-                    return fixture
-                with open(path, 'r') as f:
-                    return f.read()
-        raise ValueError(f"Unexpected command: {requested_command}")
-
-    return run_command
 
 
 @pytest.mark.parametrize(
