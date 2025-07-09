@@ -1,7 +1,7 @@
 diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
 index 0c76a93f48..0198d2241b 100644
---- a/.builders/scripts/build_wheels.py
-+++ b/.builders/scripts/build_wheels.py
+--- a/scripts/build_wheels.py
++++ b/scripts/build_wheels.py
 @@ -8,7 +8,7 @@ from pathlib import Path
  from tempfile import TemporaryDirectory
  
@@ -38,8 +38,8 @@ index 0c76a93f48..0198d2241b 100644
          check_process([
 diff --git a/.builders/scripts/utils.py b/.builders/scripts/utils.py
 index 63772a277d..e1f680728f 100644
---- a/.builders/scripts/utils.py
-+++ b/.builders/scripts/utils.py
+--- a/scripts/utils.py
+--- b/scripts/utils.py
 @@ -1,10 +1,17 @@
  from __future__ import annotations
  
