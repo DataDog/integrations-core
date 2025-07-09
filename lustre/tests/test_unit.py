@@ -475,7 +475,9 @@ def test_exception_handling(mock_lustre_commands):
 
         # Test changelog IndexError handling with malformed lines
         malformed_changelog = '''4 07RMDIR 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 \
-nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus malformed_line_with_insufficient_parts incomplete 07RMDIR
+nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0]
+bacillus malformed_line_with_insufficient_parts
+incomplete 07RMDIR
 5 08CREATE 12:51:02.913242119 2025.01.02 0x1 t=[0x200000bd1:0x4:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp \
 p=[0x200000007:0x1:0x0] test'''
 
