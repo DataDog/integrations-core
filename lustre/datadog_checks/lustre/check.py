@@ -74,7 +74,7 @@ class LustreCheck(AgentCheck):
             self.params.update(set(EXTRA_STATS))
 
         self.changelog_lines_per_check: int = int(self.instance.get('changelog_lines_per_check', 1000))
-        self.update_time_delta: float = float(self.instance.get('update_time_delta', 60.0))
+        self.update_time_delta: int = int(self.instance.get('update_time_delta', 3600))
 
         self.devices: List[Dict[str, Any]] = []
         self.changelog_targets: List[str] = []
@@ -88,8 +88,6 @@ class LustreCheck(AgentCheck):
 
         self.tags: List[str] = self.instance.get('tags', [])
         self.tags.append(f'node_type:{self.node_type}')
-        version: str = self._run_command("lctl", 'get_param', '-ny', 'version').strip()
-        self.tags.append(f'lustre_version:{version}')
 
     def _find_node_type(self) -> str:
         '''
@@ -143,6 +141,7 @@ class LustreCheck(AgentCheck):
         if self.filesystem_discovery:
             self._update_filesystems()
         self._update_changelog_targets(self.devices, self.filesystems)
+        self._update_metadata()
         
         # Update the last update time
         self._last_update_time = current_time
@@ -193,6 +192,13 @@ class LustreCheck(AgentCheck):
                 if match:
                     targets.append(match.group(0))
         self.changelog_targets = list(set(targets))  # Remove duplicates
+
+    @AgentCheck.metadata_entrypoint
+    def _update_metadata(self):
+        version = self._run_command("lctl", 'get_param', '-ny', 'version').strip()
+        if version:
+            self.log.debug("Setting version %s for Lustre", version)
+            self.set_metadata("version", version)
 
     def _run_command(self, bin: str, *args: str, sudo: bool = False) -> str:
         '''

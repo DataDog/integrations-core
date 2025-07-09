@@ -67,8 +67,8 @@ instances:
     # changelog_lines_per_check: 1000
 
     ## @param update_time_delta - integer - optional - default: 3600
-    ## Seconds between consecutive updates of the device list and filesystems if 
-    ## none were provided.
+    ## Seconds between consecutive updates of the device list, Lustre version 
+    ## and filesystems if none were provided.
     #
     # update_time_delta: 3600
 

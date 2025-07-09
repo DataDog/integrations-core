@@ -80,8 +80,8 @@ files:
         example: 1000
     - name: update_time_delta
       description: |
-        Seconds between consecutive updates of the device list and filesystems if 
-        none were provided.
+        Seconds between consecutive updates of the device list, Lustre version 
+        and filesystems if none were provided.
       required: false
       value:
         type: integer
