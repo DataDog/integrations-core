@@ -18,7 +18,6 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
-    TagManager,
     default_json_event_encoding,
     tracked_query,
 )
@@ -65,7 +64,6 @@ from .queries import (
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
-    SQL_BINLOG_ENABLED,
     SQL_GROUP_REPLICATION_MEMBER,
     SQL_GROUP_REPLICATION_MEMBER_8_0_2,
     SQL_GROUP_REPLICATION_METRICS,
@@ -80,12 +78,11 @@ from .queries import (
     SQL_REPLICA_WORKER_THREADS,
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
-    SQL_SERVER_UUID,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
+from .util import DatabaseConfigurationError, connect_with_autocommit  # noqa: F401
 from .version_utils import get_version
 
 try:
@@ -98,7 +95,7 @@ except ImportError:
 try:
     import datadog_agent
 except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
+    from ..stubs import datadog_agent
 
 
 class MySql(AgentCheck):
@@ -114,8 +111,6 @@ class MySql(AgentCheck):
         self.qcache_stats = {}
         self.version = None
         self.is_mariadb = None
-        self.server_uuid = None
-        self.cluster_uuid = None
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -123,11 +118,8 @@ class MySql(AgentCheck):
         self._is_aurora = None
         self._performance_schema_enabled = None
         self._events_wait_current_enabled = None
-        self._group_replication_active = None
-        self._binlog_enabled = None
         self._config = MySQLConfig(self.instance, init_config)
-        self.tag_manager = TagManager()
-        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
+        self.tags = self._config.tags
         self.add_core_tags()
         self.cloud_metadata = self._config.cloud_metadata
 
@@ -152,6 +144,9 @@ class MySql(AgentCheck):
         )  # type: TTLCache
 
         self._runtime_queries_cached = None
+        # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
+        # go through the agent internal metrics submission processing those tags
+        self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
 
@@ -190,7 +185,7 @@ class MySql(AgentCheck):
         if self._database_identifier is None:
             template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
             tag_dict = {}
-            tags = self.tag_manager.get_tags()
+            tags = self.tags.copy()
             # sort tags to ensure consistent ordering
             tags.sort()
             for t in tags:
@@ -239,31 +234,26 @@ class MySql(AgentCheck):
         """
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
         """
-        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
-        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+        self.tags.append("database_instance:{}".format(self.database_identifier))
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
-            self.tag_manager.set_tag(
-                "dd.internal.resource",
-                "gcp_sql_database_instance:{}:{}".format(
+            self.tags.append(
+                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
                     self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
-                ),
+                )
             )
         if self.cloud_metadata.get("aws") is not None:
-            self.tag_manager.set_tag(
-                "dd.internal.resource",
-                "aws_rds_instance:{}".format(
+            self.tags.append(
+                "dd.internal.resource:aws_rds_instance:{}".format(
                     self.cloud_metadata.get("aws")["instance_endpoint"],
-                ),
+                )
             )
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tag_manager.set_tag(
-                "dd.internal.resource",
-                "aws_rds_instance:{}".format(self.resolved_hostname),
-            )
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
             self.cloud_metadata["aws"] = {
                 "instance_endpoint": self.resolved_hostname,
             }
@@ -272,45 +262,36 @@ class MySql(AgentCheck):
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
-                self.tag_manager.set_tag(
-                    "dd.internal.resource",
-                    "{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"]),
+                self.tags.append(
+                    "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
                 )
         # finally, emit a `database_instance` resource for this instance
-        self.tag_manager.set_tag(
-            "dd.internal.resource",
-            "database_instance:{}".format(
+        self.tags.append(
+            "dd.internal.resource:database_instance:{}".format(
                 self.database_identifier,
-            ),
+            )
         )
 
     def set_version(self, db):
-        self.version = get_version(db)
-        self.is_mariadb = self.version.flavor == "MariaDB"
-        self.tag_manager.set_tag("dbms_flavor", self.version.flavor.lower(), replace=True)
-
-    def set_server_uuid(self, db):
-        # MariaDB does not support server_uuid
-        if self.is_mariadb:
+        version = get_version(db)
+        if version == self.version:
             return
-        self.server_uuid = self._get_server_uuid(db)
-        if self.server_uuid:
-            self.tag_manager.set_tag("server_uuid", self.server_uuid, replace=True)
 
-    def _get_server_uuid(self, db):
-        with closing(db.cursor(CommenterCursor)) as cursor:
+        if self.version and self.version.flavor != version.flavor:
             try:
-                cursor.execute(SQL_SERVER_UUID)
-                return cursor.fetchone()[0]
-            except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-                self.warning("Error getting server uuid: %s", e)
-                return None
+                self.tags.remove('dbms_flavor:{}'.format(self.version.flavor.lower()))
+            except ValueError:
+                pass
+
+        self.version = version
+        if not self.version.flavor:
+            return
+
+        self.tags.append('dbms_flavor:{}'.format(self.version.flavor.lower()))
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
-        self._check_binlog_enabled(db)
-        self._is_group_replication_active(db)
 
     def _check_performance_schema_enabled(self, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -363,7 +344,7 @@ class MySql(AgentCheck):
         return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]
 
     def debug_stats_kwargs(self, tags=None):
-        tags = self.tag_manager.get_tags() + self._get_debug_tags() + (tags or [])
+        tags = self.tags + self._get_debug_tags() + (tags or [])
         return {
             'tags': tags,
             "hostname": self.resolved_hostname,
@@ -385,27 +366,25 @@ class MySql(AgentCheck):
             with self._connect() as db:
                 self._conn = db
 
-                # version collection
-                self.set_version(db)
-                self._send_metadata()
-                self._check_database_configuration(db)
-
-                self.set_server_uuid(db)
-                self.set_cluster_tags(db)
-
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
                     self._update_runtime_aurora_tags(aurora_tags)
 
-                # All data collection starts here
+                # version collection
+                self.set_version(db)
+                self._send_metadata()
                 self._send_database_instance_metadata()
+
+                self.is_mariadb = self.version.flavor == "MariaDB"
+
+                self._check_database_configuration(db)
 
                 if self._config.table_rows_stats_enabled:
                     self.check_userstat_enabled(db)
 
                 # Metric collection
-                tags = self.tag_manager.get_tags()
+                tags = copy.deepcopy(self.tags)
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
@@ -431,6 +410,13 @@ class MySql(AgentCheck):
         finally:
             self._conn = None
             self._report_warnings()
+
+    # _set_database_instance_tags sets the tag list for the `database_instance` resource
+    # based on metadata that is collected on check start. This ensures that we see tags such as
+    # `replication_role` appear on the database_instance as a host tag.
+    def _set_database_instance_tags(self, aurora_tags):
+        tags = copy.deepcopy(self._non_internal_tags)
+        return list(set(tags) | set(aurora_tags))
 
     def cancel(self):
         self._statement_samples.cancel()
@@ -538,7 +524,7 @@ class MySql(AgentCheck):
             server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
-        ] + self.tag_manager.get_tags()
+        ] + self.tags
         if not self.disable_generic_tags:
             service_check_tags.append('server:{0}'.format(server))
         return service_check_tags
@@ -549,7 +535,7 @@ class MySql(AgentCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = connect_with_session_variables(**connect_args)
+            db = connect_with_autocommit(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
@@ -574,13 +560,15 @@ class MySql(AgentCheck):
             results = self._get_stats_from_status(db)
         with tracked_query(self, operation="variables_metrics"):
             results.update(self._get_stats_from_variables(db))
-
-        if not is_affirmative(
-            self._config.options.get('disable_innodb_metrics', False)
-        ) and self._check_innodb_engine_enabled(db):
-            with tracked_query(self, operation="innodb_metrics"):
-                results.update(self.innodb_stats.get_stats_from_innodb_status(db))
-            self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
+        
+        if not is_affirmative(self._config.options.get('disable_innodb_metrics', False)):
+            if self._get_is_aurora(db) and not self._is_aurora_writer(db):
+                self.log.debug("Skipping innodb metrics collection for Aurora reader")
+                return
+            if self._check_innodb_engine_enabled(db):
+                with tracked_query(self, operation="innodb_metrics"):
+                    results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+                self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
@@ -675,8 +663,8 @@ class MySql(AgentCheck):
                 results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
-        if self._config.replication_enabled:
-            if self.performance_schema_enabled and self._group_replication_active:
+        if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
+            if self.performance_schema_enabled and self._is_group_replication_active(db):
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
@@ -700,7 +688,7 @@ class MySql(AgentCheck):
                         collected_metric,
                     )
                 else:
-                    additional_status_dict[status_name] = (status_metric, status_dict["type"])
+                    additional_status_dict[status_dict["name"]] = (status_dict["metric_name"], status_dict["type"])
             metrics.update(additional_status_dict)
 
         if len(self._config.additional_variable) > 0:
@@ -757,8 +745,9 @@ class MySql(AgentCheck):
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
-        results.update(self._get_replica_stats(db))
-        results.update(self._get_replicas_connected_count(db, above_560))
+        replication_channel = self._config.options.get('replication_channel')
+        results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
+        results.update(self._get_replica_status(db, above_560))
         return REPLICA_VARS
 
     def _collect_group_replica_metrics(self, db, results):
@@ -784,9 +773,7 @@ class MySql(AgentCheck):
                     ]
                     if above_802 and len(replica_results) > 2:
                         additional_tags.append('member_role:{}'.format(replica_results[2]))
-                    self.gauge(
-                        'mysql.replication.group.member_status', 1, tags=additional_tags + self.tag_manager.get_tags()
-                    )
+                    self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self.tags)
 
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
@@ -818,9 +805,7 @@ class MySql(AgentCheck):
                     vars_to_submit.update(GROUP_REPLICATION_VARS_8_0_2)
 
                 # Submit metrics now, so it's possible to attach `channel_name` tag
-                self._submit_metrics(
-                    vars_to_submit, results, self.tag_manager.get_tags() + ['channel_name:{}'.format(r[0])]
-                )
+                self._submit_metrics(vars_to_submit, results, self.tags + ['channel_name:{}'.format(r[0])])
 
                 return vars_to_submit
         except Exception as e:
@@ -841,6 +826,7 @@ class MySql(AgentCheck):
             replica_io_running = any(v.lower().strip() == 'yes' for v in replica_io_running.values())
         if replica_sql_running:
             replica_sql_running = any(v.lower().strip() == 'yes' for v in replica_sql_running.values())
+        binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
         replicas = collect_scalar('Slaves_connected', results)
@@ -850,7 +836,7 @@ class MySql(AgentCheck):
         # If the host act as a source
         source_repl_running_status = AgentCheck.UNKNOWN
         if self._is_source_host(replicas, results):
-            if replicas > 0 and self._binlog_enabled:
+            if replicas > 0 and binlog_running:
                 self.log.debug("Host is master, there are replicas and binlog is running")
                 source_repl_running_status = AgentCheck.OK
             else:
@@ -882,7 +868,7 @@ class MySql(AgentCheck):
         self.gauge(
             name=self.SLAVE_SERVICE_CHECK_NAME,
             value=1 if status == AgentCheck.OK else 0,
-            tags=self.tag_manager.get_tags() + additional_tags,
+            tags=self.tags + additional_tags,
             hostname=self.reported_hostname,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
@@ -912,11 +898,6 @@ class MySql(AgentCheck):
         return collect_string('Master_Host', results) or collect_string('Source_Host', results)
 
     def _is_group_replication_active(self, db):
-        if not self._config.replication_enabled:
-            self.log.debug("Replication is not enabled, skipping group replication check")
-            self._group_replication_active = False
-            return self._group_replication_active
-
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(SQL_GROUP_REPLICATION_PLUGIN_STATUS)
             r = cursor.fetchone()
@@ -924,12 +905,9 @@ class MySql(AgentCheck):
             # Plugin is installed
             if r is not None and r[0].lower() == 'active':
                 self.log.debug('Group replication plugin is detected and active')
-                self._group_replication_active = True
-                return self._group_replication_active
-            else:
-                self.log.debug('Group replication plugin not detected')
-                self._group_replication_active = False
-                return self._group_replication_active
+                return True
+        self.log.debug('Group replication plugin not detected')
+        return False
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in variables.items():
@@ -1005,13 +983,13 @@ class MySql(AgentCheck):
             self.log.exception("Error while running %s", query)
 
     def _get_runtime_aurora_tags(self, db):
-        runtime_tags = {}
+        runtime_tags = []
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
                 replication_role = cursor.fetchone()[0]
                 if replication_role in {'writer', 'reader'}:
-                    runtime_tags['replication_role'] = replication_role
+                    runtime_tags.append('replication_role:' + replication_role)
         except Exception:
             self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
         return runtime_tags
@@ -1022,8 +1000,15 @@ class MySql(AgentCheck):
         First removes any existing Aurora runtime tags by key name, then adds the new tags.
         """
         # Extract tag keys from aurora_tags to identify which tags to remove
-        for tag, value in aurora_tags.items():
-            self.tag_manager.set_tag(tag, value, replace=True)
+        aurora_tag_keys = {tag.split(':')[0] for tag in aurora_tags}
+
+        # Remove existing Aurora runtime tags from both tag lists
+        self.tags = [tag for tag in self.tags if tag.split(':')[0] not in aurora_tag_keys]
+        self._non_internal_tags = [tag for tag in self._non_internal_tags if tag.split(':')[0] not in aurora_tag_keys]
+
+        # Add the new Aurora tags using set operations
+        self.tags = list(set(self.tags) | set(aurora_tags))
+        self._non_internal_tags = list(set(self._non_internal_tags) | set(aurora_tags))
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
@@ -1170,36 +1155,26 @@ class MySql(AgentCheck):
             self._is_innodb_engine_enabled_cached = False
         return self._is_innodb_engine_enabled_cached
 
-    def _get_replica_stats(self, db):
+    def _get_replica_stats(self, db, is_mariadb, replication_channel):
         replica_results = defaultdict(dict)
-        replica_status = self._get_replica_replication_status(db)
-        if replica_status:
-            # MySQL <5.7 does not have Channel_Name.
-            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-            channel = self._config.replication_channel or replica_status.get('Channel_Name') or 'default'
-            for key, value in replica_status.items():
-                if value is not None:
-                    replica_results[key]['channel:{0}'.format(channel)] = value
-        return replica_results
-
-    def _get_replica_replication_status(self, db):
-        result = {}
-        if not self._config.replication_enabled:
-            return result
-
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if self.is_mariadb and self._config.replication_channel:
-                    cursor.execute("SET @@default_master_connection = '{0}';".format(self._config.replication_channel))
-                cursor.execute(
-                    show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
-                )
+                if is_mariadb and replication_channel:
+                    cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
+                cursor.execute(show_replica_status_query(self.version, is_mariadb, replication_channel))
 
-                result = cursor.fetchone()
-                self.log.debug("Getting replication status: %s", result)
+                results = cursor.fetchall()
+                self.log.debug("Getting replication status: %s", results)
+                for replica_result in results:
+                    # MySQL <5.7 does not have Channel_Name.
+                    # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                    channel = replication_channel or replica_result.get('Channel_Name') or 'default'
+                    for key, value in replica_result.items():
+                        if value is not None:
+                            replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
-            if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
+            if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
                 # MariaDB complains when you try to get replica status with a
                 # connection name on the master, without connection name it
                 # responds an empty string as expected.
@@ -1208,29 +1183,27 @@ class MySql(AgentCheck):
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
-        return result
-
-    def _check_binlog_enabled(self, db):
-        if not self._config.replication_enabled:
-            self._binlog_enabled = False
-            return self._binlog_enabled
-
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                cursor.execute(SQL_BINLOG_ENABLED)
+                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
+                    cursor.execute("SHOW BINARY LOG STATUS;")
+                else:
+                    cursor.execute("SHOW MASTER STATUS;")
 
-                result = cursor.fetchone()
-
-                self._binlog_enabled = self._get_variable_enabled(result, 'binlog_enabled')
+                binlog_results = cursor.fetchone()
+                if binlog_results:
+                    replica_results.update({'Binlog_enabled': True})
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Error while checking if binlog is enabled. Defaulting to False: %s", e)
-            self._binlog_enabled = False
+            if "You are not using binary logging" in str(e):
+                replica_results.update({'Binlog_enabled': False})
+            else:
+                self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
 
-        return self._binlog_enabled
+        return replica_results
 
-    def _get_replicas_connected_count(self, db, above_560):
+    def _get_replica_status(self, db, above_560):
         """
-        Retrieve the count of connected replicas using:
+        Retrieve the replicas statuses using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
         2. The `information_schema.processlist` table. Blocking
         """
@@ -1446,7 +1419,7 @@ class MySql(AgentCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.version.version + '+' + self.version.build,
                 'integration_version': __version__,
-                "tags": self.tag_manager.get_tags(),
+                "tags": self._non_internal_tags,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {
@@ -1457,25 +1430,11 @@ class MySql(AgentCheck):
             self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-    def set_cluster_tags(self, db):
-        if not self._config.replication_enabled:
-            self.log.debug("Replication is not enabled, skipping cluster tags")
-            return
-        if self.is_mariadb:
-            self.log.debug("MariaDB cluster tags are not currently supported")
-            return
-        if self._group_replication_active:
-            self.log.debug("Group replication cluster tags are not currently supported")
-            return
-
-        replica_status = self._get_replica_replication_status(db)
-        if replica_status:
-            self.cluster_uuid = replica_status.get('Source_UUID', replica_status.get('Master_UUID'))
-            if self.cluster_uuid:
-                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
-                self.tag_manager.set_tag('replication_role', "replica", replace=True)
-        else:
-            if self._binlog_enabled:
-                self.cluster_uuid = self.server_uuid
-                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
-                self.tag_manager.set_tag('replication_role', "primary", replace=True)
+    def _is_aurora_writer(self, db):
+        if not self._get_is_aurora(db):
+            return False
+        aurora_tags = self._get_runtime_aurora_tags(db)
+        for tag in aurora_tags:
+            if tag == 'replication_role:writer':
+                return True
+        return False
