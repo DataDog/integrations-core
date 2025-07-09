@@ -8,9 +8,10 @@ import re
 import sys
 from fnmatch import fnmatch
 
-from ..fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
-from ..structures import EnvVars
-from ..subprocess import run_command
+from datadog_checks.dev.fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
+from datadog_checks.dev.structures import EnvVars
+from datadog_checks.dev.subprocess import run_command
+
 from .commands.console import abort, echo_debug, echo_info, echo_success
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .dependencies import read_check_base_dependencies
@@ -268,7 +269,6 @@ def select_hatch_envs(
     latest,
     env_filter_re,
 ):
-
     available_envs = get_available_hatch_envs(check, sort, e2e_tests_only=e2e_tests_only)
 
     if style or format_style:
@@ -553,7 +553,7 @@ def construct_pytest_options(
             # junit report file must contain the env name to handle multiple envs
             # $HATCH_ENV_ACTIVE is a Hatch injected variable
             # See https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars  # noqa
-            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE.xml'
+            f' --junit-xml=junit/test-{test_group}-$HATCH_ENV_ACTIVE.xml'
             # Junit test results class prefix
             f' --junit-prefix={check}'
         )

@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 3.3.0 / 2025-05-15
+## 3.3.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:
 
@@ -10,7 +10,7 @@
 * Introduce a `foundationdb.processes_per_role` gauge tagged by process role/class ([#19706](https://github.com/DataDog/integrations-core/pull/19706))
 * Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
 
-## 3.2.1 / 2025-04-17
+## 3.2.1 / 2025-04-17 / Agent 7.66.0
 
 ***Fixed***:
 

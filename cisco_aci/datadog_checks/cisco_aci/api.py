@@ -85,7 +85,6 @@ class SessionWrapper:
 
 
 class Api:
-
     wrapper_factory = SessionWrapper
 
     def __init__(

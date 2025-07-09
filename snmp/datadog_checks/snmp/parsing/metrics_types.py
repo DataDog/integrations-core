@@ -6,6 +6,7 @@ Type definitions for items in the `metrics` section of a config file.
 
 Helps us ensure we only manipulate known fields with the correct types.
 """
+
 from typing import Dict, List, TypedDict, Union
 
 # Symbols.

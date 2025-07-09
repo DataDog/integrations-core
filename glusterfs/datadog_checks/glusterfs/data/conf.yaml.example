@@ -17,7 +17,7 @@ instances:
     ## @param use_sudo - boolean - optional - default: true
     ## GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
     ##
-    ## dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
+    ## dd-agent ALL=(ALL) NOPASSWD:<datadog-agent>/embedded/sbin/gstatus
     ##
     ## Enable the option for the check to run with sudo.
     #

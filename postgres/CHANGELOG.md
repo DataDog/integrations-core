@@ -2,6 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 22.14.2 / 2025-07-02
+
+***Fixed***:
+
+* Ensure extension IDs are sent as text, not integer ([#20605](https://github.com/DataDog/integrations-core/pull/20605))
+
+## 22.14.1 / 2025-06-26
+
+***Fixed***:
+
+* checking wal_level and if is aurora before querying for control checkpoint metrics ([#20500](https://github.com/DataDog/integrations-core/pull/20500))
+
+## 22.14.0 / 2025-06-12
+
+***Added***:
+
+* Collect and forward list of PostgreSQL extensions ([#20266](https://github.com/DataDog/integrations-core/pull/20266))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399)), ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+* Added a configuration option to support SQL_ASCII encoded Postgres databases with clients making requests in other encodings ([#20441](https://github.com/DataDog/integrations-core/pull/20441))
+
+***Fixed***:
+
+* Check for aws extensions before querying aurora_version() ([#20310](https://github.com/DataDog/integrations-core/pull/20310))
+* Allow EXPLAIN on multi-statement SQL where one or more SET commands appear before another supported statement type ([#20319](https://github.com/DataDog/integrations-core/pull/20319))
+* Checks wal_level before collecting control checkpoint metrics ([#20490](https://github.com/DataDog/integrations-core/pull/20490))
+
+## 22.13.1 / 2025-05-19 / Agent 7.67.0
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
 ## 22.13.0 / 2025-05-15
 
 ***Added***:
@@ -13,7 +45,13 @@
 
 ***Fixed***:
 
-* Fixed bug where we fail to explain parameterized queries that have no parameters ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
+* Fixed bug where we fail to explain parameterized queries that have no parameters. *Note: Does not include fix from 22.12.1* ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
+
+## 22.12.1 / 2025-05-19 / Agent 7.66.0
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix. *Note: This fix is not included in 22.13.0* ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
 
 ## 22.12.0 / 2025-05-14
 

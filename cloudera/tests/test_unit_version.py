@@ -145,15 +145,20 @@ def test_version(
     expected_exception,
     expected_service_checks,
 ):
-    with expected_exception, mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        side_effect=[cloudera_version],
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
-        return_value=[],
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        return_value=[],
+    with (
+        expected_exception,
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
+            side_effect=[cloudera_version],
+        ),
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
+            return_value=[],
+        ),
+        mock.patch(
+            'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
+            return_value=[],
+        ),
     ):
         check = cloudera_check(instance)
         dd_run_check(check)

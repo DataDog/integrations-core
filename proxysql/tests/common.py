@@ -97,6 +97,7 @@ MEMORY_METRICS = (
 
 BACKENDS_METRICS = ('proxysql.backends.count',)
 
+ALL_BACKENDS_METRICS = ('proxysql.all_backends.count',)
 QUERY_RULES_TAGS_METRICS = ('proxysql.query_rules.rule_hits',)
 
 
@@ -107,6 +108,8 @@ ALL_METRICS = (
     + CONNECTION_POOL_METRICS
     + USER_TAGS_METRICS
     + QUERY_RULES_TAGS_METRICS
+    + BACKENDS_METRICS
+    + ALL_BACKENDS_METRICS
 )
 
 DOCKER_HOST = get_docker_hostname()
@@ -158,6 +161,8 @@ INSTANCE_ALL_METRICS = {
         'users_metrics',
         'memory_metrics',
         'query_rules_metrics',
+        'backends_metrics',
+        'all_backends_metrics',
     ],
 }
 
@@ -174,6 +179,8 @@ INSTANCE_ALL_METRICS_STATS = {
         'users_metrics',
         'memory_metrics',
         'query_rules_metrics',
+        'backends_metrics',
+        'all_backends_metrics',
     ],
 }
 

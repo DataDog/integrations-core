@@ -51,6 +51,7 @@ class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
         'ssl_key': {'name': 'tls_private_key'},
     }
 
@@ -355,7 +356,6 @@ class SparkCheck(AgentCheck):
 
         if metrics_json.get('apps'):
             if metrics_json['apps'].get('app') is not None:
-
                 for app_json in metrics_json['apps']['app']:
                     app_id = app_json.get('id')
                     tracking_url = app_json.get('trackingUrl')
@@ -412,7 +412,7 @@ class SparkCheck(AgentCheck):
                 yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
             except JSONDecodeError:
                 self.log.debug(
-                    'Skipping metrics for %s from app %s due to unparseable JSON payload.', property, app_name
+                    'Skipping metrics for %s from app %s due to unparsable JSON payload.', property, app_name
                 )
                 continue
 
@@ -545,9 +545,7 @@ class SparkCheck(AgentCheck):
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
-                self.log.debug(
-                    "No structured streaming metrics to collect from" " app %s. %s", app_name, e, exc_info=True
-                )
+                self.log.debug("No structured streaming metrics to collect from app %s. %s", app_name, e, exc_info=True)
                 pass
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
@@ -698,7 +696,7 @@ class SparkCheck(AgentCheck):
 
         soup = BeautifulSoup(html_content, 'html.parser')
         redirect_link = None
-        for link in soup.findAll('a'):
+        for link in soup.find_all('a'):
             href = link.get('href')
             if 'proxyapproved' in href:
                 redirect_link = href
