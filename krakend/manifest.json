@@ -34,7 +34,7 @@
       },
       "metrics": {
         "prefix": "krakend.api.",
-        "check": "krakend.api.telemetry.metrics.processed.count",
+        "check": "krakend.api.http_server.duration.bucket",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
