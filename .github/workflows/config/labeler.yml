@@ -105,6 +105,8 @@ integration/cacti:
 - cacti/**/*
 integration/calico:
 - calico/**/*
+integration/carbon_black_cloud:
+- carbon_black_cloud/**/*
 integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
@@ -343,6 +345,8 @@ integration/keda:
 - keda/**/*
 integration/keycloak:
 - keycloak/**/*
+integration/klaviyo:
+- klaviyo/**/*
 integration/kong:
 - kong/**/*
 integration/kube_apiserver_metrics:

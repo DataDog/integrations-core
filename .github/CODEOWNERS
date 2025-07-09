@@ -533,6 +533,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /box/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /box/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/carbon_black_cloud/                                                               @DataDog/saas-integrations
+/carbon_black_cloud/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
+/carbon_black_cloud/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
+/carbon_black_cloud/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /forcepoint_security_service_edge/                                   @DataDog/saas-integrations
 /forcepoint_security_service_edge/*.md                               @DataDog/saas-integrations @DataDog/documentation
 /forcepoint_security_service_edge/manifest.json                      @DataDog/saas-integrations @DataDog/documentation
@@ -581,6 +586,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /bitwarden/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /bitwarden/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /bitwarden/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/klaviyo/                                                            @DataDog/saas-integrations
+/klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/klaviyo/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /beyondtrust_password_safe/                                          @DataDog/saas-integrations @DataDog/agent-integrations
 /beyondtrust_password_safe/*.md                                      @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation

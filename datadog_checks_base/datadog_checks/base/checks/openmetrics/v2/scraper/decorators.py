@@ -27,7 +27,10 @@ class WithHttpCodeClass(OpenMetricsScraper):
     def __init__(self, scraper: OpenMetricsScraper, http_status_tag: str):
         self.scraper = scraper
         self.http_status_tag = http_status_tag
-        super().__init__(scraper.check, scraper.config)
+        self.decorated_methods = {"yield_metrics": self.yield_metrics}
+
+    def __getattr__(self, name: str) -> Any:
+        return self.decorated_methods.get(name, getattr(self.scraper, name))
 
     def _add_http_code_class(self, metric: Metric, http_status_tag: str) -> Metric:
         for sample in metric.samples:

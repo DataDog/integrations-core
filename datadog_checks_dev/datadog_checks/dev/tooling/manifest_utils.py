@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from ..fs import file_exists, path_join
+from datadog_checks.dev.fs import file_exists, path_join
+
 from .commands.console import abort
 from .constants import get_root
 from .datastructures import JSONDict

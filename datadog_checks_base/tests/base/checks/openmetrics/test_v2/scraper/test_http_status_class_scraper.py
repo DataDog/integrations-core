@@ -44,7 +44,7 @@ def response(status_label: str, status_code: str, target_info: bool) -> str:
 
         # HELP target_info Target metadata
         # TYPE target_info gauge
-        target_info{service_name="service",service_version="1.0.0"} 1
+        target_info{service_version="1.0.0"} 1
         """
         parsed_response += target_info_text
     return parsed_response
@@ -97,3 +97,14 @@ def test_http_status_class_scraper(
 
     aggregator.assert_metric("test.http_client_routes.count", count=1)
     aggregator.assert_metric_has_tag("test.http_client_routes.count", f"code_class:{expected_class}", count=0)
+
+    # Shared tags are respected using the inner state of the decorated scraper
+    # The first time it runs there is no tag
+    aggregator.assert_metric_has_tag("test.http_client_request_size.count", "info_tag:shared_tag_value", count=0)
+
+    # After running a second time we collect the target_info tags
+    dd_run_check(check)
+    target_info_tag_count = 1 if target_info else 0
+    aggregator.assert_metric_has_tag(
+        "test.http_client_request_size.count", "service_version:1.0.0", count=target_info_tag_count
+    )

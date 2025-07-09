@@ -7,7 +7,8 @@ import tempfile
 
 import click
 
-from ...utils import (
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info
+from datadog_checks.dev.tooling.utils import (
     complete_valid_checks,
     get_check_file,
     get_data_directory,
@@ -18,7 +19,6 @@ from ...utils import (
     has_logs,
     is_tile_only,
 )
-from ..console import CONTEXT_SETTINGS, abort, echo_info
 
 CSV_COLUMNS = [
     'name',
