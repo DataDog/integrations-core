@@ -60,7 +60,7 @@ instances:
     #
     # enable_extra_params: false
 
-    ## @param changelog_lines_per_check - integer - optional
+    ## @param changelog_lines_per_check - integer - optional - default: 1000
     ## Number of changelog lines to process per check run (client nodes only).
     ## Higher values may impact performance.
     #

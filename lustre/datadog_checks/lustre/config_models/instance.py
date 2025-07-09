@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
@@ -35,7 +35,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    changelog_lines_per_check: Optional[int] = Field(None, ge=1, le=10000)
+    changelog_lines_per_check: Optional[int] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_changelogs: Optional[bool] = None
