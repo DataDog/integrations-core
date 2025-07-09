@@ -198,7 +198,7 @@ def test_submit_changelogs(instance, mock_lustre_commands):
             'message': 't=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus',
         }
         assert first_call[0][0] == expected_data
-        assert first_call[0][1] == {'index': '4'}
+        assert first_call[0][1] == {'index': '5'}
 
 
 def test_get_changelog(instance, mock_lustre_commands):

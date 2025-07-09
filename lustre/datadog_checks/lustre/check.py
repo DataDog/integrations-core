@@ -532,7 +532,8 @@ class LustreCheck(AgentCheck):
                 except IndexError:
                     self.log.debug('Unexpected changelog format: %s', line)
                     continue
-                self.send_log(data, {'index': parts[0]}, stream=target)
+                next_index = int(parts[0]) + 1
+                self.send_log(data, {'index': str(next_index)}, stream=target)
 
     def _get_changelog(self, target: str, lines: int) -> str:
         '''
