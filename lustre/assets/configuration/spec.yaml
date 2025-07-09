@@ -81,3 +81,8 @@ files:
         minimum: 1
         maximum: 10000
     - template: instances/default
+  - template: logs
+    example:
+    - type: integration
+      source: lustre
+      service: <SERVICE>

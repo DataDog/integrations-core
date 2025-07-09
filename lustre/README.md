@@ -25,8 +25,6 @@ The Lustre check is included in the [Datadog Agent][3] package. No additional in
 
 ### Configuration
 
-#### Metrics
-
 1. Edit the `lustre.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Lustre performance data. See the [sample lustre.d/conf.yaml][4] for all available configuration options.
 
 2. Add the dd-agent user to the sudoers file to allow it to run Lustre commands without a password. Edit the sudoers file with `visudo` and add:
@@ -39,18 +37,6 @@ The Lustre check is included in the [Datadog Agent][3] package. No additional in
 **Note**: The Datadog Agent must have sufficient privileges to execute Lustre commands (lctl, lnetctl, lfs). This typically requires running as root or with appropriate sudo permissions.
 
 3. [Restart the Agent][5].
-
-
-#### Logs
-
-**Changelog Collection**: For client nodes, changelog users must be registered for changelogs to be collected. Use the `lctl changelog_register` command to register changelog users.
-
-The Lustre integration collects changelog events as structured logs on client nodes. These logs contain:
-
-- `operation_type`: The type of filesystem operation
-- `timestamp`: When the operation occurred  
-- `flags`: Operation flags
-- `message`: Detailed operation information
 
 ### Validation
 
@@ -68,10 +54,41 @@ The Lustre integration does not include any events.
 
 ### Logs
 
+On *client nodes* the Lustre integration can collect changelog events as structured logs. These logs contain:
+
+- `operation_type`: The type of filesystem operation
+- `timestamp`: When the operation occurred  
+- `flags`: Operation flags
+- `message`: Detailed operation information
+
+**Important**: Changelog users must be registered for changelogs to be collected. Use the `lctl changelog_register` command to register changelog users. (see Lustre manual [here][9])
+
+To collect Lustre changelogs:
+
+1. Enable logs in your `datadog.yaml` file:
+
+```yaml
+   logs_enabled: true
+```
+
+2. Uncomment and edit the logs configuration block in your `lustre.d/conf.yaml` file. For example:
+
+```yaml
+   logs:
+     - type: integration
+       source: lustre
+       service: lustre
+``` 
+
+3. Enable changelog collection in the `lustre.d/conf.yaml` file.
+
+```yaml
+   enable_changelogs: true
+```
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+The Lustre integration does not include any service checks.
 
 ## Troubleshooting
 
@@ -115,7 +132,7 @@ lctl changelog_register
 lctl changelog_users <filesystem>
 ```
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 [1]: https://www.lustre.org/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -124,5 +141,5 @@ Need help? Contact [Datadog support][9].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/lustre/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/lustre/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/
+[9]: https://doc.lustre.org/lustre_manual.xhtml#idm140276013629712
