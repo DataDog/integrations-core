@@ -232,6 +232,7 @@ class LustreCheck(AgentCheck):
                 continue
             if suffix == 'hist':
                 # TODO: Handle histogram metrics if needed
+                self.log.debug("Histograms are currently not supported. Ignoring %s", f"job_stats.{name}")
                 continue
             metric_type = _get_stat_type(suffix, values['unit'])
             self._submit(f'job_stats.{name}.{suffix}', value, metric_type, tags=tags)
@@ -541,4 +542,5 @@ class LustreCheck(AgentCheck):
             self.monotonic_count(name, value, tags=tags)
         elif metric_type == 'histogram':
             # TODO: handle this case
+            self.log.debug("Histograms are currently not supported. Ignoring %s", f"{name}")
             return
