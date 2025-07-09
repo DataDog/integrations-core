@@ -4,7 +4,7 @@
 import re
 import subprocess
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
 
@@ -128,7 +128,6 @@ class LustreCheck(AgentCheck):
             self._update_filesystems()
         self._update_changelog_targets(self.devices, self.filesystems)
         self._update_metadata()
-
 
     def _update_devices(self) -> None:
         '''
