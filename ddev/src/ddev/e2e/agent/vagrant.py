@@ -359,7 +359,8 @@ class VagrantAgent(AgentInterface):
         print(f"Vagrant VM `{self._vm_name}` started successfully.\n{stdout}")
 
         # Configure sudoers after VM is up but before starting the agent
-        self._configure_sudoers()
+        if sudoers_content := self.metadata.get("vagrant_sudoers_config"):
+            self._configure_sudoers(sudoers_content)
 
         if start_guest_commands:
             self._run_commands(start_guest_commands, "start")
@@ -557,7 +558,7 @@ class VagrantAgent(AgentInterface):
 
         return client
 
-    def _configure_sudoers(self) -> None:
+    def _configure_sudoers(self, sudoers_content: str) -> None:
         """Configure sudoers to allow dd-agent to run sudo commands without password."""
         if self._is_windows_vm:
             print("Skipping sudoers configuration for Windows VM")
@@ -565,8 +566,8 @@ class VagrantAgent(AgentInterface):
 
         print(f"Configuring sudoers for dd-agent in VM: {self._vm_name}")
 
-        sudoers_content = "dd-agent ALL=(ALL) NOPASSWD:/usr/sbin/gluster\ndd-agent ALL=(ALL) NOPASSWD:/sbin/gluster"
-        sudoers_file = "/etc/sudoers.d/dd-agent-gluster"
+        # Use integration name and env for the sudoers file name
+        sudoers_file = "/etc/sudoers.d/dd-agent"
 
         try:
             with closing(self._get_ssh_client()) as ssh:

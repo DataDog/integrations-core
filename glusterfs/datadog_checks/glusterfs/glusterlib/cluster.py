@@ -4,115 +4,57 @@ import sys
 from glustercli.cli import glusterfs_version, heal, peer, quota, snapshot, volume
 from glustercli.cli.utils import GlusterCmdException
 
-# Global variables for monkey patching
-_USE_SUDO = True
 _LOGGER = None
 
 
-# Monkey patch glustercli to add sudo support and logging
-# We'll patch it dynamically after import to avoid import errors
-def _apply_glustercli_patch():
-    """Apply monkey patch to glustercli's execute function"""
+def _apply_sudo_patch():
+    """Minimal patch to add sudo to glustercli commands"""
     try:
-        # Try to find and patch the execute function in glustercli
-        import glustercli.cli.utils as utils_module
+        import subprocess
 
-        if hasattr(utils_module, 'execute'):
-            original_execute = utils_module.execute
+        from glustercli.cli import utils
 
-            def patched_execute(cmd, **kwargs):
-                """Patched execute function that adds sudo support and logging"""
-                global _USE_SUDO, _LOGGER
+        if hasattr(utils, 'execute'):
+            original_execute = utils.execute
 
-                # Prepend sudo if needed
-                if _USE_SUDO and not cmd.startswith('sudo'):
-                    cmd = 'sudo ' + cmd
+            def execute_with_sudo(cmd):
+                # Build the command following the original logic
+                cmd_args = []
 
-                # Log the command being executed
-                if _LOGGER:
-                    _LOGGER.debug("Executing GlusterFS command: %s", cmd)
+                cmd_args.append('sudo')
 
-                try:
-                    # Call the original execute function
-                    result = utils_module.execute(cmd, **kwargs)
+                # Add the gluster command
+                cmd_args.append(utils.GLUSTERCMD)
 
-                    # Log the output
-                    if _LOGGER and result:
-                        output_lines = str(result).strip().split('\n')
-                        if output_lines:
-                            _LOGGER.debug("Command output (first 5 lines):")
-                            for line in output_lines[:5]:
-                                _LOGGER.debug("  %s", line)
-                            if len(output_lines) > 5:
-                                _LOGGER.debug("  ... (%d more lines)", len(output_lines) - 5)
+                # Add glusterd socket if configured
+                if hasattr(utils, 'GLUSTERD_SOCKET') and utils.GLUSTERD_SOCKET:
+                    cmd_args.append("--glusterd-sock={0}".format(utils.GLUSTERD_SOCKET))
 
-                    return result
-                except Exception as e:
-                    if _LOGGER:
-                        _LOGGER.error("GlusterFS command failed: %s", str(e))
-                    raise
+                # Add mode script
+                cmd_args.append("--mode=script")
 
-            # Apply the patch
-            utils_module.execute = patched_execute
+                # Add the actual command arguments
+                cmd_args += cmd
+
+                if (
+                    hasattr(utils, 'SSH_HOST')
+                    and hasattr(utils, 'SSH_PEM_FILE')
+                    and utils.SSH_HOST is not None
+                    and utils.SSH_PEM_FILE is not None
+                ):
+                    return original_execute(cmd)
+                else:
+                    proc = subprocess.Popen(
+                        cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
+                    )
+                    out, err = proc.communicate()
+
+                    return (proc.returncode, out, err)
+
+            utils.execute = execute_with_sudo
             return True
     except (ImportError, AttributeError):
-        # If we can't find the execute function, try alternative locations
-        try:
-            import glustercli
-
-            # Look for execute in various possible locations
-            for module_path in ['utils', 'cli.utils', 'cli']:
-                try:
-                    module = glustercli
-                    for part in module_path.split('.'):
-                        module = getattr(module, part)
-                    if hasattr(module, 'execute'):
-                        # Found it, apply patch here
-                        original_execute = module.execute
-
-                        def make_patched_execute(original_func):
-                            """Create a patched execute function with proper closure"""
-
-                            def patched_execute(cmd, **kwargs):
-                                """Patched execute function that adds sudo support and logging"""
-                                global _USE_SUDO, _LOGGER
-
-                                # Prepend sudo if needed
-                                if _USE_SUDO and not cmd.startswith('sudo'):
-                                    cmd = 'sudo ' + cmd
-
-                                # Log the command being executed
-                                if _LOGGER:
-                                    _LOGGER.debug("Executing GlusterFS command: %s", cmd)
-
-                                try:
-                                    # Call the original execute function
-                                    result = original_func(cmd, **kwargs)
-
-                                    # Log the output
-                                    if _LOGGER and result:
-                                        output_lines = str(result).strip().split('\n')
-                                        if output_lines:
-                                            _LOGGER.debug("Command output (first 5 lines):")
-                                            for line in output_lines[:5]:
-                                                _LOGGER.debug("  %s", line)
-                                            if len(output_lines) > 5:
-                                                _LOGGER.debug("  ... (%d more lines)", len(output_lines) - 5)
-
-                                    return result
-                                except Exception as e:
-                                    if _LOGGER:
-                                        _LOGGER.error("GlusterFS command failed: %s", str(e))
-                                    raise
-
-                            return patched_execute
-
-                        module.execute = make_patched_execute(original_execute)
-                        return True
-                except AttributeError:
-                    continue
-        except ImportError:
-            pass
+        pass
 
     return False
 
@@ -121,15 +63,6 @@ class Cluster(object):
     """The cluster object is the parent of nodes, bricks and volumes"""
 
     def __init__(self, options, logger, use_sudo):
-        # Set global variables for the monkey patch
-        global _USE_SUDO, _LOGGER
-        _USE_SUDO = use_sudo
-        _LOGGER = logger
-
-        # Apply the monkey patch on first initialization
-        _apply_glustercli_patch()
-
-        # Store as instance attributes as well
         self.logger = logger
         self.use_sudo = use_sudo
 
@@ -147,6 +80,11 @@ class Cluster(object):
         self.displayquota = options.displayquota
         self.displaysnap = options.displaysnap
         self.output_mode = options.output_mode.lower() if options.output_mode else 'console'
+
+        if use_sudo:
+            patch_result = _apply_sudo_patch()
+            if patch_result and self.logger:
+                self.logger.info("Sudo support enabled for gluster commands")
 
     def gather_data(self):
         try:
@@ -292,11 +230,27 @@ class Cluster(object):
     def _update_heal_info(self):
         heal_fail = 0
         for _volume in self.volume_data:
-            if _volume['status'].lower() == 'started':
+            # Only get heal info for replicate and disperse volumes
+            volume_type = _volume.get('type', '').lower()
+            if _volume['status'].lower() == 'started' and volume_type in [
+                'replicate',
+                'disperse',
+                'distributed-replicate',
+                'distributed-disperse',
+            ]:
                 try:
                     _volume['healinfo'] = heal.info(_volume['name'])
-                except GlusterCmdException:
-                    heal_fail = 1
+                except GlusterCmdException as e:
+                    # Check if it's the "not supported for this volume type" error
+                    if "not of type replicate/disperse" in str(e):
+                        # This is expected for non-replicate/disperse volumes, skip silently
+                        self.logger.debug(
+                            "Heal info not supported for volume %s of type %s", _volume['name'], volume_type
+                        )
+                    else:
+                        # Other errors should be reported
+                        heal_fail = 1
+                        self.logger.warning("Failed to get heal info for volume %s: %s", _volume['name'], e)
                     pass
         if heal_fail:
             print("Note: Unable to get self-heal status for one or more " "volumes", file=sys.stderr)

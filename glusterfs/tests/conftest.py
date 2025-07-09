@@ -28,6 +28,7 @@ E2E_METADATA = {
         "sudo gluster volume create volume2 172.30.1.5:/gluster/brick2 force",
         "sudo gluster volume start volume2",
     ],
+    "vagrant_sudoers_config": "dd-agent ALL=(ALL) NOPASSWD: /usr/sbin/gluster\ndd-agent ALL=(ALL) NOPASSWD: /sbin/gluster",  # noqa: E501
 }
 
 
