@@ -172,6 +172,13 @@ def compress(file_path: str) -> int:
 def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[FileDataEntry]:
     """
     Calculates integration file sizes and versions from a repository.
+    Only takes into account integrations with a valid version looking at the pyproject.toml file
+    The pyproject.toml file should have a classifier with this format:
+        classifiers = [
+            ...
+            "Programming Language :: Python :: 3.12",
+            ...
+        ]
     """
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
@@ -179,6 +186,7 @@ def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[
 
     for root, _, files in os.walk(repo_path):
         integration_name = str(os.path.relpath(root, repo_path).split(os.sep)[0])
+
         if not check_version(str(repo_path), integration_name, py_version):
             continue
         for file in files:
