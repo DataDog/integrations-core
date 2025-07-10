@@ -25,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 22778164,
-      "source_type_name": "kubevirt",
+      "source_type_name": "KubeVirt Handler",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
