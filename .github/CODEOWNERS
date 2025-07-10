@@ -592,6 +592,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /beyondtrust_identity_security_insights/manifest.json                @DataDog/saas-integrations @DataDog/documentation
 /beyondtrust_identity_security_insights/assets/logs/                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/klaviyo/                                                            @DataDog/saas-integrations
+/klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+/klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+/klaviyo/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.

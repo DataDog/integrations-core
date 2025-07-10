@@ -21,7 +21,7 @@ from .utils import deep_compare
 pytestmark = pytest.mark.unit
 
 
-def test__get_runtime_aurora_tags():
+def test__get_aurora_replication_role():
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
     class MockCursor:
@@ -52,27 +52,27 @@ def test__get_runtime_aurora_tags():
     reader_row = ('reader',)
     writer_row = ('writer',)
 
-    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[reader_row])))
-    assert tags == {'replication_role': 'reader'}
+    role = mysql_check._get_aurora_replication_role(MockDatabase(MockCursor(rows=[reader_row])))
+    assert role == 'reader'
 
-    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[writer_row])))
-    assert tags == {'replication_role': 'writer'}
+    role = mysql_check._get_aurora_replication_role(MockDatabase(MockCursor(rows=[writer_row])))
+    assert role == 'writer'
 
-    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[(1, 'reader')])))
-    assert tags == {}
+    role = mysql_check._get_aurora_replication_role(MockDatabase(MockCursor(rows=[(1, 'reader')])))
+    assert role is None
 
     # Error cases for non-aurora databases; any error should be caught and not fail the check
 
-    tags = mysql_check._get_runtime_aurora_tags(
+    role = mysql_check._get_aurora_replication_role(
         MockDatabase(
             MockCursor(
                 rows=[], side_effect=pymysql.err.InternalError(pymysql.constants.ER.UNKNOWN_TABLE, 'Unknown Table')
             )
         )
     )
-    assert tags == {}
+    assert role is None
 
-    tags = mysql_check._get_runtime_aurora_tags(
+    role = mysql_check._get_aurora_replication_role(
         MockDatabase(
             MockCursor(
                 rows=[],
@@ -80,7 +80,7 @@ def test__get_runtime_aurora_tags():
             )
         )
     )
-    assert tags == {}
+    assert role is None
 
 
 def test__get_server_pid():
@@ -458,21 +458,22 @@ def test_exception_handling_by_do_for_dbs():
         databases_data._fetch_for_databases([{"name": "my_db"}], "dummy_cursor")
 
 
-def test_update_runtime_aurora_tags():
+def test_update_aurora_replication_role():
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
     # Initial state - no tags
     assert 'replication_role:writer' not in mysql_check.tag_manager.get_tags()
+    assert 'replication_role:reader' not in mysql_check.tag_manager.get_tags()
 
     # First check - writer role
-    aurora_tags = {'replication_role': 'writer'}
-    mysql_check._update_runtime_aurora_tags(aurora_tags)
+    role = 'writer'
+    mysql_check._update_aurora_replication_role(role)
     assert 'replication_role:writer' in mysql_check.tag_manager.get_tags()
     assert len([t for t in mysql_check.tag_manager.get_tags() if t.startswith('replication_role:')]) == 1
 
     # Simulate failover - reader role
-    aurora_tags = {'replication_role': 'reader'}
-    mysql_check._update_runtime_aurora_tags(aurora_tags)
+    role = 'reader'
+    mysql_check._update_aurora_replication_role(role)
     assert 'replication_role:reader' in mysql_check.tag_manager.get_tags()
     assert 'replication_role:writer' not in mysql_check.tag_manager.get_tags()
     assert len([t for t in mysql_check.tag_manager.get_tags() if t.startswith('replication_role:')]) == 1
