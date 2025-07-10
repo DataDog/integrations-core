@@ -148,7 +148,7 @@ datadog-mysql==15.7.0
 datadog-nagios==3.0.0
 datadog-network==5.3.0
 datadog-nfsstat==3.1.0; sys_platform == 'linux2'
-datadog-nginx-ingress-controller==4.1.0
+datadog-nginx-ingress-controller==5.0.0
 datadog-nginx==9.0.0
 datadog-nvidia-nim==1.1.0
 datadog-nvidia-triton==2.2.0
