@@ -64,7 +64,7 @@ datadog-eset-protect==1.0.0
 datadog-esxi==4.0.0
 datadog-etcd==9.0.0
 datadog-exchange-server==4.2.0; sys_platform == 'win32'
-datadog-external-dns==5.1.0
+datadog-external-dns==6.0.0
 datadog-falco==1.1.0
 datadog-flink==3.0.0
 datadog-fluentd==5.1.0
