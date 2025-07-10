@@ -789,7 +789,29 @@ pipeline:
         - type: string-builder-processor
           name: Add privileges
           enabled: true
-          template: ADMIN_PRIVILEGES_ASSIGNED
+          template: "[ADMIN,ADMIN_PRIVILEGES_ASSIGNED]"
+          target: ocsf.privileges
+        - type: grok-parser
+          name: Profiles string to array
+          enabled: true
+          source: ocsf.privileges
+          samples:
+            - "[ADMIN_PRIVILEGES_ASSIGNED]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.privileges:array("[]",",")}
+    - type: pipeline
+      name: LastPass OCSF sub pipeline for class User Access Management [3005]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:("Remove admin") -@Username:""'
+      processors:
+        - type: string-builder-processor
+          name: Add privileges
+          enabled: true
+          template: "[ADMIN]"
           target: ocsf.privileges
         - type: grok-parser
           name: Profiles string to array

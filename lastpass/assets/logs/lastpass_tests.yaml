@@ -492,6 +492,8 @@ tests:
               name: "LastPass reporting events"
               vendor_name: "LastPass"
             version: "1.5.0"
+          privileges:
+            - "ADMIN"
           severity: "Informational"
           severity_id: 1
           src_endpoint:
@@ -741,7 +743,7 @@ tests:
               name: "LastPass reporting events"
               vendor_name: "LastPass"
             profiles:
-            - "host"
+              - "host"
             version: "1.5.0"
           severity: "Informational"
           severity_id: 1
@@ -750,9 +752,8 @@ tests:
           time: 1.722921377E12
           type_uid: 600107
           web_resources:
-          -
-            name: "LastPass vault"
-            type: "PASSWORD_MANAGER_VAULT"
+            - name: "LastPass vault"
+              type: "PASSWORD_MANAGER_VAULT"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -766,7 +767,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
