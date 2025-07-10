@@ -113,6 +113,9 @@ def ci(app: Application, sync: bool):
 
         jobs[job_id] = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
 
+        if data['target'] == 'ddev':
+            jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
+
     jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
 
     # Enforce proper string types
