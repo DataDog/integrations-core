@@ -6,7 +6,7 @@
 
 ***Removed***:
 
-* Remove `time_elasped` metrics from Falco ([#20634](https://github.com/DataDog/integrations-core/pull/20634))
+* Remove `time_elapsed` metrics from Falco ([#20634](https://github.com/DataDog/integrations-core/pull/20634))
 
 ***Changed***:
 

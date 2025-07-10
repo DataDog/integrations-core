@@ -11,7 +11,7 @@
 
 ***Fixed***:
 
-* Avoid querying INFORMATION_SCHEMA.COLUMNS in favor of a static version check ([#20514](https://github.com/DataDog/integrations-core/pull/20514))
+* Avoid querying `INFORMATION_SCHEMA.COLUMNS` in favor of a static version check ([#20514](https://github.com/DataDog/integrations-core/pull/20514))
 * Fixes incorrect tag values when monitoring Percona Server. Previous tags on the database instance resource and metrics indicated dbms_flavor:mysql, but now indicate dbms_flavor:percona. This change issues a new query `SELECT @@version_comment` on startup. ([#20529](https://github.com/DataDog/integrations-core/pull/20529))
 * Fixes missing mysql variables from database instances configured with templated names ([#20620](https://github.com/DataDog/integrations-core/pull/20620))
 * Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
