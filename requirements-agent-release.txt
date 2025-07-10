@@ -118,7 +118,7 @@ datadog-kube-proxy==9.0.0
 datadog-kube-scheduler==7.0.0
 datadog-kubeflow==2.0.0
 datadog-kubelet==10.0.0
-datadog-kubernetes-cluster-autoscaler==2.2.0
+datadog-kubernetes-cluster-autoscaler==3.0.0
 datadog-kubernetes-state==10.1.0
 datadog-kubevirt-api==1.2.0
 datadog-kubevirt-controller==1.1.0
