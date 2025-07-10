@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 """This module contains test annotations"""
+
 import pytest
 
 from .utils import ON_MACOS, ON_WINDOWS

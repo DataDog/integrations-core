@@ -103,6 +103,8 @@ integration/cacti:
 - cacti/**/*
 integration/calico:
 - calico/**/*
+integration/carbon_black_cloud:
+- carbon_black_cloud/**/*
 integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
@@ -341,8 +343,12 @@ integration/keda:
 - keda/**/*
 integration/keycloak:
 - keycloak/**/*
+integration/klaviyo:
+- klaviyo/**/*
 integration/kong:
 - kong/**/*
+integration/krakend:
+- krakend/**/*
 integration/kube_apiserver_metrics:
 - kube_apiserver_metrics/**/*
 integration/kube_controller_manager:
@@ -521,6 +527,8 @@ integration/prometheus:
 - prometheus/**/*
 integration/proofpoint_tap:
 - proofpoint_tap/**/*
+integration/proxmox:
+- proxmox/**/*
 integration/proxysql:
 - proxysql/**/*
 integration/pulsar:

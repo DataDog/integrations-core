@@ -44,10 +44,6 @@ The Falco integration seamlessly ingests the data of Falco logs using the webhoo
 
 The Falco integration collects and forwards Falco alert logs to Datadog.
 
-### Metrics
-
-The Falco integration does not include any metrics.
-
 ### Events
 
 The Falco integration does not include any events.

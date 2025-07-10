@@ -44,17 +44,17 @@ def check():
 
 @pytest.fixture
 def mocked_request():
-    with patch("requests.get", new=requests_get_mock):
+    with patch("requests.Session.get", new=requests_get_mock):
         yield
 
 
 @pytest.fixture
 def mocked_auth_request():
-    with patch("requests.get", new=requests_auth_mock):
+    with patch("requests.Session.get", new=requests_auth_mock):
         yield
 
 
-def requests_get_mock(url, *args, **kwargs):
+def requests_get_mock(session, url, *args, **kwargs):
     if url == NAME_SYSTEM_STATE_URL:
         return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_state.json'))
     elif url == NAME_SYSTEM_URL:

@@ -6,7 +6,7 @@ import socket
 import time
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
@@ -45,6 +45,7 @@ from .common import (
     check_stat_replication_physical_slot,
     check_stat_wal_metrics,
     check_uptime_metrics,
+    check_wait_event_metrics,
     check_wal_receiver_metrics,
     requires_static_version,
 )
@@ -96,6 +97,14 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
+    expected_wait_event_tags = expected_tags + [
+        'app:datadog-agent',
+        'user:datadog',
+        'db:datadog_test',
+        'backend_type:client backend',
+        'wait_event:NoWaitEvent',
+    ]
+    check_wait_event_metrics(aggregator, expected_tags=expected_wait_event_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
 
@@ -121,8 +130,7 @@ def test_initialization_tags(integration_check, pg_instance):
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             if float(POSTGRES_VERSION) >= 13.0:
                 query = 'select pg_snapshot_xmin(pg_current_snapshot());'
@@ -139,9 +147,7 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
     assert aggregator.metrics('postgresql.snapshot.xmax')[0].value >= xmin
 
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        # Force autocommit
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             _increase_txid(cur)
 
@@ -283,7 +289,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     def format_with_error(value, **kwargs):
         if 'pg_is_in_recovery' in value:
             called.append(True)
-            raise psycopg2.errors.FeatureNotSupported("Not available")
+            raise psycopg.errors.FeatureNotSupported("Not available")
         return unpatched_fmt.format(value, **kwargs)
 
     # This simulate an error in the fmt function, as it's a bit hard to mock psycopg
@@ -331,7 +337,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # Forth: connection health check failed
     with pytest.raises(DatabaseHealthCheckError):
         db = mock.MagicMock()
-        db.cursor().__enter__().execute.side_effect = psycopg2.OperationalError('foo')
+        db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
 
         @contextlib.contextmanager
         def mock_db():
@@ -389,7 +395,7 @@ def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
     Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
     """
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.run()
@@ -646,7 +652,7 @@ def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
-    with pytest.raises(psycopg2.errors.QueryCanceled):
+    with pytest.raises(psycopg.errors.QueryCanceled):
         with check.db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("select pg_sleep(2000)")
@@ -897,7 +903,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
                     "enabled": True,
                 },
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -927,7 +933,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
                     "enabled": 'true',
                 },
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -1001,7 +1007,7 @@ def test_database_instance_cloud_metadata_aws(
             {
                 "client_id": "my-client-id",
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -1047,7 +1053,7 @@ def test_database_instance_cloud_metadata_aws(
             {
                 "client_id": "my-client-id",
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -1062,7 +1068,7 @@ def test_database_instance_cloud_metadata_aws(
                 },
             },
             None,
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),

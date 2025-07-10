@@ -43,9 +43,12 @@ dogstatsd_metrics_stats_enable: true
             build=True,
             conditions=[CheckEndpoints(URL + "/api/v1/health", attempts=120)],
         ):
-            yield instance, {
-                'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(temp_dir)],
-            }
+            yield (
+                instance,
+                {
+                    'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(temp_dir)],
+                },
+            )
 
 
 @pytest.fixture(scope='session')

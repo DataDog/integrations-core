@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.1 / 2025-06-12
+
+***Fixed***:
+
+* Fix collection of metrics from sinfo on `collection_level` 2 ([#20456](https://github.com/DataDog/integrations-core/pull/20456))
+
 ## 2.0.0 / 2025-05-15 / Agent 7.67.0
 
 ***Changed***:

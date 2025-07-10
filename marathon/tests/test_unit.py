@@ -107,7 +107,8 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Marathon('marathon', init_config, instances=[instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         check.check(instance)

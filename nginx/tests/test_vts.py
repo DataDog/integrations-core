@@ -49,7 +49,7 @@ def test_vts(check, instance_vts, aggregator):
 
 @pytest.mark.unit
 def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mocker):
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
     c = check(mocked_instance_vts)
     dd_run_check(c)
 
