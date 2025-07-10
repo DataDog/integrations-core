@@ -527,6 +527,8 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
+integration/proofpoint_on_demand:
+- proofpoint_on_demand/**/*
 integration/proxmox:
 - proxmox/**/*
 integration/proxysql:
