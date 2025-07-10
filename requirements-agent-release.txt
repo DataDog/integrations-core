@@ -42,7 +42,7 @@ datadog-cloudera==3.2.0
 datadog-cockroachdb==6.0.0
 datadog-confluent-platform==3.0.0
 datadog-consul==5.0.0
-datadog-coredns==5.1.0; sys_platform == 'linux2'
+datadog-coredns==6.0.0; sys_platform == 'linux2'
 datadog-couch==8.3.0
 datadog-couchbase==5.1.0
 datadog-crio==4.1.0
