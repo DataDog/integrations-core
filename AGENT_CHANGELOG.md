@@ -1,3 +1,30 @@
+## Datadog Agent version [7.68.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7680)
+
+* Amazon Kafka [6.7.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* ArgoCD [3.4.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
+* Datadog Checks Base [37.15.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Datadog Checks Downloader [8.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
+* Cisco ACI [4.7.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ESET Protect [1.0.0](https://github.com/DataDog/integrations-core/blob/master/eset_protect/CHANGELOG.md)
+* Falco [1.1.0](https://github.com/DataDog/integrations-core/blob/master/falco/CHANGELOG.md)
+* HTTP [11.5.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* Kuma [1.0.0](https://github.com/DataDog/integrations-core/blob/master/kuma/CHANGELOG.md)
+* LiteLLM [1.0.0](https://github.com/DataDog/integrations-core/blob/master/litellm/CHANGELOG.md)
+* Microsoft DNS [1.0.0](https://github.com/DataDog/integrations-core/blob/master/microsoft_dns/CHANGELOG.md)
+* MongoDB [10.1.1](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.6.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* NFSstat [3.1.0](https://github.com/DataDog/integrations-core/blob/master/nfsstat/CHANGELOG.md)
+* OpenStack Controller [8.6.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* Postgres [22.14.2](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Redis [8.0.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md) **BREAKING CHANGE**
+* RiakCS [4.6.0](https://github.com/DataDog/integrations-core/blob/master/riakcs/CHANGELOG.md)
+* Slurm [2.0.1](https://github.com/DataDog/integrations-core/blob/master/slurm/CHANGELOG.md)
+* SNMP [10.1.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* SonarQube [5.3.0](https://github.com/DataDog/integrations-core/blob/master/sonarqube/CHANGELOG.md)
+* SQL Server [22.7.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* TLS [4.6.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* WatchGuard Firebox [1.0.0](https://github.com/DataDog/integrations-core/blob/master/watchguard_firebox/CHANGELOG.md)
+
 ## Datadog Agent version [7.67.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7670)
 
 * Amazon Kafka [6.6.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
