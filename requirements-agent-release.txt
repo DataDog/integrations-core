@@ -76,7 +76,7 @@ datadog-gitlab-runner==7.0.0
 datadog-gitlab==10.0.0
 datadog-glusterfs==3.0.2; sys_platform == 'linux2'
 datadog-go-expvar==5.0.0
-datadog-gunicorn==4.1.0; sys_platform != 'win32'
+datadog-gunicorn==4.1.1; sys_platform != 'win32'
 datadog-haproxy==7.1.0
 datadog-harbor==5.1.0
 datadog-hazelcast==6.2.0
