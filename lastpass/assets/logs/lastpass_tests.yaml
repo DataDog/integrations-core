@@ -461,7 +461,59 @@ tests:
           "Data": "abc1@test.com",
           "timestamp": 1722921377000.0  
       }
-    result: null
+    result:
+      custom:
+        Action: "Remove admin"
+        Data: "abc1@test.com"
+        IP_Address: "10.10.10.10"
+        Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
+        evt:
+          name: "Remove admin"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        ocsf:
+          activity_id: 2
+          activity_name: "Revoke Privileges"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "User Access Management"
+          class_uid: 3005
+          message: "Remove admin"
+          metadata:
+            event_code: "Remove admin"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 300502
+          user:
+            name: "abc1@test.com"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Remove admin",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "abc1@test.com",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -658,7 +710,7 @@ tests:
           "Time": "2024-08-06 05:16:17",
           "Username": "abc@test.com",
           "IP_Address": "10.10.10.10",
-          "Action": "Data import",
+          "Action": "Data export",
           "Data": "",
           "timestamp": 1722921377000.0
       }
