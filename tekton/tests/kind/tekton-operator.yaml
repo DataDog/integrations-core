@@ -1032,7 +1032,7 @@ spec:
             - name: IMAGE_PIPELINES_PROXY
               value: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/proxy-webhook:v0.69.1@sha256:f6224b715671cbbcfd3a164e3557ff533b47e39a5a689a0d818fd2fd1f027016
             - name: IMAGE_JOB_PRUNER_TKN
-              value: ghcr.io/tektoncd/plumbing/tkn: v20241224-afeb9554b4
+              value: ghcr.io/tektoncd/plumbing/tkn:v20241224-afeb9554b4
             - name: METRICS_DOMAIN
               value: tekton.dev/operator
             - name: VERSION
