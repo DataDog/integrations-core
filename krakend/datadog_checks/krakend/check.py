@@ -26,7 +26,7 @@ class HttpCodeClassScraper(OpenMetricsScraper):
     def __init__(self, check: AgentCheck, config: Mapping):
         super().__init__(check, config)
 
-    def consume_metrics(self, runtime_data):
+    def consume_metrics_w_target_info(self, runtime_data: dict):
         metrics = super().consume_metrics(runtime_data)
         for metric in metrics:
             yield HttpCodeClassScraper.inject_code_class(metric)

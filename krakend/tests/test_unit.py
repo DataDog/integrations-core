@@ -117,3 +117,7 @@ def test_labels_renaming(ready_check: KrakendCheck, aggregator: AggregatorStub, 
 
 def test_service_check_emitted(ready_check: KrakendCheck, aggregator: AggregatorStub):
     aggregator.assert_service_check("krakend.api.openmetrics.health", status=AgentCheck.OK)
+
+
+def test_http_code_class_tag(ready_check: KrakendCheck, aggregator: AggregatorStub):
+    aggregator.assert_metric_has_tag("krakend.api.http_client.duration.bucket", "code_class:5XX")
