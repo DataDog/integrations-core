@@ -208,7 +208,7 @@ datadog-symantec-endpoint-protection==1.0.0
 datadog-system-core==4.0.0
 datadog-system-swap==3.0.0
 datadog-tcp-check==6.0.0
-datadog-teamcity==6.1.0
+datadog-teamcity==7.0.0
 datadog-tekton==2.2.0
 datadog-teleport==2.3.0
 datadog-temporal==3.2.0
