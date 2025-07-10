@@ -1030,9 +1030,9 @@ spec:
             - name: OPERATOR_NAME
               value: tekton-operator
             - name: IMAGE_PIPELINES_PROXY
-              value: ghcr.io/tekton-releases/github.com/tektoncd/operator/cmd/kubernetes/proxy-webhook:v0.69.1@sha256:f6224b715671cbbcfd3a164e3557ff533b47e39a5a689a0d818fd2fd1f027016
+              value: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/proxy-webhook:v0.69.1@sha256:f6224b715671cbbcfd3a164e3557ff533b47e39a5a689a0d818fd2fd1f027016
             - name: IMAGE_JOB_PRUNER_TKN
-              value: ghcr.io/tekton-releases/dogfooding/tkn@sha256:a572f1748eb5c0e8002dd0a83ee836ad9d755d035cbd5bfbdef5de810d2bea0b
+              value: ghcr.io/tektoncd/dogfooding/tkn@sha256:a572f1748eb5c0e8002dd0a83ee836ad9d755d035cbd5bfbdef5de810d2bea0b
             - name: METRICS_DOMAIN
               value: tekton.dev/operator
             - name: VERSION
@@ -1049,7 +1049,7 @@ spec:
                 configMapKeyRef:
                   key: DEFAULT_TARGET_NAMESPACE
                   name: tekton-config-defaults
-          image: ghcr.io/tekton-releases/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.69.1@sha256:142c59f97aac2fba714e928012b5576476313c7cd4394b568df656b0693dbea0
+          image: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.69.1@sha256:142c59f97aac2fba714e928012b5576476313c7cd4394b568df656b0693dbea0
           imagePullPolicy: Always
           name: tekton-operator-lifecycle
         - args:
@@ -1074,7 +1074,7 @@ spec:
               value: v0.69.1
             - name: METRICS_DOMAIN
               value: tekton.dev/operator
-          image: ghcr.io/tekton-releases/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.69.1@sha256:142c59f97aac2fba714e928012b5576476313c7cd4394b568df656b0693dbea0
+          image: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.69.1@sha256:142c59f97aac2fba714e928012b5576476313c7cd4394b568df656b0693dbea0
           imagePullPolicy: Always
           name: tekton-operator-cluster-operations
       serviceAccountName: tekton-operator
@@ -1116,7 +1116,7 @@ spec:
               value: tekton-operator-webhook-certs
             - name: METRICS_DOMAIN
               value: tekton.dev/operator
-          image: ghcr.io/tekton-releases/github.com/tektoncd/operator/cmd/kubernetes/webhook:v0.69.1@sha256:6e56a9a25b74c3758fd9d2f57aa9e2984a0a41477b1a4cde63e4e20160d02800
+          image: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/webhook:v0.69.1@sha256:6e56a9a25b74c3758fd9d2f57aa9e2984a0a41477b1a4cde63e4e20160d02800
           name: tekton-operator-webhook
           ports:
             - containerPort: 8443
