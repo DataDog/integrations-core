@@ -9,7 +9,7 @@ datadog-airflow==7.0.0
 datadog-amazon-msk==7.0.0
 datadog-ambari==6.1.0; sys_platform != 'win32'
 datadog-apache==7.0.0
-datadog-appgate-sdp==1.1.0; sys_platform != 'win32'
+datadog-appgate-sdp==2.0.0; sys_platform != 'win32'
 datadog-arangodb==3.2.0
 datadog-argo-rollouts==2.2.0
 datadog-argo-workflows==2.3.0
