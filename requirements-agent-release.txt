@@ -109,6 +109,7 @@ datadog-kaspersky==1.0.0
 datadog-keda==1.0.1
 datadog-keycloak==1.0.0
 datadog-kong==5.1.0
+datadog-krakend==1.0.0
 datadog-kube-apiserver-metrics==6.2.0
 datadog-kube-controller-manager==7.1.0
 datadog-kube-dns==6.1.0
