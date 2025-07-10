@@ -218,12 +218,12 @@ class LustreCheck(AgentCheck):
             device_name = jobstats_param.split('.')[1]  # For example: lustre-MDT0000
             if not any(device_name.startswith(fs) for fs in filesystems):
                 continue
-            jobstats_metrics = self._get_jobstats_metrics(jobstats_param)['job_stats']
+            jobstats_metrics = self._get_jobstats_metrics(jobstats_param).get('job_stats')
             if jobstats_metrics is None:
                 self.log.debug('No jobstats metrics found for %s', jobstats_param)
                 continue
             for job in jobstats_metrics:
-                job_id = job['job_id']
+                job_id = job.get('job_id') or "unknown"
                 tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
                 for metric_name, metric_values in job.items():
                     if not isinstance(metric_values, dict):
@@ -265,15 +265,19 @@ class LustreCheck(AgentCheck):
         jobstats_output = self._run_command('lctl', 'get_param', '-ny', jobstats_param, sudo=True)
         try:
             return yaml.safe_load(jobstats_output) or {}
-        except KeyError:
-            self.log.debug('No jobstats metrics found for %s', jobstats_param)
+        except Exception as e:
+            self.log.debug('Could not get data for "%s", caught exception: %s', jobstats_param, e)
             return {}
 
     def submit_lnet_stats_metrics(self) -> None:
         '''
         Submit the lnet stats metrics.
         '''
-        lnet_metrics = self._get_lnet_metrics('stats')['statistics']
+        lnet_metrics = self._get_lnet_metrics('stats')
+        if 'statistics' not in lnet_metrics:
+            self.log.debug('Got unexpected output for lnet stats. Keys: %s', lnet_metrics.keys())
+            return
+        lnet_metrics = lnet_metrics['statistics']
         for metric in lnet_metrics:
             if metric.endswith('_count') or metric == 'errors':
                 metric_type = 'count'
@@ -285,7 +289,11 @@ class LustreCheck(AgentCheck):
         '''
         Submit the lnet local ni metrics.
         '''
-        lnet_local_stats = self._get_lnet_metrics('net')['net']
+        lnet_local_stats = self._get_lnet_metrics('net')
+        if 'net' not in lnet_local_stats:
+            self.log.debug('Got unexpected output for lnet local stats. Keys: %s', lnet_local_stats.keys())
+            return
+        lnet_local_stats = lnet_local_stats['net']
         for net in lnet_local_stats:
             net_type = net.get('net type')
             for ni in net.get('local NI(s)', []):
@@ -302,7 +310,11 @@ class LustreCheck(AgentCheck):
         '''
         Submit the lnet peer ni metrics.
         '''
-        lnet_peer_stats = self._get_lnet_metrics('peer')['peer']
+        lnet_peer_stats = self._get_lnet_metrics('peer')
+        if 'peer' not in lnet_peer_stats:
+            self.log.debug('Got unexpected output for lnet peer stats. Keys: %s', lnet_peer_stats.keys())
+            return
+        lnet_peer_stats = lnet_peer_stats['peer']
         for peer in lnet_peer_stats:
             nid = peer.get('primary nid')
             for ni in peer.get('peer ni', []):
@@ -347,8 +359,8 @@ class LustreCheck(AgentCheck):
         lnet_stats = self._run_command('lnetctl', stats_type, 'show', '-v', self.lnetctl_verbosity, sudo=True)
         try:
             return yaml.safe_load(lnet_stats) or {}
-        except (KeyError, ValueError):
-            self.log.debug('No lnet stats found')
+        except Exception as e:
+            self.log.debug('Could not get lnet %s, caught exception: %s', stats_type, e)
             return {}
 
     def submit_param_data(self, params: Set[LustreParam], filesystems: List[str]) -> None:
