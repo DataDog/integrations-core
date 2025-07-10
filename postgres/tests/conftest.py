@@ -4,7 +4,7 @@
 import copy
 import os
 
-import psycopg2
+import psycopg
 import pytest
 from semver import VersionInfo
 
@@ -22,6 +22,7 @@ from .common import (
     PORT_REPLICA2,
     PORT_REPLICA_LOGICAL,
     POSTGRES_IMAGE,
+    POSTGRES_LOCALE,
     POSTGRES_VERSION,
     USER,
 )
@@ -38,12 +39,20 @@ INSTANCE = {
 }
 
 
+E2E_METADATA = {
+    'start_commands': [
+        'apt update',
+        'apt install -y --no-install-recommends build-essential python3-dev libpq-dev',
+    ],
+}
+
+
 def connect_to_pg():
-    psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
+    psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
     if float(POSTGRES_VERSION) >= 10.0:
-        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
-        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
-        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA_LOGICAL, password=PASSWORD)
+        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
+        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
+        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA_LOGICAL, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -57,9 +66,9 @@ def dd_environment(e2e_instance):
     with docker_run(
         os.path.join(HERE, 'compose', compose_file),
         conditions=[WaitFor(connect_to_pg)],
-        env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE},
+        env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE, "POSTGRES_LOCALE": POSTGRES_LOCALE},
     ):
-        yield e2e_instance
+        yield e2e_instance, E2E_METADATA
 
 
 @pytest.fixture

@@ -7,9 +7,17 @@ from email.headerregistry import Address
 
 import click
 
-from ....fs import basepath
-from ...testing import process_checks_option
-from ...utils import (
+from datadog_checks.dev.fs import basepath
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import (
     complete_valid_checks,
     get_package_name,
     get_project_file,
@@ -20,7 +28,6 @@ from ...utils import (
     normalize_project_name,
     read_setup_file,
 )
-from ..console import CONTEXT_SETTINGS, abort, annotate_display_queue, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
 EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base", "ddev"]
@@ -93,7 +100,7 @@ def package(check):
                 display_queue.append(
                     (
                         echo_failure,
-                        f'   Invalid email(s) found in {check}/pyproject.toml: ' f'{", ".join(invalid_emails)}.',
+                        f'   Invalid email(s) found in {check}/pyproject.toml: {", ".join(invalid_emails)}.',
                     )
                 )
 

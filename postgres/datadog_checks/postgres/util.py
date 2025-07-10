@@ -249,6 +249,34 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
     ],
 }
 
+QUERY_PG_STAT_RECOVERY_PREFETCH = {
+    'name': 'pg_stat_recovery_prefetch',
+    'query': """
+        SELECT
+            prefetch,
+            hit,
+            skip_init,
+            skip_new,
+            skip_fpw,
+            skip_rep,
+            wal_distance,
+            block_distance,
+            io_depth
+        FROM pg_stat_recovery_prefetch
+    """.strip(),
+    'columns': [
+        {'name': 'recovery_prefetch.prefetch', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.hit', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_init', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_new', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_fpw', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_rep', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.wal_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.block_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.io_depth', 'type': 'gauge'},
+    ],
+}
+
 QUERY_PG_UPTIME = {
     'name': 'pg_uptime',
     'query': "SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))",
@@ -526,6 +554,23 @@ SELECT
     total_txns, total_bytes
 FROM pg_stat_replication_slots AS stat
 JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
+""".strip(),
+}
+
+QUERY_PG_WAIT_EVENT_METRICS = {
+    'name': 'wait_event_stats',
+    'columns': [
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'user', 'type': 'tag_not_null'},
+        {'name': 'wait_event', 'type': 'tag'},
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'activity.wait_event', 'type': 'gauge'},
+    ],
+    'query': """
+SELECT application_name, datname, usename, COALESCE(wait_event, 'NoWaitEvent'), backend_type, COUNT(*)
+FROM pg_stat_activity
+GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
 

@@ -13,8 +13,16 @@ import click
 import yaml
 
 from datadog_checks.dev import TempDir
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+    set_debug,
+)
 
-from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, set_debug
 from .constants import CLEAR_LINE_ESCAPE_CODE, MIB_SOURCE_URL
 
 # Unique identifiers of traps in json-compiled MIB files.
