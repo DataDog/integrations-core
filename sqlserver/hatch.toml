@@ -4,7 +4,8 @@ base-package-features = ["deps", "db", "json"]
 [[envs.default.matrix]]
 python = ["3.12"]
 os = ["linux"]
-version = ["2017", "2019", "2022"]
+driver = ["FreeTDS", "odbc"]
+version = ["2019", "2022"]
 setup = ["single", "ha"]
 
 # test the compatibility of sqlserver running on non-utc timezone
@@ -65,6 +66,7 @@ matrix.version.env-vars = [
 ]
 matrix.driver.env-vars = [
   { key = "WINDOWS_SQLSERVER_DRIVER", platform = ["windows"] },
+  { key = "LINUX_SQLSERVER_DRIVER", platform = ["linux"] },
 ]
 matrix.tz.env-vars = [
   { key = "TZ", value = "America/New_York", if = ["newyork"] },

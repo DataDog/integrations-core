@@ -2,6 +2,50 @@
 
 <!-- towncrier release notes start -->
 
+## 12.0.0 / 2025-07-01
+
+***Changed***:
+
+* Replaced multiple format flags with a single `--format` option in the `ddev size` command. ([#20330](https://github.com/DataDog/integrations-core/pull/20330))
+* Remove Black dependency from the hatch environment collector in favor of Ruff ([#20451](https://github.com/DataDog/integrations-core/pull/20451))
+
+***Added***:
+
+* Update style dependencies. ([#20312](https://github.com/DataDog/integrations-core/pull/20312))
+* - Added `ddev size create-dashboard` to visualize size metrics on the Datadog platform
+  - Added `--to-dd-org` option to `ddev size status` to send metrics to Datadog ([#20330](https://github.com/DataDog/integrations-core/pull/20330))
+* Add nanodollar as valid metric units ([#20341](https://github.com/DataDog/integrations-core/pull/20341))
+* - Adds the required logic to upload historical size metrics to a specified Datadog organization.
+  - Updates the CI pipeline to send metrics to Datadog on pushes to the master branch. Note that the metrics may not be fully accurate yet, as dependency sizes could be outdated since the lockfile updates are handled in a separate PR. ([#20431](https://github.com/DataDog/integrations-core/pull/20431))
+* Add --fmt-unsafe and --lint-unsafe options to ddev test ([#20451](https://github.com/DataDog/integrations-core/pull/20451))
+
+***Fixed***:
+
+* Update ddev metadata validator to only error on required headers ([#20419](https://github.com/DataDog/integrations-core/pull/20419))
+* Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors ([#20435](https://github.com/DataDog/integrations-core/pull/20435))
+
+## 11.4.0 / 2025-05-27
+
+***Added***:
+
+* Allow ddev to override configuration values from a local .ddev.toml file found either in the local directory or any parent directory. This allows modifying ddev behavior when running it in different directories. ([#19877](https://github.com/DataDog/integrations-core/pull/19877))
+* Added new commands to track and analyze size changes in integrations and dependencies:
+  - **`ddev size status`**: Shows current sizes of all modules.
+  - **`ddev size diff [COMMIT_BEFORE] [COMMIT_AFTER]`**: Compares size changes between two commits.
+  - **`ddev size timeline {integration | dependency} [INTEGRATION_NAME/DEPENDENCY_NAME]`**: Visualizes the size evolution of a module over time. ([#20128](https://github.com/DataDog/integrations-core/pull/20128))
+* Add ZillizCloud requested metric units ([#20195](https://github.com/DataDog/integrations-core/pull/20195))
+* Bump datadog-checks-dev version to 35.1 ([#20370](https://github.com/DataDog/integrations-core/pull/20370))
+
+## 11.3.0 / 2025-04-30
+
+***Added***:
+
+* Add support for license-expression when retrieving licenses from PyPi ([#20117](https://github.com/DataDog/integrations-core/pull/20117))
+
+***Fixed***:
+
+* Diasble tag signing in unit tests for release agent CLI command ([#19971](https://github.com/DataDog/integrations-core/pull/19971))
+
 ## 11.2.0 / 2025-02-26
 
 ***Added***:

@@ -16,17 +16,25 @@ import orjson
 import requests
 from packaging.requirements import Requirement
 
-from ....fs import file_exists, read_file_lines, write_file_lines
-from ...constants import (
+from datadog_checks.dev.fs import file_exists, read_file_lines, write_file_lines
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import (
     get_agent_requirements,
     get_copyright_ignore_re,
     get_copyright_locations_re,
     get_copyright_re,
     get_license_attribution_file,
 )
-from ...github import get_auth_info
-from ...utils import get_extra_license_files, read_license_file_rows
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
+from datadog_checks.dev.tooling.github import get_auth_info
+from datadog_checks.dev.tooling.utils import get_extra_license_files, read_license_file_rows
 
 EXPLICIT_LICENSES = {
     # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
@@ -45,9 +53,6 @@ EXPLICIT_LICENSES = {
     'mmh3': ['CC0-1.0'],
     # https://github.com/paramiko/paramiko/blob/master/LICENSE
     'paramiko': ['LGPL-2.1-only'],
-    # https://github.com/psycopg/psycopg2/blob/master/LICENSE
-    # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
-    'psycopg2-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
     # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
     'psycopg': ['LGPL-3.0-only'],
     # https://github.com/psycopg/psycopg/blob/master/psycopg_pool/LICENSE.txt
@@ -68,8 +73,6 @@ EXPLICIT_LICENSES = {
     'simplejson': ['MIT'],
     # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
     'supervisor': ['BSD-3-Clause-Modification'],
-    # https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
-    'uptime': ['BSD-2-Clause'],
     # https://github.com/hickeroar/win_inet_pton/blob/master/LICENSE
     'win-inet-pton': ['Unlicense'],
 }
@@ -161,7 +164,6 @@ PACKAGE_REPO_OVERRIDES = {
     'packaging': 'https://github.com/pypa/packaging',
     'paramiko': 'https://github.com/paramiko/paramiko',
     'protobuf': 'https://github.com/protocolbuffers/protobuf',
-    'psycopg2-binary': 'https://github.com/psycopg/psycopg2',
     'psycopg': 'https://github.com/psycopg/psycopg',
     'pycryptodomex': 'https://github.com/Legrandin/pycryptodome',
     'redis': 'https://github.com/redis/redis-py',

@@ -1,4 +1,4 @@
-:: Only required on pull requests
-if defined GITHUB_BASE_REF (
+:: Only required on non-master branches
+if "%GITHUB_REF_NAME%" NEQ "master" (
   git fetch origin master:master
 )

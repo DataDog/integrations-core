@@ -85,6 +85,7 @@ instances:
     #   - memory_metrics
     #   - backends_metrics
     #   - query_rules_metrics
+    #   - all_backends_metrics
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

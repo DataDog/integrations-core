@@ -72,7 +72,7 @@ def create_interface_metadata(phys_if, address, namespace):
     return interface
 
 
-def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespace):
+def create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace):
     """
     Create a TopologyLinkMetadata object from LLDP or CDP (only LLDP is supported as of right now)
     """
@@ -120,6 +120,18 @@ def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespa
                 f"{local_device_id}:{get_raw_id(lldp_attrs.local_port_id)}.{get_raw_id(lldp_attrs.remote_port_id)}"
             )
         else:
+            if lldp_attrs.remote_port_index is None:
+                logger.warning(
+                    "skipping LLDP link with missing remote port index for device %s, local port %s; "
+                    "remote device: name=%s, id=%s, ip=%s, interface=%s",
+                    local_device_id,
+                    lldp_attrs.local_port_id,
+                    lldp_attrs.sys_name,
+                    lldp_attrs.chassis_id_v,
+                    lldp_attrs.mgmt_ip,
+                    lldp_attrs.port_id_v,
+                )
+                continue
             link_id = f"{local_device_id}:{get_raw_id(lldp_attrs.local_port_id)}.{lldp_attrs.remote_port_index}"
 
         yield TopologyLinkMetadata(
@@ -186,7 +198,9 @@ def batch_payloads(namespace, devices, interfaces, links, collect_ts):
     """
     Batch payloads into NetworkDevicesMetadata objects
     """
-    network_devices_metadata = NetworkDevicesMetadata(namespace=namespace, collect_timestamp=collect_ts)
+    network_devices_metadata = NetworkDevicesMetadata(
+        integration="cisco-aci", namespace=namespace, collect_timestamp=collect_ts
+    )
     for device in devices:
         current_payload, new_payload = append_to_payload(device, network_devices_metadata, namespace, collect_ts)
         if new_payload:

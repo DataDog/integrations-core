@@ -1,41 +1,52 @@
+# BlazeMeter
+
 ## Overview
 
-This check monitors [BlazeMeter][1].
+[BlazeMeter][1] is a cloud-based performance testing platform that enables scalable load testing for web applications, mobile apps, and APIs. It offers a range of testing capabilities, including performance testing and functional testing.
+
+Integrate BlazeMeter with Datadog to gain insights into performance and functional test results metrics data.
 
 ## Setup
 
-### Installation
+### Generate API Key Id and API Key Secret in BlazeMeter
 
-The BlazeMeter check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Log in to [BlazeMeter Account][2].
+2. Navigate to the Settings page by clicking the gear icon in the upper-right corner of the page.
+3. In the left side bar, under the **Personal** section, click **API Keys**. 
+4. Create a new API Key by clicking **+ icon**.
+5. In the **Generate API Key** section, enter a name and select an expiration date.
+6. Click the **Generate** button to generate the **API Key Id** and **API Key Secret**.
 
-### Configuration
+### Connect your BlazeMeter account to Datadog
 
-!!! Add list of steps to set up this integration !!!
+1. Add your API Key Id and API Key Secret   
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |API Key Id|API Key Id of BlazeMeter Account.|
+    |API Key Secret|API Key Secret of BlazeMeter Account.|
 
-### Validation
+2. Click the **Save** button to save your settings.
 
-!!! Add steps to validate integration is functioning as expected !!!
 
 ## Data Collected
 
 ### Metrics
 
-BlazeMeter does not include any metrics.
+The BlazeMeter integration collects and forwards **Performance** and **Functional** test results metrics to Datadog. See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-BlazeMeter does not include any service checks.
+The BlazeMeter integration does not include any service checks.
 
 ### Events
 
-BlazeMeter does not include any events.
+The BlazeMeter integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][4].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://www.blazemeter.com/
+[2]: https://auth.blazemeter.com/auth/realms/blazect/protocol/saml/clients/blazemeter
+[3]: https://github.com/DataDog/integrations-core/blob/master/blazemeter/metadata.csv
+[4]: https://docs.datadoghq.com/help/

@@ -2,6 +2,36 @@
 
 <!-- towncrier release notes start -->
 
+## 4.7.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+***Fixed***:
+
+* skip topology link resolution for cisco-aci when remote port index is None ([#20418](https://github.com/DataDog/integrations-core/pull/20418))
+
+## 4.6.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 4.5.0 / 2025-04-17 / Agent 7.66.0
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+## 4.4.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Add failover support with Agent High Availability feature. ([#19776](https://github.com/DataDog/integrations-core/pull/19776))
+* Collect Cisco ACI faults as logs. ([#19836](https://github.com/DataDog/integrations-core/pull/19836))
+
 ## 4.3.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.2 / 2025-05-15 / Agent 7.67.0
+
+***Fixed***:
+
+* Create new kafka consumer client only if needed when fetching highwater offsets. ([#20163](https://github.com/DataDog/integrations-core/pull/20163))
+
+## 6.5.1 / 2025-03-06 / Agent 7.65.0
+
+***Fixed***:
+
+* Collect consumer state tag as string name instead of int value. ([#19744](https://github.com/DataDog/integrations-core/pull/19744))
+
 ## 6.5.0 / 2025-02-13 / Agent 7.63.0
 
 ***Added***:

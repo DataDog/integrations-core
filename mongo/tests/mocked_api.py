@@ -79,7 +79,10 @@ class MockedDB(object):
     def command(self, command, *args, **kwargs):
         filename = command
         if "dbStats" in command:
-            filename = f"dbstats-{self._db_name}"
+            if command.get("freeStorage") == 0:
+                filename = f"dbstats-non-free-storage-{self._db_name}"
+            else:
+                filename = f"dbstats-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"
@@ -90,6 +93,9 @@ class MockedDB(object):
             filename = f"custom-query-{command}"
         elif command == "explain":
             filename = f"explain-{self.deployment}"
+            verbosity = kwargs.get("verbosity")
+            if verbosity:
+                filename = f"{filename}-{verbosity}"
         elif command == "profile":
             filename = f"profile-{self._db_name}"
         elif command == "getLog":

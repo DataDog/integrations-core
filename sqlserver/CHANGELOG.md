@@ -2,7 +2,96 @@
 
 <!-- towncrier release notes start -->
 
-## 21.2.0 / 2025-02-20
+## 22.7.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Add $full_server_name support as template variable to sqlserver template config key ([#20342](https://github.com/DataDog/integrations-core/pull/20342))
+* Add size and row count collection for tables in SQLServer ([#20367](https://github.com/DataDog/integrations-core/pull/20367))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+* Add `sys.dm_exec_sessions.client_interface_name` to activity samples payload. ([#20463](https://github.com/DataDog/integrations-core/pull/20463))
+
+***Fixed***:
+
+* Update SQL server to TagManager and fix race conditions in tag values dependent on server queries ([#20424](https://github.com/DataDog/integrations-core/pull/20424))
+
+## 22.6.0 / 2025-05-19 / Agent 7.67.0
+
+***Added***:
+
+* Fill in missing fields for XE events ([#20293](https://github.com/DataDog/integrations-core/pull/20293))
+
+***Fixed***:
+
+* Add object_name to rpc_completed XE events, add activity ID and activity ID Xfer to error events ([#20302](https://github.com/DataDog/integrations-core/pull/20302))
+
+## 22.5.0 / 2025-05-15
+
+***Added***:
+
+* Add database and Azure name to SQL Server database identifier template variables ([#20301](https://github.com/DataDog/integrations-core/pull/20301))
+
+## 22.4.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Added SQLServer Extended Event Handlers ([#20229](https://github.com/DataDog/integrations-core/pull/20229))
+
+## 22.3.1 / 2025-04-25 / Agent 7.66.0
+
+***Fixed***:
+
+* Use DB_NAME for query metrics in an Azure SQL database since joining on sys.databases doesn't always work. The dbid from dm_exec_query_stats doesn't match the one in sys.databases. ([#20097](https://github.com/DataDog/integrations-core/pull/20097))
+
+## 22.3.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+
+## 22.2.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 22.1.0 / 2025-04-17
+
+***Added***:
+
+* Optimize SQL Server integration by removing redundant query comment parsing using `extract_sql_comments` and switching stored procedure name extraction to use `OBJECT_NAME(sproc_object_id, dbid)`; when `disable_secondary_tags` is enabled, fall back to parsing the procedure name from the raw query text. ([#19935](https://github.com/DataDog/integrations-core/pull/19935))
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+
+***Fixed***:
+
+* Remove unnecessary `like` from SQL Server deadlock query ([#19921](https://github.com/DataDog/integrations-core/pull/19921))
+
+## 22.0.1 / 2025-03-28 / Agent 7.65.0
+
+***Fixed***:
+
+* Fix SQL Server integration when database is using case sensitive collation ([#19930](https://github.com/DataDog/integrations-core/pull/19930))
+* Fixed support for FreeTDS driver ([#19931](https://github.com/DataDog/integrations-core/pull/19931))
+
+## 22.0.0 / 2025-03-19
+
+***Changed***:
+
+* Optimize sqlserver index usage stats query ([#19807](https://github.com/DataDog/integrations-core/pull/19807))
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* Collect SQL Server foreign key delete & update actions. ([#19796](https://github.com/DataDog/integrations-core/pull/19796))
+
+***Fixed***:
+
+* Bump base check dependency to use new assert method functionality. ([#19763](https://github.com/DataDog/integrations-core/pull/19763))
+* Fix a bug where `tempdb` is wrongly excluded from database files metrics due to all instances inherited from `SqlserverDatabaseMetricsBase` share the same reference of auto-discovered databases. ([#19803](https://github.com/DataDog/integrations-core/pull/19803))
+
+## 21.2.0 / 2025-02-20 / Agent 7.64.0
 
 ***Added***:
 

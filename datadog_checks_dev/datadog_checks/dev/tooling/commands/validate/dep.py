@@ -2,21 +2,29 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from urllib.parse import urlparse
 
 import click
 from packaging.requirements import Requirement
 
-from ....utils import get_next
-from ...constants import get_agent_requirements, get_root
-from ...dependencies import (
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    annotate_errors,
+    echo_failure,
+    echo_success,
+)
+from datadog_checks.dev.tooling.constants import get_agent_requirements, get_root
+from datadog_checks.dev.tooling.dependencies import (
     get_dependency_set,
     read_agent_dependencies,
     read_check_base_dependencies,
     read_check_dependencies,
 )
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_project_file, has_project_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure, echo_success
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_project_file, has_project_file
+from datadog_checks.dev.utils import get_next
 
 
 def get_marker_string(dependency_definition):
@@ -114,6 +122,26 @@ def verify_dependency(source, name, python_versions, file):
         for dependency_definition, checks in dependency_definitions.items():
             requirement = Requirement(dependency_definition)
             specifier_set = requirement.specifier
+
+            # git support: https://pip.pypa.io/en/stable/topics/vcs-support/
+            pip_vcs_support_link = "https://pip.pypa.io/en/stable/topics/vcs-support/"
+            valid_schemes = ["git+file", "git+https", "git+ssh", "git+http", "git+git", "git"]
+
+            if requirement.url:
+                u = urlparse(requirement.url)
+                if u.scheme not in valid_schemes:
+                    message = f'Invalid URL scheme found for dependency `{name}`: {format_check_usage(checks, source)}.\nSupported URL schemes are: {", ".join(valid_schemes)}.\nFor more information, please visit: {pip_vcs_support_link}'  # noqa: E501
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
+                _, _, git_ref = requirement.url.partition("@")
+                if not git_ref:
+                    message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}. \nFor more information, please visit: {pip_vcs_support_link}'  # noqa: E501
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
+
+                return True
 
             if not specifier_set:
                 message = f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}'

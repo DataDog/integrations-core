@@ -22,6 +22,8 @@ DEFAULT_IGNORE_DATABASES = [
     'postgres',
 ]
 
+DEFAULT_IGNORED_SCHEMAS_OWNED_BY = ['rdsadmin', 'rds_superuser']
+
 
 class PostgresConfig:
     RATE = AgentCheck.rate
@@ -29,6 +31,8 @@ class PostgresConfig:
     MONOTONIC = AgentCheck.monotonic_count
 
     def __init__(self, instance, init_config, check):
+        self.exclude_hostname = instance.get("exclude_hostname", False)
+        self.database_identifier = instance.get('database_identifier', {})
         self.init_config = init_config
         self.host = instance.get('host', '')
         if not self.host:
@@ -91,6 +95,7 @@ class PostgresConfig:
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', True)):
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
+        self.ignore_schemas_owned_by = instance.get('ignore_schemas_owned_by', DEFAULT_IGNORED_SCHEMAS_OWNED_BY)
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
@@ -111,6 +116,7 @@ class PostgresConfig:
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.query_encodings = instance.get('query_encodings')
         self.managed_identity = instance.get('managed_identity', {})
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
@@ -239,8 +245,9 @@ class PostgresConfig:
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                         raise ConfigurationError(
-                            'Collector method {} is not known. '
-                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
+                            'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(
+                                cap_mtype
+                            )
                         )
 
                     m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)

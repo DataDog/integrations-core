@@ -6,7 +6,6 @@ from typing import Dict, List
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.discovery import Discovery
-from datadog_checks.postgres.cursor import CommenterCursor
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
@@ -26,7 +25,7 @@ class PostgresAutodiscovery(Discovery):
         super(PostgresAutodiscovery, self).__init__(
             self._get_databases,
             # parent class asks for includelist to be a dictionary
-            include={db: 0 for db in autodiscovery_config.get("include", [".*"])},
+            include=dict.fromkeys(autodiscovery_config.get("include", [".*"]), 0),
             exclude=autodiscovery_config.get("exclude", DEFAULT_EXCLUDES),
             interval=autodiscovery_config.get("refresh", DEFAULT_REFRESH),
         )
@@ -72,7 +71,7 @@ class PostgresAutodiscovery(Discovery):
 
     def _get_databases(self) -> List[str]:
         with self.db_pool.get_connection(self._db, self._default_ttl) as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute(AUTODISCOVERY_QUERY)
                 databases = list(cursor.fetchall())
                 databases = [

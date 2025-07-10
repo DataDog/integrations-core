@@ -1961,6 +1961,18 @@
             "prefix": "host",
             "available_values": [],
             "default": "*"
+        },
+        {
+            "name": "scope",
+            "prefix": "scope",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "node",
+            "prefix": "kube_node",
+            "available_values": [],
+            "default": "*"
         }
     ],
     "layout_type": "ordered",

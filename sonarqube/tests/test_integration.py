@@ -6,7 +6,7 @@ import os
 import pytest
 
 from .common import PROJECT
-from .metrics import WEB_METRICS
+from .metrics import WEB_OLD_METRICS
 
 pytestmark = [pytest.mark.usefixtures('dd_environment')]
 
@@ -19,7 +19,7 @@ def test_check(aggregator, dd_run_check, sonarqube_check, web_instance):
     global_tags.extend(web_instance['tags'])
 
     project_tag = 'project:{}'.format(PROJECT)
-    for metric in WEB_METRICS:
+    for metric in WEB_OLD_METRICS:
         tags = [project_tag]
         tags.extend(global_tags)
         aggregator.assert_metric(metric, tags=tags)
@@ -37,7 +37,7 @@ def test_check_with_autodiscovery(
     global_tags.extend(web_instance_with_autodiscovery_only_include['tags'])
 
     project_tag = 'project:{}'.format(PROJECT)
-    for metric in WEB_METRICS:
+    for metric in WEB_OLD_METRICS:
         tags = [project_tag]
         tags.extend(global_tags)
         aggregator.assert_metric(metric, tags=tags)

@@ -141,6 +141,7 @@ class InstanceConfig(BaseModel):
     tag_by_endpoint: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     telemetry: Optional[bool] = None
+    tenants: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None

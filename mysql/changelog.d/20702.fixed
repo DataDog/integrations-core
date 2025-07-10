@@ -1,0 +1,1 @@
+Switch table rows stats query from information_schema to performance_schema

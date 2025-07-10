@@ -43,7 +43,7 @@ def call_endpoint(url):
 
 @pytest.fixture(scope='session')
 def mock_local_http_dns():
-    mapping = {x: ('127.0.0.1', 443) for x in MOCKED_HOSTS}
+    mapping = dict.fromkeys(MOCKED_HOSTS, ('127.0.0.1', 443))
     with mock_local(mapping):
         yield
 

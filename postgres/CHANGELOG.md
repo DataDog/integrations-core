@@ -2,6 +2,113 @@
 
 <!-- towncrier release notes start -->
 
+## 22.14.2 / 2025-07-02 / Agent 7.68.0
+
+***Fixed***:
+
+* Ensure extension IDs are sent as text, not integer ([#20605](https://github.com/DataDog/integrations-core/pull/20605))
+
+## 22.14.1 / 2025-06-26
+
+***Fixed***:
+
+* checking wal_level and if is aurora before querying for control checkpoint metrics ([#20500](https://github.com/DataDog/integrations-core/pull/20500))
+
+## 22.14.0 / 2025-06-12
+
+***Added***:
+
+* Collect and forward list of PostgreSQL extensions ([#20266](https://github.com/DataDog/integrations-core/pull/20266))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399)), ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+* Added a configuration option to support SQL_ASCII encoded Postgres databases with clients making requests in other encodings ([#20441](https://github.com/DataDog/integrations-core/pull/20441))
+
+***Fixed***:
+
+* Check for aws extensions before querying aurora_version() ([#20310](https://github.com/DataDog/integrations-core/pull/20310))
+* Allow EXPLAIN on multi-statement SQL where one or more SET commands appear before another supported statement type ([#20319](https://github.com/DataDog/integrations-core/pull/20319))
+* Checks wal_level before collecting control checkpoint metrics ([#20490](https://github.com/DataDog/integrations-core/pull/20490))
+
+## 22.13.1 / 2025-05-19 / Agent 7.67.0
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
+## 22.13.0 / 2025-05-15
+
+***Added***:
+
+* Enable HA agent support for DBM integrations ([#20124](https://github.com/DataDog/integrations-core/pull/20124))
+* Include foreign tables in DBM agent schema collection ([#20137](https://github.com/DataDog/integrations-core/pull/20137))
+* Make owner of schemas to be ignored during collection configurable ([#20153](https://github.com/DataDog/integrations-core/pull/20153))
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+***Fixed***:
+
+* Fixed bug where we fail to explain parameterized queries that have no parameters. *Note: Does not include fix from 22.12.1* ([#20243](https://github.com/DataDog/integrations-core/pull/20243))
+
+## 22.12.1 / 2025-05-19 / Agent 7.66.0
+
+***Fixed***:
+
+* fix Postgresql replication stat metrics to include `replication.` prefix. *Note: This fix is not included in 22.13.0* ([#20316](https://github.com/DataDog/integrations-core/pull/20316))
+
+## 22.12.0 / 2025-05-14
+
+***Added***:
+
+* Add exclude_hostname option to specs ([#20259](https://github.com/DataDog/integrations-core/pull/20259))
+
+## 22.11.0 / 2025-04-22
+
+***Added***:
+
+* Create exclude_hostname option for Postgres, MySQL, and SQLServer ([#20094](https://github.com/DataDog/integrations-core/pull/20094))
+* Added query call count `calls` to StatementMetrics execution indicators to filter out false positives from normalized queries being evicted and re-inserted with same call count and slight duration change. ([#20096](https://github.com/DataDog/integrations-core/pull/20096))
+
+## 22.10.0 / 2025-04-18
+
+***Added***:
+
+* Added a new configuration option `database_identifier.template`. Use this template to specify the unique identifier for a database instance, separate from the underlying host.
+  The `empty_default_hostname` configuration option is now respected and will omit the `host` tag from database instances when enabled. ([#19341](https://github.com/DataDog/integrations-core/pull/19341))
+
+## 22.9.0 / 2025-04-17
+
+***Added***:
+
+* Update dependencies ([#19962](https://github.com/DataDog/integrations-core/pull/19962))
+* Postgres: Add checkpoint byte delay metric ([#20017](https://github.com/DataDog/integrations-core/pull/20017))
+* add replication slot information and replication slot type to postgres replication stat metric ([#20035](https://github.com/DataDog/integrations-core/pull/20035))
+
+***Fixed***:
+
+* Add handling for IndeterminateDatatype error in explain plan collection ([#19969](https://github.com/DataDog/integrations-core/pull/19969))
+* Add handling for UndefinedFunction error in explain plan collection ([#19998](https://github.com/DataDog/integrations-core/pull/19998))
+
+## 22.8.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+* When Amazon adds Extended Support to older Postgres versions, they update the version string to a format we are currently unable to parse. This adds the ability to parse those versions. Here is an example announcement where they communicate such a version string: https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-rds-postgresql-minor-11-22-rds-20241121/ ([#19773](https://github.com/DataDog/integrations-core/pull/19773))
+
+***Fixed***:
+
+* Omit .* regex filter to avoid unnecessary work in query ([#19470](https://github.com/DataDog/integrations-core/pull/19470))
+
+## 22.7.0 / 2025-02-26 / Agent 7.64.0
+
+***Added***:
+
+* Add support for Postgres 17 ([#19625](https://github.com/DataDog/integrations-core/pull/19625))
+
+## 22.6.1 / 2025-02-25
+
+***Fixed***:
+
+* When collecting Postgres setttings, only trigger the activations extensions that are installed in default namespaces. ([#19694](https://github.com/DataDog/integrations-core/pull/19694))
+
 ## 22.6.0 / 2025-02-20
 
 ***Added***:

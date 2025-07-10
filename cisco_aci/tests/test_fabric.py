@@ -198,11 +198,11 @@ def assert_fabric_port_ingr_metrics(aggregator):
     aggregator.assert_metric(name=metric_name, value=90202911073.0, tags=interface_tags_201_eth2, hostname=hn201)
 
     metric_name = 'cisco_aci.fabric.port.ingr_bytes.unicast'
-    aggregator.assert_metric(name=metric_name, value=50443812.0, tags=interface_tags_101_eth1, hostname=hn101),
-    aggregator.assert_metric(name=metric_name, value=70147142.0, tags=interface_tags_101_eth2, hostname=hn101),
-    aggregator.assert_metric(name=metric_name, value=32704715.0, tags=interface_tags_102_eth1, hostname=hn102),
-    aggregator.assert_metric(name=metric_name, value=23770059.0, tags=interface_tags_102_eth2, hostname=hn102),
-    aggregator.assert_metric(name=metric_name, value=105702610.0, tags=interface_tags_201_eth1, hostname=hn201),
+    aggregator.assert_metric(name=metric_name, value=50443812.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=70147142.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=32704715.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=23770059.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=105702610.0, tags=interface_tags_201_eth1, hostname=hn201)
     aggregator.assert_metric(name=metric_name, value=29485355.0, tags=interface_tags_201_eth2, hostname=hn201)
 
     metric_name = 'cisco_aci.fabric.port.ingr_bytes.unicast.cum'

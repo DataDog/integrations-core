@@ -718,8 +718,7 @@ class TestTransformerCompilation:
         with pytest.raises(
             ValueError,
             match=(
-                '^error compiling type `percent` for extra foo of test query: '
-                'the `total` parameter must be a string$'
+                '^error compiling type `percent` for extra foo of test query: the `total` parameter must be a string$'
             ),
         ):
             query_manager.compile_queries()
@@ -910,8 +909,7 @@ class TestTransformerCompilation:
         with pytest.raises(
             ValueError,
             match=(
-                '^error compiling type `log` for extra log of test query: '
-                'the `attributes` parameter must be a mapping$'
+                '^error compiling type `log` for extra log of test query: the `attributes` parameter must be a mapping$'
             ),
         ):
             query_manager.compile_queries()
@@ -934,8 +932,7 @@ class TestTransformerCompilation:
         with pytest.raises(
             ValueError,
             match=(
-                '^error compiling type `log` for extra log of test query: '
-                'the `attributes` parameter must not be empty$'
+                '^error compiling type `log` for extra log of test query: the `attributes` parameter must not be empty$'
             ),
         ):
             query_manager.compile_queries()
@@ -1114,9 +1111,9 @@ class TestSubmission:
         query_manager2 = QueryManager(check2, mock_executor(), [dummy_query])
         query_manager1.compile_queries()
         query_manager2.compile_queries()
-        assert not id(query_manager1.queries[0]) == id(
-            query_manager2.queries[0]
-        ), "QueryManager does not copy the queries"
+        assert not id(query_manager1.queries[0]) == id(query_manager2.queries[0]), (
+            "QueryManager does not copy the queries"
+        )
 
     def test_query_execution_error(self, caplog, aggregator):
         class Result(object):

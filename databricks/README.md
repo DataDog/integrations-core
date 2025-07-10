@@ -2,7 +2,7 @@
 
 <div class="alert alert-info">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks model serving metrics and cluster utilization data.
+This page is limited to documentation for ingesting Databricks model serving metrics, cluster utilization data, and reference tables.
 </div>
 
 ![Databricks default dashboard][21]
@@ -19,6 +19,8 @@ Datadog offers several Databricks monitoring capabilities.
 
 [Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
 
+[Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry with critical context like workspace names, job definitions, cluster configurations, and user roles.
+
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
 
@@ -29,6 +31,25 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 
 ### Configuration
 #### Model Serving Configuration
+<!-- xxx tabs xxx -->
+
+<!-- xxx tab "Use a Service Principal for OAuth" xxx -->
+<div class="alert alert-warning">New workspaces must authenticate using OAuth. Workspaces integrated with a Personal Access Token continue to function and can switch to OAuth at any time. After a workspace starts using OAuth, it cannot revert to a Personal Access Token.</div>
+
+1. In your Databricks account, click on **User Management** in the left menu. Then, under the **Service principals** tab, click **Add service principal**.
+2. Under the **Credentials & secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret. Also take note of your account ID, which can be found by clicking on your profile in the upper-right corner.
+3. Click **Workspaces** in the left menu, then select the name of your workspace.
+4. Go to the **Permissions** tab and click **Add permissions**.
+5. Search for the service principal you created and assign it the **Admin** permission.
+6. In Datadog, open the Databricks integration tile.
+7. On the **Configure** tab, click **Add Databricks Workspace**.
+9. Enter a workspace name, your Databricks workspace URL, account ID, and the client ID and secret you generated.
+10. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Use a Personal Access Token (Legacy)" xxx -->
+<div class="alert alert-warning">This option is only available for workspaces created before July 7, 2025. New workspaces must authenticate using OAuth.</div>
+
 1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
 2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.
 
@@ -42,6 +63,19 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 4. On the **Configure** tab, click **Add Databricks Workspace**.
 5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
 6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
+<!-- xxz tab xxx -->
+
+<!-- xxz tabs xxx -->
+
+#### Reference Table Configuration
+1. Configure a workspace in Datadog's Databricks integration tile.
+2. In the accounts detail panel, click **Reference Tables**.
+3. In the **Reference Tables** tab, click **Add New Reference Table**.
+4. Provide the **Reference table name**, **Databricks table name**, and **Primary key** of your Databricks view or table.
+
+  * For optimal results, create a view in Databricks that includes only the specific data you want to send to Datadog. This means generating a dedicated table that reflects the exact scope needed for your use case.
+
+5. Click **Save**.
 
 #### Spark Configuration
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
@@ -495,8 +529,8 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
-[3]: https://app.datadoghq.com/integrations/spark
-[4]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: /integrations/spark
+[4]: /account/settings/agent/latest
 [6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
@@ -513,7 +547,7 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/agent/troubleshooting/
 [21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
 [22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
-[23]: https://app.datadoghq.com/integrations/spark
+[23]: /integrations/spark
 [24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume
 [25]: https://www.datadoghq.com/product/data-jobs-monitoring/
 [26]: https://www.datadoghq.com/product/cloud-cost-management/
@@ -522,3 +556,4 @@ Additional helpful documentation, links, and articles:
 [29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
 [30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
 [31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal
+[32]: https://docs.datadoghq.com/reference_tables

@@ -20,8 +20,16 @@ def instance_collect_sacct_stats():
     return True
 
 
+def instance_collect_scontrol_stats():
+    return False
+
+
 def instance_collect_sdiag_stats():
     return True
+
+
+def instance_collect_seff_stats():
+    return False
 
 
 def instance_collect_sinfo_stats():
@@ -37,6 +45,10 @@ def instance_collect_sshare_stats():
 
 
 def instance_debug_sacct_stats():
+    return False
+
+
+def instance_debug_scontrol_stats():
     return False
 
 
@@ -70,6 +82,10 @@ def instance_min_collection_interval():
 
 def instance_sacct_path():
     return '/usr/bin/sacct'
+
+
+def instance_scontrol_path():
+    return '/usr/bin/scontrol'
 
 
 def instance_sdiag_path():

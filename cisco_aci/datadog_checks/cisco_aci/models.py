@@ -160,6 +160,8 @@ class LldpAdjAttributes(BaseModel):
     @computed_field
     @property
     def remote_port_index(self) -> int:
+        if self.remote_port_id is None:
+            return None
         return helpers.get_index_from_eth_id(self.remote_port_id)
 
 
@@ -313,6 +315,7 @@ class TopologyLinkMetadata(BaseModel):
 
 
 class NetworkDevicesMetadata(BaseModel):
+    integration: str = None
     namespace: str = None
     devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
     interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)

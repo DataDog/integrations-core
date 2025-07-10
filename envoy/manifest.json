@@ -18,6 +18,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Network",
+      "Category::Security",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Offering::Integration"

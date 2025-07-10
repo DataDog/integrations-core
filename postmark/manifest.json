@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1af07d08-4c45-43f1-9fef-4c2653d1a0b8",
   "app_id": "postmark",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -12,13 +12,13 @@
     "title": "Postmark",
     "media": [
       {
-        "caption": "Postmark - Message Streams Activity",
-        "image_url": "images/postmark_message_streams_activity_1.png",
+        "caption": "Postmark - Overview",
+        "image_url": "images/postmark_overview_1.png",
         "media_type": "image"
       },
       {
-        "caption": "Postmark - Message Streams Activity",
-        "image_url": "images/postmark_message_streams_activity_2.png",
+        "caption": "Postmark - Overview",
+        "image_url": "images/postmark_overview_2.png",
         "media_type": "image"
       }
     ],
@@ -41,7 +41,7 @@
       }
     },
     "dashboards": {
-      "Postmark - Message Streams Activity" : "assets/dashboards/postmark_message_streams_activity.json"
+      "Postmark - Overview" : "assets/dashboards/postmark_overview.json"
     },
     "monitors": {
       "High block rate by message stream" : "assets/monitors/postmark_high_block_rate_by_message_stream.json",

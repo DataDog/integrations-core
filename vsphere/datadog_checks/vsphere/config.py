@@ -97,6 +97,7 @@ class VSphereConfig(object):
         self.collect_vsan = is_affirmative(instance.get("collect_vsan_data", False))
         self.attr_prefix = instance.get("attributes_prefix", DEFAULT_VSPHERE_ATTR_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
+        self.empty_default_hostname = instance.get("empty_default_hostname", False)
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(
             'refresh_infrastructure_cache_interval', DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL
@@ -183,8 +184,9 @@ class VSphereConfig(object):
         for resource_type in self.event_resource_filters:
             if resource_type not in all_valid_resource_types:
                 raise ConfigurationError(
-                    "Invalid resource type specified in `event_resource_filters`: {}. "
-                    "Valid resource types: {}".format(resource_type, all_valid_resource_types),
+                    "Invalid resource type specified in `event_resource_filters`: {}. Valid resource types: {}".format(
+                        resource_type, all_valid_resource_types
+                    ),
                 )
 
     def _parse_resource_filters(self, all_resource_filters):
@@ -244,8 +246,7 @@ class VSphereConfig(object):
 
             if resource_filter['property'] not in allowed_prop_names:
                 self.log.warning(
-                    "Ignoring filter %r because property '%s' is not valid "
-                    "for resource type %s. Should be one of %r.",
+                    "Ignoring filter %r because property '%s' is not valid for resource type %s. Should be one of %r.",
                     resource_filter,
                     resource_filter['property'],
                     resource_filter['resource'],

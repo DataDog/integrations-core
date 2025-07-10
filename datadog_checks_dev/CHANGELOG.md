@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 35.1.1 / 2025-06-04
+
+***Fixed***:
+
+* Stop relying on manifest.json to validate spec.yaml. Also stop checking the 'name' field in spec.yaml. ([#20398](https://github.com/DataDog/integrations-core/pull/20398))
+* Ignore missing readmes in extras and marketplace repos. This is to temporarily unblock contributors while we discuss how to handle readmes in Publishing Platform. ([#20438](https://github.com/DataDog/integrations-core/pull/20438))
+
+## 35.1.0 / 2025-05-27
+
+***Added***:
+
+* Update release tag to ensure that tags are fetched before getting the list of tags ([#20292](https://github.com/DataDog/integrations-core/pull/20292))
+
+## 35.0.1 / 2025-04-30
+
+***Fixed***:
+
+* Fix `ddev validate dep` command to support dependencies with Git urls ([#19743](https://github.com/DataDog/integrations-core/pull/19743))
+* Soft deprecation of service check submission:
+  - remove them from integration scaffolding templates
+  - add a warning to the method docstring ([#19831](https://github.com/DataDog/integrations-core/pull/19831))
+* Stop using the uptime library ([#19842](https://github.com/DataDog/integrations-core/pull/19842))
+* Bump Python version to 3.12 for new integration templates. ([#19970](https://github.com/DataDog/integrations-core/pull/19970))
+* Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)`, respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
+
 ## 35.0.0 / 2025-02-26
 
 ***Removed***:

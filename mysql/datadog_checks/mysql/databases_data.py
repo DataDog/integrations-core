@@ -5,7 +5,7 @@
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
 from collections import defaultdict
@@ -20,11 +20,9 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
-    SQL_INDEXES,
-    SQL_INDEXES_8_0_13,
-    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_PARTITION,
     SQL_TABLES,
+    get_indexes_query,
 )
 
 from .util import get_list_chunks
@@ -33,7 +31,6 @@ DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
-
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._base_event = base_event
@@ -43,9 +40,11 @@ class SubmitData:
         self._total_columns_sent = 0
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
+        self.any_tables_found = False  # Flag to track for permission issues
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version, flavor):
+    def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
+        self._base_event["database_instance"] = database_instance
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
@@ -55,6 +54,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self._columns_count = 0
         self.db_info.clear()
+        self.any_tables_found = False
 
     def store_db_infos(self, db_infos):
         for db_info in db_infos:
@@ -64,6 +64,8 @@ class SubmitData:
         self._columns_count += columns_count
         known_tables = self.db_to_tables.setdefault(db_name, [])
         known_tables.extend(tables)
+        if tables:
+            self.any_tables_found = True
 
     def columns_since_last_submit(self):
         return self._columns_count
@@ -113,7 +115,6 @@ def agent_check_getter(self):
 
 
 class DatabasesData:
-
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -164,8 +165,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
         tables = self._get_tables(db_name, cursor)
-        tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-        for tables_chunk in tables_chunks:
+        for tables_chunk in get_list_chunks(tables, self.TABLES_CHUNK_SIZE):
             schema_collection_elapsed_time = time.time() - start_time
             if schema_collection_elapsed_time > self._max_execution_time:
                 self._data_submitter.submit()
@@ -225,6 +225,8 @@ class DatabasesData:
                             - referenced_table_schema (str): The schema of the referenced table.
                             - referenced_table_name (str): The name of the referenced table.
                             - referenced_column_names (str): The column names in the referenced table.
+                            - update_action (str): The update rule for the foreign key.
+                            - delete_action (str): The delete rule for the foreign key.
                     - partitions (list): A list of partition dictionaries.
                         - partition (dict): A dictionary representing a partition.
                             - name (str): The name of the partition.
@@ -249,7 +251,8 @@ class DatabasesData:
         self._tags = tags
         with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._data_submitter.set_base_event_data(
-                self._check.resolved_hostname,
+                self._check.reported_hostname,
+                self._check.database_identifier,
                 self._tags,
                 self._check._config.cloud_metadata,
                 self._check.version.version,
@@ -280,6 +283,16 @@ class DatabasesData:
                     )
                 )
 
+        # Check if we found databases but no tables across all of them.
+        # This happens when the datadog user has permissions to see databases
+        # but lacks SELECT privileges on the tables themselves, which prevents
+        # the agent from collecting table metadata.
+        if db_infos and not self._data_submitter.any_tables_found:
+            self._log.warning(
+                "No tables were found across any of the {} databases. This may indicate insufficient privileges "
+                "to view table metadata. The datadog user needs SELECT privileges on the tables.".format(len(db_infos))
+            )
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
         self._cursor_run(cursor, query=SQL_DATABASES)
@@ -298,15 +311,13 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):
-
         if len(table_list) == 0:
-            return
+            return 0, []
+
         table_name_to_table_index = {}
-        table_names = ""
         for i, table in enumerate(table_list):
             table_name_to_table_index[table["name"]] = i
-            table_names += '"' + str(table["name"]) + '",'
-        table_names = table_names[:-1]
+        table_names = ','.join(f'"{str(table["name"])}"' for table in table_list)
         total_columns_number = self._populate_with_columns_data(
             table_name_to_table_index, table_list, table_names, db_name, cursor
         )
@@ -340,12 +351,7 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
-        query = (
-            SQL_INDEXES_8_0_13.format(table_names)
-            if cursor.fetchone()["column_count"] > 0
-            else SQL_INDEXES.format(table_names)
-        )
+        query = get_indexes_query(self._check.version, self._check.is_mariadb, table_names)
         self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
         if not rows:

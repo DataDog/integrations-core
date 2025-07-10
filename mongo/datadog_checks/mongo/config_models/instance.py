@@ -29,6 +29,19 @@ class Aws(BaseModel):
     instance_endpoint: Optional[str] = None
 
 
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_search_indexes: Optional[bool] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_collections: Optional[float] = None
+    max_depth: Optional[float] = None
+    sample_size: Optional[float] = None
+
+
 class Field(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -80,6 +93,8 @@ class MetricsCollectionInterval(BaseModel):
     )
     collection: Optional[int] = None
     collections_indexes_stats: Optional[int] = None
+    db_stats: Optional[int] = None
+    session_stats: Optional[int] = None
     sharded_data_distribution: Optional[int] = None
 
 
@@ -90,6 +105,7 @@ class OperationSamples(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
 
 
 class Schemas(BaseModel):
@@ -112,6 +128,7 @@ class SlowOperations(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
     max_operations: Optional[float] = None
 
 
@@ -125,6 +142,7 @@ class InstanceConfig(BaseModel):
     additional_metrics: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     cluster_name: Optional[str] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
     connection_scheme: Optional[str] = None
@@ -137,6 +155,7 @@ class InstanceConfig(BaseModel):
     dbstats_tag_dbname: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    free_storage_metrics: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics_collection_interval: Optional[MetricsCollectionInterval] = None
@@ -150,6 +169,7 @@ class InstanceConfig(BaseModel):
     server: Optional[str] = None
     service: Optional[str] = None
     slow_operations: Optional[SlowOperations] = None
+    system_database_stats: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None

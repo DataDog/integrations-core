@@ -62,9 +62,9 @@ pytestmark = pytest.mark.unit
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("raw.json"))
-def test_simple_metrics(_, aggregator):
+def test_simple_metrics(_, aggregator, dd_run_check):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(metric, count=1, tags=EXPECTED_TAGS)
@@ -73,9 +73,9 @@ def test_simple_metrics(_, aggregator):
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("warn.json"))
-def test_warn_health(_, aggregator):
+def test_warn_health(_, aggregator, dd_run_check):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(metric, count=1, tags=EXPECTED_TAGS)
@@ -84,11 +84,11 @@ def test_warn_health(_, aggregator):
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_luminous_warn.json"))
-def test_luminous_warn_health(_, aggregator):
+def test_luminous_warn_health(_, aggregator, dd_run_check):
     config = copy.deepcopy(BASIC_CONFIG)
     config["collect_service_check_for"] = ['OSD_NEARFULL', 'OSD_FULL']
     ceph_check = Ceph(CHECK_NAME, {}, [config])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     aggregator.assert_service_check('ceph.overall_status', status=Ceph.CRITICAL, tags=EXPECTED_SERVICE_TAGS)
     aggregator.assert_service_check('ceph.osd_nearfull', status=Ceph.WARNING, tags=EXPECTED_SERVICE_TAGS)
@@ -96,11 +96,11 @@ def test_luminous_warn_health(_, aggregator):
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_luminous_ok.json"))
-def test_luminous_ok_health(_, aggregator):
+def test_luminous_ok_health(_, aggregator, dd_run_check):
     config = copy.deepcopy(BASIC_CONFIG)
     config["collect_service_check_for"] = ['OSD_NEARFULL']
     ceph_check = Ceph(CHECK_NAME, {}, [config])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     aggregator.assert_service_check('ceph.overall_status', status=Ceph.OK)
     aggregator.assert_service_check('ceph.osd_nearfull', status=Ceph.OK)
@@ -108,19 +108,18 @@ def test_luminous_ok_health(_, aggregator):
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_luminous_warn.json"))
-def test_luminous_osd_full_metrics(_, aggregator):
+def test_luminous_osd_full_metrics(_, aggregator, dd_run_check):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     aggregator.assert_metric('ceph.num_full_osds', value=1)
     aggregator.assert_metric('ceph.num_near_full_osds', value=1)
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("raw.json"))
-def test_tagged_metrics(_, aggregator):
-
+def test_tagged_metrics(_, aggregator, dd_run_check):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     for osd in ['osd0', 'osd1', 'osd2']:
         expected_tags = EXPECTED_TAGS + ['ceph_osd:%s' % osd] + OSD_SPECIFIC_TAGS[osd]
@@ -136,10 +135,9 @@ def test_tagged_metrics(_, aggregator):
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("raw2.json"))
-def test_osd_perf_with_osdstats(_, aggregator):
-
+def test_osd_perf_with_osdstats(_, aggregator, dd_run_check):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     for osd in ['osd0', 'osd1', 'osd2']:
         expected_tags = EXPECTED_TAGS + ['ceph_osd:%s' % osd] + OSD_SPECIFIC_TAGS[osd]
@@ -149,10 +147,9 @@ def test_osd_perf_with_osdstats(_, aggregator):
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_10.2.2.json"))
-def test_osd_status_metrics(_, aggregator):
-
+def test_osd_status_metrics(_, aggregator, dd_run_check):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     expected_metrics = ['ceph.read_op_per_sec', 'ceph.write_op_per_sec', 'ceph.op_per_sec']
 
@@ -170,14 +167,27 @@ def test_osd_status_metrics(_, aggregator):
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_10.2.2_mon_health.json"))
-def test_osd_status_metrics_non_osd_health(_, aggregator):
+def test_osd_status_metrics_non_osd_health(_, aggregator, dd_run_check):
     """
     The `detail` key of `health detail` can contain info on the health of non-osd units:
     shouldn't make the check fail
     """
 
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
-    ceph_check.check({})
+    dd_run_check(ceph_check)
 
     aggregator.assert_metric('ceph.num_full_osds', value=0, count=1, tags=EXPECTED_TAGS)
     aggregator.assert_metric('ceph.num_near_full_osds', value=0, count=1, tags=EXPECTED_TAGS)
+
+
+@mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("ceph_stats_by_class.json"))
+def test_stats_by_class_metrics(_, aggregator, dd_run_check):
+    """
+    Test with populated stats by class field
+    """
+
+    ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
+    dd_run_check(ceph_check)
+
+    aggregator.assert_metric('ceph.class_pct_used', count=1, tags=EXPECTED_TAGS + ['ceph_osd_device_class:hdd'])
+    aggregator.assert_metric('ceph.class_pct_used', count=0, tags=EXPECTED_TAGS + ['ceph_osd_device_class:nvme'])

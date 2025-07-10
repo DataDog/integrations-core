@@ -11,7 +11,7 @@ from pyVmomi import vim, vmodl
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
+from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS, PROPERTY_METRICS_BY_RESOURCE_TYPE
 
 from .common import (
     EVENTS,
@@ -2321,7 +2321,7 @@ def test_max_query_metrics(
             },
             pytest.raises(
                 ConfigurationError,
-                match="Your configuration is incorrectly attempting to " "set the `collection_type` to ",
+                match="Your configuration is incorrectly attempting to set the `collection_type` to ",
             ),
             None,
             id='\'collection_type\' set to invalid value',
@@ -2837,6 +2837,29 @@ def test_datastore_property_metrics(aggregator, historical_instance, dd_run_chec
     aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags)
 
 
+def test_historical_property_metrics_empty_hostname(
+    aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex
+):
+    historical_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    # assert historical metrics sent with empty hostname
+    # these can be submitted with the agent hostname if empty_default_hostname is False, but that logic is
+    # in the agent code https://github.com/DataDog/datadog-agent/blob/7.65.x/pkg/aggregator/sender.go#L209-L211
+    aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.enabled', hostname='')
+    aggregator.assert_metric('vsphere.datastore.summary.capacity', hostname='')
+
+    historical_resources_with_property_metrics = ['cluster', 'datastore']
+    for resource_type in historical_resources_with_property_metrics:
+        metrics = PROPERTY_METRICS_BY_RESOURCE_TYPE[resource_type]
+        for metric in metrics:
+            aggregator.assert_metric(f"vsphere.{resource_type}.{metric}", hostname='')
+
+
 def test_property_metrics_resource_filters(
     aggregator,
     realtime_instance,
@@ -2923,7 +2946,6 @@ def test_property_metrics_metric_filters(
     service_instance,
     vm_properties_ex,
 ):
-
     default_instance['collection_type'] = 'both'
     default_instance['collect_property_metrics'] = True
     default_instance['metric_filters'] = {
@@ -3040,9 +3062,7 @@ def test_property_metrics_expired_cache(
     service_instance,
     vm_properties_ex,
 ):
-
     with mock.patch('datadog_checks.vsphere.cache.time') as time:
-
         realtime_instance['collect_property_metrics'] = True
 
         service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
@@ -3336,7 +3356,6 @@ def test_make_batch_historical(
     metrics_per_query,
     max_historical_metrics,
 ):
-
     # based on PERF_COUNTER_INFO: there are 7 metrics- counter IDs 100- 106
     # 1 cluster metric, 1 datacenter metric, and 3 datastore metrics
     #
@@ -3430,7 +3449,6 @@ def test_make_batch_realtime(
     metrics_per_query,
     max_historical_metrics,
 ):
-
     if max_query_metrics is not None:
         service_instance.content.setting.QueryOptions = mock.MagicMock(
             return_value=[mock.MagicMock(value=max_query_metrics)]

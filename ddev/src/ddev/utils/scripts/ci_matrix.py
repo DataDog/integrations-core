@@ -78,6 +78,9 @@ PLATFORMS = {
     'macos': __plat('macOS', 'macos-13'),
 }
 
+# The following integrations are no longer tested in CI
+UNTESTABLE_INTEGRATIONS = {"mesos_slave"}
+
 
 @lru_cache(maxsize=None)
 def read_manifest(root: Path, target: str) -> dict:
@@ -154,6 +157,8 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
     agent_requirements_file = root / AGENT_REQUIREMENTS_FILE
     targets = []
     for directory_name, files in changed_directories.items():
+        if directory_name in UNTESTABLE_INTEGRATIONS:
+            continue
         directory = root / directory_name
         if not ((directory / 'hatch.toml').is_file() and (directory / 'tests').is_dir()):
             continue
@@ -172,6 +177,8 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
 def get_all_targets(root: Path) -> list[str]:
     targets = []
     for entry in root.iterdir():
+        if entry.name in UNTESTABLE_INTEGRATIONS:
+            continue
         if (entry / 'hatch.toml').is_file() and (entry / 'tests').is_dir():
             targets.append(entry.name)
 

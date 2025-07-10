@@ -1,0 +1,32 @@
+{
+  "totalCount": "1",
+  "imdata": [
+    {
+      "faultDelegate": {
+        "attributes": {
+          "ack": "no",
+          "affected": "resPolCont/rtdOutCont/rtdOutDef-[uni/tn-Legado/out-PANDORA_to_NELS.l3out]/node-101/stpathatt-[N5KFRE-VPC]/nwissues",
+          "cause": "configuration-failed",
+          "changeSet": "configQual:invalid-path, configSt:failed-to-apply, debugMessage:invalid-path: Interface does not exist;, temporaryError:no",
+          "childAction": "",
+          "code": "F0467",
+          "created": "2025-03-12T14:50:49.955+00:00",
+          "descr": "Fault delegate: Configuration failed for uni/tn-Legado/out-PANDORA_to_NELS.l3out node 101 N5KFRE-VPC due to Invalid Path Configuration, debug message: invalid-path: Interface does not exist;",
+          "dn": "uni/tn-Legado/out-PANDORA_to_NELS.l3out/fd-[resPolCont/rtdOutCont/rtdOutDef-[uni/tn-Legado/out-PANDORA_to_NELS.l3out]/node-101/stpathatt-[N5KFRE-VPC]/nwissues]-fault-F0467",
+          "domain": "tenant",
+          "highestSeverity": "minor",
+          "lastTransition": "2025-03-12T14:53:06.041+00:00",
+          "lc": "raised",
+          "occur": "1",
+          "origSeverity": "minor",
+          "prevSeverity": "minor",
+          "rule": "fv-nw-issues-config-failed",
+          "severity": "minor",
+          "status": "",
+          "subject": "management",
+          "type": "config"
+        }
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import socket
 import time
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
@@ -34,14 +34,18 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
+    check_metrics_metadata,
     check_performance_metrics,
     check_physical_replication_slots,
+    check_recovery_prefetch_metrics,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_io_metrics,
-    check_stat_replication,
+    check_stat_replication_no_slot,
+    check_stat_replication_physical_slot,
     check_stat_wal_metrics,
     check_uptime_metrics,
+    check_wait_event_metrics,
     check_wal_receiver_metrics,
     requires_static_version,
 )
@@ -81,7 +85,8 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_conflict_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
-    check_stat_replication(aggregator, expected_tags=expected_tags)
+    check_stat_replication_physical_slot(aggregator, expected_tags=expected_tags)
+    check_stat_replication_no_slot(aggregator, expected_tags=expected_tags)
     if is_aurora is False:
         check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
         check_file_wal_metrics(aggregator, expected_tags=expected_tags)
@@ -91,10 +96,20 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+    check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
+    expected_wait_event_tags = expected_tags + [
+        'app:datadog-agent',
+        'user:datadog',
+        'db:datadog_test',
+        'backend_type:client backend',
+        'wait_event:NoWaitEvent',
+    ]
+    check_wait_event_metrics(aggregator, expected_tags=expected_wait_event_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
 
     aggregator.assert_all_metrics_covered()
+    check_metrics_metadata(aggregator)
 
 
 def _increase_txid(cur):
@@ -115,8 +130,7 @@ def test_initialization_tags(integration_check, pg_instance):
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             if float(POSTGRES_VERSION) >= 13.0:
                 query = 'select pg_snapshot_xmin(pg_current_snapshot());'
@@ -133,9 +147,7 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
     assert aggregator.metrics('postgresql.snapshot.xmax')[0].value >= xmin
 
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        # Force autocommit
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             _increase_txid(cur)
 
@@ -277,7 +289,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     def format_with_error(value, **kwargs):
         if 'pg_is_in_recovery' in value:
             called.append(True)
-            raise psycopg2.errors.FeatureNotSupported("Not available")
+            raise psycopg.errors.FeatureNotSupported("Not available")
         return unpatched_fmt.format(value, **kwargs)
 
     # This simulate an error in the fmt function, as it's a bit hard to mock psycopg
@@ -325,7 +337,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # Forth: connection health check failed
     with pytest.raises(DatabaseHealthCheckError):
         db = mock.MagicMock()
-        db.cursor().__enter__().execute.side_effect = psycopg2.OperationalError('foo')
+        db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
 
         @contextlib.contextmanager
         def mock_db():
@@ -383,7 +395,7 @@ def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
     Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
     """
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.run()
@@ -640,7 +652,7 @@ def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
-    with pytest.raises(psycopg2.errors.QueryCanceled):
+    with pytest.raises(psycopg.errors.QueryCanceled):
         with check.db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("select pg_sleep(2000)")
@@ -690,6 +702,54 @@ def test_pg_control(aggregator, integration_check, pg_instance):
     assert_metric_at_least(
         aggregator, 'postgresql.control.checkpoint_delay', count=1, higher_bound=2.0, tags=dd_agent_tags
     )
+    # After a checkpoint, we have the CHECKPOINT_ONLINE record (114 bytes) and also
+    # likely receive RUNNING_XACTS (50 bytes) record
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.checkpoint_delay_bytes', count=1, higher_bound=250, tags=dd_agent_tags
+    )
+    # And restart should be slightly more than checkpoint delay
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.redo_delay_bytes', count=1, higher_bound=300, tags=dd_agent_tags
+    )
+
+
+def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
+    """
+    Makes sure that we only get the control checkpoint metrics in the correct environment
+    """
+
+    # The control checkpoint metrics is not possible to collect in aurora if wal_level is not logical
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=True)
+    check._get_wal_level = mock.MagicMock(return_value="replica")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=0)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=0)
+
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=True)
+    check._get_wal_level = mock.MagicMock(return_value="logical")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=1)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=1)
+
+    # We should be able to collect the control checkpoint metrics in non-aurora environments no matter the wal_level
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=False)
+    check._get_wal_level = mock.MagicMock(return_value="replica")
+    aggregator.reset()
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=1)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=1)
 
 
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
@@ -761,7 +821,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         (True, None),
         (False, None),
         (True, 'forced_hostname'),
-        (True, 'forced_hostname'),
+        (False, 'forced_hostname'),
     ],
 )
 def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
@@ -769,19 +829,36 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     # this will block on cancel and wait for the coll interval of 600 seconds,
     # unless the collection_interval is set to a short amount of time
     pg_instance['collect_resources'] = {'collection_interval': 0.1}
+
+    expected_database_hostname = expected_database_instance = expected_host = "stubbed.hostname"
     if reported_hostname:
         pg_instance['reported_hostname'] = reported_hostname
-    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
+        expected_host = reported_hostname
+        expected_database_instance = reported_hostname
+
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'postgresql_cluster_name:primary',
+        'replication_role:master',
+        'database_hostname:{}'.format(expected_database_hostname),
+        'database_instance:{}'.format(expected_database_instance),
+    ]
     check = PostgreSql('test_instance', {}, [pg_instance])
     run_one_check(check)
+
+    # These tags are a bit dynamic in value, so we get them from the check and ensure they are present
+    expected_tags.append('postgresql_version:{}'.format(check.raw_version))
+    expected_tags.append('system_identifier:{}'.format(check.system_identifier))
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is not None
     assert event['host'] == expected_host
+    assert event['database_instance'] == expected_database_instance
+    assert event['database_hostname'] == expected_database_hostname
     assert event['dbms'] == "postgres"
-    assert event['tags'].sort() == expected_tags.sort()
+
+    assert sorted(event['tags']) == sorted(expected_tags)
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {
@@ -826,7 +903,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
                     "enabled": True,
                 },
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -856,7 +933,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
                     "enabled": 'true',
                 },
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -930,7 +1007,7 @@ def test_database_instance_cloud_metadata_aws(
             {
                 "client_id": "my-client-id",
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -976,7 +1053,7 @@ def test_database_instance_cloud_metadata_aws(
             {
                 "client_id": "my-client-id",
             },
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),
@@ -991,7 +1068,7 @@ def test_database_instance_cloud_metadata_aws(
                 },
             },
             None,
-            psycopg2.OperationalError,
+            psycopg.OperationalError,
             'password authentication failed',
             True,
         ),

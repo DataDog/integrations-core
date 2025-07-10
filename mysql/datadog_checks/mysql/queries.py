@@ -13,8 +13,13 @@ ORDER BY `percentile` ASC
 LIMIT 1"""
 
 SQL_QUERY_TABLE_ROWS_STATS = """\
-SELECT table_schema, table_name, rows_read, rows_changed
-FROM information_schema.table_statistics"""
+SELECT
+    OBJECT_SCHEMA as table_schema,
+    OBJECT_NAME as table_name,
+    COUNT_READ as rows_read,
+    COUNT_WRITE as rows_changed
+FROM performance_schema.table_io_waits_summary_by_table
+WHERE OBJECT_SCHEMA NOT IN ('mysql', 'performance_schema', 'information_schema')"""
 
 SQL_QUERY_SCHEMA_SIZE = """\
 SELECT table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
@@ -41,14 +46,22 @@ FROM performance_schema.events_statements_summary_by_digest
 WHERE schema_name IS NOT NULL
 GROUP BY schema_name"""
 
-SQL_WORKER_THREADS = "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'"
+SQL_REPLICA_WORKER_THREADS = (
+    "SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE PROCESSLIST_COMMAND LIKE 'Binlog dump%'"
+)
 
-SQL_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'"
+SQL_REPLICA_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE 'Binlog dump%'"
 
 SQL_INNODB_ENGINES = """\
 SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
+
+SQL_BINLOG_ENABLED = """\
+SELECT @@log_bin AS binlog_enabled"""
+
+SQL_SERVER_UUID = """\
+SELECT @@server_uuid"""
 
 SQL_SERVER_ID_AWS_AURORA = """\
 SHOW VARIABLES LIKE 'aurora_server_id'"""
@@ -115,14 +128,6 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
 """
 
-SQL_INDEXES_EXPRESSION_COLUMN_CHECK = """
-    SELECT COUNT(*) as column_count
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = 'information_schema'
-      AND TABLE_NAME = 'STATISTICS'
-      AND COLUMN_NAME = 'EXPRESSION';
-"""
-
 SQL_INDEXES = """\
 SELECT
     table_name as `table_name`,
@@ -161,19 +166,32 @@ WHERE table_schema = %s AND table_name IN ({});
 
 SQL_FOREIGN_KEYS = """\
 SELECT
-    constraint_schema as `constraint_schema`,
-    constraint_name as `name`,
-    table_name as `table_name`,
-    group_concat(column_name order by ordinal_position asc) as column_names,
-    referenced_table_schema as `referenced_table_schema`,
-    referenced_table_name as `referenced_table_name`,
-    group_concat(referenced_column_name) as referenced_column_names
+    kcu.constraint_schema as constraint_schema,
+    kcu.constraint_name as name,
+    kcu.table_name as table_name,
+    group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
+    kcu.referenced_table_schema as referenced_table_schema,
+    kcu.referenced_table_name as referenced_table_name,
+    group_concat(kcu.referenced_column_name) as referenced_column_names,
+    rc.update_rule as update_action,
+    rc.delete_rule as delete_action
 FROM
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+LEFT JOIN
+    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+    ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+    AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
 WHERE
-    table_schema = %s AND table_name in ({})
-    AND referenced_table_name is not null
-GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
+    kcu.table_schema = %s AND kcu.table_name in ({})
+    AND kcu.referenced_table_name is not null
+GROUP BY
+    kcu.constraint_schema,
+    kcu.constraint_name,
+    kcu.table_name,
+    kcu.referenced_table_schema,
+    kcu.referenced_table_name,
+    rc.update_rule,
+    rc.delete_rule
 """
 
 SQL_PARTITION = """\
@@ -243,3 +261,15 @@ def show_replica_status_query(version, is_mariadb, channel=''):
         return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
     else:
         return "{0};".format(base_query)
+
+
+def get_indexes_query(version, is_mariadb, table_names):
+    """
+    Get the appropriate indexes query based on MySQL version and flavor.
+    The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
+    MariaDB doesn't support functional indexes.
+    """
+    if not is_mariadb and version.version_compatible((8, 0, 13)):
+        return SQL_INDEXES_8_0_13.format(table_names)
+    else:
+        return SQL_INDEXES.format(table_names)
