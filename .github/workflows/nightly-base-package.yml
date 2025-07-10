@@ -9,6 +9,8 @@ on:
   schedule:
   # 5 AM UTC
   - cron: "0 5 * * *"
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
   test:
