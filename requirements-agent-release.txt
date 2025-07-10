@@ -102,7 +102,7 @@ datadog-ivanti-connect-secure==1.0.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
 datadog-juniper-srx-firewall==1.0.0
-datadog-kafka-consumer==6.5.2
+datadog-kafka-consumer==6.6.0
 datadog-kafka==4.0.0
 datadog-karpenter==2.3.0
 datadog-kaspersky==1.0.0
