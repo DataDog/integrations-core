@@ -980,8 +980,8 @@ metadata:
   labels:
     app: tekton-operator
     name: tekton-operator-webhook
-    operator.tekton.dev/release: v0.69.1
-    version: v0.69.1
+    operator.tekton.dev/release: v0.73.1
+    version: v0.73.1
   name: tekton-operator-webhook
   namespace: tekton-operator
 spec:
@@ -1029,8 +1029,6 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: tekton-operator
-            - name: IMAGE_PIPELINES_PROXY
-              value: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/proxy-webhook:v0.69.1@sha256:f6224b715671cbbcfd3a164e3557ff533b47e39a5a689a0d818fd2fd1f027016
             - name: METRICS_DOMAIN
               value: tekton.dev/operator
             - name: VERSION
@@ -1047,7 +1045,7 @@ spec:
                 configMapKeyRef:
                   key: DEFAULT_TARGET_NAMESPACE
                   name: tekton-config-defaults
-          image: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.69.1@sha256:142c59f97aac2fba714e928012b5576476313c7cd4394b568df656b0693dbea0
+          image: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.73.1
           imagePullPolicy: Always
           name: tekton-operator-lifecycle
         - args:
@@ -1072,7 +1070,7 @@ spec:
               value: v0.69.1
             - name: METRICS_DOMAIN
               value: tekton.dev/operator
-          image: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.69.1@sha256:142c59f97aac2fba714e928012b5576476313c7cd4394b568df656b0693dbea0
+          image: ghcr.io/tektoncd/github.com/tektoncd/operator/cmd/kubernetes/operator:v0.73.1
           imagePullPolicy: Always
           name: tekton-operator-cluster-operations
       serviceAccountName: tekton-operator
