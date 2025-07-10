@@ -63,7 +63,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -127,7 +127,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -192,7 +192,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -257,7 +257,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -322,7 +322,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -387,7 +387,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -451,7 +451,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -526,7 +526,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -589,7 +589,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -652,7 +652,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -725,7 +725,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -792,7 +792,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -855,7 +855,7 @@ tests:
           "timestamp" : 1.722921377E12
         }
       tags:
-      - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Action" : "Update folder permissions",
@@ -865,63 +865,63 @@ tests:
           "IP_Address" : "10.10.10.10",
           "timestamp" : 1.722921377E12
       }
-  result:
-    custom:
-      Action: "Update folder permissions"
-      Data: "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'"
-      IP_Address: "10.10.10.10"
-      Time: "2024-08-06 05:16:17"
-      Username: "abc@test.com"
-      evt:
-        name: "Update folder permissions"
-      network:
-        client:
-          geoip: {}
-          ip: "10.10.10.10"
-      ocsf:
-        activity_id: 3
-        activity_name: "Update"
-        actor:
-          user:
-            email_addr: "abc@test.com"
-            name: "abc@test.com"
-        api:
-          operation: "Update folder permissions"
-        category_name: "Application Activity"
-        category_uid: 6
-        class_name: "API Activity"
-        class_uid: 6003
-        message: "Update folder permissions"
-        metadata:
-          event_code: "Update folder permissions"
-          product:
-            name: "LastPass reporting events"
-            vendor_name: "LastPass"
-          version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          ip: "10.10.10.10"
-        time: 1.722921377E12
-        type_uid: 600303
-      shared_folder:
-        modified_user: "cdd@test.com"
-        name: "SF5"
-        permissions:
-          hide_password: "yes"
-          is_admin: "yes"
-          read_only: "yes"
-      timestamp: 1.722921377E12
-      usr:
-        name: "abc@test.com"
-    message: |-
-      {
-        "Action" : "Update folder permissions",
-        "Username" : "abc@test.com",
-        "Time" : "2024-08-06 05:16:17",
-        "Data" : "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'",
-        "IP_Address" : "10.10.10.10",
-        "timestamp" : 1.722921377E12
-      }
-    tags:
-     - "source:LOGS_SOURCE"
+    result:
+      custom:
+        Action: "Update folder permissions"
+        Data: "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'"
+        IP_Address: "10.10.10.10"
+        Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
+        evt:
+          name: "Update folder permissions"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        ocsf:
+          activity_id: 3
+          activity_name: "Update"
+          actor:
+            user:
+              email_addr: "abc@test.com"
+              name: "abc@test.com"
+          api:
+            operation: "Update folder permissions"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "API Activity"
+          class_uid: 6003
+          message: "Update folder permissions"
+          metadata:
+            event_code: "Update folder permissions"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600303
+        shared_folder:
+          modified_user: "cdd@test.com"
+          name: "SF5"
+          permissions:
+            hide_password: "yes"
+            is_admin: "yes"
+            read_only: "yes"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Update folder permissions",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
