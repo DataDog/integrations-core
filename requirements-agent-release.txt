@@ -195,7 +195,7 @@ datadog-solr==2.1.0
 datadog-sonarqube==5.3.0
 datadog-sonatype-nexus==2.0.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.0.0
-datadog-spark==6.4.0
+datadog-spark==7.0.0
 datadog-sqlserver==22.7.0
 datadog-squid==4.1.0
 datadog-ssh-check==4.2.1
