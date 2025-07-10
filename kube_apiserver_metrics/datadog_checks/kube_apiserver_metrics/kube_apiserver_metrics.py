@@ -37,8 +37,7 @@ METRICS = {
     'apiserver_admission_step_admission_latencies_seconds': 'admission_step_admission_latencies_seconds',
     'apiserver_admission_controller_admission_latencies_seconds': 'admission_controller_admission_duration_seconds',
     # fmt: off
-    'apiserver_admission_step_admission_latencies_seconds_summary':
-        'admission_step_admission_latencies_seconds_summary',
+    'apiserver_admission_step_admission_latencies_seconds_summary': 'admission_step_admission_latencies_seconds_summary',  # noqa
     # fmt: on
     # For Kubernetes >= 1.14
     # (https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.14.md#deprecated-metrics)
@@ -47,8 +46,7 @@ METRICS = {
     'apiserver_admission_step_admission_duration_seconds': 'admission_step_admission_latencies_seconds',
     'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
     # fmt: off
-    'apiserver_admission_step_admission_duration_seconds_summary':
-        'admission_step_admission_latencies_seconds_summary',
+    'apiserver_admission_step_admission_duration_seconds_summary': 'admission_step_admission_latencies_seconds_summary',
     # fmt: on
     # For Kubernetes >= 1.16
     # https://v1-16.docs.kubernetes.io/docs/setup/release/#added-metrics

@@ -16,7 +16,6 @@ CONNECTION_STRING = 'tcp://{}:{}'
 
 
 class TibcoEMSCheck(AgentCheck):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'tibco_ems'
 
@@ -46,7 +45,6 @@ class TibcoEMSCheck(AgentCheck):
         ]
 
     def check(self, _):
-
         output = self.run_tibco_command()
         decoded_output = output.decode('utf-8')
 
@@ -207,7 +205,6 @@ class TibcoEMSCheck(AgentCheck):
         return data
 
     def _submit_metrics_factory(self, prefix, metric_data, metric_names, tag_keys):
-
         tags = []
         for key in tag_keys:
             if prefix == 'server':

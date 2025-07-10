@@ -23,8 +23,8 @@ def test_returns_the_right_instance(is_bsd, is_linux, is_windows, is_solaris, ch
 def ss_subprocess_mock(*args, **kwargs):
     if ['kstat', '-p', 'link:0:'] == args[0]:
         fixture = os.path.join(FIXTURE_DIR, 'solaris', 'kstat_p_link0')
-    elif ["netstat", "-s", "-Ptcp"] == args[0]:
-        fixture = os.path.join(FIXTURE_DIR, 'solaris', 'netstat_s_ptcp')
+    elif ["netstat", "-s", "-P", "tcp"] == args[0]:
+        fixture = os.path.join(FIXTURE_DIR, 'solaris', 'netstat_s_p_tcp')
     with open(fixture, 'rb') as f:
         contents = f.read()
         return decode_string(contents), None, None

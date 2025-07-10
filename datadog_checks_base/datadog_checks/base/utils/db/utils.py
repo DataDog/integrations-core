@@ -11,19 +11,19 @@ import socket
 import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from enum import Enum, auto
 from ipaddress import IPv4Address
-from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
 from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
-
-from ..common import to_native_string
 
 logger = logging.getLogger(__file__)
 
@@ -441,3 +441,128 @@ def tracked_query(check, operation, tags=None):
     yield
     elapsed_ms = (time.time() - start_time) * 1000
     check.histogram("dd.{}.operation.time".format(check.name), elapsed_ms, **stats_kwargs)
+
+
+class TagType(Enum):
+    """Enum for different types of tags"""
+
+    KEYLESS = auto()
+
+
+class TagManager:
+    """
+    Manages tags for a check. Tags are stored as a dictionary of key-value pairs
+    for key-value tags and as a list of values for keyless tags useful for easy update and deletion.
+    There's an internal cache of the tag list to avoid generating the list of tag strings
+    multiple times.
+    """
+
+    def __init__(self) -> None:
+        self._tags: Dict[Union[str, TagType], List[str]] = {}
+        self._cached_tag_list: Optional[tuple[str, ...]] = None
+        self._keyless: TagType = TagType.KEYLESS
+
+    def set_tag(self, key: Optional[str], value: str, replace: bool = False) -> None:
+        """
+        Set a tag with the given key and value.
+        If key is None or empty, the value is stored as a keyless tag.
+        Args:
+            key (str): The tag key, or None/empty for keyless tags
+            value (str): The tag value
+            replace (bool): If True, replaces all existing values for this key
+                           If False, appends the value if it doesn't exist
+        """
+        if not key:
+            key = self._keyless
+
+        if replace or key not in self._tags:
+            self._tags[key] = [value]
+            # Invalidate the cache since tags have changed
+            self._cached_tag_list = None
+        elif value not in self._tags[key]:
+            self._tags[key].append(value)
+            # Invalidate the cache since tags have changed
+            self._cached_tag_list = None
+
+    def set_tags_from_list(self, tag_list: List[str], replace: bool = False) -> None:
+        """
+        Set multiple tags from a list of strings.
+        Strings can be in "key:value" format or just "value" format.
+        Args:
+            tag_list (List[str]): List of tags in "key:value" format or just "value"
+            replace (bool): If True, replaces all existing tags with the new tags list
+        """
+        if replace:
+            self._tags.clear()
+            self._cached_tag_list = None
+
+        for tag in tag_list:
+            if ':' in tag:
+                key, value = tag.split(':', 1)
+                self.set_tag(key, value)
+            else:
+                self.set_tag(None, tag)
+
+    def delete_tag(self, key: Optional[str], value: Optional[str] = None) -> bool:
+        """
+        Delete a tag or specific value for a tag.
+        For keyless tags, use None or empty string as the key.
+        Args:
+            key (str): The tag key to delete, or None/empty for keyless tags
+            value (str, optional): If provided, only deletes this specific value for the key.
+                                 If None, deletes all values for the key.
+        Returns:
+            bool: True if something was deleted, False otherwise
+        """
+        if not key:
+            key = self._keyless
+
+        if key not in self._tags:
+            return False
+
+        if value is None:
+            # Delete the entire key
+            del self._tags[key]
+            # Invalidate the cache
+            self._cached_tag_list = None
+            return True
+        else:
+            # Delete specific value if it exists
+            if value in self._tags[key]:
+                self._tags[key].remove(value)
+                # Clean up empty lists
+                if not self._tags[key]:
+                    del self._tags[key]
+                # Invalidate the cache
+                self._cached_tag_list = None
+                return True
+        return False
+
+    def _generate_tag_strings(self, tags_dict: Dict[Union[str, TagType], List[str]]) -> tuple[str, ...]:
+        """
+        Generate a tuple of tag strings from a tags dictionary.
+        Args:
+            tags_dict (Dict[Union[str, TagType], List[str]]): Dictionary of tags to convert to strings
+        Returns:
+            tuple[str, ...]: Tuple of tag strings
+        """
+        return tuple(
+            value if key == self._keyless else f"{key}:{value}" for key, values in tags_dict.items() for value in values
+        )
+
+    def get_tags(self) -> List[str]:
+        """
+        Get a list of tag strings.
+        For key-value tags, returns "key:value" format.
+        For keyless tags, returns just the value.
+        The returned list is always sorted alphabetically.
+        Returns:
+            list: Sorted list of tag strings
+        """
+        # Return cached list if available
+        if self._cached_tag_list is not None:
+            return list(self._cached_tag_list)
+
+        # Generate and cache regular tags
+        self._cached_tag_list = self._generate_tag_strings(self._tags)
+        return list(self._cached_tag_list)

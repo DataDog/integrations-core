@@ -867,7 +867,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -908,7 +907,7 @@
             "id": 8236156193990667,
             "definition": {
               "type": "note",
-              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. [Learn more](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)",
+              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. [Learn more](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)\n\nAssign the **topic** variable to view insights about a specific topic",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
@@ -921,6 +920,27 @@
             "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
           },
           {
+            "id": 3148501078668227,
+            "definition": {
+              "title": "Kafka Topology for $topic, $env",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "topology_map",
+              "requests": [
+                {
+                  "request_type": "topology",
+                  "query": {
+                    "filters": ["$env"],
+                    "service": "",
+                    "data_source": "data_streams",
+                    "query_string": "traffic_type:kafka queue:$topic.value"
+                  }
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 6, "height": 6 }
+          },
+          {
             "id": 2184446562382655,
             "definition": {
               "title": "Top 10 Max Kafka Lag by env",
@@ -929,7 +949,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -958,7 +977,7 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 12, "height": 4 }
+            "layout": { "x": 6, "y": 1, "width": 6, "height": 6 }
           },
           {
             "id": 1870414104649433,
@@ -1008,7 +1027,7 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 5, "width": 6, "height": 2 }
+            "layout": { "x": 0, "y": 7, "width": 6, "height": 2 }
           },
           {
             "id": 944656656985134,
@@ -1058,7 +1077,7 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 5, "width": 6, "height": 2 }
+            "layout": { "x": 6, "y": 7, "width": 6, "height": 2 }
           },
           {
             "id": 6058441691900230,
@@ -1069,7 +1088,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1106,7 +1124,7 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 7, "width": 6, "height": 2 }
+            "layout": { "x": 0, "y": 9, "width": 6, "height": 2 }
           },
           {
             "id": 3284852106159467,
@@ -1115,7 +1133,6 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "time": {},
               "type": "distribution",
               "xaxis": {
                 "scale": "linear",
@@ -1147,11 +1164,11 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 7, "width": 6, "height": 2 }
+            "layout": { "x": 6, "y": 9, "width": 6, "height": 2 }
           }
         ]
       },
-      "layout": { "x": 0, "y": 18, "width": 12, "height": 10 }
+      "layout": { "x": 0, "y": 18, "width": 12, "height": 12 }
     },
     {
       "id": 6693725981895002,
@@ -1368,7 +1385,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 28,
+        "y": 30,
         "width": 12,
         "height": 6,
         "is_column_break": true
@@ -1408,7 +1425,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1449,7 +1465,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1483,7 +1498,7 @@
           }
         ]
       },
-      "layout": { "x": 0, "y": 34, "width": 12, "height": 5 }
+      "layout": { "x": 0, "y": 36, "width": 12, "height": 5 }
     },
     {
       "id": 8466685701903458,
@@ -1584,7 +1599,7 @@
           }
         ]
       },
-      "layout": { "x": 0, "y": 39, "width": 12, "height": 6 }
+      "layout": { "x": 0, "y": 41, "width": 12, "height": 6 }
     }
   ],
   "template_variables": [

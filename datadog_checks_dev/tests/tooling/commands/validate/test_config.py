@@ -25,7 +25,6 @@ def test_validate_config_spec_file_mandatory_in_core(repo, expect_failure):
     runner = CliRunner()
 
     with runner.isolated_filesystem():
-
         # Generate the check structure
         working_repo = 'integrations-{}'.format(repo)
         shutil.copytree(
@@ -49,3 +48,26 @@ def test_validate_config_spec_file_mandatory_in_core(repo, expect_failure):
         assert 'my_check:' in result.stdout
         assert 'Did not find spec file' in result.stdout
         assert '' == result.stderr
+
+
+@pytest.mark.parametrize(
+    'check',
+    [
+        'ddev',
+        'datadog_checks_dev',
+        'datadog_checks_base',
+        'datadog_checks_dependency_provider',
+        'datadog_checks_downloader',
+    ],
+)
+def test_configless_check(check):
+    """
+    Test that a check without a config just passes.
+    """
+
+    result = run_command(
+        [sys.executable, '-m', 'datadog_checks.dev', '--here', 'validate', 'config', check],
+        capture=True,
+    )
+    assert result.code == 0
+    assert f'Skipping {check}, it does not need an Agent-level config.' in result.stdout

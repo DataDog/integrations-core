@@ -59,8 +59,8 @@ class TestRaw:
         constructor = ensure_bytes
         finalizer = ensure_unicode
 
-        name = constructor(u'nam\u00E9')
-        value = constructor(u'valu\u00E9')
+        name = constructor('nam\u00e9')
+        value = constructor('valu\u00e9')
 
         with mock.patch(SET_CHECK_METADATA_METHOD) as m:
             check.set_metadata(name, value)
