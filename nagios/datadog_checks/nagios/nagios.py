@@ -63,7 +63,6 @@ SOURCE_TYPE_NAME = 'Nagios'
 
 
 class NagiosCheck(AgentCheck):
-
     NAGIOS_CONF_KEYS = [
         re.compile(r'^(?P<key>log_file)\s*=\s*(?P<value>.+)$'),
         re.compile(r'^(?P<key>host_perfdata_file_template)\s*=\s*(?P<value>.+)$'),

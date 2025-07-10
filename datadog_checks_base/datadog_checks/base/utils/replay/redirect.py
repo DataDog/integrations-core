@@ -5,13 +5,12 @@ import logging
 import os
 import sys
 
+from datadog_checks.base.checks import base
+from datadog_checks.base.log import LOG_LEVEL_MAP, TRACE_LEVEL, _get_py_loglevel
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.format import json
-
-from ...checks import base
-from ...log import LOG_LEVEL_MAP, TRACE_LEVEL, _get_py_loglevel
-from ...utils.common import to_native_string
-from ...utils.metadata import core
-from ...utils.replay.constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
+from datadog_checks.base.utils.metadata import core
+from datadog_checks.base.utils.replay.constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
 
 MESSAGE_INDICATOR = os.environ[EnvVars.MESSAGE_INDICATOR]
 LOG_METHODS = {log_level: log_method.lower() for log_method, log_level in LOG_LEVEL_MAP.items()}

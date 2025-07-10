@@ -8,7 +8,7 @@ import os
 from string import Template
 from time import time
 
-import psycopg2
+import psycopg
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_res
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
-from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
@@ -58,6 +58,7 @@ from .util import (
     QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
+    QUERY_PG_WAIT_EVENT_METRICS,
     REPLICATION_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
@@ -82,7 +83,7 @@ from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionU
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -233,7 +234,7 @@ class PostgreSql(AgentCheck):
 
     def execute_query_raw(self, query, db):
         with db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
                 return rows
@@ -248,11 +249,11 @@ class PostgreSql(AgentCheck):
             self._db = self._new_connection(self._config.dbname)
             # once the connection is reinitialized, we need to reload the pg_settings
             self._load_pg_settings(self._db)
-        if self._db.status != psycopg2.extensions.STATUS_READY:
+        if self._db.info.status != psycopg.pq.ConnStatus.OK:
             self._db.rollback()
         try:
             yield self._db
-        except (psycopg2.InterfaceError, InterruptedError):
+        except (psycopg.InterfaceError, InterruptedError):
             # if we get an interface error or an interrupted error,
             # we gracefully close the connection
             self.log.warning(
@@ -273,10 +274,10 @@ class PostgreSql(AgentCheck):
         try:
             # run a simple query to check if the connection is healthy
             # health check should run after a connection is established
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 cursor.fetchall()
-        except psycopg2.OperationalError as e:
+        except psycopg.OperationalError as e:
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
             raise DatabaseHealthCheckError(err_msg)
@@ -347,6 +348,7 @@ class PostgreSql(AgentCheck):
             queries.append(QUERY_PG_REPLICATION_STATS_METRICS)
             queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
             queries.append(STAT_SUBSCRIPTION_METRICS)
+            queries.append(QUERY_PG_WAIT_EVENT_METRICS)
 
         if self.version >= V12:
             queries.append(CLUSTER_VACUUM_PROGRESS_METRICS)
@@ -414,7 +416,7 @@ class PostgreSql(AgentCheck):
 
     def _get_replication_role(self):
         with self.db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SELECT pg_is_in_recovery();')
                 role = cursor.fetchone()[0]
                 # value fetched for role is of <type 'bool'>
@@ -465,13 +467,13 @@ class PostgreSql(AgentCheck):
 
     def load_system_identifier(self):
         with self.db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SELECT system_identifier FROM pg_control_system();')
                 self.system_identifier = cursor.fetchone()[0]
 
     def load_cluster_name(self):
         with self.db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SHOW cluster_name;')
                 self.cluster_name = cursor.fetchone()[0]
 
@@ -487,7 +489,7 @@ class PostgreSql(AgentCheck):
 
     def _get_wal_level(self):
         with self.db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SHOW wal_level;')
                 wal_level = cursor.fetchone()[0]
                 return wal_level
@@ -580,20 +582,20 @@ class PostgreSql(AgentCheck):
                     cursor.execute(query.replace(r'%', r'%%'))
 
                 results = cursor.fetchall()
-        except psycopg2.errors.FeatureNotSupported as e:
+        except psycopg.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.log.debug("Disabling replication metrics")
             self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
-        except psycopg2.errors.UndefinedFunction as e:
+        except psycopg.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
                 "It seems the PG version has been incorrectly identified as %s. "
                 "A reattempt to identify the right version will happen on next agent run." % self.version
             )
             self._clean_state()
-        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+        except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
 
         if not results:
@@ -643,8 +645,7 @@ class PostgreSql(AgentCheck):
             expected_number_of_columns = len(descriptors) + len(cols)
             if len(row) != expected_number_of_columns:
                 raise RuntimeError(
-                    'Row does not contain enough values: '
-                    'expected {} ({} descriptors + {} columns), got {}'.format(
+                    'Row does not contain enough values: expected {} ({} descriptors + {} columns), got {}'.format(
                         expected_number_of_columns, len(descriptors), len(cols), len(row)
                     )
                 )
@@ -714,7 +715,7 @@ class PostgreSql(AgentCheck):
         for db in databases:
             try:
                 with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                    with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                    with conn.cursor() as cursor:
                         for scope in scopes:
                             self._query_scope(cursor, scope, instance_tags, False, db)
             except Exception as e:
@@ -803,7 +804,7 @@ class PostgreSql(AgentCheck):
             metric_scope.append(replication_metrics_query)
 
         with self.db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
                 if results_len is not None:
                     self.gauge(
@@ -813,14 +814,14 @@ class PostgreSql(AgentCheck):
                         hostname=self.reported_hostname,
                     )
 
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
             if self._config.collect_checksum_metrics and self.version >= V12:
                 # SHOW queries need manual cursor execution so can't be bundled with the metrics
-                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                with conn.cursor() as cursor:
                     cursor.execute("SHOW data_checksums;")
                     enabled = cursor.fetchone()[0]
                     self.count(
@@ -831,7 +832,7 @@ class PostgreSql(AgentCheck):
                     )
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
-                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                with conn.cursor() as cursor:
                     self._query_scope(cursor, activity_metrics, instance_tags, False)
 
             if per_database_metric_scope:
@@ -847,11 +848,11 @@ class PostgreSql(AgentCheck):
                     metric_scope.extend(per_database_metric_scope)
 
             for scope in list(metric_scope):
-                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                with conn.cursor() as cursor:
                     self._query_scope(cursor, scope, instance_tags, False)
 
             for scope in self._config.custom_metrics:
-                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                with conn.cursor() as cursor:
                     self._query_scope(cursor, scope, instance_tags, True)
 
         if self.dynamic_queries:
@@ -861,12 +862,12 @@ class PostgreSql(AgentCheck):
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
-            connection_string = "user=%s dbname=%s application_name=%s" % (
+            connection_string = "dbname=%s user=%s application_name=%s" % (
                 self._config.user,
                 dbname,
                 self._config.application_name,
             )
-            conn = psycopg2.connect(connection_string)
+            conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=CommenterCursor)
         else:
             password = self._config.password
             if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
@@ -899,7 +900,7 @@ class PostgreSql(AgentCheck):
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': password,
-                'database': dbname,
+                'dbname': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -913,13 +914,19 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg2.connect(**args)
+            conn = psycopg.connect(**args, autocommit=True, cursor_factory=CommenterCursor)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        conn.set_session(autocommit=True, readonly=True)
         if self._config.query_timeout:
             # Set the statement_timeout for the session
             with conn.cursor() as cursor:
                 cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
+        if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
+            text_loader = SQLASCIITextLoader
+            text_loader.encodings = self._config.query_encodings
+            conn.adapters.register_loader("text", text_loader)
+            conn.adapters.register_loader("varchar", text_loader)
+            conn.adapters.register_loader("name", text_loader)
+            conn.adapters.register_loader("regclass", text_loader)
         return conn
 
     def _connect(self):
@@ -934,7 +941,7 @@ class PostgreSql(AgentCheck):
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
-            with db.cursor(cursor_factory=CommenterDictCursor) as cursor:
+            with db.cursor() as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
@@ -945,7 +952,7 @@ class PostgreSql(AgentCheck):
                 for setting in rows:
                     name, val = setting
                     self.pg_settings[name] = val
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+        except (psycopg.DatabaseError, psycopg.OperationalError) as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",
@@ -957,17 +964,19 @@ class PostgreSql(AgentCheck):
 
     def _get_main_db(self):
         """
-        Returns a memoized, persistent psycopg2 connection to `self.dbname`.
+        Returns a memoized, persistent psycopg connection to `self.dbname`.
         Threadsafe as long as no transactions are used
-        :return: a psycopg2 connection
+        :return: a psycopg connection
         """
         # reload settings for the main DB only once every time the connection is reestablished
-        return self.db_pool.get_connection(
+        conn = self.db_pool.get_connection(
             self._config.dbname,
             self._config.idle_connection_timeout,
             startup_fn=self._load_pg_settings,
             persistent=True,
         )
+
+        return conn
 
     def _close_db_pool(self):
         self.db_pool.close_all_connections()
@@ -1065,7 +1074,7 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
+            message = 'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
             )
             self.service_check(

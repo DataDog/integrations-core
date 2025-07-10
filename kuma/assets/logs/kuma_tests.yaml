@@ -1,0 +1,157 @@
+id: kuma
+tests:
+ -
+  sample: "[2025-06-26T21:29:21.535Z] - default 10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms, sent 6195 bytes, received: 194 bytes"
+  result:
+    custom:
+      date: "2025-06-26T21:29:21.535Z"
+      duration: 1.4004E10
+      kuma:
+        destination_service: "redis_kuma-demo_svc_6379"
+        mesh: "default"
+        source_address_without_port: "10.42.1.5"
+        upstream:
+          host: "10.42.1.5:6379"
+      network:
+        bytes_read: 194
+        bytes_written: 6195
+    message: "[2025-06-26T21:29:21.535Z] - default 10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms, sent 6195 bytes, received: 194 bytes"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750973361535
+ -
+  sample: "[2025-06-26T13:19:18.314Z] default \"GET /api?timeout=32s HTTP/1.1\" 404 NR 0 0 0 - \"10.42.1.26\" \"kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd\" \"-\" \"0efbfa26-1e2d-9144-919a-e9985d0eab30\" \"localhost:8080\" \"unknown\" \"edge-gateway_kuma-demo_svc\" \"10.42.3.27\" \"-\""
+  result:
+    custom:
+      date: "2025-06-26T13:19:18.314Z"
+      duration: 0.0
+      http:
+        _x_forwarded_for: "10.42.1.26"
+        method: "GET"
+        request_id: "0efbfa26-1e2d-9144-919a-e9985d0eab30"
+        status_code: 404
+        url: "/api?timeout=32s"
+        useragent: "kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Linux"
+        version: "HTTP/1.1"
+      kuma:
+        destination_service: "edge-gateway_kuma-demo_svc"
+        http:
+          request:
+            authority: "localhost:8080"
+        mesh: "default"
+        source_address_without_port: "10.42.3.27"
+      network:
+        bytes_read: 0
+        bytes_written: 0
+      response:
+        flags: "NR"
+    message: "[2025-06-26T13:19:18.314Z] default \"GET /api?timeout=32s HTTP/1.1\" 404 NR 0 0 0 - \"10.42.1.26\" \"kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd\" \"-\" \"0efbfa26-1e2d-9144-919a-e9985d0eab30\" \"localhost:8080\" \"unknown\" \"edge-gateway_kuma-demo_svc\" \"10.42.3.27\" \"-\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750943958314
+ -
+  sample: "[2025-06-03 18:44:06.650][31][info][upstream] [source/common/listener_manager/lds_api.cc:106] lds: add/update listener 'outbound:10.43.182.159:80'"
+  result:
+    custom:
+      component: "upstream"
+      date: 1748976246650
+      level: "info"
+      logger:
+        file: "source/common/listener_manager/lds_api.cc"
+        lineno: 106.0
+        thread_name: 31.0
+    message: "lds: add/update listener 'outbound:10.43.182.159:80'"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1748976246650
+ -
+  sample: "[2025-06-03 18:54:23.975][32][info][main] [source/server/server.cc:998] main dispatch loop exited"
+  result:
+    custom:
+      component: "main"
+      date: 1748976863975
+      level: "info"
+      logger:
+        file: "source/server/server.cc"
+        lineno: 998.0
+        thread_name: 32.0
+    message: "main dispatch loop exited"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1748976863975
+ -
+  sample: "2025-05-26T20:44:41.327Z\tINFO\tplugin.runtime.gateway\tregistered gateway plugin"
+  result:
+    custom:
+      date: "2025-05-26T20:44:41.327Z"
+      level: "INFO"
+      logger:
+        name: "plugin.runtime.gateway"
+    message: "registered gateway plugin"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1748292281327
+ -
+  sample: "2025-05-26T20:47:04.174Z\tINFO\tcontrollers.Service\tannotating service which is part of the mesh\t{\"service\": {\"name\":\"datadog-admission-controller\",\"namespace\":\"datadog-operator\"}, \"annotation\": \"ingress.kubernetes.io/service-upstream=true\"}"
+  result:
+    custom:
+      annotation: "ingress.kubernetes.io/service-upstream=true"
+      date: "2025-05-26T20:47:04.174Z"
+      level: "INFO"
+      logger:
+        name: "controllers.Service"
+      service:
+        name: "datadog-admission-controller"
+        namespace: "datadog-operator"
+    message: "annotating service which is part of the mesh"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1748292424174
+ -
+  sample: "I0526 20:44:41.456499       1 leaderelection.go:257] attempting to acquire leader lease kuma-system/cp-leader-lease..."
+  result:
+    custom:
+      date: 44138681456
+      level: "I"
+      logger:
+        lineno: 257.0
+        name: "leaderelection.go"
+        thread_name: 1.0
+    message: "attempting to acquire leader lease kuma-system/cp-leader-lease..."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 44138681456
+ -
+  sample: "2025/05/31 15:56:10 http: TLS handshake error from 10.42.0.1:41588: EOF"
+  result:
+    custom:
+      date: "2025/05/31 15:56:10"
+      prefix: "http"
+    message: "TLS handshake error from 10.42.0.1:41588: EOF"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "[INFO] SIGTERM: Shutting down servers then terminating"
+  result:
+    custom:
+      level: "INFO"
+      signal: "SIGTERM"
+    message: "Shutting down servers then terminating"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1

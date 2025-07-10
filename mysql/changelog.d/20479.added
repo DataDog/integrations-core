@@ -1,1 +1,0 @@
-Add `cluster_uuid` and `replication_role` cluster identifier tags for mysql instances using traditional replication

@@ -43,9 +43,26 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "kuma-cp run",
-        "kuma-dp run"
+        "kuma-cp",
+        "kuma-dp"
       ]
+    },
+    "saved_views": {
+      "Kuma Mesh Access Logs Overview": "assets/saved_views/logs_overview.json"
+    },
+    "logs": {
+      "source": "kuma"
+    },
+    "dashboards": {
+      "Kuma Control Plane": "assets/dashboards/kuma_control_plane.json",
+      "Kuma Service Communication": "assets/dashboards/kuma_service_communication.json"
+    },
+    "monitors": {
+      "Kuma No Leader Detected": "assets/monitors/no_leader_detected.json",
+      "Kuma Multiple Leaders Detected": "assets/monitors/multiple_leaders_detected.json",
+      "Kuma API Server High Error Rate": "assets/monitors/api_server_error_rate.json",
+      "Kuma xDS Configuration Generation Errors": "assets/monitors/xds_generation_errors.json",
+      "Kuma xDS High Configuration Delivery Latency": "assets/monitors/xds_delivery_latency.json"
     }
   },
   "author": {
