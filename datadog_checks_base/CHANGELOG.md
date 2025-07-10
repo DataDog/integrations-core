@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 37.16.0 / 2025-07-10
+
+***Added***:
+
+* Add OpenMetrics decorator to add code_class to metrics that have an HTTP status code tag ([#20528](https://github.com/DataDog/integrations-core/pull/20528))
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add flag to allow symmetric inclusion validation on assert_metrics_using_metadata in AggregatorStub ([#20563](https://github.com/DataDog/integrations-core/pull/20563))
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Add support for ingesting target_info when using the WithHttpCodeClass decorator ([#20555](https://github.com/DataDog/integrations-core/pull/20555))
+* Fix WithHttpCodeClass decorator not keeping track of internal state of the scraper ([#20640](https://github.com/DataDog/integrations-core/pull/20640))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* Replace patch_all with modern config ddtrace.auto ([#20651](https://github.com/DataDog/integrations-core/pull/20651))
+
 ## 37.15.0 / 2025-06-13 / Agent 7.68.0
 
 ***Security***:
