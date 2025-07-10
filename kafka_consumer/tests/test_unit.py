@@ -29,7 +29,7 @@ def fake_consumer_offsets_for_times(partitions):
 def seed_mock_client():
     """Set some common defaults for the mock client to kafka."""
     client = mock.create_autospec(KafkaClient)
-    client.list_consumer_groups.return_value = ["consumer_group1"]
+    client.list_consumer_groups.return_value = ["consumer_group1", "datadog-agent"]
     client.get_partitions_for_topic.return_value = ['partition1']
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
     client.describe_consumer_group.return_value = 'STABLE'
@@ -461,7 +461,7 @@ def test_load_broker_timestamps_empty(
 
 def test_client_init(kafka_instance, check, dd_run_check):
     """
-    We only open a connection to a consumer once per consumer group.
+    We only open a connection to datadog-agent consumer once.
 
     Doing so more often degrades performance, as described in this issue:
     https://github.com/DataDog/integrations-core/issues/19564
@@ -471,7 +471,7 @@ def test_client_init(kafka_instance, check, dd_run_check):
     check.client = mock_client
     dd_run_check(check)
 
-    assert check.client.open_consumer.mock_calls == [mock.call("consumer_group1")]
+    assert check.client.open_consumer.mock_calls == [mock.call("datadog-agent")]
 
 
 def test_resolve_start_offsets():
