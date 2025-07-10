@@ -25,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 22545001,
-      "source_type_name": "KubeVirt Controller",
+      "source_type_name": "kubevirt",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
