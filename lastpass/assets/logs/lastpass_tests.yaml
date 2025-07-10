@@ -714,7 +714,59 @@ tests:
           "Data": "",
           "timestamp": 1722921377000.0
       }
-    result: null
+    result:
+      custom:
+        Action: "Data export"
+        Data: ""
+        IP_Address: "10.10.10.10"
+        Time: "2024-08-06 05:16:17"
+        Username: "abc@test.com"
+        evt:
+          name: "Data export"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        ocsf:
+          activity_id: 7
+          activity_name: "Export"
+          category_name: "Application Activity"
+          category_uid: 6
+          class_name: "Web Resources Activity"
+          class_uid: 6001
+          message: "Data export"
+          metadata:
+            event_code: "Data export"
+            product:
+              name: "LastPass reporting events"
+              vendor_name: "LastPass"
+            profiles:
+            - "host"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "10.10.10.10"
+          time: 1.722921377E12
+          type_uid: 600107
+          web_resources:
+          -
+            name: "LastPass vault"
+            type: "PASSWORD_MANAGER_VAULT"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Data export",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+      - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
