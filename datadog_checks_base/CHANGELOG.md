@@ -18,7 +18,7 @@
 * Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
 * Replace patch_all with modern config ddtrace.auto ([#20651](https://github.com/DataDog/integrations-core/pull/20651))
 
-## 37.15.0 / 2025-06-13
+## 37.15.0 / 2025-06-13 / Agent 7.68.0
 
 ***Security***:
 
