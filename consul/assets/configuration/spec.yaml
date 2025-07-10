@@ -133,6 +133,15 @@ files:
         example: true
       enabled: true
 
+    - name: collect_health_checks
+      description: |
+        Whether to enable new service health checks from this instance. Enabling this will
+        also emit an event for every failed service health check.
+      value:
+        type: boolean
+        display_default: false
+        example: true
+
     - template: instances/http
     - template: instances/default
   - template: logs
