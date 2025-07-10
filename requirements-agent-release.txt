@@ -138,7 +138,7 @@ datadog-mapreduce==7.0.0
 datadog-marathon==5.0.0; sys_platform != 'win32'
 datadog-marklogic==6.1.2
 datadog-mcache==6.1.0; sys_platform != 'win32'
-datadog-mesos-master==5.1.0; sys_platform != 'win32'
+datadog-mesos-master==6.0.0; sys_platform != 'win32'
 datadog-mesos-slave==5.1.0; sys_platform != 'win32'
 datadog-microsoft-dns==1.0.0; sys_platform == 'win32'
 datadog-microsoft-sysmon==1.0.0; sys_platform == 'win32'
