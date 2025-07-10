@@ -115,7 +115,7 @@ datadog-kube-controller-manager==8.0.0
 datadog-kube-dns==7.0.0
 datadog-kube-metrics-server==6.0.0
 datadog-kube-proxy==9.0.0
-datadog-kube-scheduler==6.1.0
+datadog-kube-scheduler==7.0.0
 datadog-kubeflow==1.1.0
 datadog-kubelet==9.1.0
 datadog-kubernetes-cluster-autoscaler==2.2.0
