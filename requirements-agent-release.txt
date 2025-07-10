@@ -125,7 +125,7 @@ datadog-kubevirt-controller==2.0.0
 datadog-kubevirt-handler==2.0.0
 datadog-kuma==2.0.0
 datadog-kyototycoon==4.1.0
-datadog-kyverno==2.2.0
+datadog-kyverno==3.0.0
 datadog-lighttpd==5.1.0
 datadog-linkerd==6.1.0
 datadog-linux-audit-logs==1.0.0; sys_platform == 'linux2'
