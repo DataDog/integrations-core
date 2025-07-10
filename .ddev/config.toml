@@ -40,6 +40,27 @@ platforms = ["linux", "windows"]
 [overrides.ci.network]
 platforms = ["linux", "windows"]
 
+[overrides.ci.postgres]
+targets = [
+    "py3.12-9.6-UTF8",
+    "py3.12-10.0-UTF8",
+    "py3.12-11.0-UTF8",
+    "py3.12-12.17-UTF8 ",
+    "py3.12-13.0-UTF8",
+    "py3.12-14.0-UTF8",
+    "py3.12-15.0-UTF8",
+    "py3.12-16.0-UTF8",
+    "py3.12-17.0-UTF8",
+    "py3.12-10.0-C",
+    "py3.12-11.0-C",
+    "py3.12-12.17-C",
+    "py3.12-13.0-C",
+    "py3.12-14.0-C",
+    "py3.12-15.0-C",
+    "py3.12-16.0-C",
+    "py3.12-17.0-C"
+]
+
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
 runners = { windows = ["windows-2025"] }

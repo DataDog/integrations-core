@@ -248,7 +248,15 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 config['python-support'] = ''.join(supported_python_versions)
 
             config['name'] = normalize_job_name(config['name'])
-            job_matrix.append(config)
+            targets = (
+                [[target + ":" + t] for t in matrix_overrides.get("targets", [""])]
+                if matrix_overrides.get("targets")
+                else [target]
+            )
+            for target in targets:
+                config = config.copy()
+                config['target'] = target
+                job_matrix.append(config)
 
     return job_matrix
 
