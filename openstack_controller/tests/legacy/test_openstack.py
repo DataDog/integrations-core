@@ -41,7 +41,7 @@ def test_parse_uptime_string(aggregator):
 def test_api_error_log_no_password(check, instance, caplog):
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(KeystoneUnreachable):
-            with mock.patch('datadog_checks.base.utils.http.requests.post') as req:
+            with mock.patch('datadog_checks.base.utils.http.requests.Session.post') as req:
                 req.side_effect = HTTPError(mock.Mock(status=404), 'not found')
                 check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)
                 identity = Authenticator._get_user_identity(instance.get("user"))
