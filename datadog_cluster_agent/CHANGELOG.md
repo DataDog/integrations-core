@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2025-07-10
+
+***Changed***:
+
+* Update CWS mutating webhook metrics to better track its performance ([#20557](https://github.com/DataDog/integrations-core/pull/20557))
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
 ## 5.5.0 / 2025-02-20 / Agent 7.64.0
 
 ***Added***:
