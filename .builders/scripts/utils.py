@@ -4,9 +4,9 @@ import email
 import re
 from pathlib import Path
 from zipfile import ZipFile
+from typing import Iterator
 
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
-
 
 def normalize_project_name(name: str) -> str:
     # https://peps.python.org/pep-0503/#normalized-names
@@ -33,3 +33,9 @@ def extract_metadata(wheel: Path) -> email.Message:
 
     return email.message_from_string(metadata_file_contents)
 
+
+
+def iter_wheels(source_dir: str) -> Iterator[Path]:
+    for entry in sorted(Path(source_dir).iterdir(), key=lambda entry: entry.name.casefold()):
+        if entry.suffix == '.whl' and entry.is_file():
+            yield entry
