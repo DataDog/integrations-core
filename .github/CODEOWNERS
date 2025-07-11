@@ -582,6 +582,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 /dnsfilter/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /dnsfilter/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+<<<<<<< HEAD
 /workato/                                                            @DataDog/saas-integrations
 /workato/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /workato/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
@@ -591,6 +592,12 @@ plaid/assets/logs/                                                  @DataDog/saa
 /bitwarden/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /bitwarden/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /bitwarden/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+=======
+/barracuda_secure_edge/                                               @DataDog/agent-integrations
+/barracuda_secure_edge/*.md                                           @DataDog/agent-integrations @DataDog/documentation
+/barracuda_secure_edge/manifest.json                                  @DataDog/agent-integrations @DataDog/documentation
+/barracuda_secure_edge/assets/logs/                                   @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+>>>>>>> 3f372fc75 (Barracuda Secure Edge Integration PR)
 
 /klaviyo/                                                            @DataDog/saas-integrations
 /klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
