@@ -25,10 +25,8 @@
   },
   "assets": {
     "dashboards": {
-        "Kong Mesh Control Plane": "assets/dashboards/kong_mesh_control_plane.json"
-    },
-    "monitors": {},
-    "saved_views": {}
+      "Kong Mesh Control Plane": "assets/dashboards/kong_mesh_control_plane.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
