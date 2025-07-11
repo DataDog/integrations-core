@@ -1,6 +1,7 @@
 {
   "title": "Airbyte OTel Overview",
   "description": "**Airbyte OTel**\n\nThis dashboard monitors your Airbyte deployment using OpenTelemetry metrics. All queries use OTel metric names and tags as per https://docs.airbyte.com/platform/operator-guides/collecting-metrics#available-metrics\n\n**Useful Links**\n\n* [Airbyte OTel Metrics](https://docs.airbyte.com/platform/operator-guides/collecting-metrics#available-metrics)",
+  "layout_type": "ordered",
   "widgets": [
     {
       "id": 1,
@@ -23,21 +24,10 @@
         "type": "timeseries",
         "requests": [
           {
-            "queries": [
-              {
-                "query": "sum:airbyte.syncs{*} by {status}",
-                "data_source": "metrics",
-                "name": "Syncs by Status"
-              }
-            ],
-            "formulas": [{"formula": "query1"}],
-            "response_format": "timeseries"
+            "q": "sum:airbyte.syncs{*} by {status}",
+            "name": "Syncs by Status"
           }
-        ],
-        "show_legend": true,
-        "legend_layout": "auto",
-        "legend_columns": ["avg", "min", "max", "value", "sum"],
-        "display_type": "bars"
+        ]
       },
       "layout": {"x": 0, "y": 2, "width": 12, "height": 4}
     },
@@ -48,21 +38,10 @@
         "type": "timeseries",
         "requests": [
           {
-            "queries": [
-              {
-                "query": "avg:airbyte.sync_duration{*}",
-                "data_source": "metrics",
-                "name": "Avg Duration"
-              }
-            ],
-            "formulas": [{"formula": "query1"}],
-            "response_format": "timeseries"
+            "q": "avg:airbyte.sync_duration{*}",
+            "name": "Avg Duration"
           }
-        ],
-        "show_legend": true,
-        "legend_layout": "auto",
-        "legend_columns": ["avg", "min", "max", "value", "sum"],
-        "display_type": "line"
+        ]
       },
       "layout": {"x": 0, "y": 6, "width": 12, "height": 4}
     },
@@ -73,21 +52,10 @@
         "type": "timeseries",
         "requests": [
           {
-            "queries": [
-              {
-                "query": "sum:airbyte.gb_moved{*}",
-                "data_source": "metrics",
-                "name": "GB Moved"
-              }
-            ],
-            "formulas": [{"formula": "query1"}],
-            "response_format": "timeseries"
+            "q": "sum:airbyte.gb_moved{*}",
+            "name": "GB Moved"
           }
-        ],
-        "show_legend": true,
-        "legend_layout": "auto",
-        "legend_columns": ["avg", "min", "max", "value", "sum"],
-        "display_type": "line"
+        ]
       },
       "layout": {"x": 0, "y": 10, "width": 12, "height": 4}
     },
@@ -98,26 +66,14 @@
         "type": "timeseries",
         "requests": [
           {
-            "queries": [
-              {
-                "query": "sum:airbyte.syncs{*} by {connection_id}",
-                "data_source": "metrics",
-                "name": "Syncs by Connection"
-              }
-            ],
-            "formulas": [{"formula": "query1"}],
-            "response_format": "timeseries"
+            "q": "sum:airbyte.syncs{*} by {connection_id}",
+            "name": "Syncs by Connection"
           }
-        ],
-        "show_legend": true,
-        "legend_layout": "auto",
-        "legend_columns": ["avg", "min", "max", "value", "sum"],
-        "display_type": "bars"
+        ]
       },
       "layout": {"x": 0, "y": 14, "width": 12, "height": 4}
     }
   ],
-  "layout_type": "ordered",
   "notify_list": [],
   "reflow_type": "fixed"
 }
