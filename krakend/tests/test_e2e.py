@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from rich import print
 
 from datadog_checks.dev.docker import get_docker_hostname
 from tests.helpers import get_metrics_from_metadata
