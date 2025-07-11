@@ -1,0 +1,24 @@
+Datadog Metric,Purpose,OTel Metric,Notes
+airbyte.metrics_reporter.num_unusually_long_syncs,Number of jobs running unusually long,,Not directly available; may need to derive from sync duration
+airbyte.worker.job.succeeded_by_release_stage,Jobs succeeded,airbyte.syncs (status=success),Use status tag
+airbyte.metrics_reporter.num_running_jobs,Number of running jobs,,Not directly available; may need to count active syncs
+airbyte.metrics_reporter.oldest_pending_job_age_secs,Oldest pending job age,,Not in OTel metrics
+airbyte.metrics_reporter.num_pending_jobs,Number of pending jobs,,Not in OTel metrics
+airbyte.metrics_reporter.oldest_running_job_age_secs,Oldest running job age,,Not in OTel metrics
+airbyte.worker.job.failed_by_release_stage,Jobs failed,airbyte.syncs (status=failed),Use status tag
+airbyte.worker.attempt.failed_by_failure_origin,Attempts failed by origin,,Not in OTel metrics
+airbyte.worker.job.cancelled_by_release_stage,Jobs cancelled,airbyte.syncs (status=cancelled?),If available
+airbyte.worker.attempt_created_by_release_stage,Attempts created,,Not in OTel metrics
+airbyte.worker.attempt_succeeded_by_release_stage,Attempts succeeded,,Not in OTel metrics
+airbyte.worker.attempt_failed_by_release_stage,Attempts failed,,Not in OTel metrics
+airbyte.worker.state_commit.attempt,State commit attempts,,Not in OTel metrics
+airbyte.worker.state_commit.attempt_successful,State commit success,,Not in OTel metrics
+airbyte.worker.state_commit.attempt_failed,State commit failed,,Not in OTel metrics
+airbyte.worker.state_commit.not_attempted,State commit not attempted,,Not in OTel metrics
+airbyte.worker.state_buffering,State buffered for commit,,Not in OTel metrics
+airbyte.worker.state_commit.close_successful,State final flush,,Not in OTel metrics
+airbyte.metrics_reporter.overall_job_runtime_in_last_hour_by_terminal_state_secs,Job runtime by state,airbyte.sync_duration,Use with status tag
+airbyte.syncs,Syncs,airbyte.syncs,OTel native
+airbyte.gb_moved,Data volume moved,airbyte.gb_moved,OTel native
+airbyte.sync_duration,Sync duration,airbyte.sync_duration,OTel native
+airbyte.api_requests,API requests,airbyte.api_requests,OTel native
