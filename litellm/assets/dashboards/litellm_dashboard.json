@@ -1,0 +1,111 @@
+{
+  "title": "LiteLLM Overview",
+  "description": "## LiteLLM\n\nLiteLLM is a lightweight, flexible LLM proxy and management layer. This dashboard provides real-time insights into API key and team quotas, deployment health, proxy performance, latency, token usage, endpoint health, and more.\n\n**Further reading:**\n- [LiteLLM GitHub](https://github.com/BerriAI/litellm)\n- [LiteLLM Docs](https://docs.litellm.ai/)\n",
+  "widgets": [
+    {
+      "id": 1001,
+      "definition": {
+        "title": "",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1002,
+            "definition": {
+              "type": "note",
+              "content": "LiteLLM is a lightweight, flexible LLM proxy and management layer. This dashboard provides real-time insights into API key and team quotas, deployment health, proxy performance, latency, token usage, endpoint health, and more.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 1003,
+            "definition": {
+              "type": "note",
+              "content": "**Further reading:**\n- [LiteLLM GitHub](https://github.com/BerriAI/litellm)\n- [LiteLLM Docs](https://docs.litellm.ai/)",
+              "background_color": "white",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 0, "width": 12, "height": 3 }
+    },
+    {
+      "id": 8000,
+      "definition": {
+        "title": "Other Useful Metrics",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8001,
+            "definition": {
+              "type": "query_value",
+              "title": "Total Spend",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:litellm.spend.metric.count{}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": { "x": 0, "y": 0, "width": 2, "height": 1 }
+          },
+          {
+            "id": 8002,
+            "definition": {
+              "type": "query_value",
+              "title": "Process Uptime (seconds)",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:litellm.process.uptime.seconds{}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": { "x": 2, "y": 0, "width": 2, "height": 1 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 19, "width": 12, "height": 1 }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+} 

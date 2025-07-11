@@ -1,0 +1,153 @@
+{
+  "title": "LiteLLM Overview",
+  "description": "## LiteLLM\n\nLiteLLM is a lightweight, flexible LLM proxy and management layer. This dashboard provides real-time insights into API key and team quotas, deployment health, proxy performance, latency, token usage, endpoint health, and more.\n\n**Further reading:**\n- [LiteLLM GitHub](https://github.com/BerriAI/litellm)\n- [LiteLLM Docs](https://docs.litellm.ai/)",
+  "widgets": [
+    {
+      "definition": {
+        "type": "note",
+        "content": "LiteLLM is a lightweight, flexible LLM proxy and management layer. This dashboard provides real-time insights into API key and team quotas, deployment health, proxy performance, latency, token usage, endpoint health, and more.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      }
+    },
+    {
+      "definition": {
+        "type": "note",
+        "content": "**Further reading:**\n- [LiteLLM GitHub](https://github.com/BerriAI/litellm)\n- [LiteLLM Docs](https://docs.litellm.ai/)",
+        "background_color": "white",
+        "font_size": "16",
+        "text_align": "center",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      }
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "Deployment Failures",
+        "requests": [
+          {
+            "formulas": [
+              { "formula": "query1" }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:litellm.deployment.failure_responses.count{}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      }
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "Proxy Failed Requests",
+        "requests": [
+          {
+            "formulas": [
+              { "formula": "query1" }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:litellm.proxy.failed_requests.metric.count{}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      }
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "Deployment State",
+        "requests": [
+          {
+            "formulas": [
+              { "formula": "query1" }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:litellm.deployment.state{}",
+                "aggregator": "avg"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      }
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "Total Deployment Requests",
+        "requests": [
+          {
+            "formulas": [
+              { "formula": "query1" }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:litellm.deployment.total_requests.count{}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      }
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "Input Tokens",
+        "requests": [
+          {
+            "formulas": [
+              { "formula": "query1" }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:litellm.input.tokens.count{}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      }
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+} 
