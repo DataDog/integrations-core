@@ -45,4 +45,4 @@ RESOURCE_METRIC_NAME = {
     'disk': 'disk',
 }
 
-RESOURCE_COUNT_METRICS = ['uptime']
+PERCENT_METRICS = ['cpu', 'cpu.current', 'cpu.iowait']
