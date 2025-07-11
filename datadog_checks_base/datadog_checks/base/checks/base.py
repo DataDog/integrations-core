@@ -32,15 +32,6 @@ from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.base.types import (  # noqa: F401, TODO: update when removing py2 typing
-    AgentConfigType,
-    Event,
-    ExternalTagType,
-    InitConfigType,
-    InstanceType,
-    ProxySettings,
-    ServiceCheckStatus,
-)
 from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
