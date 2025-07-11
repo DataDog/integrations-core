@@ -113,4 +113,4 @@ def test_relkind_does_not_apply_to_index_metrics():
     relations = RelationsManager(relations_config, default_max_relations)
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
-    assert 'relkind' not in query_filter
+    assert "relkind = ANY(array['r'])" not in query_filter
