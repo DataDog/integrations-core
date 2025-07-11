@@ -367,8 +367,9 @@ class KafkaCheck(AgentCheck):
             len(topic_partitions_to_check),
             dd_consumer_group,
         )
-        for topic, partition, offset in self.client.consumer_offsets_for_times(partitions=topic_partitions_to_check):
-            highwater_offsets[(topic, partition)] = offset
+        if topic_partitions_to_check:
+            for topic, partition, offset in self.client.consumer_offsets_for_times(partitions=topic_partitions_to_check):
+                highwater_offsets[(topic, partition)] = offset
 
         self.client.close_consumer()
         self.log.debug('Got %s highwater offsets', len(highwater_offsets))
