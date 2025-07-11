@@ -414,6 +414,10 @@ coverage:
         target: 75
         flags:
         - litellm
+      Lustre:
+        target: 75
+        flags:
+        - lustre
       Mac_Audit_Logs:
         target: 75
         flags:
@@ -534,6 +538,10 @@ coverage:
         target: 75
         flags:
         - prometheus
+      Proxmox:
+        target: 75
+        flags:
+        - proxmox
       ProxySQL:
         target: 75
         flags:
@@ -1327,6 +1335,11 @@ flags:
     paths:
     - litellm/datadog_checks/litellm
     - litellm/tests
+  lustre:
+    carryforward: true
+    paths:
+    - lustre/datadog_checks/lustre
+    - lustre/tests
   mac_audit_logs:
     carryforward: true
     paths:
@@ -1482,6 +1495,11 @@ flags:
     paths:
     - prometheus/datadog_checks/prometheus
     - prometheus/tests
+  proxmox:
+    carryforward: true
+    paths:
+    - proxmox/datadog_checks/proxmox
+    - proxmox/tests
   proxysql:
     carryforward: true
     paths:
