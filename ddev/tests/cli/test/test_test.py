@@ -14,6 +14,13 @@ from tests.helpers.assertions import assert_calls
 from tests.helpers.mocks import MockPopen
 
 
+@pytest.fixture(autouse=True)
+def mock_worktrees(mocker):
+    # Mock the access to worktrees because these tests mock the global subprocess run
+    # Should be refactored to avoid such a broad mock
+    mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
+
+
 class TestInputValidation:
     @pytest.mark.parametrize('flag', ('--lint', '--fmt', '--bench', '--latest'))
     def test_specific_environment_and_functionality(self, ddev, helpers, flag):
