@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2025-07-01",
+	"last_updated_at": "2025-07-01",
+	"title": "Falco: Output Queue Drops Detected",
+	"description": "Falco has dropped at least one event from its output queue in the last 5 minutes. This may indicate missed security events.",
+	"definition": {
+		"id": null,
+		"name": "Falco: Output Queue Drops Detected",
+		"type": "query alert",
+		"query": "sum(last_5m):sum:falco.outputs.queue.num.drops.count{*}.as_count() > 0",
+		"message": "Falco has dropped at least one event from its output queue in the last 5 minutes. This may indicate missed security events. Investigate Falco resource usage and configuration.",
+		"tags": [
+			"integration:falco"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:falco"
+	]
+}
