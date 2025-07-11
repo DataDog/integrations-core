@@ -46,3 +46,4 @@ RESOURCE_METRIC_NAME = {
 }
 
 PERCENT_METRICS = ['cpu', 'cpu.current', 'cpu.iowait']
+RESOURCE_COUNT_METRICS = ['uptime']

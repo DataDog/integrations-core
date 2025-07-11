@@ -11,6 +11,7 @@ from .constants import (
     OK_STATUS,
     PERCENT_METRICS,
     PERF_METRIC_NAME,
+    RESOURCE_COUNT_METRICS,
     RESOURCE_METRIC_NAME,
     RESOURCE_TYPE_MAP,
     VM_RESOURCE,
@@ -33,10 +34,11 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
     def _submit_resource_metrics(self, resource, tags, hostname):
         for metric_name, metric_name_remapped in RESOURCE_METRIC_NAME.items():
             metric_value = resource.get(metric_name)
+            metric_method = self.count if metric_name in RESOURCE_COUNT_METRICS else self.gauge
             if metric_value is not None:
                 if metric_name_remapped in PERCENT_METRICS:
                     metric_value = metric_value * 100
-                self.gauge(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
+                metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
 
     def _get_vm_hostname(self, vm_id, vm_name, node):
         try:
@@ -66,6 +68,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             metric_name = metric.get('metric')
             metric_name_remapped = PERF_METRIC_NAME.get(metric_name)
             metric_value = metric.get('value')
+            metric_type = metric.get('type')
             hostname = resource.get('hostname')
             tags = resource.get('tags', [])
             if not resource or metric_name_remapped is None:
@@ -76,7 +79,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
             if metric_name_remapped in PERCENT_METRICS:
                 metric_value = metric_value * 100
-            self.gauge(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
+
+            metric_method = self.count if metric_type == 'derive' else self.gauge
+            metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
 
     def _collect_resource_metrics(self):
         resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
