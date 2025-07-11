@@ -10,7 +10,17 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Klaviyo marketing and eCommerce events.",
     "title": "Klaviyo",
-    "media": [],
+    "media": [
+      {
+        "caption": "Klaviyo - Marketing Overview",
+        "image_url": "images/klaviyo_marketing_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Klaviyo - eCommerce Overview",
+        "image_url": "images/klaviyo_ecommerce_overview.png",
+        "media_type": "image"
+      }],
     "classifier_tags": [
       "Category::Log Collection",
       "Submitted Data Type::Logs",
@@ -28,6 +38,13 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+        "Klaviyo - Marketing Overview": "assets/dashboards/klaviyo_marketing_overview.json",
+        "Klaviyo - eCommerce Overview": "assets/dashboards/klaviyo_ecommerce_overview.json"
+    },
+    "logs": {
+        "source": "klaviyo"
     }
   },
   "author": {
