@@ -347,6 +347,8 @@ integration/klaviyo:
 - klaviyo/**/*
 integration/kong:
 - kong/**/*
+integration/kong_mesh:
+- kong_mesh/**/*
 integration/krakend:
 - krakend/**/*
 integration/kube_apiserver_metrics:
