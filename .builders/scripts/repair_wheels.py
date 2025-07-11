@@ -252,18 +252,16 @@ def main():
     argparser = argparse.ArgumentParser(
         description='Repair wheels found in a directory with the platform-specific tool'
     )
-    argparser.add_argument('--source-dir', required=True)
+    argparser.add_argument('--source-built-dir', required=True)
+    argparser.add_argument('--source-external-dir', required=True)
     argparser.add_argument('--built-dir', required=True)
     argparser.add_argument('--external-dir', required=True)
     args = argparser.parse_args()
 
-    source_built_dir = Path(args.source_dir) / 'built'
-    source_external_dir = Path(args.source_dir) / 'external'
-    
-    print(f'Repairing wheels in: {args.source_dir}')
+    print(f'Repairing wheels in: {args.source_built_dir}')
     print(f'Outputting built wheels to: {args.built_dir}')
     print(f'Outputting external wheels to: {args.external_dir}')
-    REPAIR_FUNCTIONS[sys.platform](source_built_dir, source_external_dir, args.built_dir, args.external_dir)
+    REPAIR_FUNCTIONS[sys.platform](args.source_built_dir, args.source_external_dir, args.built_dir, args.external_dir)
 
 
 if __name__ == '__main__':
