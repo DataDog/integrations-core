@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
+
 import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
-from datadog_checks.lustre.constants import CURATED_PARAMS, DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS
+from datadog_checks.lustre.constants import CURATED_PARAMS, DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS, LustreParam
 
 from .metrics import (
     CLIENT_METRICS,
@@ -473,3 +475,70 @@ def test_run_command_exceptions():
     # Test subprocess exception
     with mock.patch('subprocess.run', side_effect=Exception("Command failed")):
         assert check._run_command('lctl', 'test') == ''
+
+
+def test_logging(caplog, mock_lustre_commands):
+    """Test that the most useful debug logs are emitted correctly."""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lctl list_param mdt.*.job_stats': 'mdt.filesystem-MDT0000.job_stats',
+        'lctl list_param some.*.param.mds': 'some.wrongfilesystem-MDT0000.param.mds',
+        'lnetctl stats show': 'invalid yaml',
+        'lfs changelog': 'test_changelog',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            # Test node type determination with error
+            with mock.patch.object(LustreCheck, '_update_devices', side_effect=Exception("Device error")):
+                check = LustreCheck('lustre', {}, [{}])
+
+            # Test filesystem discovery for MDS (will trigger filesystem finding)
+            check = LustreCheck('lustre', {}, [{'node_type': 'mds'}])
+
+            # Test lnet data retrieval error by mocking yaml.safe_load
+            with mock.patch('yaml.safe_load', side_effect=Exception("YAML error")):
+                check._get_lnet_metrics('stats')
+
+            # Test parameter skipping for wrong node type
+            params = {
+                LustreParam(
+                    regex="some.*.param.client",
+                    node_types=("client",),
+                    wildcards=("device_name",),
+                    prefix="",
+                    fixture="",
+                ),
+                LustreParam(
+                    regex="some.*.param.mds",
+                    node_types=("mds",),
+                    wildcards=("device_name",),
+                    prefix="",
+                    fixture="",
+                ),
+            }
+            check.submit_param_data(params, ['lustre'])
+
+            # Test changelog cursor error and fetching
+            with mock.patch.object(check, 'get_log_cursor', side_effect=Exception("Cursor error")):
+                check._get_changelog('lustre-MDT0000', 100)
+
+        log_text = caplog.text
+
+        # Critical error logs (should be present)
+        assert 'Failed to determine node type:' in log_text
+        assert 'Could not get lnet stats, caught exception:' in log_text
+        assert 'Could not retrieve log cursor, assuming initialization' in log_text
+
+        # Important debug logs (should be present)
+        assert 'Determining node type...' in log_text
+        assert 'Updating device list...' in log_text
+        assert 'Fetching changelog from index 0 to 100' in log_text
+
+        # Verify we captured important operational logs
+        assert 'Collecting changelogs for:' in log_text
+
+        # Parameter filtering logs (if applicable)
+        assert 'Skipping param some.*.param.client for node type mds' in log_text
+        assert 'Skipping param some.wrongfilesystem-MDT0000.param.mds as it did not match any filesystem' in log_text
