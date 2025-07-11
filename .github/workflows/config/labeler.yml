@@ -403,6 +403,8 @@ integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/litellm:
 - litellm/**/*
+integration/lustre:
+- lustre/**/*
 integration/mac_audit_logs:
 - mac_audit_logs/**/*
 integration/mailchimp:

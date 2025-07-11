@@ -28,7 +28,7 @@ datadog-celery==1.0.0
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==5.3.0
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.15.0
+datadog-checks-base==37.16.0
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==8.0.0
 datadog-cilium==5.2.0
@@ -92,6 +92,7 @@ datadog-ibm-db2==4.0.1
 datadog-ibm-i==4.1.0; sys_platform != 'win32'
 datadog-ibm-mq==8.2.0
 datadog-ibm-was==5.1.0
+datadog-iboss==1.0.0
 datadog-ignite==3.1.0
 datadog-iis==5.2.0; sys_platform == 'win32'
 datadog-impala==3.2.0
@@ -108,6 +109,7 @@ datadog-kaspersky==1.0.0
 datadog-keda==1.0.1
 datadog-keycloak==1.0.0
 datadog-kong==5.1.0
+datadog-krakend==1.0.0
 datadog-kube-apiserver-metrics==6.2.0
 datadog-kube-controller-manager==7.1.0
 datadog-kube-dns==6.1.0
@@ -129,6 +131,8 @@ datadog-linkerd==6.1.0
 datadog-linux-audit-logs==1.0.0; sys_platform == 'linux2'
 datadog-linux-proc-extras==4.0.0; sys_platform == 'linux2'
 datadog-litellm==1.0.0
+datadog-lustre==1.0.0
+datadog-mac-audit-logs==1.0.0; sys_platform == 'darwin'
 datadog-mapr==3.0.0; sys_platform == 'linux2'
 datadog-mapreduce==6.1.0
 datadog-marathon==4.1.0; sys_platform != 'win32'
@@ -168,6 +172,7 @@ datadog-powerdns-recursor==4.1.0
 datadog-presto==3.1.0
 datadog-process==5.0.0
 datadog-prometheus==5.0.0
+datadog-proxmox==1.0.0
 datadog-proxysql==7.1.0
 datadog-pulsar==3.2.0
 datadog-quarkus==1.1.0

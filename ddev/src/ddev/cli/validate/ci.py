@@ -117,6 +117,9 @@ def ci(app: Application, sync: bool):
             job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
         jobs[job_id] = job_config
 
+        if data['target'] == 'ddev':
+            jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
+
     jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
 
     # Enforce proper string types
