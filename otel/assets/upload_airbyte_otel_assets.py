@@ -1,3 +1,8 @@
+# /// script
+# dependencies = [
+#   "requests"
+# ]
+# ///
 import json
 import os
 
@@ -27,17 +32,20 @@ def upload_dashboard():
 
 
 def upload_monitor():
-    with open(MONITOR_PATH) as f:
-        monitor = json.load(f)
-    # The monitor JSON is a wrapper, extract the 'definition' for the API
-    monitor_api_payload = monitor["definition"]
-    monitor_api_payload["name"] = monitor["title"]
-    monitor_api_payload["tags"] = monitor.get("tags", [])
-    resp = requests.post(MONITOR_API, headers=HEADERS, json=monitor_api_payload)
-    print("Monitor upload status:", resp.status_code)
-    print(resp.json())
+    print("No-op")
+
+
+#    with open(MONITOR_PATH) as f:
+#        monitor = json.load(f)
+#    # The monitor JSON is a wrapper, extract the 'definition' for the API
+#    monitor_api_payload = monitor["definition"]
+#    monitor_api_payload["name"] = monitor["title"]
+#    monitor_api_payload["tags"] = monitor.get("tags", [])
+#    resp = requests.post(MONITOR_API, headers=HEADERS, json=monitor_api_payload)
+#    print("Monitor upload status:", resp.status_code)
+#    print(resp.json())
 
 
 if __name__ == "__main__":
     upload_dashboard()
-    upload_monitor()
+#    upload_monitor()
