@@ -1,0 +1,39 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "46d3df79-b309-43ed-b49c-3f29a4983235",
+  "app_id": "kong-mesh",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics and logs from Kong Mesh, an enterprise service mesh for Kubernetes and VMs.",
+    "title": "Kong Mesh",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Network",
+      "Category::Kubernetes",
+      "Category::Containers",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "dashboards": {
+        "Kong Mesh Control Plane": "assets/dashboards/kong_mesh_control_plane.json"
+    },
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
