@@ -2,6 +2,15 @@
 
 <!-- towncrier release notes start -->
 
+## 22.7.1 / 2025-07-10
+
+***Fixed***:
+
+* Fixes "Column 'sys.foreign_keys.object_id' is invalid in the select list ..." error with the `FOREIGN_KEY_QUERY_PRE_2017` query ([#20546](https://github.com/DataDog/integrations-core/pull/20546))
+* Emit `session_id` in XE events as an integer always, remove unnecessary `event_source` field ([#20559](https://github.com/DataDog/integrations-core/pull/20559))
+* Only submit plan events when we have a plan definition ([#20584](https://github.com/DataDog/integrations-core/pull/20584))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
 ## 22.7.0 / 2025-06-12 / Agent 7.68.0
 
 ***Added***:
