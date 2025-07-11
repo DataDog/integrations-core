@@ -109,6 +109,11 @@ def generate_lock_file(
                 if not is_compatible_wheel(target, python_major, interpreter, abi, platform):
                     continue
 
+                if build and 'WID' in build:
+                    # TODO: we're skipping any wheels with WID in them until we merge
+                    # the final changes to use this format
+                    continue
+
                 build_number = int(build[0]) if build else -1
                 candidates[build_number] = blob
 
