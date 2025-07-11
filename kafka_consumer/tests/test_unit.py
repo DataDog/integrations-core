@@ -126,6 +126,20 @@ def test_tls_verify_is_string(tls_verify, expected, check, kafka_instance):
 
 mock_client = mock.MagicMock()
 mock_client.get_highwater_offsets.return_value = ({}, "")
+mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
+    "cluster_id",
+    # topics
+    [
+        # Used in unit tets
+        ('topic1', ["partition1"]),
+        ('topic2', ["partition2"]),
+        # Copied from integration tests
+        ('dc', [0, 1]),
+        ('unconsumed_topic', [0, 1]),
+        ('marvel', [0, 1]),
+        ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+    ],
+)
 
 
 @pytest.mark.parametrize(
