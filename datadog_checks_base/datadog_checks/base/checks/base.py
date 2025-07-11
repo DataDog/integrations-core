@@ -32,7 +32,7 @@ from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.base.types import (
+from datadog_checks.base.types import (  # noqa: F401, TODO: update when removing py2 typing
     AgentConfigType,
     Event,
     ExternalTagType,
