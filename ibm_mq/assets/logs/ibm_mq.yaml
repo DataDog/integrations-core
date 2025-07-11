@@ -25,7 +25,7 @@ pipeline:
       source: message
       grok:
         supportRules: |
-          _date (%{date("MM/dd/yy HH:mm:ss"):timestamp}|%{date("dd/MM/yyyy  HH:mm:ss"):timestamp})
+          _date (%{date("MM/dd/yy HH:mm:ss"):timestamp}|%{date("dd/MM/yyyy  HH:mm:ss"):timestamp}|%{date("MM/dd/yyyy HH:mm:ss a"):timestamp})
         matchRules: |
           ibm_mq_rule %{_date}\s+- Process\(%{number:process}\) User\(%{notSpace:system.user}\)\s+Program\(%{notSpace:system.app}\)\s+Host\(%{notSpace:system.host}\)\s+Installation\(%{notSpace:system.installation}\)\s+VRMF\(%{notSpace:vrmf}\)%{data::keyvalue}(\n|\t|\s)+EXPLANATION:(\n|\s|\t)+%{data:error.message}(\n|\t|\s)+ACTION:(\n|\s|\t)+%{data:system.action}(\n|\t|\s)+-.*
 
