@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
 
 
-
 class Integration:
     def __init__(self, path: Path, repo_path: Path, repo_config: RepositoryConfig):
         # Do nothing but simple assignment here as we initialize often without
