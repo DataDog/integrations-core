@@ -24,8 +24,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:airbyte.syncs{*} by {status}",
-            "name": "Syncs by Status"
+            "q": "sum:airbyte.syncs{*} by {status}"
           }
         ]
       },
@@ -38,8 +37,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "avg:airbyte.sync_duration{*}",
-            "name": "Avg Duration"
+            "q": "avg:airbyte.sync_duration{*}"
           }
         ]
       },
@@ -52,8 +50,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:airbyte.gb_moved{*}",
-            "name": "GB Moved"
+            "q": "sum:airbyte.gb_moved{*}"
           }
         ]
       },
@@ -66,8 +63,7 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:airbyte.syncs{*} by {connection_id}",
-            "name": "Syncs by Connection"
+            "q": "sum:airbyte.syncs{*} by {connection_id}"
           }
         ]
       },
