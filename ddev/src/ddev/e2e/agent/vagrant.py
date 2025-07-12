@@ -48,9 +48,24 @@ def disable_integration_before_install(config_file: Path):
 
 
 class VagrantAgent(AgentInterface):
+    # Default private network IP for the VM (matches Vagrantfile.template)
+    VM_HOST_IP = "172.30.1.5"
+
+    def _substitute_template_variables(self, value: Any) -> Any:
+        """Replace template variables like %HOST% in metadata values."""
+        if isinstance(value, str):
+            return value.replace("%HOST%", self.VM_HOST_IP)
+        elif isinstance(value, list):
+            return [self._substitute_template_variables(item) for item in value]
+        elif isinstance(value, dict):
+            return {k: self._substitute_template_variables(v) for k, v in value.items()}
+        return value
+
     def __init__(
         self, platform: Platform, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
     ) -> None:
+        # Apply template substitution to the entire metadata dictionary
+        metadata = self._substitute_template_variables(metadata)
         super().__init__(platform, integration, env, metadata, config_file)
         self._initialize_vagrant(overwrite=False)
 
@@ -398,7 +413,7 @@ class VagrantAgent(AgentInterface):
 
         # Execute post_install_commands (guest commands)
         if post_install_guest_commands:
-            self._run_commands(start_guest_commands, "post-install")
+            self._run_commands(post_install_guest_commands, "post-install")
 
     def _run_commands(self, commands: list[str], command_type: str) -> None:
         print(f"Running {command_type} commands in VM `{self._vm_name}`...")
