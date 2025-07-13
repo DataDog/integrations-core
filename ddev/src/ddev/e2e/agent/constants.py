@@ -20,3 +20,19 @@ class AgentEnvVars:
     SITE = 'DD_SITE'
     TELEMETRY_ENABLED = 'DD_TELEMETRY_ENABLED'
     URL = 'DD_DD_URL'
+
+
+# Agent file paths (Linux)
+LINUX_AGENT_LOG_PATH = "/var/log/datadog/agent.log"
+LINUX_AGENT_BIN_PATH = "/opt/datadog-agent/bin/agent/agent"
+LINUX_AGENT_PYTHON_PREFIX = "/opt/datadog-agent/embedded/bin/python"
+LINUX_AGENT_CONF_DIR = "/etc/datadog-agent/conf.d"
+LINUX_BASE_SYNCED_DIR = "/home"
+LINUX_SUDOERS_FILE_PATH = "/etc/sudoers.d/dd-agent"
+
+# Agent file paths (Windows)
+WINDOWS_AGENT_LOG_PATH = r"C:\\ProgramData\\Datadog\\logs\\agent.log"
+WINDOWS_AGENT_BIN_PATH = r"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe"
+WINDOWS_AGENT_PYTHON_PREFIX = r"C:\\Program Files\\Datadog\\Datadog Agent\\embedded"
+WINDOWS_AGENT_CONF_DIR = r"C:\\ProgramData\\Datadog\\conf.d"
+WINDOWS_BASE_SYNCED_DIR = r"C:\\vagrant"
