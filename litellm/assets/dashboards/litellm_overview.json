@@ -283,6 +283,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Healthy Endpoints",
                                             "formula": "query1"
                                         }
                                     ],
@@ -303,6 +304,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Healthy Endpoint States",
                             "title_align": "left",
                             "title_size": "16",
@@ -366,6 +368,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Unhealthy Endpoints",
                                             "formula": "query1"
                                         }
                                     ],
@@ -386,6 +389,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Unhealthy Endpoint States",
                             "title_align": "left",
                             "title_size": "16",
@@ -467,6 +471,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Spend Metric",
                                             "formula": "query1"
                                         }
                                     ],
@@ -516,6 +521,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Input Tokens",
                                             "formula": "query1"
                                         }
                                     ],
@@ -565,6 +571,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Output Tokens",
                                             "formula": "query1"
                                         }
                                     ],
@@ -929,6 +936,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Remaining Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -978,6 +986,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Remaining Token",
                                             "formula": "query1"
                                         }
                                     ],
@@ -999,7 +1008,7 @@
                             ],
                             "show_legend": false,
                             "time": {},
-                            "title": "Remaining API Key Toekn per Model",
+                            "title": "Remaining API Key Token per Model",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1045,6 +1054,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Proxy Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1094,6 +1104,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Failed Proxy Request",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1209,6 +1220,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Deployment Success",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1258,6 +1270,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Deployment Failures",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1265,7 +1278,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:litellm.deployment.success_responses.count{$host,$litellm_team,$api_key_alias} by {requested_model,litellm_model_name,model_id,api_base,api_provider,hashed_api_key,api_key_alias,team,team_alias,exception_status,exception_class,host}.as_count()"
+                                            "query": "sum:litellm.deployment.failure_responses.count{$host,$litellm_team,$api_key_alias} by {requested_model,litellm_model_name,model_id,api_base,api_provider,hashed_api_key,api_key_alias,team,team_alias,exception_status,exception_class,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1307,6 +1320,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Deployment Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1356,6 +1370,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Remaining Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1405,6 +1420,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Remaining Tokens",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1454,6 +1470,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Deployment State",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1503,6 +1520,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg Deployment Latency per Token",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -1557,6 +1575,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Deployment Cooled Down",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1606,6 +1625,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Successful Fallbacks",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1704,6 +1724,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg Latency",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -1758,6 +1779,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg Overhead Latency",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -1812,6 +1834,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg API Latency",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -1866,6 +1889,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg API Time to First Token",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -1938,6 +1962,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg Self Latency",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -1992,6 +2017,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Self Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2041,6 +2067,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Self Failed Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2090,6 +2117,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg Redis Latency",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -2144,6 +2172,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Redis Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2193,6 +2222,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Redis Failed Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2242,6 +2272,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Avg Postgres Latency",
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -2296,6 +2327,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Postgres Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2345,6 +2377,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
+                                            "alias": "Postgres Failed Requests",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2366,7 +2399,7 @@
                             ],
                             "show_legend": true,
                             "time": {},
-                            "title": "Redis Failed Requests",
+                            "title": "Postgres Failed Requests",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -2412,6 +2445,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Pod Lock Manager Size",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2461,6 +2495,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Daily Spend Update Queue",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2510,6 +2545,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Spend Update Queue",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2559,6 +2595,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Redis Daily Spend Update Queue",
                                             "formula": "query1"
                                         }
                                     ],
@@ -2608,6 +2645,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
+                                            "alias": "Redis Spend Update Queue",
                                             "formula": "query1"
                                         }
                                     ],
