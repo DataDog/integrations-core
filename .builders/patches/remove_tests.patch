@@ -1,7 +1,7 @@
 diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
 index 0ae4035590..6d38e1f197 100644
---- a/.builders/scripts/build_wheels.py
-+++ b/.builders/scripts/build_wheels.py
+--- a/scripts/build_wheels.py
++++ b/scripts/build_wheels.py
 @@ -8,7 +8,7 @@ from pathlib import Path
  from tempfile import TemporaryDirectory
  
@@ -60,8 +60,8 @@ index 0ae4035590..6d38e1f197 100644
  if __name__ == "__main__":
 diff --git a/.builders/scripts/utils.py b/.builders/scripts/utils.py
 index 35d8ca138c..431fd6ddbb 100644
---- a/.builders/scripts/utils.py
-+++ b/.builders/scripts/utils.py
+--- a/scripts/utils.py
++++ b/scripts/utils.py
 @@ -1,11 +1,17 @@
  from __future__ import annotations
  
