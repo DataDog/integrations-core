@@ -7,10 +7,10 @@ import json
 import os
 from typing import Dict  # noqa: F401
 
-from ...datastructures import JSONDict
-from ...git import git_show_file
-from ...utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
-from ..constants import V1, V1_STRING, V2, V2_STRING
+from datadog_checks.dev.tooling.datastructures import JSONDict
+from datadog_checks.dev.tooling.git import git_show_file
+from datadog_checks.dev.tooling.manifest_validator.constants import V1, V1_STRING, V2, V2_STRING
+from datadog_checks.dev.tooling.utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 
 
 class ValidationResult(object):
@@ -86,7 +86,6 @@ class BaseManifestValidator(abc.ABC):
 
 
 class MaintainerValidator(BaseManifestValidator):
-
     MAINTAINER_PATH = {V1: '/maintainer', V2: '/author/support_email'}
 
     def validate(self, check_name, decoded, fix):
@@ -110,7 +109,6 @@ class MaintainerValidator(BaseManifestValidator):
 
 
 class MetricsMetadataValidator(BaseManifestValidator):
-
     METADATA_PATH = {V1: "/assets/metrics_metadata", V2: "/assets/integration/metrics/metadata_path"}
 
     def validate(self, check_name, decoded, fix):

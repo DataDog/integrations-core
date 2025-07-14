@@ -187,7 +187,6 @@ class YarnCheck(AgentCheck):
             raise ConfigurationError("Invalid mapping: {}".format(e))
 
     def check(self, instance):
-
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
         app_tags = instance.get('application_tags', {})

@@ -58,9 +58,6 @@ def mock_size_diff_dependencies():
         patch("ddev.cli.size.diff.get_files", side_effect=get_compressed_files_side_effect),
         patch("ddev.cli.size.diff.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
         patch("ddev.cli.size.diff.format_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.size.utils.common_funcs.plt.show"),
-        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
-        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
@@ -140,9 +137,6 @@ def test_diff_no_differences(ddev):
                 {"Name": "dep2.whl", "Version": "2.0.0", "Size_Bytes": 1000},
             ],
         ),
-        patch("ddev.cli.size.utils.common_funcs.plt.show"),
-        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
-        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
