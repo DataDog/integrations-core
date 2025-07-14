@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import requests
 import squarify
 from datadog import api, initialize
+from matplotlib.axes import Axes
 from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
@@ -689,7 +690,7 @@ def scale_colors_treemap(area: float, max_area: float) -> float:
 
 
 def draw_treemap_rects_with_labels(
-    ax: plt.Axes,
+    ax: Axes,
     rects: list[dict],
     modules: list[FileDataEntry] | list[FileDataEntryPlatformVersion],
     colors: list[tuple[float, float, float, float]],
