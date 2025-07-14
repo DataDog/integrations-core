@@ -30,7 +30,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Logs
 
-To collect logs from all the your Proxmox services on your node:
+To collect logs from all of the Proxmox services on your node:
 
 1. Enable log collection in your `datadog.yaml` file:
 
