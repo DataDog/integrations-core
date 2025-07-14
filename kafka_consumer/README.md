@@ -15,7 +15,7 @@ This Agent integration collects message offset metrics from your Kafka consumers
 
 ### Installation
 
-The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. No additional installation is needed on your Kafka nodes.
+The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. No additional installation is needed on your Kafka nodes, but configuration is still required.
 
 ### Configuration
 
@@ -29,6 +29,15 @@ To configure this check for an Agent running on a host running your Kafka consum
 ##### Metric collection
 
 1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options.
+
+Here's a barebones example configuration:
+```yaml
+init_config:
+
+instances:
+  - kafka_connect_str: kafka:29092 # Replace with your Kafka cluster address
+    monitor_unlisted_consumer_groups: true
+```
 
 2. [Restart the Agent][5].
 
