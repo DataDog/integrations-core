@@ -8,6 +8,8 @@ ibm_mq.channel.bytes_rcvd,gauge,,byte,,This attribute specifies the number of by
 ibm_mq.channel.bytes_sent,gauge,,byte,,This attribute specifies the number of bytes sent (parameter identifier: `MQIACH_BYTES_SENT`).,0,ibm_mq,bytes sent,
 ibm_mq.channel.channel_status,gauge,,,,This attribute specifies the channel status (parameter identifier: `MQIACH_CHANNEL_STATUS`).,0,ibm_mq,channel status,
 ibm_mq.channel.channels,gauge,,resource,,The number of active channels.,0,ibm_mq,active channel count,
+ibm_mq.channel.conn_status,gauge,,connection,,The connection status for the channel (parameter identifier: `MQIACH_CONNS`).,0,ibm_mq,conn status,
+ibm_mq.channel.connections_active,gauge,,connection,,The total number of active channel connections (instances) per channel.,0,ibm_mq,connections active,
 ibm_mq.channel.count,gauge,,,,Sum by status to count channels. Filter by channel and status tags to create notifications.,0,ibm_mq,channel count,
 ibm_mq.channel.current_msgs,gauge,,message,,This attribute specifies the number of messages in-doubt (parameter identifier: `MQIACH_CURRENT_MSGS`).,0,ibm_mq,current msgs,
 ibm_mq.channel.disc_interval,gauge,,second,,"This attribute is the length of time after which a channel closes down, if no message arrives during that period (parameter identifier: `DISCINT`).",0,ibm_mq,disc interval,

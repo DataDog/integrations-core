@@ -23,7 +23,7 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
         MockResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.get', side_effect=mock_responses):
+    with mock.patch('requests.Session.get', side_effect=mock_responses):
         dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -47,7 +47,7 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
         MockResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.get', side_effect=mock_responses):
+    with mock.patch('requests.Session.get', side_effect=mock_responses):
         dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -81,7 +81,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     """
     mock_http_response(status_code=404)
     check = vLLMCheck("vllm", {}, [instance])
-    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
