@@ -1,5 +1,5 @@
 diff --git a/.builders/scripts/build_wheels.py b/.builders/scripts/build_wheels.py
-index 0ae4035590..6d38e1f197 100644
+index 0ae4035590..d664994402 100644
 --- a/scripts/build_wheels.py
 +++ b/scripts/build_wheels.py
 @@ -8,7 +8,7 @@ from pathlib import Path
@@ -25,7 +25,7 @@ index 0ae4035590..6d38e1f197 100644
  def main():
      parser = argparse.ArgumentParser(prog="wheel-builder", allow_abbrev=False)
      parser.add_argument("--python", required=True)
-@@ -165,17 +170,21 @@ def main():
+@@ -165,12 +170,21 @@ def main():
          )
  
      dependencies: dict[str, tuple[str, str]] = {}
@@ -35,11 +35,6 @@ index 0ae4035590..6d38e1f197 100644
 -            project_name = normalize_project_name(project_metadata["Name"])
 -            project_version = project_metadata["Version"]
 -            dependencies[project_name] = project_version
--
--    final_requirements = MOUNT_DIR / "frozen.txt"
--    with final_requirements.open("w", encoding="utf-8") as f:
--        for project_name, project_version in sorted(dependencies.items()):
--            f.write(f"{project_name}=={project_version}\n")
 +    # Handle wheels currently in the external directory and move them to the built directory if they were modified
 +    for wheel in iter_wheels(external_wheels_dir):
 +        was_modified = remove_test_files(wheel)
@@ -56,8 +51,8 @@ index 0ae4035590..6d38e1f197 100644
 +        remove_test_files(wheel)
 +        add_dependency(dependencies, wheel)
  
- 
- if __name__ == "__main__":
+     final_requirements = MOUNT_DIR / "frozen.txt"
+     with final_requirements.open("w", encoding="utf-8") as f:
 diff --git a/.builders/scripts/utils.py b/.builders/scripts/utils.py
 index 35d8ca138c..431fd6ddbb 100644
 --- a/scripts/utils.py
