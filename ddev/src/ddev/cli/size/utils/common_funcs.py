@@ -12,7 +12,7 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import Literal, Optional, Type, TypedDict, overload
+from typing import Callable, Literal, Optional, Type, TypedDict, overload
 
 import matplotlib.pyplot as plt
 import requests
@@ -23,7 +23,7 @@ from matplotlib.patches import Patch
 
 from ddev.cli.application import Application
 
-METRIC_VERSION = 2
+METRIC_VERSION = 1
 
 
 class FileDataEntry(TypedDict):
@@ -298,17 +298,7 @@ def get_dependencies_sizes(
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     zip_ref.extractall(extract_path)
 
-                size = 0
-                for dirpath, _, filenames in os.walk(extract_path):
-                    rel_dir = os.path.relpath(dirpath, extract_path)
-                    if is_excluded_from_wheel(rel_dir):
-                        continue
-                    for name in filenames:
-                        file_path = os.path.join(dirpath, name)
-                        rel_file = os.path.relpath(file_path, extract_path)
-                        if is_excluded_from_wheel(rel_file):
-                            continue
-                        size += os.path.getsize(file_path)
+                size = filtered_uncompressed_size(extract_path, filter_func=is_excluded_from_wheel)
 
         file_data.append(
             {
@@ -321,6 +311,21 @@ def get_dependencies_sizes(
         )
 
     return file_data
+
+
+def filtered_uncompressed_size(path: Path, filter_func: Callable[[str], bool]) -> int:
+    size = 0
+    for dirpath, _, filenames in os.walk(path):
+        rel_dir = os.path.relpath(dirpath, path)
+        if filter_func(rel_dir):
+            continue
+        for name in filenames:
+            file_path = os.path.join(dirpath, name)
+            rel_file = os.path.relpath(file_path, path)
+            if filter_func(rel_file):
+                continue
+            size += os.path.getsize(file_path)
+    return size
 
 
 def is_excluded_from_wheel(path: str) -> bool:
@@ -338,12 +343,17 @@ def is_excluded_from_wheel(path: str) -> bool:
             "Cryptodome/SelfTest",
             "gssapi/tests",
             "keystoneauth1/tests",
+            "lazy_loader/tests",
             "openstack/tests",
             "os_service_types/tests",
             "pbr/tests",
             "pkg_resources/tests",
+            "pip/_vendor/colorama/tests",
             "psutil/tests",
+            "requests_unixsocket/tests",
             "securesystemslib/_vendor/ed25519/test_data",
+            "setuptools/_distutils/compilers/C/tests",
+            "setuptools/_vendor/packaging/tests",
             "setuptools/_distutils/tests",
             "setuptools/tests",
             "simplejson/tests",
@@ -352,6 +362,7 @@ def is_excluded_from_wheel(path: str) -> bool:
             "test",  # cm-client
             "vertica_python/tests",
             "websocket/tests",
+            "win32com/test",
         ]
     ]
 
