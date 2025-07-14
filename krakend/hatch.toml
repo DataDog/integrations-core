@@ -1,4 +1,10 @@
 [env.collectors.datadog-checks]
+check-types = true
 
 [[envs.default.matrix]]
 python = ["3.12"]
+krakend = ["2.10"]
+
+[envs.default.overrides]
+matrix.krakend.env-vars = "KRAKEND_VERSION"
+matrix.krakend.dependencies = ["httpx"]
