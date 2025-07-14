@@ -116,6 +116,7 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
+    litellm_health_endpoint: Optional[str] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
@@ -123,7 +124,7 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = Field(None, pattern='\\w*')
     non_cumulative_histogram_buckets: Optional[bool] = None
     ntlm_domain: Optional[str] = None
-    openmetrics_endpoint: str
+    openmetrics_endpoint: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     proxy: Optional[Proxy] = None

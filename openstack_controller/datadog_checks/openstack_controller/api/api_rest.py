@@ -453,7 +453,6 @@ class ApiRest(Api):
         )
 
     def get_baremetal_conductors(self):
-
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
 
         url = '{}/v1/conductors'.format(ironic_endpoint)
