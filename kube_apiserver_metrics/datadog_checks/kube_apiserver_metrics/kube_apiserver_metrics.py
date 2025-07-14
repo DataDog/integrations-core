@@ -9,6 +9,7 @@ from datadog_checks.base.errors import CheckException
 
 from .sli_metrics import SliMetricsScraperMixin
 
+
 METRICS = {
     'apiserver_current_inflight_requests': 'current_inflight_requests',
     # Deprecated in 1.23 (replaced by apiserver_longrunning_requests)
@@ -81,9 +82,12 @@ METRICS = {
     'apiserver_storage_db_total_size_in_bytes': 'etcd.db.total_size',
     # For Kubernetes >= 1.28
     'apiserver_storage_size_bytes': 'etcd.db.total_size',
-    'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_request_concurrency_limit',
     'etcd_requests_total': 'etcd_requests_total',
     'etcd_request_errors_total': 'etcd_request_errors_total',
+    # For Kubernetes >= 1.29
+    'apiserver_flowcontrol_current_executing_seats': 'flowcontrol_current_executing_seats',
+    'apiserver_flowcontrol_request_wait_duration_seconds': 'flowcontrol_request_wait_duration_seconds',
+    'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_nominal_limit_seats',
 }
 
 
@@ -147,6 +151,9 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
                     )
 
     def check(self, instance):
+        print("KUBECHECK STD OPUT")
+        self.log.error('KUBECHECK: Processing kube apiserver metrics')
+        self.log.info('KUBECHECK: Processing kube apiserver metrics')
         if self.kube_apiserver_config is None:
             self.kube_apiserver_config = self.get_scraper_config(self.instance)
 
@@ -159,15 +166,18 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
             self.log.debug('Processing kube apiserver SLI metrics')
             self.process(instance['sli_scraper_config'], metric_transformers=self.sli_transformers)
 
+
     def get_scraper_config(self, instance):
         # Change config before it's cached by parent get_scraper_config
         config = self._create_kube_apiserver_metrics_instance(instance)
         return super(KubeAPIServerMetricsCheck, self).get_scraper_config(config)
 
     def _create_kube_apiserver_metrics_instance(self, instance):
+
         """
         Set up kube_apiserver_metrics instance so it can be used in OpenMetricsBaseCheck
         """
+        self.log.info('KUBECHECK: Creating kube_apiserver_metrics instance')
         kube_apiserver_metrics_instance = deepcopy(instance)
         endpoint = instance.get('prometheus_url')
         prometheus_url = endpoint
