@@ -37,9 +37,9 @@ def upload_historical_metrics(date_from_str: str, org: str) -> None:
                 for i, commit in enumerate(commits, 0):
                     date, _, _ = gitRepo.get_commit_metadata(commit)
                     progress.update(
-                        commit_task, description=f"Processing commit {i+1}/{len(commits)}: {commit[:8]} ({date})"
+                        commit_task, description=f"Processing commit {i + 1}/{len(commits)}: {commit[:8]} ({date})"
                     )
-                    print(f"Processing commit {i+1}/{len(commits)}: {commit[:8]} ({date})", flush=True)
+                    print(f"Processing commit {i + 1}/{len(commits)}: {commit[:8]} ({date})", flush=True)
                     if i > 0:
                         result = subprocess.run(
                             ["ddev", "--here", "size", "diff", "--to-dd-org", org, commits[i - 1], commit],

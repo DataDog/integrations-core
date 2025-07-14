@@ -14,19 +14,19 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import Callable, Literal, Optional, Type, TypedDict, overload
+from typing import TYPE_CHECKING, Callable, Literal, Optional, Type, TypedDict, overload
 
 import requests
 import squarify
 from datadog import api, initialize
 
-from matplotlib.axes import Axes
-from matplotlib.patches import Patch
-
-
 from ddev.cli.application import Application
 
 METRIC_VERSION = 1
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.patches import Patch
 
 
 class FileDataEntry(TypedDict):
