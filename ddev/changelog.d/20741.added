@@ -1,0 +1,1 @@
+ Adds support for sending metrics to Datadog using the `--to-dd-org` and `--to-dd-key` options in the `diff` command between two consecutive commits.
