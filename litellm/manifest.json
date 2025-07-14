@@ -44,7 +44,7 @@
       }
     },
     "dashboards": {
-        "LiteLLM Overview": "assets/dashboards/litellm_overview.json"
+      "LiteLLM Overview": "assets/dashboards/litellm_overview.json"
     }
   },
   "author": {
