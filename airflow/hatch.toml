@@ -2,12 +2,11 @@
 
 [[envs.default.matrix]]
 python = ["3.12"]
-version = ["2.11", "3.0"]
+version = ["2.11"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "AIRFLOW_VERSION", value = "2.11.0", if = ["2.11"] },
-  { key = "AIRFLOW_VERSION", value = "3.0.2", if = ["3.0"] },
 ]
 
 [envs.latest.env-vars]
