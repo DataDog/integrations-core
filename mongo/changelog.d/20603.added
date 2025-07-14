@@ -1,2 +1,0 @@
-Add new `collect_schemas` configuration to replace deprecated `schemas` while maintaining backward compatibility.
-
