@@ -1001,13 +1001,7 @@ def test_statement_conditional_stored_procedure_with_temp_table(
     assert dbm_samples, "should have collected at least one sample"
 
     matched_events = [s for s in dbm_samples if s['dbm_type'] == "plan" and "#Ids" in s['db']['statement']]
-    assert matched_events, "should have collected plan event"
-
-    for event in matched_events:
-        assert event['db']['plan']['definition'] is None
-        assert event['sqlserver']['plan_handle'] is not None
-        assert event['sqlserver']['query_hash'] is not None
-        assert event['sqlserver']['query_plan_hash'] is not None
+    assert not matched_events, "should not have collected plan event because there is no plan definition"
 
 
 @pytest.mark.integration

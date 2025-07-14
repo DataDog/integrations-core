@@ -87,6 +87,8 @@ integration/azure_iot_edge:
 - azure_iot_edge/**/*
 integration/bitdefender:
 - bitdefender/**/*
+integration/bitwarden:
+- bitwarden/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
@@ -101,6 +103,8 @@ integration/cacti:
 - cacti/**/*
 integration/calico:
 - calico/**/*
+integration/carbon_black_cloud:
+- carbon_black_cloud/**/*
 integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
