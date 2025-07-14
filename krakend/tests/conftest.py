@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 import os
-from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
