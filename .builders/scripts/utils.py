@@ -1,16 +1,10 @@
 from __future__ import annotations
 
 import email
-import os
 import re
-import shutil
-import tempfile
 from pathlib import Path
 from typing import Iterator
 from zipfile import ZipFile
-
-from wheel.cli.pack import pack
-from wheel.cli.unpack import unpack
 
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r"[-_.]+")
 
