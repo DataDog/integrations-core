@@ -6,8 +6,9 @@ import re
 
 from semver import VersionInfo
 
-from ..fs import chdir
-from ..subprocess import SubprocessResult, run_command
+from datadog_checks.dev.fs import chdir
+from datadog_checks.dev.subprocess import SubprocessResult, run_command
+
 from .constants import get_root
 
 

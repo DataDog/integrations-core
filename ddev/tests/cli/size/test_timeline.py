@@ -27,9 +27,6 @@ def mock_timeline():
             "ddev.cli.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.size.timeline.plt.show"),
-        patch("ddev.cli.size.timeline.plt.savefig"),
-        patch("ddev.cli.size.timeline.plt.figure"),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
@@ -141,9 +138,6 @@ def mock_timeline_dependencies():
         ),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.size.timeline.plt.show"),
-        patch("ddev.cli.size.timeline.plt.savefig"),
-        patch("ddev.cli.size.timeline.plt.figure"),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
@@ -423,9 +417,6 @@ def test_timeline_integration_not_found(ddev):
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.module_exists", return_value=False),
-        patch("ddev.cli.size.utils.common_funcs.plt.show"),
-        patch("ddev.cli.size.utils.common_funcs.plt.savefig"),
-        patch("ddev.cli.size.utils.common_funcs.plt.figure"),
     ):
         result = ddev(
             "size",

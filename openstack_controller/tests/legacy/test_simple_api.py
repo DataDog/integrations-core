@@ -46,12 +46,12 @@ def test_get_endpoint():
     authenticator = Authenticator()
     assert (
         authenticator._get_nova_endpoint(common.EXAMPLE_AUTH_RESPONSE)
-        == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
+        == 'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
     )
     with pytest.raises(MissingNovaEndpoint):
         authenticator._get_nova_endpoint({})
 
-    assert authenticator._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
+    assert authenticator._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == 'http://10.0.2.15:9292'
     with pytest.raises(MissingNeutronEndpoint):
         authenticator._get_neutron_endpoint({})
 
@@ -61,18 +61,18 @@ def test_get_endpoint():
     assert authenticator._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
     assert authenticator._get_valid_endpoint({'token': {"catalog": [{}]}}, None, None) is None
     assert (
-        authenticator._get_valid_endpoint({'token': {"catalog": [{u'type': u'compute', u'name': u'nova'}]}}, None, None)
+        authenticator._get_valid_endpoint({'token': {"catalog": [{'type': 'compute', 'name': 'nova'}]}}, None, None)
         is None
     )
     assert (
         authenticator._get_valid_endpoint(
-            {'token': {"catalog": [{u'endpoints': [], u'type': u'compute', u'name': u'nova'}]}}, None, None
+            {'token': {"catalog": [{'endpoints': [], 'type': 'compute', 'name': 'nova'}]}}, None, None
         )
         is None
     )
     assert (
         authenticator._get_valid_endpoint(
-            {'token': {"catalog": [{u'endpoints': [{}], u'type': u'compute', u'name': u'nova'}]}}, 'nova', 'compute'
+            {'token': {"catalog": [{'endpoints': [{}], 'type': 'compute', 'name': 'nova'}]}}, 'nova', 'compute'
         )
         is None
     )
@@ -82,9 +82,9 @@ def test_get_endpoint():
                 'token': {
                     "catalog": [
                         {
-                            u'endpoints': [{u'url': u'dummy_url', u'interface': u'dummy'}],
-                            u'type': u'compute',
-                            u'name': u'nova',
+                            'endpoints': [{'url': 'dummy_url', 'interface': 'dummy'}],
+                            'type': 'compute',
+                            'name': 'nova',
                         }
                     ]
                 }
@@ -96,7 +96,7 @@ def test_get_endpoint():
     )
     assert (
         authenticator._get_valid_endpoint(
-            {'token': {"catalog": [{u'endpoints': [{u'url': u'dummy_url'}], u'type': u'compute', u'name': u'nova'}]}},
+            {'token': {"catalog": [{'endpoints': [{'url': 'dummy_url'}], 'type': 'compute', 'name': 'nova'}]}},
             'nova',
             'compute',
         )
@@ -104,11 +104,7 @@ def test_get_endpoint():
     )
     assert (
         authenticator._get_valid_endpoint(
-            {
-                'token': {
-                    "catalog": [{u'endpoints': [{u'interface': u'public'}], u'type': u'compute', u'name': u'nova'}]
-                }
-            },
+            {'token': {"catalog": [{'endpoints': [{'interface': 'public'}], 'type': 'compute', 'name': 'nova'}]}},
             'nova',
             'compute',
         )
@@ -120,9 +116,9 @@ def test_get_endpoint():
                 'token': {
                     "catalog": [
                         {
-                            u'endpoints': [{u'url': u'dummy_url', u'interface': u'internal'}],
-                            u'type': u'compute',
-                            u'name': u'nova',
+                            'endpoints': [{'url': 'dummy_url', 'interface': 'internal'}],
+                            'type': 'compute',
+                            'name': 'nova',
                         }
                     ]
                 }
@@ -206,8 +202,8 @@ def test_from_config_with_admin(requests_wrapper):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     del mock_http_response['token']['roles']
     mock_http_response['token']['roles'] = [
-        {u'id': u'9fe2ff9ee4384b1894a90878d3e92bab', u'name': u'admin'},
-        {u'id': u'f20c215f5a4d47b7a6e510bc65485ced', u'name': u'datadog_monitoring'},
+        {'id': '9fe2ff9ee4384b1894a90878d3e92bab', 'name': 'admin'},
+        {'id': 'f20c215f5a4d47b7a6e510bc65485ced', 'name': 'datadog_monitoring'},
     ]
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -697,7 +693,6 @@ def test_get_servers_detail(aggregator, requests_wrapper):
 
 
 def test__get_paginated_list(requests_wrapper):
-
     log = mock.MagicMock()
 
     instance = copy.deepcopy(common.MOCK_CONFIG["instances"][0])
@@ -775,7 +770,7 @@ def test__make_request_failure(requests_wrapper):
         api = ApiFactory.create(log, instance, requests_wrapper)
 
     response_mock = mock.MagicMock()
-    with mock.patch("datadog_checks.openstack_controller.legacy.api.requests.get", return_value=response_mock):
+    with mock.patch("datadog_checks.openstack_controller.legacy.api.requests.Session.get", return_value=response_mock):
         response_mock.raise_for_status.side_effect = requests.exceptions.HTTPError
         response_mock.status_code = 401
         with pytest.raises(AuthenticationNeeded):

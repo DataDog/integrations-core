@@ -85,8 +85,8 @@ class VSphereEvent(object):
             return transform_method()
 
         # Default event transformation
-        self.payload["msg_title"] = u"{0}".format(self.event_type)
-        self.payload["msg_text"] = u"@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
+        self.payload["msg_title"] = "{0}".format(self.event_type)
+        self.payload["msg_text"] = "@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
 
         return self.payload
 
@@ -103,20 +103,20 @@ class VSphereEvent(object):
         pre_ds = self.raw_event.ds.name
         new_ds = self.raw_event.destDatastore.name
         if pre_host == new_host:
-            changes.append(u"- No host migration: still {0}".format(new_host))
+            changes.append("- No host migration: still {0}".format(new_host))
         else:
             # Insert in front if it's a change
-            changes = [u"- Host MIGRATION: from {0} to {1}".format(pre_host, new_host)] + changes
+            changes = ["- Host MIGRATION: from {0} to {1}".format(pre_host, new_host)] + changes
         if pre_dc == new_dc:
-            changes.append(u"- No datacenter migration: still {0}".format(new_dc))
+            changes.append("- No datacenter migration: still {0}".format(new_dc))
         else:
             # Insert in front if it's a change
-            changes = [u"- Datacenter MIGRATION: from {0} to {1}".format(pre_dc, new_dc)] + changes
+            changes = ["- Datacenter MIGRATION: from {0} to {1}".format(pre_dc, new_dc)] + changes
         if pre_ds == new_ds:
-            changes.append(u"- No datastore migration: still {0}".format(new_ds))
+            changes.append("- No datastore migration: still {0}".format(new_ds))
         else:
             # Insert in front if it's a change
-            changes = [u"- Datastore MIGRATION: from {0} to {1}".format(pre_ds, new_ds)] + changes
+            changes = ["- Datastore MIGRATION: from {0} to {1}".format(pre_ds, new_ds)] + changes
 
         self.payload["msg_text"] += "\n".join(changes)
 
@@ -174,7 +174,7 @@ class VSphereEvent(object):
         if transition is None:
             return None
 
-        self.payload['msg_title'] = u"[{transition}] {monitor} on {host_type} {entity_name} is now {status}".format(
+        self.payload['msg_title'] = "[{transition}] {monitor} on {host_type} {entity_name} is now {status}".format(
             transition=transition,
             monitor=self.raw_event.alarm.name,
             host_type=self.host_type,
@@ -184,8 +184,9 @@ class VSphereEvent(object):
         self.payload['alert_type'] = TO_ALERT_TYPE[trans_after]
         self.payload['event_object'] = get_agg_key(self.raw_event)
         self.payload['msg_text'] = (
-            "vCenter monitor status changed on this alarm, "
-            "it was {before} and it's now {after}.".format(before=trans_before, after=trans_after)
+            "vCenter monitor status changed on this alarm, it was {before} and it's now {after}.".format(
+                before=trans_before, after=trans_after
+            )
         )
         self.payload['host'] = host_name
 
@@ -201,72 +202,60 @@ class VSphereEvent(object):
         return self.payload
 
     def transform_vmmessageevent(self):
-        self.payload["msg_title"] = u"VM {0} is reporting".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
+        self.payload["msg_title"] = "VM {0} is reporting".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = "@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmmigratedevent(self):
-        self.payload["msg_title"] = u"VM {0} has been migrated".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
+        self.payload["msg_title"] = "VM {0} has been migrated".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = "@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmpoweredoffevent(self):
-        self.payload["msg_title"] = u"VM {0} has been powered OFF".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = (
-            u"""{user} has powered off this virtual machine. It was running on:
+        self.payload["msg_title"] = "VM {0} has been powered OFF".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = """{user} has powered off this virtual machine. It was running on:
 - datacenter: {dc}
 - host: {host}
-""".format(
-                user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name
-            )
-        )
+""".format(user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name)
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmpoweredonevent(self):
-        self.payload["msg_title"] = u"VM {0} has been powered ON".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = (
-            u"""{user} has powered on this virtual machine. It is running on:
+        self.payload["msg_title"] = "VM {0} has been powered ON".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = """{user} has powered on this virtual machine. It is running on:
 - datacenter: {dc}
 - host: {host}
-""".format(
-                user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name
-            )
-        )
+""".format(user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name)
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmresumingevent(self):
-        self.payload["msg_title"] = u"VM {0} is RESUMING".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has resumed {vm}. It will soon be powered on.""".format(
+        self.payload["msg_title"] = "VM {0} is RESUMING".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = """{user} has resumed {vm}. It will soon be powered on.""".format(
             user=self.raw_event.userName, vm=self.raw_event.vm.name
         )
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmsuspendedevent(self):
-        self.payload["msg_title"] = u"VM {0} has been SUSPENDED".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = (
-            u"""{user} has suspended this virtual machine. It was running on:
+        self.payload["msg_title"] = "VM {0} has been SUSPENDED".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = """{user} has suspended this virtual machine. It was running on:
 - datacenter: {dc}
 - host: {host}
-""".format(
-                user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name
-            )
-        )
+""".format(user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name)
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmreconfiguredevent(self):
-        self.payload["msg_title"] = u"VM {0} configuration has been changed".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"{user} saved the new configuration:\n@@@\n".format(user=self.raw_event.userName)
+        self.payload["msg_title"] = "VM {0} configuration has been changed".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = "{user} saved the new configuration:\n@@@\n".format(user=self.raw_event.userName)
         # Add lines for configuration change don't show unset, that's hacky...
         config_change_lines = [
             line for line in self.raw_event.configSpec.__repr__().splitlines() if 'unset' not in line
         ]
-        self.payload["msg_text"] += u"\n".join(config_change_lines)
-        self.payload["msg_text"] += u"\n@@@"
+        self.payload["msg_text"] += "\n".join(config_change_lines)
+        self.payload["msg_text"] += "\n@@@"
         self.payload['host'] = self.raw_event.vm.name
         return self.payload

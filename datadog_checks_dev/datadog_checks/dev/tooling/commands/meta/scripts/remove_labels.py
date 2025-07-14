@@ -4,7 +4,7 @@
 import click
 import requests
 
-from ...console import CONTEXT_SETTINGS, abort, echo_success
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_success
 
 
 @click.command(
