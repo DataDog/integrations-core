@@ -81,6 +81,10 @@ def main():
         staged_built_wheels_dir = staged_wheel_dir / "built"
         staged_external_wheels_dir = staged_wheel_dir / "external"
 
+        # Create the directories
+        staged_built_wheels_dir.mkdir(parents=True, exist_ok=True)
+        staged_external_wheels_dir.mkdir(parents=True, exist_ok=True)
+
         env_vars = dict(os.environ)
         env_vars["PATH"] = f"{python_path.parent}{os.pathsep}{env_vars['PATH']}"
         env_vars["PIP_WHEEL_DIR"] = str(staged_wheel_dir)
