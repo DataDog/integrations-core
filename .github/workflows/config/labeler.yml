@@ -337,8 +337,6 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
-integration/kaspersky:
-- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
@@ -527,10 +525,10 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
-integration/proofpoint_tap:
-- proofpoint_tap/**/*
 integration/proofpoint_on_demand:
 - proofpoint_on_demand/**/*
+integration/proofpoint_tap:
+- proofpoint_tap/**/*
 integration/proxmox:
 - proxmox/**/*
 integration/proxysql:
