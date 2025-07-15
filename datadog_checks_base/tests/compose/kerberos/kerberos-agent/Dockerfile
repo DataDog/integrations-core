@@ -1,4 +1,4 @@
-FROM datadog/agent:7.25.0-rc.4
+FROM datadog/agent:7.68.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 
