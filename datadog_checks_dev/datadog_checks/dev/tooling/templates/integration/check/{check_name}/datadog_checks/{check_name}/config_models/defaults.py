@@ -2,6 +2,7 @@
 
 {documentation}
 
+
 def instance_empty_default_hostname():
     return False
 

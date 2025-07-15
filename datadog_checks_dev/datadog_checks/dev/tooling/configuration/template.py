@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import yaml
 
-from ...utils import file_exists, get_parent_dir, path_join, read_file
+from datadog_checks.dev.utils import file_exists, get_parent_dir, path_join, read_file
 
 TEMPLATES_DIR = path_join(get_parent_dir(get_parent_dir(__file__)), 'templates', 'configuration')
 VALID_EXTENSIONS = ('yaml', 'yml')
@@ -52,7 +52,9 @@ class ConfigTemplates:
                 if branch in data:
                     data = data[branch]
                 else:
-                    raise ValueError(f"Template `{'/'.join(path_parts)}` has no element `{'.'.join(branches[:i + 1])}`")
+                    raise ValueError(
+                        f"Template `{'/'.join(path_parts)}` has no element `{'.'.join(branches[: i + 1])}`"
+                    )
             elif isinstance(data, list):
                 for item in data:
                     if isinstance(item, dict) and item.get('name') == branch:

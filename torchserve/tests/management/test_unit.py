@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_check(dd_run_check, aggregator, check, mocked_management_instance, mocker):
-    mocker.patch('requests.get', wraps=mock_http_responses())
+    mocker.patch('requests.Session.get', wraps=mock_http_responses())
     dd_run_check(check(mocked_management_instance))
 
     for metric in METRICS:
@@ -43,7 +43,7 @@ def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_manage
 
         return mock_http_responses()(url)
 
-    mocker.patch('requests.get', wraps=custom_mock_http_responses)
+    mocker.patch('requests.Session.get', wraps=custom_mock_http_responses)
     dd_run_check(check(mocked_management_instance))
 
     # We should not get anything for these models
@@ -157,7 +157,7 @@ def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_manage
 def test_check_with_discovery(
     dd_run_check, aggregator, check, mocked_management_instance, mocker, include, exclude, limit, expected_models
 ):
-    mocker.patch('requests.get', wraps=mock_http_responses())
+    mocker.patch('requests.Session.get', wraps=mock_http_responses())
     mocked_management_instance["limit"] = limit
     mocked_management_instance["exclude"] = exclude
     mocked_management_instance["include"] = include
@@ -308,13 +308,13 @@ def test_check_with_events(
     datadog_agent.reset()
 
     check_instance = check(mocked_management_instance)
-    mocker.patch('requests.get', wraps=mock_http_responses())
+    mocker.patch('requests.Session.get', wraps=mock_http_responses())
     dd_run_check(check_instance)
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0
 
-    mocker.patch('requests.get', wraps=mock_http_responses(new_response))
+    mocker.patch('requests.Session.get', wraps=mock_http_responses(new_response))
     dd_run_check(check_instance)
 
     for expected_event, actual_event in zip(expected_events, aggregator.events, strict=True):
@@ -338,13 +338,13 @@ def test_check_disable_events(dd_run_check, datadog_agent, aggregator, check, mo
     mocked_management_instance["submit_events"] = False
 
     check_instance = check(mocked_management_instance)
-    mocker.patch('requests.get', wraps=mock_http_responses())
+    mocker.patch('requests.Session.get', wraps=mock_http_responses())
     dd_run_check(check_instance)
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0
 
-    mocker.patch('requests.get', wraps=mock_http_responses("management/events/models_all_dropped.json"))
+    mocker.patch('requests.Session.get', wraps=mock_http_responses("management/events/models_all_dropped.json"))
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0

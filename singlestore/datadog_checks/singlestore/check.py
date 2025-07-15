@@ -26,7 +26,6 @@ ADDITIONAL_SYSTEM_QUERIES = [SYSINFO_CPU, SYSINFO_DISK, SYSINFO_MEM, SYSINFO_NET
 
 
 class SinglestoreCheck(AgentCheck):
-
     SERVICE_CHECK_NAME = "can_connect"
     __NAMESPACE__ = "singlestore"
 

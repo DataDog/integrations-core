@@ -76,6 +76,8 @@ include = ["src"]
 [tool.hatch.build.targets.app]
 scripts = ["ddev"]
 
+# Keep Black configuration to generate models through validate
+# Switch to Ruff after it provides a Python API
 [tool.black]
 include = '\.pyi?$'
 line-length = 120
@@ -99,6 +101,7 @@ select = [
   "G",
   "W",
   "I",
+  "TID252",
 ]
 ignore = [
   # From legacy flake8 settings
@@ -116,11 +119,17 @@ unfixable = [
   "F401",
 ]
 
+[tool.ruff.format]
+quote-style = "preserve"
+exclude = [
+  "src/ddev/_version.py"
+]
+
 [tool.ruff.lint.isort]
 known-first-party = ["ddev"]
 
 [tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+ban-relative-imports = "parents"
 
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports

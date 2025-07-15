@@ -139,7 +139,8 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
     instance.update(extra_config)
     check = check(instance)
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         dd_run_check(check)
@@ -189,7 +190,7 @@ def test_metadata_with_exception(
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    with mock.patch('requests.get', side_effect=exception):
+    with mock.patch('requests.Session.get', side_effect=exception):
         check._collect_metadata()
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(*log_call_parameters)

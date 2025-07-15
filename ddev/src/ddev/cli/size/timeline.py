@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Optional, overload
 
 import click
-import matplotlib.pyplot as plt
 import requests
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
@@ -810,6 +809,8 @@ def plot_linegraph(
         show: If True, displays the plot interactively.
         path: If provided, saves the plot to this file path.
     """
+    import matplotlib.pyplot as plt
+
     if modules == []:
         return
 
