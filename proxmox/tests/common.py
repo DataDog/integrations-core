@@ -46,6 +46,8 @@ PERF_METRICS = [
     'proxmox.swap.used',
 ]
 
+HA_METIRCS = ['proxmox.ha.quorate', 'proxmox.ha.quorum']
+
 NODE_RESOURCE_METRICS = set(RESOURCE_METRICS) - {
     'proxmox.diskread',
     'proxmox.diskwrite',
@@ -77,4 +79,4 @@ CONTAINER_PERF_METRICS = set(PERF_METRICS) - {
 
 STORAGE_PERF_METRICS = {'proxmox.disk.total', 'proxmox.disk.used'}
 
-ALL_METRICS = BASE_METRICS + RESOURCE_METRICS + PERF_METRICS
+ALL_METRICS = BASE_METRICS + RESOURCE_METRICS + PERF_METRICS + HA_METIRCS
