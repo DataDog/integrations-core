@@ -10,7 +10,6 @@ from time import time
 
 import psycopg
 from cachetools import TTLCache
-from postgres.datadog_checks.postgres.health import HealthEvent, PostgresHealth
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
@@ -26,6 +25,7 @@ from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
+from datadog_checks.postgres.health import HealthEvent, PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -131,8 +131,14 @@ class PostgreSql(AgentCheck):
             )
 
         # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
-        self._config = PostgresConfig(self.instance, self.init_config, self)
+        self._config = PostgresConfig(self)
         validation_result = self._config.initialize(self.instance, self.init_config)
+
+        self.cloud_metadata = self._config.cloud_metadata
+        self.tags = self._config.tags
+        self.add_core_tags()
+
+        # Handle the config validation result after we've set tags so those tags are included in the health event
         self.health.submit_health_event(
             HealthEvent.INITIALIZATION,
             HealthCode.HEALTHY if validation_result.valid else HealthCode.UNHEALTHY,
@@ -145,13 +151,11 @@ class PostgreSql(AgentCheck):
             },
         )
 
+        # Abort initializing the check if the config is invalid
         if validation_result.valid is False:
             self.log.error("Configuration validation failed: %s", validation_result.errors)
             raise validation_result.errors[0]
 
-        self.cloud_metadata = self._config.cloud_metadata
-        self.tags = self._config.tags
-        self.add_core_tags()
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)

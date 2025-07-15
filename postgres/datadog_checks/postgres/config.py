@@ -45,19 +45,20 @@ class PostgresConfig:
         :return: ConfigResult
             The result of the configuration initialization.
         """
+        validation_result = ValidationResult()
 
         self.exclude_hostname = instance.get("exclude_hostname", False)
         self.database_identifier = instance.get('database_identifier', {})
         self.init_config = init_config
         self.host = instance.get('host', '')
         if not self.host:
-            raise ConfigurationError('Specify a Postgres host to connect to.')
+            validation_result.add_error('Specify a Postgres host to connect to.')
         self.port = instance.get('port', '5432')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
         if not self.user:
-            raise ConfigurationError('Please specify a user to connect to Postgres.')
+            validation_result.add_error('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
         self.reported_hostname = instance.get('reported_hostname', '')
@@ -66,20 +67,20 @@ class PostgresConfig:
 
         self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
         if self.discovery_config['enabled'] and self.dbname != 'postgres':
-            raise ConfigurationError(
+            validation_result.add_error(
                 "'dbname' parameter should not be set when `database_autodiscovery` is enabled."
                 "To monitor more databases, add them to the `database_autodiscovery` includelist."
             )
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.application_name.isascii():
-            raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
+            validation_result.add_error("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = int(instance.get('query_timeout', 5000))
         self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
         self.relations = instance.get('relations', [])
         if self.relations and not (self.dbname or self.discovery_config['enabled']):
-            raise ConfigurationError(
+            validation_result.add_error(
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
         self.max_connections = instance.get('max_connections', 30)
@@ -200,6 +201,8 @@ class PostgresConfig:
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
             additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
         )
+
+        return validation_result
 
     def _build_tags(self, custom_tags, propagate_agent_tags, additional_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -330,28 +333,6 @@ class PostgresConfig:
         # if neither the instance nor the init_config has set the value, return False
         return False
 
-    def validate(self):
-        # type: () -> ValidationResult
-        """
-        Validate the configuration of the Postgres check.
-        """
-
-        result = ValidationResult(valid=True, features=[])
-
-        if not self.host:
-            raise ConfigurationError('Postgres host must be specified.')
-        if not self.user:
-            raise ConfigurationError('Postgres user must be specified.')
-        if not isinstance(self.port, int):
-            raise ConfigurationError('Postgres port must be an integer.')
-        if self.ssl_mode not in SSL_MODES:
-            raise ConfigurationError(f"Invalid ssl mode '{self.ssl_mode}', should be one of {SSL_MODES}.")
-        if self.query_timeout < 0:
-            raise ConfigurationError('Query timeout must be a non-negative integer.')
-        if self.idle_connection_timeout < 0:
-            raise ConfigurationError('Idle connection timeout must be a non-negative integer.')
-        return result
-
 
 class FeatureKey(Enum):
     """
@@ -391,8 +372,7 @@ class ValidationResult:
     It can be extended in the future to include more details about the validation.
     """
 
-    def __init__(self, valid=True, features=None, errors=None):
-        # type: (bool, list[Feature]) -> None
+    def __init__(self, valid=True, features: list[Feature] = None, errors: list[ConfigurationError] = None):
         """
         :param valid: Whether the validation passed.
         :param features: A list of features that were validated.
@@ -401,19 +381,17 @@ class ValidationResult:
         self.features = features or []
         self.errors = errors or []
 
-    def add_feature(self, feature):
-        # type: (Feature) -> None
+    def add_feature(self, feature: Feature):
         """
         Add a feature to the validation result.
         :param feature: The feature to add.
         """
         self.features.append(feature)
 
-    def add_error(self, error):
-        # type: (str) -> None
+    def add_error(self, error: str):
         """
         Add an error to the validation result.
         :param error: The error message to add.
         """
-        self.errors.append(error)
+        self.errors.append(ConfigurationError(error))
         self.valid = False

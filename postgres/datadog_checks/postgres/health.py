@@ -1,13 +1,20 @@
-from postgres.datadog_checks.postgres import PostgreSql
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
+from enum import Enum
 
 from datadog_checks.base.utils.db.health import Health, HealthCode, HealthEvent
 
 
-class PostgresHealthCode(HealthCode):
+class PostgresHealthCode(Enum):
     NOOP = 'noop'
 
 
-class PostgresHealthEvent(HealthEvent):
+class PostgresHealthEvent(Enum):
     """
     Enum representing the health events for PostgreSQL monitoring.
     """
@@ -27,8 +34,13 @@ class PostgresHealth(Health):
         super().__init__(check)
         self.check = check
 
-    def submit_health_event(self, event_name, code: HealthCode, metadata=None, **kwargs):
-        # type: (PostgresHealth, PostgresHealthEvent, HealthCode, dict) -> None
+    def submit_health_event(
+        self,
+        event_name: HealthEvent | PostgresHealthEvent,
+        code: HealthCode | PostgresHealthCode,
+        metadata=None,
+        **kwargs,
+    ):
         """
         Submit a health event to the aggregator.
 
@@ -44,7 +56,8 @@ class PostgresHealth(Health):
             event_name,
             code,
             metadata,
-            tags=self.check.tags,
+            # If we have an error parsing the config we may not have tags yet
+            tags=self.check.tags if hasattr(self.check, 'tags') else [],
             database_identifier=self.check.database_identifier,
             agent_hostname=self.check.agent_hostname,
             **kwargs,
