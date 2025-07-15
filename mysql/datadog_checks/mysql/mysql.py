@@ -125,6 +125,7 @@ class MySql(AgentCheck):
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._binlog_enabled = None
+        self._replication_role = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
@@ -395,8 +396,8 @@ class MySql(AgentCheck):
 
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
-                    aurora_tags = self._get_runtime_aurora_tags(db)
-                    self._update_runtime_aurora_tags(aurora_tags)
+                    role = self._get_aurora_replication_role(db)
+                    self._update_aurora_replication_role(role)
 
                 # All data collection starts here
                 self._send_database_instance_metadata()
@@ -578,9 +579,13 @@ class MySql(AgentCheck):
         if not is_affirmative(
             self._config.options.get('disable_innodb_metrics', False)
         ) and self._check_innodb_engine_enabled(db):
-            with tracked_query(self, operation="innodb_metrics"):
-                results.update(self.innodb_stats.get_stats_from_innodb_status(db))
-            self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
+            # Innodb metrics are not available for Aurora reader instances
+            if self._is_aurora and self._replication_role == "reader":
+                self.log.debug("Skipping innodb metrics collection for reader instance")
+            else:
+                with tracked_query(self, operation="innodb_metrics"):
+                    results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+                self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
@@ -644,7 +649,7 @@ class MySql(AgentCheck):
                 results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)) and self.userstat_enabled:
+        if self._config.table_rows_stats_enabled and self.userstat_enabled:
             # report size of tables in MiB to Datadog
             self.log.debug("Collecting Table Row Stats Metrics.")
             with tracked_query(self, operation="table_rows_stats_metrics"):
@@ -1004,26 +1009,25 @@ class MySql(AgentCheck):
             self.warning("Error while running %s\n%s", query, traceback.format_exc())
             self.log.exception("Error while running %s", query)
 
-    def _get_runtime_aurora_tags(self, db):
-        runtime_tags = {}
+    def _get_aurora_replication_role(self, db):
+        role = None
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
                 replication_role = cursor.fetchone()[0]
                 if replication_role in {'writer', 'reader'}:
-                    runtime_tags['replication_role'] = replication_role
+                    role = replication_role
         except Exception:
             self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
-        return runtime_tags
+        return role
 
-    def _update_runtime_aurora_tags(self, aurora_tags):
+    def _update_aurora_replication_role(self, replication_role):
         """
-        Update the tags with Aurora runtime tags, ensuring no duplicate tags exist.
-        First removes any existing Aurora runtime tags by key name, then adds the new tags.
+        Updates the replication_role tag with the aurora replication role if it exists
         """
-        # Extract tag keys from aurora_tags to identify which tags to remove
-        for tag, value in aurora_tags.items():
-            self.tag_manager.set_tag(tag, value, replace=True)
+        if replication_role:
+            self.tag_manager.set_tag('replication_role', replication_role, replace=True)
+            self._replication_role = replication_role
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
@@ -1474,8 +1478,10 @@ class MySql(AgentCheck):
             if self.cluster_uuid:
                 self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
                 self.tag_manager.set_tag('replication_role', "replica", replace=True)
+                self._replication_role = "replica"
         else:
             if self._binlog_enabled:
                 self.cluster_uuid = self.server_uuid
                 self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
                 self.tag_manager.set_tag('replication_role', "primary", replace=True)
+                self._replication_role = "primary"
