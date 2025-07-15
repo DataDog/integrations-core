@@ -54,7 +54,7 @@ services:
       - "464:8464"
 
   web:
-    image: kerberos-nginx:1.17.3
+    image: kerberos-nginx:1.20.2
     build: ./kerberos-nginx
     environment:
       KRB5_KEYTAB: ${KRB5_KEYTAB}
