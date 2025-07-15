@@ -94,16 +94,22 @@ instances:
     #
     # dbstrict: false
 
-    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata', 'postgres']
+    ## @param ignore_databases - list of strings - optional
     ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
     ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
     ## set collect_default_database to false in addition to adding it to this array.
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
-    #   - private_data
+    #   - template0
+    #   - template1
+    #   - rdsadmin
+    #   - azure_maintenance
+    #   - cloudsqladmin
+    #   - alloydbadmin
+    #   - alloydbmetadata
 
-    ## @param ignore_schemas_owned_by - list of strings - optional - default: ['rds_superuser', 'rdsadmin']
+    ## @param ignore_schemas_owned_by - list of strings - optional
     ## A list of database users which own schemas to ignore.
     ## No metrics or statement samples will be collected for these schemas.
     ## Each value can be a plain string or a Postgres pattern.
@@ -270,7 +276,7 @@ instances:
     #
     # collect_wal_metrics: false
 
-    ## @param data_directory - string - optional
+    ## @param data_directory - string - optional - default: /usr/local/pgsql/data
     ## The data directory of your postgres installation
     ## Required when collecting WAL metrics.
     #

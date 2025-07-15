@@ -99,8 +99,6 @@ files:
         items:
           type: string
         example:
-          - private_data
-        display_default:
           - 'template0'
           - 'template1'
           - rdsadmin
@@ -108,7 +106,14 @@ files:
           - cloudsqladmin
           - alloydbadmin
           - alloydbmetadata
-          - postgres
+        default:
+          - 'template0'
+          - 'template1'
+          - rdsadmin
+          - azure_maintenance
+          - cloudsqladmin
+          - alloydbadmin
+          - alloydbmetadata
     - name: ignore_schemas_owned_by
       description: |
         A list of database users which own schemas to ignore.
@@ -123,7 +128,7 @@ files:
           - rdsadmin
           - user123
           - 'dev_%_owner'
-        display_default:
+        default:
           - rds_superuser
           - rdsadmin
     - name: ssl
@@ -343,7 +348,6 @@ files:
       value:
         type: string
         example: /usr/local/pgsql/data
-        display_default: None
     - name: tag_replication_role
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
