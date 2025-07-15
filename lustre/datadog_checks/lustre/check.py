@@ -36,7 +36,7 @@ def _get_stat_type(suffix: str, unit: str) -> str:
         return 'gauge'
 
 
-def _handle_ip_in_param(parts: List[str]) -> List[str]:
+def _handle_ip_in_param(parts: List[str]) -> Tuple[List[str], bool]:
     """
     Merge parameter parts corresponding to an IP address.
 
@@ -44,12 +44,16 @@ def _handle_ip_in_param(parts: List[str]) -> List[str]:
         ['some','172','0','0','12@tcp','param']
     =>  ['some','172.0.0.12@tcp', 'param']
     """
-    match_index = 0
+    match_index = None
     for i, part in enumerate(parts):
         if '@' in part:
             match_index = i
+    if match_index is None or match_index < 3:
+        return [], False
     new_part = ".".join(parts[match_index - 3 : match_index + 1])
-    return [*parts[: match_index - 3], new_part, *parts[match_index + 1 :]]
+    if not re.match(r"\b\d*\.\d*\.\d*\.\d*@\b.", new_part):
+        return [], False
+    return [*parts[: match_index - 3], new_part, *parts[match_index + 1 :]], True
 
 
 class LustreCheck(AgentCheck):
@@ -412,32 +416,36 @@ class LustreCheck(AgentCheck):
             else:
                 self.log.debug('Unexpected metric value for %s.%s: %s', name, suffix, metric_value)
 
-    def _extract_tags_from_param(self, param_regex: str, param_name: str, wildcards: Tuple[str]) -> List[str]:
+    def _extract_tags_from_param(self, param_regex: str, param_name: str, wildcards: Tuple[str, ...]) -> List[str]:
         '''
         Extract tags from the parameter name based on the regex and wildcard meanings.
         '''
+        if not wildcards:
+            return []
         tags = []
-        if wildcards:
-            regex_parts = param_regex.split('.')
-            param_parts = param_name.split('.')
-            wildcard_number = 0
-            if not len(regex_parts) == len(param_parts):
-                # Edge case: mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats
-                if any("@" in part for part in param_parts):
-                    # We need to reconstruct the address
-                    param_parts = _handle_ip_in_param(param_parts)
-                else:
-                    self.log.debug('Parameter name %s does not match regex %s', param_name, param_regex)
+        regex_parts = param_regex.split('.')
+        param_parts = param_name.split('.')
+        wildcard_number = 0
+        if not len(regex_parts) == len(param_parts):
+            # Edge case: mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats
+            if len(regex_parts) + 3 == len(param_parts):
+                # We need to reconstruct the address
+                param_parts, is_valid_ip = _handle_ip_in_param(param_parts)
+                if not is_valid_ip:
+                    self.log.debug("Skipping tags for parameter %s", param_name)
+                    return []
+            else:
+                self.log.debug('Parameter name %s does not match regex %s', param_name, param_regex)
+                return tags
+        for part_number, part in enumerate(regex_parts):
+            if part == '*':
+                if wildcard_number >= len(wildcards):
+                    self.log.debug(
+                        'Found %s wildcards, which exceeds available wildcard tags %s', wildcard_number, wildcards
+                    )
                     return tags
-            for part_number, part in enumerate(regex_parts):
-                if part == '*':
-                    if wildcard_number >= len(wildcards):
-                        self.log.debug(
-                            'Found %s wildcards, which exceeds available wildcard tags %s', wildcard_number, wildcards
-                        )
-                        return tags
-                    tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
-                    wildcard_number += 1
+                tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
+                wildcard_number += 1
         return tags
 
     def _parse_stats(self, raw_stats: str) -> Dict[str, Dict[str, Union[int, str]]]:
