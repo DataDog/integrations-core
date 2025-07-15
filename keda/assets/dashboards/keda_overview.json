@@ -241,7 +241,7 @@
                             "sort": "status,asc",
                             "start": 0,
                             "summary_type": "monitors",
-                            "title": "Kyverno Monitor Summary",
+                            "title": "Keda Monitor Summary",
                             "type": "manage_status"
                         },
                         "id": 4628596810698702,
