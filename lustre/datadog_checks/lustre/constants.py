@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Tuple
 
 FILESYSTEM_DISCOVERY_PARAM_MAPPING = {
     'mds': (r'mdt.*.job_stats', r'(?<=mdt\.).*(?=-MDT)'),
