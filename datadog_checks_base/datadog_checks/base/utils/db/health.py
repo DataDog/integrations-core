@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 # This is the base implementation of the Agent Health reporting system.
 # It provides a structure for health events and codes that can be extended by specific checks.
 
