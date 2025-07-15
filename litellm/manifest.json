@@ -45,6 +45,10 @@
     },
     "dashboards": {
       "LiteLLM Overview": "assets/dashboards/litellm_overview.json"
+    },
+    "monitors": {
+      "High LLM API Failure Rate Detected": "assets/monitors/high_failure_response.json",
+      "High Fallback Failure Rate Detected": "assets/monitors/high_fallback_failures.json"
     }
   },
   "author": {

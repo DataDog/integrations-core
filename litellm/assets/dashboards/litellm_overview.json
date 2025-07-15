@@ -114,7 +114,7 @@
                         "definition": {
                             "background_color": "blue",
                             "content": "LiteLLM Overview show a quick summary of all reporting LiteLLM instances and related monitors and their status.",
-                            "font_size": "14",
+                            "font_size": "18",
                             "has_padding": true,
                             "show_tick": false,
                             "text_align": "center",
@@ -270,6 +270,27 @@
                 "widgets": [
                     {
                         "definition": {
+                            "background_color": "blue",
+                            "content": "Checks the health of all configured LLMs by calling their APIs via the `/health` proxy endpoint.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2558421851369601,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -304,7 +325,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Healthy Endpoint States",
                             "title_align": "left",
                             "title_size": "16",
@@ -315,7 +335,7 @@
                             "height": 3,
                             "width": 10,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -324,6 +344,13 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -340,6 +367,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "Healthy Endpoints",
                             "title_align": "left",
                             "title_size": "16",
@@ -350,7 +378,7 @@
                             "height": 3,
                             "width": 2,
                             "x": 10,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -389,7 +417,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Unhealthy Endpoint States",
                             "title_align": "left",
                             "title_size": "16",
@@ -400,7 +427,7 @@
                             "height": 3,
                             "width": 10,
                             "x": 0,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -409,6 +436,13 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_red",
+                                            "value": 1
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -425,6 +459,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "title": "Unhealthy Endpoints",
                             "title_align": "left",
                             "title_size": "16",
@@ -435,14 +470,14 @@
                             "height": 3,
                             "width": 2,
                             "x": 10,
-                            "y": 3
+                            "y": 4
                         }
                     }
                 ]
             },
             "id": 8446156488178829,
             "layout": {
-                "height": 7,
+                "height": 8,
                 "width": 12,
                 "x": 0,
                 "y": 7
@@ -456,6 +491,27 @@
                 "title": "API Key & Team Quota",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Displays usage, budget, and rate limit metrics across users, teams, and virtual API keys to monitor spend, token consumption, and resource limits.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5442015390627365,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -492,7 +548,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "LiteLLM Spend Metric",
                             "title_align": "left",
                             "title_size": "16",
@@ -503,7 +558,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -542,7 +597,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "LiteLLM Input Tokens",
                             "title_align": "left",
                             "title_size": "16",
@@ -553,7 +607,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -592,7 +646,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "LiteLLM Output Tokens",
                             "title_align": "left",
                             "title_size": "16",
@@ -603,7 +656,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -657,7 +710,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -711,7 +764,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -765,7 +818,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -805,7 +858,6 @@
                                 },
                                 "palette": "dog_classic"
                             },
-                            "time": {},
                             "title": "Max Budget For API Key",
                             "title_align": "left",
                             "title_size": "16",
@@ -816,7 +868,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -856,7 +908,6 @@
                                 },
                                 "palette": "dog_classic"
                             },
-                            "time": {},
                             "title": "LiteLLM Spend Metric",
                             "title_align": "left",
                             "title_size": "16",
@@ -867,7 +918,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -907,7 +958,6 @@
                                 },
                                 "palette": "dog_classic"
                             },
-                            "time": {},
                             "title": "Time Until API Key Budget Reset",
                             "title_align": "left",
                             "title_size": "16",
@@ -918,7 +968,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -957,7 +1007,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Remaining API Key Request per Model",
                             "title_align": "left",
                             "title_size": "16",
@@ -968,7 +1017,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 9
+                            "y": 10
                         }
                     },
                     {
@@ -1007,7 +1056,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "Remaining API Key Token per Model",
                             "title_align": "left",
                             "title_size": "16",
@@ -1018,17 +1066,17 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 9
+                            "y": 10
                         }
                     }
                 ]
             },
             "id": 3441768660125406,
             "layout": {
-                "height": 13,
+                "height": 14,
                 "width": 12,
                 "x": 0,
-                "y": 14
+                "y": 15
             }
         },
         {
@@ -1039,6 +1087,27 @@
                 "title": "Proxy Metrics",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Shows overall LiteLLM Proxy usage by tracking total and failed client-side requests, providing insight into traffic volume and reliability across users, teams, and keys.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3790010523025878,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -1070,7 +1139,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "cool"
                                     }
                                 }
                             ],
@@ -1086,7 +1155,7 @@
                             "height": 3,
                             "width": 5,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1120,7 +1189,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "warm"
                                     }
                                 }
                             ],
@@ -1136,7 +1205,7 @@
                             "height": 3,
                             "width": 5,
                             "x": 5,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1173,7 +1242,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "LiteLLM Proxy Failed Request Percentage",
                             "title_align": "left",
                             "title_size": "16",
@@ -1184,17 +1252,17 @@
                             "height": 3,
                             "width": 2,
                             "x": 10,
-                            "y": 0
+                            "y": 1
                         }
                     }
                 ]
             },
             "id": 8957181564639513,
             "layout": {
-                "height": 4,
+                "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 27
+                "y": 29
             }
         },
         {
@@ -1205,6 +1273,27 @@
                 "title": "LLM Provider Metrics",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Monitors LLM provider performance by tracking API call success/failure rates, rate/token limits, deployment health, latency, and fallback events across models, keys, and teams.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1909373940130482,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -1236,7 +1325,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "cool"
                                     }
                                 }
                             ],
@@ -1252,7 +1341,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1286,7 +1375,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "warm"
                                     }
                                 }
                             ],
@@ -1302,7 +1391,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1341,7 +1430,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment Total Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -1352,7 +1440,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -1391,7 +1479,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Remaining Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -1402,7 +1489,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -1441,7 +1528,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Remaining Tokens",
                             "title_align": "left",
                             "title_size": "16",
@@ -1452,7 +1538,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -1491,7 +1577,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment State",
                             "title_align": "left",
                             "title_size": "16",
@@ -1502,7 +1587,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -1546,7 +1631,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment Latency Per Token",
                             "title_align": "left",
                             "title_size": "16",
@@ -1557,7 +1641,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -1572,7 +1656,7 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Deployment Cooled Down",
@@ -1591,7 +1675,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "cool"
                                     }
                                 }
                             ],
@@ -1607,7 +1691,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 9
+                            "y": 10
                         }
                     },
                     {
@@ -1622,7 +1706,7 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "alias": "Successful Fallbacks",
@@ -1641,7 +1725,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "cool"
                                     }
                                 }
                             ],
@@ -1657,7 +1741,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 9
+                            "y": 10
                         }
                     },
                     {
@@ -1672,7 +1756,7 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -1690,7 +1774,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "warm"
                                     }
                                 }
                             ],
@@ -1706,7 +1790,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 9
+                            "y": 10
                         }
                     },
                     {
@@ -1750,7 +1834,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Average Total Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1761,7 +1844,7 @@
                             "height": 3,
                             "width": 3,
                             "x": 0,
-                            "y": 12
+                            "y": 13
                         }
                     },
                     {
@@ -1805,7 +1888,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Average Overhead Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1816,7 +1898,7 @@
                             "height": 3,
                             "width": 3,
                             "x": 3,
-                            "y": 12
+                            "y": 13
                         }
                     },
                     {
@@ -1860,7 +1942,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Average LLM API Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1871,7 +1952,7 @@
                             "height": 3,
                             "width": 3,
                             "x": 6,
-                            "y": 12
+                            "y": 13
                         }
                     },
                     {
@@ -1915,7 +1996,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Average LLM API Time to First Token",
                             "title_align": "left",
                             "title_size": "16",
@@ -1926,17 +2006,17 @@
                             "height": 3,
                             "width": 3,
                             "x": 9,
-                            "y": 12
+                            "y": 13
                         }
                     }
                 ]
             },
             "id": 1520788251526388,
             "layout": {
-                "height": 16,
+                "height": 17,
                 "width": 12,
                 "x": 0,
-                "y": 31
+                "y": 34
             }
         },
         {
@@ -1947,6 +2027,27 @@
                 "title": "Service Health Metrics",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Monitors the health and performance of LiteLLM and its adjacent services by tracking Redis/Postgres call latency and failures, as well as overall LiteLLM API call latency.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5623510269775430,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -1988,7 +2089,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "LiteLLM Self Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1999,7 +2099,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2038,7 +2138,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "LiteLLM Self Total Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -2049,7 +2148,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2083,7 +2182,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "warm"
                                     }
                                 }
                             ],
@@ -2099,7 +2198,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2143,7 +2242,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Redis Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -2154,7 +2252,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -2193,7 +2291,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Redis Total Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -2204,7 +2301,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -2238,7 +2335,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal",
                                         "order_by": "values",
-                                        "palette": "dog_classic"
+                                        "palette": "warm"
                                     }
                                 }
                             ],
@@ -2254,7 +2351,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -2298,7 +2395,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Postgres Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -2309,7 +2405,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -2348,7 +2444,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Postgres Total Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -2359,7 +2454,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -2398,7 +2493,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Postgres Failed Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -2409,17 +2503,17 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 6
+                            "y": 7
                         }
                     }
                 ]
             },
             "id": 7250476941150852,
             "layout": {
-                "height": 10,
+                "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 47
+                "y": 51
             }
         },
         {
@@ -2430,6 +2524,27 @@
                 "title": "DB Transaction Queue Health",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Provides visibility into the health of the DB Transaction Queue by tracking which pod holds the DB write lock and monitoring the size of in-memory and Redis spend update queues for users, teams, and keys.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 72555129860617,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "legend_columns": [
@@ -2466,7 +2581,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "LiteLLM Pod Lock Manager Size",
                             "title_align": "left",
                             "title_size": "16",
@@ -2477,7 +2591,7 @@
                             "height": 3,
                             "width": 12,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -2516,7 +2630,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "In Memory Daily Spend Update",
                             "title_align": "left",
                             "title_size": "16",
@@ -2527,7 +2640,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -2566,7 +2679,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "In Memory Spend Update",
                             "title_align": "left",
                             "title_size": "16",
@@ -2577,7 +2689,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 3
+                            "y": 4
                         }
                     },
                     {
@@ -2616,7 +2728,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Redis Daily Spend Update",
                             "title_align": "left",
                             "title_size": "16",
@@ -2627,7 +2738,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 6
+                            "y": 7
                         }
                     },
                     {
@@ -2666,7 +2777,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Redis Spend Update",
                             "title_align": "left",
                             "title_size": "16",
@@ -2677,17 +2787,17 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 6
+                            "y": 7
                         }
                     }
                 ]
             },
             "id": 73885135336978,
             "layout": {
-                "height": 10,
+                "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 57
+                "y": 62
             }
         },
         {
@@ -2698,6 +2808,27 @@
                 "title": "LiteLLM Logs",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "Enables logging of all successful and failed LLM calls, as well as system service metrics, to Datadog for observability and monitoring. [More info here](https://docs.litellm.ai/docs/observability/datadog).",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 720728780674148,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "requests": [
@@ -2752,17 +2883,17 @@
                             "height": 4,
                             "width": 12,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     }
                 ]
             },
             "id": 1067574392662629,
             "layout": {
-                "height": 5,
+                "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 67
+                "y": 73
             }
         }
     ]
