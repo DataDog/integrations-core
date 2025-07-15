@@ -363,13 +363,12 @@ class DatabasesData:
             index_name = str(row["name"])
             index_data = table_index_dict[table_name][index_name]
 
-            # in-memory table has no index stats apparently, so we skip them
-            if row["cardinality"] is None:
-                continue
-
             # Update index-level info
             index_data["name"] = index_name
-            index_data["cardinality"] = int(row["cardinality"])
+
+            # in-memory table BTREE indexes have no cardinality apparently, so we default to 0
+            # https://bugs.mysql.com/bug.php?id=58520
+            index_data["cardinality"] = int(row["cardinality"]) if row["cardinality"] is not None else 0
             index_data["index_type"] = str(row["index_type"])
             index_data["non_unique"] = bool(row["non_unique"])
             if row["expression"]:
