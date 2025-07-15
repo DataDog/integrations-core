@@ -1,1 +1,2 @@
-Fix an error when attempting to populate index information for in-memory table where the cardinality information would be null
+Fix preventing an error being raised when reading cardinality information for BTREE indexes on in-memory tables.
+They have apparently no cardinality, so we default to 0 instead of raising an error. See https://bugs.mysql.com/bug.php?id=58520
