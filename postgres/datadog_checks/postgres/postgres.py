@@ -131,8 +131,8 @@ class PostgreSql(AgentCheck):
             )
 
         # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
-        self._config = PostgresConfig(self)
-        validation_result = self._config.initialize(self.instance, self.init_config)
+        self._config = PostgresConfig(self, self.init_config)
+        validation_result = self._config.initialize(self.instance)
 
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
@@ -142,13 +142,9 @@ class PostgreSql(AgentCheck):
         self.health.submit_health_event(
             HealthEvent.INITIALIZATION,
             HealthCode.HEALTHY if validation_result.valid else HealthCode.UNHEALTHY,
-            metadata={
-                "config": self._config,
-                "init_config": self.init_config,
-                "agent_config": self.agentConfig,
-                "instance": self.instance,
-                "features": validation_result.features,
-            },
+            metadata={},
+            config=sanitize(self._config.__dict__),
+            features=validation_result.features,
         )
 
         # Abort initializing the check if the config is invalid
@@ -1127,3 +1123,10 @@ class PostgreSql(AgentCheck):
     def _update_tag_sets(self, tags):
         self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
         self.tags_without_db = list(set(self.tags_without_db) | set(tags))
+
+
+def sanitize(dict: dict):
+    sanitized = copy.deepcopy(dict)
+    sanitized['password'] = '***' if sanitized.get('password') else None
+    sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
+    return sanitized

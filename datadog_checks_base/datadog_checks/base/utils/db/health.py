@@ -47,10 +47,9 @@ class Health:
         """
         self.check.database_monitoring_health(
             {
-                'event_type': 'dbm-health',
                 'check_id': self.check.check_id,
                 'check_name': self.check.__class__.__name__,
-                'event_name': event_name,
+                'name': event_name,
                 'code': code,
                 'metadata': metadata or {},
                 **kwargs,

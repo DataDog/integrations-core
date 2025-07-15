@@ -57,7 +57,7 @@ def instance_collect_wal_metrics():
 
 
 def instance_data_directory():
-    return '/usr/local/pgsql/data'
+    return 'None'
 
 
 def instance_database_instance_collection_interval():
@@ -101,6 +101,7 @@ def instance_ignore_databases():
         'cloudsqladmin',
         'alloydbadmin',
         'alloydbmetadata',
+        'postgres',
     ]
 
 

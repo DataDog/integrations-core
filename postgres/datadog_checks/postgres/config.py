@@ -2,8 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+from __future__ import annotations
+
 from enum import Enum
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+from datadog_checks.postgres.config_models.defaults import instance_ignore_databases, instance_ignore_schemas_owned_by
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
@@ -12,30 +19,18 @@ from datadog_checks.base.utils.db.utils import get_agent_host_tags
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
 
-DEFAULT_IGNORE_DATABASES = [
-    'template0',
-    'template1',
-    'rdsadmin',
-    'azure_maintenance',
-    'cloudsqladmin',
-    'alloydbadmin',
-    'alloydbmetadata',
-    'postgres',
-]
-
-DEFAULT_IGNORED_SCHEMAS_OWNED_BY = ['rdsadmin', 'rds_superuser']
-
 
 class PostgresConfig:
     RATE = AgentCheck.rate
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, check):
+    def __init__(self, check: PostgreSql, init_config: dict):
         self.check = check
+        self.init_config = init_config
 
-    def initialize(self, instance, init_config):
-        # type: (dict, dict) -> ValidationResult
+    def initialize(self, instance):
+        # type: (dict) -> ValidationResult
         """
         Initialize the Postgres configuration.
         :param instance: dict
@@ -49,7 +44,9 @@ class PostgresConfig:
 
         self.exclude_hostname = instance.get("exclude_hostname", False)
         self.database_identifier = instance.get('database_identifier', {})
-        self.init_config = init_config
+        self.reported_hostname = instance.get('reported_hostname', '')
+
+        # Connection parameters
         self.host = instance.get('host', '')
         if not self.host:
             validation_result.add_error('Specify a Postgres host to connect to.')
@@ -60,42 +57,53 @@ class PostgresConfig:
         if not self.user:
             validation_result.add_error('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
-        self.dbname = instance.get('dbname', 'postgres')
-        self.reported_hostname = instance.get('reported_hostname', '')
-        self.dbstrict = is_affirmative(instance.get('dbstrict', False))
-        self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
+        # Database discovery
+        self.dbname = instance.get('dbname', 'postgres')
+        self.dbstrict = is_affirmative(instance.get('dbstrict', False))
         self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
         if self.discovery_config['enabled'] and self.dbname != 'postgres':
             validation_result.add_error(
                 "'dbname' parameter should not be set when `database_autodiscovery` is enabled."
                 "To monitor more databases, add them to the `database_autodiscovery` includelist."
             )
+        self.ignore_databases = instance.get('ignore_databases', instance_ignore_databases())
+        self.collect_default_database = is_affirmative(instance.get('collect_default_database', True))
+        if self.collect_default_database and 'postgres' in self.ignore_databases:
+            validation_result.add_warning(
+                'The `postgres` database cannot be ignored when `collect_default_database` is enabled.'
+            )
+        elif not self.collect_default_database:
+            self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
+        self.ignore_schemas_owned_by = instance.get('ignore_schemas_owned_by', instance_ignore_schemas_owned_by())
 
-        self.application_name = instance.get('application_name', 'datadog-agent')
-        if not self.application_name.isascii():
-            validation_result.add_error("Application name can include only ASCII characters: %s", self.application_name)
-
+        # Connection details
         self.query_timeout = int(instance.get('query_timeout', 5000))
         self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
-        self.relations = instance.get('relations', [])
-        if self.relations and not (self.dbname or self.discovery_config['enabled']):
-            validation_result.add_error(
-                '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
-            )
         self.max_connections = instance.get('max_connections', 30)
 
+        # SSL configuration
         ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
         else:
-            self.check.warning(f"Invalid ssl option '{ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'.")
+            warning = f"Invalid ssl option '{ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'."
+            self.check.warning(warning)
+            validation_result.add_warning(warning)
             self.ssl_mode = "allow"
-
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)
         self.ssl_key = instance.get('ssl_key', None)
         self.ssl_password = instance.get('ssl_password', None)
+
+        # Tags and metadata
+        self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
+        self.application_name = instance.get('application_name', 'datadog-agent')
+        if not self.application_name.isascii():
+            validation_result.add_error("Application name can include only ASCII characters: %s", self.application_name)
+
+        # Relation metrics
+        self.relations = instance.get('relations', [])
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_buffercache_metrics = is_affirmative(instance.get('collect_buffercache_metrics', False))
         self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
@@ -106,12 +114,22 @@ class PostgresConfig:
         self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', [])
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
-        self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
         self.data_directory = instance.get('data_directory', None)
-        self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
-        if is_affirmative(instance.get('collect_default_database', True)):
-            self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
-        self.ignore_schemas_owned_by = instance.get('ignore_schemas_owned_by', DEFAULT_IGNORED_SCHEMAS_OWNED_BY)
+        if self.collect_wal_metrics and not self.data_directory:
+            validation_result.add_error(
+                'The `data_directory` parameter must be set when `collect_wal_metrics` is enabled.'
+            )
+        self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
+        if self.relations and not (self.dbname or self.discovery_config['enabled']):
+            validation_result.add_error(
+                '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
+            )
+        validation_result.add_feature(
+            FeatureKey.RELATION_METRICS,
+            self.relations,
+            "Relation metrics requires a value for `relations` in the configuration." if not self.relations else None,
+        )
+
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
@@ -194,13 +212,20 @@ class PostgresConfig:
             self.statement_metrics_config.get('incremental_query_metrics', False)
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
-        self.service = instance.get('service') or init_config.get('service') or ''
+        self.service = instance.get('service') or self.init_config.get('service') or ''
 
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, self.init_config),
             additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
         )
+
+        # Add warnings for common extraneous values
+        if instance.get('empty_default_hostname'):
+            validation_result.add_warning(
+                'The `empty_default_hostname` option has no effect in the Postgres check.'
+                'Use the `exclude_hostname` option instead.'
+            )
 
         return validation_result
 
@@ -339,14 +364,12 @@ class FeatureKey(Enum):
     Enum representing the keys for features in the Postgres configuration.
     """
 
-    DATABASE_AUTODISCOVERY = 'database_autodiscovery'
-    COLLECT_BUFFERCACHE_METRICS = 'collect_buffercache_metrics'
-    COLLECT_FUNCTION_METRICS = 'collect_function_metrics'
-    COLLECT_COUNT_METRICS = 'collect_count_metrics'
-    COLLECT_ACTIVITY_METRICS = 'collect_activity_metrics'
-    COLLECT_CHECKSUM_METRICS = 'collect_checksum_metrics'
-    COLLECT_DATABASE_SIZE_METRICS = 'collect_database_size_metrics'
-    COLLECT_WAL_METRICS = 'collect_wal_metrics'
+    RELATION_METRICS = "relation_metrics"
+
+
+FeatureNames = {
+    FeatureKey.RELATION_METRICS: 'Relation Metrics',
+}
 
 
 class Feature:
@@ -354,16 +377,17 @@ class Feature:
     A simple class to represent a feature in the Postgres configuration.
     """
 
-    def __init__(self, key, name, enabled):
-        # type: (FeatureKey, str, bool) -> None
+    def __init__(self, key, name, enabled, description=None):
         """
         :param key: The unique key for the feature.
         :param name: The name of the feature.
         :param enabled: Whether the feature is enabled.
+        :param description: Optional description of the feature's status.
         """
         self.key = key
         self.name = name
         self.enabled = enabled
+        self.description = description
 
 
 class ValidationResult:
@@ -372,21 +396,23 @@ class ValidationResult:
     It can be extended in the future to include more details about the validation.
     """
 
-    def __init__(self, valid=True, features: list[Feature] = None, errors: list[ConfigurationError] = None):
+    def __init__(self, valid=True):
         """
         :param valid: Whether the validation passed.
         :param features: A list of features that were validated.
         """
         self.valid = valid
-        self.features = features or []
-        self.errors = errors or []
+        self.features = []
+        self.errors = []
+        self.warnings = []
 
-    def add_feature(self, feature: Feature):
+    def add_feature(self, feature: FeatureKey, enabled=True, description: Optional[str] = None):
         """
         Add a feature to the validation result.
         :param feature: The feature to add.
+        :param enabled: Whether the feature is enabled.
         """
-        self.features.append(feature)
+        self.features.append(Feature(feature, FeatureNames[feature], enabled, description))
 
     def add_error(self, error: str):
         """
@@ -395,3 +421,10 @@ class ValidationResult:
         """
         self.errors.append(ConfigurationError(error))
         self.valid = False
+
+    def add_warning(self, warning: str):
+        """
+        Add a warning to the validation result.
+        :param warning: The warning message to add.
+        """
+        self.warnings.append(warning)
