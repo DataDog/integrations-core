@@ -1,4 +1,4 @@
-FROM nginx:1.17.3
+FROM nginx:1.20.2
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -15,7 +15,7 @@ RUN apt-get update -y -qq && apt-get install -y --no-install-recommends \
   git
 
 RUN cd /usr/src && mkdir nginx \
-  && curl -kfSL https://nginx.org/download/nginx-1.17.3.tar.gz -o nginx.tar.gz \
+  && curl -kfSL https://nginx.org/download/nginx-1.20.2.tar.gz -o nginx.tar.gz \
   && tar -xzf nginx.tar.gz -C nginx --strip-components=1
 
 RUN cd /usr/src/nginx \
