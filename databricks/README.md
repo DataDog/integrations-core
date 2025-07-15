@@ -45,7 +45,7 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 7. On the **Configure** tab, click **Add Databricks Workspace**.
 9. Enter a workspace name, your Databricks workspace URL, account ID, and the client ID and secret you generated.
 10. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
-<!-- xxx tab xxx -->
+<!-- xxz tab xxx -->
 
 <!-- xxx tab "Use a Personal Access Token (Legacy)" xxx -->
 <div class="alert alert-warning">This option is only available for workspaces created before July 7, 2025. New workspaces must authenticate using OAuth.</div>
@@ -63,9 +63,9 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 4. On the **Configure** tab, click **Add Databricks Workspace**.
 5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
 6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
-<!-- xxx tab xxx -->
+<!-- xxz tab xxx -->
 
-<!-- xxx tabs xxx -->
+<!-- xxz tabs xxx -->
 
 #### Reference Table Configuration
 1. Configure a workspace in Datadog's Databricks integration tile.
