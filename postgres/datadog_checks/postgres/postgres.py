@@ -8,9 +8,9 @@ import os
 from string import Template
 from time import time
 
-from postgres.datadog_checks.postgres.health import HealthEvent, PostgresHealth
 import psycopg
 from cachetools import TTLCache
+from postgres.datadog_checks.postgres.health import HealthEvent, PostgresHealth
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
@@ -129,7 +129,26 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
+
+        # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
         self._config = PostgresConfig(self.instance, self.init_config, self)
+        validation_result = self._config.initialize(self.instance, self.init_config)
+        self.health.submit_health_event(
+            HealthEvent.INITIALIZATION,
+            HealthCode.HEALTHY if validation_result.valid else HealthCode.UNHEALTHY,
+            metadata={
+                "config": self._config,
+                "init_config": self.init_config,
+                "agent_config": self.agentConfig,
+                "instance": self.instance,
+                "features": validation_result.features,
+            },
+        )
+
+        if validation_result.valid is False:
+            self.log.error("Configuration validation failed: %s", validation_result.errors)
+            raise validation_result.errors[0]
+
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         self.add_core_tags()
@@ -163,10 +182,6 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
-
-        # Validate config and submit initialization event
-        self.health.submit_health_event(HealthEvent.INITIALIZATION, HealthCode.HEALTHY)
-
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:

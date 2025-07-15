@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+from enum import Enum
 from typing import Optional
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -30,7 +31,21 @@ class PostgresConfig:
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, instance, init_config, check):
+    def __init__(self, check):
+        self.check = check
+
+    def initialize(self, instance, init_config):
+        # type: (dict, dict) -> ValidationResult
+        """
+        Initialize the Postgres configuration.
+        :param instance: dict
+            The instance configuration for the Postgres check.
+        :param init_config: dict
+            The init_config for the Postgres check.
+        :return: ConfigResult
+            The result of the configuration initialization.
+        """
+
         self.exclude_hostname = instance.get("exclude_hostname", False)
         self.database_identifier = instance.get('database_identifier', {})
         self.init_config = init_config
@@ -73,7 +88,7 @@ class PostgresConfig:
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
         else:
-            check.warning(f"Invalid ssl option '{ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'.")
+            self.check.warning(f"Invalid ssl option '{ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'.")
             self.ssl_mode = "allow"
 
         self.ssl_cert = instance.get('ssl_cert', None)
@@ -314,3 +329,91 @@ class PostgresConfig:
             return init_config_propagate_agent_tags
         # if neither the instance nor the init_config has set the value, return False
         return False
+
+    def validate(self):
+        # type: () -> ValidationResult
+        """
+        Validate the configuration of the Postgres check.
+        """
+
+        result = ValidationResult(valid=True, features=[])
+
+        if not self.host:
+            raise ConfigurationError('Postgres host must be specified.')
+        if not self.user:
+            raise ConfigurationError('Postgres user must be specified.')
+        if not isinstance(self.port, int):
+            raise ConfigurationError('Postgres port must be an integer.')
+        if self.ssl_mode not in SSL_MODES:
+            raise ConfigurationError(f"Invalid ssl mode '{self.ssl_mode}', should be one of {SSL_MODES}.")
+        if self.query_timeout < 0:
+            raise ConfigurationError('Query timeout must be a non-negative integer.')
+        if self.idle_connection_timeout < 0:
+            raise ConfigurationError('Idle connection timeout must be a non-negative integer.')
+        return result
+
+
+class FeatureKey(Enum):
+    """
+    Enum representing the keys for features in the Postgres configuration.
+    """
+
+    DATABASE_AUTODISCOVERY = 'database_autodiscovery'
+    COLLECT_BUFFERCACHE_METRICS = 'collect_buffercache_metrics'
+    COLLECT_FUNCTION_METRICS = 'collect_function_metrics'
+    COLLECT_COUNT_METRICS = 'collect_count_metrics'
+    COLLECT_ACTIVITY_METRICS = 'collect_activity_metrics'
+    COLLECT_CHECKSUM_METRICS = 'collect_checksum_metrics'
+    COLLECT_DATABASE_SIZE_METRICS = 'collect_database_size_metrics'
+    COLLECT_WAL_METRICS = 'collect_wal_metrics'
+
+
+class Feature:
+    """
+    A simple class to represent a feature in the Postgres configuration.
+    """
+
+    def __init__(self, key, name, enabled):
+        # type: (FeatureKey, str, bool) -> None
+        """
+        :param key: The unique key for the feature.
+        :param name: The name of the feature.
+        :param enabled: Whether the feature is enabled.
+        """
+        self.key = key
+        self.name = name
+        self.enabled = enabled
+
+
+class ValidationResult:
+    """
+    A simple class to represent the result of a validation.
+    It can be extended in the future to include more details about the validation.
+    """
+
+    def __init__(self, valid=True, features=None, errors=None):
+        # type: (bool, list[Feature]) -> None
+        """
+        :param valid: Whether the validation passed.
+        :param features: A list of features that were validated.
+        """
+        self.valid = valid
+        self.features = features or []
+        self.errors = errors or []
+
+    def add_feature(self, feature):
+        # type: (Feature) -> None
+        """
+        Add a feature to the validation result.
+        :param feature: The feature to add.
+        """
+        self.features.append(feature)
+
+    def add_error(self, error):
+        # type: (str) -> None
+        """
+        Add an error to the validation result.
+        :param error: The error message to add.
+        """
+        self.errors.append(error)
+        self.valid = False

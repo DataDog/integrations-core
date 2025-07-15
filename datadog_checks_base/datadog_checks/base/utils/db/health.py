@@ -1,6 +1,9 @@
+# This is the base implementation of the Agent Health reporting system.
+# It provides a structure for health events and codes that can be extended by specific checks.
+
+
 from enum import Enum
 
-from datadog_checks.base.checks.base import AgentCheck
 
 class HealthEvent(Enum):
     """
@@ -9,6 +12,7 @@ class HealthEvent(Enum):
 
     INITIALIZATION = 'initialization'
 
+
 class HealthCode(Enum):
     """
     Enum representing the health codes for database monitoring.
@@ -16,14 +20,9 @@ class HealthCode(Enum):
 
     HEALTHY = 'healthy'
     UNHEALTHY = 'unhealthy'
-    UNKNOWN = 'unknown'
-    NOT_CONFIGURED = 'not_configured'
-    NOT_SUPPORTED = 'not_supported'
-    NOT_COLLECTING = 'not_collecting'
-    NOT_ENABLED = 'not_enabled'
 
 
-class Health():
+class Health:
     def __init__(self, check):
         # type: (AgentCheck) -> None
         """
@@ -61,21 +60,21 @@ class Health():
 
 # Existing diagnosis model
 
-    #     // run-time (pass, fail etc)
-    #     Result DiagnosisResult
-    #     // static-time (meta typically)
-    #     Name string
-    #     // run-time (actual diagnosis consumable by a user)
-    #     Diagnosis string
+#     // run-time (pass, fail etc)
+#     Result DiagnosisResult
+#     // static-time (meta typically)
+#     Name string
+#     // run-time (actual diagnosis consumable by a user)
+#     Diagnosis string
 
-    #     // --------------------------
-    #     // optional fields
+#     // --------------------------
+#     // optional fields
 
-    #     // static-time (meta typically)
-    #     Category string
-    #     // static-time (meta typically, description of what being tested)
-    #     Description string
-    #     // run-time (what can be done of what docs need to be consulted to address the issue)
-    #     Remediation string
-    #     // run-time
-    #     RawError error
+#     // static-time (meta typically)
+#     Category string
+#     // static-time (meta typically, description of what being tested)
+#     Description string
+#     // run-time (what can be done of what docs need to be consulted to address the issue)
+#     Remediation string
+#     // run-time
+#     RawError error
