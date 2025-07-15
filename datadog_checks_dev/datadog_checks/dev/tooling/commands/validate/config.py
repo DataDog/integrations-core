@@ -7,24 +7,28 @@ import os
 import click
 import yaml
 
-from ....fs import basepath, file_exists, path_exists, path_join, read_file, write_file
-from ...config_validator.validator import validate_config
-from ...config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
-from ...configuration import ConfigSpec
-from ...configuration.consumers import ExampleConsumer
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
-from ..console import (
+from datadog_checks.dev.fs import basepath, file_exists, path_exists, path_join, read_file, write_file
+from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
     annotate_error,
-    echo_debug,
     echo_failure,
     echo_info,
     echo_success,
     echo_waiting,
     echo_warning,
+)
+from datadog_checks.dev.tooling.config_validator.validator import validate_config
+from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
+from datadog_checks.dev.tooling.configuration import ConfigSpec
+from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import (
+    complete_valid_checks,
+    get_config_files,
+    get_data_directory,
+    get_version_string,
 )
 
 FILE_INDENT = ' ' * 8
@@ -60,14 +64,18 @@ def config(ctx, check, sync, verbose):
 
     echo_waiting(f'Validating default configuration files for {len(checks)} checks...')
     for check in checks:
+        if check in (
+            'ddev',
+            'datadog_checks_dev',
+            'datadog_checks_base',
+            'datadog_checks_dependency_provider',
+            'datadog_checks_downloader',
+        ):
+            echo_info(f'Skipping {check}, it does not need an Agent-level config.')
+            continue
         check_display_queue = []
 
-        manifest = Manifest.load_manifest(check)
-        if not manifest:
-            echo_debug(f"Skipping validation for check: {check}; can't process manifest")
-            continue
-
-        spec_file_path = manifest.get_config_spec()
+        spec_file_path = path_join(get_root(), check, 'assets', 'configuration', 'spec.yaml')
         if not file_exists(spec_file_path):
             example_location = get_data_directory(check)
 
@@ -95,11 +103,9 @@ def config(ctx, check, sync, verbose):
 
         # source is the default file name
         if check == 'agent':
-            display_name = 'Datadog Agent'
             source = 'datadog'
             version = None
         else:
-            display_name = manifest.get_display_name()
             source = check
             version = get_version_string(check)
 
@@ -118,12 +124,6 @@ def config(ctx, check, sync, verbose):
             for error in spec.errors:
                 check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
         else:
-            if spec.data['name'] != display_name:
-                files_failed[spec_file_path] = True
-                message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
-                check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
-                annotate_error(spec_file_path, message)
-
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
             for example_file, (contents, errors) in example_consumer.render().items():

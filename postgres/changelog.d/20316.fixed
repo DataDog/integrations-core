@@ -1,1 +1,0 @@
-fix Postgresql replication stat metrics to include `replication.` prefix

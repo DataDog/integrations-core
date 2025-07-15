@@ -6,8 +6,9 @@ from __future__ import annotations
 import logging
 import os
 import re
-import ssl
+import socket
 import warnings
+from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from urllib.parse import quote, urlparse, urlunparse
@@ -21,14 +22,14 @@ from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils import _http_utils
 
-from ..config import is_affirmative
-from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
-from .network import CertAdapter, create_socket_connection
 from .time import get_timestamp
+from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -53,10 +54,6 @@ DEFAULT_EXPIRATION = 300
 # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
-
-# https://github.com/python/cpython/blob/ef516d11c1a0f885dba0aba8cf5366502077cdd4/Lib/ssl.py#L158-L165
-DEFAULT_PROTOCOL_VERSIONS = {'SSLv3', 'TLSv1.2', 'TLSv1.3'}
-SUPPORTED_PROTOCOL_VERSIONS = {'SSLv3', 'TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3'}
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -83,17 +80,10 @@ STANDARD_FIELDS = {
     'read_timeout': None,
     'request_size': DEFAULT_CHUNK_SIZE,
     'skip_proxy': False,
-    'tls_ca_cert': None,
-    'tls_cert': None,
-    'tls_use_host_header': False,
-    'tls_ignore_warning': False,
-    'tls_private_key': None,
-    'tls_protocols_allowed': DEFAULT_PROTOCOL_VERSIONS,
-    'tls_verify': True,
-    'tls_ciphers': 'ALL',
     'timeout': DEFAULT_TIMEOUT,
     'use_legacy_auth_encoding': True,
     'username': None,
+    **TlsConfig().__dict__,  # This will include all TLS-related fields
 }
 # For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
@@ -113,6 +103,98 @@ PROXY_SETTINGS_DISABLED = {
 KERBEROS_STRATEGIES = {}
 
 UDS_SCHEME = 'unix'
+
+
+def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
+    """See: https://github.com/python/cpython/blob/40ee9a3640d702bce127e9877c82a99ce817f0d1/Lib/socket.py#L691"""
+    err = None
+    try:
+        for res in socket.getaddrinfo(hostname, port, 0, sock_type):
+            af, socktype, proto, canonname, sa = res
+            sock = None
+            try:
+                sock = socket.socket(af, socktype, proto)
+                sock.settimeout(timeout)
+                sock.connect(sa)
+                # Break explicitly a reference cycle
+                err = None
+                return sock
+
+            except socket.error as _:
+                err = _
+                if sock is not None:
+                    sock.close()
+
+        if err is not None:
+            raise err
+        else:
+            raise socket.error('No valid addresses found, try checking your IPv6 connectivity')  # noqa: G
+    except socket.gaierror as e:
+        err_code, message = e.args
+        if err_code == socket.EAI_NODATA or err_code == socket.EAI_NONAME:
+            raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
+
+        raise
+
+
+def get_tls_config_from_options(new_options):
+    '''Extract TLS configuration from request options.'''
+    tls_config = {}
+    verify = new_options.get('verify')
+    cert = new_options.get('cert')
+
+    if isinstance(verify, str):
+        tls_config["tls_verify"] = True
+        tls_config["tls_ca_cert"] = verify
+    elif isinstance(verify, bool):
+        tls_config["tls_verify"] = verify
+    elif verify is not None:
+        raise TypeError(
+            'Unexpected type for `verify` option. Expected bool or str, got {}.'.format(type(verify).__name__)
+        )
+
+    if isinstance(cert, str):
+        tls_config["tls_cert"] = cert
+    elif isinstance(cert, tuple) or isinstance(cert, list):
+        if len(cert) != 2:
+            raise TypeError(
+                'Unexpected length for `cert` option. Expected a tuple of length 2, got {}.'.format(len(cert))
+            )
+        tls_config["tls_cert"] = cert[0]
+        tls_config["tls_private_key"] = cert[1]
+    elif cert is not None:
+        raise TypeError('Unexpected type for `cert` option. Expected str or tuple, got {}.'.format(type(cert).__name__))
+    return tls_config
+
+
+class _SSLContextAdapter(requests.adapters.HTTPAdapter):
+    """
+    This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
+    """
+
+    def __init__(self, ssl_context, **kwargs):
+        self.ssl_context = ssl_context
+        super().__init__()
+
+    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        pool_kwargs['ssl_context'] = self.ssl_context
+        return super().init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
+
+    def cert_verify(self, conn, url, verify, cert):
+        """
+        This method is overridden to ensure that the SSL context
+        is configured on the integration side.
+        """
+        pass
+
+    def build_connection_pool_key_attributes(self, request, verify, cert=None):
+        """
+        This method is overridden according to the requests library's
+        expectations to ensure that the custom SSL context is passed to urllib3.
+        """
+        # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
+        host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
+        return host_params, {"ssl_context": self.ssl_context}
 
 
 class ResponseWrapper(ObjectProxy):
@@ -141,6 +223,7 @@ class ResponseWrapper(ObjectProxy):
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
         'log_requests',
@@ -152,7 +235,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
-        'tls_ciphers_allowed',
+        'tls_config',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
@@ -254,7 +337,8 @@ class RequestsWrapper(object):
 
         allow_redirects = is_affirmative(config['allow_redirects'])
 
-        # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
+        # For TLS verification, we now rely on the TLS context wrapper
+        # but still need to set verify for requests compatibility
         verify = True
         if isinstance(config['tls_ca_cert'], str):
             verify = config['tls_ca_cert']
@@ -347,13 +431,8 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
-        ciphers = config.get('tls_ciphers')
-        if ciphers:
-            if 'ALL' in ciphers:
-                updated_ciphers = "ALL"
-            else:
-                updated_ciphers = ":".join(ciphers)
-        self.tls_ciphers_allowed = updated_ciphers
+        self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
+        self._https_adapters = {}
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -378,7 +457,7 @@ class RequestsWrapper(object):
 
     def _request(self, method, url, options):
         if self.log_requests:
-            self.logger.debug(u'Sending %s request to %s', method.upper(), url)
+            self.logger.debug('Sending %s request to %s', method.upper(), url)
 
         if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
             options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
@@ -387,10 +466,10 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
-        new_options = self.populate_options(options)
+        new_options = ChainMap(options, self.options)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.debug(u'An unverified HTTPS request is being made to %s', url)
+            self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         extra_headers = options.pop('extra_headers', None)
         if extra_headers is not None:
@@ -406,17 +485,18 @@ class RequestsWrapper(object):
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
-            if persist:
-                request_method = getattr(self.session, method)
-            else:
-                request_method = getattr(requests, method)
+
+            session = self.session if persist else self._create_session()
+            if url.startswith('https'):
+                self._mount_https_adapter(session, ChainMap(get_tls_config_from_options(new_options), self.tls_config))
+            request_method = getattr(session, method)
 
             if self.auth_token_handler:
                 try:
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
                     response.raise_for_status()
                 except Exception as e:
-                    self.logger.debug(u'Renewing auth token, as an error occurred: %s', e)
+                    self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
@@ -435,29 +515,12 @@ class RequestsWrapper(object):
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
                 raise e
-            # retry the connection via session object
-            certadapter = CertAdapter(certs=certs)
-            if not persist:
-                session = requests.Session()
-                for option, value in self.options.items():
-                    setattr(session, option, value)
-            else:
-                session = self.session
+            session = self.session if persist else self._create_session()
+            if parsed_url.scheme == "https":
+                self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
             request_method = getattr(session, method)
-            session.mount(url, certadapter)
             response = request_method(url, **new_options)
         return response
-
-    def populate_options(self, options):
-        # Avoid needless dictionary update if there are no options
-        if not options:
-            return self.options
-
-        for option, value in self.options.items():
-            # Make explicitly set options take precedence
-            options.setdefault(option, value)
-
-        return options
 
     def fetch_intermediate_certs(self, hostname, port=443):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
@@ -471,9 +534,7 @@ class RequestsWrapper(object):
 
         with sock:
             try:
-                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                context.verify_mode = ssl.CERT_NONE
-                context.set_ciphers(self.tls_ciphers_allowed)
+                context = create_ssl_context(ChainMap({'tls_verify': False}, self.tls_config))
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -521,7 +582,7 @@ class RequestsWrapper(object):
 
             # Assume HTTP for now
             try:
-                response = requests.get(uri)  # SKIP_HTTP_VALIDATION
+                response = self.get(uri)  # SKIP_HTTP_VALIDATION
             except Exception as e:
                 self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
                 continue
@@ -532,23 +593,29 @@ class RequestsWrapper(object):
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
 
+    def _create_session(self):
+        """
+        Initializes requests.Session and configures it with a UDS Adapter and options coming from user's config.
+
+        We leave it to callers to mount any HTTPS adapters if necessary.
+        """
+        session = requests.Session()
+        # Enable Unix Domain Socket (UDS) support.
+        # See: https://github.com/msabramo/requests-unixsocket
+        session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
+
+        # Options cannot be passed to the requests.Session init method
+        # but can be set as attributes on an initialized Session instance.
+        for option, value in self.options.items():
+            setattr(session, option, value)
+        return session
+
     @property
     def session(self):
         if self._session is None:
-            self._session = requests.Session()
-
-            # Enables HostHeaderSSLAdapter
-            # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
-            if self.tls_use_host_header:
-                self._session.mount('https://', _http_utils.HostHeaderSSLAdapter())
-            # Enable Unix Domain Socket (UDS) support.
-            # See: https://github.com/msabramo/requests-unixsocket
-            self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
-
-            # Attributes can't be passed to the constructor
-            for option, value in self.options.items():
-                setattr(self._session, option, value)
-
+            # Create a new session if it doesn't exist and mount default HTTPS adapter.
+            self._session = self._create_session()
+            self._mount_https_adapter(self._session, self.tls_config)
         return self._session
 
     def handle_auth_token(self, **request):
@@ -562,6 +629,38 @@ class RequestsWrapper(object):
             # A persistent connection was never used or an error occurred during instantiation
             # before _session was ever defined (since __del__ executes even if __init__ fails).
             pass
+
+    def _mount_https_adapter(self, session, tls_config):
+        # Reuse existing adapter if it matches the TLS config
+        tls_config_key = TlsConfig(**tls_config)
+        if tls_config_key in self._https_adapters:
+            session.mount('https://', self._https_adapters[tls_config_key])
+            return
+
+        context = create_ssl_context(tls_config)
+        # Enables HostHeaderSSLAdapter if needed
+        # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
+        if self.tls_use_host_header:
+            # Create a combined adapter that supports both TLS context and host headers
+            class SSLContextHostHeaderAdapter(_SSLContextAdapter, _http_utils.HostHeaderSSLAdapter):
+                def __init__(self, ssl_context, **kwargs):
+                    _SSLContextAdapter.__init__(self, ssl_context, **kwargs)
+                    _http_utils.HostHeaderSSLAdapter.__init__(self, **kwargs)
+
+                def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+                    # Use TLS context from wrapper
+                    pool_kwargs['ssl_context'] = self.ssl_context
+                    return _http_utils.HostHeaderSSLAdapter.init_poolmanager(
+                        self, connections, maxsize, block=block, **pool_kwargs
+                    )
+
+            https_adapter = SSLContextHostHeaderAdapter(context)
+        else:
+            https_adapter = _SSLContextAdapter(context)
+
+        # Cache the adapter for reuse
+        self._https_adapters[tls_config_key] = https_adapter
+        session.mount('https://', https_adapter)
 
 
 @contextmanager

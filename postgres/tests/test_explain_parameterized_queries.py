@@ -4,7 +4,7 @@
 
 from unittest import mock
 
-import psycopg2
+import psycopg
 import pytest
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -51,7 +51,9 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, query, e
     if check.version < V12:
         return
 
-    plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(DB_NAME, query, query, query)
+    plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
+        DB_NAME, query, query, "7231596c8b5536d1"
+    )
     assert plan_dict is not None
     assert explain_err_code == expected_explain_err_code
     assert err is None
@@ -111,12 +113,15 @@ def test_explain_parameterized_queries_version_below_12(integration_check, dbm_i
         return
 
     plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
-        DB_NAME, "SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1", ""
+        DB_NAME,
+        "SELECT * FROM pg_settings WHERE name = $1",
+        "SELECT * FROM pg_settings WHERE name = $1",
+        "7231596c8b5536d1",
     )
     assert plan_dict is None
     assert explain_err_code == DBExplainError.parameterized_query
     assert err is not None
-    assert err == "<class 'psycopg2.errors.UndefinedParameter'>"
+    assert err == "<class 'psycopg.errors.UndefinedParameter'>"
 
 
 @pytest.mark.integration
@@ -130,15 +135,18 @@ def test_explain_parameterized_queries_create_prepared_statement_exception(integ
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._create_prepared_statement',
-        side_effect=psycopg2.errors.DatabaseError("unexpected exception"),
+        side_effect=psycopg.errors.DatabaseError("unexpected exception"),
     ):
         plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
-            DB_NAME, "SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1", ""
+            DB_NAME,
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "7231596c8b5536d1",
         )
         assert plan_dict is None
         assert explain_err_code == DBExplainError.failed_to_explain_with_prepared_statement
         assert err is not None
-        assert err == "<class 'psycopg2.DatabaseError'>"
+        assert err == "<class 'psycopg.DatabaseError'>"
 
 
 @pytest.mark.integration
@@ -152,14 +160,16 @@ def test_explain_parameterized_queries_explain_prepared_statement_exception(inte
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._explain_prepared_statement',
-        side_effect=psycopg2.errors.DatabaseError("unexpected exception"),
+        side_effect=psycopg.errors.DatabaseError("unexpected exception"),
     ):
         query = "SELECT * FROM pg_settings WHERE name = $1"
-        plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(DB_NAME, query, query, "")
+        plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
+            DB_NAME, query, query, "7231596c8b5536d1"
+        )
         assert plan_dict is None
         assert explain_err_code == DBExplainError.failed_to_explain_with_prepared_statement
         assert err is not None
-        assert err == "<class 'psycopg2.DatabaseError'>"
+        assert err == "<class 'psycopg.DatabaseError'>"
         # check that we deallocated the prepared statement after explaining
         rows = check.statement_samples._explain_parameterized_queries._execute_query_and_fetch_rows(
             DB_NAME,
@@ -184,7 +194,10 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
         return_value=None,
     ):
         plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
-            DB_NAME, "SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1", ""
+            DB_NAME,
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "SELECT * FROM pg_settings WHERE name = $1",
+            "7231596c8b5536d1",
         )
         assert plan_dict is None
         assert explain_err_code == DBExplainError.no_plan_returned_with_prepared_statement
@@ -205,7 +218,6 @@ def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._get_number_of_parameters_for_prepared_statement',
         return_value=0,
     ):
-
         prepared_statement_query = (
             check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
                 DB_NAME, test_query_signature
@@ -228,7 +240,6 @@ def test_generate_prepared_statement_query_three_parameters(integration_check, d
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._get_number_of_parameters_for_prepared_statement',
         return_value=3,
     ):
-
         prepared_statement_query = (
             check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
                 DB_NAME, test_query_signature

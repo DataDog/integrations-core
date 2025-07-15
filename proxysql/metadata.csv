@@ -1,5 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 proxysql.active_transactions,gauge,,transaction,,The number of client connections currently processing a transaction.,0,proxysql,active_transactions,
+proxysql.all_backends.count,gauge,,node,,"The number of all MySQL servers, including whether they are online or not.",0,proxysql,mysql_backends_count,
 proxysql.backend.query_time_pct,gauge,,percent,,Time spent (as a percentage of total time) making network calls to communicate with the backends.,-1,proxysql,backend_query_time,
 proxysql.backends.count,gauge,,node,,Number of mysql servers connected.,0,proxysql,mysql_backends_connected_count,
 proxysql.client.connections_aborted,gauge,,connection,second,Client failed or improperly closed connections per second.,-1,proxysql,client_connections_failed,

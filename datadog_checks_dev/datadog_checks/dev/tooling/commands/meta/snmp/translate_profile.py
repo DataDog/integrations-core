@@ -6,7 +6,8 @@ import os
 import click
 import yaml
 
-from ...console import CONTEXT_SETTINGS
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS
+
 from .constants import MIB_SOURCE_URL
 
 

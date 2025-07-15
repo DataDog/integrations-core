@@ -52,9 +52,10 @@ class ApiV7(Api):
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
         if len(discovered_clusters) > 0:
-            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor, raising_submitter(
-                executor
-            ) as submit:
+            with (
+                ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor,
+                raising_submitter(executor) as submit,
+            ):
                 for pattern, cluster_name, item, cluster_config in discovered_clusters:
                     self._log.debug(
                         "Discovered cluster: [pattern:%s, cluster_name:%s, config:%s]",
@@ -136,9 +137,10 @@ class ApiV7(Api):
         # Use len(discovered_hosts) * 4 workers since
         # for each host, we are executing 4 tasks in parallel.
         if len(discovered_hosts) > 0:
-            with ThreadPoolExecutor(max_workers=len(discovered_hosts) * 4) as executor, raising_submitter(
-                executor
-            ) as submit:
+            with (
+                ThreadPoolExecutor(max_workers=len(discovered_hosts) * 4) as executor,
+                raising_submitter(executor) as submit,
+            ):
                 for pattern, key, item, config in discovered_hosts:
                     self._log.debug(
                         "discovered host: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config

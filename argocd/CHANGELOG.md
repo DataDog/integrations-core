@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2025-07-10
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+## 3.4.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Add functionality to collect metrics from [commit server](https://argo-cd.readthedocs.io/en/latest/operator-manual/metrics/#commit-server-metrics) ([#20412](https://github.com/DataDog/integrations-core/pull/20412))
+
 ## 3.3.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

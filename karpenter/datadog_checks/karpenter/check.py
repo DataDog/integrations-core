@@ -12,7 +12,6 @@ class KarpenterCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'karpenter'
 
     def __init__(self, name, init_config, instances=None):
-
         super(KarpenterCheck, self).__init__(
             name,
             init_config,
