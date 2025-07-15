@@ -363,6 +363,10 @@ class DatabasesData:
             index_name = str(row["name"])
             index_data = table_index_dict[table_name][index_name]
 
+            # in-memory table has no index stats apparently, so we skip them
+            if row["cardinality"] is None:
+                continue
+
             # Update index-level info
             index_data["name"] = index_name
             index_data["cardinality"] = int(row["cardinality"])
