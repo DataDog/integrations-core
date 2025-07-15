@@ -94,6 +94,8 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.flowcontrol_rejected_requests_total',
         NAMESPACE + '.flowcontrol_current_inqueue_requests',
         NAMESPACE + '.flowcontrol_dispatched_requests_total',
+        NAMESPACE + '.flowcontrol_request_wait_duration_seconds.sum',
+        NAMESPACE + '.flowcontrol_request_wait_duration_seconds.count',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
