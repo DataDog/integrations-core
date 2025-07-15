@@ -3,10 +3,16 @@
 
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datadog_checks.base import AgentCheck
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 
 from enum import Enum
@@ -40,7 +46,7 @@ class Health:
         """
         self.check = check
 
-    def submit_health_event(self, name: HealthEvent, status: HealthStatus, **kwargs):
+    def submit_health_event(self, name: HealthEvent, status: HealthStatus, tags: list[str] = None, **kwargs):
         """
         Submit a health event to the aggregator.
 
@@ -48,15 +54,21 @@ class Health:
             The name of the health event.
         :param status: HealthStatus
             The health status to submit.
-
+        :param tags: list of str
+            Tags to associate with the health event.
         :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
         self.check.database_monitoring_health(
             {
+                'timestamp': time.time() * 1000,
+                'version': 1,
                 'check_id': self.check.check_id,
-                'check_name': self.check.__class__.__name__,
+                'category': self.check.__class__.__name__,
                 'name': name,
                 'status': status,
+                'tags': tags or [],
+                'ddagentversion': datadog_agent.get_version(),
+                'ddagenthostname': datadog_agent.get_hostname(),
                 'data': {**kwargs},
             }
         )
