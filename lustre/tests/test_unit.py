@@ -270,6 +270,10 @@ def test_extract_tags_from_param(mock_lustre_commands):
         )
         assert tags == ['device_name:lustre-MDT0000', 'nid:172.31.16.218@tcp']
 
+        # Test with malformed IP
+        tags = check._extract_tags_from_param('mdt.*.stats', 'mdt.172.malformed.16.218@tcp.stats', ('nid',))
+        assert tags == []
+
         # Test with no wildcards
         tags = check._extract_tags_from_param('mds.MDS.mdt.stats', 'mds.MDS.mdt.stats', ())
         assert tags == []
