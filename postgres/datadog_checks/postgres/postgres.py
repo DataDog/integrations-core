@@ -14,7 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
-from datadog_checks.base.utils.db.health import HealthCode
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -170,7 +170,7 @@ class PostgreSql(AgentCheck):
         # Placeholder event, to be enhanced later
         self.health.submit_health_event(
             HealthEvent.INITIALIZATION,
-            HealthCode.HEALTHY,
+            HealthStatus.OK,
             config=sanitize(self._config.__dict__),
             features=[],
         )
