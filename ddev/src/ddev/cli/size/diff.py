@@ -27,6 +27,7 @@ from .utils.common_funcs import (
     get_valid_versions,
     plot_treemap,
     print_table,
+    send_metrics_to_dd,
 )
 
 console = Console(stderr=True)
@@ -38,6 +39,8 @@ MINIMUM_LENGTH_COMMIT = 7
 @click.argument("first_commit")
 @click.argument("second_commit")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
+@click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
@@ -49,6 +52,8 @@ def diff(
     compressed: bool,
     format: list[str],
     show_gui: bool,
+    to_dd_org: str,
+    to_dd_key: str,
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -119,6 +124,10 @@ def diff(
                     )
                 if format:
                     export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
+                if to_dd_org or to_dd_key:
+                    send_metrics_to_dd(
+                        app, modules_plat_ver, to_dd_org, to_dd_key, compressed, "diff", [first_commit, second_commit]
+                    )
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
