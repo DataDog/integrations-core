@@ -173,6 +173,7 @@ class MySQLMetadata(DBMAsyncJob):
             settings = [dict(row) for row in rows]
         event = {
             "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
             "dbms": "mysql",
             "kind": "mysql_variables",
