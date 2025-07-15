@@ -7,11 +7,7 @@ if TYPE_CHECKING:
 
 from enum import Enum
 
-from datadog_checks.base.utils.db.health import Health, HealthCode, HealthEvent
-
-
-class PostgresHealthCode(Enum):
-    NOOP = 'noop'
+from datadog_checks.base.utils.db.health import Health, HealthEvent, HealthStatus
 
 
 class PostgresHealthEvent(Enum):
@@ -36,26 +32,22 @@ class PostgresHealth(Health):
 
     def submit_health_event(
         self,
-        event_name: HealthEvent | PostgresHealthEvent,
-        code: HealthCode | PostgresHealthCode,
-        metadata=None,
+        name: HealthEvent | PostgresHealthEvent,
+        status: HealthStatus,
         **kwargs,
     ):
         """
         Submit a health event to the aggregator.
 
-        :param event_name: PostgresHealthEvent
+        :param name: PostgresHealthEvent
             The name of the health event.
-        :param code: HealthCode
-            The health code to submit.
-        :param metadata: dict, optional
-            Additional metadata to include with the health event.
+        :param status: HealthStatus
+            The health status to submit.
         :param kwargs: Additional keyword arguments to include in the event.
         """
         super().submit_health_event(
-            event_name,
-            code,
-            metadata,
+            name,
+            status,
             # If we have an error parsing the config we may not have tags yet
             tags=self.check.tags if hasattr(self.check, 'tags') else [],
             database_identifier=self.check.database_identifier,

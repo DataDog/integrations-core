@@ -1,6 +1,13 @@
 # This is the base implementation of the Agent Health reporting system.
 # It provides a structure for health events and codes that can be extended by specific checks.
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datadog_checks.base import AgentCheck
+
 
 from enum import Enum
 
@@ -13,18 +20,18 @@ class HealthEvent(Enum):
     INITIALIZATION = 'initialization'
 
 
-class HealthCode(Enum):
+class HealthStatus(Enum):
     """
-    Enum representing the health codes for database monitoring.
+    Enum representing the health statuses for a given event.
     """
 
-    HEALTHY = 'healthy'
-    UNHEALTHY = 'unhealthy'
+    OK = 'ok'
+    WARNING = 'warning'
+    ERROR = 'error'
 
 
 class Health:
-    def __init__(self, check):
-        # type: (AgentCheck) -> None
+    def __init__(self, check: AgentCheck):
         """
         Initialize the HealthCheck instance.
 
@@ -33,26 +40,24 @@ class Health:
         """
         self.check = check
 
-    def submit_health_event(self, event_name, code, metadata=None, **kwargs):
-        # type: (Health, HealthEvent, HealthCode, dict) -> None
+    def submit_health_event(self, name: HealthEvent, status: HealthStatus, **kwargs):
         """
         Submit a health event to the aggregator.
 
-        :param event_name: HealthEvent
+        :param name: HealthEvent
             The name of the health event.
-        :param code: HealthCode
-            The health code to submit.
-        :param metadata: dict, optional
-            Additional metadata to include with the health event.
+        :param status: HealthStatus
+            The health status to submit.
+
+        :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
         self.check.database_monitoring_health(
             {
                 'check_id': self.check.check_id,
                 'check_name': self.check.__class__.__name__,
-                'name': event_name,
-                'code': code,
-                'metadata': metadata or {},
-                **kwargs,
+                'name': name,
+                'status': status,
+                'data': {**kwargs},
             }
         )
 

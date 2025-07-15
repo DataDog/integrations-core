@@ -175,7 +175,6 @@ class PostgreSql(AgentCheck):
             features=[],
         )
 
-
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
             return None
