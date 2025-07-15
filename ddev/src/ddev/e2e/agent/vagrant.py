@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import os
 import shlex
 import shutil
@@ -63,209 +64,27 @@ def disable_integration_before_install(config_file: Path):
 class VagrantAgent(AgentInterface):
     VM_HOST_IP = "172.30.1.5"
 
-    def _run_command(self, cmd, check_msg=None, check=True, **kwargs):
-        print(f"Running command: {' '.join(cmd)}")
-        process = self.platform.run_command(
-            cmd,
-            stdout=self.platform.modules.subprocess.PIPE,
-            stderr=self.platform.modules.subprocess.PIPE,
-            **kwargs,
-        )
-        stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
-        stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
-        if stdout:
-            print(stdout)
-        if stderr:
-            print(stderr)
-        if check and process.returncode:
-            msg = check_msg or f"Command failed: {' '.join(cmd)}"
-            raise RuntimeError(f"{msg}\nRC: {process.returncode}\nStdout:\n{stdout}\nStderr:\n{stderr}")
-        return process, stdout.strip(), stderr.strip()
-
-    def _substitute_template_variables(self, value: Any) -> Any:
-        """Replace template variables like %HOST% in metadata values."""
-        if isinstance(value, str):
-            return value.replace("%HOST%", self.VM_HOST_IP)
-        elif isinstance(value, list):
-            return [self._substitute_template_variables(item) for item in value]
-        elif isinstance(value, dict):
-            return {k: self._substitute_template_variables(v) for k, v in value.items()}
-        return value
-
+    # =============================
+    # Constructor and Dunder Methods
+    # =============================
     def __init__(
         self, platform: Platform, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
     ) -> None:
-        # Apply template substitution to the entire metadata dictionary
         metadata = self._substitute_template_variables(metadata)
         super().__init__(platform, integration, env, metadata, config_file)
+        self.log = logging.getLogger(__name__)
+        # Set log level from DDEV_LOG_LEVEL environment variable
+        log_level_str = os.environ.get('DDEV_LOG_LEVEL', 'INFO').upper()
+        log_level = getattr(logging, log_level_str, logging.INFO)
+        self.log.setLevel(log_level)
         self._initialize_vagrant(overwrite=False)
-
-    def _initialize_vagrant(self, overwrite: bool = False, **kwargs):
-        # Initialize and create the directory for Vagrant files specific to this VM
-        home_dir = Path.home()
-        self._temp_vagrant_dir = home_dir / ".ddev" / "vagrant" / self._vm_name
-        self._temp_vagrant_dir.mkdir(parents=True, exist_ok=True)
-
-        # Generate Vagrantfile if it doesn't exist
-        vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
-        if not vagrantfile_path.exists() or overwrite:
-            old_file_hash = None
-            if overwrite:
-                old_file_hash = hashlib.sha256(vagrantfile_path.read_text().encode()).hexdigest()
-                print(f"Overwriting Vagrantfile found at '{vagrantfile_path}'.")
-                vagrantfile_path.unlink()
-                print(f"Vagrantfile deleted at {vagrantfile_path}")
-            else:
-                print(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
-
-            vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
-            vagrantfile_path.write_text(vagrantfile_content)
-            print(f"Vagrantfile generated at {vagrantfile_path}")
-            new_file_hash = hashlib.sha256(vagrantfile_content.encode()).hexdigest()
-            if old_file_hash and old_file_hash != new_file_hash:
-                self.metadata["vagrant_provision"] = True
-        else:
-            print(f"Using existing Vagrantfile at {vagrantfile_path}")
-
-        # Set VAGRANT_CWD to self.temp_vagrant_dir
-        os.environ["VAGRANT_CWD"] = str(self._temp_vagrant_dir)
-        print(f"Vagrant working directory set to: {self._temp_vagrant_dir}")
-
-    def _get_vagrantfile_template(self) -> Template:
-        template_path = Path(__file__).parent / "Vagrantfile.template"
-        if not template_path.is_file():
-            raise FileNotFoundError(f"Vagrantfile template not found at {template_path}")
-        return Template(template_path.read_text())
-
-    def _generate_vagrantfile_content(self, **kwargs) -> str:
-        agent_install_env_vars = kwargs.get("agent_install_env_vars", {})
-        synced_folders = kwargs.get("synced_folders", [])
-        exported_env_vars = kwargs.get("exported_env_vars", {})
-
-        agent_install_env_vars_str = (
-            " ".join([f'{key}="{value}"' for key, value in agent_install_env_vars.items()])
-            if agent_install_env_vars
-            else ""
-        )
-        exported_env_vars_str = (
-            "\n".join([f'export {key}="{value}"' for key, value in exported_env_vars.items()])
-            if exported_env_vars
-            else ""
-        )
-
-        vm_hostname = self._vm_name  # Already sanitized and unique
-        vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
-
-        synced_folders_str = ""
-        for volume in synced_folders:
-            path, target = volume.split(":")
-            synced_folders_str += f'config.vm.synced_folder "{path}", "{target}"\n'
-
-        template = self._get_vagrantfile_template()
-
-        return template.render(
-            dd_api_key=os.environ.get("DD_API_KEY", ""),
-            exported_env_vars_str=exported_env_vars_str,
-            vagrant_box=vagrant_box,
-            synced_folders_str=synced_folders_str,
-            vm_hostname=vm_hostname,
-            agent_install_env_vars_str=agent_install_env_vars_str,
-        )
-
-    @cached_property
-    def _isatty(self) -> bool:
-        isatty: Callable[[], bool] | None = getattr(sys.stdout, "isatty", None)
-        if isatty is not None:
-            try:
-                return isatty()
-            except ValueError:  # Raised if sys.stdout is not a tty (e.g. in a pipe)
-                pass
-        return False
-
-    @cached_property
-    def _vm_name(self) -> str:
-        # vm name can only conntain letters, numbers, hyphens and dots.
-        return f"dd_vagrant_{super().get_id()}".replace("_", "-")
-
-    @cached_property
-    def _is_windows_vm(self) -> bool:
-        return self.metadata.get("vagrant_guest_os", "linux").lower() == "windows"
-
-    @cached_property
-    def _package_mount_dir(self) -> str:
-        # Default path INSIDE the VM where host packages are synced/mounted.
-        # Assumes a synced folder like `/home` or `C:\vagrant` on the guest.
-        base_synced_dir = WINDOWS_BASE_SYNCED_DIR if self._is_windows_vm else LINUX_BASE_SYNCED_DIR
-        return os.path.join(base_synced_dir, "packages/").replace(
-            "\\", "\\\\"
-        )  # Ensure correct path sep for os.join and escape for f-strings
-
-    @cached_property
-    def _config_mount_dir(self) -> str:
-        # Path INSIDE the VM where agent configs are expected.
-        name = self.integration.name
-        if self._is_windows_vm:
-            return f"{WINDOWS_AGENT_CONF_DIR}\\{name}.d"
-        else:
-            return f"{LINUX_AGENT_CONF_DIR}/{name}.d"
-
-    @cached_property
-    def _python_path(self) -> str:
-        # Path to python executable INSIDE the VM.
-        py_major = self.python_version[0]
-        if self._is_windows_vm:
-            return f"{WINDOWS_AGENT_PYTHON_PREFIX}{py_major}\\python.exe"
-        else:
-            return f"{LINUX_AGENT_PYTHON_PREFIX}{py_major}"
-
-    def _format_command(self, guest_command_parts: list[str], interactive: bool = False) -> list[str]:
-        # Returns the host-side command to execute something in the guest.
-        if interactive:
-            return ["vagrant", "ssh", self._vm_name]
-
-        # Prepare the command string to be executed inside the VM via ssh -c "..."
-        inner_cmd_list = []
-        inner_cmd_list.extend(guest_command_parts)
-
-        # Handle sudo for non-Windows guests if metadata suggests it's needed for the command.
-        # This is a basic approach. More complex sudo needs might require specific command metadata.
-        if not self._is_windows_vm and self.metadata.get("vagrant_command_needs_sudo", False):
-            if not inner_cmd_list or inner_cmd_list[0] != "sudo":
-                inner_cmd_list.insert(0, "sudo -E")
-
-        inner_cmd_str = " ".join(shlex.quote(part) for part in inner_cmd_list)
-        host_command = ["vagrant", "ssh", self._vm_name, "-c", inner_cmd_str.replace("'", "")]
-        return host_command
-
-    def _show_logs(self) -> None:
-        print(f"Attempting to fetch agent logs from VM: {self._vm_name}...")
-        log_file_path_guest = WINDOWS_AGENT_LOG_PATH if self._is_windows_vm else LINUX_AGENT_LOG_PATH
-
-        guest_cmd_parts = ["type" if self._is_windows_vm else "cat", log_file_path_guest]
-
-        # Reading agent logs on Linux might require sudo.
-        if not self._is_windows_vm and self.metadata.get("vagrant_logs_require_sudo", True):
-            if guest_cmd_parts[0] != "sudo":  # Avoid double sudo if 'cat' was replaced by 'sudo cat'
-                guest_cmd_parts.insert(0, "sudo")
-
-        host_cmd_to_fetch_logs = self._format_command(guest_cmd_parts)
-
-        process, stdout, stderr = self._run_command(host_cmd_to_fetch_logs)
-
-        if process.returncode == 0 and stdout:
-            print(f"Agent logs from VM ({self._vm_name}):\n{stdout}")
-        elif process.returncode == 0 and not stdout:
-            print(f"Successfully fetched agent logs from VM ({self._vm_name}), but logs are empty.")
-        else:
-            raise Exception(
-                f"Failed to fetch agent logs from VM ({self._vm_name}). RC: {process.returncode}\n"
-                f"Stdout:\n{stdout}\n"
-                f"Stderr:\n{stderr}"
-            )
 
     def get_id(self) -> str:
         return self._vm_name
 
+    # =============================
+    # Public Methods: Lifecycle (start, stop, restart, enter shell)
+    # =============================
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         # prepare agent install scripts environment variables
         agent_install_env_vars = {}
@@ -326,11 +145,11 @@ class VagrantAgent(AgentInterface):
             synced_folders=synced_folders,
         )
 
-        print(f"Starting Vagrant environment for VM: {self._vm_name} with agent build: '{agent_build}'")
+        self.log.info("Starting Vagrant environment for VM: %s with agent build: '%s'", self._vm_name, agent_build)
 
         up_command_host = ["vagrant", "up", self._vm_name]
         if self.metadata.get("vagrant_provision", False):
-            print(f"VagrantFile changed, provisioning Vagrant VM: {self._vm_name}")
+            self.log.info("VagrantFile changed, provisioning Vagrant VM: %s", self._vm_name)
             up_command_host.append("--provision")
 
         # Agent installation script via Python is removed. Assumed to be in Vagrantfile provisioning.
@@ -354,42 +173,337 @@ class VagrantAgent(AgentInterface):
             )
 
         if local_packages or start_commands or post_install_guest_commands:
-            print("Local packages installed or custom start/post-install commands run. Restarting agent service.")
+            self.log.info(
+                "Local packages installed or custom start/post-install commands run. Restarting agent service."
+            )
             self.restart_agent_service()
         else:
-            print("No local packages or custom start/post-install commands. Agent service restart skipped.")
+            self.log.info("No local packages or custom start/post-install commands. Agent service restart skipped.")
+
+    def stop(self) -> None:
+        self.log.info("Stopping Vagrant VM: %s...", self._vm_name)
+        stop_guest_commands = self.metadata.get("stop_commands", [])
+        if stop_guest_commands:
+            self._run_commands(stop_guest_commands, "stop")
+
+        # Halt the VM
+        halt_cmd_host = ["vagrant", "halt", self._vm_name]
+        self.log.info("Halting VM: %s with command: %s", self._vm_name, ' '.join(halt_cmd_host))
+        process = self.platform.run_command(
+            halt_cmd_host,
+        )
+        stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+        stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+        if stdout:
+            self.log.debug("Command stdout:\n%s", stdout)
+        if stderr:
+            self.log.debug("Command stderr:\n%s", stderr)
+        if process.returncode:
+            self.log.error(
+                "Failed to halt Vagrant VM `%s` (RC: %s). Stderr: %s",
+                self._vm_name,
+                process.returncode,
+                stderr if stderr else 'N/A',
+            )
+        else:
+            self.log.info("VM %s halted.", self._vm_name)
+
+        # Destroy the VM
+        destroy_cmd_host = ["vagrant", "destroy", self._vm_name, "--force"]
+        self.log.info("Destroying VM: %s with command: %s", self._vm_name, ' '.join(destroy_cmd_host))
+        process = self.platform.run_command(
+            destroy_cmd_host,
+        )
+        stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+        stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+        if stdout:
+            self.log.debug("Command stdout:\n%s", stdout)
+        if stderr:
+            self.log.debug("Command stderr:\n%s", stderr)
+        if process.returncode:
+            self.log.error(
+                "Failed to destroy Vagrant VM `%s` (RC: %s).\nStdout: %s\nStderr: %s",
+                self._vm_name,
+                process.returncode,
+                stdout if stdout else 'N/A',
+                stderr if stderr else 'N/A',
+            )
+            raise RuntimeError(
+                f"Failed to destroy Vagrant VM `{self._vm_name}` (RC: {process.returncode}).\n"
+                f"Stdout: "
+                f"{stdout if stdout else 'N/A'}\n"
+                f"Stderr: "
+                f"{stderr if stderr else 'N/A'}"
+            )
+        self.log.info("VM %s destroyed.", self._vm_name)
+
+        # delete the temp vagrant dir
+        shutil.rmtree(self._temp_vagrant_dir)
+        self.log.info("Vagrant working directory deleted: %s", self._temp_vagrant_dir)
+
+    def restart(self) -> None:
+        self.log.info("Restarting (reloading) Vagrant VM: %s...", self._vm_name)
+        reload_cmd_host = ["vagrant", "reload", self._vm_name]
+        if self.metadata.get("vagrant_provision_on_reload", True):  # Default to reprovisioning on reload
+            reload_cmd_host.append("--provision")
+
+        process = self.platform.run_command(
+            reload_cmd_host,
+        )
+        stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+        stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+        if stdout:
+            self.log.debug("Command stdout:\n%s", stdout)
+        if stderr:
+            self.log.debug("Command stderr:\n%s", stderr)
+        if process.returncode:
+            self.log.error(
+                "Failed to restart (reload) Vagrant VM `%s` (RC: %s).\nStdout:\n%s\nStderr:\n%s",
+                self._vm_name,
+                process.returncode,
+                stdout,
+                stderr,
+            )
+            raise RuntimeError(
+                f"Failed to restart (reload) Vagrant VM `{self._vm_name}` "
+                f"(RC: {process.returncode}).\n"
+                f"Stdout:\n{stdout}\nStderr:\n{stderr}"
+            )
+        self.log.info("Vagrant VM `%s` restarted successfully.\n%s", self._vm_name, stdout)
+
+    def enter_shell(self) -> None:
+        self.log.info("Entering interactive shell for VM: %s...", self._vm_name)
+        host_cmd = self._format_command([], interactive=True)
+        self.log.debug("Interactive shell command: %s", ' '.join(host_cmd))
+        self.platform.modules.subprocess.run(host_cmd, check=True)
+
+    # =============================
+    # Public Methods: Agent Control
+    # =============================
+    def restart_agent_service(self) -> None:
+        self.log.info("Restarting Datadog Agent service in VM: %s...", self._vm_name)
+        if self._is_windows_vm:
+            agent_service_name = self.metadata.get("vagrant_windows_agent_service_name", "DatadogAgent")
+            guest_cmds = [f"sc stop {agent_service_name}", f"sc start {agent_service_name}"]
+        else:
+            restart_cmd_str = "sudo service datadog-agent restart"
+            guest_cmds = [restart_cmd_str]
+
+        self._run_commands(guest_cmds, "restart-agent-service")
+        self.log.info("Datadog Agent service restart sequence completed.")
+
+    def invoke(self, args: list[str]) -> None:
+        agent_bin = LINUX_AGENT_BIN_PATH if not self._is_windows_vm else WINDOWS_AGENT_BIN_PATH
+
+        guest_cmd_parts = ["sudo", agent_bin] + args
+        host_cmd = self._format_command(guest_cmd_parts)
+
+        self.log.info("Invoking agent command in VM `%s`: %s", self._vm_name, ' '.join(host_cmd))
+        process = self.platform.run_command(
+            host_cmd,
+        )
+        stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+        stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+        if stdout:
+            self.log.info("%s", stdout)
+        if stderr:
+            self.log.debug("%s", stderr)
+
+    def _show_logs(self) -> None:
+        self.log.info("Attempting to fetch agent logs from VM: %s...", self._vm_name)
+        log_file_path_guest = WINDOWS_AGENT_LOG_PATH if self._is_windows_vm else LINUX_AGENT_LOG_PATH
+
+        guest_cmd_parts = ["type" if self._is_windows_vm else "cat", log_file_path_guest]
+
+        if not self._is_windows_vm and self.metadata.get("vagrant_logs_require_sudo", True):
+            if guest_cmd_parts[0] != "sudo":
+                guest_cmd_parts.insert(0, "sudo")
+
+        host_cmd_to_fetch_logs = self._format_command(guest_cmd_parts)
+        self.log.debug("Fetching logs with command: %s", ' '.join(host_cmd_to_fetch_logs))
+        process = self.platform.run_command(
+            host_cmd_to_fetch_logs,
+        )
+        stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+        stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+        if stdout:
+            self.log.debug("Command stdout:\n%s", stdout)
+        if stderr:
+            self.log.debug("Command stderr:\n%s", stderr)
+        if process.returncode == 0 and stdout:
+            self.log.info("Agent logs from VM (%s):\n%s", self._vm_name, stdout)
+        elif process.returncode == 0 and not stdout:
+            self.log.info("Successfully fetched agent logs from VM (%s), but logs are empty.", self._vm_name)
+        else:
+            self.log.error(
+                "Failed to fetch agent logs from VM (%s). RC: %s\nStdout:\n%s\nStderr:\n%s",
+                self._vm_name,
+                process.returncode,
+                stdout,
+                stderr,
+            )
+            raise Exception(
+                f"Failed to fetch agent logs from VM ({self._vm_name}). RC: {process.returncode}\n"
+                f"Stdout:\n{stdout}\n"
+                f"Stderr:\n{stderr}"
+            )
+
+    # =============================
+    # Private Helpers: Vagrant Setup & Initialization
+    # =============================
+    def _initialize_vagrant(self, overwrite: bool = False, **kwargs):
+        # Initialize and create the directory for Vagrant files specific to this VM
+        home_dir = Path.home()
+        self._temp_vagrant_dir = home_dir / ".ddev" / "vagrant" / self._vm_name
+        self._temp_vagrant_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate Vagrantfile if it doesn't exist
+        vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
+        if not vagrantfile_path.exists() or overwrite:
+            old_file_hash = None
+            if overwrite:
+                self.log.info("Overwriting Vagrantfile found at '%s'.", vagrantfile_path)
+                vagrantfile_path.unlink()
+                self.log.debug("Vagrantfile deleted at %s", vagrantfile_path)
+            else:
+                self.log.info("Vagrantfile not found at %s, generating new one.", vagrantfile_path)
+
+            vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
+            vagrantfile_path.write_text(vagrantfile_content)
+            self.log.info("Vagrantfile generated at %s", vagrantfile_path)
+            new_file_hash = hashlib.sha256(vagrantfile_content.encode()).hexdigest()
+            if old_file_hash and old_file_hash != new_file_hash:
+                self.metadata["vagrant_provision"] = True
+        else:
+            self.log.info("Using existing Vagrantfile at %s", vagrantfile_path)
+
+        # Set VAGRANT_CWD to self.temp_vagrant_dir
+        os.environ["VAGRANT_CWD"] = str(self._temp_vagrant_dir)
+        self.log.debug("Vagrant working directory set to: %s", self._temp_vagrant_dir)
+
+    def _get_vagrantfile_template(self) -> Template:
+        template_path = Path(__file__).parent / "Vagrantfile.template"
+        if not template_path.is_file():
+            raise FileNotFoundError(f"Vagrantfile template not found at {template_path}")
+        return Template(template_path.read_text())
+
+    def _generate_vagrantfile_content(self, **kwargs) -> str:
+        agent_install_env_vars = kwargs.get("agent_install_env_vars", {})
+        synced_folders = kwargs.get("synced_folders", [])
+        exported_env_vars = kwargs.get("exported_env_vars", {})
+
+        agent_install_env_vars_str = (
+            " ".join([f'{key}="{value}"' for key, value in agent_install_env_vars.items()])
+            if agent_install_env_vars
+            else ""
+        )
+        exported_env_vars_str = (
+            "\n".join([f'export {key}="{value}"' for key, value in exported_env_vars.items()])
+            if exported_env_vars
+            else ""
+        )
+
+        vm_hostname = self._vm_name  # Already sanitized and unique
+        vagrant_box = self.metadata.get("vagrant_box", "net9/ubuntu-24.04-arm64")  # Default box
+
+        synced_folders_str = ""
+        for volume in synced_folders:
+            path, target = volume.split(":")
+            synced_folders_str += f'config.vm.synced_folder "{path}", "{target}"\n'
+
+        template = self._get_vagrantfile_template()
+
+        return template.render(
+            dd_api_key=os.environ.get("DD_API_KEY", ""),
+            exported_env_vars_str=exported_env_vars_str,
+            vagrant_box=vagrant_box,
+            synced_folders_str=synced_folders_str,
+            vm_hostname=vm_hostname,
+            agent_install_env_vars_str=agent_install_env_vars_str,
+        )
+
+    def _run_commands(self, commands: list[str], command_type: str) -> None:
+        self.log.info("Running %s commands in VM `%s`...", command_type, self._vm_name)
+        for guest_cmd_str in commands:
+            cmd_parts_guest = self.platform.modules.shlex.split(guest_cmd_str)
+            formatted_host_cmd = self._format_command(cmd_parts_guest)
+            self.log.debug("Running command: %s", ' '.join(formatted_host_cmd))
+            process = self.platform.run_command(
+                formatted_host_cmd,
+            )
+            stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+            stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+            if stdout:
+                self.log.debug("Command stdout:\n%s", stdout)
+            if stderr:
+                self.log.debug("Command stderr:\n%s", stderr)
+            if process.returncode:
+                self.log.error(
+                    "Failed to run %s command `%s` in VM `%s` (RC: %s).\nStdout:\n%s\nStderr:\n%s",
+                    command_type,
+                    ' '.join(cmd_parts_guest),
+                    self._vm_name,
+                    process.returncode,
+                    stdout,
+                    stderr,
+                )
+                raise RuntimeError(
+                    f"Failed to run {command_type} command `{' '.join(cmd_parts_guest)}` in VM "
+                    f"`{self._vm_name}` (RC: {process.returncode}).\n"
+                    f"Stdout:\n{stdout}\nStderr:\n{stderr}"
+                )
+            self.log.info("Successfully ran %s command `%s`.\n%s", command_type, ' '.join(cmd_parts_guest), stdout)
 
     def _initialize(
         self,
         up_command_host: list[str],
         local_packages: dict[Path, str],
-        start_guest_commands: list[str],  # Renamed from start_commands for clarity here
+        start_guest_commands: list[str],
         post_install_guest_commands: list[str],
-        host_operation_env_vars: EnvVars,
+        host_operation_env_vars,
     ):
-        print(
-            f"Bringing up Vagrant VM: {self._vm_name} from {self._temp_vagrant_dir} "
-            f"with command: {' '.join(up_command_host)}"
+        self.log.info(
+            "Bringing up Vagrant VM: %s from %s with command: %s",
+            self._vm_name,
+            self._temp_vagrant_dir,
+            ' '.join(up_command_host),
         )
-        # _captured_process will now automatically use self._temp_vagrant_dir as cwd for vagrant commands
-        process, stdout, stderr = self._run_command(up_command_host, env=host_operation_env_vars)
+        process = self.platform.run_command(
+            up_command_host,
+            env=host_operation_env_vars,
+        )
+        stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+        stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+        if stdout:
+            self.log.debug("Command stdout:\n%s", stdout)
+        if stderr:
+            self.log.debug("Command stderr:\n%s", stderr)
         if process.returncode:
+            self.log.error(
+                "Failed to start Vagrant VM `%s` (RC: %s).\nStdout:\n%s\nStderr:\n%s",
+                self._vm_name,
+                process.returncode,
+                stdout,
+                stderr,
+            )
             raise RuntimeError(
                 f"Failed to start Vagrant VM `{self._vm_name}` (RC: {process.returncode}).\n"
                 f"Stdout:\n{stdout}\nStderr:\n{stderr}"
             )
-        print(f"Vagrant VM `{self._vm_name}` started successfully.\n{stdout}")
+        self.log.info("Vagrant VM `%s` started successfully.\n%s", self._vm_name, stdout)
 
         # Configure sudoers after VM is up but before starting the agent
         if sudoers_content := self.metadata.get("vagrant_sudoers_config"):
+            self.log.info("Configuring sudoers after VM is up but before starting the agent")
             self._configure_sudoers(sudoers_content)
 
         if start_guest_commands:
+            self.log.info("Running start commands in VM `%s`...", self._vm_name)
             self._run_commands(start_guest_commands, "start")
 
         # Install local packages
         if local_packages:
-            print(f"Installing local packages in VM `{self._vm_name}`...")
+            self.log.info("Installing local packages in VM `%s`...", self._vm_name)
             base_pip_command = [
                 "sudo",
                 "-u",
@@ -404,132 +518,74 @@ class VagrantAgent(AgentInterface):
             for local_package, features in local_packages.items():
                 package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
                 formatted_cmd = self._format_command([*base_pip_command, package_mount])
-                print(f"Running command: {' '.join(formatted_cmd)}")
-                process, stdout, stderr = self._run_command(formatted_cmd)
+                self.log.debug("Running command: %s", ' '.join(formatted_cmd))
+                process = self.platform.run_command(
+                    formatted_cmd,
+                )
+                stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+                stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+                if stdout:
+                    self.log.debug("Command stdout:\n%s", stdout)
+                if stderr:
+                    self.log.debug("Command stderr:\n%s", stderr)
                 if process.returncode:
+                    self.log.error(
+                        "Failed to run command `%s` in VM `%s` (RC: %s).\nStdout:\n%s\nStderr:\n%s",
+                        ' '.join(formatted_cmd),
+                        self._vm_name,
+                        process.returncode,
+                        stdout,
+                        stderr,
+                    )
                     raise RuntimeError(
                         f"Failed to run command `{' '.join(formatted_cmd)}` in VM `{self._vm_name}` "
                         f"(RC: {process.returncode}).\n"
                         f"Stdout:\n{stdout}\nStderr:\n{stderr}"
                     )
-                print(
-                    f"Successfully installed  local package `{local_package.name}` in Agent Vagrant VM "
-                    f"`{self._vm_name}`\n stdout: {stdout}"
+                self.log.info(
+                    "Successfully installed local package `%s` in Agent Vagrant VM `%s`\nstdout: %s",
+                    local_package.name,
+                    self._vm_name,
+                    stdout,
                 )
 
         # Execute post_install_commands (guest commands)
         if post_install_guest_commands:
+            self.log.info("Running post-install commands in VM `%s`...", self._vm_name)
             self._run_commands(post_install_guest_commands, "post-install")
 
-    def _run_commands(self, commands: list[str], command_type: str) -> None:
-        print(f"Running {command_type} commands in VM `{self._vm_name}`...")
-        for guest_cmd_str in commands:
-            cmd_parts_guest = self.platform.modules.shlex.split(guest_cmd_str)
-            formatted_host_cmd = self._format_command(cmd_parts_guest)
-            process, stdout, stderr = self._run_command(formatted_host_cmd)
-            if process.returncode:
-                raise RuntimeError(
-                    f"Failed to run {command_type} command `{' '.join(cmd_parts_guest)}` in VM "
-                    f"`{self._vm_name}` (RC: {process.returncode}).\n"
-                    f"Stdout:\n{stdout}\nStderr:\n{stderr}"
-                )
-            print(f"Successfully ran {command_type} command `{' '.join(cmd_parts_guest)}`.\n{stdout}")
+    # =============================
+    # Private Helpers: Command Formatting & Execution
+    # =============================
+    def _format_command(self, guest_command_parts: list[str], interactive: bool = False) -> list[str]:
+        # Returns the host-side command to execute something in the guest.
+        if interactive:
+            return ["vagrant", "ssh", self._vm_name]
 
-    def stop(self) -> None:
-        print(f"Stopping Vagrant VM: {self._vm_name}...")
-        stop_guest_commands = self.metadata.get("stop_commands", [])
-        if stop_guest_commands:
-            self._run_commands(stop_guest_commands, "stop")
+        # Prepare the command string to be executed inside the VM via ssh -c "..."
+        inner_cmd_list = []
+        inner_cmd_list.extend(guest_command_parts)
 
-        # Halt the VM
-        halt_cmd_host = ["vagrant", "halt", self._vm_name]
-        print(f"Halting VM: {self._vm_name} with command: {' '.join(halt_cmd_host)}")
-        process, stdout, stderr = self._run_command(halt_cmd_host)
-        if process.returncode:
-            print(
-                f"Failed to halt Vagrant VM `{self._vm_name}` (RC: {process.returncode}). "
-                f"Stderr: "
-                f"{stderr if stderr else 'N/A'}"
-            )
-        else:
-            print(f"VM {self._vm_name} halted.")
+        # Handle sudo for non-Windows guests if metadata suggests it's needed for the command.
+        # This is a basic approach. More complex sudo needs might require specific command metadata.
+        if not self._is_windows_vm and self.metadata.get("vagrant_command_needs_sudo", False):
+            if not inner_cmd_list or inner_cmd_list[0] != "sudo":
+                inner_cmd_list.insert(0, "sudo -E")
 
-        # Destroy the VM
-        destroy_cmd_host = ["vagrant", "destroy", self._vm_name, "--force"]
-        print(f"Destroying VM: {self._vm_name} with command: {' '.join(destroy_cmd_host)}")
-        process, stdout, stderr = self._run_command(destroy_cmd_host)
-        if process.returncode:
-            raise RuntimeError(
-                f"Failed to destroy Vagrant VM `{self._vm_name}` (RC: {process.returncode}).\n"
-                f"Stdout: "
-                f"{stdout if stdout else 'N/A'}\n"
-                f"Stderr: "
-                f"{stderr if stderr else 'N/A'}"
-            )
-        print(f"VM {self._vm_name} destroyed.")
+        inner_cmd_str = " ".join(shlex.quote(part) for part in inner_cmd_list)
+        host_command = ["vagrant", "ssh", self._vm_name, "-c", inner_cmd_str.replace("'", "")]
+        return host_command
 
-        # delete the temp vagrant dir
-        shutil.rmtree(self._temp_vagrant_dir)
-        print(f"Vagrant working directory deleted: {self._temp_vagrant_dir}")
-
-    def restart(self) -> None:
-        print(f"Restarting (reloading) Vagrant VM: {self._vm_name}...")
-        reload_cmd_host = ["vagrant", "reload", self._vm_name]
-        if self.metadata.get("vagrant_provision_on_reload", True):  # Default to reprovisioning on reload
-            reload_cmd_host.append("--provision")
-
-        process, stdout, stderr = self._run_command(reload_cmd_host)
-        if process.returncode:
-            raise RuntimeError(
-                f"Failed to restart (reload) Vagrant VM `{self._vm_name}` "
-                f"(RC: {process.returncode}).\n"
-                f"Stdout:\n{stdout}\nStderr:\n{stderr}"
-            )
-        print(f"Vagrant VM `{self._vm_name}` restarted successfully.\n{stdout}")
-
-    def restart_agent_service(self) -> None:
-        # Restarts the Datadog Agent service *inside* the VM
-        print(f"Restarting Datadog Agent service in VM: {self._vm_name}...")
-        if self._is_windows_vm:
-            # Example for Windows: restart using sc. Ensure agent service name is correct.
-            agent_service_name = self.metadata.get("vagrant_windows_agent_service_name", "DatadogAgent")
-            # Stop and then start, as 'restart' is not always available/reliable with sc for all services
-            guest_cmds = [f"sc stop {agent_service_name}", f"sc start {agent_service_name}"]
-        else:
-            restart_cmd_str = "sudo service datadog-agent restart"
-            guest_cmds = [restart_cmd_str]
-
-        self._run_commands(guest_cmds, "restart-agent-service")
-        print("Datadog Agent service restart sequence completed.")
-
-    def invoke(self, args: list[str]) -> None:
-        # Runs an 'agent <command>' inside the VM
-        agent_bin = LINUX_AGENT_BIN_PATH if not self._is_windows_vm else WINDOWS_AGENT_BIN_PATH
-
-        guest_cmd_parts = ["sudo", agent_bin] + args
-        host_cmd = self._format_command(guest_cmd_parts)
-
-        print(f"Invoking agent command in VM `{self._vm_name}`: {' '.join(host_cmd)}")
-        process, stdout, stderr = self._run_command(host_cmd)
-        if stdout:
-            print(stdout)
-        if stderr:
-            print(stderr)
-
-    def enter_shell(self) -> None:
-        print(f"Entering interactive shell for VM: {self._vm_name}...")
-        host_cmd = self._format_command([], interactive=True)
-        # Use the platform's subprocess module to run interactively
-        # Do not capture output, let it inherit the terminal
-        self.platform.modules.subprocess.run(host_cmd, check=True)
-
+    # =============================
+    # Private Helpers: Sudoers, Template, and Misc
+    # =============================
     def _configure_sudoers(self, sudoers_content: str) -> None:
         """Configure sudoers to allow dd-agent to run sudo commands without password."""
         if self._is_windows_vm:
-            print("Skipping sudoers configuration for Windows VM")
+            self.log.info("Skipping sudoers configuration for Windows VM")
             return
 
-        print(f"Configuring sudoers for dd-agent in VM: {self._vm_name}")
+        self.log.info("Configuring sudoers for dd-agent in VM: %s", self._vm_name)
 
         # Create commands to configure sudoers
         # Use a here-document to write the sudoers file content
@@ -550,12 +606,84 @@ EOF'"""
         for cmd in commands:
             # For complex shell commands with pipes, we need to pass them as a single string
             host_cmd = ["vagrant", "ssh", self._vm_name, "-c", cmd]
-            process, stdout, stderr = self._run_command(host_cmd)
-
+            self.log.debug("Configuring sudoers with command: %s", ' '.join(host_cmd))
+            process = self.platform.run_command(
+                host_cmd,
+            )
+            stdout = process.stdout.decode("utf-8", errors="replace") if process.stdout else ""
+            stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
+            if stdout:
+                self.log.debug("Command stdout:\n%s", stdout)
+            if stderr:
+                self.log.debug("Command stderr:\n%s", stderr)
             if process.returncode != 0:
+                self.log.error(
+                    "Failed to execute command '%s' on VM %s. Exit status: %s, Error: %s",
+                    cmd,
+                    self._vm_name,
+                    process.returncode,
+                    stderr if stderr else 'N/A',
+                )
                 raise RuntimeError(
                     f"Failed to execute command '{cmd}' on VM {self._vm_name}. "
                     f"Exit status: {process.returncode}, Error: {stderr if stderr else 'N/A'}"
                 )
 
-        print(f"Successfully configured sudoers for dd-agent in VM: {self._vm_name}")
+        self.log.info("Successfully configured sudoers for dd-agent in VM: %s", self._vm_name)
+
+    def _substitute_template_variables(self, value: Any) -> Any:
+        """Replace template variables like %HOST% in metadata values."""
+        if isinstance(value, str):
+            return value.replace("%HOST%", self.VM_HOST_IP)
+        elif isinstance(value, list):
+            return [self._substitute_template_variables(item) for item in value]
+        elif isinstance(value, dict):
+            return {k: self._substitute_template_variables(v) for k, v in value.items()}
+        return value
+
+    # =============================
+    # Cached Properties
+    # =============================
+    @cached_property
+    def _isatty(self) -> bool:
+        isatty: Callable[[], bool] | None = getattr(sys.stdout, "isatty", None)
+        if isatty is not None:
+            try:
+                return isatty()
+            except ValueError:  # Raised if sys.stdout is not a tty (e.g. in a pipe)
+                pass
+        return False
+
+    @cached_property
+    def _vm_name(self) -> str:
+        # vm name can only conntain letters, numbers, hyphens and dots.
+        return f"dd_vagrant_{super().get_id()}".replace("_", "-")
+
+    @cached_property
+    def _is_windows_vm(self) -> bool:
+        return self.metadata.get("vagrant_guest_os", "linux").lower() == "windows"
+
+    @cached_property
+    def _package_mount_dir(self) -> str:
+        # Default path INSIDE the VM where host packages are synced/mounted.
+        # Assumes a synced folder like `/home` or `C:\vagrant` on the guest.
+        base_synced_dir = WINDOWS_BASE_SYNCED_DIR if self._is_windows_vm else LINUX_BASE_SYNCED_DIR
+        return os.path.join(base_synced_dir, "packages/").replace("\\", "\\\\")
+
+    @cached_property
+    def _config_mount_dir(self) -> str:
+        # Path INSIDE the VM where agent configs are expected.
+        name = self.integration.name
+        if self._is_windows_vm:
+            return f"{WINDOWS_AGENT_CONF_DIR}\\{name}.d"
+        else:
+            return f"{LINUX_AGENT_CONF_DIR}/{name}.d"
+
+    @cached_property
+    def _python_path(self) -> str:
+        # Path to python executable INSIDE the VM.
+        py_major = self.python_version[0]
+        if self._is_windows_vm:
+            return f"{WINDOWS_AGENT_PYTHON_PREFIX}{py_major}\\python.exe"
+        else:
+            return f"{LINUX_AGENT_PYTHON_PREFIX}{py_major}"

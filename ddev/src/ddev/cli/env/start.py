@@ -3,10 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+# Configure logging level from DDEV_LOG_LEVEL environment variable
+import logging
+import os
 from typing import TYPE_CHECKING
 
 import click
 from datadog_checks.dev.ci import running_on_ci
+
+log_level_str = os.environ.get('DDEV_LOG_LEVEL', 'INFO').upper()
+log_level = getattr(logging, log_level_str, logging.INFO)
+logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
