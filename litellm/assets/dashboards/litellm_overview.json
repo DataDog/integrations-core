@@ -367,7 +367,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Healthy Endpoints",
                             "title_align": "left",
                             "title_size": "16",
@@ -459,7 +458,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Unhealthy Endpoints",
                             "title_align": "left",
                             "title_size": "16",
@@ -885,7 +883,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:litellm.api.key.max_budget.metric{$host,$api_key_alias} by {hashed_api_key,api_key_alias,host}"
+                                            "query": "sum:litellm.remaining.api_key.budget.metric{$host,$api_key_alias} by {hashed_api_key,api_key_alias,host}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -908,7 +906,8 @@
                                 },
                                 "palette": "dog_classic"
                             },
-                            "title": "LiteLLM Spend Metric",
+                            "time": {},
+                            "title": "Remaining API Key Budget",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "toplist"
@@ -1144,7 +1143,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Proxy Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -1194,7 +1192,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Failed Proxy Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -1330,7 +1327,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment Success Responses",
                             "title_align": "left",
                             "title_size": "16",
@@ -1380,7 +1376,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment Failure Responses",
                             "title_align": "left",
                             "title_size": "16",
@@ -1680,7 +1675,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment Cooled Down",
                             "title_align": "left",
                             "title_size": "16",
@@ -1730,7 +1724,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment Successful Fallbacks",
                             "title_align": "left",
                             "title_size": "16",
@@ -1779,7 +1772,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deployment Failed Fallbacks",
                             "title_align": "left",
                             "title_size": "16",
@@ -2187,7 +2179,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "LiteLLM Self Failed Requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -2340,7 +2331,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Redis Failed Requests",
                             "title_align": "left",
                             "title_size": "16",
