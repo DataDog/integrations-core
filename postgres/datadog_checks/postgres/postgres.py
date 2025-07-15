@@ -8,13 +8,14 @@ import os
 from string import Template
 from time import time
 
+from postgres.datadog_checks.postgres.health import HealthEvent, PostgresHealth
 import psycopg
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
-from datadog_checks.base.utils.db.health import HealthCheck, HealthCode
+from datadog_checks.base.utils.db.health import HealthCode
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -91,7 +92,7 @@ MAX_CUSTOM_RESULTS = 100
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
 
-class PostgreSql(HealthCheck):
+class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     __NAMESPACE__ = 'postgresql'
@@ -104,6 +105,7 @@ class PostgreSql(HealthCheck):
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
+        self.health = PostgresHealth(self)
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -161,7 +163,10 @@ class PostgreSql(HealthCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
-        self.submit_health_event(HealthCode.HEALTHY)
+
+        # Validate config and submit initialization event
+        self.health.submit_health_event(HealthEvent.INITIALIZATION, HealthCode.HEALTHY)
+
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
