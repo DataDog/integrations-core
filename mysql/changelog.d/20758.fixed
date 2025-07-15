@@ -1,0 +1,1 @@
+Fix an error when attempting to populate index information for in-memory table where the cardinality information would be null
