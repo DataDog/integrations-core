@@ -133,6 +133,11 @@ class PostgreSql(AgentCheck):
         # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
         self._config = PostgresConfig(self, self.init_config)
         validation_result = self._config.initialize(self.instance)
+        # Log validation errors and warnings
+        for error in validation_result.errors:
+            self.log.error(error)
+        for warning in validation_result.warnings:
+            self.log.warning(warning)
 
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags

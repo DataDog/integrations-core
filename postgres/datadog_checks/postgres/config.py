@@ -69,11 +69,12 @@ class PostgresConfig:
             )
         self.ignore_databases = instance.get('ignore_databases', instance_ignore_databases())
         self.collect_default_database = is_affirmative(instance.get('collect_default_database', True))
-        if self.collect_default_database and 'postgres' in self.ignore_databases:
+        if instance.get('collect_default_database') and 'postgres' in instance.get('ignore_databases', []):
+            # Our default settings conflict, so we only warn the user if they've explicitly set these values to conflict
             validation_result.add_warning(
                 'The `postgres` database cannot be ignored when `collect_default_database` is enabled.'
             )
-        elif not self.collect_default_database:
+        if not self.collect_default_database:
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.ignore_schemas_owned_by = instance.get('ignore_schemas_owned_by', instance_ignore_schemas_owned_by())
 
@@ -101,8 +102,10 @@ class PostgresConfig:
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.application_name.isascii():
             validation_result.add_error("Application name can include only ASCII characters: %s", self.application_name)
+        self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
 
         # Relation metrics
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
         self.relations = instance.get('relations', [])
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_buffercache_metrics = is_affirmative(instance.get('collect_buffercache_metrics', False))
@@ -120,6 +123,7 @@ class PostgresConfig:
                 'The `data_directory` parameter must be set when `collect_wal_metrics` is enabled.'
             )
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
+        self.max_relations = int(instance.get('max_relations', 300))
         if self.relations and not (self.dbname or self.discovery_config['enabled']):
             validation_result.add_error(
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
@@ -130,26 +134,49 @@ class PostgresConfig:
             "Relation metrics requires a value for `relations` in the configuration." if not self.relations else None,
         )
 
-        self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
-        self.max_relations = int(instance.get('max_relations', 300))
-        self.min_collection_interval = instance.get('min_collection_interval', 15)
+
         # database monitoring adds additional telemetry for query metrics & samples
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        if instance.get('deep_database_monitoring'):
+            validation_result.add_warning('The `deep_database_monitoring` option is deprecated. Use `dbm` instead.')
+
+        # Statement samples and explain plans
         self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1
         )
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
-        # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        if instance.get('statement_samples'):
+            validation_result.add_warning('The `statement_samples` option is deprecated. Use `query_samples` instead.')
+        validation_result.add_feature(FeatureKey.QUERY_SAMPLES, self.statement_samples_config.get('enabled', False))
+        if self.statement_samples_config.get('enabled', False) and not self.dbm_enabled:
+            validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
         self.settings_metadata_config = instance.get('collect_settings', {}) or {}
+        validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, self.settings_metadata_config.get('enabled', False))
+        if self.settings_metadata_config.get('enabled', False) and not self.dbm_enabled:
+            validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
         self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
+        validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, self.schemas_metadata_config.get('enabled', False))
+        if self.schemas_metadata_config.get('enabled', False) and not self.dbm_enabled:
+            validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
+        validation_result.add_feature(
+            FeatureKey.COLLECT_RESOURCES, self.resources_metadata_config.get('enabled', False)
+        )
+        if self.resources_metadata_config.get('enabled', False) and not self.dbm_enabled:
+            validation_result.add_warning('The `collect_resources` feature requires the `dbm` option to be enabled.')
         self.statement_activity_config = instance.get('query_activity', {}) or {}
+        validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, self.statement_activity_config.get('enabled', False))
+        if self.statement_activity_config.get('enabled', False) and not self.dbm_enabled:
+            validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        validation_result.add_feature(FeatureKey.QUERY_METRICS, self.statement_metrics_config.get('enabled', False))
+        if self.statement_metrics_config.get('enabled', False) and not self.dbm_enabled:
+            validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
         self.query_encodings = instance.get('query_encodings')
         self.managed_identity = instance.get('managed_identity', {})
         self.cloud_metadata = {}
@@ -159,12 +186,18 @@ class PostgresConfig:
         # Remap fully_qualified_domain_name to name
         azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
-            aws['managed_authentication'] = self._aws_managed_authentication(aws, self.password)
+            try:
+                aws['managed_authentication'] = self._aws_managed_authentication(aws, self.password)
+            except ConfigurationError as e:
+                validation_result.add_error(e)
             self.cloud_metadata.update({'aws': aws})
         if gcp:
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
-            azure['managed_authentication'] = self._azure_managed_authentication(azure, self.managed_identity)
+            try:
+                azure['managed_authentication'] = self._azure_managed_authentication(azure, self.managed_identity)
+            except ConfigurationError as e:
+                validation_result.add_error(e)
             self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
@@ -214,11 +247,14 @@ class PostgresConfig:
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
         self.service = instance.get('service') or self.init_config.get('service') or ''
 
-        self.tags = self._build_tags(
-            custom_tags=instance.get('tags', []),
-            propagate_agent_tags=self._should_propagate_agent_tags(instance, self.init_config),
-            additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
-        )
+        try:
+            self.tags = self._build_tags(
+                custom_tags=instance.get('tags', []),
+                propagate_agent_tags=self._should_propagate_agent_tags(instance, self.init_config),
+                additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
+            )
+        except ConfigurationError as e:
+            validation_result.add_error(e)
 
         # Add warnings for common extraneous values
         if instance.get('empty_default_hostname'):
@@ -365,10 +401,22 @@ class FeatureKey(Enum):
     """
 
     RELATION_METRICS = "relation_metrics"
+    QUERY_SAMPLES = "query_samples"
+    COLLECT_SETTINGS = "collect_settings"
+    COLLECT_SCHEMAS = "collect_schemas"
+    COLLECT_RESOURCES = "collect_resources"
+    QUERY_ACTIVITY = "query_activity"
+    QUERY_METRICS = "query_metrics"
 
 
 FeatureNames = {
     FeatureKey.RELATION_METRICS: 'Relation Metrics',
+    FeatureKey.QUERY_SAMPLES: 'Query Samples',
+    FeatureKey.COLLECT_SETTINGS: 'Collect Settings',
+    FeatureKey.COLLECT_SCHEMAS: 'Collect Schemas',
+    FeatureKey.COLLECT_RESOURCES: 'Collect Resources',
+    FeatureKey.QUERY_ACTIVITY: 'Query Activity',
+    FeatureKey.QUERY_METRICS: 'Query Metrics',
 }
 
 
@@ -414,12 +462,12 @@ class ValidationResult:
         """
         self.features.append(Feature(feature, FeatureNames[feature], enabled, description))
 
-    def add_error(self, error: str):
+    def add_error(self, error: str | ConfigurationError):
         """
         Add an error to the validation result.
         :param error: The error message to add.
         """
-        self.errors.append(ConfigurationError(error))
+        self.errors.append(ConfigurationError(error) if isinstance(error, str) else error)
         self.valid = False
 
     def add_warning(self, warning: str):
