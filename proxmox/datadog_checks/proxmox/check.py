@@ -18,6 +18,7 @@ from .constants import (
 
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
+    HA_SUPPORTED = True
     __NAMESPACE__ = 'proxmox'
 
     def __init__(self, name, init_config, instances):
