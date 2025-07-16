@@ -14,7 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
-from datadog_checks.base.utils.db.health import HealthStatus
+from datadog_checks.base.utils.db.health import HealthCode
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -131,10 +131,31 @@ class PostgreSql(AgentCheck):
             )
 
         # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
-        self._config = PostgresConfig(self.instance, self.init_config, self)
+        self._config = PostgresConfig(self, self.init_config)
+        validation_result = self._config.initialize(self.instance)
+        # Log validation errors and warnings
+        for error in validation_result.errors:
+            self.log.error(error)
+        for warning in validation_result.warnings:
+            self.log.warning(warning)
+
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         self.add_core_tags()
+
+        # Handle the config validation result after we've set tags so those tags are included in the health event
+        self.health.submit_health_event(
+            HealthEvent.INITIALIZATION,
+            HealthCode.HEALTHY if validation_result.valid else HealthCode.UNHEALTHY,
+            metadata={},
+            config=sanitize(self._config.__dict__),
+            features=validation_result.features,
+        )
+
+        # Abort initializing the check if the config is invalid
+        if validation_result.valid is False:
+            self.log.error("Configuration validation failed: %s", validation_result.errors)
+            raise validation_result.errors[0]
 
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
@@ -166,14 +187,6 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
-
-        # Placeholder event, to be enhanced later
-        self.health.submit_health_event(
-            HealthEvent.INITIALIZATION,
-            HealthStatus.OK,
-            config=sanitize(self._config.__dict__),
-            features=[],
-        )
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
