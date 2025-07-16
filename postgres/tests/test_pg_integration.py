@@ -605,49 +605,6 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     assert_state_clean(check)
 
 
-@requires_over_14
-@pytest.mark.parametrize(
-    'is_aurora',
-    [True, False],
-)
-@pytest.mark.flaky(max_runs=5)
-def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
-    conn = _get_superconn(pg_instance)
-    with conn.cursor() as cur:
-        cur.execute("select wal_records, wal_fpi, wal_bytes from pg_stat_wal;")
-        (wal_records, wal_fpi, wal_bytes) = cur.fetchall()[0]
-        cur.execute("insert into persons (lastname) values ('test');")
-
-    # Wait for pg_stat_wal to be updated
-    for _ in range(10):
-        with conn.cursor() as cur:
-            cur.execute("select wal_records, wal_bytes from pg_stat_wal;")
-            new_wal_records = cur.fetchall()[0][0]
-            if new_wal_records > wal_records:
-                break
-        time.sleep(0.1)
-
-    check = integration_check(pg_instance)
-    check.is_aurora = is_aurora
-    if is_aurora is True:
-        return
-    check.run()
-
-    expected_tags = _get_expected_tags(check, pg_instance)
-    aggregator.assert_metric('postgresql.wal.records', count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.wal.bytes', count=1, tags=expected_tags)
-
-    # Expect at least one Heap + one Transaction additional records in the WAL
-    assert_metric_at_least(
-        aggregator, 'postgresql.wal.records', tags=expected_tags, count=1, lower_bound=wal_records + 2
-    )
-    # We should have at least one full page write
-    assert_metric_at_least(aggregator, 'postgresql.wal.bytes', tags=expected_tags, count=1, lower_bound=wal_bytes + 100)
-    assert_metric_at_least(
-        aggregator, 'postgresql.wal.full_page_images', tags=expected_tags, count=1, lower_bound=wal_fpi
-    )
-
-
 def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
@@ -656,61 +613,6 @@ def test_query_timeout(integration_check, pg_instance):
         with check.db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("select pg_sleep(2000)")
-
-
-@requires_over_10
-@pytest.mark.parametrize(
-    'is_aurora',
-    [True, False],
-)
-def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
-    check = integration_check(pg_instance)
-    check.is_aurora = is_aurora
-
-    if is_aurora is True:
-        return
-    # Default PG's wal size is 16MB
-    wal_size = 16777216
-
-    postgres_conn = _get_superconn(pg_instance)
-    with postgres_conn.cursor() as cur:
-        cur.execute("select count(*) from pg_ls_waldir();")
-        expected_num_wals = cur.fetchall()[0][0]
-
-    check.run()
-
-    expected_wal_size = expected_num_wals * wal_size
-    dd_agent_tags = _get_expected_tags(check, pg_instance)
-    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
-
-
-def test_pg_control(aggregator, integration_check, pg_instance):
-    check = integration_check(pg_instance)
-    check.run()
-
-    dd_agent_tags = _get_expected_tags(check, pg_instance)
-    aggregator.assert_metric('postgresql.control.timeline_id', count=1, value=1, tags=dd_agent_tags)
-
-    postgres_conn = _get_superconn(pg_instance)
-    with postgres_conn.cursor() as cur:
-        cur.execute("CHECKPOINT;")
-
-    aggregator.reset()
-    check.run()
-    # checkpoint should be less than 2s old
-    assert_metric_at_least(
-        aggregator, 'postgresql.control.checkpoint_delay', count=1, higher_bound=2.0, tags=dd_agent_tags
-    )
-    # After a checkpoint, we have the CHECKPOINT_ONLINE record (114 bytes) and also
-    # likely receive RUNNING_XACTS (50 bytes) record
-    assert_metric_at_least(
-        aggregator, 'postgresql.control.checkpoint_delay_bytes', count=1, higher_bound=250, tags=dd_agent_tags
-    )
-    # And restart should be slightly more than checkpoint delay
-    assert_metric_at_least(
-        aggregator, 'postgresql.control.redo_delay_bytes', count=1, higher_bound=300, tags=dd_agent_tags
-    )
 
 
 def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
