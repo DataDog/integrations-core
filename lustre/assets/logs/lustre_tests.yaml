@@ -1,22 +1,70 @@
 id: lustre
 tests:
-  - sample: 01CREAT 07:58:31.093789921 2025.06.11 0x0 t=[0x200000bd1:0x24:0x0]
-      j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0]
-      .vim_edited_file.txt.swp
-    result: null
-  - sample: >
-      10OPEN 07:58:31.093811911 2025.06.11 0xcb t=[0x200000bd1:0x24:0x0]
-      j=vim.0 ef=0x17 u=0:0 nid=172.31.38.176@tcp m=rw- p=[0x200000007:0x1:0x0]
-    result: null
-  - sample: >
-      14SATTR 07:58:31.098341742 2025.06.11 0x14 t=[0x200000bd1:0x24:0x0]
-      j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp
-    result: null
-  - sample: 183 08RENME 07:58:36.619506011 2025.06.11 0x0 t=[0:0x0:0x0] j=vim.0
+-
+  sample: "01CREAT 07:58:31.093789921 2025.06.11 0x0 t=[0x200000bd1:0x24:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] .vim_edited_file.txt.swp"
+  result:
+    custom:
+      date: 1749628711093
+      lustre:
+        extended_flags: "0x13"
+        flags: "0x0"
+        job_id: "vim.0"
+        nid: "172.31.38.176@tcp"
+        operation_type: "01CREAT"
+        parent_fid: "[0x200000007:0x1:0x0]"
+        target_fid: "[0x200000bd1:0x24:0x0]"
+        target_name: ".vim_edited_file.txt.swp"
+        user: "0:0"
+    message: "01CREAT 07:58:31.093789921 2025.06.11 0x0 t=[0x200000bd1:0x24:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] .vim_edited_file.txt.swp"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749628711093
+-
+  sample: |
+    10OPEN 07:58:31.093811911 2025.06.11 0xcb t=[0x200000bd1:0x24:0x0] j=vim.0 ef=0x17 u=0:0 nid=172.31.38.176@tcp m=rw- p=[0x200000007:0x1:0x0]
+  result:
+    custom:
+      date: 1749628711093
+      lustre:
+        extended_flags: "0x17"
+        flags: "0xcb"
+        job_id: "vim.0"
+        nid: "172.31.38.176@tcp"
+        open_mode: "rw-"
+        operation_type: "10OPEN"
+        parent_fid: "[0x200000007:0x1:0x0]"
+        target_fid: "[0x200000bd1:0x24:0x0]"
+        user: "0:0"
+    message: |
+      10OPEN 07:58:31.093811911 2025.06.11 0xcb t=[0x200000bd1:0x24:0x0] j=vim.0 ef=0x17 u=0:0 nid=172.31.38.176@tcp m=rw- p=[0x200000007:0x1:0x0]
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749628711093
+-
+  sample: |
+    14SATTR 07:58:31.098341742 2025.06.11 0x14 t=[0x200000bd1:0x24:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp
+  result:
+    custom:
+      date: 1749628711098
+      lustre:
+        extended_flags: "0x13"
+        flags: "0x14"
+        job_id: "vim.0"
+        nid: "172.31.38.176@tcp"
+        operation_type: "14SATTR"
+        target_fid: "[0x200000bd1:0x24:0x0]"
+        user: "0:0"
+    message: |
+      14SATTR 07:58:31.098341742 2025.06.11 0x14 t=[0x200000bd1:0x24:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749628711098
+- 
+  sample: 08RENME 07:58:36.619506011 2025.06.11 0x0 t=[0:0x0:0x0] j=vim.0
       ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0]
       vim_edited_file.txt~ s=[0x200000bd1:0x21:0x0] sp=[0x200000007:0x1:0x0]
       vim_edited_file.txt
-    result: null
+  result: null
 
 # The `result` field should be left blank to start. Once you submit your log asset files with
 # your integration pull-request in a Datadog GitHub repository, Datadog's validations will
