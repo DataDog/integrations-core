@@ -619,7 +619,7 @@ def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
         cur.execute("insert into persons (lastname) values ('test');")
 
     # Wait for pg_stat_wal to be updated
-    for _ in range(10):
+    for _ in range(50):
         with conn.cursor() as cur:
             cur.execute("select wal_records, wal_bytes from pg_stat_wal;")
             new_wal_records = cur.fetchall()[0][0]
