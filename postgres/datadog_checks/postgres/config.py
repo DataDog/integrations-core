@@ -444,8 +444,8 @@ class ValidationResult:
         """
         self.valid = valid
         self.features = []
-        self.errors = []
-        self.warnings = []
+        self.errors: list[ConfigurationError] = []
+        self.warnings: list[str] = []
 
     def add_feature(self, feature: FeatureKey, enabled=True, description: Optional[str] = None):
         """

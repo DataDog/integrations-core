@@ -103,8 +103,8 @@ class PostgreSql(AgentCheck):
 
     HA_SUPPORTED = True
 
-    def __init__(self, name, init_config, instances):
-        super(PostgreSql, self).__init__(name, init_config, instances)
+    def __init__(self, name, init_config, instances, **kwargs):
+        super(PostgreSql, self).__init__(name, init_config, instances, **kwargs)
         self.health = PostgresHealth(self)
         self._resolved_hostname = None
         self._database_identifier = None
@@ -151,7 +151,7 @@ class PostgreSql(AgentCheck):
             else HealthStatus.WARNING
             if validation_result.warnings
             else HealthStatus.OK,
-            errors=validation_result.errors,
+            errors=[str(error) for error in validation_result.errors],
             warnings=validation_result.warnings,
             config=sanitize(self._config.__dict__),
             features=validation_result.features,
