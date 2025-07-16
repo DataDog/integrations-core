@@ -21,6 +21,12 @@ on:
         type: string
         default: ""
 
+      pytest-args:
+        description: "Specific pytest target"
+        required: false
+        type: string
+        default: ""
+
 jobs:
   compute-matrix:
     uses: ./.github/workflows/compute-matrix.yml
@@ -59,6 +65,7 @@ jobs:
       setup-env-vars: "${{ inputs.setup-env-vars }}"
       python-version: "${{ inputs.python-version }}"
       pytest-args: ${{ inputs.pytest-args }}
+      pytest-target: ${{ inputs.pytest-target }}
     secrets: inherit
 
   save-event:
