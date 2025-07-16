@@ -1,6 +1,6 @@
 {
     "title": "OpenTelemetry Host Metrics Dashboard",
-    "description": "Default dashboard to visualize OpenTelemetry host metrics from the hostmetrics receiver.\n\nFor additional details, see the [specification (https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/). (cloned)",
+    "description": "Default dashboard to visualize OpenTelemetry host metrics from the hostmetrics receiver.\n\nFor additional details, see the [specification (https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/).",
     "widgets": [
         {
             "id": 3310659042452680,
