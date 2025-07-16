@@ -1,0 +1,215 @@
+id: lustre
+metric_id: lustre
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+    type: string
+  - groups:
+      - Lustre
+    name: Job ID
+    path: lustre.job_id
+    source: log
+    type: string
+  - groups:
+      - Lustre
+    name: Open Mode
+    path: lustre.open_mode
+    source: log
+    type: string
+  - groups:
+      - Lustre
+    name: Operation Type
+    path: lustre.operation_type
+    source: log
+    type: string
+  - groups:
+      - Lustre
+    name: User
+    path: lustre.user
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Lustre
+  enabled: true
+  filter:
+    query: source:lustre
+  processors:
+    - type: grok-parser
+      name: Main parser
+      enabled: true
+      source: message
+      samples:
+        - 07RMDIR 12:47:32.913242547 2025.06.02 0x1 t=[0x200000bd1:0x3:0x0]
+          ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] some_dir
+        - 23GXATR 14:57:42.650942657 2025.06.02 0x0 t=[0x200000bd1:0x14:0x0]
+          j=vim.0 ef=0x1b u=0:0 nid=172.31.38.176@tcp x=user.job
+          p=[0x200000007:0x1:0x0]
+        - >
+          08RENME 07:59:40.665687763 2025.06.11 0x0 t=[0:0x0:0x0] j=vim.0
+          ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0]
+          vim_edited_file.txt~ s=[0x200000bd1:0x26:0x0] sp=[0x200000007:0x1:0x0]
+          vim_edited_file.txt
+        - >
+          14SATTR 08:25:55.811908329 2025.06.19 0x14 t=[0x200000bd1:0x2b:0x0]
+          j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp
+      grok:
+        supportRules: >-
+          standard_fields
+          %{word:lustre.operation_type}\s%{date("HH:mm:ss.SSSSSSSSS
+          yyyy.MM.dd"):date}\s%{word:lustre.flags}
+
+          key_value %{data::keyvalue("=", ":\\[\\]")}
+        matchRules: >-
+          double_rule
+          %{standard_fields}\s%{key_value}\s%{regex("[^=]*"):target_name}\s%{key_value}\s%{regex("[^=]*"):source_name}
+
+          single_rule %{standard_fields}\s%{key_value}(\s%{regex("[^=]*"):target_name})?
+    - type: grok-parser
+      name: NID separator
+      enabled: true
+      source: message
+      samples:
+        - 172.31.38.176@tcp
+      grok:
+        supportRules: ""
+        matchRules: rule %{ip:network.client.ip}@%{word:network.client.protocol}
+    - type: attribute-remapper
+      name: Target FID
+      enabled: true
+      sources:
+        - t
+      sourceType: attribute
+      target: lustre.target_fid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Extended flags
+      enabled: true
+      sources:
+        - ef
+      sourceType: attribute
+      target: lustre.extended_flags
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: User
+      enabled: true
+      sources:
+        - u
+      sourceType: attribute
+      target: lustre.user
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Parent FID
+      enabled: true
+      sources:
+        - p
+      sourceType: attribute
+      target: lustre.parent_fid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Open mode
+      enabled: true
+      sources:
+        - m
+      sourceType: attribute
+      target: lustre.open_mode
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Source FID
+      enabled: true
+      sources:
+        - s
+      sourceType: attribute
+      target: lustre.source_fid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Source parent FID
+      enabled: true
+      sources:
+        - sp
+      sourceType: attribute
+      target: lustre.source_parent_fid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Source parent FID
+      enabled: true
+      sources:
+        - sp
+      sourceType: attribute
+      target: lustre.source_parent_fid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Job ID
+      enabled: true
+      sources:
+        - j
+      sourceType: attribute
+      target: lustre.job_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Extended attribute
+      enabled: true
+      sources:
+        - x
+      sourceType: attribute
+      target: lustre.extended_attribute
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Target
+      enabled: true
+      sources:
+        - target_name
+      sourceType: attribute
+      target: lustre.target_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Source
+      enabled: true
+      sources:
+        - source_name
+      sourceType: attribute
+      target: lustre.source_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: NID
+      enabled: true
+      sources:
+        - nid
+      sourceType: attribute
+      target: lustre.nid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: date-remapper
+      name: Date
+      enabled: true
+      sources:
+        - date
