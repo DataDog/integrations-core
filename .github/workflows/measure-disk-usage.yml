@@ -50,13 +50,14 @@ jobs:
       run: |
         run_id=$(gh run list --limit 10 --json databaseId,headSha,event,name \
           | jq -r --arg sha "${{ steps.prev.outputs.sha }}" \
-            '.[] | select(.headSha == $sha and .event == "push" and .name == "Upload file sizes (uncompressed)") | .databaseId' \
+            '.[] | select(.headSha == $sha and .name == "Measure Disk Usage") | .databaseId' \
           | head -n 1)
         if [ -z "$run_id" ]; then
           echo "No matching run found for previous commit"
           exit 1
         fi
         echo "run_id=$run_id" >> $GITHUB_OUTPUT
+
 
     - name: Download artifact
       run: gh run download ${{ steps.find_run.outputs.run_id }} --name hola.txt
