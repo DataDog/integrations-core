@@ -1,9 +1,9 @@
 import subprocess
 import sys
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
 import pytest
-import mock
 
 
 @pytest.mark.integration
@@ -16,7 +16,7 @@ def test_build_linux_x86_64():
         worflow_id = '1234567890'
         # Run the build.py script as a subprocess
         result = subprocess.run([
-            sys.executable, str(build_py), image, str(output_dir), '--workflow-id', worflow_id, 
+            sys.executable, str(build_py), image, str(output_dir), '--workflow-id', worflow_id,
         ], capture_output=True, text=True)
         print(result.stdout)
         print(result.stderr, file=sys.stderr)
@@ -28,7 +28,7 @@ def test_build_linux_x86_64():
         assert frozen_txt.is_file(), f"Missing frozen.txt: {frozen_txt}"
         # Optionally, check that wheels/built and wheels/external exist
         assert (wheels_dir / 'built').is_dir(), "Missing built wheels directory"
-        assert (wheels_dir / 'external').is_dir(), "Missing external wheels directory" 
+        assert (wheels_dir / 'external').is_dir(), "Missing external wheels directory"
 
         with open(frozen_txt, 'r') as f:
             frozen_lines = f.readlines()

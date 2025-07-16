@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import json
 import re
 from functools import cache
@@ -120,7 +119,7 @@ def generate_lock_file(
                 selected = candidates.get(f'{workflow_id}WID')
             else:
                 selected = candidates.get(-1)
-            
+
             if not selected:
                 continue
 
