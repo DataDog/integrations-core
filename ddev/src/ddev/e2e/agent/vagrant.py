@@ -85,58 +85,13 @@ class VagrantAgent(AgentInterface):
     # Public Methods: Lifecycle (start, stop, restart, enter shell)
     # =============================
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
-        # prepare agent install scripts environment variables
-        agent_install_env_vars = {}
+        # Prepare all necessary environment variables and configurations
+        agent_install_env_vars = self._prepare_agent_install_env_vars(agent_build)
+        synced_folders = self._prepare_synced_folders(local_packages)
+        host_operation_env_vars = self._prepare_host_env_vars(env_vars)
+        exported_env_vars = self._prepare_exported_env_vars(env_vars)
 
-        if agent_build:
-            pipeline_id, major_version, arch = agent_build.split("-")
-            agent_install_env_vars["TESTING_APT_URL"] = "s3.amazonaws.com/apttesting.datad0g.com"
-            agent_install_env_vars["TESTING_APT_REPO_VERSION"] = (
-                f"pipeline-{pipeline_id}-a{major_version}-{arch} {major_version}"
-            )
-            agent_install_env_vars["TESTING_YUM_URL"] = "s3.amazonaws.com/yumtesting.datad0g.com"
-            agent_install_env_vars["TESTING_YUM_VERSION_PATH"] = (
-                f"testing/pipeline-{pipeline_id}-a{major_version}/{major_version}"
-            )
-
-        # prepare synced_folders
-        synced_folders = []
-        synced_folders.extend(self.metadata.get('vagrant_synced_folders', []))
-
-        ensure_local_pkg: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
-        if self.config_file.is_file():
-            synced_folders.append(f'{self.config_file.parent}:{self._config_mount_dir}')
-            if local_packages:
-                ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
-
-        # It is safe to assume that the directory name is unique across all repos
-        for local_package in local_packages:
-            synced_folders.append(f'{local_package}:{self._package_mount_dir}{local_package.name}')
-
-        # Host environment variables for `vagrant up` command itself
-        host_operation_env_vars = EnvVars(os.environ)
-        host_operation_env_vars.update(env_vars)  # User-provided can override system for the vagrant command
-
-        # Prepare environment variables intended for the Agent process inside the VM.
-        exported_env_vars = {}
-        exported_env_vars.update(self.metadata.get('env', {}))
-        if AgentEnvVars.API_KEY not in env_vars:
-            exported_env_vars[AgentEnvVars.API_KEY] = "a" * 32
-
-        # By default, the hostname is the VM hostname (set in VagrantFile with DD_HOSTNAME)
-        if self.metadata.get("dd_hostname"):
-            exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname")
-
-        exported_env_vars[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
-        exported_env_vars[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")
-        exported_env_vars[AgentEnvVars.EXPVAR_PORT] = self.metadata.get("dd_expvar_port", "5000")
-        if (proxy_data := self.metadata.get("proxy")) is not None:
-            if (http_proxy := proxy_data.get("http")) is not None:
-                exported_env_vars[AgentEnvVars.PROXY_HTTP] = http_proxy
-            if (https_proxy := proxy_data.get("https")) is not None:
-                exported_env_vars[AgentEnvVars.PROXY_HTTPS] = https_proxy
-
-        # We can now generate the Vagrantfile content
+        # Generate the Vagrantfile content
         self._initialize_vagrant(
             overwrite=True,
             exported_env_vars=exported_env_vars,
@@ -144,40 +99,8 @@ class VagrantAgent(AgentInterface):
             synced_folders=synced_folders,
         )
 
-        self.log.info("Starting Vagrant environment for VM: %s with agent build: '%s'", self._vm_name, agent_build)
-
-        up_command_host = f"vagrant up {self._vm_name}"
-        if self.metadata.get("vagrant_provision", False):
-            self.log.info("VagrantFile changed, provisioning Vagrant VM: %s", self._vm_name)
-            up_command_host += " --provision"
-
-        # Agent installation script via Python is removed. Assumed to be in Vagrantfile provisioning.
-        # Custom start_commands from metadata are still run.
-        start_commands = []
-        if custom_start_cmds := self.metadata.get("start_commands"):
-            if isinstance(custom_start_cmds, list):
-                start_commands.extend(custom_start_cmds)
-            else:
-                start_commands.append(str(custom_start_cmds))
-
-        post_install_guest_commands = self.metadata.get("post_install_commands", [])
-
-        with ensure_local_pkg():
-            self._initialize(
-                up_command_host,
-                local_packages,
-                start_commands,
-                post_install_guest_commands,
-                host_operation_env_vars,
-            )
-
-        if local_packages or start_commands or post_install_guest_commands:
-            self.log.info(
-                "Local packages installed or custom start/post-install commands run. Restarting agent service."
-            )
-            self.restart_agent_service()
-        else:
-            self.log.info("No local packages or custom start/post-install commands. Agent service restart skipped.")
+        # Initialize the VM, run custom commands, and handle restart if necessary
+        self._initialize_vm_with_commands(agent_build, local_packages, host_operation_env_vars)
 
     def stop(self) -> None:
         self.log.info("Stopping Vagrant VM `%s`", self._vm_name)
@@ -190,7 +113,7 @@ class VagrantAgent(AgentInterface):
         self.log.info("Halting VM `%s`", self._vm_name)
         self._run_command(halt_cmd_host, "halt_command", host=True)
 
-        self.log.info("VM %s halted.", self._vm_name)
+        self.log.info("VM `%s` halted", self._vm_name)
 
         # Destroy the VM
         destroy_cmd_host = f"vagrant destroy {self._vm_name} --force"
@@ -455,6 +378,102 @@ class VagrantAgent(AgentInterface):
     # =============================
     # Private Helpers: Sudoers, Template, and Misc
     # =============================
+    def _prepare_agent_install_env_vars(self, agent_build: str) -> dict[str, str]:
+        """Prepare environment variables for agent installation based on the build."""
+        agent_install_env_vars = {}
+
+        if agent_build:
+            pipeline_id, major_version, arch = agent_build.split("-")
+            agent_install_env_vars["TESTING_APT_URL"] = "s3.amazonaws.com/apttesting.datad0g.com"
+            agent_install_env_vars["TESTING_APT_REPO_VERSION"] = (
+                f"pipeline-{pipeline_id}-a{major_version}-{arch} {major_version}"
+            )
+            agent_install_env_vars["TESTING_YUM_URL"] = "s3.amazonaws.com/yumtesting.datad0g.com"
+            agent_install_env_vars["TESTING_YUM_VERSION_PATH"] = (
+                f"testing/pipeline-{pipeline_id}-a{major_version}/{major_version}"
+            )
+
+        return agent_install_env_vars
+
+    def _prepare_synced_folders(self, local_packages: dict[Path, str]) -> list[str]:
+        """Prepare the list of folders to sync between host and VM."""
+        synced_folders = []
+        synced_folders.extend(self.metadata.get('vagrant_synced_folders', []))
+
+        if self.config_file.is_file():
+            synced_folders.append(f'{self.config_file.parent}:{self._config_mount_dir}')
+
+        # It is safe to assume that the directory name is unique across all repos
+        for local_package in local_packages:
+            synced_folders.append(f'{local_package}:{self._package_mount_dir}{local_package.name}')
+
+        return synced_folders
+
+    def _prepare_host_env_vars(self, env_vars: dict[str, str]) -> EnvVars:
+        """Prepare host environment variables for vagrant commands."""
+        host_operation_env_vars = EnvVars(os.environ)
+        host_operation_env_vars.update(env_vars)  # User-provided can override system for the vagrant command
+        return host_operation_env_vars
+
+    def _prepare_exported_env_vars(self, env_vars: dict[str, str]) -> dict[str, str]:
+        """Prepare environment variables to export inside the VM for the Agent process."""
+        exported_env_vars = {}
+        exported_env_vars.update(self.metadata.get('env', {}))
+
+        if AgentEnvVars.API_KEY not in env_vars:
+            exported_env_vars[AgentEnvVars.API_KEY] = "a" * 32
+
+        # By default, the hostname is the VM hostname (set in VagrantFile with DD_HOSTNAME)
+        if self.metadata.get("dd_hostname"):
+            exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname")
+
+        exported_env_vars[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
+        exported_env_vars[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")
+        exported_env_vars[AgentEnvVars.EXPVAR_PORT] = self.metadata.get("dd_expvar_port", "5000")
+
+        if (proxy_data := self.metadata.get("proxy")) is not None:
+            if (http_proxy := proxy_data.get("http")) is not None:
+                exported_env_vars[AgentEnvVars.PROXY_HTTP] = http_proxy
+            if (https_proxy := proxy_data.get("https")) is not None:
+                exported_env_vars[AgentEnvVars.PROXY_HTTPS] = https_proxy
+
+        return exported_env_vars
+
+    def _initialize_vm_with_commands(
+        self, agent_build: str, local_packages: dict[Path, str], host_operation_env_vars: EnvVars
+    ) -> None:
+        """Initialize the VM, execute custom commands, and handle agent restart if necessary."""
+        # Prepare the vagrant up command
+        up_command_host = f"vagrant up {self._vm_name}"
+        if self.metadata.get("vagrant_provision", False):
+            up_command_host += " --provision"
+
+        # Get custom commands from metadata
+        start_commands = self.metadata.get("start_commands", [])
+        post_install_commands = self.metadata.get("post_install_commands", [])
+
+        # Set up context manager for local package installation
+        ensure_local_pkg: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
+        if self.config_file.is_file() and local_packages:
+            ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
+
+        # Initialize the VM with all configurations
+        with ensure_local_pkg():
+            self._initialize(
+                up_command_host,
+                local_packages,
+                start_commands,
+                post_install_commands,
+                host_operation_env_vars,
+            )
+
+        # Handle agent restart after initialization if any custom operations were performed
+        operations_performed = bool(local_packages or start_commands or post_install_commands)
+
+        if operations_performed:
+            self.log.info("Custom operations performed. Restarting agent service...")
+            self.restart_agent_service()
+
     def _configure_sudoers(self, sudoers_content: str) -> None:
         """Configure sudoers to allow dd-agent to run sudo commands without password."""
         if self._is_windows_vm:
