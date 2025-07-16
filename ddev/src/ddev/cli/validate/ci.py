@@ -62,6 +62,7 @@ def ci(app: Application, sync: bool):
     )
     jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''
+    ddev_jobs_id = ('jd316aba', 'j6712d43')
 
     jobs = {}
     for data in construct_job_matrix(app.repo.path, get_all_targets(app.repo.path)):
@@ -69,7 +70,6 @@ def ci(app: Application, sync: bool):
         config = {
             'job-name': data['name'],
             'target': data['target'],
-            'pytest-target': data['pytest-target'],
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
@@ -101,7 +101,7 @@ def ci(app: Application, sync: bool):
         if is_core:
             config.update(
                 {
-                    'pytest-args': '${{ inputs.pytest-args }}'
+                    'pytest-args': '${{ inputs.pytest-args }}',
                 }
             )
 
@@ -112,7 +112,13 @@ def ci(app: Application, sync: bool):
         job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
         job_id = f'j{job_id}'
 
-        jobs[job_id] = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
+        job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
+        if job_id in ddev_jobs_id:
+            job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
+        jobs[job_id] = job_config
+
+        if data['target'] == 'ddev':
+            jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
 
     jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
 
@@ -125,6 +131,7 @@ def ci(app: Application, sync: bool):
         'agent-image-py2',
         'agent-image-windows',
         'agent-image-windows-py2',
+        'skip-ddev-tests',
     ):
         jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
 

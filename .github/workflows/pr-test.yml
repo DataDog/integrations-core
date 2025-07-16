@@ -50,6 +50,7 @@ jobs:
     with:
       job-name: "${{ matrix.name }}"
       target: "${{ matrix.target }}"
+      pytest-target: ${{ matrix.pytest-target }}
       platform: "${{ matrix.platform }}"
       runner: "${{ toJson(matrix.runner) }}"
       repo: "${{ inputs.repo }}"
@@ -65,7 +66,6 @@ jobs:
       setup-env-vars: "${{ inputs.setup-env-vars }}"
       python-version: "${{ inputs.python-version }}"
       pytest-args: ${{ inputs.pytest-args }}
-      pytest-target: ${{ inputs.pytest-target }}
     secrets: inherit
 
   save-event:
