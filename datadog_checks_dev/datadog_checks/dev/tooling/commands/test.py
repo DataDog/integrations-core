@@ -47,6 +47,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--skip-env', is_flag=True, help='Skip environment creation and assume it is already running')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
+@click.option('--pytest-target', '', help='Specific pytest target to run, e.g. `postgres:py3.12-9.6-UTF8`')
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
 @click.option('--force-env-rebuild', '-fr', is_flag=True, help='Force creating a new env')

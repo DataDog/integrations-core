@@ -69,6 +69,7 @@ def ci(app: Application, sync: bool):
         config = {
             'job-name': data['name'],
             'target': data['target'],
+            'pytest-target': data['pytest-target'],
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
@@ -100,7 +101,7 @@ def ci(app: Application, sync: bool):
         if is_core:
             config.update(
                 {
-                    'pytest-args': '${{ inputs.pytest-args }}',
+                    'pytest-args': '${{ inputs.pytest-args }}'
                 }
             )
 
