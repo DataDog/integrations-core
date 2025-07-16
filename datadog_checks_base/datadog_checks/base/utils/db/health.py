@@ -65,18 +65,19 @@ class Health:
         """
         self.check.database_monitoring_health(
             json.dumps(
-            {
-                'timestamp': time.time() * 1000,
-                'version': 1,
-                'check_id': self.check.check_id,
-                'category': self.check.__class__.__name__,
-                'name': name,
-                'status': status,
-                'tags': tags or [],
-                'ddagentversion': datadog_agent.get_version(),
-                'ddagenthostname': datadog_agent.get_hostname(),
-                'data': {**kwargs},
-            })
+                {
+                    'timestamp': time.time() * 1000,
+                    'version': 1,
+                    'check_id': self.check.check_id,
+                    'category': self.check.__class__.__name__,
+                    'name': name,
+                    'status': status,
+                    'tags': tags or [],
+                    'ddagentversion': datadog_agent.get_version(),
+                    'ddagenthostname': datadog_agent.get_hostname(),
+                    'data': {**kwargs},
+                }
+            )
         )
 
 
