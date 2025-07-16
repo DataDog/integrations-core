@@ -342,6 +342,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -361,13 +362,13 @@
                                             "query": "avg:otel.system.network.io{$host, direction:receive}",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "semantic_mode": "native"
                                         },
                                         {
                                             "query": "avg:otel.system.network.io{$host, direction:transmit}",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "semantic_mode": "combined"
+                                            "semantic_mode": "native"
                                         }
                                     ],
                                     "style": {
@@ -911,6 +912,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -927,16 +929,16 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otel.system.network.io{$host,direction:transmit} by {host}",
+                                            "query": "avg:otel.system.network.io{$host,direction:transmit}",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "semantic_mode": "native"
                                         },
                                         {
-                                            "query": "avg:otel.system.network.io{$host,direction:receive} by {host}",
+                                            "query": "avg:otel.system.network.io{$host,direction:receive}",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "semantic_mode": "combined"
+                                            "semantic_mode": "native"
                                         }
                                     ],
                                     "style": {
