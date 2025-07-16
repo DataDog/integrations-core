@@ -9,6 +9,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from datadog_checks.base.utils.serialization import json
+
 if TYPE_CHECKING:
     from datadog_checks.base import AgentCheck
 
@@ -62,18 +64,20 @@ class Health:
         :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
         self.check.database_monitoring_health(
-            {
-                'timestamp': time.time() * 1000,
-                'version': 1,
-                'check_id': self.check.check_id,
-                'category': self.check.__class__.__name__,
-                'name': name,
-                'status': status,
-                'tags': tags or [],
-                'ddagentversion': datadog_agent.get_version(),
-                'ddagenthostname': datadog_agent.get_hostname(),
-                'data': {**kwargs},
-            }
+            json.dumps(
+                {
+                    'timestamp': time.time() * 1000,
+                    'version': 1,
+                    'check_id': self.check.check_id,
+                    'category': self.check.__class__.__name__,
+                    'name': name,
+                    'status': status,
+                    'tags': tags or [],
+                    'ddagentversion': datadog_agent.get_version(),
+                    'ddagenthostname': datadog_agent.get_hostname(),
+                    'data': {**kwargs},
+                }
+            )
         )
 
 
