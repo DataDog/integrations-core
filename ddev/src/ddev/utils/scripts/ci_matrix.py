@@ -248,14 +248,10 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 config['python-support'] = ''.join(supported_python_versions)
 
             config['name'] = normalize_job_name(config['name'])
-            targets = (
-                [target + ":" + t for t in matrix_overrides.get("targets", [""])]
-                if matrix_overrides.get("targets")
-                else [target]
-            )
-            for target in targets:
+            
+            for env in matrix_overrides.get("target-envs", [""]):
                 config = config.copy()
-                config['target'] = target
+                config['pytest-target'] = target + ":" + env if env else target
                 job_matrix.append(config)
 
     return job_matrix
