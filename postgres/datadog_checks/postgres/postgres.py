@@ -14,7 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
-from datadog_checks.base.utils.db.health import HealthCode
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -145,9 +145,14 @@ class PostgreSql(AgentCheck):
 
         # Handle the config validation result after we've set tags so those tags are included in the health event
         self.health.submit_health_event(
-            HealthEvent.INITIALIZATION,
-            HealthCode.HEALTHY if validation_result.valid else HealthCode.UNHEALTHY,
-            metadata={},
+            name=HealthEvent.INITIALIZATION,
+            status=HealthStatus.ERROR
+            if not validation_result.valid
+            else HealthStatus.WARNING
+            if validation_result.warnings
+            else HealthStatus.OK,
+            errors=validation_result.errors,
+            warnings=validation_result.warnings,
             config=sanitize(self._config.__dict__),
             features=validation_result.features,
         )
@@ -1131,7 +1136,8 @@ class PostgreSql(AgentCheck):
 
 
 def sanitize(dict: dict):
-    sanitized = copy.deepcopy(dict)
+    sanitized = {k: v for k, v in copy.deepcopy(dict).items() if k != "check"}
     sanitized['password'] = '***' if sanitized.get('password') else None
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
+
     return sanitized

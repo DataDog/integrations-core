@@ -37,6 +37,8 @@ class PostgresHealth(Health):
         self,
         name: HealthEvent | PostgresHealthEvent,
         status: HealthStatus,
+        # errors: list[str] = None,
+        # warnings: list[str] = None,
         **kwargs,
     ):
         """
@@ -49,10 +51,12 @@ class PostgresHealth(Health):
         :param kwargs: Additional keyword arguments to include in the event.
         """
         super().submit_health_event(
-            name,
-            status,
+            name=name,
+            status=status,
             # If we have an error parsing the config we may not have tags yet
-            self.check.tags if hasattr(self.check, 'tags') else [],
+            tags=self.check.tags if hasattr(self.check, 'tags') else [],
             database_instance=self.check.database_identifier,
+            # errors=errors,
+            # warnings=warnings,
             **kwargs,
         )

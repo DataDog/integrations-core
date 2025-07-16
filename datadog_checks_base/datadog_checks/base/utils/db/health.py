@@ -51,7 +51,15 @@ class Health:
         """
         self.check = check
 
-    def submit_health_event(self, name: HealthEvent, status: HealthStatus, tags: list[str] = None, **kwargs):
+    def submit_health_event(
+        self,
+        name: HealthEvent,
+        status: HealthStatus,
+        tags: list[str] = None,
+        # errors: list[str] = None,
+        # warnings: list[str] = None,
+        **kwargs,
+    ):
         """
         Submit a health event to the aggregator.
 
@@ -63,22 +71,25 @@ class Health:
             Tags to associate with the health event.
         :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
-        self.check.database_monitoring_health(
-            json.dumps(
-                {
-                    'timestamp': time.time() * 1000,
-                    'version': 1,
-                    'check_id': self.check.check_id,
-                    'category': self.check.__class__.__name__,
-                    'name': name,
-                    'status': status,
-                    'tags': tags or [],
-                    'ddagentversion': datadog_agent.get_version(),
-                    'ddagenthostname': datadog_agent.get_hostname(),
-                    'data': {**kwargs},
-                }
-            )
+        payload = json.dumps(
+            {
+                'timestamp': time.time() * 1000,
+                'version': 1,
+                'check_id': self.check.check_id,
+                'category': self.check.__class__.__name__,
+                'name': name,
+                'status': status,
+                'tags': tags or [],
+                'ddagentversion': datadog_agent.get_version(),
+                'ddagenthostname': datadog_agent.get_hostname(),
+                # 'errors': errors or [],
+                # 'warnings': warnings or [],
+                'data': {**kwargs},
+            },
+            default=lambda x: x.__dict__ if hasattr(x, '__dict__') else x,
         )
+        print(f'Submitting health event: {payload}')
+        self.check.database_monitoring_health(payload)
 
 
 # Existing diagnosis model

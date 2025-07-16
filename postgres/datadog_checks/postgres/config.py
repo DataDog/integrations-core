@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, TypedDict
 
 from datadog_checks.postgres.config_models.defaults import instance_ignore_databases, instance_ignore_schemas_owned_by
 
@@ -169,11 +169,11 @@ class PostgresConfig:
         )
         if self.resources_metadata_config.get('enabled', False) and not self.dbm_enabled:
             validation_result.add_warning('The `collect_resources` feature requires the `dbm` option to be enabled.')
-        self.statement_activity_config = instance.get('query_activity', {}) or {}
+        self.statement_activity_config = instance.get('query_activity', {"enabled": True}) or {}
         validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, self.statement_activity_config.get('enabled', False))
         if self.statement_activity_config.get('enabled', False) and not self.dbm_enabled:
             validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
-        self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.statement_metrics_config = instance.get('query_metrics', {"enabled": True}) or {}
         validation_result.add_feature(FeatureKey.QUERY_METRICS, self.statement_metrics_config.get('enabled', False))
         if self.statement_metrics_config.get('enabled', False) and not self.dbm_enabled:
             validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
@@ -420,22 +420,15 @@ FeatureNames = {
 }
 
 
-class Feature:
+class Feature(TypedDict):
     """
-    A simple class to represent a feature in the Postgres configuration.
+    A feature in the Postgres configuration that can be enabled or disabled.
     """
 
-    def __init__(self, key, name, enabled, description=None):
-        """
-        :param key: The unique key for the feature.
-        :param name: The name of the feature.
-        :param enabled: Whether the feature is enabled.
-        :param description: Optional description of the feature's status.
-        """
-        self.key = key
-        self.name = name
-        self.enabled = enabled
-        self.description = description
+    key: str
+    name: str
+    enabled: bool
+    description: str | None
 
 
 class ValidationResult:
@@ -460,7 +453,9 @@ class ValidationResult:
         :param feature: The feature to add.
         :param enabled: Whether the feature is enabled.
         """
-        self.features.append(Feature(feature, FeatureNames[feature], enabled, description))
+        self.features.append(
+            {"key": feature, "name": FeatureNames[feature], "enabled": enabled, "description": description}
+        )
 
     def add_error(self, error: str | ConfigurationError):
         """
