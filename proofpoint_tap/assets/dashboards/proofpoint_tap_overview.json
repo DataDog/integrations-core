@@ -26,7 +26,7 @@
             "id": 4742521996525905,
             "definition": {
                 "type": "note",
-                "content": "**[Proofpoint TAP](https://www.proofpoint.com/uk/products/advanced-threat-protection/targeted-attack-protection)** is a cybersecurity solution designed to detect, mitigate, and block advanced threats that target people through email. It leverages a next-generation email security platform to provide visibility into all email communications.\n\nThis dashboard provides a comprehensive summary of proofpoint TAP events.\n\nFor more information, see the [Proofpoint TAP Documentation](https://docs.datadoghq.com/integrations/proofpoint_tap/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
+                "content": "**[Proofpoint TAP](https://www.proofpoint.com/uk/products/advanced-threat-protection/targeted-attack-protection)** is a cybersecurity solution designed to detect, mitigate, and block advanced threats that target people through email. It uses a next-generation email security platform to provide visibility into all email communications.\n\nThis dashboard provides a comprehensive summary of proofpoint TAP events.\n\nFor more information, see the [Proofpoint TAP Documentation](https://docs.datadoghq.com/integrations/proofpoint_tap/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
