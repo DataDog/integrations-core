@@ -138,12 +138,13 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:proxmox.api.up{$proxmox_server,$host}"
+                                            "query": "avg:proxmox.api.up{$proxmox_server,$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
                                 "type": "area"
                             },
@@ -1120,7 +1121,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 0
+                "y": 17
             }
         },
         {
@@ -1268,7 +1269,7 @@
                 "height": 3,
                 "width": 12,
                 "x": 0,
-                "y": 8
+                "y": 25
             }
         },
         {
@@ -1391,7 +1392,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area"
                             },
@@ -1415,7 +1415,170 @@
                 "height": 3,
                 "width": 12,
                 "x": 0,
-                "y": 11
+                "y": 28
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "High Availability",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_green",
+                                            "value": 1
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:proxmox.ha.quorate{$proxmox_server,$proxmox_name,$proxmox_pool,$proxmox_id,$proxmox_node,$host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "In Quorate?",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 7147122307888686,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Quorum?",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:proxmox.ha.quorum{$proxmox_server, $proxmox_name, $proxmox_pool, $proxmox_id, $proxmox_node, $host} by {proxmox_name,node_status}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "time": {},
+                            "title": "Quorum Status",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 516460646452799,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Quorum?",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:proxmox.ha.quorate{$proxmox_server,$proxmox_name,$proxmox_pool,$proxmox_id,$proxmox_node,$host} by {proxmox_name,node_status}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "time": {},
+                            "title": "Quorate Status",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 3429760729512607,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 1781174206475869,
+            "layout": {
+                "height": 3,
+                "width": 12,
+                "x": 0,
+                "y": 31
             }
         }
     ]
