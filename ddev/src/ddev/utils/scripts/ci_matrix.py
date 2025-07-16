@@ -249,7 +249,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
             config['name'] = normalize_job_name(config['name'])
             targets = (
-                [[target + ":" + t] for t in matrix_overrides.get("targets", [""])]
+                [target + ":" + t for t in matrix_overrides.get("targets", [""])]
                 if matrix_overrides.get("targets")
                 else [target]
             )
