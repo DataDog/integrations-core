@@ -41,7 +41,7 @@ platforms = ["linux", "windows"]
 platforms = ["linux", "windows"]
 
 [overrides.ci.postgres]
-targets-envs = [
+target-envs = [
     "py3.12-9.6-UTF8",
     "py3.12-10.0-UTF8",
     "py3.12-11.0-UTF8",
