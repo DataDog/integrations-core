@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 
-from ..constants import RESOURCE_TYPES
+from datadog_checks.marklogic.constants import RESOURCE_TYPES
+
 from .common import build_metric_to_submit, is_metric
 
 

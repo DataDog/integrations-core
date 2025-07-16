@@ -91,3 +91,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.ruff]
+extend = "../pyproject.toml"

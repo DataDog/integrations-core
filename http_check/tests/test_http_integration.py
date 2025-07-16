@@ -72,7 +72,6 @@ def test_cert_expiration_no_cert(http_check):
     http_check.instance = instance
 
     with mock.patch('ssl.SSLSocket.getpeercert', return_value=None):
-
         status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
         assert status == AgentCheck.UNKNOWN
         expected_msg = 'Empty or no certificate found.'
@@ -311,7 +310,6 @@ def test_check_ssl_expire_error_secs(aggregator, http_check):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_check_hostname_override(aggregator, http_check):
-
     # Run the check for all the instances in the config
     for instance in CONFIG_CUSTOM_NAME['instances']:
         http_check.check(instance)
@@ -400,7 +398,6 @@ def test_service_check_instance_name_normalization(aggregator, http_check):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_dont_check_expiration(aggregator, http_check):
-
     # Run the check for the one instance
     instance = CONFIG_DONT_CHECK_EXP['instances'][0]
     http_check.check(instance)
@@ -414,7 +411,6 @@ def test_dont_check_expiration(aggregator, http_check):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_data_methods(aggregator, http_check):
-
     # Run the check once for both POST configs
     for instance in CONFIG_DATA_METHOD['instances']:
         http_check.check(instance)
@@ -432,7 +428,7 @@ def test_data_methods(aggregator, http_check):
         aggregator.reset()
 
 
-def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
+def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -444,11 +440,14 @@ def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
         'skip_proxy': 'false',
     }
 
-    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
-
-    dd_run_check(check)
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)
-    assert 'invalid path: /tmp/unexisting.crt' in aggregator._service_checks[HTTPCheck.SC_STATUS][0].message
+    with (
+        mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning,
+        mock.patch('requests.Session.get'),
+    ):
+        check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+        dd_run_check(check)
+        mock_warning.assert_called()
+        assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)
 
 
 def test_instance_auth_token(dd_run_check):
@@ -506,7 +505,6 @@ def test_instance_auth_token(dd_run_check):
     ],
 )
 def test_expected_headers(dd_run_check, instance, expected_headers):
-
     check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
     dd_run_check(check)
     assert expected_headers == check.http.options['headers']

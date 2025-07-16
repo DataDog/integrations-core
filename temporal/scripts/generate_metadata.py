@@ -102,7 +102,7 @@ def main():
         existing_dd_metric = check_existing_metric(metric_name, previous_metadata, added_dd_metrics)
 
         if existing_dd_metric:
-            print(f"INFO: metric `{metric_name}` is reserved because it's present " "in the current metadata.csv file")
+            print(f"INFO: metric `{metric_name}` is reserved because it's present in the current metadata.csv file")
             metadata.extend(existing_dd_metric)
             continue
 

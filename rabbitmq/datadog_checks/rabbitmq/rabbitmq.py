@@ -556,7 +556,7 @@ class RabbitMQManagement(AgentCheck):
         for vhost in vhosts:
             tags = ['vhost:{}'.format(vhost)] + custom_tags
             # We need to urlencode the vhost because it can be '/'.
-            path = u'aliveness-test/{}'.format(quote_plus(vhost))
+            path = 'aliveness-test/{}'.format(quote_plus(vhost))
             aliveness_url = urljoin(base_url, path)
             aliveness_response = {}
             try:
@@ -569,6 +569,6 @@ class RabbitMQManagement(AgentCheck):
                 message = None
             else:
                 status = AgentCheck.CRITICAL
-                message = u"Response from aliveness API: {}".format(aliveness_response)
+                message = "Response from aliveness API: {}".format(aliveness_response)
 
             self.service_check('rabbitmq.aliveness', status, tags, message=message)

@@ -45,7 +45,6 @@ class TestGetIntegration:
 
 
 class TestIntegrationsIteration:
-
     iter_test_params = [
         pytest.param("iter", lambda path: (path / 'manifest.json').is_file(), id="only integrations"),
         pytest.param(

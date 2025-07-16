@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 10.2.0 / 2025-07-10
+
+***Added***:
+
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add new `collect_schemas` configuration to replace deprecated `schemas` while maintaining backward compatibility. ([#20603](https://github.com/DataDog/integrations-core/pull/20603))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 10.1.1 / 2025-06-26 / Agent 7.68.0
+
+***Fixed***:
+
+* Add `maxTimeMS` to limit agent resource consumption and prevent operations from running indefinitely on the server side. ([#20515](https://github.com/DataDog/integrations-core/pull/20515))
+
 ## 10.1.0 / 2025-06-12
 
 ***Added***:
