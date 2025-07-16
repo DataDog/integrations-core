@@ -9,7 +9,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
-from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.serialization import json
 
 if TYPE_CHECKING:
     from datadog_checks.base import AgentCheck
