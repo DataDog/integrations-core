@@ -21,7 +21,7 @@ on:
         type: string
         default: ""
 
-      pytest-args:
+      pytest-target:
         description: "Specific pytest target"
         required: false
         type: string
