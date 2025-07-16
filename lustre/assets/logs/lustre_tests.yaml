@@ -5,7 +5,7 @@ tests:
       .vim_edited_file.txt.swp
     result: null
   - sample: >
-      10OPEN  07:58:31.093811911 2025.06.11 0xcb t=[0x200000bd1:0x24:0x0]
+      10OPEN 07:58:31.093811911 2025.06.11 0xcb t=[0x200000bd1:0x24:0x0]
       j=vim.0 ef=0x17 u=0:0 nid=172.31.38.176@tcp m=rw- p=[0x200000007:0x1:0x0]
     result: null
   - sample: >

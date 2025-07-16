@@ -7,7 +7,6 @@ facets:
     name: Client IP
     path: network.client.ip
     source: log
-    type: string
   - groups:
       - Lustre
     name: Job ID
@@ -60,15 +59,15 @@ pipeline:
       grok:
         supportRules: >-
           standard_fields
-          %{word:lustre.operation_type}\s%{date("HH:mm:ss.SSSSSSSSS
-          yyyy.MM.dd"):date}\s%{word:lustre.flags}
+          %{word:lustre.operation_type}\s+%{date("HH:mm:ss.SSSSSSSSS
+          yyyy.MM.dd"):date}\s+%{word:lustre.flags}
 
           key_value %{data::keyvalue("=", ":\\[\\]")}
         matchRules: >-
           double_rule
-          %{standard_fields}\s%{key_value}\s%{regex("[^=]*"):target_name}\s%{key_value}\s%{regex("[^=]*"):source_name}
+          %{standard_fields}\s+%{key_value}\s+%{regex("[^=]*"):target_name}\s+%{key_value}\s+%{regex("[^=]*"):source_name}
 
-          single_rule %{standard_fields}\s%{key_value}(\s%{regex("[^=]*"):target_name})?
+          single_rule %{standard_fields}\s+%{key_value}(\s+%{regex("[^=]*"):target_name})?
     - type: grok-parser
       name: NID separator
       enabled: true
