@@ -37,6 +37,31 @@ jobs:
         name: hola.txt
         path: hola.txt
         if-no-files-found: error
+
+    - name: Get previous commit SHA
+      id: prev
+      run: |
+        echo "sha=$(git rev-parse HEAD^1)" >> $GITHUB_OUTPUT
+
+    - name: Find previous workflow run ID
+      id: find_run
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        run_id=$(gh run list --limit 10 --json databaseId,headSha,event,name \
+          | jq -r --arg sha "${{ steps.prev.outputs.sha }}" \
+            '.[] | select(.headSha == $sha and .event == "push" and .name == "Your Workflow Name") | .databaseId' \
+          | head -n 1)
+        if [ -z "$run_id" ]; then
+          echo "No matching run found for previous commit"
+          exit 1
+        fi
+        echo "run_id=$run_id" >> $GITHUB_OUTPUT
+
+    - name: Download artifact
+      run: gh run download ${{ steps.find_run.outputs.run_id }} --name hola.txt
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # ------------------------------------------------------------
     # - name: Measure disk usage (uncompressed)
     #   run: | 
