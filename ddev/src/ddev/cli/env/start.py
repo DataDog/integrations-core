@@ -148,7 +148,7 @@ def start(
     if agent_type == "vagrant" and running_on_ci():
         app.abort(text="Vagrant is not supported on CI", code=0)
 
-    agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
+    agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
 
     if not agent_build:
         agent_build = (

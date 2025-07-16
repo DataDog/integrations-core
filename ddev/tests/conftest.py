@@ -21,7 +21,7 @@ from ddev.utils.fs import Path, temp_directory
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
-from .helpers import PLATFORM
+from .helpers import APPLICATION, PLATFORM
 from .helpers.git import ClonedRepo
 from .helpers.runner import CliRunner
 
@@ -39,6 +39,11 @@ def ddev():
 @pytest.fixture(scope='session')
 def platform() -> Platform:
     return PLATFORM
+
+
+@pytest.fixture(scope='session')
+def app() -> Platform:
+    return APPLICATION
 
 
 @pytest.fixture(scope='session')
