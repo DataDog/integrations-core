@@ -23,7 +23,6 @@ TARGET_TAG_PATTERNS = {
     'linux-aarch64': 'manylinux.*_aarch64|linux_aarch64',
     'windows-x86_64': 'win_amd64',
     'macos-x86_64': 'macosx.*_(x86_64|intel|universal2)',
-    'macos-aarch64': 'macosx.*_(aarch64|arm64|universal2)',
 }
 
 
@@ -70,6 +69,7 @@ def generate_lock_file(
     lock_file_folder: Path,
     target: str,
     python_version: str,
+    workflow_id: str,
 ) -> None:
     python_target = target_python_for_major(python_version)
     # The lockfiles contain the major.minor Python version
@@ -97,7 +97,7 @@ def generate_lock_file(
         for artifact_type in ('built', 'external'):
             candidates = {}
             for blob in bucket.list_blobs(prefix=f'{artifact_type}/{project}/'):
-                wheel_name = blob.name.split('/')[-1]
+                wheel_name = blob.name.split('/')[-1] # e.g. 'built/confluent-kafka/confluent-kafka-2.13.0-cp311-cp311-manylinux2010_x86_64.whl'
                 if not wheel_name.endswith('.whl'):
                     continue
 
@@ -109,18 +109,21 @@ def generate_lock_file(
                 if not is_compatible_wheel(target, python_major, interpreter, abi, platform):
                     continue
 
-                if build and 'WID' in build:
-                    # TODO: we're skipping any wheels with WID in them until we merge
-                    # the final changes to use this format
-                    continue
-
-                build_number = int(build[0]) if build else -1
+                build_number = build[0] if build else -1
                 candidates[build_number] = blob
 
             if not candidates:
                 continue
 
-            selected = candidates[max(candidates)]
+            # if artifact_type is built, then we need to use the workflow_id
+            if artifact_type == 'built':
+                selected = candidates.get(f'{workflow_id}WID')
+            else:
+                selected = candidates.get(-1)
+            
+            if not selected:
+                continue
+
             selected.reload()
             sha256_digest = selected.metadata['sha256']
             index_url = f'{STORAGE_URL}/{selected.name}'
@@ -134,11 +137,7 @@ def generate_lock_file(
     lock_file.write_text('\n'.join(lock_file_lines), encoding='utf-8')
 
 
-def main():
-    parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
-    parser.add_argument('targets_dir')
-    args = parser.parse_args()
-
+def lock(targets_dir, workflow_id):
     LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
     with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
         contents = json.dumps(
@@ -151,7 +150,7 @@ def main():
         f.write(f'{contents}\n')
 
     image_digests = {}
-    for target in Path(args.targets_dir).iterdir():
+    for target in Path(targets_dir).iterdir():
         for python_version in target.iterdir():
             if python_version.name.startswith('py'):
                 generate_lock_file(
@@ -159,6 +158,7 @@ def main():
                     LOCK_FILE_DIR,
                     target.name,
                     python_version.name.strip('py'),
+                    workflow_id,
                 )
 
         if (image_digest_file := target / 'image_digest').is_file():
@@ -166,8 +166,4 @@ def main():
 
     with RESOLUTION_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
         contents = json.dumps(image_digests, indent=2, sort_keys=True)
-        f.write(f'{contents}\n')
-
-
-if __name__ == '__main__':
-    main()
+        f.write(f'{contents}\n')g

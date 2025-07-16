@@ -140,13 +140,13 @@ jobs:
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true'
       run: |-
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+        python .builders/build.py ${{ matrix.job.image }} --workflow-id ${{ github.run_id }} --python 3 ${{ env.OUT_DIR }}/py3
 
     - name: Pull image and build wheels
       if: steps.changed-files.outputs.builders_any_changed != 'true'
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
+        python .builders/build.py ${{ matrix.job.image }} --workflow-id ${{ github.run_id }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
 
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
@@ -172,21 +172,12 @@ jobs:
         path: output
 
   build-macos:
-    name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
-    runs-on: ${{ matrix.job.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        job:
-        - arch: x86_64
-          os: macos-13
-          macosx_version_min: "10.12"
-        - arch: aarch64
-          os: macos-13-xlarge # "macOS 13 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
-          macosx_version_min: "11.0"
+    name: Target macOS
+    runs-on: macos-13
+
     env:
-      TARGET_NAME: macos-${{ matrix.job.arch }}
-      OUT_DIR: output/macos-${{ matrix.job.arch }}
+      TARGET_NAME: macos-x86_64
+      OUT_DIR: output/macos-x86_64
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
 
     permissions:
@@ -222,26 +213,26 @@ jobs:
       with:
         path: |
           ~/builder_root
-        key: macos-${{ matrix.job.arch }}-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/resolve-build-deps.yml') }}
+        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/resolve-build-deps.yml') }}
 
     - name: Run the build
       env:
         # This sets the minimum macOS version compatible for all built artifacts
-        MACOSX_DEPLOYMENT_TARGET: ${{ matrix.job.macosx_version_min }}
+        MACOSX_DEPLOYMENT_TARGET: "10.12"
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |-
         # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --workflow-id ${{ github.run_id }} --skip-setup
         else
           mkdir ~/builder_root
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --workflow-id ${{ github.run_id }} --skip-setup
         fi
 
     - name: Upload artifacts
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: target-macos-${{ matrix.job.arch }}
+        name: target-macos
         path: output
 
   publish:
@@ -284,11 +275,8 @@ jobs:
         project_id: datadog-agent-int-build
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
-    - name: Upload wheels
-      run: python .builders/upload.py targets ${{ github.run_id }}
-
-    - name: Lock files
-      run: python .builders/lock.py targets
+    - name: Upload and Lock Wheels
+      run: python .builders/upload_and_lock.py targets --workflow-id ${{ github.run_id }}
 
     - name: Clean up repository
       run: |-

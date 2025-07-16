@@ -72,6 +72,7 @@ def build_macos():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('image')
     parser.add_argument('output_dir')
+    parser.add_argument('--workflow-id')
     parser.add_argument('--python', default='3')
     parser.add_argument('--builder-root', required=True,
                         help='Path to a folder where things will be installed during builder setup.')
@@ -135,7 +136,7 @@ def build_macos():
             )
 
         check_process(
-            [os.environ['DD_PYTHON3'], str(mount_dir / 'scripts' / 'build_wheels.py'), '--python', args.python],
+            [os.environ['DD_PYTHON3'], str(mount_dir / 'scripts' / 'build_wheels.py'), '--python', args.python, '--workflow-id', args.workflow_id],
             env=env,
             cwd=builder_root,
         )
@@ -158,6 +159,7 @@ def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('image')
     parser.add_argument('output_dir')
+    parser.add_argument('--workflow-id')
     parser.add_argument('--digest')
     parser.add_argument('--python', default='3')
     parser.add_argument('--no-run', action='store_true')
@@ -220,7 +222,7 @@ def build_image():
             final_requirements = mount_dir / 'frozen.txt'
             final_requirements.touch()
 
-            script_args = ['--python', args.python]
+            script_args = ['--python', args.python, '--workflow-id', args.workflow_id]
 
             # Assumption: if a digest was provided we're not changing the build image and therefore
             # we're fine with reusing wheels we've built previously
