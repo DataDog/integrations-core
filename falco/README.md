@@ -139,5 +139,5 @@ For further assistance, contact [Datadog Support][2].
 [2]: https://docs.datadoghq.com/help/
 [3]: https://github.com/DataDog/integrations-core/blob/master/falco/metadata.csv
 [4]: https://github.com/DataDog/integrations-core/blob/master/falco/datadog_checks/falco/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/containers/kubernetes/integrations/
