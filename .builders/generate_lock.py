@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from functools import cache
@@ -119,7 +120,7 @@ def generate_lock_file(
                 selected = candidates.get(f'{workflow_id}WID')
             else:
                 selected = candidates.get(-1)
-
+            
             if not selected:
                 continue
 
@@ -165,4 +166,4 @@ def lock(targets_dir, workflow_id):
 
     with RESOLUTION_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
         contents = json.dumps(image_digests, indent=2, sort_keys=True)
-        f.write(f'{contents}\n')g
+        f.write(f'{contents}\n')
