@@ -154,21 +154,7 @@ class VagrantAgent(AgentInterface):
         if stdout:
             self.app.display_info(stdout)
         if stderr:
-            self.app.display_debug(stderr)
-
-    def _show_logs(self) -> None:
-        self.app.display_info(f"Attempting to fetch agent logs from VM `{self._vm_name}`")
-        log_file_path_guest = WINDOWS_AGENT_LOG_PATH if self._is_windows_vm else LINUX_AGENT_LOG_PATH
-
-        host_cmd_to_fetch_logs = ["type" if self._is_windows_vm else "cat", log_file_path_guest]
-
-        if not self._is_windows_vm and self.metadata.get("vagrant_logs_require_sudo", True):
-            if host_cmd_to_fetch_logs[0] != "sudo":
-                host_cmd_to_fetch_logs.insert(0, "sudo")
-
-        logs_command_formatted = ' '.join(host_cmd_to_fetch_logs)
-        self.app.display_debug(f"Fetching logs with command: {logs_command_formatted}")
-        self._run_command(logs_command_formatted, "show-logs")
+            self.app.display_error(stderr)
 
     # =============================
     # Private Helpers: Vagrant Setup & Initialization
