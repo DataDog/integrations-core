@@ -192,8 +192,10 @@ def test_submit_changelogs(instance, mock_lustre_commands):
         # Verify the first call arguments
         first_call = mock_send_log.call_args_list[0]
         expected_data = {
-            'message': '07RMDIR 12:47:32.913242547 2025.06.02 0x1 t=[0x200000bd1:0x3:0x0]\
-                    ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus',
+            'operation_type': '07RMDIR',
+            'timestamp': 1748868452.913242,
+            'flags': '0x1',
+            'message': 't=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] bacillus',
         }
         assert first_call[0][0] == expected_data
         assert first_call[0][1] == {'index': '5'}
