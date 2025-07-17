@@ -32,6 +32,24 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
+The integration collects metrics from the following Windows Performance Objects:
+
+- **NTDS**: Core Active Directory metrics including replication, LDAP operations, and directory service threads
+- **Netlogon**: Authentication performance metrics including semaphore statistics for monitoring authentication bottlenecks
+- **Security System-Wide Statistics**: Authentication protocol usage metrics (NTLM vs Kerberos)
+
+#### Netlogon Metrics
+
+The Netlogon metrics help monitor authentication performance and identify bottlenecks in domain controller authentication processing:
+
+- `active_directory.netlogon.semaphore_waiters`: Number of threads waiting for the authentication semaphore
+- `active_directory.netlogon.semaphore_holders`: Number of threads currently holding the semaphore
+- `active_directory.netlogon.semaphore_acquires`: Total number of semaphore acquisitions
+- `active_directory.netlogon.semaphore_timeouts`: Number of timeouts waiting for the semaphore
+- `active_directory.netlogon.semaphore_hold_time`: Average time (in seconds) the semaphore is held
+
+These metrics are particularly useful for monitoring authentication load from network access control (NAC) devices, WiFi authentication, and other authentication-heavy scenarios.
+
 ### Events
 
 The Active Directory check does not include any events.

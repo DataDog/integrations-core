@@ -53,6 +53,27 @@ METRICS_CONFIG = {
             }
         ],
     },
+    'Netlogon': {
+        'name': 'netlogon',
+        'counters': [
+            {
+                'Semaphore Waiters': 'semaphore_waiters',
+                'Semaphore Holders': 'semaphore_holders',
+                'Semaphore Acquires': {'name': 'semaphore_acquires', 'type': 'count'},
+                'Semaphore Timeouts': {'name': 'semaphore_timeouts', 'type': 'count'},
+                'Average Semaphore Hold Time': 'semaphore_hold_time',
+            }
+        ],
+    },
+    'Security System-Wide Statistics': {
+        'name': 'security',
+        'counters': [
+            {
+                'NTLM Authentications': {'name': 'ntlm_authentications', 'type': 'rate'},
+                'Kerberos Authentications': {'name': 'kerberos_authentications', 'type': 'rate'},
+            }
+        ],
+    },
 }
 
 DEFAULT_COUNTERS = [
