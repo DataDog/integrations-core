@@ -58,11 +58,11 @@ jobs:
 
 
     - name: Download artifact
-      run: gh run view ${{ steps.find_run.outputs.run_id }} --log
+      run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # run: gh run download ${{ steps.find_run.outputs.run_id }} --name size_status_visualizations/
+    # run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
 
     # ------------------------------------------------------------
     # - name: Measure disk usage (uncompressed)
