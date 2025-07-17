@@ -15,7 +15,7 @@ from .util import connect_with_session_variables
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
@@ -138,9 +138,7 @@ class MySQLMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting database settings.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
@@ -151,9 +149,7 @@ class MySQLMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.
-                                These may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
     def shut_down(self):
@@ -177,6 +173,7 @@ class MySQLMetadata(DBMAsyncJob):
             settings = [dict(row) for row in rows]
         event = {
             "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
             "dbms": "mysql",
             "kind": "mysql_variables",

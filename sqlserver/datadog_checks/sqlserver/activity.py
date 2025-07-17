@@ -24,7 +24,7 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
@@ -77,6 +77,7 @@ SELECT
     sess.host_name as host_name,
     sess.program_name as program_name,
     sess.is_user_process as is_user_process,
+    sess.client_interface_name as client_interface_name,
     {input_buffer_columns}
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
@@ -118,7 +119,8 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
-    sess.is_user_process as is_user_process
+    sess.is_user_process as is_user_process,
+    sess.client_interface_name as client_interface_name
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id

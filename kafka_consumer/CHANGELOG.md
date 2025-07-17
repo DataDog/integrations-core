@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.5.2 / 2025-05-15
+## 6.6.0 / 2025-07-10
+
+***Added***:
+
+* kafka_consumer check can retrieve messages from Kafka and log them. ([#20512](https://github.com/DataDog/integrations-core/pull/20512))
+
+## 6.5.2 / 2025-05-15 / Agent 7.67.0
 
 ***Fixed***:
 

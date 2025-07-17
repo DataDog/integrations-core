@@ -114,7 +114,8 @@ def test_config_kerberos_keytab_file():
     assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
     with mock.patch(
-        'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', ''))
+        'requests.Session.get',
+        side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', '')),
     ):
         response = http.get('https://www.google.com')
         assert response.text == '/test/file'
@@ -130,7 +131,9 @@ def test_config_kerberos_cache():
 
     assert os.environ.get('KRB5CCNAME') is None
 
-    with mock.patch('requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))):
+    with mock.patch(
+        'requests.Session.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
+    ):
         response = http.get('https://www.google.com')
         assert response.text == '/test/file'
 
@@ -145,7 +148,7 @@ def test_config_kerberos_cache_restores_rollback():
 
     with EnvVars({'KRB5CCNAME': 'old'}):
         with mock.patch(
-            'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
+            'requests.Session.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
         ):
             response = http.get('https://www.google.com')
             assert response.text == '/test/file'
@@ -163,7 +166,7 @@ def test_config_kerberos_keytab_file_rollback():
         assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
         with mock.patch(
-            'requests.get',
+            'requests.Session.get',
             side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', '')),
         ):
             response = http.get('https://www.google.com')

@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2025-07-02",
+	"last_updated_at": "2025-07-02",
+	"title": "Excessive bandwidth usage detected",
+	"description": "It monitors for excessive bandwidth usage by a user over 30 mins, which may signal sustained large data transfers, unauthorized activities, or malware. Extended high usage can lead to network congestion and impact overall performance.",
+	"definition": {
+		"id": 176623265,
+		"name": "Excessive bandwidth usage detected",
+		"type": "log alert",
+		"query": "logs(\"source:iboss @evt.name:WEB_LOG\").index(\"*\").rollup(\"sum\", \"@totalByteCount\").by(\"@usr.name\").last(\"30m\") > 10737418240",
+		"message": "{{#is_warning}}⚠️ **Warning**: Excessive bandwidth usage detected for user **{{log.attributes.usr.name}}**.\n\n- **Current Usage**: {{value}} Bytes\n- **Warning Threshold**: {{warn_threshold}} Bytes\n{{/is_warning}}\n\n{{#is_alert}}🚨 **Alert**: Critical bandwidth usage threshold exceeded by user **{{log.attributes.usr.name}}**.\n\n- **Current Usage**: {{value}} Bytes\n- **Alert Threshold**: {{threshold}} Bytes\n{{/is_alert}}\n\n\n@example@example.com",
+		"tags": [
+			"integration:iboss"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10737418240,
+				"warning": 5368709120
+			},
+			"enable_logs_sample": true,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:iboss"
+	]
+}

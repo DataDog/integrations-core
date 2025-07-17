@@ -5,12 +5,16 @@ import json
 from collections import defaultdict
 from time import time
 
+from confluent_kafka import TopicPartition
+
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
 MAX_TIMESTAMPS = 1000
+SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
+DATA_STREAMS_MESSAGES_CACHE_KEY = 'get_messages_cache'
 
 
 class KafkaCheck(AgentCheck):
@@ -96,6 +100,7 @@ class KafkaCheck(AgentCheck):
         )
         if self.config._close_admin_client:
             self.client.close_admin_client()
+        self.data_streams_live_message(highwater_offsets or {}, cluster_id)
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -109,7 +114,6 @@ class KafkaCheck(AgentCheck):
         self.log.debug('%s futures to be waited on', len(offsets))
 
         for consumer_group, topic_partitions in offsets:
-
             self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
 
             for topic, partition, offset in topic_partitions:
@@ -176,6 +180,30 @@ class KafkaCheck(AgentCheck):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
 
+    def _messages_have_been_retrieved(self, config_id):
+        """Check if messages have been retrieved for the given config ID."""
+        try:
+            content = self.read_persistent_cache(DATA_STREAMS_MESSAGES_CACHE_KEY)
+            if content:
+                config_ids = set(content.split(","))
+                return config_id in config_ids
+        except Exception as e:
+            self.log.warning('Could not read persistent cache: %s', str(e))
+        return False
+
+    def _mark_messages_retrieved(self, config_id):
+        """Mark that messages have been retrieved for the given config ID."""
+        try:
+            content = self.read_persistent_cache(DATA_STREAMS_MESSAGES_CACHE_KEY)
+            if content:
+                config_ids = set(content.split(","))
+            else:
+                config_ids = set()
+            config_ids.add(config_id)
+            self.write_persistent_cache(DATA_STREAMS_MESSAGES_CACHE_KEY, ",".join(config_ids))
+        except Exception as e:
+            self.log.warning('Could not write to persistent cache: %s', str(e))
+
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
@@ -231,7 +259,7 @@ class KafkaCheck(AgentCheck):
 
                 partitions = self.client.get_partitions_for_topic(topic)
                 self.log.debug("Received partitions %s for topic %s", partitions, topic)
-                if partitions is not None and partition in partitions:
+                if partition in partitions:
                     # report consumer offset if the partition is valid because even if leaderless
                     # the consumer offset will be valid once the leader failover completes
                     self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
@@ -379,6 +407,78 @@ class KafkaCheck(AgentCheck):
         }
         self.event(event_dict)
 
+    def data_streams_live_message(self, highwater_offsets, cluster_id):
+        for cfg in self.config.live_messages_configs:
+            kafka = cfg['kafka']
+            topic = kafka["topic"]
+            partition = kafka["partition"]
+            start_offset = kafka["start_offset"]
+            n_messages = kafka["n_messages"]
+            cluster = kafka["cluster"]
+            config_id = cfg["id"]
+            if self._messages_have_been_retrieved(config_id):
+                continue
+            if cluster != cluster_id:
+                continue
+            start_offsets = resolve_start_offsets(highwater_offsets, topic, partition, start_offset, n_messages)
+
+            if not start_offsets:
+                self.log.warning('Unable to get a list of partitions to read from for live messages')
+                self.send_log(
+                    {
+                        'timestamp': int(time()),
+                        'config_id': config_id,
+                        'technology': 'kafka',
+                        'cluster': str(cluster),
+                        'topic': str(topic),
+                        'live_messages_error': 'Unable to list partitions to read from',
+                        'message': "Unable to list partitions to read from",
+                    }
+                )
+                continue
+
+            self.client.start_collecting_messages(start_offsets)
+            for _ in range(n_messages):
+                message = self.client.get_next_message()
+                if message is None:
+                    self.log.debug('Live messages: no message to retrieve')
+                    self.send_log(
+                        {
+                            'timestamp': int(time()),
+                            'config_id': config_id,
+                            'technology': 'kafka',
+                            'cluster': str(cluster),
+                            'topic': str(topic),
+                            'live_messages_error': 'No more messages to retrieve',
+                            'message': "No more messages to retrieve",
+                        }
+                    )
+                    break
+                data = {
+                    'timestamp': int(time()),
+                    'technology': 'kafka',
+                    'cluster': str(cluster),
+                    'config_id': config_id,
+                    'topic': str(topic),
+                    'partition': str(message.partition()),
+                    'offset': str(message.offset()),
+                }
+                decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(message)
+                if decoded_value:
+                    data['message_value'] = decoded_value
+                else:
+                    data['message'] = "Message format not supported"
+                    data['live_messages_error'] = 'Message format not supported'
+                if value_schema_id:
+                    data['value_schema_id'] = str(value_schema_id)
+                if decoded_key:
+                    data['message_key'] = decoded_key
+                if key_schema_id:
+                    data['key_schema_id'] = str(key_schema_id)
+                self.send_log(data)
+            self.client.close_consumer()
+            self._mark_messages_retrieved(config_id)
+
 
 def _get_interpolated_timestamp(timestamps, offset):
     if offset in timestamps:
@@ -407,3 +507,66 @@ def _get_interpolated_timestamp(timestamps, offset):
     slope = (timestamp_after - timestamp_before) / float(offset_after - offset_before)
     timestamp = slope * (offset - offset_after) + timestamp_after
     return timestamp
+
+
+def resolve_start_offsets(highwater_offsets, target_topic, target_partition, start_offset, n_messages):
+    if int(target_partition) == -1:
+        # in this case, we get n_messages, starting at offset latest - n_messages on each partition.
+        # this doesn't match exactly to the latest messages, but if we don't do that, we could run into
+        # edge cases when some partitions don't get any traffic.
+        start_offsets = []
+        for topic, partition in highwater_offsets:
+            if topic == target_topic and highwater_offsets[(topic, partition)] >= 0:
+                start_offsets.append(
+                    TopicPartition(topic, partition, max(0, highwater_offsets[(topic, partition)] - n_messages + 1))
+                )
+                if len(start_offsets) >= n_messages:
+                    break
+        return start_offsets
+    if int(start_offset) == -1:
+        end_offset = highwater_offsets.get((target_topic, target_partition), -1)
+        return (
+            []
+            if end_offset < 0
+            else [TopicPartition(target_topic, target_partition, max(0, end_offset - n_messages + 1))]
+        )
+    return [TopicPartition(target_topic, target_partition, start_offset)]
+
+
+def deserialize_message(message):
+    try:
+        decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(message.value())
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return None, None, None, None
+    try:
+        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(message.key())
+        return decoded_value, value_schema_id, decoded_key, key_schema_id
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return decoded_value, value_schema_id, None, None
+
+
+def _deserialize_bytes_maybe_schema_registry(message):
+    try:
+        return _deserialize_bytes(message), None
+    except (UnicodeDecodeError, json.JSONDecodeError) as e:
+        # If the message is not a valid JSON, it might be a schema registry message, that is prefixed
+        # with a magic byte and a schema ID.
+        if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
+            raise e
+        schema_id = int.from_bytes(message[1:5], 'big')
+        message = message[5:]  # Skip the schema ID bytes
+        return _deserialize_bytes(message), schema_id
+
+
+def _deserialize_bytes(message):
+    """Deserialize a message from Kafka. Supports JSON format.
+    Args:
+        message: Raw message bytes from Kafka
+    Returns:
+        Decoded message as a string
+    """
+    if not message:
+        return ""
+    decoded = message.decode('utf-8')
+    json.loads(decoded)
+    return decoded

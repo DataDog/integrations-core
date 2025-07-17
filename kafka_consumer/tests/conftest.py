@@ -54,10 +54,13 @@ def dd_environment():
             },
             build=True,
         ):
-            yield {
-                'instances': [common.E2E_INSTANCE],
-                'init_config': {'kafka_timeout': 30},
-            }, common.E2E_METADATA
+            yield (
+                {
+                    'instances': [common.E2E_INSTANCE],
+                    'init_config': {'kafka_timeout': 30},
+                },
+                common.E2E_METADATA,
+            )
 
 
 def is_cluster_id_available():

@@ -25,7 +25,7 @@ from .util import DatabaseConfigurationError, connect_with_session_variables, wa
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 PyMysqlRow = Dict[str, Any]
 Row = Dict[str, Any]
@@ -246,9 +246,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
             {}
-            """.format(
-            condition
-        )
+            """.format(condition)
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             args = [self._last_seen] if only_query_recent_statements else None

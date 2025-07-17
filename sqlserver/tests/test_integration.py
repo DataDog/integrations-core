@@ -515,7 +515,6 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
     for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
-
         # These require extra setup to test
         if mname not in DATABASE_INDEX_METRICS and mname not in [m[0] for m in TABLE_SIZE_METRICS]:
             aggregator.assert_metric(mname)
@@ -1110,18 +1109,10 @@ def test_xe_collection_integration(aggregator, dd_run_check, bob_conn, instance_
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
     # Filter completion events (now each event may contain multiple query details)
-    query_completion_batches = [
-        e
-        for e in dbm_activity
-        if e.get('dbm_type') == 'query_completion' and 'datadog_query_completions' in str(e.get('event_source', ''))
-    ]
+    query_completion_batches = [e for e in dbm_activity if e.get('dbm_type') == 'query_completion']
 
     # Filter error events (now each event may contain multiple query details)
-    error_batches = [
-        e
-        for e in dbm_activity
-        if e.get('dbm_type') == 'query_error' and 'datadog_query_errors' in str(e.get('event_source', ''))
-    ]
+    error_batches = [e for e in dbm_activity if e.get('dbm_type') == 'query_error']
 
     # We should have at least one batch of completion events
     assert len(query_completion_batches) > 0, "No query completion batches collected"

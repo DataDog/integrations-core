@@ -22,7 +22,7 @@ from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
 
-from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_VERSION_PARSED, PORT
+from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -126,8 +126,10 @@ def test_activity_collection(
         'port:13306',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         expected_tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            expected_tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
     assert sorted(activity['ddtags']) == sorted(expected_tags)
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
@@ -148,7 +150,9 @@ def test_activity_collection(
     expected_sql_text = (
         query[:1021] + '...'
         if len(query) > 1024 and (MYSQL_VERSION_PARSED == parse_version('5.6') or MYSQL_FLAVOR == 'mariadb')
-        else query[:4093] + '...' if len(query) > 4096 else query
+        else query[:4093] + '...'
+        if len(query) > 4096
+        else query
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
@@ -551,8 +555,10 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(check.server_uuid),)
+        if MYSQL_REPLICATION == 'classic':
+            _tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
     return _tags
 
 
@@ -635,9 +641,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
 
     deadlock_metric_end = aggregator.metrics("mysql.innodb.deadlocks")
 
-    assert (
-        len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1
-    ), "there should be one new deadlock"
+    assert len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1, (
+        "there should be one new deadlock"
+    )
 
 
 def _get_conn_for_user(user, _autocommit=False):

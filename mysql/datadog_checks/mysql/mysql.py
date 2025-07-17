@@ -65,6 +65,7 @@ from .queries import (
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
+    SQL_BINLOG_ENABLED,
     SQL_GROUP_REPLICATION_MEMBER,
     SQL_GROUP_REPLICATION_MEMBER_8_0_2,
     SQL_GROUP_REPLICATION_METRICS,
@@ -97,7 +98,7 @@ except ImportError:
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class MySql(AgentCheck):
@@ -114,6 +115,7 @@ class MySql(AgentCheck):
         self.version = None
         self.is_mariadb = None
         self.server_uuid = None
+        self.cluster_uuid = None
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -121,6 +123,9 @@ class MySql(AgentCheck):
         self._is_aurora = None
         self._performance_schema_enabled = None
         self._events_wait_current_enabled = None
+        self._group_replication_active = None
+        self._binlog_enabled = None
+        self._replication_role = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
@@ -305,6 +310,8 @@ class MySql(AgentCheck):
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
+        self._check_binlog_enabled(db)
+        self._is_group_replication_active(db)
 
     def _check_performance_schema_enabled(self, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -379,17 +386,18 @@ class MySql(AgentCheck):
             with self._connect() as db:
                 self._conn = db
 
-                # Update tag set with relevant information
-                if self._get_is_aurora(db):
-                    aurora_tags = self._get_runtime_aurora_tags(db)
-                    self._update_runtime_aurora_tags(aurora_tags)
-
                 # version collection
                 self.set_version(db)
                 self._send_metadata()
                 self._check_database_configuration(db)
 
                 self.set_server_uuid(db)
+                self.set_cluster_tags(db)
+
+                # Update tag set with relevant information
+                if self._get_is_aurora(db):
+                    role = self._get_aurora_replication_role(db)
+                    self._update_aurora_replication_role(role)
 
                 # All data collection starts here
                 self._send_database_instance_metadata()
@@ -571,9 +579,13 @@ class MySql(AgentCheck):
         if not is_affirmative(
             self._config.options.get('disable_innodb_metrics', False)
         ) and self._check_innodb_engine_enabled(db):
-            with tracked_query(self, operation="innodb_metrics"):
-                results.update(self.innodb_stats.get_stats_from_innodb_status(db))
-            self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
+            # Innodb metrics are not available for Aurora reader instances
+            if self._is_aurora and self._replication_role == "reader":
+                self.log.debug("Skipping innodb metrics collection for reader instance")
+            else:
+                with tracked_query(self, operation="innodb_metrics"):
+                    results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+                self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
@@ -637,7 +649,7 @@ class MySql(AgentCheck):
                 results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if is_affirmative(self._config.options.get('table_rows_stats_metrics', False)) and self.userstat_enabled:
+        if self._config.table_rows_stats_enabled and self.userstat_enabled:
             # report size of tables in MiB to Datadog
             self.log.debug("Collecting Table Row Stats Metrics.")
             with tracked_query(self, operation="table_rows_stats_metrics"):
@@ -668,8 +680,8 @@ class MySql(AgentCheck):
                 results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
-        if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
-            if self.performance_schema_enabled and self._is_group_replication_active(db):
+        if self._config.replication_enabled:
+            if self.performance_schema_enabled and self._group_replication_active:
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
@@ -750,9 +762,8 @@ class MySql(AgentCheck):
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
-        replication_channel = self._config.options.get('replication_channel')
-        results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
-        results.update(self._get_replica_status(db, above_560))
+        results.update(self._get_replica_stats(db))
+        results.update(self._get_replicas_connected_count(db, above_560))
         return REPLICA_VARS
 
     def _collect_group_replica_metrics(self, db, results):
@@ -835,7 +846,6 @@ class MySql(AgentCheck):
             replica_io_running = any(v.lower().strip() == 'yes' for v in replica_io_running.values())
         if replica_sql_running:
             replica_sql_running = any(v.lower().strip() == 'yes' for v in replica_sql_running.values())
-        binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
         replicas = collect_scalar('Slaves_connected', results)
@@ -845,7 +855,7 @@ class MySql(AgentCheck):
         # If the host act as a source
         source_repl_running_status = AgentCheck.UNKNOWN
         if self._is_source_host(replicas, results):
-            if replicas > 0 and binlog_running:
+            if replicas > 0 and self._binlog_enabled:
                 self.log.debug("Host is master, there are replicas and binlog is running")
                 source_repl_running_status = AgentCheck.OK
             else:
@@ -907,6 +917,11 @@ class MySql(AgentCheck):
         return collect_string('Master_Host', results) or collect_string('Source_Host', results)
 
     def _is_group_replication_active(self, db):
+        if not self._config.replication_enabled:
+            self.log.debug("Replication is not enabled, skipping group replication check")
+            self._group_replication_active = False
+            return self._group_replication_active
+
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(SQL_GROUP_REPLICATION_PLUGIN_STATUS)
             r = cursor.fetchone()
@@ -914,9 +929,12 @@ class MySql(AgentCheck):
             # Plugin is installed
             if r is not None and r[0].lower() == 'active':
                 self.log.debug('Group replication plugin is detected and active')
-                return True
-        self.log.debug('Group replication plugin not detected')
-        return False
+                self._group_replication_active = True
+                return self._group_replication_active
+            else:
+                self.log.debug('Group replication plugin not detected')
+                self._group_replication_active = False
+                return self._group_replication_active
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in variables.items():
@@ -991,29 +1009,25 @@ class MySql(AgentCheck):
             self.warning("Error while running %s\n%s", query, traceback.format_exc())
             self.log.exception("Error while running %s", query)
 
-    def _get_runtime_aurora_tags(self, db):
-        runtime_tags = {}
+    def _get_aurora_replication_role(self, db):
+        role = None
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
                 replication_role = cursor.fetchone()[0]
                 if replication_role in {'writer', 'reader'}:
-                    runtime_tags['replication_role'] = replication_role
+                    role = replication_role
         except Exception:
             self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
-        return runtime_tags
+        return role
 
-    def _update_runtime_aurora_tags(self, aurora_tags):
+    def _update_aurora_replication_role(self, replication_role):
         """
-        Update the tags with Aurora runtime tags, ensuring no duplicate tags exist.
-        First removes any existing Aurora runtime tags by key name, then adds the new tags.
+        Updates the replication_role tag with the aurora replication role if it exists
         """
-        # Extract tag keys from aurora_tags to identify which tags to remove
-        for tag, value in aurora_tags.items():
-            self.tag_manager.set_tag(tag, value, replace=True)
-        self.tag_manager.set_tag(
-            "dd.internal.resource", "database_instance:{}".format(self.database_identifier), replace=True
-        )
+        if replication_role:
+            self.tag_manager.set_tag('replication_role', replication_role, replace=True)
+            self._replication_role = replication_role
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
@@ -1160,26 +1174,36 @@ class MySql(AgentCheck):
             self._is_innodb_engine_enabled_cached = False
         return self._is_innodb_engine_enabled_cached
 
-    def _get_replica_stats(self, db, is_mariadb, replication_channel):
+    def _get_replica_stats(self, db):
         replica_results = defaultdict(dict)
+        replica_status = self._get_replica_replication_status(db)
+        if replica_status:
+            # MySQL <5.7 does not have Channel_Name.
+            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+            channel = self._config.replication_channel or replica_status.get('Channel_Name') or 'default'
+            for key, value in replica_status.items():
+                if value is not None:
+                    replica_results[key]['channel:{0}'.format(channel)] = value
+        return replica_results
+
+    def _get_replica_replication_status(self, db):
+        result = {}
+        if not self._config.replication_enabled:
+            return result
+
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if is_mariadb and replication_channel:
-                    cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
-                cursor.execute(show_replica_status_query(self.version, is_mariadb, replication_channel))
+                if self.is_mariadb and self._config.replication_channel:
+                    cursor.execute("SET @@default_master_connection = '{0}';".format(self._config.replication_channel))
+                cursor.execute(
+                    show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
+                )
 
-                results = cursor.fetchall()
-                self.log.debug("Getting replication status: %s", results)
-                for replica_result in results:
-                    # MySQL <5.7 does not have Channel_Name.
-                    # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                    channel = replication_channel or replica_result.get('Channel_Name') or 'default'
-                    for key, value in replica_result.items():
-                        if value is not None:
-                            replica_results[key]['channel:{0}'.format(channel)] = value
+                result = cursor.fetchone()
+                self.log.debug("Getting replication status: %s", result)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
-            if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
+            if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
                 # MariaDB complains when you try to get replica status with a
                 # connection name on the master, without connection name it
                 # responds an empty string as expected.
@@ -1188,27 +1212,29 @@ class MySql(AgentCheck):
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
+        return result
+
+    def _check_binlog_enabled(self, db):
+        if not self._config.replication_enabled:
+            self._binlog_enabled = False
+            return self._binlog_enabled
+
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
-                    cursor.execute("SHOW BINARY LOG STATUS;")
-                else:
-                    cursor.execute("SHOW MASTER STATUS;")
+                cursor.execute(SQL_BINLOG_ENABLED)
 
-                binlog_results = cursor.fetchone()
-                if binlog_results:
-                    replica_results.update({'Binlog_enabled': True})
+                result = cursor.fetchone()
+
+                self._binlog_enabled = self._get_variable_enabled(result, 'binlog_enabled')
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            if "You are not using binary logging" in str(e):
-                replica_results.update({'Binlog_enabled': False})
-            else:
-                self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
+            self.warning("Error while checking if binlog is enabled. Defaulting to False: %s", e)
+            self._binlog_enabled = False
 
-        return replica_results
+        return self._binlog_enabled
 
-    def _get_replica_status(self, db, above_560):
+    def _get_replicas_connected_count(self, db, above_560):
         """
-        Retrieve the replicas statuses using:
+        Retrieve the count of connected replicas using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
         2. The `information_schema.processlist` table. Blocking
         """
@@ -1434,3 +1460,28 @@ class MySql(AgentCheck):
             }
             self._database_instance_emitted[self.database_identifier] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
+    def set_cluster_tags(self, db):
+        if not self._config.replication_enabled:
+            self.log.debug("Replication is not enabled, skipping cluster tags")
+            return
+        if self.is_mariadb:
+            self.log.debug("MariaDB cluster tags are not currently supported")
+            return
+        if self._group_replication_active:
+            self.log.debug("Group replication cluster tags are not currently supported")
+            return
+
+        replica_status = self._get_replica_replication_status(db)
+        if replica_status:
+            self.cluster_uuid = replica_status.get('Source_UUID', replica_status.get('Master_UUID'))
+            if self.cluster_uuid:
+                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
+                self.tag_manager.set_tag('replication_role', "replica", replace=True)
+                self._replication_role = "replica"
+        else:
+            if self._binlog_enabled:
+                self.cluster_uuid = self.server_uuid
+                self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
+                self.tag_manager.set_tag('replication_role', "primary", replace=True)
+                self._replication_role = "primary"
