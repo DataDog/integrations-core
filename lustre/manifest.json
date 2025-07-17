@@ -48,6 +48,9 @@
 	"ldlm_bl_01",
 	"ldlm_elt"
       ]
+    },
+    "saved_views": {
+    "Lustre Operations Overview": "assets/saved_views/operations_overview.json"
     }
   },
   "author": {
