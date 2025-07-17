@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:learn.microsoft.com)",
+      "WebFetch(domain:mskb.pkisolutions.com)",
+      "WebFetch(domain:windowstechno.com)",
+      "Bash(ls:*)",
+      "Bash(python3:*)"
+    ],
+    "deny": []
+  }
+}

@@ -126,6 +126,33 @@ instances:
     #     name: ds
     #     counters:
     #     - DS % Writes from LDAP: writes_from_ldap
+    #
+    #   ## Netlogon metrics configuration
+    #   ## Monitors authentication performance and DC secure channel health
+    #   Netlogon:
+    #     name: netlogon
+    #     counters:
+    #     - Semaphore Waiters: semaphore_waiters
+    #     - Semaphore Holders: semaphore_holders
+    #     - Semaphore Acquires:
+    #         name: semaphore_acquires
+    #         type: count
+    #     - Semaphore Timeouts:
+    #         name: semaphore_timeouts
+    #         type: count
+    #     - Average Semaphore Hold Time: semaphore_hold_time
+    #
+    #   ## Security System-Wide Statistics
+    #   ## Tracks authentication protocol usage (NTLM vs Kerberos)
+    #   Security System-Wide Statistics:
+    #     name: security
+    #     counters:
+    #     - NTLM Authentications:
+    #         name: ntlm_authentications
+    #         type: rate
+    #     - Kerberos Authentications:
+    #         name: kerberos_authentications
+    #         type: rate
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
