@@ -277,9 +277,6 @@ class VagrantAgent(AgentInterface):
         stderr = process.stderr.decode("utf-8", errors="replace") if process.stderr else ""
         if process.returncode:
             cmd_str = ' '.join(command_formatted) if isinstance(command_formatted, list) else str(command_formatted)
-            self.app.display_error(
-                f"Command failed: {cmd_str} (RC: {process.returncode})\nStdout:\n{stdout}\nStderr:\n{stderr}"
-            )
             raise RuntimeError(
                 f"Command failed: {cmd_str} (RC: {process.returncode})\nStdout:\n{stdout}\nStderr:\n{stderr}"
             )
