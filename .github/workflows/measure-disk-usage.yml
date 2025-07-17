@@ -17,11 +17,6 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
-      - name: Fetch master and PR branch explicitly (safely)
-        run: |
-          git fetch origin master:refs/remotes/origin/master
-          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
-
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
@@ -45,47 +40,42 @@ jobs:
           path: hola.txt
           if-no-files-found: error
 
-      - name: Get merge base commit with master
+      - name: Fetch master and PR branch
+        run: |
+          git fetch origin master:refs/remotes/origin/master
+          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
+
+      - name: Get merge base commit
         id: merge_base
         run: |
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
           echo "sha=$base" >> $GITHUB_OUTPUT
-          echo "sha=$base" >> $GITHUB_STEP_SUMMARY
+          echo "🔁 Merge-base is: $base"
 
-
-      - name: Find exact run for merge base using API
+      - name: Find workflow run at exact merge-base SHA (push event included)
         id: find_run
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Looking for run at SHA: ${{ steps.merge_base.outputs.sha }}"
+          MERGE_BASE=${{ steps.merge_base.outputs.sha }}
+          echo "🔍 Searching for workflow run at SHA: $MERGE_BASE"
 
-          run_id=$(
-            curl -s -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/runs?head_sha=${{ steps.merge_base.outputs.sha }}" \
-            | jq -r '.workflow_runs[] | select(.name == "Measure Disk Usage") | .id' | head -n 1
-          )
+          run_id=$(gh run list --workflow "Measure Disk Usage" --limit 100 --json databaseId,headSha,event \
+            | jq -r --arg sha "$MERGE_BASE" '.[] | select(.headSha == $sha) | .databaseId' | head -n 1)
 
           if [ -z "$run_id" ]; then
             echo "❌ No workflow run found for that SHA"
             exit 1
           fi
 
-          echo "✅ Found run_id: $run_id"
+          echo "✅ Found run_id=$run_id"
           echo "run_id=$run_id" >> $GITHUB_OUTPUT
           echo "run_id=$run_id" >> $GITHUB_STEP_SUMMARY
 
-
-
-      - name: Download artifact from merge base
+      - name: Download artifact from merge-base run
         run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: List downloaded files
-        run: find . -type f >> $GITHUB_STEP_SUMMARY
-
 
     # run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
 
