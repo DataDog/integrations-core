@@ -58,7 +58,7 @@ jobs:
 
 
     - name: Download artifact
-      run: gh run download ${{ steps.find_run.outputs.run_id }} --name hola.txt
+      run: gh run download ${{ steps.find_run.outputs.run_id }} --name size_status_visualizations
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # ------------------------------------------------------------
