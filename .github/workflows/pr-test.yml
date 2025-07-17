@@ -44,6 +44,7 @@ jobs:
     with:
       job-name: "${{ matrix.name }}"
       target: "${{ matrix.target }}"
+      pytest-test: "${{ matrix.pytest-test }}"
       platform: "${{ matrix.platform }}"
       runner: "${{ toJson(matrix.runner) }}"
       repo: "${{ inputs.repo }}"

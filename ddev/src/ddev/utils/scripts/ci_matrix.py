@@ -20,7 +20,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from sympy import root
+from pprint import pp
 
 if sys.version_info[:2] >= (3, 11):
     import tomllib
@@ -209,7 +209,28 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             continue
 
         hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
-        print(hatch_config)
+        env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
+        target_envs = []
+        # convert the env matrix to a list of targets for each combination of values
+        if env_matrix:
+            for env in env_matrix:
+                if not isinstance(env, dict):
+                    continue
+
+                # Create a list of all combinations of values
+                keys = env.keys()
+                values = [env[key] for key in keys]
+                if not values:
+                    continue
+
+                # Generate all combinations of values
+                from itertools import product
+                for combination in product(*values):
+                    target_envs.append(f"{target}:{'-'.join(combination)}")
+
+        else:
+            # If no env matrix is defined, use the target name as the only environment
+            target_envs = [target]        
 
         manifest = read_manifest(root, target)
         platform_ids = matrix_overrides.get('platforms', [])
@@ -258,7 +279,8 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 config['python-support'] = ''.join(supported_python_versions)
 
             config['name'] = normalize_job_name(config['name'])
-            job_matrix.append(config)
+            for target_env in target_envs:
+                job_matrix.append({**config, 'pytest-test': target_env})
 
     return job_matrix
 
