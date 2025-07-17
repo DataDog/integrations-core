@@ -14,6 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -24,6 +25,7 @@ from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
+from datadog_checks.postgres.health import HealthEvent, PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -101,8 +103,9 @@ class PostgreSql(AgentCheck):
 
     HA_SUPPORTED = True
 
-    def __init__(self, name, init_config, instances):
-        super(PostgreSql, self).__init__(name, init_config, instances)
+    def __init__(self, name, init_config, instances, **kwargs):
+        super(PostgreSql, self).__init__(name, init_config, instances, **kwargs)
+        self.health = PostgresHealth(self)
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -126,10 +129,39 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
-        self._config = PostgresConfig(self.instance, self.init_config, self)
+
+        # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
+        self._config = PostgresConfig(self, self.init_config)
+        validation_result = self._config.initialize(self.instance)
+        # Log validation errors and warnings
+        for error in validation_result.errors:
+            self.log.error(error)
+        for warning in validation_result.warnings:
+            self.log.warning(warning)
+
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         self.add_core_tags()
+
+        # Handle the config validation result after we've set tags so those tags are included in the health event
+        self.health.submit_health_event(
+            name=HealthEvent.INITIALIZATION,
+            status=HealthStatus.ERROR
+            if not validation_result.valid
+            else HealthStatus.WARNING
+            if validation_result.warnings
+            else HealthStatus.OK,
+            errors=[str(error) for error in validation_result.errors],
+            warnings=validation_result.warnings,
+            config=sanitize(self._config.__dict__),
+            features=validation_result.features,
+        )
+
+        # Abort initializing the check if the config is invalid
+        if validation_result.valid is False:
+            self.log.error("Configuration validation failed: %s", validation_result.errors)
+            raise validation_result.errors[0]
+
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
@@ -1101,3 +1133,11 @@ class PostgreSql(AgentCheck):
     def _update_tag_sets(self, tags):
         self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
         self.tags_without_db = list(set(self.tags_without_db) | set(tags))
+
+
+def sanitize(dict: dict):
+    sanitized = {k: v for k, v in copy.deepcopy(dict).items() if k != "check"}
+    sanitized['password'] = '***' if sanitized.get('password') else None
+    sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
+
+    return sanitized
