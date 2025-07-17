@@ -70,7 +70,7 @@ class VagrantAgent(AgentInterface):
     ) -> None:
         metadata = self._substitute_template_variables(metadata)
         super().__init__(app, integration, env, metadata, config_file)
-        self._initialize_vagrant(overwrite=False)
+        self._initialize_vagrant(write=False)
 
     def get_id(self) -> str:
         return self._vm_name
@@ -87,7 +87,7 @@ class VagrantAgent(AgentInterface):
 
         # Generate the Vagrantfile content
         self._initialize_vagrant(
-            overwrite=True,
+            write=True,
             exported_env_vars=exported_env_vars,
             agent_install_env_vars=agent_install_env_vars,
             synced_folders=synced_folders,
@@ -159,7 +159,7 @@ class VagrantAgent(AgentInterface):
     # =============================
     # Private Helpers: Vagrant Setup & Initialization
     # =============================
-    def _initialize_vagrant(self, overwrite: bool = False, **kwargs):
+    def _initialize_vagrant(self, write: bool = False, **kwargs):
         # Initialize and create the directory for Vagrant files specific to this VM
         home_dir = Path.home()
         self._temp_vagrant_dir = home_dir / ".ddev" / "vagrant" / self._vm_name
@@ -167,23 +167,17 @@ class VagrantAgent(AgentInterface):
 
         # Generate Vagrantfile if it doesn't exist
         vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
-        if not vagrantfile_path.exists() or overwrite:
-            if overwrite:
-                self.app.display_debug(f"Overwriting Vagrantfile found at '{vagrantfile_path}'.")
-                vagrantfile_path.unlink()
-                self.app.display_debug(f"Vagrantfile deleted at {vagrantfile_path}")
-            else:
-                self.app.display_debug(f"Vagrantfile not found at {vagrantfile_path}, generating new one.")
 
+        # Set VAGRANT_CWD to self.temp_vagrant_dir
+        os.environ["VAGRANT_CWD"] = str(self._temp_vagrant_dir)
+        self.app.display_debug(f"Vagrant working directory set to: {self._temp_vagrant_dir}")
+
+        if write:
             vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
             vagrantfile_path.write_text(vagrantfile_content)
             self.app.display_info(f"Vagrantfile generated at {vagrantfile_path}")
         else:
             self.app.display_info(f"Using existing Vagrantfile at {vagrantfile_path}")
-
-        # Set VAGRANT_CWD to self.temp_vagrant_dir
-        os.environ["VAGRANT_CWD"] = str(self._temp_vagrant_dir)
-        self.app.display_debug(f"Vagrant working directory set to: {self._temp_vagrant_dir}")
 
     def _get_vagrantfile_template(self) -> Template:
         template_path = Path(__file__).parent / "Vagrantfile.template"
