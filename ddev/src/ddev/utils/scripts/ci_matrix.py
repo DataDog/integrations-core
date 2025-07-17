@@ -10,6 +10,7 @@ The logic is also imported by ddev to perform the CI validation on 3.8 which wor
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import re
@@ -229,7 +230,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 # Generate all combinations of values
                 from itertools import product
                 for combination in product(*values):
-                    target_envs.append(f"{target}:{'-'.join(combination)}")
+                    target_envs.append('-'.join(combination))
 
         else:
             # If no env matrix is defined, use the target name as the only environment
@@ -281,9 +282,11 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             if supported_python_versions:
                 config['python-support'] = ''.join(supported_python_versions)
 
-            config['name'] = normalize_job_name(config['name'])
+            job_name = normalize_job_name(config['name'])
             for target_env in target_envs:
-                job_matrix.append({**config, 'pytest-test': target_env})
+                if target_env != target:
+                    config['name'] = f'{copy.copy(job_name)} ({target_env})'
+                job_matrix.append({**config, 'pytest-test': f"{target}:{target_env}"})
 
     return job_matrix
 
