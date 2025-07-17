@@ -85,6 +85,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/beyondtrust_password_safe:
+- beyondtrust_password_safe/**/*
 integration/bitdefender:
 - bitdefender/**/*
 integration/bitwarden:
@@ -403,6 +405,8 @@ integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/litellm:
 - litellm/**/*
+integration/lustre:
+- lustre/**/*
 integration/mac_audit_logs:
 - mac_audit_logs/**/*
 integration/mailchimp:
@@ -525,6 +529,12 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
+integration/proofpoint_tap:
+- proofpoint_tap/**/*
+integration/proofpoint_on_demand:
+- proofpoint_on_demand/**/*
+integration/proxmox:
+- proxmox/**/*
 integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
