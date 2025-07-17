@@ -262,7 +262,7 @@ class VagrantAgent(AgentInterface):
             self._run_command(cmd, command_type, host, shell, **kwargs)
 
     def _run_command(self, command: str, command_type: str, host=False, shell=False, **kwargs):
-        self.app.display_debug(f"Running command_type: `{command_type}` command: `{command}`")
+        self.app.display_debug(f"[{self._vm_name}] Running command_type: `{command_type}` command: `{command}`")
 
         command_formatted: str | list[str]
         if host:
