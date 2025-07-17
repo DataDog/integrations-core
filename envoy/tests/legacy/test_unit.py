@@ -293,7 +293,7 @@ def test_metadata_not_collected(datadog_agent, check):
         "rbac_shadow_metrics",
     ],
 )
-def test_stats_prefix_tags(
+def test_stats_prefix_optional_tags(
     aggregator,
     fixture_path,
     mock_http_response,
