@@ -37,6 +37,8 @@ jobs:
         name: hola.txt
         path: hola.txt
         if-no-files-found: error
+    - name: Fetch master
+      run: git fetch origin master:refs/remotes/origin/master
     - name: Get merge base commit with master
       id: merge_base
       run: |
