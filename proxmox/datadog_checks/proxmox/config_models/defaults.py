@@ -28,10 +28,6 @@ def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname():
-    return False
-
-
 def instance_kerberos_auth():
     return 'disabled'
 
