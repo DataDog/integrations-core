@@ -20,6 +20,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from sympy import root
+
 if sys.version_info[:2] >= (3, 11):
     import tomllib
 # TODO: remove this once ddev drops versions less than 3.11
@@ -195,11 +197,19 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
     display_overrides = overrides.get('display-name', {})
     ci_overrides = overrides.get('ci', {})
 
+    
     job_matrix = []
     for target in targets:
         matrix_overrides = ci_overrides.get(target, {})
         if matrix_overrides.get('exclude', False):
             continue
+
+        hatch_toml = root / target / 'hatch.toml'
+        if not hatch_toml.is_file():
+            continue
+
+        hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
+        print(hatch_config)
 
         manifest = read_manifest(root, target)
         platform_ids = matrix_overrides.get('platforms', [])

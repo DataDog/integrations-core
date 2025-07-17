@@ -102,6 +102,7 @@ class PostgreSql(AgentCheck):
     HA_SUPPORTED = True
 
     def __init__(self, name, init_config, instances):
+        print("HI")
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None
         self._database_identifier = None
