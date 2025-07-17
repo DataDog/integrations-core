@@ -20,7 +20,6 @@ Install the [Datadog Agent][2] and configure the Proxmox integration on one Prox
     ```
     instances:
     - proxmox_server: http://localhost:8006/api2/json
-      empty_default_hostname: true
       headers:
           Authorization: PVEAPIToken=<USER>@<REALM>!<TOKEN_ID>=<YOUR_TOKEN>
     ```
