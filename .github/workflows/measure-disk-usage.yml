@@ -36,7 +36,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: uncompressed_status.csv
+          name: hola.txt
           path: hola.txt
           if-no-files-found: error
 
@@ -50,7 +50,7 @@ jobs:
         run: |
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
           echo "sha=$base" >> $GITHUB_OUTPUT
-          echo "🔁 Merge-base is: $base"
+          echo "🔁 Merge-base is: $base" >> $GITHUB_STEP_SUMMARY
 
       - name: Find workflow run at exact merge-base SHA (push event included)
         id: find_run
@@ -58,17 +58,17 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MERGE_BASE=${{ steps.merge_base.outputs.sha }}
-          echo "🔍 Searching for workflow run at SHA: $MERGE_BASE"
+          echo "🔍 Searching for workflow run at SHA: $MERGE_BASE" >> $GITHUB_STEP_SUMMARY
 
           run_id=$(gh run list --workflow "Measure Disk Usage" --limit 100 --json databaseId,headSha,event \
             | jq -r --arg sha "$MERGE_BASE" '.[] | select(.headSha == $sha) | .databaseId' | head -n 1)
 
           if [ -z "$run_id" ]; then
-            echo "❌ No workflow run found for that SHA"
+            echo "❌ No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
-          echo "✅ Found run_id=$run_id"
+          echo "✅ Found run_id=$run_id" >> $GITHUB_STEP_SUMMARY 
           echo "run_id=$run_id" >> $GITHUB_OUTPUT
           echo "run_id=$run_id" >> $GITHUB_STEP_SUMMARY
 
