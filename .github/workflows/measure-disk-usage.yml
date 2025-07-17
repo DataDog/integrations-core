@@ -53,23 +53,27 @@ jobs:
           echo "sha=$base" >> $GITHUB_STEP_SUMMARY
 
 
-      - name: Find workflow run at merge base
+      - name: Find exact workflow run by head SHA using GitHub API
         id: find_run
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          run_id=$(gh run list --workflow "Measure Disk Usage" --json databaseId,headSha \
-            | jq -r --arg sha "${{ steps.merge_base.outputs.sha }}" \
-              '.[] | select(.headSha == $sha) | .databaseId' \
-            | head -n 1)
+          echo "Looking for workflow run at SHA: ${{ steps.merge_base.outputs.sha }}"
+          response=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?head_sha=${{ steps.merge_base.outputs.sha }}")
+
+          run_id=$(echo "$response" | jq -r '.workflow_runs[] | select(.name == "Measure Disk Usage") | .id' | head -n 1)
 
           if [ -z "$run_id" ]; then
-            echo "No matching run found at merge base"
+            echo "❌ No workflow run found at that SHA."
             exit 1
           fi
 
+          echo "✅ Found run_id=$run_id"
           echo "run_id=$run_id" >> $GITHUB_OUTPUT
           echo "run_id=$run_id" >> $GITHUB_STEP_SUMMARY
+
 
       - name: Download artifact from merge base
         run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
