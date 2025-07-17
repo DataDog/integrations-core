@@ -383,7 +383,7 @@
             {
               "id": 458567982736634,
               "definition": {
-                "title": "Auth Logs ",
+                "title": "Auth Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -963,7 +963,7 @@
             {
               "id": 7426280462740333,
               "definition": {
-                "title": "Firewall  Logs",
+                "title": "Firewall Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -1058,7 +1058,7 @@
             {
               "id": 4415251969355039,
               "definition": {
-                "title": "Firewall Event  Time",
+                "title": "Firewall Event Time",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -1202,7 +1202,7 @@
       {
         "id": 8811010146812934,
         "definition": {
-          "title": " SSH Deamon",
+          "title": "SSH Deamon",
           "title_align": "center",
           "background_color": "vivid_orange",
           "show_title": true,
@@ -1392,7 +1392,7 @@
             {
               "id": 5972068170566162,
               "definition": {
-                "title": "Network Logs ",
+                "title": "Network Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -1572,7 +1572,7 @@
             {
               "id": 3647253314318828,
               "definition": {
-                "title": "Auth Access Logs ",
+                "title": "Auth Access Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -1822,7 +1822,7 @@
             {
               "id": 6657035932032435,
               "definition": {
-                "title": "Admin  Logs ",
+                "title": "Admin Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -1964,7 +1964,7 @@
             {
               "id": 3014667008426488,
               "definition": {
-                "title": "Admin  Event Time",
+                "title": "Admin Event Time",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -2049,7 +2049,7 @@
             {
               "id": 930056298424580,
               "definition": {
-                "title": "System  Logs ",
+                "title": "System Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -2191,7 +2191,7 @@
             {
               "id": 6896383809812739,
               "definition": {
-                "title": "System  Event Time",
+                "title": "System Event Time",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -2276,7 +2276,7 @@
             {
               "id": 5124118448435917,
               "definition": {
-                "title": "VPN Logs ",
+                "title": "VPN Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -2371,7 +2371,7 @@
             {
               "id": 3545920037460380,
               "definition": {
-                "title": "VPN  Event Timeline",
+                "title": "VPN Event Timeline",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
