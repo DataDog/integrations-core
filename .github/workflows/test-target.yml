@@ -203,26 +203,26 @@ jobs:
           exit 1
         }
 
-    # - name: Prepare for testing
-    #   env: >-
-    #     ${{ fromJson(inputs.setup-env-vars || format(
-    #       '{{
-    #         "PYTHONUNBUFFERED": "1",
-    #         "DOCKER_USERNAME": "{0}",
-    #         "DOCKER_ACCESS_TOKEN": "{1}",
-    #         "ORACLE_DOCKER_USERNAME": "{2}",
-    #         "ORACLE_DOCKER_PASSWORD": "{3}",
-    #         "DD_GITHUB_USER": "{4}",
-    #         "DD_GITHUB_TOKEN": "{5}"
-    #       }}',
-    #       secrets.DOCKER_USERNAME,
-    #       secrets.DOCKER_ACCESS_TOKEN,
-    #       secrets.ORACLE_DOCKER_USERNAME,
-    #       secrets.ORACLE_DOCKER_PASSWORD,
-    #       github.actor,
-    #       secrets.GITHUB_TOKEN
-    #     ))}}
-    #   run: ddev ci setup ${{ inputs.target }}
+    - name: Prepare for testing
+      env: >-
+        ${{ fromJson(inputs.setup-env-vars || format(
+          '{{
+            "PYTHONUNBUFFERED": "1",
+            "DOCKER_USERNAME": "{0}",
+            "DOCKER_ACCESS_TOKEN": "{1}",
+            "ORACLE_DOCKER_USERNAME": "{2}",
+            "ORACLE_DOCKER_PASSWORD": "{3}",
+            "DD_GITHUB_USER": "{4}",
+            "DD_GITHUB_TOKEN": "{5}"
+          }}',
+          secrets.DOCKER_USERNAME,
+          secrets.DOCKER_ACCESS_TOKEN,
+          secrets.ORACLE_DOCKER_USERNAME,
+          secrets.ORACLE_DOCKER_PASSWORD,
+          github.actor,
+          secrets.GITHUB_TOKEN
+        ))}}
+      run: ddev ci setup ${{ inputs.target }}
 
     - name: Set up trace capturing
       if: inputs.repo == 'core'
@@ -249,7 +249,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev test --cov --junit ${{ inputs.pytest-test }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
+          ddev test -d -v --cov --junit ${{ inputs.pytest-test }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
         fi
 
     - name: Run Unit & Integration tests with minimum version of base package
