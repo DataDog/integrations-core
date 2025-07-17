@@ -41,7 +41,7 @@ jobs:
       id: merge_base
       run: |
         base=$(git merge-base HEAD origin/master)
-        echo "sha=$base" >> $GITHUB_OUTPUT
+        echo "sha=$base" >> $GITHUB_STEP_SUMMARY
 
     - name: Find workflow run at merge base
       id: find_run
@@ -57,7 +57,7 @@ jobs:
           echo "No matching run found at merge base"
           exit 1
         fi
-        echo "run_id=$run_id" >> $GITHUB_OUTPUT
+        echo "run_id=$run_id" >> $GITHUB_STEP_SUMMARY
 
 
     - name: Download artifact
