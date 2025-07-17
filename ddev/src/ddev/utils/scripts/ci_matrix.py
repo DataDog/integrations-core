@@ -286,7 +286,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             for target_env in target_envs:
                 if target_env != target:
                     config['name'] = f'{copy.copy(job_name)} ({target_env})'
-                job_matrix.append({**config, 'pytest-test': f"{target}:{target_env}"})
+                job_matrix.append({**config, 'target-env': target_env})
 
     return job_matrix
 
