@@ -77,6 +77,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: List downloaded files
+        run: |
+          echo "Downloaded files:"
+          ls -lh
+
     # run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
 
     # ------------------------------------------------------------
