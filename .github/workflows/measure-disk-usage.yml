@@ -79,8 +79,8 @@ jobs:
 
       - name: List downloaded files
         run: |
-          echo "Downloaded files:"
-          ls -lh
+          echo "Downloaded files:" >> $GITHUB_STEP_SUMMARY
+          ls -lh >> $GITHUB_STEP_SUMMARY
 
     # run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
 
