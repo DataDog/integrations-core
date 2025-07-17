@@ -219,7 +219,10 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
                 # Create a list of all combinations of values
                 keys = env.keys()
-                values = [env[key] for key in keys]
+                values = [
+                    [f"py{v}" if key == "python" else v for v in env[key]]
+                    for key in keys
+                ]
                 if not values:
                     continue
 
