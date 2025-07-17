@@ -98,13 +98,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:mysql.net.aborted_connects{$scope}",
-                      "semantic_mode": "combined"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "reduce(equiv_otel(query1), 'avg')"
+                      "query": "avg:mysql.net.aborted_connects{$scope}"
                     }
                   ]
                 }
@@ -134,11 +128,6 @@
                       "name": "query1",
                       "query": "avg:mysql.net.connections{$scope}"
                     }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "reduce(equiv_otel(query1), 'avg')"
-                    }
                   ]
                 }
               ],
@@ -166,7 +155,8 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:mysql.net.max_connections{$scope}",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
