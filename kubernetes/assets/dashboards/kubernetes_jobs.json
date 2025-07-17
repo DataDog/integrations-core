@@ -24,7 +24,7 @@
             "name": "kube_job",
             "prefix": "kube_job"
         }
-    ],    
+    ],
     "title": "Kubernetes Jobs and CronJobs Overview",
     "widgets": [
         {
