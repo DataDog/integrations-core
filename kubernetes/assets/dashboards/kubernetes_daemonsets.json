@@ -14,17 +14,23 @@
         "title": "Ready",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
             "conditional_formats": [
               {
                 "comparator": ">",
                 "palette": "green_on_white",
                 "value": 0
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                "aggregator": "last"
               }
             ]
           }
@@ -47,11 +53,17 @@
         "title_align": "left",
         "show_legend": false,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}"
+              }
+            ],
             "style": {
               "palette": "green",
               "line_type": "solid",
@@ -82,17 +94,23 @@
         "title": "Desired",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
             "conditional_formats": [
               {
                 "comparator": ">",
                 "palette": "green_on_white",
                 "value": 0
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                "aggregator": "last"
               }
             ]
           }
@@ -115,11 +133,17 @@
         "title_align": "left",
         "show_legend": false,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}"
+              }
+            ],
             "style": {
               "palette": "cool",
               "line_type": "solid",
@@ -152,11 +176,27 @@
         "title_align": "left",
         "show_legend": false,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}-sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1 - query2"
+              }
+            ],
             "style": {
               "palette": "warm",
               "line_type": "solid",
@@ -208,11 +248,17 @@
         "title_align": "left",
         "show_legend": false,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -243,16 +289,30 @@
         "title": "Replicas Changes",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "type": "change",
         "requests": [
           {
-            "q": "top(avg:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')",
-            "compare_to": "hour_before",
             "increase_good": true,
             "order_by": "change",
             "change_type": "absolute",
-            "order_dir": "desc"
+            "order_dir": "desc",
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "hour_before(query1)"
+              },
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "metrics",
+                "query": "top(avg:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')",
+                "aggregator": "avg"
+              }
+            ]
           }
         ]
       }
@@ -271,11 +331,27 @@
         "title_align": "left",
         "show_legend": false,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}-sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1 - query2"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -346,11 +422,22 @@
         "title_align": "left",
         "show_legend": true,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set})",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -383,11 +470,22 @@
         "title_align": "left",
         "show_legend": true,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "exclude_null(sum:kubernetes.memory.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_daemon_set})",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.memory.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -424,7 +522,30 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
           }
         ]
       }
@@ -447,7 +568,30 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
           }
         ]
       }
@@ -469,7 +613,24 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes.cpu.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.cpu.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.cpu.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query3",
+                "query": "sum:kubernetes.cpu.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -504,7 +665,24 @@
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes.memory.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.memory.rss{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.memory.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.memory.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "sum:kubernetes.memory.rss{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query3",
+                "query": "sum:kubernetes.memory.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -612,11 +790,30 @@
         "title_align": "left",
         "show_legend": true,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "exclude_null(sum:kubernetes.network.rx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), exclude_null(sum:kubernetes.network.tx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.network.rx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "sum:kubernetes.network.tx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              },
+              {
+                "formula": "exclude_null(query2)"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -649,11 +846,30 @@
         "title_align": "left",
         "show_legend": true,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "exclude_null(sum:kubernetes.network.rx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), exclude_null(sum:kubernetes.network.tx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.network.rx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "sum:kubernetes.network.tx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              },
+              {
+                "formula": "exclude_null(query2)"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -692,11 +908,22 @@
         "title_align": "left",
         "show_legend": true,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "exclude_null(sum:kubernetes.filesystem.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.filesystem.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -729,11 +956,22 @@
         "title_align": "left",
         "show_legend": true,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "exclude_null(sum:kubernetes.filesystem.usage_pct{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})*100",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1) * 100"
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
@@ -761,7 +999,7 @@
     {
       "id": 28,
       "layout": {
-        "x": -1,
+        "x": 0,
         "y": 215,
         "width": 59,
         "height": 24
@@ -776,7 +1014,30 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
           }
         ]
       }
@@ -799,7 +1060,30 @@
         "type": "toplist",
         "requests": [
           {
-            "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "exclude_null(query1)"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
           }
         ]
       }
@@ -816,17 +1100,28 @@
         "title": "DaemonSets",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "type": "query_value",
         "requests": [
           {
-            "q": "count_nonzero(sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set})",
-            "aggregator": "last",
             "conditional_formats": [
               {
                 "comparator": ">",
                 "palette": "white_on_green",
                 "value": 0
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
+                "aggregator": "last"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "count_nonzero(query1)"
               }
             ]
           }
@@ -846,11 +1141,33 @@
         "title": "DaemonSets Size By Cluster",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "type": "toplist",
         "requests": [
           {
-            "q": "top(max:kubernetes_state.daemonset.desired{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name}, 10, 'mean', 'desc')"
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "max:kubernetes_state.daemonset.desired{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
           }
         ]
       }
@@ -867,17 +1184,23 @@
         "title": "Scheduled",
         "title_size": "16",
         "title_align": "left",
-        "time": {},
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.scheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
             "conditional_formats": [
               {
                 "comparator": ">",
                 "palette": "green_on_white",
                 "value": 0
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.scheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                "aggregator": "last"
               }
             ]
           }
@@ -901,13 +1224,20 @@
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
             "conditional_formats": [
               {
                 "comparator": ">",
                 "palette": "green_on_white",
                 "value": 0
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                "aggregator": "last"
               }
             ]
           }
@@ -930,11 +1260,17 @@
         "title_align": "left",
         "show_legend": false,
         "legend_size": "0",
-        "time": {},
         "type": "timeseries",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}"
+              }
+            ],
             "style": {
               "palette": "cool",
               "line_type": "solid",
@@ -957,26 +1293,28 @@
   "template_variables": [
     {
       "name": "scope",
-      "default": "*",
-      "prefix": null
+      "available_values": [],
+      "default": "*"
     },
     {
       "name": "kube_cluster_name",
-      "default": "*",
-      "prefix": "kube_cluster_name"
+      "prefix": "kube_cluster_name",
+      "available_values": [],
+      "default": "*"
     },
     {
       "name": "kube_namespace",
-      "default": "*",
-      "prefix": "kube_namespace"
+      "prefix": "kube_namespace",
+      "available_values": [],
+      "default": "*"
     },
     {
       "name": "kube_daemon_set",
-      "default": "*",
-      "prefix": "kube_daemon_set"
+      "prefix": "kube_daemon_set",
+      "available_values": [],
+      "default": "*"
     }
   ],
   "layout_type": "free",
-  "is_read_only": true,
   "notify_list": []
 }
