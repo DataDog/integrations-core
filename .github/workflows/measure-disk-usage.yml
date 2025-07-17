@@ -18,9 +18,9 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Fetch master and PR branch explicitly (safely)
-          run: |
-            git fetch origin master:refs/remotes/origin/master
-            git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
+        run: |
+          git fetch origin master:refs/remotes/origin/master
+          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
 
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
