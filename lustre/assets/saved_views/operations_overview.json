@@ -1,0 +1,36 @@
+{
+  "name": "Lustre Operations Overview",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:lustre",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": [
+    "source",
+    "host",
+    "service",
+    "@log_lustre.operation_type",
+    "@log_lustre.job_id",
+    "@log_lustre.open_mode",
+    "@log_lustre.user",
+    "@network.client.ip"
+  ],
+  "options": {
+    "columns": [
+      "host",
+      "service",
+      "@network.client.ip",
+      "@log_lustre.operation_type",
+      "@log_lustre.open_mode",
+      "@log_lustre.job_id",
+      "@log_lustre.user",
+      "@log_lustre.target_name"
+    ],
+    "show_date_column": true,
+    "show_message_column": false,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}
+
