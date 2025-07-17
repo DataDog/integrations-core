@@ -62,7 +62,7 @@ def test_get_counters(check):
     due to a missing = character.
     See https://github.com/DataDog/integrations-core/pull/1643
     """
-    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
+    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
         with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
             g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
             check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
@@ -73,7 +73,7 @@ def test_get_counters(check):
 
 
 def test_host_without_protocol(check, instance):
-    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
+    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
         with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
             g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
             check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
@@ -83,7 +83,7 @@ def test_host_without_protocol(check, instance):
 
 def test_host_https(check, instance):
     instance['host'] = 'https://localhost'
-    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
+    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
         with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
             g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
             check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
@@ -103,7 +103,7 @@ def test_legacy_username_password(instance, auth_config):
     instance.update(auth_config)
     check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests.get') as g:
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get') as g:
         with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
             check.get_counters('host', 'port', [])
 

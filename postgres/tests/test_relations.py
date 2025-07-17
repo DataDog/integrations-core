@@ -4,7 +4,7 @@
 
 import threading
 
-import psycopg2
+import psycopg
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -99,6 +99,7 @@ def test_relations_metrics_access_exclusive_lock(aggregator, integration_check, 
     check = integration_check(pg_instance)
 
     conn = _get_superconn(pg_instance)
+    conn.execute("SET client_encoding TO 'UTF8'")
     cursor = conn.cursor()
     # Lock the persons table with an AccessExclusiveLock
     cursor.execute("BEGIN")  # must be in a transaction to lock a table
@@ -343,7 +344,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(
-        check, pg_instance, db="dogs", table="breed", index="breed_names", schema="public"
+        check, pg_instance, db="dogs", table="breed", index="breed_names", schema="public", valid="true"
     )
     for name in IDX_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
@@ -456,7 +457,7 @@ def check_with_lock(check, instance, lock_table=None):
     lock_statement = "LOCK persons"
     if lock_table is not None:
         lock_statement = "LOCK {}".format(lock_table)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute(lock_statement)
             check.check(instance)
