@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.1.0-beta.1 / 2025-07-17
+
+***Added***:
+
+* Add HA metrics. ([#20763](https://github.com/DataDog/integrations-core/pull/20763))
+
 ## 1.0.0 / 2025-07-10
 
 ***Added***:
