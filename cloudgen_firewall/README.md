@@ -54,7 +54,7 @@ After running this command, you should see traffic from the CloudGen Firewall IP
 
 ### Metrics
 
-cloudgen_firewall does not include any metrics.
+The Barracuda CloudGen Firewall integration does not include any metrics.
 
 ### Log collection
 ## Data Collected
