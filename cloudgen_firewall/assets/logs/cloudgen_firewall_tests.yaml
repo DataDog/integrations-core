@@ -1,6 +1,7 @@
 id: "cloudgen_firewall"
 tests:
-  - sample: "2025-03-17T08:24:45+05:30 sacumentestlocal
+  - 
+    sample: "2025-03-17T08:24:45+05:30 sacumentestlocal
       sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
       boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
     result: null
