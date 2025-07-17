@@ -249,7 +249,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev test -d -v --cov --junit ${{ inputs.pytest-test }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
+          ddev test --debug --verbose --cov --junit ${{ inputs.pytest-test }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
         fi
 
     - name: Run Unit & Integration tests with minimum version of base package
