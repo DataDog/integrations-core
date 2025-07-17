@@ -97,13 +97,13 @@ instances:
     #     <OPTION_1>: <VALUE_1>
     #     <OPTION_2>: <VALUE_2>
 
-    ## @param empty_default_hostname - boolean - required
+    ## @param empty_default_hostname - boolean - optional - default: true
     ## The Proxmox integration is a check where metrics are usually unrelated to the host on which the Agent
     ## runs. Setting this parameter to "true" prevents the Agent from attaching the hostname (and the host
     ## tags) to the metrics. It is especially important to leave this parameter set to "true" when you are running the
     ## Agent inside a Proxmox VM or Node, because in this scenario the host tags are unrelated to other metrics.
     #
-    empty_default_hostname: true
+    # empty_default_hostname: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

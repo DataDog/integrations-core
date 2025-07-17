@@ -62,7 +62,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
-    empty_default_hostname: bool
+    empty_default_hostname: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     kerberos_auth: Optional[str] = None

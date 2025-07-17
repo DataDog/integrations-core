@@ -1,1 +1,1 @@
-Make `empty_default_hostname` a required parameter.
+Set `empty_default_hostname` true by default.
