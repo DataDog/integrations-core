@@ -59,7 +59,7 @@ pipeline:
       grok:
         supportRules: >-
           standard_fields
-          %{word:lustre.operation_type}\s+%{date("HH:mm:ss.SSSSSSSSS
+          %{integer}%{notSpace:lustre.operation_type}\s+%{date("HH:mm:ss.SSSSSSSSS
           yyyy.MM.dd"):date}\s+%{word:lustre.flags}
 
           key_value %{data::keyvalue("=", ":\\[\\]")}
