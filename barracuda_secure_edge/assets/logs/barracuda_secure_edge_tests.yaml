@@ -1,8 +1,13 @@
 id: "barracuda_secure_edge"
 tests:
-  - sample: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ;
-      PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
-    result: null
+  -
+    sample: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ; PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
+    result:
+      custom: {}
+      message: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ; PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
   - sample: "2025 04 02 12:20:51 +00:00 Security Block:
       FWD|UDP|p1|10.10.17.18|137|00:41:0e:93:aa:91|10.10.17.255|137|netbios-ns|\
       |BLOCKALL|4002|||0|1|40|30|20|10||||||"
