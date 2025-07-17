@@ -27,11 +27,6 @@
                   "semantic_mode": "combined"
                 }
               ],
-              "formulas": [
-                {
-                  "formula": "equiv_otel(query1)"
-                }
-              ],
               "style": {
                 "palette": "dog_classic",
                 "line_type": "solid",

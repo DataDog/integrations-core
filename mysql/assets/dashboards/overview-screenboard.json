@@ -98,7 +98,8 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:mysql.net.aborted_connects{$scope}"
+                      "query": "avg:mysql.net.aborted_connects{$scope}",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -126,7 +127,8 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:mysql.net.connections{$scope}"
+                      "query": "avg:mysql.net.connections{$scope}",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -601,17 +603,13 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "equiv_otel(query1)"
-                    }
-                  ],
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.threads_running{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -656,17 +654,13 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "equiv_otel(query1)"
-                    }
-                  ],
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.threads_connected{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -732,18 +726,13 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Cache Utilization",
-                      "formula": "equiv_otel(query1)"
-                    }
-                  ],
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.key_cache_utilization{$scope} by {service}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -788,27 +777,19 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Data Reads",
-                      "formula": "equiv_otel(query1)"
-                    },
-                    {
-                      "alias": "Data Writes",
-                      "formula": "equiv_otel(query2)"
-                    }
-                  ],
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.data_reads{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.data_writes{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -853,36 +834,25 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Available Buffer Pool",
-                      "formula": "equiv_otel(query1)"
-                    },
-                    {
-                      "alias": "Used Buffer Pool",
-                      "formula": "equiv_otel(query2)"
-                    },
-                    {
-                      "alias": "Total Buffer Pool",
-                      "formula": "equiv_otel(query3)"
-                    }
-                  ],
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.buffer_pool_free{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_used{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_total{$scope}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -927,31 +897,19 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Total Pages",
-                      "formula": "equiv_otel(query1)"
-                    },
-                    {
-                      "alias": "Free Pages",
-                      "formula": "equiv_otel(query2)"
-                    },
-                    {
-                      "alias": "Pages Data",
-                      "formula": "equiv_otel(query3)"
-                    }
-                  ],
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_total{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_free{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_data{$scope}",
@@ -1082,7 +1040,8 @@
                     {
                       "query": "avg:system.cpu.iowait{$scope}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.user{$scope}",
@@ -1161,7 +1120,8 @@
                     {
                       "query": "avg:system.load.1{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.load.5{$scope}",
@@ -1236,7 +1196,8 @@
                     {
                       "query": "sum:system.mem.total{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
