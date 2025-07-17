@@ -178,14 +178,14 @@ jobs:
         restore-keys: |-
           v01-python-${{ env.pythonLocation }}
 
-    # - name: Install ddev from local folder
-    #   if: inputs.repo == 'core'
-    #   run: |-
-    #     pip install -e ./datadog_checks_dev[cli]
-    #     pip install -e ./ddev
+    - name: Install ddev from local folder
+      if: inputs.repo == 'core'
+      run: |-
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
 
     - name: Install ddev from PyPI
-      if: inputs.repo == 'core'
+      if: inputs.repo != 'core'
       run: pip install ddev
 
     - name: Configure ddev
@@ -220,7 +220,7 @@ jobs:
           github.actor,
           secrets.GITHUB_TOKEN
         ))}}
-      run: ddev ci setup ${{ inputs.target }}
+      run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Set up trace capturing
       if: inputs.repo == 'core'
