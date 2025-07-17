@@ -59,14 +59,25 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1749628711098
-- 
-  sample: 08RENME 07:58:36.619506011 2025.06.11 0x0 t=[0:0x0:0x0] j=vim.0
-      ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0]
-      vim_edited_file.txt~ s=[0x200000bd1:0x21:0x0] sp=[0x200000007:0x1:0x0]
-      vim_edited_file.txt
-  result: null
-
-# The `result` field should be left blank to start. Once you submit your log asset files with
-# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
-# run your raw logs against your pipeline and return the result. If the result output in the
-# validation is accurate, take the output and add it to the `result` field in your test YAML file.
+-
+  sample: "08RENME 07:58:36.619506011 2025.06.11 0x0 t=[0:0x0:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] vim_edited_file.txt~ s=[0x200000bd1:0x21:0x0] sp=[0x200000007:0x1:0x0] vim_edited_file.txt"
+  result:
+    custom:
+      date: 1749628716619
+      lustre:
+        extended_flags: "0x13"
+        flags: "0x0"
+        job_id: "vim.0"
+        nid: "172.31.38.176@tcp"
+        operation_type: "08RENME"
+        parent_fid: "[0x200000007:0x1:0x0]"
+        source_fid: "[0x200000bd1:0x21:0x0]"
+        source_name: "vim_edited_file.txt"
+        source_parent_fid: "[0x200000007:0x1:0x0]"
+        target_fid: "[0:0x0:0x0]"
+        target_name: "vim_edited_file.txt~"
+        user: "0:0"
+    message: "08RENME 07:58:36.619506011 2025.06.11 0x0 t=[0:0x0:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] vim_edited_file.txt~ s=[0x200000bd1:0x21:0x0] sp=[0x200000007:0x1:0x0] vim_edited_file.txt"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1749628716619
