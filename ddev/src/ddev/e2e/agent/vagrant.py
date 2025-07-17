@@ -366,6 +366,14 @@ class VagrantAgent(AgentInterface):
         agent_install_env_vars = {}
 
         if agent_build:
+            # format: <pipeline_id>-<major_version>-<arch>"
+            # example: "12345-7-x86_64"
+            parts = agent_build.split("-")
+            if len(parts) != 3 or not all(parts):
+                self.app.abort(
+                    text=f"Invalid `agent_build` format: '{agent_build}'. "
+                    f"Expected format: '<pipeline_id>-<major_version>-<arch>'"
+                )
             pipeline_id, major_version, arch = agent_build.split("-")
             agent_install_env_vars["TESTING_APT_URL"] = "s3.amazonaws.com/apttesting.datad0g.com"
             agent_install_env_vars["TESTING_APT_REPO_VERSION"] = (
