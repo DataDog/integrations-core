@@ -38,26 +38,26 @@ jobs:
         path: hola.txt
         if-no-files-found: error
     - name: Get merge base commit with master
-        id: merge_base
-        run: |
-          base=$(git merge-base HEAD origin/master)
-          echo "sha=$base" >> $GITHUB_OUTPUT
+      id: merge_base
+      run: |
+        base=$(git merge-base HEAD origin/master)
+        echo "sha=$base" >> $GITHUB_OUTPUT
 
     - name: Find workflow run at merge base
-        id: find_run
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          run_id=$(gh run list --branch master --workflow "Measure Disk Usage" --json databaseId,headSha \
-            | jq -r --arg sha "${{ steps.merge_base.outputs.sha }}" \
-              '.[] | select(.headSha == $sha) | .databaseId' \
-            | head -n 1)
+      id: find_run
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        run_id=$(gh run list --branch master --workflow "Measure Disk Usage" --json databaseId,headSha \
+          | jq -r --arg sha "${{ steps.merge_base.outputs.sha }}" \
+            '.[] | select(.headSha == $sha) | .databaseId' \
+          | head -n 1)
 
-          if [ -z "$run_id" ]; then
-            echo "No matching run found at merge base"
-            exit 1
-          fi
-          echo "run_id=$run_id" >> $GITHUB_OUTPUT
+        if [ -z "$run_id" ]; then
+          echo "No matching run found at merge base"
+          exit 1
+        fi
+        echo "run_id=$run_id" >> $GITHUB_OUTPUT
 
 
     - name: Download artifact
