@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import hashlib
 import os
 import shlex
 import shutil
@@ -120,17 +119,6 @@ class VagrantAgent(AgentInterface):
         shutil.rmtree(self._temp_vagrant_dir)
         self.app.display_info(f"Vagrant working directory deleted: {self._temp_vagrant_dir}")
 
-    def restart(self) -> None:
-        self.app.display_info(f"Restarting (reloading) Vagrant VM `{self._vm_name}`")
-        reload_cmd_host = ["vagrant", "reload", self._vm_name]
-        if self.metadata.get("vagrant_provision_on_reload", True):  # Default to reprovisioning on reload
-            reload_cmd_host.append("--provision")
-
-        self.platform.run_command(
-            reload_cmd_host,
-        )
-        self.app.display_info(f"Vagrant VM `{self._vm_name}` restarted successfully.\n")
-
     def enter_shell(self) -> None:
         self.app.display_info(f"Entering interactive shell for VM `{self._vm_name}`")
         host_cmd = self._format_command([], interactive=True)
@@ -140,7 +128,7 @@ class VagrantAgent(AgentInterface):
     # =============================
     # Public Methods: Agent Control
     # =============================
-    def restart_agent_service(self) -> None:
+    def restart(self) -> None:
         self.app.display_info(f"Restarting Datadog Agent service in VM `{self._vm_name}`")
         if self._is_windows_vm:
             agent_service_name = self.metadata.get("vagrant_windows_agent_service_name", "DatadogAgent")
@@ -194,7 +182,6 @@ class VagrantAgent(AgentInterface):
         # Generate Vagrantfile if it doesn't exist
         vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
         if not vagrantfile_path.exists() or overwrite:
-            old_file_hash = None
             if overwrite:
                 self.app.display_debug(f"Overwriting Vagrantfile found at '{vagrantfile_path}'.")
                 vagrantfile_path.unlink()
@@ -205,9 +192,6 @@ class VagrantAgent(AgentInterface):
             vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
             vagrantfile_path.write_text(vagrantfile_content)
             self.app.display_info(f"Vagrantfile generated at {vagrantfile_path}")
-            new_file_hash = hashlib.sha256(vagrantfile_content.encode()).hexdigest()
-            if old_file_hash and old_file_hash != new_file_hash:
-                self.metadata["vagrant_provision"] = True
         else:
             self.app.display_info(f"Using existing Vagrantfile at {vagrantfile_path}")
 
@@ -436,8 +420,6 @@ class VagrantAgent(AgentInterface):
         """Initialize the VM, execute custom commands, and handle agent restart if necessary."""
         # Prepare the vagrant up command
         up_command_host = f"vagrant up {self._vm_name}"
-        if self.metadata.get("vagrant_provision", False):
-            up_command_host += " --provision"
 
         # Get custom commands from metadata
         start_commands = self.metadata.get("start_commands", [])
@@ -463,7 +445,7 @@ class VagrantAgent(AgentInterface):
 
         if operations_performed:
             self.app.display_info("Custom operations performed. Restarting agent service...")
-            self.restart_agent_service()
+            self.restart()
 
     def _configure_sudoers(self, sudoers_content: str) -> None:
         """Configure sudoers to allow dd-agent to run sudo commands without password."""
