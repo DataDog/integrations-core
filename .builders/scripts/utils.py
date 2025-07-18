@@ -3,6 +3,7 @@ from __future__ import annotations
 import email
 import re
 from pathlib import Path
+from typing import Iterator
 from zipfile import ZipFile
 
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
@@ -32,3 +33,10 @@ def extract_metadata(wheel: Path) -> email.Message:
             raise RuntimeError(message) from None
 
     return email.message_from_string(metadata_file_contents)
+
+
+
+def iter_wheels(source_dir: str) -> Iterator[Path]:
+    for entry in sorted(Path(source_dir).iterdir(), key=lambda entry: entry.name.casefold()):
+        if entry.suffix == '.whl' and entry.is_file():
+            yield entry

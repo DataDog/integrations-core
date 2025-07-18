@@ -8,7 +8,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from dotenv import dotenv_values
-from utils import extract_metadata, normalize_project_name
+from utils import extract_metadata, iter_wheels, normalize_project_name
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
@@ -78,6 +78,13 @@ def main():
 
     with TemporaryDirectory() as d:
         staged_wheel_dir = Path(d).resolve()
+        staged_built_wheels_dir = staged_wheel_dir / 'built'
+        staged_external_wheels_dir = staged_wheel_dir / 'external'
+
+        # Create the directories
+        staged_built_wheels_dir.mkdir(parents=True, exist_ok=True)
+        staged_external_wheels_dir.mkdir(parents=True, exist_ok=True)
+
         env_vars = dict(os.environ)
         env_vars['PATH'] = f'{python_path.parent}{os.pathsep}{env_vars["PATH"]}'
         env_vars['PIP_WHEEL_DIR'] = str(staged_wheel_dir)
@@ -119,18 +126,42 @@ def main():
 
         check_process(command_args, env=env_vars)
 
+        # Classify wheels
+        check_process(
+            [
+                sys.executable,
+                '-u',
+                str(MOUNT_DIR / 'scripts' / 'classify_wheels.py'),
+                '--source-dir',
+                str(staged_wheel_dir),
+                '--built-dir',
+                str(staged_built_wheels_dir),
+                '--external-dir',
+                str(staged_external_wheels_dir),
+            ]
+        )
+
         # Repair wheels
-        check_process([
-            sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
-            '--source-dir', str(staged_wheel_dir),
-            '--built-dir', str(built_wheels_dir),
-            '--external-dir', str(external_wheels_dir),
-        ])
+        check_process(
+            [
+                sys.executable,
+                '-u',
+                str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
+                '--source-built-dir',
+                str(staged_built_wheels_dir),
+                '--source-external-dir',
+                str(staged_external_wheels_dir),
+                '--built-dir',
+                str(built_wheels_dir),
+                '--external-dir',
+                str(external_wheels_dir),
+            ]
+        )
 
     dependencies: dict[str, tuple[str, str]] = {}
     for wheel_dir in wheels_dir.iterdir():
-        for entry in wheel_dir.iterdir():
-            project_metadata = extract_metadata(entry)
+        for wheel in iter_wheels(wheel_dir):
+            project_metadata = extract_metadata(wheel)
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
