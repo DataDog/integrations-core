@@ -1,5 +1,9 @@
 id: cloudgen_firewall
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: cloudgen-firewall
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
   - description: ""
@@ -7,7 +11,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: component
-    path: cloudgen_firewall.component
+    path: component
     source: log
     type: string
   - description: ""
@@ -15,7 +19,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: IPs
-    path: cloudgen_firewall.ip
+    path: ip
     source: log
     type: string
   - description: ""
@@ -23,7 +27,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process
-    path: cloudgen_firewall.process
+    path: process
     source: log
     type: string
   - description: ""
@@ -31,7 +35,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: process ID
-    path: cloudgen_firewall.pid
+    path: pid
     source: log
     type: string
   - description: ""
@@ -39,7 +43,7 @@ facets:
     groups:
       - Barracuda CloudGen Firewall
     name: session_status
-    path: cloudgen_firewall.session_status
+    path: session_status
     source: log
     type: string
 pipeline:
@@ -47,27 +51,27 @@ pipeline:
   name: Barracuda CloudGen Firewall
   enabled: true
   filter:
-    query: source:cloudgen_firewall
+    query: source:barracuda_cloudgen_logs
   processors:
     - type: attribute-remapper
-      name: Map `timestamp` to `syslog.timestamp`
+      name: " Map `timestamp` to `syslog.timestamp`"
       enabled: true
       sources:
         - timestamp
       sourceType: attribute
       target: syslog.timestamp
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `hostname` to `syslog.hostname`
+      name: Map hostname to syslog.hostname
       enabled: true
       sources:
         - hostname
       sourceType: attribute
       target: syslog.hostname
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map 'component' to 'service'
@@ -77,25 +81,25 @@ pipeline:
       sourceType: attribute
       target: service
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `level` to `status`
+      name: Remapping status from level attribute
       enabled: true
       sources:
         - level
       sourceType: attribute
       target: status
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: status-remapper
-      name: Define `level` as the official status of the log
+      name: Remapper level to status
       enabled: true
       sources:
         - level
     - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+      name: "Define `timestamp` as the official date of the log "
       enabled: true
       sources:
         - timestamp
