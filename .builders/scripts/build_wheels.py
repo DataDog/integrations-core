@@ -101,7 +101,6 @@ def main():
     built_wheels_dir = wheels_dir / 'built'
     external_wheels_dir = wheels_dir / 'external'
     dependency_sizes_dir = MOUNT_DIR / 'dependency_sizes'
-    dependency_sizes_dir.mkdir(parents=True, exist_ok=True)
 
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
@@ -176,10 +175,10 @@ def main():
     target_name: str | None = None
 
     for wheel_dir in wheels_dir.iterdir():
-        for entry in wheel_dir.iterdir():
-            wheel_name = WheelName.parse(entry.name)
+        for wheel in wheel_dir.iterdir():
+            wheel_name = WheelName.parse(wheel.name)
             platform_tag = wheel_name.platform_tag
-            project_metadata = extract_metadata(entry)
+            project_metadata = extract_metadata(wheel)
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
@@ -190,7 +189,8 @@ def main():
                 if classified != 'any':
                     target_name = classified
 
-            project_sizes = calculate_wheel_sizes(entry)
+            project_sizes = calculate_wheel_sizes(wheel)
+            project_sizes['version'] = project_version
             sizes[project_name] = project_sizes
 
     output_path = dependency_sizes_dir / f'{target_name}_{python_version}.json'
