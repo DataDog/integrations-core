@@ -229,7 +229,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
         else:
             # If no env matrix is defined, use the target name as the only environment
-            target_envs = [target]
+            target_envs = []
 
         manifest = read_manifest(root, target)
         platform_ids = matrix_overrides.get('platforms', [])
@@ -278,10 +278,14 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 config['python-support'] = ''.join(supported_python_versions)
 
             job_name = normalize_job_name(config['name'])
-            for target_env in target_envs:
-                if target_env != target:
-                    config['name'] = f'{copy.copy(job_name)} ({target_env})'
-                job_matrix.append({**config, 'target-env': target_env})
+            if target_envs:
+                for target_env in target_envs:
+                    if target_env != target:
+                        config['name'] = f'{copy.copy(job_name)} ({target_env})'
+                    job_matrix.append({**config, 'target-env': target_env})
+            else:
+                config['name'] = job_name
+                job_matrix.append({**config})
 
     return job_matrix
 
