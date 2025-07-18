@@ -97,7 +97,7 @@ class TestStart:
             ),
         ],
     )
-    def test_agent_build(
+    def test_sets_correct_env_vars_for_different_agent_builds(
         self,
         app,
         temp_dir,
@@ -131,7 +131,7 @@ class TestStart:
         for key, value in expected_env_vars.items():
             assert f'{key}="{value}"' in agent_install_env_vars_str
 
-    def test_env_vars(
+    def test_passes_env_vars_to_vagrantfile_template(
         self,
         app,
         temp_dir,
@@ -165,7 +165,7 @@ class TestStart:
         assert 'export DD_APM_ENABLED="false"' in exported_env_vars_str
         assert 'export DD_TELEMETRY_ENABLED="true"' in exported_env_vars_str
 
-    def test_no_config_file(
+    def test_without_config_file_does_not_add_synced_folder(
         self,
         app,
         temp_dir,
@@ -190,7 +190,7 @@ class TestStart:
         synced_folders_str = render_kwargs['synced_folders_str']
         assert synced_folders_str == ""
 
-    def test_windows_vm(
+    def test_uses_windows_paths_for_windows_guest_os(
         self,
         app,
         temp_dir,
@@ -223,7 +223,7 @@ class TestStart:
             and 'glusterfs.d' in synced_folders_str
         )
 
-    def test_synced_folders(
+    def test_includes_custom_synced_folders_from_metadata(
         self,
         app,
         temp_dir,
@@ -252,7 +252,7 @@ class TestStart:
         assert 'config.vm.synced_folder "/host/path", "/guest/path"' in synced_folders_str
         assert 'config.vm.synced_folder "/another/host", "/another/guest"' in synced_folders_str
 
-    def test_custom_hostname(
+    def test_exports_custom_hostname_as_env_var(
         self,
         app,
         temp_dir,
@@ -280,7 +280,7 @@ class TestStart:
         exported_env_vars_str = render_kwargs['exported_env_vars_str']
         assert 'export DD_HOSTNAME="custom-hostname"' in exported_env_vars_str
 
-    def test_proxies(
+    def test_exports_proxy_settings_as_env_vars(
         self,
         app,
         temp_dir,
@@ -309,7 +309,7 @@ class TestStart:
         assert 'export DD_PROXY_HTTP="http://localhost:8080"' in exported_env_vars_str
         assert 'export DD_PROXY_HTTPS="https://localhost:4443"' in exported_env_vars_str
 
-    def test_start_commands(
+    def test_executes_start_commands_after_vagrant_up(
         self,
         app,
         temp_dir,
@@ -341,7 +341,7 @@ class TestStart:
 
         assert mock_platform_run.call_args_list == expected_calls
 
-    def test_post_install_commands(
+    def test_executes_post_install_commands_before_restart(
         self,
         app,
         temp_dir,
@@ -372,7 +372,7 @@ class TestStart:
         ]
         assert mock_platform_run.call_args_list == expected_calls
 
-    def test_local_packages_linux(
+    def test_mounts_and_installs_local_packages_on_linux(
         self,
         app,
         temp_dir,
@@ -422,7 +422,7 @@ class TestStart:
         ]
         assert mock_platform_run.call_args_list == expected_calls
 
-    def test_local_packages_windows(
+    def test_mounts_local_packages_with_windows_paths(
         self,
         app,
         temp_dir,
@@ -455,7 +455,7 @@ class TestStart:
         # The path will have escaped backslashes and the foo directory
         assert any('foo"' in line and 'vagrant' in line for line in synced_folders_str.split('\n'))
 
-    def test_sudoers_configuration(
+    def test_configures_sudoers_when_specified_in_metadata(
         self,
         app,
         temp_dir,
@@ -492,7 +492,7 @@ class TestStart:
                 f"Expected command '{cmd}' not found"
             )
 
-    def test_template_variable_substitution(
+    def test_substitutes_host_variable_in_commands_and_env_vars(
         self,
         app,
         temp_dir,
@@ -532,7 +532,7 @@ class TestStart:
         ]
         assert mock_platform_run.call_args_list == expected_calls
 
-    def test_invalid_agent_build_format(
+    def test_aborts_with_invalid_agent_build_format(
         self,
         app,
         temp_dir,
@@ -563,7 +563,7 @@ class TestStart:
 
 
 class TestStop:
-    def test_basic(
+    def test_halts_destroys_vm_and_removes_temp_dir(
         self,
         app,
         temp_dir,
@@ -592,7 +592,7 @@ class TestStop:
         # Verify temp directory was removed
         rmtree.assert_called_once()
 
-    def test_stop_commands(
+    def test_executes_stop_commands_before_halting_vm(
         self,
         app,
         temp_dir,
@@ -621,7 +621,7 @@ class TestStop:
 
 
 class TestRestart:
-    def test_linux_restart(
+    def test_uses_service_command_on_linux(
         self,
         app,
         get_integration,
@@ -645,7 +645,7 @@ class TestRestart:
         ]
         assert mock_platform_run.call_args_list == expected_calls
 
-    def test_windows_restart(
+    def test_uses_sc_commands_on_windows(
         self,
         app,
         get_integration,
@@ -670,7 +670,7 @@ class TestRestart:
         ]
         assert mock_platform_run.call_args_list == expected_calls
 
-    def test_windows_custom_service_name(
+    def test_uses_custom_service_name_on_windows(
         self,
         app,
         get_integration,
@@ -697,7 +697,7 @@ class TestRestart:
 
 
 class TestInvoke:
-    def test_linux_invoke(
+    def test_uses_linux_agent_path_for_commands(
         self,
         app,
         get_integration,
@@ -721,7 +721,7 @@ class TestInvoke:
         ]
         assert mock_platform_run.call_args_list == expected_calls
 
-    def test_windows_invoke(
+    def test_uses_windows_agent_path_for_commands(
         self,
         app,
         get_integration,
@@ -755,7 +755,7 @@ class TestInvoke:
 
 
 class TestEnterShell:
-    def test_enter_shell(
+    def test_runs_vagrant_ssh_interactively(
         self,
         app,
         get_integration,
@@ -782,7 +782,7 @@ class TestEnterShell:
 
 
 class TestDisableIntegrationBeforeInstall:
-    def test_context_manager(self, temp_dir):
+    def test_renames_config_file_and_restores_after(self, temp_dir):
         """Test the disable_integration_before_install context manager."""
         config_file = temp_dir / 'conf.yaml'
         config_file.write_text('test content')
@@ -798,7 +798,7 @@ class TestDisableIntegrationBeforeInstall:
         assert config_file.read_text() == 'test content'
         assert not (temp_dir / 'conf.yaml.example').exists()
 
-    def test_context_manager_with_error(self, temp_dir):
+    def test_restores_config_file_even_on_error(self, temp_dir):
         """Test the context manager properly restores the file even if an error occurs."""
         config_file = temp_dir / 'conf.yaml'
         config_file.write_text('test content')
@@ -819,7 +819,7 @@ class TestDisableIntegrationBeforeInstall:
 
 
 class TestVagrantProperties:
-    def test_vm_name_sanitization(
+    def test_vm_name_replaces_underscores_with_hyphens(
         self,
         app,
         get_integration,
@@ -835,7 +835,7 @@ class TestVagrantProperties:
         # VM name should have underscores replaced with hyphens
         assert agent._vm_name == 'dd-vagrant-test-integration-py3.12-test'
 
-    def test_cached_properties(
+    def test_linux_properties_return_correct_paths(
         self,
         app,
         get_integration,
@@ -854,7 +854,7 @@ class TestVagrantProperties:
         assert agent._config_mount_dir == '/etc/datadog-agent/conf.d/glusterfs.d'
         assert agent._python_path == '/opt/datadog-agent/embedded/bin/python3'
 
-    def test_windows_cached_properties(
+    def test_windows_properties_return_correct_paths(
         self,
         app,
         get_integration,
