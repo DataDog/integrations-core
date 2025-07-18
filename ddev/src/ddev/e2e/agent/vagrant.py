@@ -28,6 +28,7 @@ from ddev.e2e.agent.constants import (
     AgentEnvVars,
 )
 from ddev.e2e.agent.interface import AgentInterface
+from ddev.e2e.config import EnvDataStorage
 from ddev.utils.fs import Path
 from ddev.utils.structures import EnvVars
 
@@ -35,7 +36,6 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.integration.core import Integration
     from ddev.utils.fs import Path
-    from ddev.utils.platform import Platform
 
 
 @contextmanager
@@ -70,6 +70,7 @@ class VagrantAgent(AgentInterface):
     ) -> None:
         metadata = self._substitute_template_variables(metadata)
         super().__init__(app, integration, env, metadata, config_file)
+        self.env_data = EnvDataStorage(app.data_dir).get(integration.name, env)
         self._initialize_vagrant(write=False)
 
     def get_id(self) -> str:
@@ -116,8 +117,8 @@ class VagrantAgent(AgentInterface):
         self.app.display_info(f"VM `{self._vm_name}` destroyed.")
 
         # delete the temp vagrant dir
-        shutil.rmtree(self._temp_vagrant_dir)
-        self.app.display_info(f"Vagrant working directory deleted: {self._temp_vagrant_dir}")
+        shutil.rmtree(self._vagrant_dir)
+        self.app.display_info(f"Vagrant working directory deleted: {self._vagrant_dir}")
 
     def enter_shell(self) -> None:
         self.app.display_info(f"Entering interactive shell for VM `{self._vm_name}`")
@@ -160,17 +161,15 @@ class VagrantAgent(AgentInterface):
     # Private Helpers: Vagrant Setup & Initialization
     # =============================
     def _initialize_vagrant(self, write: bool = False, **kwargs):
-        # Initialize and create the directory for Vagrant files specific to this VM
-        home_dir = Path.home()
-        self._temp_vagrant_dir = home_dir / ".ddev" / "vagrant" / self._vm_name
-        self._temp_vagrant_dir.mkdir(parents=True, exist_ok=True)
+        self._vagrant_dir = self.env_data.storage_dir / "vagrant" / self._vm_name
+        self._vagrant_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate Vagrantfile if it doesn't exist
-        vagrantfile_path = self._temp_vagrant_dir / "Vagrantfile"
+        vagrantfile_path = self._vagrant_dir / "Vagrantfile"
 
         # Set VAGRANT_CWD to self.temp_vagrant_dir
-        os.environ["VAGRANT_CWD"] = str(self._temp_vagrant_dir)
-        self.app.display_debug(f"Vagrant working directory set to: {self._temp_vagrant_dir}")
+        os.environ["VAGRANT_CWD"] = str(self._vagrant_dir)
+        self.app.display_debug(f"Vagrant working directory set to: {self._vagrant_dir}")
 
         if write:
             vagrantfile_content = self._generate_vagrantfile_content(**kwargs)
@@ -300,9 +299,6 @@ class VagrantAgent(AgentInterface):
         if post_install_commands:
             self._run_commands(post_install_commands, "post-install")
 
-    # =============================
-    # Private Helpers: Command Formatting & Execution
-    # =============================
     def _format_command(self, guest_command_parts: list[str], interactive: bool = False) -> list[str]:
         # Returns the host-side command to execute something in the guest.
         if interactive:
@@ -322,9 +318,6 @@ class VagrantAgent(AgentInterface):
         host_command = ["vagrant", "ssh", self._vm_name, "-c", inner_cmd_str.replace("'", "")]
         return host_command
 
-    # =============================
-    # Private Helpers: Sudoers, Template, and Misc
-    # =============================
     def _prepare_agent_install_env_vars(self, agent_build: str) -> dict[str, str]:
         """Prepare environment variables for agent installation based on the build."""
         agent_install_env_vars = {}
