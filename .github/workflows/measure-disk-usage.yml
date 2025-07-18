@@ -1,15 +1,17 @@
 name: Measure Disk Usage
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: [resolve-build-deps]
+    types:
+      - completed
     branches:
-    - master 
+      - master
 env:
   PYTHON_VERSION: "3.12"
 
 jobs:
   measure-disk-usage:
-    needs: [resolve-build-deps]
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
