@@ -98,8 +98,10 @@ class IbmICheck(AgentCheck, ConfigMixin):
         fcntl.fcntl(self._subprocess.stderr, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
         try:
+            self.log.debug("Sending connection string: %s", self.connection_string)
             print(self.connection_string, file=self._subprocess.stdin, flush=True)
         except BrokenPipeError as e:
+            self.log.debug("Broken pipe")
             # The stdin pipe is broken, usually due to the Agent
             # killing the subprocess when stopping.
             # Clean up then return.
@@ -117,7 +119,9 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def execute_query(self, query, disconnect_on_error=True):
         try:
             # Write query
-            print(query['text'], file=self.connection_subprocess.stdin, flush=True)
+            qtext = query['text']
+            self.log.debug("Sending query: %s", qtext)
+            print(qtext, file=self.connection_subprocess.stdin, flush=True)
         except BrokenPipeError as e:
             # The stdin pipe is broken, usually due to the Agent
             # killing the subprocess when stopping.
@@ -134,6 +138,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
             try:
                 # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
                 for line in iter(self.connection_subprocess.stdout.readline, ''):
+                    self.log.debug("Got this line from subprocess stdout: %s", line)
                     stripped_line = line.strip()
                     if stripped_line == "":
                         # Empty line, skip
