@@ -2,7 +2,7 @@
 
 ## Overview
 
-Barracuda CloudGen Firewall is a next-generation firewall (NGFW) family from Barracuda Networks designed to protect and optimize modern, distributed networks—whether on-premises, in the cloud, or across hybrid environments. This integration monitors [cloudgen_firewall][1].
+Barracuda CloudGen Firewall is a next-generation firewall (NGFW) family from Barracuda Networks designed to protect and optimize modern, distributed networks whether on_premises, in the cloud, or across hybrid environments. This integration monitors [cloudgen_firewall][1].
 
 ## Setup
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
