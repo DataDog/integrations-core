@@ -100,6 +100,8 @@ def main():
     wheels_dir = MOUNT_DIR / 'wheels'
     built_wheels_dir = wheels_dir / 'built'
     external_wheels_dir = wheels_dir / 'external'
+    dependency_sizes_dir = MOUNT_DIR / 'dependency_sizes'
+    dependency_sizes_dir.mkdir(parents=True, exist_ok=True)
 
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
@@ -170,9 +172,7 @@ def main():
 
     dependencies: dict[str, tuple[str, str]] = {}
     sizes: dict[str, dict[str, int]] = {}
-    dependency_sizes_dir = MOUNT_DIR / 'dependency_sizes'
-    dependency_sizes_dir.mkdir(parents=True, exist_ok=True)
-
+    
     target_name: str | None = None
 
     for wheel_dir in wheels_dir.iterdir():
