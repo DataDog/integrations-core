@@ -223,6 +223,8 @@ def build_image():
             external_wheels_dir.mkdir()
             final_requirements = mount_dir / 'frozen.txt'
             final_requirements.touch()
+            dependency_sizes_dir = mount_dir / 'dependency_sizes'
+            dependency_sizes_dir.mkdir()
 
             script_args = ['--python', args.python]
 
@@ -249,6 +251,9 @@ def build_image():
 
             # Move the final requirements file to the output directory
             shutil.move(final_requirements, output_dir)
+
+            # Move the dependency sizes to the output directory
+            shutil.move(dependency_sizes_dir, output_dir)
 
 
 def main():
