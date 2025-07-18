@@ -51,7 +51,7 @@ pipeline:
   name: Barracuda CloudGen Firewall
   enabled: true
   filter:
-    query: source:cloudgen_firewall
+    query: source:barracuda_cloudgen_logs
   processors:
     - type: attribute-remapper
       name: " Map `timestamp` to `syslog.timestamp`"
@@ -288,7 +288,7 @@ pipeline:
       name: Box Events
       enabled: true
       filter:
-        query: source:cloudgen_firewall service:event
+        query: source:barracuda_cloudgen_logs service:event
       processors:
         - type: grok-parser
           name: Box Event Events
