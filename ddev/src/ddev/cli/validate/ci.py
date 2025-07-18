@@ -70,10 +70,17 @@ def ci(app: Application, sync: bool):
 
     # Reduce the target-envs to single jobs with the same name
     # We do this to keep the job list from exceeding Github's maximum file size limit
+    # TODO: Split the jobs into multiple files that are called by the test-all.yml workflow
     # Remove anything inside parentheses from job names and trim trailing space
+    job_dict = {}
     for job in job_matrix:
         job['name'] = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
-    job_matrix = list({job['name']: job for job in job_matrix}.values())
+        if job['name'] not in job_dict:
+            job_dict[job['name']] = job
+            job_dict[job['name']]['target-env'] = [job.get('target-env')] if job.get('target-env') else []
+        elif job.get('target-env'):
+            job_dict[job['name']]['target-env'].append(job['target-env'])
+    job_matrix = list(job_dict.values())
     
     for data in job_matrix:
         python_restriction = data.get('python-support', '')
@@ -83,6 +90,7 @@ def ci(app: Application, sync: bool):
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
+            'target-env': '${{ matrix.target-env }}',
             # Options
             'python-version': '${{ inputs.python-version }}',
             'standard': '${{ inputs.standard }}',
@@ -122,13 +130,17 @@ def ci(app: Application, sync: bool):
         job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
         job_id = f'j{job_id}'
 
-        job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
+        job_config = {'uses': test_workflow, 'strategy': {"matrix": {"target-env": data.get('target-env', [])}}, 'with': config, 'secrets': 'inherit'}
         if job_id in ddev_jobs_id:
             job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
         jobs[job_id] = job_config
 
         if data['target'] == 'ddev':
             jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
+
+    # Cap jobs at 150
+    # Hack for now, TODO: split the jobs into multiple files that are called by the test-all.yml workflow
+    jobs = dict(sorted(jobs.items(), key=lambda item: item[0])[:150])
 
     jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
 
