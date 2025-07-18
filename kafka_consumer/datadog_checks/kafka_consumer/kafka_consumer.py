@@ -259,7 +259,7 @@ class KafkaCheck(AgentCheck):
 
                 partitions = self.client.get_partitions_for_topic(topic)
                 self.log.debug("Received partitions %s for topic %s", partitions, topic)
-                if partitions is not None and partition in partitions:
+                if partition in partitions:
                     # report consumer offset if the partition is valid because even if leaderless
                     # the consumer offset will be valid once the leader failover completes
                     self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
