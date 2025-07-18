@@ -245,7 +245,6 @@ jobs:
         path: output
     
   measure-disk-usage:
-    name: Measure disk usage on macOS
     needs: build-macos
     runs-on: ubuntu-latest
     strategy:
