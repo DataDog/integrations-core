@@ -21,8 +21,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from pprint import pp
-
 if sys.version_info[:2] >= (3, 11):
     import tomllib
 # TODO: remove this once ddev drops versions less than 3.11
@@ -198,7 +196,6 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
     display_overrides = overrides.get('display-name', {})
     ci_overrides = overrides.get('ci', {})
 
-    
     job_matrix = []
     for target in targets:
         matrix_overrides = ci_overrides.get(target, {})
@@ -220,21 +217,19 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
                 # Create a list of all combinations of values
                 keys = env.keys()
-                values = [
-                    [f"py{v}" if key == "python" else v for v in env[key]]
-                    for key in keys
-                ]
+                values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
                 if not values:
                     continue
 
                 # Generate all combinations of values
                 from itertools import product
+
                 for combination in product(*values):
                     target_envs.append('-'.join(combination))
 
         else:
             # If no env matrix is defined, use the target name as the only environment
-            target_envs = [target]        
+            target_envs = [target]
 
         manifest = read_manifest(root, target)
         platform_ids = matrix_overrides.get('platforms', [])
