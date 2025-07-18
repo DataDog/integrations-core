@@ -14,9 +14,17 @@ Install the [Datadog Agent][2] and configure the Proxmox integration on one Prox
 
 ### Configuration
 
-1. Edit the `proxmox.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your proxmox performance data. See the [sample proxmox.d/conf.yaml][4] for all available configuration options.
+1. Create an [API Token][10] in your Proxmox Management Interface.
+2. Edit the `proxmox.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your proxmox performance data. See the [sample proxmox.d/conf.yaml][4] for all available configuration options. Ensure you have set the following parameters:
 
-2. [Restart the Agent][5].
+    ```
+    instances:
+    - proxmox_server: http://localhost:8006/api2/json
+      headers:
+          Authorization: PVEAPIToken=<USER>@<REALM>!<TOKEN_ID>=<YOUR_TOKEN>
+    ```
+
+3. [Restart the Agent][5].
 
 ### Validation
 
@@ -77,3 +85,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/proxmox/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/proxmox/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://pve.proxmox.com/wiki/Proxmox_VE_API#API_Tokens

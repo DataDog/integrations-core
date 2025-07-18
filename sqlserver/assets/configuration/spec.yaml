@@ -1012,9 +1012,8 @@ files:
             type: number
             example: 10
     - name: schemas_collection
-      hidden: true
       deprecation:
-        Agent version: 7.69.0
+        Agent version: 7.70.0
         Migration: Use `collect_schemas` instead.
       description: |
         DEPRECATED: Use `collect_schemas` instead.
@@ -1118,9 +1117,8 @@ files:
               example: 1000
               display_default: 1000
     - name: xe_collection
-      hidden: true
       deprecation:
-        Agent version: 7.69.0
+        Agent version: 7.70.0
         Migration: Use `collect_xe` instead.
       description: |
         DEPRECATED: Use `collect_xe` instead.
@@ -1214,9 +1212,8 @@ files:
             type: number
             example: 100
     - name: deadlocks_collection
-      hidden: true
       deprecation:
-        Agent version: 7.69.0
+        Agent version: 7.70.0
         Migration: Use `collect_deadlocks` instead.
       description: |
         DEPRECATED: Use `collect_deadlocks` instead.
