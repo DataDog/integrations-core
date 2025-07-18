@@ -37,7 +37,7 @@ pipeline:
   name: Postgresql
   enabled: true
   filter:
-    query: source:postgresql
+    query: source:(postgres OR postgresql)
   processors:
     - type: grok-parser
       name: Parsing Postgresql logs
