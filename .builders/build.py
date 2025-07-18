@@ -154,7 +154,7 @@ def build_macos():
         shutil.move(final_requirements, output_dir)
 
         # Move the dependency sizes to the output directory
-        dependency_sizes_dir = mount_dir / 'dependency_sizes'
+        dependency_sizes_dir = mount_dir / 'sizes.json'
         shutil.move(dependency_sizes_dir, output_dir)
 
 
@@ -223,8 +223,8 @@ def build_image():
             external_wheels_dir.mkdir()
             final_requirements = mount_dir / 'frozen.txt'
             final_requirements.touch()
-            dependency_sizes_dir = mount_dir / 'dependency_sizes'
-            dependency_sizes_dir.mkdir()
+            dependency_sizes = mount_dir / 'sizes.json'
+            dependency_sizes.touch()
 
             script_args = ['--python', args.python]
 
@@ -253,7 +253,7 @@ def build_image():
             shutil.move(final_requirements, output_dir)
 
             # Move the dependency sizes to the output directory
-            shutil.move(dependency_sizes_dir, output_dir)
+            shutil.move(dependency_sizes, output_dir)
 
 
 def main():
