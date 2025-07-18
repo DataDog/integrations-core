@@ -288,7 +288,7 @@ pipeline:
       name: Box Events
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:event
+        query: source:cloudgen_firewall service:event
       processors:
         - type: grok-parser
           name: Box Event Events
