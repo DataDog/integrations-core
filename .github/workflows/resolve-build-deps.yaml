@@ -65,8 +65,8 @@ jobs:
           image: linux-aarch64
         - os: ubuntu-22.04
           image: linux-x86_64
-        - os: windows-2022
-          image: windows-x86_64
+        # - os: windows-2022  # TODO: REMEMBER TO REENABLE THIS
+        #   image: windows-x86_64
 
     permissions:
       packages: write
