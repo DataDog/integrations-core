@@ -8,7 +8,7 @@ This integration ingests the following logs:
 
 - Message Logs: These logs contain detailed information about email traffic.
 
-This integration seamlessly collects message logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insights into message logs through the out-of-the-box dashboards and includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
+This integration collects message logs and send them to Datadog for analysis. The logs are parsed and enriched using Datadog's built-in pipeline, which allows for searching and analysis. Dashboards and Cloud SIEM detection rules are included to help monitor message logs and improve security.
 
 ## Setup
 
@@ -26,12 +26,12 @@ This integration seamlessly collects message logs, channeling them into Datadog 
 
 ### Connect your Proofpoint On-Demand Account to Datadog
 
-1. Add your Proofpoint On-Demand Credentials.
+1. Add your Proofpoint On-Demand credentials.
 
     | Parameters                            | Description                                                  |
     | ------------------------------------- | ------------------------------------------------------------ |
-    | Cluster ID                            | The Cluster ID of your Proofpoint On-Demand account          |
-    | API Key                             | The API Key of your Proofpoint On-Demand account           |
+    | Cluster ID                            | The Cluster ID for your Proofpoint On-Demand account         |
+    | API key                               | The API key for your Proofpoint On-Demand account           |
 
 2. Click the **Save** button to save your settings.
 
