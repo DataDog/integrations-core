@@ -246,7 +246,7 @@ jobs:
     
   measure-disk-usage-x86_64:
     needs: build-macos
-    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@$lucia-sb/calculate-dep-sizes
+    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
     with:
       dependency_sizes_json: output/macos-x86_64/py3/sizes.json
       platform: macos-x86_64
