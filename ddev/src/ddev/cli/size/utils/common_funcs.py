@@ -341,7 +341,7 @@ def get_dependencies_from_json(
     return [
         {
             "Name": name,
-            "Version": version,
+            "Version": sizes.get("version", ""),
             "Size_Bytes": int(sizes.get(size_key, 0)),
             "Size": convert_to_human_readable_size(sizes.get(size_key, 0)),
             "Type": "Dependency",
