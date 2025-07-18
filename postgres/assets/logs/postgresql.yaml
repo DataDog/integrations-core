@@ -1,6 +1,9 @@
 id: postgresql
 metric_id: postgres
 backend_only: false
+installation_sources:
+  - postgres
+  - postgresql
 facets:
   - groups:
       - Database
