@@ -2,28 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-
-try:
-    from json.decoder import JSONDecodeError
-except ImportError:
-    from simplejson import JSONDecodeError
-
-import os
-import subprocess
 from typing import Dict, List  # noqa: F401
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
-
 from .glusterlib.cluster import Cluster
-
+from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
@@ -166,7 +151,6 @@ class GlusterfsCheck(AgentCheck):
         else:
             self.service_check(sc_name, AgentCheck.UNKNOWN, tags=tags, message=msg)
 
-
     def get_gstatus_data(self):
         options = type('', (), {})()
         options.volumes = False
@@ -177,7 +161,7 @@ class GlusterfsCheck(AgentCheck):
         options.units = "g"
         options.output_mode = "json"
 
-        cluster = Cluster(options, None)
+        cluster = Cluster(options, self.log, self.use_sudo)
         # check_version(cluster)
         cluster.gather_data()
 
@@ -188,16 +172,13 @@ class GlusterfsCheck(AgentCheck):
 
         # Build the cluster data for json
         gstatus = {}
-        gstatus['cluster_status']  = data.cluster_status
-        gstatus['glfs_version']    = data.glusterfs_version
-        gstatus['node_count']      = data.nodes
-        gstatus['nodes_active']    = data.nodes_reachable
-        gstatus['volume_count']    = data.volume_count
+        gstatus['cluster_status'] = data.cluster_status
+        gstatus['glfs_version'] = data.glusterfs_version
+        gstatus['node_count'] = data.nodes
+        gstatus['nodes_active'] = data.nodes_reachable
+        gstatus['volume_count'] = data.volume_count
         gstatus['volumes_started'] = data.volumes_started
         if data.volume_count:
             gstatus['volume_summary'] = data.volume_data
 
-        return json.dumps({
-            "last_updated": str(datetime.now()),
-            "data": gstatus
-        })
+        return json.dumps({"last_updated": str(datetime.now()), "data": gstatus})
