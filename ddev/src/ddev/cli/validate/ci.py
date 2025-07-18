@@ -52,6 +52,7 @@ def ci(app: Application, sync: bool):
     import yaml
 
     from ddev.utils.scripts.ci_matrix import construct_job_matrix, get_all_targets
+    import re
 
     is_core = app.repo.name == 'core'
     is_marketplace = app.repo.name == 'marketplace'
@@ -65,12 +66,20 @@ def ci(app: Application, sync: bool):
     ddev_jobs_id = ('jd316aba', 'j6712d43')
 
     jobs = {}
-    for data in construct_job_matrix(app.repo.path, get_all_targets(app.repo.path)):
+    job_matrix = construct_job_matrix(app.repo.path, get_all_targets(app.repo.path))
+
+    # Reduce the target-envs to single jobs with the same name
+    # We do this to keep the job list from exceeding Github's maximum file size limit
+    # Remove anything inside parentheses from job names and trim trailing space
+    for job in job_matrix:
+        job['name'] = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
+    job_matrix = list({job['name']: job for job in job_matrix}.values())
+    
+    for data in job_matrix:
         python_restriction = data.get('python-support', '')
         config = {
             'job-name': data['name'],
             'target': data['target'],
-            'target-env': data.get('target-env'),
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
