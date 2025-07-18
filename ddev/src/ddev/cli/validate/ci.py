@@ -165,6 +165,8 @@ def ci(app: Application, sync: bool):
     # Remove anything inside parentheses from job names and trim trailing space
     job_dict = {}
     for job in job_matrix:
+        if len(job_dict.keys()) >= 20:
+            continue
         target_name = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
         if target_name not in job_dict:
             job_dict[target_name] = [job]
