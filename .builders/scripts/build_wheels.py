@@ -1,18 +1,39 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 from dotenv import dotenv_values
-from utils import extract_metadata, normalize_project_name
+from utils import WheelName, extract_metadata, normalize_project_name
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
+
+TARGET_TAG_PATTERNS = {
+    'linux-x86_64': r'manylinux.*_x86_64|linux_x86_64',
+    'linux-aarch64': r'manylinux.*_aarch64|linux_aarch64',
+    'windows-x86_64': r'win_amd64',
+    'macos-x86_64': r'macosx.*_(x86_64|intel|universal2)',
+    'macos-aarch64': r'macosx.*_(aarch64|arm64|universal2)',
+}
+
+
+def classify_target(platform_tag: str) -> str:
+    """Return the canonical target name (linux-x86_64, macos-aarch64, etc.) for a given wheel platform tag."""
+    for target_name, pattern in TARGET_TAG_PATTERNS.items():
+        if re.search(pattern, platform_tag):
+            return target_name
+    # Fallback – treat non-specific wheels as "any" so we still record their size
+    return 'any'
+
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -53,6 +74,13 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
         sys.exit(process.returncode)
 
     return process
+
+
+def calculate_wheel_sizes(wheel_path: Path) -> dict[str, int]:
+    compressed_size = wheel_path.stat().st_size
+    with ZipFile(wheel_path) as zf:
+        uncompressed_size = sum(zinfo.file_size for zinfo in zf.infolist())
+    return {'compressed': compressed_size, 'uncompressed': uncompressed_size}
 
 
 def main():
@@ -109,10 +137,16 @@ def main():
 
         # Fetch or build wheels
         command_args = [
-            str(python_path), '-m', 'pip', 'wheel',
-            '-r', str(MOUNT_DIR / 'requirements.in'),
-            '--wheel-dir', str(staged_wheel_dir),
-            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+            str(python_path),
+            '-m',
+            'pip',
+            'wheel',
+            '-r',
+            str(MOUNT_DIR / 'requirements.in'),
+            '--wheel-dir',
+            str(staged_wheel_dir),
+            '--extra-index-url',
+            CUSTOM_EXTERNAL_INDEX,
         ]
         if args.use_built_index:
             command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
@@ -120,20 +154,48 @@ def main():
         check_process(command_args, env=env_vars)
 
         # Repair wheels
-        check_process([
-            sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
-            '--source-dir', str(staged_wheel_dir),
-            '--built-dir', str(built_wheels_dir),
-            '--external-dir', str(external_wheels_dir),
-        ])
+        check_process(
+            [
+                sys.executable,
+                '-u',
+                str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
+                '--source-dir',
+                str(staged_wheel_dir),
+                '--built-dir',
+                str(built_wheels_dir),
+                '--external-dir',
+                str(external_wheels_dir),
+            ]
+        )
 
     dependencies: dict[str, tuple[str, str]] = {}
+    sizes: dict[str, dict[str, int]] = {}
+    dependency_sizes_dir = MOUNT_DIR / 'dependency_sizes'
+    dependency_sizes_dir.mkdir(parents=True, exist_ok=True)
+
+    target_name: str | None = None
+
     for wheel_dir in wheels_dir.iterdir():
         for entry in wheel_dir.iterdir():
+            wheel_name = WheelName.parse(entry.name)
+            platform_tag = wheel_name.platform_tag
             project_metadata = extract_metadata(entry)
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
+
+            # Determine the builder target once (skip wheels that are "any")
+            if target_name is None or target_name == 'any':
+                classified = classify_target(platform_tag)
+                if classified != 'any':
+                    target_name = classified
+
+            project_sizes = calculate_wheel_sizes(entry)
+            sizes[project_name] = project_sizes
+
+    output_path = dependency_sizes_dir / f'{target_name}_{python_version}.json'
+    with output_path.open('w', encoding='utf-8') as fp:
+        json.dump(dict(sorted(sizes.items())), fp, indent=2, sort_keys=True)
 
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:

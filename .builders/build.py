@@ -153,6 +153,10 @@ def build_macos():
         final_requirements = mount_dir / 'frozen.txt'
         shutil.move(final_requirements, output_dir)
 
+        # Move the dependency sizes to the output directory
+        dependency_sizes_dir = mount_dir / 'dependency_sizes'
+        shutil.move(dependency_sizes_dir, output_dir)
+
 
 def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
