@@ -51,7 +51,7 @@ pipeline:
   name: Barracuda CloudGen Firewall
   enabled: true
   filter:
-    query: source:barracuda_cloudgen_logs
+    query: source:cloudgen_firewall
   processors:
     - type: attribute-remapper
       name: " Map `timestamp` to `syslog.timestamp`"
