@@ -329,13 +329,12 @@ def get_dependencies_sizes(
 def get_dependencies_from_json(
     dependency_sizes: str, platform: str, version: str, compressed: bool
 ) -> list[FileDataEntry]:
-    sizes_json = None
-    for fname in os.listdir(dependency_sizes):
-        if is_correct_dependency(platform, version.split(".")[0], fname):
-            sizes_json = os.path.join(dependency_sizes, fname)
-    if sizes_json is None:
-        raise ValueError(f"No dependency sizes found for platform {platform} and version {version}")
-    with open(sizes_json, "r", encoding="utf-8") as f:
+    # for fname in os.listdir(dependency_sizes):
+    #     if is_correct_dependency(platform, version.split(".")[0], fname):
+    #         sizes_json = os.path.join(dependency_sizes, fname)
+    # if sizes_json is None:
+    #     raise ValueError(f"No dependency sizes found for platform {platform} and version {version}")
+    with open(dependency_sizes, "r", encoding="utf-8") as f:
         data = json.load(f)
     size_key = "compressed" if compressed else "uncompressed"
     return [
