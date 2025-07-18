@@ -1,7 +1,7 @@
 id: "cloudgen_firewall"
 # See app_id in your integration's manifest.json file to learn more:
 # https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
-metric_id: "cloudgen-firewall"
+metric_id: cloudgen-firewall
 # If for some reason id must be different than app_id, add the app_id in this field instead.
 # If id and app_id already match, this field can be left blank.
 backend_only: false
@@ -51,7 +51,7 @@ pipeline:
   name: Barracuda CloudGen Firewall
   enabled: true
   filter:
-    query: source:cloudgen_firewall
+    query: source:barracuda_cloudgen_logs
   processors:
     - type: attribute-remapper
       name: " Map `timestamp` to `syslog.timestamp`"
@@ -105,7 +105,7 @@ pipeline:
         - timestamp
     - type: pipeline
       name: Box Authentication
-      enabled: true
+      enabled: false
       filter:
         query: source:barracuda_cloudgen_logs service:auth
       processors:
@@ -543,3 +543,30 @@ pipeline:
             supportRules: ""
             matchRules: autoFilledRule1
               %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+%{greedyData:message}
+    - type: grok-parser
+      name: Box Auth Access
+      enabled: true
+      source: message
+      samples:
+        - "2025-03-17T08:24:45+05:30 sacumentestlocal
+          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
+          boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
+        - "2025-03-05T12:35:00+05:30 sacumentestlocal
+          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
+          ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from
+          127.0.0.1 : Allowed."
+        - "2025-04-10T10:44:34+05:30 sacumentestlocal
+          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
+          phiona[24524]: Session abhishek: Closed"
+        - "2025-04-10T10:44:34+05:30 sacumentestlocal
+          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
+          box_control[24539]: Session abhishek: Closed"
+        - "2025-03-05T12:35:00+05:30 sacumentestlocal
+          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
+          ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from
+          127.0.0.1 : Allowed."
+      grok:
+        supportRules: ""
+        matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
+          %{hostname:hostname}
+          %{data:component}:\s+%{word:level}\s+%{word:source}\s+(%{data:event}:)?%{data:process}\[%{integer:pid}\]:\s+%{data:message}(\s+)?:\s+%{word:session_status}(.)?
