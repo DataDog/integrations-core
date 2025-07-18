@@ -538,6 +538,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /box/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /box/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/proofpoint_tap/                                                    @DataDog/saas-integrations
+/proofpoint_tap/*.md                                                @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_tap/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_tap/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /carbon_black_cloud/                                                               @DataDog/saas-integrations
 /carbon_black_cloud/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
 /carbon_black_cloud/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
