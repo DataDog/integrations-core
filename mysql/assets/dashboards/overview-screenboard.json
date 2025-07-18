@@ -914,7 +914,8 @@
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_data{$scope}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {

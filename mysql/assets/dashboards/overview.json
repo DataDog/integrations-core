@@ -39,7 +39,8 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:mysql.net.max_connections{$scope}"
+                  "query": "sum:mysql.net.max_connections{$scope}",
+                  "semantic_mode": "combined"
                 }
               ]
             }
