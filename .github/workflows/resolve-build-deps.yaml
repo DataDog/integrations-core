@@ -244,11 +244,18 @@ jobs:
         name: target-macos-${{ matrix.job.arch }}
         path: output
     
-    - name: Measure disk usage
-      uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@master
-      with:
-        dependency_sizes_json: output/macos-${{ matrix.job.arch }}/py3/sizes.json
-        platform: macos-${{ matrix.job.arch }}
+  measure-disk-usage:
+    name: Measure disk usage on macOS
+    needs: build-macos
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@master
+    with:
+      dependency_sizes_json: output/macos-${{ matrix.arch }}/py3/sizes.json
+      platform: macos-${{ matrix.arch }}
+
 
 
   publish:
