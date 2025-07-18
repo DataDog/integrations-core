@@ -238,7 +238,7 @@ spec:
   features:
     oomKill:
       # Only enable this feature if there is nothing else that requires the system-probe container in all Agent pods
-      # Examples of system-probe features are npm, cws, usm, oom_kill.
+      # Examples of system-probe features are npm, cws, usm
       enabled: true
 
 override:
