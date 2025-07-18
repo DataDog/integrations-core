@@ -90,7 +90,6 @@ def ci(app: Application, sync: bool):
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
-            'target-env': '${{ matrix.target-env }}',
             # Options
             'python-version': '${{ inputs.python-version }}',
             'standard': '${{ inputs.standard }}',
@@ -102,6 +101,9 @@ def ci(app: Application, sync: bool):
             'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
+        if data.get('target-env'):
+            config['target-env'] = '${{ matrix.target-env }}'
+
         if is_core or is_marketplace:
             config.update(
                 {
@@ -130,7 +132,12 @@ def ci(app: Application, sync: bool):
         job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
         job_id = f'j{job_id}'
 
-        job_config = {'uses': test_workflow, 'strategy': {"matrix": {"target-env": data.get('target-env', [])}}, 'with': config, 'secrets': 'inherit'}
+        job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
+        if data.get('target-env'):
+            job_config['strategy'] = {
+                'matrix': {'target-env': data['target-env']},
+                'fail-fast': False,
+            }
         if job_id in ddev_jobs_id:
             job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
         jobs[job_id] = job_config
