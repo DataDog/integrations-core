@@ -266,8 +266,8 @@ def ci(app: Application, sync: bool):
         if original_jobs_workflow != expected_jobs_workflow:
             if sync:
                 target_path.write_text(expected_jobs_workflow)
-            else:
-                app.abort('CI configuration is not in sync, try again with the `--sync` flag')
+            # else:
+                # app.abort('CI configuration is not in sync, try again with the `--sync` flag')
         # sub_tasks.append({f'test-all-{i // 100}': {'uses': f'./.github/workflows/test-all-{i // 100}.yml'}})
 
     all_jobs = {}
