@@ -1,13 +1,14 @@
 id: cloudgen_firewall
 tests:
   - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-      boxconfig[7171]: Session localhost_sacumentestlocal: Closed"
+      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
+      ATTEMPT: boxconfig[8016]: Login localhost_sacumentestlocal from 127.0.0.1
+      : Allowed."
     result: null
   - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
       sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
-      [1071065] Insert Event from 127.0.0.1:38791 -
-      (D|2|NGAdmin|2|Login|2420|abhishek|sacumentestlocal|1741670525|Login
+      [1071065] Insert Event from 127.0.0.1:33994 -
+      (D|2|control|2|Login|2420|abhishek|sacumentestlocal|1741670526|Login
       abhishek from 10.10.16.1 : Allowed.)"
     result: null
 
