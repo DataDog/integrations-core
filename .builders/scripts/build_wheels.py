@@ -24,7 +24,7 @@ if sys.platform == 'win32':
         return subprocess.list2cmdline(args)
 
     def path_to_uri(path: str) -> str:
-        return f'file:///{os.path.abspath(path).replace(' ', '%20').replace(os.sep, '/')}'
+        return f'file:///{os.path.abspath(path).replace(" ", "%20").replace(os.sep, "/")}'
 
 else:
     import shlex
@@ -116,16 +116,10 @@ def main():
 
         # Fetch or build wheels
         command_args = [
-            str(python_path),
-            '-m',
-            'pip',
-            'wheel',
-            '-r',
-            str(MOUNT_DIR / 'requirements.in'),
-            '--wheel-dir',
-            str(staged_wheel_dir),
-            '--extra-index-url',
-            CUSTOM_EXTERNAL_INDEX,
+            str(python_path), '-m', 'pip', 'wheel',
+            '-r', str(MOUNT_DIR / 'requirements.in'),
+            '--wheel-dir', str(staged_wheel_dir),
+            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
         ]
         if args.use_built_index:
             command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
