@@ -143,7 +143,7 @@ class VagrantAgent(AgentInterface):
 
     def invoke(self, args: list[str]) -> None:
         agent_bin = LINUX_AGENT_BIN_PATH if not self._is_windows_vm else WINDOWS_AGENT_BIN_PATH
-        guest_cmd_parts = ["sudo", agent_bin] + args
+        guest_cmd_parts = ["sudo", agent_bin] + args if not self._is_windows_vm else [agent_bin] + args
         host_cmd = self._format_command(guest_cmd_parts)
 
         self.app.display_info(f"Invoking agent command in VM `{self._vm_name}`: {' '.join(host_cmd)}")
@@ -205,7 +205,19 @@ class VagrantAgent(AgentInterface):
 
         synced_folders_str = ""
         for volume in synced_folders:
-            path, target = volume.split(":")
+            # Handle Windows paths that contain drive letters (e.g., C:\path)
+            # Look for pattern like ":C:\" or ":D:\" etc.
+            import re
+
+            windows_path_match = re.search(r':([A-Za-z]:\\.*)', volume)
+            if windows_path_match:
+                # Split at the position before the drive letter
+                split_pos = windows_path_match.start()
+                path = volume[:split_pos]
+                target = volume[split_pos + 1 :]  # Skip the colon
+            else:
+                # For non-Windows paths, use simple split
+                path, target = volume.split(":", 1)
             synced_folders_str += f'config.vm.synced_folder "{path}", "{target}"\n'
 
         template = self._get_vagrantfile_template()
@@ -260,7 +272,6 @@ class VagrantAgent(AgentInterface):
             up_command_host,
             "up_command",
             host=True,
-            env=host_operation_env_vars,
         )
 
         self.app.display_info(f"Vagrant VM `{self._vm_name}` started successfully.")
@@ -288,7 +299,7 @@ class VagrantAgent(AgentInterface):
             ]
             for local_package, features in local_packages.items():
                 package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
-                local_package_cmd = " ".join(base_pip_command) + package_mount
+                local_package_cmd = " ".join(base_pip_command + [package_mount])
                 self._run_command(local_package_cmd, f"installing_local_package_{local_package.name}{features}")
 
                 self.app.display_info(
@@ -488,8 +499,10 @@ EOF'"""
     def _package_mount_dir(self) -> str:
         # Default path INSIDE the VM where host packages are synced/mounted.
         # Assumes a synced folder like `/home` or `C:\vagrant` on the guest.
-        base_synced_dir = WINDOWS_BASE_SYNCED_DIR if self._is_windows_vm else LINUX_BASE_SYNCED_DIR
-        return os.path.join(base_synced_dir, "packages/").replace("\\", "\\\\")
+        if self._is_windows_vm:
+            return "C:\\vagrant\\packages\\"
+        else:
+            return "/home/packages/"
 
     @cached_property
     def _config_mount_dir(self) -> str:
