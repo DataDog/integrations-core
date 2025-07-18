@@ -70,6 +70,7 @@ def ci(app: Application, sync: bool):
         config = {
             'job-name': data['name'],
             'target': data['target'],
+            'target-env': data.get('target-env'),
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
