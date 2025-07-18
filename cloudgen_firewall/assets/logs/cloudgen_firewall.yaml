@@ -51,7 +51,7 @@ pipeline:
   name: Barracuda CloudGen Firewall
   enabled: true
   filter:
-    query: source:barracuda_cloudgen_logs
+    query: source:cloudgen_firewall
   processors:
     - type: attribute-remapper
       name: " Map `timestamp` to `syslog.timestamp`"
@@ -107,7 +107,7 @@ pipeline:
       name: Box Authentication
       enabled: false
       filter:
-        query: source:barracuda_cloudgen_logs service:auth
+        query: source:cloudgen_firewall service:auth
       processors:
         - type: grok-parser
           name: Box Auth Access
@@ -141,7 +141,7 @@ pipeline:
       name: Box Firewall
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:firewall
+        query: source:cloudgen_firewall service:firewall
       processors:
         - type: grok-parser
           name: Box Firewall Activity
@@ -288,7 +288,7 @@ pipeline:
       name: Box Events
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:event
+        query: source:cloudgen_firewall service:event
       processors:
         - type: grok-parser
           name: Box Event Events
@@ -351,7 +351,7 @@ pipeline:
       name: Box SSH
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:ssh
+        query: source:cloudgen_firewall service:ssh
       processors:
         - type: grok-parser
           name: Box SSH Config
@@ -407,7 +407,7 @@ pipeline:
       name: Box Config
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:config
+        query: source:cloudgen_firewall service:config
       processors:
         - type: grok-parser
           name: Box Config Daemon Download
@@ -507,7 +507,7 @@ pipeline:
       name: Box Control
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:control
+        query: source:cloudgen_firewall service:control
       processors:
         - type: grok-parser
           name: Box Control Auth Service
@@ -526,7 +526,7 @@ pipeline:
       name: Box System
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:system
+        query: source:cloudgen_firewall service:system
       processors:
         - type: grok-parser
           name: Box System Mgmaccess
