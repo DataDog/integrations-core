@@ -240,9 +240,10 @@ def ci(app: Application, sync: bool):
 
 
 
+    batch_size = 50
     # sub_tasks = []
-    for i in range(0, len(jobs), 100):
-        job_slice = dict(sorted(jobs.items(), key=lambda item: item[1]['with']['job-name'])[i:i + 100])
+    for i in range(0, len(jobs), batch_size):
+        job_slice = dict(sorted(jobs.items(), key=lambda item: item[1]['with']['job-name'])[i:i + batch_size])
         jobs_component = yaml.safe_dump({'jobs': job_slice}, default_flow_style=False, sort_keys=False)
 
         # Enforce proper string types
@@ -260,7 +261,7 @@ def ci(app: Application, sync: bool):
 
         manual_component = original_jobs_workflow.split('jobs:')[0].strip()
         expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
-        target_path = app.repo.path / '.github' / 'workflows' / f'test-all-{i // 100}.yml'
+        target_path = app.repo.path / '.github' / 'workflows' / f'test-all-{i // batch_size}.yml'
 
         if original_jobs_workflow != expected_jobs_workflow:
             if sync:
@@ -271,8 +272,8 @@ def ci(app: Application, sync: bool):
 
     all_jobs = {}
     # for k, v in job_dict.items():
-    for i in range(0, len(jobs), 100):
-        all_jobs[f'test-all-{i // 100}'] = {'uses': f'./.github/workflows/test-all-{i // 100}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
+    for i in range(0, len(jobs), batch_size):
+        all_jobs[f'test-all-{i // batch_size}'] = {'uses': f'./.github/workflows/test-all-{i // batch_size}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
     jobs_component = yaml.safe_dump({'jobs': all_jobs}, default_flow_style=False, sort_keys=False)
     manual_component = original_jobs_workflow.split('jobs:')[0].strip()
     expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'

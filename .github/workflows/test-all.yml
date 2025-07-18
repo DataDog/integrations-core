@@ -122,3 +122,67 @@ jobs:
       agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
       pytest-args: ${{ inputs.pytest-args }}
       skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
+  test-all-4:
+    uses: ./.github/workflows/test-all-4.yml
+    with:
+      repo: ${{ inputs.repo }}
+      python-version: ${{ inputs.python-version }}
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: ${{ inputs.agent-image }}
+      agent-image-py2: ${{ inputs.agent-image-py2 }}
+      agent-image-windows: ${{ inputs.agent-image-windows }}
+      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
+      pytest-args: ${{ inputs.pytest-args }}
+      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
+  test-all-5:
+    uses: ./.github/workflows/test-all-5.yml
+    with:
+      repo: ${{ inputs.repo }}
+      python-version: ${{ inputs.python-version }}
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: ${{ inputs.agent-image }}
+      agent-image-py2: ${{ inputs.agent-image-py2 }}
+      agent-image-windows: ${{ inputs.agent-image-windows }}
+      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
+      pytest-args: ${{ inputs.pytest-args }}
+      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
+  test-all-6:
+    uses: ./.github/workflows/test-all-6.yml
+    with:
+      repo: ${{ inputs.repo }}
+      python-version: ${{ inputs.python-version }}
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: ${{ inputs.agent-image }}
+      agent-image-py2: ${{ inputs.agent-image-py2 }}
+      agent-image-windows: ${{ inputs.agent-image-windows }}
+      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
+      pytest-args: ${{ inputs.pytest-args }}
+      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
+  test-all-7:
+    uses: ./.github/workflows/test-all-7.yml
+    with:
+      repo: ${{ inputs.repo }}
+      python-version: ${{ inputs.python-version }}
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: ${{ inputs.agent-image }}
+      agent-image-py2: ${{ inputs.agent-image-py2 }}
+      agent-image-windows: ${{ inputs.agent-image-windows }}
+      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
+      pytest-args: ${{ inputs.pytest-args }}
+      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
