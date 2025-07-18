@@ -365,7 +365,7 @@ class VagrantAgent(AgentInterface):
 
     def _prepare_exported_env_vars(self, env_vars: dict[str, str]) -> dict[str, str]:
         """Prepare environment variables to export inside the VM for the Agent process."""
-        exported_env_vars = {}
+        exported_env_vars = env_vars
         exported_env_vars.update(self.metadata.get('env', {}))
 
         if AgentEnvVars.API_KEY not in env_vars:
@@ -373,7 +373,7 @@ class VagrantAgent(AgentInterface):
 
         # By default, the hostname is the VM hostname (set in VagrantFile with DD_HOSTNAME)
         if self.metadata.get("dd_hostname"):
-            exported_env_vars[AgentEnvVars.HOSTNAME] = self.metadata.get("dd_hostname")
+            exported_env_vars[AgentEnvVars.HOSTNAME] = str(self.metadata.get("dd_hostname", ""))
 
         exported_env_vars[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
         exported_env_vars[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")

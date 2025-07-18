@@ -4,9 +4,7 @@
 $set_environment_variables = <<SCRIPT
 tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
 
-export DD_API_KEY="{{ dd_api_key }}"
 export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
-export DD_SITE="datadoghq.com"
 export DD_HOSTNAME=$(hostname)
 {{ exported_env_vars_str }}
 
