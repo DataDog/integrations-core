@@ -101,6 +101,7 @@ def main():
     built_wheels_dir = wheels_dir / 'built'
     external_wheels_dir = wheels_dir / 'external'
     dependency_sizes_dir = MOUNT_DIR / 'dependency_sizes'
+    dependency_sizes_dir.mkdir(parents=True, exist_ok=True)
 
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
