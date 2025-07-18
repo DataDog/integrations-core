@@ -246,14 +246,14 @@ jobs:
     
   measure-disk-usage-x86_64:
     needs: build-macos
-    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@master
+    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@${{ github.ref }}
     with:
       dependency_sizes_json: output/macos-x86_64/py3/sizes.json
       platform: macos-x86_64
 
   measure-disk-usage-aarch64:
     needs: build-macos
-    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@master
+    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@${{ github.ref }}
     with:
       dependency_sizes_json: output/macos-aarch64/py3/sizes.json
       platform: macos-aarch64
