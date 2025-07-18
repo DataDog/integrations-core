@@ -243,6 +243,13 @@ jobs:
       with:
         name: target-macos-${{ matrix.job.arch }}
         path: output
+    
+    - name: Measure disk usage
+      uses: ./.github/workflows/measure-disk-usage.yml
+      with:
+        dependency_sizes_json: output/macos-${{ matrix.job.arch }}/py3/sizes.json
+        platform: macos-${{ matrix.job.arch }}
+
 
   publish:
     name: Publish artifacts and update lockfiles via PR

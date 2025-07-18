@@ -1,10 +1,14 @@
 name: Measure Disk Usage
 
 on:
-  workflow_run:
-    workflows: [resolve-build-deps]
-    types:
-      - completed
+  workflow_call:
+    inputs:
+      dependency_sizes_json:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
 env:
   PYTHON_VERSION: "3.12"
 
@@ -31,8 +35,8 @@ jobs:
   
     - name: Testing dependency sizes
       run: |
-        ddev size status --dependency-sizes ./dependency_sizes > size-dependency-sizes.txt
-        ddev size status --dependency-sizes ./dependency_sizes --format png,csv,markdown
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.dependency_sizes_json }} > size-dependency-sizes.txt
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.dependency_sizes_json }} --format png,csv,markdown
         cat size-dependency-sizes.txt
         echo "# Size (dependency sizes)" >> $GITHUB_STEP_SUMMARY
         cat dependency_sizes_status.md >> $GITHUB_STEP_SUMMARY

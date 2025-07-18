@@ -100,8 +100,6 @@ def main():
     wheels_dir = MOUNT_DIR / 'wheels'
     built_wheels_dir = wheels_dir / 'built'
     external_wheels_dir = wheels_dir / 'external'
-    dependency_sizes_dir = MOUNT_DIR / 'dependency_sizes'
-    dependency_sizes_dir.mkdir(parents=True, exist_ok=True)
 
     # Install build dependencies
     check_process([str(python_path), '-m', 'pip', 'install', '-r', str(MOUNT_DIR / 'build_dependencies.txt')])
@@ -194,7 +192,7 @@ def main():
             project_sizes['version'] = project_version
             sizes[project_name] = project_sizes
 
-    output_path = dependency_sizes_dir / f'{target_name}_{python_version}.json'
+    output_path = MOUNT_DIR / 'sizes.json'
     with output_path.open('w', encoding='utf-8') as fp:
         json.dump(dict(sorted(sizes.items())), fp, indent=2, sort_keys=True)
 
