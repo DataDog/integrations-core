@@ -10,6 +10,7 @@ The logic is also imported by ddev to perform the CI validation on 3.8 which wor
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import re
@@ -201,6 +202,35 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
         if matrix_overrides.get('exclude', False):
             continue
 
+        hatch_toml = root / target / 'hatch.toml'
+        if not hatch_toml.is_file():
+            continue
+
+        hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
+        env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
+        target_envs = []
+        # convert the env matrix to a list of targets for each combination of values
+        if env_matrix:
+            for env in env_matrix:
+                if not isinstance(env, dict):
+                    continue
+
+                # Create a list of all combinations of values
+                keys = env.keys()
+                values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
+                if not values:
+                    continue
+
+                # Generate all combinations of values
+                from itertools import product
+
+                for combination in product(*values):
+                    target_envs.append('-'.join(combination))
+
+        else:
+            # If no env matrix is defined, use the target name as the only environment
+            target_envs = []
+
         manifest = read_manifest(root, target)
         platform_ids = matrix_overrides.get('platforms', [])
         if not platform_ids:
@@ -247,8 +277,15 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             if supported_python_versions:
                 config['python-support'] = ''.join(supported_python_versions)
 
-            config['name'] = normalize_job_name(config['name'])
-            job_matrix.append(config)
+            job_name = normalize_job_name(config['name'])
+            if target_envs:
+                for target_env in target_envs:
+                    if target_env != target:
+                        config['name'] = f'{copy.copy(job_name)} ({target_env})'
+                    job_matrix.append({**config, 'target-env': target_env})
+            else:
+                config['name'] = job_name
+                job_matrix.append({**config})
 
     return job_matrix
 

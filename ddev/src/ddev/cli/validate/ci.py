@@ -39,6 +39,97 @@ def sort_projects(projects):
     return sorted(projects.items(), key=lambda item: (item[0] != 'default', item[0]))
 
 
+WORKFLOW_TRIGGER = {
+    "on": {
+        "workflow_call": {
+            "inputs": {
+                "repo": {
+                    "required": True,
+                    "type": "string",
+                },
+                "python-version": {
+                    "required": False,
+                    "default": "",
+                    "type": "string",
+                },
+                "standard": {
+                    "required": False,
+                    "default": False,
+                    "type": "boolean",
+                },
+                "latest": {
+                    "required": False,
+                    "default": False,
+                    "type": "boolean",
+                },
+                "minimum-base-package": {
+                    "required": False,
+                    "default": False,
+                    "type": "boolean",
+                },
+                "test-py2": {
+                    "required": False,
+                    "default": False,
+                    "type": "boolean",
+                },
+                "test-py3": {
+                    "required": False,
+                    "default": True,
+                    "type": "boolean",
+                },
+                "agent-image": {
+                    "required": False,
+                    "default": "",
+                    "type": "string",
+                },
+                "agent-image-py2": {
+                    "required": False,
+                    "default": "",
+                    "type": "string",
+                },
+                "agent-image-windows": {
+                    "required": False,
+                    "default": "",
+                    "type": "string",
+                },
+                "agent-image-windows-py2": {
+                    "required": False,
+                    "default": "",
+                    "type": "string",
+                },
+                "pytest-args": {
+                    "description": "Arguments to pass to pytest",
+                    "required": False,
+                    "type": "string",
+                    "default": "",
+                },
+                "skip-ddev-tests": {
+                    "required": False,
+                    "default": False,
+                    "type": "boolean",
+                },
+            }
+        }
+    }
+}
+
+WORKFLOW_JOB_INPUTS = {
+    "repo": "${{ inputs.repo }}",
+    "python-version": "${{ inputs.python-version }}",
+    "standard": "${{ inputs.standard }}",
+    "latest": "${{ inputs.latest }}",
+    "minimum-base-package": "${{ inputs.minimum-base-package }}",
+    "test-py2": "${{ inputs.test-py2 }}",
+    "test-py3": "${{ inputs.test-py3 }}",
+    "agent-image": "${{ inputs.agent-image }}",
+    "agent-image-py2": "${{ inputs.agent-image-py2 }}",
+    "agent-image-windows": "${{ inputs.agent-image-windows }}",
+    "agent-image-windows-py2": "${{ inputs.agent-image-windows-py2 }}",
+    "pytest-args": "${{ inputs.pytest-args }}",
+    "skip-ddev-tests": "${{ inputs.skip-ddev-tests }}",
+}
+
+
 @click.command()
 @click.option('--sync', is_flag=True, help='Update the CI configuration')
 @click.pass_obj
@@ -52,6 +143,7 @@ def ci(app: Application, sync: bool):
     import yaml
 
     from ddev.utils.scripts.ci_matrix import construct_job_matrix, get_all_targets
+    import re
 
     is_core = app.repo.name == 'core'
     is_marketplace = app.repo.name == 'marketplace'
@@ -65,84 +157,133 @@ def ci(app: Application, sync: bool):
     ddev_jobs_id = ('jd316aba', 'j6712d43')
 
     jobs = {}
-    for data in construct_job_matrix(app.repo.path, get_all_targets(app.repo.path)):
-        python_restriction = data.get('python-support', '')
-        config = {
-            'job-name': data['name'],
-            'target': data['target'],
-            'platform': data['platform'],
-            'runner': json.dumps(data['runner'], separators=(',', ':')),
-            'repo': '${{ inputs.repo }}',
-            # Options
-            'python-version': '${{ inputs.python-version }}',
-            'standard': '${{ inputs.standard }}',
-            'latest': '${{ inputs.latest }}',
-            'agent-image': '${{ inputs.agent-image }}',
-            'agent-image-py2': '${{ inputs.agent-image-py2 }}',
-            'agent-image-windows': '${{ inputs.agent-image-windows }}',
-            'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
-            'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
-            'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
-        }
-        if is_core or is_marketplace:
-            config.update(
-                {
-                    'minimum-base-package': '${{ inputs.minimum-base-package }}',
-                }
-            )
+    job_matrix = construct_job_matrix(app.repo.path, get_all_targets(app.repo.path))
 
-        if not is_core:
-            config.update(
-                {
-                    'setup-env-vars': '${{ inputs.setup-env-vars }}',
-                }
-            )
-        # Allow providing pytest arguments for core, support to run (or not run) flaky tests
-        if is_core:
-            config.update(
-                {
-                    'pytest-args': '${{ inputs.pytest-args }}',
-                }
-            )
+    # Reduce the target-envs to single jobs with the same name
+    # We do this to keep the job list from exceeding Github's maximum file size limit
+    # TODO: Split the jobs into multiple files that are called by the test-all.yml workflow
+    # Remove anything inside parentheses from job names and trim trailing space
+    job_dict = {}
+    for job in job_matrix:
+        target_name = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
+        if target_name not in job_dict:
+            job_dict[target_name] = [job]
+            # job_dict[job['name']]['target-env'] = [job.get('target-env')] if job.get('target-env') else []
+        else:
+            job_dict[target_name].append(job)
+            # job_dict[job['name']]['target-env'].append(job['target-env'])
+    # job_matrix = list(job_dict.values())
+    
+    for target_name, job_matrix in job_dict.items():
+        for data in job_matrix:
+            python_restriction = data.get('python-support', '')
+            config = {
+                'job-name': data['name'],
+                'target': data['target'],
+                'platform': data['platform'],
+                'runner': json.dumps(data['runner'], separators=(',', ':')),
+                'repo': '${{ inputs.repo }}',
+                # Options
+                'python-version': '${{ inputs.python-version }}',
+                'standard': '${{ inputs.standard }}',
+                'latest': '${{ inputs.latest }}',
+                'agent-image': '${{ inputs.agent-image }}',
+                'agent-image-py2': '${{ inputs.agent-image-py2 }}',
+                'agent-image-windows': '${{ inputs.agent-image-windows }}',
+                'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
+                'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
+                'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
+            }
+            # if data.get('target-env'):
+            #     config['target-env'] = '${{ matrix.target-env }}'
 
-        # Prevent redundant job hierarchy names at the bottom of pull requests and also satisfy the naming requirements:
-        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_id
-        #
-        # We want the job ID to be unique but also small so it displays concisely on the bottom of pull requests
-        job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
-        job_id = f'j{job_id}'
+            if is_core or is_marketplace:
+                config.update(
+                    {
+                        'minimum-base-package': '${{ inputs.minimum-base-package }}',
+                    }
+                )
 
-        job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
-        if job_id in ddev_jobs_id:
-            job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
-        jobs[job_id] = job_config
+            if not is_core:
+                config.update(
+                    {
+                        'setup-env-vars': '${{ inputs.setup-env-vars }}',
+                    }
+                )
+            # Allow providing pytest arguments for core, support to run (or not run) flaky tests
+            if is_core:
+                config.update(
+                    {
+                        'pytest-args': '${{ inputs.pytest-args }}',
+                    }
+                )
 
-        if data['target'] == 'ddev':
-            jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
+            # Prevent redundant job hierarchy names at the bottom of pull requests and also satisfy the naming requirements:
+            # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_id
+            #
+            # We want the job ID to be unique but also small so it displays concisely on the bottom of pull requests
+            job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
+            job_id = f'j{job_id}'
 
-    jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
+            job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
+            # if data.get('target-env'):
+            #     job_config['strategy'] = {
+            #         'matrix': {'target-env': data['target-env']},
+            #         'fail-fast': False,
+            #     }
+            if job_id in ddev_jobs_id:
+                job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
+            jobs[job_id] = job_config
 
-    # Enforce proper string types
-    for field in (
-        'repo',
-        'python-version',
-        'setup-env-vars',
-        'agent-image',
-        'agent-image-py2',
-        'agent-image-windows',
-        'agent-image-windows-py2',
-        'skip-ddev-tests',
-    ):
-        jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
+            if data['target'] == 'ddev':
+                jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
 
+
+
+    batch_size = 50
+    # sub_tasks = []
+    for i in range(0, len(jobs), batch_size):
+        job_slice = dict(sorted(jobs.items(), key=lambda item: item[1]['with']['job-name'])[i:i + batch_size])
+        jobs_component = yaml.safe_dump({'jobs': job_slice}, default_flow_style=False, sort_keys=False)
+
+        # Enforce proper string types
+        for field in (
+            'repo',
+            'python-version',
+            'setup-env-vars',
+            'agent-image',
+            'agent-image-py2',
+            'agent-image-windows',
+            'agent-image-windows-py2',
+            'skip-ddev-tests',
+        ):
+            jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
+
+        manual_component = original_jobs_workflow.split('jobs:')[0].strip()
+        expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
+        target_path = app.repo.path / '.github' / 'workflows' / f'test-all-{i // batch_size}.yml'
+
+        if original_jobs_workflow != expected_jobs_workflow:
+            if sync:
+                target_path.write_text(expected_jobs_workflow)
+            # else:
+                # app.abort('CI configuration is not in sync, try again with the `--sync` flag')
+        # sub_tasks.append({f'test-all-{i // 100}': {'uses': f'./.github/workflows/test-all-{i // 100}.yml'}})
+
+    all_jobs = {}
+    # for k, v in job_dict.items():
+    for i in range(0, len(jobs), batch_size):
+        all_jobs[f'test-all-{i // batch_size}'] = {'uses': f'./.github/workflows/test-all-{i // batch_size}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
+    jobs_component = yaml.safe_dump({'jobs': all_jobs}, default_flow_style=False, sort_keys=False)
     manual_component = original_jobs_workflow.split('jobs:')[0].strip()
     expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
+    jobs_workflow_path.write_text(expected_jobs_workflow)
 
-    if original_jobs_workflow != expected_jobs_workflow:
-        if sync:
-            jobs_workflow_path.write_text(expected_jobs_workflow)
-        else:
-            app.abort('CI configuration is not in sync, try again with the `--sync` flag')
+
+    # Write top level test-all with calls to each slice
+    # test_all = yaml.safe_dump({'jobs': sub_tasks}, default_flow_style=False, sort_keys=False)
+    # for i in range(len(sub_tasks)):
+    #     jobs_workflow_path.write_text(manual_component + '\n\n' + test_all)
 
     validation_tracker = app.create_validation_tracker('CI configuration validation')
     error_message = ''
