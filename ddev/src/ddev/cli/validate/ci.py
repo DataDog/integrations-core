@@ -165,8 +165,6 @@ def ci(app: Application, sync: bool):
     # Remove anything inside parentheses from job names and trim trailing space
     job_dict = {}
     for job in job_matrix:
-        if len(job_dict.keys()) >= 18:
-            continue
         target_name = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
         if target_name not in job_dict:
             job_dict[target_name] = [job]
@@ -177,7 +175,6 @@ def ci(app: Application, sync: bool):
     # job_matrix = list(job_dict.values())
     
     for target_name, job_matrix in job_dict.items():
-        jobs = {}
         for data in job_matrix:
             python_restriction = data.get('python-support', '')
             config = {
@@ -244,9 +241,9 @@ def ci(app: Application, sync: bool):
 
 
     # sub_tasks = []
-    # for i in range(0, len(jobs), 100):
-    #     job_slice = dict(sorted(jobs.items(), key=lambda item: item[0])[i:i + 100])
-        jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
+    for i in range(0, len(jobs), 100):
+        job_slice = dict(sorted(jobs.items(), key=lambda item: item[1]['with']['job-name'])[i:i + 100])
+        jobs_component = yaml.safe_dump({'jobs': job_slice}, default_flow_style=False, sort_keys=False)
 
         # Enforce proper string types
         for field in (
@@ -263,7 +260,7 @@ def ci(app: Application, sync: bool):
 
         manual_component = original_jobs_workflow.split('jobs:')[0].strip()
         expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
-        target_path = app.repo.path / '.github' / 'workflows' / f'test-all-{target_name.lower().replace(' ', '-')}.yml'
+        target_path = app.repo.path / '.github' / 'workflows' / f'test-all-{i // 100}.yml'
 
         if original_jobs_workflow != expected_jobs_workflow:
             if sync:
@@ -273,8 +270,9 @@ def ci(app: Application, sync: bool):
         # sub_tasks.append({f'test-all-{i // 100}': {'uses': f'./.github/workflows/test-all-{i // 100}.yml'}})
 
     all_jobs = {}
-    for k, v in job_dict.items():
-        all_jobs[f'{k.lower().replace(' ', '-')}'] = {'uses': f'./.github/workflows/test-all-{k.lower().replace(' ', '-')}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
+    # for k, v in job_dict.items():
+    for i in range(0, len(jobs), 100):
+        all_jobs[f'test-all-{i // 100}'] = {'uses': f'./.github/workflows/test-all-{i // 100}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
     jobs_component = yaml.safe_dump({'jobs': all_jobs}, default_flow_style=False, sort_keys=False)
     manual_component = original_jobs_workflow.split('jobs:')[0].strip()
     expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'

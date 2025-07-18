@@ -58,8 +58,8 @@ on:
         type: boolean
 
 jobs:
-  ddev-on-linux:
-    uses: ./.github/workflows/test-all-ddev-on-linux.yml
+  test-all-0:
+    uses: ./.github/workflows/test-all-0.yml
     with:
       repo: ${{ inputs.repo }}
       python-version: ${{ inputs.python-version }}
@@ -74,8 +74,8 @@ jobs:
       agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
       pytest-args: ${{ inputs.pytest-args }}
       skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  ddev-on-windows:
-    uses: ./.github/workflows/test-all-ddev-on-windows.yml
+  test-all-1:
+    uses: ./.github/workflows/test-all-1.yml
     with:
       repo: ${{ inputs.repo }}
       python-version: ${{ inputs.python-version }}
@@ -90,8 +90,8 @@ jobs:
       agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
       pytest-args: ${{ inputs.pytest-args }}
       skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  datadog-checks-base-on-linux:
-    uses: ./.github/workflows/test-all-datadog-checks-base-on-linux.yml
+  test-all-2:
+    uses: ./.github/workflows/test-all-2.yml
     with:
       repo: ${{ inputs.repo }}
       python-version: ${{ inputs.python-version }}
@@ -106,232 +106,8 @@ jobs:
       agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
       pytest-args: ${{ inputs.pytest-args }}
       skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  datadog-checks-base-on-windows:
-    uses: ./.github/workflows/test-all-datadog-checks-base-on-windows.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  datadog-checks-dev-on-linux:
-    uses: ./.github/workflows/test-all-datadog-checks-dev-on-linux.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  datadog-checks-dev-on-windows:
-    uses: ./.github/workflows/test-all-datadog-checks-dev-on-windows.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  datadog-checks-downloader-on-linux:
-    uses: ./.github/workflows/test-all-datadog-checks-downloader-on-linux.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  datadog-checks-downloader-on-windows:
-    uses: ./.github/workflows/test-all-datadog-checks-downloader-on-windows.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  active-directory:
-    uses: ./.github/workflows/test-all-active-directory.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  activemq:
-    uses: ./.github/workflows/test-all-activemq.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  activemq-xml:
-    uses: ./.github/workflows/test-all-activemq-xml.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  aerospike:
-    uses: ./.github/workflows/test-all-aerospike.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  airflow:
-    uses: ./.github/workflows/test-all-airflow.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  amazon-kafka:
-    uses: ./.github/workflows/test-all-amazon-kafka.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  ambari:
-    uses: ./.github/workflows/test-all-ambari.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  apache:
-    uses: ./.github/workflows/test-all-apache.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  appgate-sdp:
-    uses: ./.github/workflows/test-all-appgate-sdp.yml
-    with:
-      repo: ${{ inputs.repo }}
-      python-version: ${{ inputs.python-version }}
-      standard: ${{ inputs.standard }}
-      latest: ${{ inputs.latest }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: ${{ inputs.agent-image }}
-      agent-image-py2: ${{ inputs.agent-image-py2 }}
-      agent-image-windows: ${{ inputs.agent-image-windows }}
-      agent-image-windows-py2: ${{ inputs.agent-image-windows-py2 }}
-      pytest-args: ${{ inputs.pytest-args }}
-      skip-ddev-tests: ${{ inputs.skip-ddev-tests }}
-  arangodb:
-    uses: ./.github/workflows/test-all-arangodb.yml
+  test-all-3:
+    uses: ./.github/workflows/test-all-3.yml
     with:
       repo: ${{ inputs.repo }}
       python-version: ${{ inputs.python-version }}
