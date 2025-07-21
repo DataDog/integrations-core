@@ -9,6 +9,9 @@ on:
       platform:
         required: true
         type: string
+      run-id:
+        required: true
+        type: string
 env:
   PYTHON_VERSION: "3.12"
 
@@ -32,7 +35,13 @@ jobs:
       run: |
         ddev config set repos.core .
         ddev config set repo core
-  
+        
+    - name: Download dependency sizes artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.dependency_sizes_json }}
+        run-id: ${{ inputs.run-id }}
+
     - name: Testing dependency sizes
       run: |
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.dependency_sizes_json }} > size-dependency-sizes.txt
