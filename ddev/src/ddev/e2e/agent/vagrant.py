@@ -16,15 +16,11 @@ from jinja2 import Template
 from ddev.e2e.agent.constants import (
     LINUX_AGENT_BIN_PATH,
     LINUX_AGENT_CONF_DIR,
-    LINUX_AGENT_LOG_PATH,
     LINUX_AGENT_PYTHON_PREFIX,
-    LINUX_BASE_SYNCED_DIR,
     LINUX_SUDOERS_FILE_PATH,
     WINDOWS_AGENT_BIN_PATH,
     WINDOWS_AGENT_CONF_DIR,
-    WINDOWS_AGENT_LOG_PATH,
     WINDOWS_AGENT_PYTHON_PREFIX,
-    WINDOWS_BASE_SYNCED_DIR,
     AgentEnvVars,
 )
 from ddev.e2e.agent.interface import AgentInterface
