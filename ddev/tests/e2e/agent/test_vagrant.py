@@ -190,7 +190,22 @@ class TestStart:
         synced_folders_str = render_kwargs['synced_folders_str']
         assert synced_folders_str == ""
 
-    def test_uses_windows_paths_for_windows_guest_os(
+    @pytest.mark.parametrize(
+        'guest_os, expected_config_path_fragment',
+        [
+            pytest.param(
+                None,  # Linux
+                'etc/datadog-agent/conf.d/glusterfs.d',
+                id='linux',
+            ),
+            pytest.param(
+                'windows',
+                'ProgramData',  # Windows path will contain ProgramData\Datadog\conf.d\glusterfs.d
+                id='windows',
+            ),
+        ],
+    )
+    def test_uses_correct_config_paths_for_guest_os(
         self,
         app,
         temp_dir,
@@ -200,6 +215,8 @@ class TestStart:
         mock_vagrantfile_template,
         mock_platform_run,
         vagrant_env_cleanup,
+        guest_os,
+        expected_config_path_fragment,
     ):
         config_file = temp_dir / 'config' / 'config.yaml'
         config_file.parent.mkdir()
@@ -207,21 +224,22 @@ class TestStart:
 
         integration = 'glusterfs'
         environment = 'py3.12'
-        metadata = {'vagrant_guest_os': 'windows'}
+        metadata = {'vagrant_guest_os': guest_os} if guest_os else {}
 
         agent = VagrantAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
-        # Verify config mount path is Windows-style
+        # Verify config mount path matches the expected OS-specific path
         mock_vagrantfile_template.render.assert_called_once()
         render_kwargs = mock_vagrantfile_template.render.call_args.kwargs
         synced_folders_str = render_kwargs['synced_folders_str']
-        # Check that the Windows config path is in the synced folders
-        assert (
-            'ProgramData' in synced_folders_str
-            and 'Datadog' in synced_folders_str
-            and 'glusterfs.d' in synced_folders_str
-        )
+
+        # Check that the correct config path fragment is in the synced folders
+        assert expected_config_path_fragment in synced_folders_str
+
+        if guest_os == 'windows':
+            # For Windows, also verify the full path pattern
+            assert 'Datadog' in synced_folders_str and 'glusterfs.d' in synced_folders_str
 
     def test_includes_custom_synced_folders_from_metadata(
         self,
@@ -383,8 +401,8 @@ class TestStart:
             ),
             pytest.param(
                 'windows',
-                None,  # For Windows, we only check if foo is in the synced folders string
-                None,  # No pip install command check for Windows
+                'C:\\vagrant\\packages\\foo',
+                'C:\\Program Files\\Datadog\\Datadog Agent\\embedded3\\python.exe -m pip install --disable-pip-version-check -e C:\\vagrant\\packages\\foo[deps]',  # noqa: E501
                 id='windows',
             ),
         ],
@@ -423,29 +441,45 @@ class TestStart:
         synced_folders_str = render_kwargs['synced_folders_str']
 
         if guest_os == 'windows':
-            # For Windows, just check that foo is in the synced folders
-            assert any('foo"' in line and 'vagrant' in line for line in synced_folders_str.split('\n'))
+            # For Windows, check that the exact Windows mount path is in the synced folders
+            assert expected_package_mount_path in synced_folders_str
         else:
             # For Linux, check the exact mount path
             assert expected_package_mount_path in synced_folders_str
 
-            # Verify pip install command for Linux
-            vm_name = 'dd-vagrant-glusterfs-py3.12'
-            expected_calls = [
-                mocker.call('vagrant up dd-vagrant-glusterfs-py3.12', shell=False),
-                mocker.call(
-                    [
-                        'vagrant',
-                        'ssh',
-                        vm_name,
-                        '-c',
-                        expected_pip_install_cmd,
-                    ],
-                    shell=False,
-                ),
-                mocker.call(['vagrant', 'ssh', vm_name, '-c', 'sudo service datadog-agent restart'], shell=False),
-            ]
-            assert mock_platform_run.call_args_list == expected_calls
+        # Verify pip install command
+        vm_name = 'dd-vagrant-glusterfs-py3.12'
+
+        # Both Linux and Windows should now work correctly
+        expected_calls = [
+            mocker.call('vagrant up dd-vagrant-glusterfs-py3.12', shell=False),
+            mocker.call(
+                [
+                    'vagrant',
+                    'ssh',
+                    vm_name,
+                    '-c',
+                    expected_pip_install_cmd,
+                ],
+                shell=False,
+            ),
+        ]
+
+        if guest_os == 'windows':
+            # Windows uses sc commands for restart
+            expected_calls.extend(
+                [
+                    mocker.call(['vagrant', 'ssh', vm_name, '-c', 'sc stop DatadogAgent'], shell=False),
+                    mocker.call(['vagrant', 'ssh', vm_name, '-c', 'sc start DatadogAgent'], shell=False),
+                ]
+            )
+        else:
+            # Linux uses service command for restart
+            expected_calls.append(
+                mocker.call(['vagrant', 'ssh', vm_name, '-c', 'sudo service datadog-agent restart'], shell=False)
+            )
+
+        assert mock_platform_run.call_args_list == expected_calls
 
     def test_configures_sudoers_when_specified_in_metadata(
         self,

@@ -281,21 +281,11 @@ class VagrantAgent(AgentInterface):
         # Install local packages
         if local_packages:
             self.app.display_info(f"Installing local packages in VM `{self._vm_name}`")
-            base_pip_command = [
-                "sudo",
-                "-u",
-                "dd-agent",
-                self._python_path,
-                '-m',
-                'pip',
-                'install',
-                '--disable-pip-version-check',
-                '-e',
-            ]
+
             for local_package, features in local_packages.items():
                 package_mount = f'{self._package_mount_dir}{local_package.name}{features}'
-                local_package_cmd = " ".join(base_pip_command + [package_mount])
-                self._run_command(local_package_cmd, f"installing_local_package_{local_package.name}{features}")
+                pip_install_cmd = self._build_pip_install_command(package_mount)
+                self._run_command(pip_install_cmd, f"installing_local_package_{local_package.name}{features}")
 
                 self.app.display_info(
                     f"Successfully installed local package `{local_package.name}` in Agent Vagrant VM `{self._vm_name}`",  # noqa: E501
@@ -304,6 +294,22 @@ class VagrantAgent(AgentInterface):
         # Execute post_install_commands (guest commands)
         if post_install_commands:
             self._run_commands(post_install_commands, "post-install")
+
+    def _build_pip_install_command(self, package_path: str) -> str:
+        """Build the pip install command for the current OS.
+
+        Args:
+            package_path: The path to the package to install (including any feature flags)
+
+        Returns:
+            The complete pip install command string
+        """
+        if self._is_windows_vm:
+            # Windows: Direct execution without sudo
+            return f'{self._python_path} -m pip install --disable-pip-version-check -e {package_path}'
+        else:
+            # Linux/Unix: Use sudo to run as dd-agent user
+            return f'sudo -u dd-agent {self._python_path} -m pip install --disable-pip-version-check -e {package_path}'
 
     def _format_command(self, guest_command_parts: list[str], interactive: bool = False) -> list[str]:
         # Returns the host-side command to execute something in the guest.
