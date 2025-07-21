@@ -53,6 +53,9 @@
     },
     "logs": {
       "source": "proxmox"
+    },
+    "dashboards": {
+      "Proxmox Overview": "assets/dashboards/overview.json"
     }
   },
   "author": {
