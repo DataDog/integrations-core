@@ -44,6 +44,11 @@ jobs:
     #   with:
     #     name: ${{ inputs.dependency_sizes_json }}
     #     run-id: ${{ inputs.run-id }}
+    
+    - name: List files in downloaded artifact
+      run: |
+        echo "Listing files in ${{ inputs.dependency_sizes_json }}:"
+        ls -lR ${{ inputs.dependency_sizes_json }}
 
     - name: Testing dependency sizes
       run: |
