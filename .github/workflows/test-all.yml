@@ -100,10 +100,10 @@ jobs:
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
     if: ${{ inputs.skip-ddev-tests == false }}
-  j927846e:
+  jb232c8c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Datadog Checks Base on Linux (py3.12)
+      job-name: Datadog Checks Base on Linux
       target: datadog_checks_base
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -120,10 +120,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j357f6e2:
+  jda96080:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Datadog Checks Base on Windows (py3.12)
+      job-name: Datadog Checks Base on Windows
       target: datadog_checks_base
       platform: windows
       runner: '["windows-2022"]'
@@ -140,10 +140,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jbd5bb76:
+  j77217e9:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Datadog Checks Dev on Linux (py3.12)
+      job-name: Datadog Checks Dev on Linux
       target: datadog_checks_dev
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -160,10 +160,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j37c1734:
+  j1176210:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Datadog Checks Dev on Windows (py3.12)
+      job-name: Datadog Checks Dev on Windows
       target: datadog_checks_dev
       platform: windows
       runner: '["windows-2022"]'
@@ -180,10 +180,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdc24315:
+  j8cdb65b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Datadog Checks Downloader on Linux (py3.12)
+      job-name: Datadog Checks Downloader on Linux
       target: datadog_checks_downloader
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -200,10 +200,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdeb2407:
+  j8c73c41:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Datadog Checks Downloader on Windows (py3.12)
+      job-name: Datadog Checks Downloader on Windows
       target: datadog_checks_downloader
       platform: windows
       runner: '["windows-2022"]'
@@ -220,10 +220,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j5b0afdd:
+  jd66e148:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Active Directory (py3.12)
+      job-name: Active Directory
       target: active_directory
       platform: windows
       runner: '["windows-2022"]'
@@ -240,10 +240,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j24a2b30:
+  j02a4c95:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ActiveMQ (py3.12-2.15.0-artemis.yaml)
+      job-name: ActiveMQ
       target: activemq
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -260,10 +260,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j2ea3c47:
+  jb4c5802:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ActiveMQ XML (py3.12-5.11.1)
+      job-name: ActiveMQ XML
       target: activemq_xml
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -280,10 +280,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je3fd97e:
+  jce7999e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Aerospike (py3.12-4)
+      job-name: Aerospike
       target: aerospike
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -309,10 +309,10 @@ jobs:
         - py3.12-5.3
         - py3.12-5.6
       fail-fast: false
-  j104f649:
+  jd58222c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Airflow (py3.12-2.11)
+      job-name: Airflow
       target: airflow
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -329,10 +329,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je5dedf9:
+  jaaddf5e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Amazon Kafka (py3.12)
+      job-name: Amazon Kafka
       target: amazon_msk
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -349,10 +349,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j4e0d821:
+  j9c53fc8:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Ambari (py3.12)
+      job-name: Ambari
       target: ambari
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -369,10 +369,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jac08f7a:
+  j87ec402:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Apache (py3.12-2.4.27)
+      job-name: Apache
       target: apache
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -389,10 +389,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j4550b5f:
+  j89811be:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Appgate SDP (py3.12)
+      job-name: Appgate SDP
       target: appgate_sdp
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -409,10 +409,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1eef423:
+  jacbd843:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ArangoDB (py3.12-3.8)
+      job-name: ArangoDB
       target: arangodb
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -429,10 +429,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j81f1fee:
+  j3650884:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Argo Rollouts (py3.12-1.6.6)
+      job-name: Argo Rollouts
       target: argo_rollouts
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -449,10 +449,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jea49d94:
+  j14e797c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Argo Workflows (py3.12)
+      job-name: Argo Workflows
       target: argo_workflows
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -469,10 +469,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j3d29d59:
+  j92d42de:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ArgoCD (py3.12-2.4.7)
+      job-name: ArgoCD
       target: argocd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -489,10 +489,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j273353f:
+  j8c9f9aa:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ASP.NET (py3.12)
+      job-name: ASP.NET
       target: aspdotnet
       platform: windows
       runner: '["windows-2022"]'
@@ -509,10 +509,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j3393814:
+  j924327f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Avi Vantage (py3.12)
+      job-name: Avi Vantage
       target: avi_vantage
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -529,10 +529,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j611927d:
+  jeb3e097:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: AWS Neuron (py3.12)
+      job-name: AWS Neuron
       target: aws_neuron
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -549,10 +549,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j74e660d:
+  j8d83b0b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Azure IoT Edge (py3.12-tls)
+      job-name: Azure IoT Edge
       target: azure_iot_edge
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -569,10 +569,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jad323a4:
+  jfcf4b1a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Boundary (py3.12-0.8)
+      job-name: Boundary
       target: boundary
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -589,10 +589,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j2540867:
+  j2883ff0:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Btrfs (py3.12)
+      job-name: Btrfs
       target: btrfs
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -609,10 +609,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jbf8b095:
+  j481d7ae:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Cacti (py3.12)
+      job-name: Cacti
       target: cacti
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -629,10 +629,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j9771db8:
+  j47ac8c7:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Calico (py3.12)
+      job-name: Calico
       target: calico
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -649,10 +649,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j306961a:
+  je3297e4:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Cassandra (py3.12)
+      job-name: Cassandra
       target: cassandra
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -669,10 +669,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb369ee3:
+  jf75679d:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Cassandra Nodetool (py3.12-2.1)
+      job-name: Cassandra Nodetool
       target: cassandra_nodetool
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -689,10 +689,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdf2cf62:
+  j17d78bd:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Celery (py3.12)
+      job-name: Celery
       target: celery
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -709,10 +709,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb11351b:
+  jdffb064:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Ceph (py3.12-4.0)
+      job-name: Ceph
       target: ceph
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -729,10 +729,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j47d0412:
+  je6bb20d:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: cert-manager (py3.12)
+      job-name: cert-manager
       target: cert_manager
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -749,10 +749,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jf620702:
+  jeb29398:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Cilium (py3.12-legacy-1.9)
+      job-name: Cilium
       target: cilium
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -778,10 +778,10 @@ jobs:
         - py3.12-1.10
         - py3.12-1.11
       fail-fast: false
-  jcb52e30:
+  j3de8d1a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Cisco ACI (py3.12)
+      job-name: Cisco ACI
       target: cisco_aci
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -798,10 +798,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j8f365e8:
+  jafd4d40:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Citrix Hypervisor (py3.12)
+      job-name: Citrix Hypervisor
       target: citrix_hypervisor
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -818,10 +818,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6b1920b:
+  jdee91dd:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ClickHouse (py3.12-18)
+      job-name: ClickHouse
       target: clickhouse
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -848,10 +848,10 @@ jobs:
         - py3.12-21.8
         - py3.12-22.7
       fail-fast: false
-  jbc8771f:
+  j4131274:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Cloud Foundry API (py3.12)
+      job-name: Cloud Foundry API
       target: cloud_foundry_api
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -868,10 +868,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1e106bf:
+  j26f9a18:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Cloudera (py3.12)
+      job-name: Cloudera
       target: cloudera
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -888,10 +888,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j72f83c0:
+  j7faf392:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: CockroachDB (py3.12-22.1)
+      job-name: CockroachDB
       target: cockroachdb
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -908,10 +908,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j7272727:
+  j89ec795:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Confluent Platform (py3.12-5.4)
+      job-name: Confluent Platform
       target: confluent_platform
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -928,10 +928,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j74904dc:
+  j13a53db:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Consul (py3.12-1.6)
+      job-name: Consul
       target: consul
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -948,10 +948,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1809ed5:
+  jb67436a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: CoreDNS (py3.12-1.2)
+      job-name: CoreDNS
       target: coredns
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -968,10 +968,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdb447c4:
+  j483e815:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: CouchDB (py3.12-1.6)
+      job-name: CouchDB
       target: couch
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -996,10 +996,10 @@ jobs:
         - py3.12-2.3
         - py3.12-3.1
       fail-fast: false
-  j6dcc445:
+  j1e84c35:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Couchbase (py3.12-6.6)
+      job-name: Couchbase
       target: couchbase
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1024,10 +1024,10 @@ jobs:
         - py3.12-7.0
         - py3.12-7.1
       fail-fast: false
-  jdcfaaf6:
+  ja3692a6:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: CRI-O (py3.12)
+      job-name: CRI-O
       target: crio
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1044,10 +1044,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jfb6cc5b:
+  j2d21154:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Datadog Cluster Agent (py3.12)
+      job-name: Datadog Cluster Agent
       target: datadog_cluster_agent
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1064,10 +1064,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jd8b22d4:
+  j69f9754:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: dcgm (py3.12)
+      job-name: dcgm
       target: dcgm
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1084,10 +1084,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jfcd8340:
+  jc8f84c3:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Directory (py3.12)
+      job-name: Directory
       target: directory
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1104,10 +1104,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j749e896:
+  j4b2fe2b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Disk on Linux (py3.12)
+      job-name: Disk on Linux
       target: disk
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1124,10 +1124,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j0365d8d:
+  j92e8bce:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Disk on Windows (py3.12)
+      job-name: Disk on Windows
       target: disk
       platform: windows
       runner: '["windows-2022"]'
@@ -1144,10 +1144,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j0682cef:
+  j3e27604:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: DNS on Linux (py3.12)
+      job-name: DNS on Linux
       target: dns_check
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1164,10 +1164,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j5073ed5:
+  j301b42d:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: DNS on Windows (py3.12)
+      job-name: DNS on Windows
       target: dns_check
       platform: windows
       runner: '["windows-2022"]'
@@ -1184,10 +1184,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j10257c2:
+  jc6b16d4:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: .NET CLR (py3.12)
+      job-name: .NET CLR
       target: dotnetclr
       platform: windows
       runner: '["windows-2022"]'
@@ -1204,10 +1204,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1129e3e:
+  j274814f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Druid (py3.12)
+      job-name: Druid
       target: druid
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1224,10 +1224,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j33436b0:
+  j9eb6aa6:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: DuckDB (py3.12-1.1.1)
+      job-name: DuckDB
       target: duckdb
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1244,10 +1244,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j390b3f3:
+  j562bfe5:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Amazon ECS Fargate (py3.12)
+      job-name: Amazon ECS Fargate
       target: ecs_fargate
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1264,10 +1264,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j4ab56ba:
+  j72f26c1:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: EKS Fargate (py3.12)
+      job-name: EKS Fargate
       target: eks_fargate
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1284,10 +1284,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j24b0f2e:
+  j31c819b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Elasticsearch (py3.12-elasticsearch-7.2)
+      job-name: Elasticsearch
       target: elastic
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1315,10 +1315,10 @@ jobs:
         - py3.12-elasticsearch-8.8
         - py3.12-opensearch-1.1
       fail-fast: false
-  jeeaa455:
+  j93163a5:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Envoy (py3.12-2)
+      job-name: Envoy
       target: envoy
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1335,10 +1335,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jcd0613f:
+  jc4fef15:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ESXi (py3.12-lab)
+      job-name: ESXi
       target: esxi
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1363,10 +1363,10 @@ jobs:
         - py3.12-vcsim-6.5
         - py3.12-vcsim-7.0
       fail-fast: false
-  jff5e21f:
+  jc38cbd9:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: etcd (py3.12-v3.4.26)
+      job-name: etcd
       target: etcd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1383,10 +1383,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb6f10b7:
+  j284dfb9:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Exchange Server (py3.12)
+      job-name: Exchange Server
       target: exchange_server
       platform: windows
       runner: '["windows-2022"]'
@@ -1403,10 +1403,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j8151fb5:
+  j1856b23:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: External DNS (py3.12)
+      job-name: External DNS
       target: external_dns
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1423,10 +1423,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je046ce0:
+  j6e7cb83:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Falco (py3.12)
+      job-name: Falco
       target: falco
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1443,10 +1443,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6e516b2:
+  j4f2c848:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Fluentd (py3.12-1.17)
+      job-name: Fluentd
       target: fluentd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1463,10 +1463,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j50fecd5:
+  j6134697:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: fluxcd (py3.12)
+      job-name: fluxcd
       target: fluxcd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1483,10 +1483,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j98a8bbe:
+  j5018b0d:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Fly.io (py3.12-caddy)
+      job-name: Fly.io
       target: fly_io
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1503,10 +1503,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb241af5:
+  jc364450:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: FoundationDB (py3.12)
+      job-name: FoundationDB
       target: foundationdb
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1523,10 +1523,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jec8fda1:
+  j3becdbc:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Gearman (py3.12-1.0)
+      job-name: Gearman
       target: gearmand
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1543,10 +1543,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jbde23f7:
+  j4ea3f09:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Gitlab (py3.12-13.12)
+      job-name: Gitlab
       target: gitlab
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1571,10 +1571,10 @@ jobs:
         - py3.12-14.10
         - py3.12-15.10
       fail-fast: false
-  j1a4e29b:
+  j563739d:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Gitlab Runner (py3.12-10.8.0)
+      job-name: Gitlab Runner
       target: gitlab_runner
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1591,10 +1591,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j006f9ed:
+  j16f5513:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: GlusterFS (py3.12-7.1)
+      job-name: GlusterFS
       target: glusterfs
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1611,10 +1611,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdbe8461:
+  j3399e09:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Go Expvar (py3.12)
+      job-name: Go Expvar
       target: go_expvar
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1631,10 +1631,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je77d774:
+  j1fede0e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Gunicorn (py3.12-22)
+      job-name: Gunicorn
       target: gunicorn
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1651,10 +1651,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j021a036:
+  j5979923:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: HAProxy (py3.12-2.0)
+      job-name: HAProxy
       target: haproxy
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1683,10 +1683,10 @@ jobs:
         - py3.12-2.7
         - py3.12-2.0-legacy
       fail-fast: false
-  jfa8e1aa:
+  j8a8c654:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Harbor (py3.12-1.10)
+      job-name: Harbor
       target: harbor
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1711,10 +1711,10 @@ jobs:
         - py3.12-2.0
         - py3.12-2.3
       fail-fast: false
-  jb5d9606:
+  j9cb9f66:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Hazelcast (py3.12-4.0)
+      job-name: Hazelcast
       target: hazelcast
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1731,10 +1731,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  ja384ba3:
+  j240a78b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: HDFS Datanode (py3.12)
+      job-name: HDFS Datanode
       target: hdfs_datanode
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1751,10 +1751,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6217d24:
+  j00a0dd6:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: HDFS Namenode (py3.12)
+      job-name: HDFS Namenode
       target: hdfs_namenode
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1771,10 +1771,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j7f438c4:
+  jaf48338:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Hive (py3.12)
+      job-name: Hive
       target: hive
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1791,10 +1791,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j235de69:
+  je66898a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: HiveMQ (py3.12-4.3)
+      job-name: HiveMQ
       target: hivemq
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1811,10 +1811,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j94b9d8b:
+  j56d6f32:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: HTTP (py3.12)
+      job-name: HTTP
       target: http_check
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1831,10 +1831,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jecd0536:
+  j95a2b08:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Hudi (py3.12)
+      job-name: Hudi
       target: hudi
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1851,10 +1851,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j112ea23:
+  j5a9585a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: IBM ACE (py3.12-12)
+      job-name: IBM ACE
       target: ibm_ace
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1871,10 +1871,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j2ac63d1:
+  j60f59ae:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: IBM Db2 (py3.12-11.1)
+      job-name: IBM Db2
       target: ibm_db2
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1891,10 +1891,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1475675:
+  j9accedb:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: IBM i (py3.12)
+      job-name: IBM i
       target: ibm_i
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1911,10 +1911,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j79ae4fd:
+  jf4d06ee:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: IBM MQ on Linux (py3.12-9)
+      job-name: IBM MQ on Linux
       target: ibm_mq
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1931,10 +1931,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j325d538:
+  j662406b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: IBM MQ on Windows (py3.12-9)
+      job-name: IBM MQ on Windows
       target: ibm_mq
       platform: windows
       runner: '["windows-2022"]'
@@ -1951,10 +1951,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j258733e:
+  j440815a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: IBM WAS (py3.12-9)
+      job-name: IBM WAS
       target: ibm_was
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1971,10 +1971,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j3b2ebee:
+  j0676988:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Ignite (py3.12-2.8)
+      job-name: Ignite
       target: ignite
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -1991,10 +1991,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j621e141:
+  j9267198:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: IIS (py3.12)
+      job-name: IIS
       target: iis
       platform: windows
       runner: '["windows-2022"]'
@@ -2011,10 +2011,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j67e7a05:
+  j5dc7466:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Impala (py3.12-4.0.0)
+      job-name: Impala
       target: impala
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2031,10 +2031,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jed5f3dd:
+  jf082b3f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Infiniband (py3.12)
+      job-name: Infiniband
       target: infiniband
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2051,10 +2051,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jaced436:
+  j0c16521:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Istio (py3.12-1.13)
+      job-name: Istio
       target: istio
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2071,10 +2071,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j3f17405:
+  j46da136:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: JBoss_WildFly (py3.12)
+      job-name: JBoss_WildFly
       target: jboss_wildfly
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2091,10 +2091,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j9818b94:
+  je4a5f92:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kafka (py3.12-2.8)
+      job-name: Kafka
       target: kafka
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2111,10 +2111,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j2a81870:
+  jeaad214:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kafka Consumer (py3.12-2.6)
+      job-name: Kafka Consumer
       target: kafka_consumer
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2140,10 +2140,10 @@ jobs:
         - py3.12-3.3-ssl
         - py3.12-3.3-kerberos
       fail-fast: false
-  j6e171c0:
+  j77f29c1:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Karpenter (py3.12)
+      job-name: Karpenter
       target: karpenter
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2160,10 +2160,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j938c73f:
+  j2cb7ef0:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Keda (py3.12-2.16.0)
+      job-name: Keda
       target: keda
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2180,10 +2180,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j96d5f18:
+  jaee58c5:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kong (py3.12-1.5.0)
+      job-name: Kong
       target: kong
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2200,10 +2200,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jcb06303:
+  ja001417:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: KrakenD (py3.12-2.10)
+      job-name: KrakenD
       target: krakend
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2220,10 +2220,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j042f56c:
+  j92491f1:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubernetes API server metrics (py3.12)
+      job-name: Kubernetes API server metrics
       target: kube_apiserver_metrics
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2240,10 +2240,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j349df79:
+  j1ce0516:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubernetes Controller Manager (py3.12)
+      job-name: Kubernetes Controller Manager
       target: kube_controller_manager
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2260,10 +2260,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  ja736f6c:
+  j19a1b27:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kube DNS (py3.12)
+      job-name: Kube DNS
       target: kube_dns
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2280,10 +2280,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6346b59:
+  jd1817b8:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kube metrics server (py3.12)
+      job-name: Kube metrics server
       target: kube_metrics_server
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2300,10 +2300,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6952485:
+  j5a98c4e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kube Proxy (py3.12)
+      job-name: Kube Proxy
       target: kube_proxy
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2320,10 +2320,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jcbd7e26:
+  jeebd4ae:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubernetes Scheduler (py3.12)
+      job-name: Kubernetes Scheduler
       target: kube_scheduler
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2340,10 +2340,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jcca1fc1:
+  j89c297c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubeflow (py3.12)
+      job-name: Kubeflow
       target: kubeflow
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2360,10 +2360,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je277f75:
+  j24a5cff:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubelet (py3.12)
+      job-name: Kubelet
       target: kubelet
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2380,10 +2380,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jf596f78:
+  j045310a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubernetes Cluster Autoscaler (py3.12)
+      job-name: Kubernetes Cluster Autoscaler
       target: kubernetes_cluster_autoscaler
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2400,10 +2400,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j8c8181a:
+  jba841f0:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubernetes State (py3.12)
+      job-name: Kubernetes State
       target: kubernetes_state
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2420,10 +2420,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j77d9453:
+  jb0447e6:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: KubeVirt API (py3.12)
+      job-name: KubeVirt API
       target: kubevirt_api
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2440,10 +2440,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  ja4d0db3:
+  jc4c1032:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: KubeVirt Controller (py3.12)
+      job-name: KubeVirt Controller
       target: kubevirt_controller
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2460,10 +2460,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j37b5194:
+  j4f368cf:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: KubeVirt Handler (py3.12)
+      job-name: KubeVirt Handler
       target: kubevirt_handler
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2480,10 +2480,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j8eceaaa:
+  j739f9be:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kuma (py3.12-2.10.1)
+      job-name: Kuma
       target: kuma
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2500,10 +2500,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j17d60cb:
+  j61e565f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kyoto Tycoon (py3.12)
+      job-name: Kyoto Tycoon
       target: kyototycoon
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2520,10 +2520,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j9d2c271:
+  j6900ead:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: kyverno (py3.12)
+      job-name: kyverno
       target: kyverno
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2540,10 +2540,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jc34249e:
+  j1c6adb2:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Lighttpd (py3.12-auth)
+      job-name: Lighttpd
       target: lighttpd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2560,10 +2560,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j0f141fb:
+  j8b3b099:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Linkerd (py3.12)
+      job-name: Linkerd
       target: linkerd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2580,10 +2580,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j0f20d58:
+  j29dcd3a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Linux proc extras (py3.12)
+      job-name: Linux proc extras
       target: linux_proc_extras
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2600,10 +2600,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb38a81a:
+  j3d7d527:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: LiteLLM (py3.12)
+      job-name: LiteLLM
       target: litellm
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2620,10 +2620,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j536094d:
+  je63e92c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Lustre (py3.12)
+      job-name: Lustre
       target: lustre
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2640,10 +2640,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j06b42da:
+  jc1b3d1e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Mac Audit Logs (py3.12)
+      job-name: Mac Audit Logs
       target: mac_audit_logs
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2660,10 +2660,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je439bf8:
+  ja15251c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: MapR (py3.12)
+      job-name: MapR
       target: mapr
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2680,10 +2680,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j871d5fe:
+  j141298e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: MapReduce (py3.12)
+      job-name: MapReduce
       target: mapreduce
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2700,10 +2700,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jfd41b2b:
+  j75f52a9:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Marathon (py3.12)
+      job-name: Marathon
       target: marathon
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2720,10 +2720,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j7f9df67:
+  j8d5404b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: MarkLogic (py3.12-9.0)
+      job-name: MarkLogic
       target: marklogic
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2748,10 +2748,10 @@ jobs:
         - py3.12-10.0
         - py3.12-11.0
       fail-fast: false
-  j30a9612:
+  j5b70138:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Memcached (py3.12)
+      job-name: Memcached
       target: mcache
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2768,10 +2768,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j711150f:
+  jbdadec9:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Mesos Master (py3.12-1.7)
+      job-name: Mesos Master
       target: mesos_master
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2788,10 +2788,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jbe124f2:
+  j062aeb0:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Milvus (py3.12)
+      job-name: Milvus
       target: milvus
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2808,10 +2808,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j8fe8dc5:
+  j91231ff:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: MongoDB (py3.12-4.4-standalone)
+      job-name: MongoDB
       target: mongo
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2853,10 +2853,10 @@ jobs:
         - py3.12-8.0-auth
         - py3.12-8.0-tls
       fail-fast: false
-  j8b7b6c6:
+  j211906c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: MySQL (py3.12-5.7)
+      job-name: MySQL
       target: mysql
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2888,10 +2888,10 @@ jobs:
         - py3.12-percona-8.0.42
         - py3.12-percona-8.4
       fail-fast: false
-  j0d1c5a6:
+  j5df646e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Nagios (py3.12-4.4)
+      job-name: Nagios
       target: nagios
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2908,10 +2908,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j3765e0c:
+  jfc1e031:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Network on Linux (py3.12)
+      job-name: Network on Linux
       target: network
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2928,10 +2928,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6c5c211:
+  j7a1dfc6:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Network on Windows (py3.12)
+      job-name: Network on Windows
       target: network
       platform: windows
       runner: '["windows-2022"]'
@@ -2948,10 +2948,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j28110b8:
+  j6a5b846:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: NFSstat (py3.12)
+      job-name: NFSstat
       target: nfsstat
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2968,10 +2968,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdbe9574:
+  j93fea02:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: NGINX (py3.12-1.12)
+      job-name: NGINX
       target: nginx
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2997,10 +2997,10 @@ jobs:
         - py3.12-1.27
         - py3.12-vts
       fail-fast: false
-  j2aca2fc:
+  ja114815:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: NGINX Ingress Controller (py3.12)
+      job-name: NGINX Ingress Controller
       target: nginx_ingress_controller
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3017,10 +3017,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jebc590c:
+  jb705691:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: nvidia_nim (py3.12)
+      job-name: nvidia_nim
       target: nvidia_nim
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3037,10 +3037,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j98f87e2:
+  j74dc677:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Nvidia Triton (py3.12)
+      job-name: Nvidia Triton
       target: nvidia_triton
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3057,10 +3057,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j0c945bc:
+  jc2a0c60:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Octopus Deploy (py3.12-caddy)
+      job-name: Octopus Deploy
       target: octopus_deploy
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3077,10 +3077,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j603b7b8:
+  j2cf0a0a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: OpenLDAP (py3.12-2.4)
+      job-name: OpenLDAP
       target: openldap
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3097,10 +3097,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j518803f:
+  jaaa5727:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: OpenMetrics (py3.12)
+      job-name: OpenMetrics
       target: openmetrics
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3117,10 +3117,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j319d645:
+  j88ddb5b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: OpenStack (py3.12)
+      job-name: OpenStack
       target: openstack
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3137,10 +3137,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j7704474:
+  j65171af:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: OpenStack Controller (py3.12)
+      job-name: OpenStack Controller
       target: openstack_controller
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3165,10 +3165,10 @@ jobs:
         - py3.12-legacy
         - py3.12-gcp
       fail-fast: false
-  j72d889d:
+  j4dff42c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: PDH (py3.12)
+      job-name: PDH
       target: pdh_check
       platform: windows
       runner: '["windows-2022"]'
@@ -3185,10 +3185,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j82e1a9d:
+  j4a8166b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: PGBouncer (py3.12-1.7)
+      job-name: PGBouncer
       target: pgbouncer
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3214,10 +3214,10 @@ jobs:
         - py3.12-1.12
         - py3.12-1.23
       fail-fast: false
-  j1da711d:
+  jaa8b34b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: PHP-FPM (py3.12)
+      job-name: PHP-FPM
       target: php_fpm
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3234,10 +3234,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jfe6905d:
+  j54fefc0:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Postfix (py3.12)
+      job-name: Postfix
       target: postfix
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3254,10 +3254,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j58d8309:
+  j44368ad:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Postgres (py3.12-9.6-UTF8)
+      job-name: Postgres
       target: postgres
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3296,10 +3296,10 @@ jobs:
         - py3.12-16.0-C
         - py3.12-17.0-C
       fail-fast: false
-  j628a25f:
+  j8e38a40:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: PowerDNS Recursor (py3.12-3.7)
+      job-name: PowerDNS Recursor
       target: powerdns_recursor
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3316,10 +3316,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je1dcfa8:
+  jaeea6e0:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Presto (py3.12-346)
+      job-name: Presto
       target: presto
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3336,10 +3336,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jf746334:
+  je083bd8:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Process (py3.12)
+      job-name: Process
       target: process
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3356,10 +3356,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j8422641:
+  jbfa97cf:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Prometheus (py3.12)
+      job-name: Prometheus
       target: prometheus
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3376,10 +3376,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j10460d0:
+  jf882f09:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Proxmox (py3.12)
+      job-name: Proxmox
       target: proxmox
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3396,10 +3396,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6f7d52b:
+  jbb39de2:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ProxySQL (py3.12-1.4)
+      job-name: ProxySQL
       target: proxysql
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3416,10 +3416,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j4b95d59:
+  j5987374:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Pulsar (py3.12-2.9)
+      job-name: Pulsar
       target: pulsar
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3436,10 +3436,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j553b8fc:
+  jcc156e5:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Quarkus (py3.12)
+      job-name: Quarkus
       target: quarkus
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3456,10 +3456,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jce1de41:
+  j694032b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: RabbitMQ (py3.12-3.7-mgmt)
+      job-name: RabbitMQ
       target: rabbitmq
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3487,10 +3487,10 @@ jobs:
         - py3.12-4.0-mgmt
         - py3.12-4.0-openmetrics
       fail-fast: false
-  j2755b5c:
+  jcc172a7:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Ray (py3.12-2.8)
+      job-name: Ray
       target: ray
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3507,10 +3507,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j17f0eed:
+  ja7f6415:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Redis (py3.12-5.0)
+      job-name: Redis
       target: redisdb
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3537,10 +3537,10 @@ jobs:
         - py3.12-8.0
         - py3.12-cloud
       fail-fast: false
-  jb4e10fd:
+  j47000ee:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: RethinkDB (py3.12-2.3)
+      job-name: RethinkDB
       target: rethinkdb
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3557,10 +3557,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jbdacd9a:
+  jdeada9f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Riak (py3.12)
+      job-name: Riak
       target: riak
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3577,10 +3577,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jbbd28ed:
+  j21f86cb:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: RiakCS (py3.12)
+      job-name: RiakCS
       target: riakcs
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3597,10 +3597,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6f26608:
+  j111b452:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SAP HANA (py3.12-2.0)
+      job-name: SAP HANA
       target: sap_hana
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3617,10 +3617,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j8ead032:
+  j6a5cfa3:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Scylla (py3.12-3.1)
+      job-name: Scylla
       target: scylla
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3645,10 +3645,10 @@ jobs:
         - py3.12-3.3
         - py3.12-5.2
       fail-fast: false
-  j10e548c:
+  j6600bce:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Silk (py3.12)
+      job-name: Silk
       target: silk
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3665,10 +3665,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j5aa0f9e:
+  jdeebd5c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Silverstripe CMS (py3.12)
+      job-name: Silverstripe CMS
       target: silverstripe_cms
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3685,10 +3685,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je37baf0:
+  j02f6aa9:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SingleStore (py3.12)
+      job-name: SingleStore
       target: singlestore
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3705,10 +3705,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6547e59:
+  j1e78283:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Slurm (py3.12)
+      job-name: Slurm
       target: slurm
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3725,10 +3725,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je5bffb1:
+  j06ca546:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SNMP (py3.12-false)
+      job-name: SNMP
       target: snmp
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3745,10 +3745,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j61747a5:
+  j1dbd59f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Snowflake (py3.12)
+      job-name: Snowflake
       target: snowflake
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3765,10 +3765,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j4c54e0e:
+  j2d7c8f5:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Solr (py3.12-8.11)
+      job-name: Solr
       target: solr
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3785,10 +3785,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  je9ac0d8:
+  j9485e6f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SonarQube (py3.12-8.5)
+      job-name: SonarQube
       target: sonarqube
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3805,10 +3805,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j2c9674c:
+  j3835902:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: sonatype_nexus (py3.12)
+      job-name: sonatype_nexus
       target: sonatype_nexus
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3825,10 +3825,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j2a0165d:
+  j529bc3b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Spark (py3.12-2.4)
+      job-name: Spark
       target: spark
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3845,10 +3845,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j756cad4:
+  j31a95c8:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SQL Server on Windows (py3.12-linux-FreeTDS-2019-single)
+      job-name: SQL Server on Windows
       target: sqlserver
       platform: windows
       runner: '["windows-2025"]'
@@ -3886,10 +3886,10 @@ jobs:
         - py3.12-windows-odbc-2019-single
         - py3.12-windows-odbc-2022-single
       fail-fast: false
-  je1d795a:
+  j3a8e004:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SQL Server on Linux (py3.12-linux-FreeTDS-2019-single)
+      job-name: SQL Server on Linux
       target: sqlserver
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3927,10 +3927,10 @@ jobs:
         - py3.12-windows-odbc-2019-single
         - py3.12-windows-odbc-2022-single
       fail-fast: false
-  jbe997e2:
+  jaf4b616:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Squid (py3.12-4.13)
+      job-name: Squid
       target: squid
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3947,10 +3947,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1fb8116:
+  j01c4d3c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SSH (py3.12-8.1)
+      job-name: SSH
       target: ssh_check
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3967,10 +3967,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j5da822f:
+  j2981dbe:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: StatsD (py3.12-0.9)
+      job-name: StatsD
       target: statsd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3987,10 +3987,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jce5ca19:
+  j6f0ded4:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Strimzi (py3.12-0.34)
+      job-name: Strimzi
       target: strimzi
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4007,10 +4007,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jabcafde:
+  jfe7ceb7:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Supabase (py3.12)
+      job-name: Supabase
       target: supabase
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4027,10 +4027,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jccf3d30:
+  jf04a052:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Supervisord (py3.12-3.3)
+      job-name: Supervisord
       target: supervisord
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4047,10 +4047,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j42d1f5b:
+  jde3891f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: System Core (py3.12)
+      job-name: System Core
       target: system_core
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4067,10 +4067,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jc34223a:
+  j64445e6:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: System Swap (py3.12)
+      job-name: System Swap
       target: system_swap
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4087,10 +4087,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j288b97f:
+  j1eeafd2:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: TCP on Linux (py3.12)
+      job-name: TCP on Linux
       target: tcp_check
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4107,10 +4107,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j337e668:
+  j87dbe3f:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: TCP on Windows (py3.12)
+      job-name: TCP on Windows
       target: tcp_check
       platform: windows
       runner: '["windows-2022"]'
@@ -4127,10 +4127,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1ba8ec8:
+  j8217a3a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: TeamCity (py3.12-legacy)
+      job-name: TeamCity
       target: teamcity
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4147,10 +4147,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jd12c1ab:
+  jf4a7e97:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Tekton (py3.12)
+      job-name: Tekton
       target: tekton
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4167,10 +4167,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jb0708bd:
+  je68b3b9:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Teleport (py3.12)
+      job-name: Teleport
       target: teleport
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4187,10 +4187,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1a64f29:
+  j840fec7:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Temporal (py3.12-1.19)
+      job-name: Temporal
       target: temporal
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4207,10 +4207,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j40fd320:
+  jeefbe37:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Teradata (py3.12)
+      job-name: Teradata
       target: teradata
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4227,10 +4227,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jfb3aa43:
+  jb4a6940:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: tibco_ems (py3.12)
+      job-name: tibco_ems
       target: tibco_ems
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4247,10 +4247,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j54e58f6:
+  jd1c18ec:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: TLS (py3.12)
+      job-name: TLS
       target: tls
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4267,10 +4267,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j875905b:
+  j9438e1d:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Tomcat (py3.12-9.0-standalone)
+      job-name: Tomcat
       target: tomcat
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4298,10 +4298,10 @@ jobs:
         - py3.12-10.1-standalone
         - py3.12-10.1-embedded
       fail-fast: false
-  jde895cc:
+  j4baeba2:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: TorchServe (py3.12-0.8)
+      job-name: TorchServe
       target: torchserve
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4318,10 +4318,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j7f9d28d:
+  j41a575a:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Traefik Mesh (py3.12)
+      job-name: Traefik Mesh
       target: traefik_mesh
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4338,10 +4338,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jcb35ab6:
+  j8a1b5bb:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Traffic Server (py3.12)
+      job-name: Traffic Server
       target: traffic_server
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4358,10 +4358,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j84cbb1f:
+  jfc2bf01:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Twemproxy (py3.12-0.5.0)
+      job-name: Twemproxy
       target: twemproxy
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4378,10 +4378,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j88f65f7:
+  jd0626ef:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Twistlock (py3.12)
+      job-name: Twistlock
       target: twistlock
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4398,10 +4398,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j7f25d4c:
+  j0c8fc90:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Varnish (py3.12-5.2)
+      job-name: Varnish
       target: varnish
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4418,10 +4418,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jd9c3e9f:
+  j5d55c41:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Vault (py3.12-1.9.0-token-auth)
+      job-name: Vault
       target: vault
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4438,10 +4438,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j9a2a96c:
+  jf929c3b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Velero (py3.12)
+      job-name: Velero
       target: velero
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4458,10 +4458,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jc33b256:
+  j9981b0b:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Vertica (py3.12-10.1)
+      job-name: Vertica
       target: vertica
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4487,10 +4487,10 @@ jobs:
         - py3.12-12.0
         - py3.12-23.3
       fail-fast: false
-  j3b865a8:
+  jeae0788:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: vLLM (py3.12)
+      job-name: vLLM
       target: vllm
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4507,10 +4507,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j77bb2a5:
+  jb120af1:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: VoltDB (py3.12-8.4-false)
+      job-name: VoltDB
       target: voltdb
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4536,10 +4536,10 @@ jobs:
         - py3.12-10.0-false
         - py3.12-10.0-true
       fail-fast: false
-  j2727143:
+  j269c8a5:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: vSphere (py3.12-6.7)
+      job-name: vSphere
       target: vsphere
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4556,10 +4556,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jd496bce:
+  je95095e:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Weaviate (py3.12-1.20-no-auth)
+      job-name: Weaviate
       target: weaviate
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4576,10 +4576,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j6fbb0c0:
+  j40e5c98:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: WebLogic (py3.12-12)
+      job-name: WebLogic
       target: weblogic
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4596,10 +4596,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j0b2eec8:
+  j70c9219:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Windows Event Log (py3.12)
+      job-name: Windows Event Log
       target: win32_event_log
       platform: windows
       runner: '["windows-2022"]'
@@ -4616,10 +4616,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jdd0bfa7:
+  jc1fb93c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Windows performance counters (py3.12)
+      job-name: Windows performance counters
       target: windows_performance_counters
       platform: windows
       runner: '["windows-2022"]'
@@ -4636,10 +4636,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jf89ce20:
+  j9798a89:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Windows Service (py3.12)
+      job-name: Windows Service
       target: windows_service
       platform: windows
       runner: '["windows-2022"]'
@@ -4656,10 +4656,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j5a905eb:
+  j25cdd56:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: WMI (py3.12)
+      job-name: WMI
       target: wmi_check
       platform: windows
       runner: '["windows-2022"]'
@@ -4676,10 +4676,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j487bd3e:
+  ja6bc642:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Yarn (py3.12)
+      job-name: Yarn
       target: yarn
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -4696,10 +4696,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jcf45288:
+  ja446cea:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: ZooKeeper (py3.12-3.5.8-true)
+      job-name: ZooKeeper
       target: zk
       platform: linux
       runner: '["ubuntu-22.04"]'

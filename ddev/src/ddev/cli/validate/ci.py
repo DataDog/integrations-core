@@ -168,6 +168,7 @@ def ci(app: Application, sync: bool):
         target_name = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
         if target_name not in job_dict:
             job_dict[target_name] = job
+            job_dict[target_name]['name'] = target_name
             job_dict[target_name]['target-env'] = [job.get('target-env')] if job.get('target-env') else []
         elif job.get('target-env'):
             # job_dict[target_name].append(job)
