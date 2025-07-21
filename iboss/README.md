@@ -188,7 +188,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 
 **Note:** 
 - If you have multiple reporter nodes, make sure to repeat the steps 3 and 4 for each reporter node.
-- The `Send Connection Error Logs` toggle should only be visible if `Send Web Logs` toggle is disabled.
+- The `Send Connection Error Logs` toggle in iboss should only be visible if `Send Web Logs` toggle is disabled.
 
 ### Validation
 
