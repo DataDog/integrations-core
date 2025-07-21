@@ -248,7 +248,6 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
         else:
             target_envs = {}
 
-
         runners = matrix_overrides.get('runners', {})
         for platform_id in platform_ids:
             if platform_id not in PLATFORMS:

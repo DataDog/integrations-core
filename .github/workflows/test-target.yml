@@ -30,10 +30,10 @@ on:
         required: false
         default: ""
         type: string
-      standard:
-        required: false
-        default: false
-        type: boolean
+      # standard:
+      #   required: false
+      #   default: false
+      #   type: boolean
       benchmark:
         required: false
         default: false
@@ -102,7 +102,6 @@ jobs:
     env:
       FORCE_COLOR: "1"
       PYTHON_VERSION: "${{ inputs.python-version || '3.12' }}"
-      # PYTHON_FILTER: "${{ (inputs.test-py2 && !inputs.test-py3) && '2.7' || '' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
@@ -231,7 +230,7 @@ jobs:
         python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
     - name: Run Unit & Integration tests
-      if: inputs.standard && !inputs.minimum-base-package
+      if: !inputs.minimum-base-package
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
@@ -251,7 +250,7 @@ jobs:
         fi
 
     - name: Run Unit & Integration tests with minimum version of base package
-      if: inputs.standard && inputs.minimum-base-package
+      if: inputs.minimum-base-package
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -269,7 +268,7 @@ jobs:
         fi
 
     - name: Run E2E tests with latest base package
-      if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
+      if: inputs.repo == 'core' && !inputs.minimum-base-package
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -307,7 +306,7 @@ jobs:
         fi
 
     - name: Run E2E tests
-      if: inputs.standard && inputs.repo != 'core'
+      if: inputs.repo != 'core'
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -419,7 +418,6 @@ jobs:
 
     - name: Upload coverage data
       if: >
-        inputs.standard &&
         !github.event.repository.private &&
         always() &&
         inputs.pytest-args != '-m flaky'

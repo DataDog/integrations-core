@@ -39,97 +39,6 @@ def sort_projects(projects):
     return sorted(projects.items(), key=lambda item: (item[0] != 'default', item[0]))
 
 
-WORKFLOW_TRIGGER = {
-    "on": {
-        "workflow_call": {
-            "inputs": {
-                "repo": {
-                    "required": True,
-                    "type": "string",
-                },
-                "python-version": {
-                    "required": False,
-                    "default": "",
-                    "type": "string",
-                },
-                "standard": {
-                    "required": False,
-                    "default": False,
-                    "type": "boolean",
-                },
-                "latest": {
-                    "required": False,
-                    "default": False,
-                    "type": "boolean",
-                },
-                "minimum-base-package": {
-                    "required": False,
-                    "default": False,
-                    "type": "boolean",
-                },
-                "test-py2": {
-                    "required": False,
-                    "default": False,
-                    "type": "boolean",
-                },
-                "test-py3": {
-                    "required": False,
-                    "default": True,
-                    "type": "boolean",
-                },
-                "agent-image": {
-                    "required": False,
-                    "default": "",
-                    "type": "string",
-                },
-                "agent-image-py2": {
-                    "required": False,
-                    "default": "",
-                    "type": "string",
-                },
-                "agent-image-windows": {
-                    "required": False,
-                    "default": "",
-                    "type": "string",
-                },
-                "agent-image-windows-py2": {
-                    "required": False,
-                    "default": "",
-                    "type": "string",
-                },
-                "pytest-args": {
-                    "description": "Arguments to pass to pytest",
-                    "required": False,
-                    "type": "string",
-                    "default": "",
-                },
-                "skip-ddev-tests": {
-                    "required": False,
-                    "default": False,
-                    "type": "boolean",
-                },
-            }
-        }
-    }
-}
-
-WORKFLOW_JOB_INPUTS = {
-    "repo": "${{ inputs.repo }}",
-    "python-version": "${{ inputs.python-version }}",
-    "standard": "${{ inputs.standard }}",
-    "latest": "${{ inputs.latest }}",
-    "minimum-base-package": "${{ inputs.minimum-base-package }}",
-    "test-py2": "${{ inputs.test-py2 }}",
-    "test-py3": "${{ inputs.test-py3 }}",
-    "agent-image": "${{ inputs.agent-image }}",
-    "agent-image-py2": "${{ inputs.agent-image-py2 }}",
-    "agent-image-windows": "${{ inputs.agent-image-windows }}",
-    "agent-image-windows-py2": "${{ inputs.agent-image-windows-py2 }}",
-    "pytest-args": "${{ inputs.pytest-args }}",
-    "skip-ddev-tests": "${{ inputs.skip-ddev-tests }}",
-}
-
-
 @click.command()
 @click.option('--sync', is_flag=True, help='Update the CI configuration')
 @click.pass_obj
@@ -181,7 +90,6 @@ def ci(app: Application, sync: bool):
             'repo': '${{ inputs.repo }}',
             # Options
             'python-version': '${{ inputs.python-version }}',
-            'standard': '${{ inputs.standard }}',
             'latest': '${{ inputs.latest }}',
             'agent-image': '${{ inputs.agent-image }}',
             'agent-image-py2': '${{ inputs.agent-image-py2 }}',
@@ -220,7 +128,7 @@ def ci(app: Application, sync: bool):
         job_id = f'j{job_id}'
 
         job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
-        
+
         if job_id in ddev_jobs_id:
             job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
         jobs[job_id] = job_config
