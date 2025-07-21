@@ -438,7 +438,7 @@ You can monitor Fargate logs by using either:
 
 Datadog recommends using AWS FireLens for the following reasons:
 - You can configure Fluent Bit directly in your Fargate tasks.
-- The Datadog Fluentbit output plugin provides additional tagging on logs which are also used to correlate with the [ECS Explorer](https://docs.datadoghq.com/infrastructure/containers/amazon_elastic_container_explorer).
+- The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][76] uses the tags to correlate logs with ECS resources.
 
 **Note**: Log collection with Fluent Bit and FireLens is not supported for AWS Batch on ECS Fargate.
 
