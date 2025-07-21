@@ -70,11 +70,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -91,11 +87,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -112,11 +104,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -132,11 +120,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -152,11 +136,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -172,11 +152,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -192,11 +168,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -212,11 +184,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -232,11 +200,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -252,11 +216,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -272,11 +232,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -292,11 +248,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -312,11 +264,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -332,11 +280,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -352,11 +296,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -372,11 +312,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -392,11 +328,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -412,11 +344,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -432,11 +360,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -452,11 +376,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -472,11 +392,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -492,11 +408,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -512,11 +424,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -532,11 +440,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -552,11 +456,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -572,11 +472,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -592,11 +488,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -612,11 +504,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -632,11 +520,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -652,11 +536,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -672,11 +552,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -692,11 +568,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -712,11 +584,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -732,11 +600,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -752,11 +616,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -772,11 +632,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -792,11 +648,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -812,11 +664,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -842,11 +690,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -862,11 +706,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -882,11 +722,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -902,11 +738,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -922,11 +754,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -942,11 +770,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -962,11 +786,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -982,11 +802,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1002,11 +818,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1022,11 +834,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1042,11 +850,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1062,11 +866,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1082,11 +882,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1102,11 +898,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1122,11 +914,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1142,11 +930,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1162,11 +946,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1182,11 +962,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1202,11 +978,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1222,11 +994,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1242,11 +1010,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1262,11 +1026,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -1293,11 +1053,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1313,11 +1069,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1333,11 +1085,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1353,11 +1101,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1373,11 +1117,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1393,11 +1133,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1413,11 +1149,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1433,11 +1165,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1453,11 +1181,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1473,11 +1197,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1493,11 +1213,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1513,11 +1229,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1533,11 +1245,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1553,11 +1261,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1573,11 +1277,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1593,11 +1293,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1613,11 +1309,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -1645,11 +1337,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1665,11 +1353,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1685,11 +1369,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1705,11 +1385,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1725,11 +1401,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1745,11 +1417,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1765,11 +1433,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1785,11 +1449,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1805,11 +1465,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1825,11 +1481,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1845,11 +1497,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1865,11 +1513,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1885,11 +1529,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1905,11 +1545,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1925,11 +1561,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1945,11 +1577,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1965,11 +1593,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -1985,11 +1609,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2005,11 +1625,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2025,11 +1641,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2045,11 +1657,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2065,11 +1673,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2085,11 +1689,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2105,11 +1705,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2125,11 +1721,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2145,11 +1737,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2165,11 +1753,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2185,11 +1769,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2205,11 +1785,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2225,11 +1801,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2245,11 +1817,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2265,11 +1833,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2285,11 +1849,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2305,11 +1865,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2325,11 +1881,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2345,11 +1897,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2365,11 +1913,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2385,11 +1929,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2405,11 +1945,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2425,11 +1961,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2445,11 +1977,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2465,11 +1993,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2485,11 +2009,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2505,11 +2025,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2525,11 +2041,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2545,11 +2057,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2565,11 +2073,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2585,11 +2089,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2605,11 +2105,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2625,11 +2121,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2645,11 +2137,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2665,11 +2153,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2685,11 +2169,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2705,11 +2185,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2725,11 +2201,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2745,11 +2217,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -2790,11 +2258,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -2825,11 +2289,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2845,11 +2305,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2865,11 +2321,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2885,11 +2337,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2905,11 +2353,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2925,11 +2369,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2945,11 +2385,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2965,11 +2401,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -2985,11 +2417,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3005,11 +2433,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3025,11 +2449,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3045,11 +2465,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3065,11 +2481,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3085,11 +2497,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3105,11 +2513,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3125,11 +2529,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3145,11 +2545,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3165,11 +2561,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -3207,11 +2599,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3227,11 +2615,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3247,11 +2631,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3267,11 +2647,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3287,11 +2663,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3307,11 +2679,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3327,11 +2695,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3347,11 +2711,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3367,11 +2727,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -3398,11 +2754,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3418,11 +2770,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -3448,11 +2796,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3468,11 +2812,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3488,11 +2828,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3508,11 +2844,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3528,11 +2860,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3548,11 +2876,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3568,11 +2892,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3588,11 +2908,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3608,11 +2924,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3628,11 +2940,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3648,11 +2956,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3668,11 +2972,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3688,11 +2988,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3708,11 +3004,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3728,11 +3020,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3748,11 +3036,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -3789,11 +3073,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -3830,11 +3110,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3850,11 +3126,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3870,11 +3142,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3890,11 +3158,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3910,11 +3174,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3930,11 +3190,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3950,11 +3206,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3970,11 +3222,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -3990,11 +3238,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4010,11 +3254,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4030,11 +3270,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4050,11 +3286,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4070,11 +3302,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4090,11 +3318,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4110,11 +3334,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4130,11 +3350,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4150,11 +3366,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4170,11 +3382,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
@@ -4201,11 +3409,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4221,11 +3425,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4241,11 +3441,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4261,11 +3457,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4281,11 +3473,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4301,11 +3489,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4321,11 +3505,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4341,11 +3521,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4361,11 +3537,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4381,11 +3553,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4401,11 +3569,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4421,11 +3585,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4441,11 +3601,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4461,11 +3617,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4481,11 +3633,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4501,11 +3649,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4521,11 +3665,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4541,11 +3681,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4561,11 +3697,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
@@ -4581,11 +3713,7 @@ jobs:
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit

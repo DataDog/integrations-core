@@ -178,7 +178,7 @@ def ci(app: Application, sync: bool):
     # for target_name, job_matrix in job_dict.items():
     jobs = {}
     for data in job_matrix:
-        python_restriction = data.get('python-support', '')
+        # python_restriction = data.get('python-support', '')
         config = {
             'job-name': data['name'],
             'target': data['target'],
@@ -190,11 +190,11 @@ def ci(app: Application, sync: bool):
             'standard': '${{ inputs.standard }}',
             'latest': '${{ inputs.latest }}',
             'agent-image': '${{ inputs.agent-image }}',
-            'agent-image-py2': '${{ inputs.agent-image-py2 }}',
+            # 'agent-image-py2': '${{ inputs.agent-image-py2 }}',
             'agent-image-windows': '${{ inputs.agent-image-windows }}',
-            'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
-            'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
-            'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
+            # 'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
+            # 'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
+            # 'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
         # We have to enforce a minimum on the number of target-envs to avoid exceeding the maximum GHA object size limit
         # This way we get the benefit of parallelization for the targets that need it most
