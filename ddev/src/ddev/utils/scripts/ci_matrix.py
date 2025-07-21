@@ -202,35 +202,6 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
         if matrix_overrides.get('exclude', False):
             continue
 
-        hatch_toml = root / target / 'hatch.toml'
-        if not hatch_toml.is_file():
-            continue
-
-        hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
-        env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
-        target_envs = []
-        # convert the env matrix to a list of targets for each combination of values
-        if env_matrix:
-            for env in env_matrix:
-                if not isinstance(env, dict):
-                    continue
-
-                # Create a list of all combinations of values
-                keys = env.keys()
-                values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
-                if not values:
-                    continue
-
-                # Generate all combinations of values
-                from itertools import product
-
-                for combination in product(*values):
-                    target_envs.append('-'.join(combination))
-
-        else:
-            # If no env matrix is defined, use the target name as the only environment
-            target_envs = []
-
         manifest = read_manifest(root, target)
         platform_ids = matrix_overrides.get('platforms', [])
         if not platform_ids:
@@ -246,6 +217,37 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                     platform_ids = ['linux']
             else:
                 platform_ids = ['linux']
+
+        hatch_toml = root / target / 'hatch.toml'
+        if not hatch_toml.is_file():
+            continue
+
+        hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
+        env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
+        target_envs = {platform_id: [] for platform_id in platform_ids}
+        # convert the env matrix to a list of targets for each combination of values
+        if env_matrix:
+            for env in env_matrix:
+                if not isinstance(env, dict):
+                    continue
+
+                # Create a list of all combinations of values
+                keys = env.keys()
+                values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
+                if not values:
+                    continue
+
+                # Generate all combinations of values
+                from itertools import product
+
+                os_index = list(keys).index('os') if 'os' in keys else -1
+                for combination in product(*values):
+                    os = combination[os_index] if os_index != -1 else platform_ids[0]
+                    target_envs[os].append('-'.join(combination))
+
+        else:
+            target_envs = {}
+
 
         runners = matrix_overrides.get('runners', {})
         for platform_id in platform_ids:
@@ -278,8 +280,8 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 config['python-support'] = ''.join(supported_python_versions)
 
             job_name = normalize_job_name(config['name'])
-            if target_envs:
-                for target_env in target_envs:
+            if target_envs.get(platform_id):
+                for target_env in target_envs[platform_id]:
                     if target_env != target:
                         config['name'] = f'{copy.copy(job_name)} ({target_env})'
                     job_matrix.append({**config, 'target-env': target_env})
