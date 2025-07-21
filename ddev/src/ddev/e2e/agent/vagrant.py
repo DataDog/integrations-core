@@ -116,7 +116,7 @@ class VagrantAgent(AgentInterface):
         self._run_command(destroy_cmd_host, "destroy_command", host=True)
         self.app.display_info(f"VM `{self._vm_name}` destroyed.")
 
-        # delete the temp vagrant dir
+        # delete the vagrant dir
         shutil.rmtree(self._vagrant_dir)
         self.app.display_info(f"Vagrant working directory deleted: {self._vagrant_dir}")
 
@@ -164,10 +164,8 @@ class VagrantAgent(AgentInterface):
         self._vagrant_dir = self.env_data.storage_dir / "vagrant" / self._vm_name
         self._vagrant_dir.mkdir(parents=True, exist_ok=True)
 
-        # Generate Vagrantfile if it doesn't exist
         vagrantfile_path = self._vagrant_dir / "Vagrantfile"
 
-        # Set VAGRANT_CWD to self.temp_vagrant_dir
         os.environ["VAGRANT_CWD"] = str(self._vagrant_dir)
         self.app.display_debug(f"Vagrant working directory set to: {self._vagrant_dir}")
 
