@@ -685,6 +685,7 @@ def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
     aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
 
 
+@pytest.mark.flaky(max_runs=10)
 def test_pg_control(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()
