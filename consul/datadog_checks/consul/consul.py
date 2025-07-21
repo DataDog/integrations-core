@@ -106,8 +106,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
             'service_whitelist', self.instance.get('services_include', default_services_include)
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
-        self.services_tags_keys_include = set(
-            self.instance.get("services_tags_keys_include", self.init_config.get("services_tags_keys_include", []))
+        self.allowed_service_tags = set(
+            self.instance.get("allowed_service_tags", self.init_config.get("allowed_service_tags", []))
         )
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
@@ -316,13 +316,13 @@ class ConsulCheck(OpenMetricsBaseCheck):
         return services
 
     def _cull_services_tags_list(self, services):
-        if self.services_tags_keys_include:
+        if self.allowed_service_tags:
             # services is a dict of {service_name: [tags]} where tags is a list
             # of string having the form of "tagkey=tagvalue"
             for service in services:
                 tags = services[service]
                 # get the tagkey (the part before the "=") and check it against the include list
-                tags = [t for t in tags if t.split("=")[0].lower() in self.services_tags_keys_include]
+                tags = [t for t in tags if t.split("=")[0].lower() in self.allowed_service_tags]
                 services[service] = tags
 
         return services

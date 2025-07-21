@@ -81,7 +81,7 @@ def test_cull_services_tags_keys(aggregator):
         "unwanted.tag.noequals",
     }
 
-    consul_check.services_tags_keys_include = include_tags
+    consul_check.allowed_service_tags = include_tags
     services = consul_mocks.mock_get_n_custom_tagged_services_in_cluster(6, all_tags)
 
     services = consul_check._cull_services_tags_list(services)
