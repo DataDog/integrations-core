@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 10.2.1 / 2025-07-21
+
+***Fixed***:
+
+* Add deprecated `schemas` option to `config.yaml.example`. This config option is deprecated at Agent 7.69.0 and will be removed in a future release. ([#20783](https://github.com/DataDog/integrations-core/pull/20783))
+
 ## 10.2.0 / 2025-07-10
 
 ***Added***:
