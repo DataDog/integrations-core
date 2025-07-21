@@ -196,6 +196,8 @@ def ci(app: Application, sync: bool):
             # 'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             # 'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
+        # We have to enforce a minimum on the number of target-envs to avoid exceeding the maximum GHA object size limit
+        # This way we get the benefit of parallelization for the targets that need it most
         if len(data.get('target-env',[])) > 4:
             config['target-env'] = '${{ matrix.target-env }}'
 
