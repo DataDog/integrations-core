@@ -182,12 +182,13 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
    - **Log Format**: Select **JSON** from the dropdown.
    - **Transfer Interval**: Select **Continuous** from the dropdown.
    - **Field Delimiter**: Select **SPACE** from the dropdown.
-   - **Send DLP/Web/DNS/Malware/Audit/Connection Error Logs**: Set to Enable based on your preference for sending logs.
+   - **Send DLP/Web/DNS/Malware/Audit/ConnectionError Logs**: Set to Enable based on your preference for sending logs.
    - **Fields to Forward**: Add all fields except **DLP Base64 Encoded Meta Data**, **Base64 Encoded Meta Data**, and **Chat GPT Message**.
      <br>After entering the required details, click **Add Service**.
 
 **Note:** 
 - If you have multiple reporter nodes, make sure to repeat the steps 3 and 4 for each reporter node.
+- The `Send Connection Error Logs` toggle should only be visible if `Send Web Logs` toggle is disabled.
 
 ### Validation
 

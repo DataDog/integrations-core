@@ -13,7 +13,7 @@
     "media": [
       {
         "caption": "iboss - Logs Overview",
-        "image_url": "images/iboss_log_overview.png",
+        "image_url": "images/iboss_logs_overview.png",
         "media_type": "image"
       },
       {
@@ -23,7 +23,7 @@
       },
       {
         "caption": "iboss - Real-Time Web Log Analytics",
-        "image_url": "images/iboss_real_time_web_analytics.png",
+        "image_url": "images/iboss_real_time_web_log_analytics.png",
         "media_type": "image"
       },
       {
