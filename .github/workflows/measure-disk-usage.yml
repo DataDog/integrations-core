@@ -44,11 +44,13 @@ jobs:
     #   with:
     #     name: ${{ inputs.dependency_sizes_json }}
     #     run-id: ${{ inputs.run-id }}
-    
-    - name: List files in downloaded artifact
+
+    - name: Debug artifact structure
       run: |
-        echo "Listing files in ${{ inputs.dependency_sizes_json }}:"
-        ls -lR ${{ inputs.dependency_sizes_json }}
+        echo "Current directory:" > $GITHUB_STEP_SUMMARY
+        pwd >> $GITHUB_STEP_SUMMARY
+        echo "Contents:" >> $GITHUB_STEP_SUMMARY
+        ls -lR >> $GITHUB_STEP_SUMMARY
 
     - name: Testing dependency sizes
       run: |
