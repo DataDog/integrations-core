@@ -65,7 +65,6 @@ def ci(app: Application, sync: bool):
     original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''
     ddev_jobs_id = ('jd316aba', 'j6712d43')
 
-    # jobs = {}
     job_matrix = construct_job_matrix(app.repo.path, get_all_targets(app.repo.path))
 
     # Reduce the target-envs to single jobs with the same name
@@ -77,6 +76,9 @@ def ci(app: Application, sync: bool):
         if target_name not in job_dict:
             job_dict[target_name] = job
             job_dict[target_name]['name'] = target_name
+            job_dict[target_name]['target-env'] = [job.get('target-env')] if job.get('target-env') else []
+        elif job.get('target-env'):
+            job_dict[target_name]['target-env'].append(job['target-env'])
     job_matrix = list(job_dict.values())
 
     jobs = {}
@@ -98,6 +100,10 @@ def ci(app: Application, sync: bool):
             'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
+        # We have to enforce a minimum on the number of target-envs to avoid exceeding the maximum GHA object size limit
+        # This way we get the benefit of parallelization for the targets that need it most
+        if len(data.get('target-env', [])) > 4:
+            config['target-env'] = '${{ matrix.target-env }}'
 
         if is_core or is_marketplace:
             config.update(
@@ -128,7 +134,11 @@ def ci(app: Application, sync: bool):
         job_id = f'j{job_id}'
 
         job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
-
+        if len(data.get('target-env', [])) > 4:
+            job_config['strategy'] = {
+                'matrix': {'target-env': data['target-env']},
+                'fail-fast': False,
+            }
         if job_id in ddev_jobs_id:
             job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
         jobs[job_id] = job_config
