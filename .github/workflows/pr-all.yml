@@ -26,7 +26,7 @@ jobs:
       repo: core
 
       # Options
-      standard: true
+      # standard: true
       test-py2: true
     secrets: inherit
 

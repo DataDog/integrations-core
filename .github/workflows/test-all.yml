@@ -11,10 +11,10 @@ on:
         required: false
         default: ""
         type: string
-      standard:
-        required: false
-        default: false
-        type: boolean
+      # standard:
+      #   required: false
+      #   default: false
+      #   type: boolean
       latest:
         required: false
         default: false
