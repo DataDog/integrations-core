@@ -248,14 +248,14 @@ jobs:
     needs: build-macos
     uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
     with:
-      dependency_sizes_json: sizes.json
+      dependency_sizes_json: target-macos-x86_64
       platform: macos-x86_64
       run-id: ${{ github.run_id }}
   measure-disk-usage-aarch64:
     needs: build-macos
     uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
     with:
-      dependency_sizes_json: sizes.json
+      dependency_sizes_json: target-macos-aarch64
       platform: macos-aarch64
       run-id: ${{ github.run_id }}
 
