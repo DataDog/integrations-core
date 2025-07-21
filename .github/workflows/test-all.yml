@@ -3570,20 +3570,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-windows-SQLOLEDB-2019-single
-        - py3.12-windows-SQLOLEDB-2022-single
-        - py3.12-windows-MSOLEDBSQL-2019-single
-        - py3.12-windows-MSOLEDBSQL-2022-single
-        - py3.12-windows-odbc-2019-single
-        - py3.12-windows-odbc-2022-single
-      fail-fast: false
   j3a8e004:
     uses: ./.github/workflows/test-target.yml
     with:
