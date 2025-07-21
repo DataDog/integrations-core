@@ -47,8 +47,8 @@ jobs:
 
     - name: Testing dependency sizes
       run: |
-        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.dependency_sizes_json }} > size-dependency-sizes.txt
-        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.dependency_sizes_json }} --format png,csv,markdown
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.dependency_sizes_json }}/py3/sizes.json > size-dependency-sizes.txt
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.dependency_sizes_json }}/py3/sizes.json --format png,csv,markdown
         cat size-dependency-sizes.txt
         echo "# Size (dependency sizes)" >> $GITHUB_STEP_SUMMARY
         cat dependency_sizes_status.md >> $GITHUB_STEP_SUMMARY
