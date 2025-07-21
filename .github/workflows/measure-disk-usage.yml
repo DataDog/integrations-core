@@ -50,7 +50,7 @@ jobs:
         echo "Current directory:" > $GITHUB_STEP_SUMMARY
         pwd >> $GITHUB_STEP_SUMMARY
         echo "Contents:" >> $GITHUB_STEP_SUMMARY
-        ls -lR >> $GITHUB_STEP_SUMMARY
+        ls -lR | grep ${{ inputs.dependency_sizes_json }} >> $GITHUB_STEP_SUMMARY
 
     - name: Testing dependency sizes
       run: |
