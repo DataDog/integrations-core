@@ -37,7 +37,7 @@ jobs:
         ddev config set repo core
 
     - name: Download dependency sizes artifact
-      run: gh run download ${{ inputs.run-id }} --name ${{ inputs.dependency_sizes_json }}
+      run: gh run view ${{ inputs.run-id }} --json databaseId,headBranch,headSha,name,displayTitle > $GITHUB_STEP_SUMMARY
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # uses: actions/download-artifact@v4
