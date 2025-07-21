@@ -30,7 +30,7 @@ class AgentInterface(ABC):
 
     @property
     def platform(self) -> Platform:
-        return self.__app.platform
+        return self.app.platform
 
     @property
     def integration(self) -> Integration:
