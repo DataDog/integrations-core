@@ -37,7 +37,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "psutil==6.0.0",
-    "pywin32==310; sys_platform == 'win32'",
+    "pywin32==311; sys_platform == 'win32'",
 ]
 
 [project.urls]
