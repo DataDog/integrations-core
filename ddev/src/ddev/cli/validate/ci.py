@@ -161,7 +161,6 @@ def ci(app: Application, sync: bool):
 
     # Reduce the target-envs to single jobs with the same name
     # We do this to keep the job list from exceeding Github's maximum file size limit
-    # TODO: Split the jobs into multiple files that are called by the test-all.yml workflow
     # Remove anything inside parentheses from job names and trim trailing space
     job_dict = {}
     for job in job_matrix:
@@ -242,9 +241,6 @@ def ci(app: Application, sync: bool):
         if data['target'] == 'ddev':
             jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
 
-    # sub_tasks = []
-    # for i in range(0, len(jobs), 100):
-    #     job_slice = dict(sorted(jobs.items(), key=lambda item: item[0])[i:i + 100])
     jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
 
     # Enforce proper string types
@@ -267,8 +263,20 @@ def ci(app: Application, sync: bool):
     if original_jobs_workflow != expected_jobs_workflow:
         if sync:
             target_path.write_text(expected_jobs_workflow)
-            # else:
-            # app.abort('CI configuration is not in sync, try again with the `--sync` flag')
+        else:
+            # original = yaml.safe_load(original_jobs_workflow)
+            # expected = yaml.safe_load(expected_jobs_workflow)
+            # # iterate through jobs in original print differences in expected
+            # for job_name, job_config in expected['jobs'].items():
+            #     if job_name not in original['jobs']:
+            #         app.display_warning(f'Job {job_name} is missing in the original workflow')
+            #     else:
+            #         original_job_config = original['jobs'][job_name]
+            #         if original_job_config != job_config:
+            #             app.display_warning(f'Job {job_name} config differs:')
+            #             app.display_warning(f'Original: {original_job_config}')
+            #             app.display_warning(f'Expected: {job_config}')
+            app.abort('CI configuration is not in sync, try again with the `--sync` flag')
         # sub_tasks.append({f'test-all-{i // 100}': {'uses': f'./.github/workflows/test-all-{i // 100}.yml'}})
 
     # all_jobs = {}

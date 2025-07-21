@@ -138,8 +138,6 @@ def test(
 
     target_name, _, environments = target_spec.partition(':')
 
-    app.display_debug(f'Target: {target_name}, Environments: {environments}')
-
     # target name -> target
     targets: dict[str, Integration] = {}
     if target_name == 'changed':
