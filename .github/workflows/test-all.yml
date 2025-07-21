@@ -11,10 +11,6 @@ on:
         required: false
         default: ""
         type: string
-      # standard:
-      #   required: false
-      #   default: false
-      #   type: boolean
       latest:
         required: false
         default: false
