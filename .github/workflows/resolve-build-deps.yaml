@@ -232,10 +232,10 @@ jobs:
       run: |-
         # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --workflow-id ${{ github.run_id }} --skip-setup
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --workflow-id ${{ github.run_id }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
         else
           mkdir ~/builder_root
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --workflow-id ${{ github.run_id }} --skip-setup
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --workflow-id ${{ github.run_id }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
         fi
 
     - name: Upload artifacts

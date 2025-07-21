@@ -57,8 +57,10 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
 
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
+    parser.add_argument('--workflow-id')
     parser.add_argument('--python', required=True)
     parser.add_argument('--use-built-index', action='store_true', default=False)
+
     args = parser.parse_args()
 
     python_version = args.python
@@ -138,7 +140,8 @@ def main():
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:
         for project_name, project_version in sorted(dependencies.items()):
-            f.write(f'{project_name}=={project_version}\n')
+
+            f.write(f'{project_name}=={project_version}-{args.workflow_id}WID\n')
 
 
 if __name__ == '__main__':
