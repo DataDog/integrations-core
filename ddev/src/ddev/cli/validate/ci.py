@@ -195,7 +195,7 @@ def ci(app: Application, sync: bool):
             'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
-        if len(data.get('target-env',[])) > 1:
+        if len(data.get('target-env',[])) > 2:
             config['target-env'] = '${{ matrix.target-env }}'
 
         if is_core or is_marketplace:
@@ -227,7 +227,7 @@ def ci(app: Application, sync: bool):
         job_id = f'j{job_id}'
 
         job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
-        if len(data.get('target-env', [])) > 1:
+        if len(data.get('target-env', [])) > 2:
             job_config['strategy'] = {
                 'matrix': {'target-env': data['target-env']},
                 'fail-fast': False,

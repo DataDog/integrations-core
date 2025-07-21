@@ -257,16 +257,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.15.0-artemis.yaml
-        - py3.12-5.15.9-activemq.yaml
-      fail-fast: false
   j2ea3c47:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -693,16 +686,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.1
-        - py3.12-3.0
-      fail-fast: false
   jdf2cf62:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -740,16 +726,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-4.0
-        - py3.12-5.0
-      fail-fast: false
   j47d0412:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -926,16 +905,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-22.1
-        - py3.12-23.2
-      fail-fast: false
   j7272727:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -953,16 +925,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-5.4
-        - py3.12-6.2
-      fail-fast: false
   j74904dc:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -980,16 +945,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-1.6
-        - py3.12-1.9
-      fail-fast: false
   j1809ed5:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1007,16 +965,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-1.2
-        - py3.12-1.8
-      fail-fast: false
   jdb447c4:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1381,16 +1332,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2
-        - py3.12-3
-      fail-fast: false
   jcd0613f:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1436,16 +1380,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-v3.4.26
-        - py3.12-v3.5.9
-      fail-fast: false
   jb6f10b7:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1563,16 +1500,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-caddy
-        - py3.12-lab
-      fail-fast: false
   jb241af5:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1590,16 +1520,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12
-        - py3.12-tls
-      fail-fast: false
   jec8fda1:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1617,16 +1540,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-1.0
-        - py3.12-1.1
-      fail-fast: false
   jbde23f7:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1732,16 +1648,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-22
-        - py3.12-23
-      fail-fast: false
   j021a036:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1819,16 +1728,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-4.0
-        - py3.12-5.0
-      fail-fast: false
   ja384ba3:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2026,16 +1928,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-9
-        - py3.12-9-cluster
-      fail-fast: false
   j325d538:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2053,16 +1948,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-9
-        - py3.12-9-cluster
-      fail-fast: false
   j258733e:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2100,16 +1988,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.8
-        - py3.12-2.14
-      fail-fast: false
   j621e141:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2227,16 +2108,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.8
-        - py3.12-3.3
-      fail-fast: false
   j2a81870:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2323,16 +2197,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-1.5.0
-        - py3.12-3.0.0
-      fail-fast: false
   jcb06303:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2690,16 +2557,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-auth
-        - py3.12-noauth
-      fail-fast: false
   j0f141fb:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3214,16 +3074,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-caddy
-        - py3.12-lab
-      fail-fast: false
   j603b7b8:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3241,16 +3094,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.4
-        - py3.12-2.6
-      fail-fast: false
   j518803f:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3467,16 +3313,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-3.7
-        - py3.12-4.0
-      fail-fast: false
   je1dcfa8:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3574,16 +3413,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-1.4
-        - py3.12-2.0
-      fail-fast: false
   j4b95d59:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3722,16 +3554,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.3
-        - py3.12-2.4
-      fail-fast: false
   jbdacd9a:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3917,16 +3742,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-false
-        - py3.12-true
-      fail-fast: false
   j61747a5:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3964,16 +3782,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-8.11
-        - py3.12-9.3
-      fail-fast: false
   je9ac0d8:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3991,16 +3802,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-8.5
-        - py3.12-9.3
-      fail-fast: false
   j2c9674c:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4038,16 +3842,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.4
-        - py3.12-3.0
-      fail-fast: false
   j756cad4:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4147,16 +3944,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-4.13
-        - py3.12-5.6
-      fail-fast: false
   j1fb8116:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4174,16 +3964,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-8.1
-        - py3.12-9.1
-      fail-fast: false
   j5da822f:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4361,16 +4144,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-legacy
-        - py3.12-openmetrics
-      fail-fast: false
   jd12c1ab:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4408,16 +4184,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12
-        - py3.12-caddy
-      fail-fast: false
   j1a64f29:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4455,16 +4224,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12
-        - py3.12-sandbox
-      fail-fast: false
   jfb3aa43:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4653,16 +4415,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-5.2
-        - py3.12-6.5
-      fail-fast: false
   jd9c3e9f:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4680,16 +4435,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-1.9.0-token-auth
-        - py3.12-1.9.0-noauth
-      fail-fast: false
   j9a2a96c:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4805,16 +4553,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-6.7
-        - py3.12-7.0
-      fail-fast: false
   jd496bce:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4832,16 +4573,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-1.20-no-auth
-        - py3.12-1.20-auth
-      fail-fast: false
   j6fbb0c0:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -4859,16 +4593,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-12
-        - py3.12-14
-      fail-fast: false
   j0b2eec8:
     uses: ./.github/workflows/test-target.yml
     with:
