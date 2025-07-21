@@ -337,8 +337,6 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
-integration/kaspersky:
-- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
