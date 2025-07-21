@@ -35,12 +35,15 @@ jobs:
       run: |
         ddev config set repos.core .
         ddev config set repo core
-        
+
     - name: Download dependency sizes artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.dependency_sizes_json }}
-        run-id: ${{ inputs.run-id }}
+      run: gh run download ${{ inputs.run-id }} --name ${{ inputs.dependency_sizes_json }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # uses: actions/download-artifact@v4
+    #   with:
+    #     name: ${{ inputs.dependency_sizes_json }}
+    #     run-id: ${{ inputs.run-id }}
 
     - name: Testing dependency sizes
       run: |
