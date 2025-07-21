@@ -11,6 +11,7 @@ import pytest
 import vcr
 from datadog_checks.dev.tooling.utils import set_root
 
+from ddev.cli.application import Application
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import DDEV_TOML, ConfigFileWithOverrides
@@ -42,7 +43,7 @@ def platform() -> Platform:
 
 
 @pytest.fixture(scope='session')
-def app() -> Platform:
+def app() -> Application:
     return APPLICATION
 
 
