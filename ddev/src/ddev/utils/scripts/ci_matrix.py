@@ -224,7 +224,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
         hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
         env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
-        target_envs = {platform_id: [] for platform_id in platform_ids}
+        target_envs: dict[str, list[str]] = {platform_id: [] for platform_id in platform_ids}
         # convert the env matrix to a list of targets for each combination of values
         if env_matrix:
             for env in env_matrix:
