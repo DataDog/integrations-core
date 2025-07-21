@@ -44,7 +44,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name} by {type}"
+                                "query": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name} by {type}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "style": {
@@ -105,7 +106,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -152,7 +154,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes.memory.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.memory.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -201,7 +204,8 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
-                                "aggregator": "avg"
+                                "aggregator": "avg",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -247,7 +251,8 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
-                                "aggregator": "avg"
+                                "aggregator": "avg",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -367,12 +372,14 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             },
                             {
                                 "data_source": "metrics",
                                 "name": "query2",
-                                "query": "sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -422,12 +429,14 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes.network.rx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.network.rx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             },
                             {
                                 "data_source": "metrics",
                                 "name": "query2",
-                                "query": "sum:kubernetes.network.tx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.network.tx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -484,7 +493,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes.filesystem.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.filesystem.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -531,7 +541,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                                "query": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -587,7 +598,8 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
-                                "aggregator": "avg"
+                                "aggregator": "avg",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -633,7 +645,8 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
-                                "aggregator": "avg"
+                                "aggregator": "avg",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -683,7 +696,8 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name}",
-                                "aggregator": "last"
+                                "aggregator": "last",
+                                "semantic_mode": "combined"
                             }
                         ]
                     }
@@ -714,7 +728,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service}"
+                                "query": "sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -760,7 +775,8 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service,kube_namespace,kube_cluster_name}",
-                                "aggregator": "max"
+                                "aggregator": "max",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "sort": {
