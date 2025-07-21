@@ -85,7 +85,7 @@ def config(ctx, check, sync, verbose):
                 files_failed[spec_file_path] = True
 
             check_display_queue.append(
-                lambda spec_file_path=spec_file_path, check=check: (echo_failure if is_core_check else echo_failure)(
+                lambda spec_file_path=spec_file_path, check=check: echo_failure(
                     f"Did not find spec file {spec_file_path} for check {check}"
                 )
             )

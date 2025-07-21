@@ -19,15 +19,6 @@ NON_INTEGRATION_PATHS = [
     "ddev",
 ]
 
-# The manifest.json file can contain the source_type_name field that the validation uses to validate different parts
-# of the integration. For example Zabbix was renamed to Zabbix (Community Version) in the manifest.json file, so we
-# need to map it back to Zabbix for validations to pass.
-EXCEPTION_MAPPER = {
-    'Zabbix (Community Version)': 'Zabbix',
-    'Scalr (Community Version)': 'Scalr',
-    'Zscaler (Community Version)': 'Zscaler',
-}
-
 
 class Manifest:
     """
@@ -149,7 +140,6 @@ class ManifestV2:
 
     def get_display_name(self):
         display_name = self._manifest_json.get_path("/assets/integration/source_type_name")
-        display_name = EXCEPTION_MAPPER.get(display_name, display_name)
         return display_name
 
     def get_app_id(self):
