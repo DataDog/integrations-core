@@ -161,23 +161,18 @@ def ci(app: Application, sync: bool):
 
     # Reduce the target-envs to single jobs with the same name
     # We do this to keep the job list from exceeding Github's maximum file size limit
-    # Remove anything inside parentheses from job names and trim trailing space
     job_dict = {}
     for job in job_matrix:
+        # Remove anything inside parentheses from job names and trim trailing space
         target_name = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
         if target_name not in job_dict:
             job_dict[target_name] = job
             job_dict[target_name]['name'] = target_name
-            job_dict[target_name]['target-env'] = [job.get('target-env')] if job.get('target-env') else []
-        elif job.get('target-env'):
-            # job_dict[target_name].append(job)
-            job_dict[target_name]['target-env'].append(job['target-env'])
     job_matrix = list(job_dict.values())
 
-    # for target_name, job_matrix in job_dict.items():
     jobs = {}
     for data in job_matrix:
-        # python_restriction = data.get('python-support', '')
+        python_restriction = data.get('python-support', '')
         config = {
             'job-name': data['name'],
             'target': data['target'],
@@ -189,16 +184,12 @@ def ci(app: Application, sync: bool):
             'standard': '${{ inputs.standard }}',
             'latest': '${{ inputs.latest }}',
             'agent-image': '${{ inputs.agent-image }}',
-            # 'agent-image-py2': '${{ inputs.agent-image-py2 }}',
+            'agent-image-py2': '${{ inputs.agent-image-py2 }}',
             'agent-image-windows': '${{ inputs.agent-image-windows }}',
-            # 'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
-            # 'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
-            # 'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
+            'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
+            'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
+            'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
-        # We have to enforce a minimum on the number of target-envs to avoid exceeding the maximum GHA object size limit
-        # This way we get the benefit of parallelization for the targets that need it most
-        if len(data.get('target-env', [])) > 4:
-            config['target-env'] = '${{ matrix.target-env }}'
 
         if is_core or is_marketplace:
             config.update(
@@ -229,11 +220,7 @@ def ci(app: Application, sync: bool):
         job_id = f'j{job_id}'
 
         job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
-        if len(data.get('target-env', [])) > 4:
-            job_config['strategy'] = {
-                'matrix': {'target-env': data['target-env']},
-                'fail-fast': False,
-            }
+        
         if job_id in ddev_jobs_id:
             job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
         jobs[job_id] = job_config
@@ -264,34 +251,7 @@ def ci(app: Application, sync: bool):
         if sync:
             target_path.write_text(expected_jobs_workflow)
         else:
-            # original = yaml.safe_load(original_jobs_workflow)
-            # expected = yaml.safe_load(expected_jobs_workflow)
-            # # iterate through jobs in original print differences in expected
-            # for job_name, job_config in expected['jobs'].items():
-            #     if job_name not in original['jobs']:
-            #         app.display_warning(f'Job {job_name} is missing in the original workflow')
-            #     else:
-            #         original_job_config = original['jobs'][job_name]
-            #         if original_job_config != job_config:
-            #             app.display_warning(f'Job {job_name} config differs:')
-            #             app.display_warning(f'Original: {original_job_config}')
-            #             app.display_warning(f'Expected: {job_config}')
             app.abort('CI configuration is not in sync, try again with the `--sync` flag')
-        # sub_tasks.append({f'test-all-{i // 100}': {'uses': f'./.github/workflows/test-all-{i // 100}.yml'}})
-
-    # all_jobs = {}
-    # for k, v in job_dict.items():
-    #     all_jobs[f'{k.lower().replace(' ', '-')}'] =
-    #  {'uses': f'./.github/workflows/test-all-{k.lower().replace(' ', '-')}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
-    # jobs_component = yaml.safe_dump({'jobs': job_matrix}, default_flow_style=False, sort_keys=False)
-    # manual_component = original_jobs_workflow.split('jobs:')[0].strip()
-    # expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
-    # jobs_workflow_path.write_text(expected_jobs_workflow)
-
-    # Write top level test-all with calls to each slice
-    # test_all = yaml.safe_dump({'jobs': sub_tasks}, default_flow_style=False, sort_keys=False)
-    # for i in range(len(sub_tasks)):
-    #     jobs_workflow_path.write_text(manual_component + '\n\n' + test_all)
 
     validation_tracker = app.create_validation_tracker('CI configuration validation')
     error_message = ''
