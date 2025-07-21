@@ -138,12 +138,12 @@ def ci(app: Application, sync: bool):
     import hashlib
     import json
     import os
+    import re
     from collections import defaultdict
 
     import yaml
 
     from ddev.utils.scripts.ci_matrix import construct_job_matrix, get_all_targets
-    import re
 
     is_core = app.repo.name == 'core'
     is_marketplace = app.repo.name == 'marketplace'
@@ -174,7 +174,7 @@ def ci(app: Application, sync: bool):
             # job_dict[target_name].append(job)
             job_dict[target_name]['target-env'].append(job['target-env'])
     job_matrix = list(job_dict.values())
-    
+
     # for target_name, job_matrix in job_dict.items():
     jobs = {}
     for data in job_matrix:
@@ -190,15 +190,15 @@ def ci(app: Application, sync: bool):
             'standard': '${{ inputs.standard }}',
             'latest': '${{ inputs.latest }}',
             'agent-image': '${{ inputs.agent-image }}',
-            # 'agent-image-py2': '${{ inputs.agent-image-py2 }}',
+            'agent-image-py2': '${{ inputs.agent-image-py2 }}',
             'agent-image-windows': '${{ inputs.agent-image-windows }}',
-            # 'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
-            # 'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
-            # 'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
+            'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
+            'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
+            'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
         # We have to enforce a minimum on the number of target-envs to avoid exceeding the maximum GHA object size limit
         # This way we get the benefit of parallelization for the targets that need it most
-        if len(data.get('target-env',[])) > 4:
+        if len(data.get('target-env', [])) > 4:
             config['target-env'] = '${{ matrix.target-env }}'
 
         if is_core or is_marketplace:
@@ -242,8 +242,6 @@ def ci(app: Application, sync: bool):
         if data['target'] == 'ddev':
             jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
 
-
-    
     # sub_tasks = []
     # for i in range(0, len(jobs), 100):
     #     job_slice = dict(sorted(jobs.items(), key=lambda item: item[0])[i:i + 100])
@@ -264,23 +262,23 @@ def ci(app: Application, sync: bool):
 
     manual_component = original_jobs_workflow.split('jobs:')[0].strip()
     expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
-    target_path = app.repo.path / '.github' / 'workflows' / f'test-all.yml'
+    target_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
 
     if original_jobs_workflow != expected_jobs_workflow:
         if sync:
             target_path.write_text(expected_jobs_workflow)
             # else:
-                # app.abort('CI configuration is not in sync, try again with the `--sync` flag')
+            # app.abort('CI configuration is not in sync, try again with the `--sync` flag')
         # sub_tasks.append({f'test-all-{i // 100}': {'uses': f'./.github/workflows/test-all-{i // 100}.yml'}})
 
     # all_jobs = {}
     # for k, v in job_dict.items():
-    #     all_jobs[f'{k.lower().replace(' ', '-')}'] = {'uses': f'./.github/workflows/test-all-{k.lower().replace(' ', '-')}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
+    #     all_jobs[f'{k.lower().replace(' ', '-')}'] =
+    #  {'uses': f'./.github/workflows/test-all-{k.lower().replace(' ', '-')}.yml', 'with': {**WORKFLOW_JOB_INPUTS}}
     # jobs_component = yaml.safe_dump({'jobs': job_matrix}, default_flow_style=False, sort_keys=False)
     # manual_component = original_jobs_workflow.split('jobs:')[0].strip()
     # expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
     # jobs_workflow_path.write_text(expected_jobs_workflow)
-
 
     # Write top level test-all with calls to each slice
     # test_all = yaml.safe_dump({'jobs': sub_tasks}, default_flow_style=False, sort_keys=False)
