@@ -176,7 +176,8 @@ class VagrantAgent(AgentInterface):
             vagrantfile_path.write_text(vagrantfile_content)
             self.app.display_info(f"Vagrantfile generated at {vagrantfile_path}")
         else:
-            self.app.display_info(f"Using existing Vagrantfile at {vagrantfile_path}")
+            if vagrantfile_path.exists():
+                self.app.display_info(f"Using existing Vagrantfile at {vagrantfile_path}")
 
     def _get_vagrantfile_template(self) -> Template:
         template_path = Path(__file__).parent / "Vagrantfile.template"
