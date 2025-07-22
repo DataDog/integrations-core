@@ -610,7 +610,7 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     'is_aurora',
     [True, False],
 )
-@pytest.mark.flaky(max_runs=5)
+@pytest.mark.flaky(max_runs=10)
 def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:

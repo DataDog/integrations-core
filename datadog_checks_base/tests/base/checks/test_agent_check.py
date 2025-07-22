@@ -1312,14 +1312,11 @@ def test_env_var_logic_preset():
 @pytest.mark.parametrize(
     "should_profile_value, expected_calls",
     [
-        (True, 1),
-        (False, 0),
+        pytest.param(True, 1, id="enabled"),
+        pytest.param(False, 0, id="disabled"),
     ],
 )
-def test_profile_memory(should_profile_value, expected_calls):
-    """
-    Test that profile_memory is called when should_profile_memory is True
-    """
+def test_profile_memory_when_enabled(should_profile_value, expected_calls):
     check = AgentCheck('test', {}, [{}])
     check.should_profile_memory = mock.MagicMock(return_value=should_profile_value)
     check.profile_memory = mock.MagicMock()
