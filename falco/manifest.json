@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Falco alert logs.",
+    "description": "Gain insights into Falco alert logs and metrics",
     "title": "Falco",
     "media": [
       {
@@ -54,7 +54,12 @@
       }
     },
     "dashboards": {
-        "Falco - Alerts": "assets/dashboards/falco_alerts.json"
+        "Falco - Alerts": "assets/dashboards/falco_alerts.json",
+        "Falco - Metrics": "assets/dashboards/falco_metrics.json"
+    },
+    "monitors": {
+      "Queue Drops": "assets/monitors/falco_output_queue_drops.json",
+      "Rules Matches": "assets/monitors/falco_rules_matches.json"
     },
     "logs": {
       "source": "falco"

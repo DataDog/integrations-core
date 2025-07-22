@@ -264,6 +264,54 @@ instances:
         #
         # collect_search_indexes: false
 
+    ## DEPRECATED: Use `collect_schemas` instead.
+    ## Configure collection of MongoDB schemas (inferred) by sampling documents.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.69.0
+    ## Migration: Use `collect_schemas` instead.
+    #
+    # schemas:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of schemas. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 3600
+        ## Set the schemas collection interval in seconds. Each collection involves sampling documents
+        ## from collections and inferring schemas.
+        #
+        # collection_interval: 3600
+
+        ## @param sample_size - number - optional - default: 10
+        ## Set the sample size for each collection. The sample size is the number of documents to sample
+        ## from each collection.
+        ## NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
+        #
+        # sample_size: 10
+
+        ## @param max_collections - number - optional
+        ## Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+        ## per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
+        ## are adding an additional limit to the total number of collections across all monitored databases that schemas
+        ## will be collected from. By default, this option is not set.
+        #
+        # max_collections: 300
+
+        ## @param max_depth - number - optional - default: 5
+        ## Set the maximum depth of nested documents to sample.
+        #
+        # max_depth: 5
+
+        ## @param collect_search_indexes - boolean - optional - default: false
+        ## Set to `true` to collect search indexes for each collection.
+        ## NOTE: This option is only applicable to MongoDB Atlas clusters.
+        #
+        # collect_search_indexes: false
+
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
     ## Disable this if any replicas are inaccessible to the Agent. This option is not supported for sharded clusters.
