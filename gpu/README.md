@@ -130,11 +130,11 @@ agents:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
-          - matchExpressions:
-              - key: nvidia.com/gpu.present
-                operator: NotIn
-                values:
-                  - "true"
+        - matchExpressions:
+          - key: nvidia.com/gpu.present
+            operator: NotIn
+            values:
+              - "true"
 ```
 
 Additionally, if you need to select nodes based on the presence of a label key, irrespective of its value, you can use the `Exists` [operator](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity). Conversely, to exclude nodes that have a specific label key, you can use `DoesNotExist`. For example, to select nodes that have the label `custom.gpu/available` (regardless of its value), you would use `operator: Exists`.
@@ -155,11 +155,11 @@ agents:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
-          - matchExpressions:
-              - key: nvidia.com/gpu.present
-                operator: In
-                values:
-                  - "true"
+        - matchExpressions:
+          - key: nvidia.com/gpu.present
+            operator: In
+            values:
+              - "true"
 
 existingClusterAgent:
   join: true
@@ -192,9 +192,15 @@ spec:
   features:
     gpu:
       enabled: true
-  # for operator versions 1.14.x and 1.15.x  add this section
+  # For operator versions below 1.18, add this section
   override:
     nodeAgent:
+     volumes:
+        # Add this volume for operator version below 1.18, unless other system-probe features
+        # such as npm, cws, usm or oom_kill are enabled.
+        - name: debugfs
+          hostPath:
+            path: /sys/kernel/debug
       containers:
         agent:
           env:
@@ -204,12 +210,18 @@ spec:
             # add this env var, if using operator versions 1.14.x or 1.15.x
             - name: DD_COLLECT_GPU_TAGS
               value: "true"
+        system-probe:
+          volumeMounts:
+            # Add this volume for operator version below 1.18, unless other system-probe features
+            # such as Cloud Network Monitoring, Cloud Workload Security or Universal Service Monitoring
+            # are enabled.
+            - name: debugfs
+              mountPath: /sys/kernel/debug
 ```
 
 For **mixed environments**, use the [DatadogAgentProfiles (DAP) feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. Note that this feature is disabled by default, so it needs to be enabled. For more information, see [Enabling DatadogAgentProfiles](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md#enabling-datadogagentprofiles).
 
 Modifying the DatadogAgent manifest is necessary to enable certain features that are not supported by the DAP yet:
-
 - In the existing configuration, enable the `system-probe` container in the datadog-agent pods. Because the DAP feature does not yet support conditionally enabling containers, a feature that uses `system-probe` needs to be enabled for all Agent pods.
   - You can check this by looking at the list of containers when running `kubectl describe pod <datadog-agent-pod-name> -n <namespace>`.
   - Datadog recommends enabling the `oomKill` integration, as it is lightweight and does not require any additional configuration or cost.
@@ -224,37 +236,39 @@ In summary, the changes that need to be applied to the DatadogAgent manifest are
 ```yaml
 spec:
   features:
-    oomKill: # Only enable this feature if there is nothing else that requires the system-probe container in all Agent pods
+    oomKill:
+      # Only enable this feature if there is nothing else that requires the system-probe container in all Agent pods
+      # Examples of system-probe features are npm, cws, usm
       enabled: true
 
 override:
-  nodeAgent:
-    volumes:
-      - name: nvidia-devices
-        hostPath:
-          path: /dev/null
-      - name: pod-resources
-        hostPath:
-          path: /var/lib/kubelet/pod-resources
-    containers:
-      agent:
-        env:
-          - name: NVIDIA_VISIBLE_DEVICES
-            value: "all"
-        volumeMounts:
-          - name: nvidia-devices
-            mountPath: /dev/nvidia-visible-devices
-          - name: pod-resources
-            mountPath: /var/lib/kubelet/pod-resources
-      system-probe:
-        env:
-          - name: NVIDIA_VISIBLE_DEVICES
-            value: "all"
-        volumeMounts:
-          - name: nvidia-devices
-            mountPath: /dev/nvidia-visible-devices
-          - name: pod-resources
-            mountPath: /var/lib/kubelet/pod-resources
+    nodeAgent:
+      volumes:
+        - name: nvidia-devices
+          hostPath:
+            path: /dev/null
+        - name: pod-resources
+          hostPath:
+            path: /var/lib/kubelet/pod-resources
+      containers:
+        agent:
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+          volumeMounts:
+            - name: nvidia-devices
+              mountPath: /dev/nvidia-visible-devices
+            - name: pod-resources
+              mountPath: /var/lib/kubelet/pod-resources
+        system-probe:
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+          volumeMounts:
+            - name: nvidia-devices
+              mountPath: /dev/nvidia-visible-devices
+            - name: pod-resources
+              mountPath: /var/lib/kubelet/pod-resources
 ```
 
 Once the DatadogAgent configuration is changed, create a profile that enables the GPU feature configuration on GPU nodes only:
