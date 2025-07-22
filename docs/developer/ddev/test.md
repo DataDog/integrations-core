@@ -51,7 +51,7 @@ The Vagrant environment type allows you to test integrations using virtual machi
 
 #### Prerequisites
 
-- [Vagrant][vagrant-home] must be installed on your machine
+- [Vagrant](https://developer.hashicorp.com/vagrant/install) must be installed on your machine
 - A virtualization provider (e.g., VirtualBox, VMware, Hyper-V)
 
 #### Usage
