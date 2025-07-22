@@ -31,7 +31,7 @@ else:
 OUTPUT_LIMIT = 1024 * 1024
 
 # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs#using-a-matrix-strategy
-JOB_LIMIT = 256
+JOB_LIMIT = 512
 
 # GitHub Actions' `paths-ignore` job filtering option requires that every changed path must match at least one of
 # the exclusion patterns, but we want any to cause that condition for the core repository to run all jobs
