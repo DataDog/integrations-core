@@ -1,3 +1,4 @@
+# stub to force CI
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
