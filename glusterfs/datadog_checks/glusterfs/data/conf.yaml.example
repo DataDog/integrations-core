@@ -2,6 +2,14 @@
 #
 init_config:
 
+    ## @param gstatus_path - string - optional - default: <datadog-agent>/embedded/sbin/gstatus
+    ## Path to the gstatus command.
+    ##
+    ## A version of the gstatus is shipped with the Agent binary.
+    ## If you are using a source install, specify the location of gstatus.
+    #
+    # gstatus_path: <datadog-agent>/embedded/sbin/gstatus
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##

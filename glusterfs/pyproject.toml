@@ -35,9 +35,7 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-deps = [
-    "glustercli==0.8.3"
-]
+deps = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

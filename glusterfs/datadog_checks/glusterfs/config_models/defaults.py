@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_gstatus_path():
+    return '<datadog-agent>/embedded/sbin/gstatus'
+
+
 def instance_disable_generic_tags():
     return False
 

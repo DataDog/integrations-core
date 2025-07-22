@@ -4,6 +4,15 @@ files:
   options:
   - template: init_config
     options:
+    - name: gstatus_path
+      description: |
+        Path to the gstatus command.
+
+        A version of the gstatus is shipped with the Agent binary.
+        If you are using a source install, specify the location of gstatus.
+      value:
+        type: string
+        example: <datadog-agent>/embedded/sbin/gstatus
     - template: init_config/default
   - template: instances
     options:
