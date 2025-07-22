@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pytest
 
@@ -11,7 +9,6 @@ from ddev.e2e.agent.vagrant import VagrantAgent, disable_integration_before_inst
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.utils.fs import Path as DdevPath
-from ddev.utils.structures import EnvVars
 
 
 @pytest.fixture(scope='module')
