@@ -187,9 +187,10 @@ def validate_default_template(spec_file):
         # This config spec does not have init_config or instances
         return True
     for line in spec_file.split('\n'):
-        if any("init_config/{}".format(template) in line for template in TEMPLATES) and any(
+        has_default_templates = any("init_config/{}".format(template) in line for template in TEMPLATES) and any(
             "instances/{}".format(template) in line for template in TEMPLATES
-        ):
+        )
+        if has_default_templates:
             return True
     return False
 
