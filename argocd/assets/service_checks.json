@@ -87,6 +87,6 @@
             "endpoint"
         ],
         "name": "Notifications Controller OpenMetrics endpoint health",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Repo Server OpenMetrics endpoint, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Notifications Controller OpenMetrics endpoint, otherwise returns `OK`."
     }
 ]

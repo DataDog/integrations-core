@@ -360,6 +360,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /postmark/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /postmark/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/proofpoint_on_demand/                                              @DataDog/saas-integrations
+/proofpoint_on_demand/*.md                                          @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_on_demand/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_on_demand/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /sanity/                                                            @DataDog/saas-integrations
 /sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /sanity/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
@@ -533,6 +538,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /box/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /box/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/proofpoint_tap/                                                    @DataDog/saas-integrations
+/proofpoint_tap/*.md                                                @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_tap/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
+/proofpoint_tap/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /carbon_black_cloud/                                                               @DataDog/saas-integrations
 /carbon_black_cloud/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
 /carbon_black_cloud/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
@@ -567,11 +577,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /watchguard_firebox/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
 /watchguard_firebox/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
-/kaspersky/                                                          @DataDog/agent-integrations
-/kaspersky/*.md                                                      @DataDog/agent-integrations @DataDog/documentation
-/kaspersky/manifest.json                                             @DataDog/agent-integrations @DataDog/documentation
-/kaspersky/assets/logs/                                              @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
-
 /dnsfilter/                                                          @DataDog/saas-integrations
 /dnsfilter/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /dnsfilter/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
@@ -591,6 +596,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
 /klaviyo/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/beyondtrust_password_safe/                                          @DataDog/saas-integrations @DataDog/agent-integrations
+/beyondtrust_password_safe/*.md                                      @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
+/beyondtrust_password_safe/manifest.json                             @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
+/beyondtrust_password_safe/assets/logs/                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations

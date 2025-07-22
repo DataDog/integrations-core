@@ -13,10 +13,19 @@ files:
       description: |
         Proxmox API endpoint.
       value:
-        example: http://localhost:8006
+        example: http://localhost:8006/api2/json
         type: string
       required: true
     - template: instances/default
+      overrides:
+        empty_default_hostname.display_priority: 1
+        empty_default_hostname.default: true
+        empty_default_hostname.value.example: true
+        empty_default_hostname.description: |
+          The Proxmox integration is a check where metrics are usually unrelated to the host on which the Agent
+          runs. Setting this parameter to "true" prevents the Agent from attaching the hostname (and the host
+          tags) to the metrics. It is especially important to leave this parameter set to "true" when you are running the
+          Agent inside a Proxmox VM or Node, because in this scenario the host tags are unrelated to other metrics.
     - template: instances/http
       overrides:
         headers.display_priority: 4

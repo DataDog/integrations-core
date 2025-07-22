@@ -2,12 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
-import json
 from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 
 app = FastAPI(title="KrakenD Test API", version="1.0.0")
 
