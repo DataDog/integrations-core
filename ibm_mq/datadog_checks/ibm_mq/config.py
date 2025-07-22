@@ -142,6 +142,7 @@ class IBMMQConfig:
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
         self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
+        self.auto_discover_queues_via_names = is_affirmative(instance.get('auto_discover_queues_via_names', False))  # type: bool
 
         ssl_options = ['ssl_cipher_spec', 'ssl_key_repository_location', 'ssl_certificate_label']
 
