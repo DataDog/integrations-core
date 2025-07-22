@@ -235,7 +235,7 @@ jobs:
           ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --workflow-id ${{ github.run_id }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
         else
           mkdir ~/builder_root
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --workflow-id ${{ github.run_id }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --workflow-id ${{ github.run_id }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
         fi
 
     - name: Upload artifacts
