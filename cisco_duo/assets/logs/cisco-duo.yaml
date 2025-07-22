@@ -2,33 +2,33 @@ id: cisco-duo
 metric_id: cisco-duo
 backend_only: false
 facets:
-- facetType: range
-  groups:
-  - Cisco Duo
-  name: Credits
-  path: cisco.duo.credits
-  source: log
-  type: double
-- groups:
-  - User
-  name: User Email
-  path: usr.email
-  source: log
-- groups:
-  - User
-  name: User Name
-  path: usr.name
-  source: log
-- groups:
-  - Event
-  name: Event Name
-  path: evt.name
-  source: log
-- groups:
-  - Event
-  name: Event Outcome
-  path: evt.outcome
-  source: log
+  - facetType: range
+    groups:
+      - Cisco Duo
+    name: Credits
+    path: cisco.duo.credits
+    source: log
+    type: double
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
   - groups:
       - OCSF
     name: Activity ID
@@ -165,7 +165,7 @@ pipeline:
           sourceType: attribute
           target: usr.email
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `event_type` to `evt.name`
@@ -185,7 +185,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Activity
@@ -208,7 +208,7 @@ pipeline:
           sourceType: attribute
           target: duo_target
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Administrator
@@ -224,7 +224,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Offline Enrollment
@@ -240,7 +240,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: attribute-remapper
       name: Map `action` to `cisco.duo.action`
@@ -250,7 +250,7 @@ pipeline:
       sourceType: attribute
       target: cisco.duo.action
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `credits` to `cisco.duo.credits`
@@ -261,7 +261,7 @@ pipeline:
       target: cisco.duo.credits
       targetType: attribute
       preserveSource: false
-      overrideOnConflict: fals
+      overrideOnConflict: false
     # OCSF transformations
     - type: pipeline
       name: OCSF pre transformations
@@ -337,21 +337,21 @@ pipeline:
           enabled: true
           source: ocsf.time
           samples:
-            - "2023-11-01T08:42:33.314482+00:00"
-            - "2023-10-10T04:45:03.639784+00:00"
+            - "2025-07-18T13:08:08.119056+00:00"
+            - "2025-07-18T03:14:43+00:00"
           grok:
             supportRules: ""
             matchRules: |-
-              nine %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'"):ocsf.time}
-              eight %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'Z'"):ocsf.time}
-              seven %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'"):ocsf.time}
-              six %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"):ocsf.time}
-              five %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSS'Z'"):ocsf.time}
-              four %{date("yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'"):ocsf.time}
-              three %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):ocsf.time}
-              two %{date("yyyy-MM-dd'T'HH:mm:ss.SS'Z'"):ocsf.time}
-              one %{date("yyyy-MM-dd'T'HH:mm:ss.S'Z'"):ocsf.time}
-              zero %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
+              nine %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ"):ocsf.time}
+              eight %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSZ"):ocsf.time}
+              seven %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ"):ocsf.time}
+              six %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              five %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              four %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              three %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              two %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              one %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              zero %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
         - type: string-builder-processor
           name: Add severity
           enabled: true
@@ -364,6 +364,36 @@ pipeline:
           template: "Informational"
           target: ocsf.severity
           replaceMissing: false
+        - type: grok-parser
+          name: Parsing action.details
+          enabled: true
+          source: action.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              action_json %{data:action.details:json}
+        - type: grok-parser
+          name: Parsing actor.details
+          enabled: true
+          source: actor.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              actor_json %{data:actor.details:json}
+        - type: grok-parser
+          name: Parsing description
+          enabled: true
+          source: description
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              description_json %{data:description:json}
     - type: pipeline
       name: OCSF sub pipeline for devices enrichment
       enabled: true
@@ -436,6 +466,49 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `auth_device.ip` to `ocsf.auth_factor.device.ip`
+          enabled: true
+          sources:
+            - auth_device.ip
+          sourceType: attribute
+          target: ocsf.auth_factor.device.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `auth_device.key` to `ocsf.auth_factor.device.uid`
+          enabled: true
+          sources:
+            - auth_device.key
+          sourceType: attribute
+          target: ocsf.auth_factor.device.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add auth device type id
+          enabled: true
+          template: "0"
+          target: ocsf.auth_factor.device.type_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.auth_factor.device.type_id` to `ocsf.auth_factor.device.type_id`
+          enabled: true
+          sources:
+            - ocsf.auth_factor.device.type_id
+          sourceType: attribute
+          target: ocsf.auth_factor.device.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add auth device type
+          enabled: true
+          template: "Unknown"
+          target: ocsf.auth_factor.device.type
+          replaceMissing: false
         - type: string-builder-processor
           name: Add OCSF profiles
           enabled: true
@@ -1057,49 +1130,6 @@ pipeline:
                 query: "@ocsf.auth_factor.factor_type_id:10"
               name: "WebAuthn"
           target: ocsf.auth_factor.factor_type
-        - type: attribute-remapper
-          name: Map `auth_device.ip` to `ocsf.auth_factor.device.ip`
-          enabled: true
-          sources:
-            - auth_device.ip
-          sourceType: attribute
-          target: ocsf.auth_factor.device.ip
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `auth_device.key` to `ocsf.auth_factor.device.uid`
-          enabled: true
-          sources:
-            - auth_device.key
-          sourceType: attribute
-          target: ocsf.auth_factor.device.uid
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: string-builder-processor
-          name: Add auth device type id
-          enabled: true
-          template: "0"
-          target: ocsf.auth_factor.device.type_id
-          replaceMissing: false
-        - type: attribute-remapper
-          name: Map `ocsf.auth_factor.device.type_id` to `ocsf.auth_factor.device.type_id`
-          enabled: true
-          sources:
-            - ocsf.auth_factor.device.type_id
-          sourceType: attribute
-          target: ocsf.auth_factor.device.type_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
-        - type: string-builder-processor
-          name: Add auth device type
-          enabled: true
-          template: "Unknown"
-          target: ocsf.auth_factor.device.type
-          replaceMissing: false
         - type: array-processor
           name: Move attributes into auth_factors array
           enabled: true
@@ -1109,12 +1139,12 @@ pipeline:
             type: append
             preserveSource: false
         - type: attribute-remapper
-          name: Map `reasons` to `message`
+          name: Map `reasons` to `ocsf.message`
           enabled: true
           sources:
             - reasons
           sourceType: attribute
-          target: message
+          target: ocsf.message
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
@@ -1189,23 +1219,24 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `user.key`, `target.key` to `ocsf.user.uid`
+          name: Map `user.key`, `actor.key` to `ocsf.user.uid`
           enabled: true
           sources:
             - user.key
-            - target.key
+            - actor.key
           sourceType: attribute
           target: ocsf.user.uid
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `user.name`, `target.name`, `object` to `ocsf.user.name`
+          name: Map `user.name`, `actor.name`, `object`, `username` to `ocsf.user.name`
           enabled: true
           sources:
             - user.name
-            - target.name
+            - actor.name
             - object
+            - username
           sourceType: attribute
           target: ocsf.user.name
           targetType: attribute
