@@ -50,7 +50,13 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         + variables.COMMON_PERFORMANCE_VARS
         + variables.INDEX_SIZE_VARS
         + variables.INDEX_USAGE_VARS
+        + [variables.OPERATION_TIME_METRIC_NAME]
     )
+
+    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
+        testable_metrics.extend(variables.INNODB_MUTEX_VARS)
+    else:
+        testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
 
     operation_time_metrics = (
         variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS
@@ -65,21 +71,12 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
             and MYSQL_VERSION_PARSED >= parse_version('10.8')
         ):
             continue
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
         else:
             aggregator.assert_metric(mname, at_least=1)
 
     optional_metrics = (
         variables.COMPLEX_STATUS_VARS
         + variables.COMPLEX_VARIABLES_VARS
-        + variables.COMPLEX_INNODB_VARS
         + variables.SYSTEM_METRICS
         + variables.SYNTHETIC_VARS
     )
@@ -180,7 +177,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.VARIABLES_VARS
         + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
-        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
@@ -191,6 +187,11 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.INDEX_SIZE_VARS
         + variables.INDEX_USAGE_VARS
     )
+
+    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
+        testable_metrics.extend(variables.INNODB_MUTEX_VARS)
+    else:
+        testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
 
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
@@ -232,14 +233,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             mname == 'mysql.innodb.os_log_fsyncs'
             and MYSQL_FLAVOR.lower() == 'mariadb'
             and MYSQL_VERSION_PARSED >= parse_version('10.8')
-        ):
-            continue
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
         ):
             continue
         if mname == 'mysql.performance.query_run_time.avg':
@@ -325,7 +318,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.VARIABLES_VARS
         + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
-        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
@@ -335,6 +327,11 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.ROW_TABLE_STATS_VARS
         + variables.INDEX_SIZE_VARS
     )
+
+    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
+        testable_metrics.extend(variables.INNODB_MUTEX_VARS)
+    else:
+        testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
 
     operation_time_metrics = (
         variables.SIMPLE_OPERATION_TIME_METRICS
@@ -378,16 +375,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
             and MYSQL_VERSION_PARSED >= parse_version('10.8')
         ):
             continue
-
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
-
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname, tags=expected_tags + ('schema:testdb',), count=1)
             aggregator.assert_metric(mname, tags=expected_tags + ('schema:information_schema',), count=1)
@@ -463,6 +450,12 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     )
 
     testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
+
+    if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
+        testable_metrics.extend(variables.INNODB_MUTEX_VARS)
+    else:
+        testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
+
     for mname in testable_metrics:
         # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
         # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
@@ -472,20 +465,11 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
             and MYSQL_VERSION_PARSED >= parse_version('10.8')
         ):
             continue
-        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
-        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
-        if (
-            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
-            and MYSQL_FLAVOR.lower() == 'mariadb'
-            and MYSQL_VERSION_PARSED >= parse_version('10.2')
-        ):
-            continue
         aggregator.assert_metric(mname, hostname=expected_hostname, count=1)
 
     optional_metrics = (
         variables.COMPLEX_STATUS_VARS
         + variables.COMPLEX_VARIABLES_VARS
-        + variables.COMPLEX_INNODB_VARS
         + variables.SYSTEM_METRICS
         + variables.SYNTHETIC_VARS
     )
@@ -538,13 +522,17 @@ def _test_optional_metrics(aggregator, optional_metrics):
 
     before = len(aggregator.not_asserted())
 
+    # If there are no metrics to assert, return early
+    if before == 0:
+        return
+
     for mname in optional_metrics:
         aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
 
     # Compute match rate
     after = len(aggregator.not_asserted())
 
-    assert before > after
+    assert before > after, aggregator.not_asserted()
 
 
 def _test_operation_time_metrics(aggregator, operation_time_metrics, tags, e2e=False):

@@ -95,14 +95,17 @@ INNODB_VARS = [
     'mysql.innodb.deadlocks',
 ]
 
-COMPLEX_INNODB_VARS = [
-    'mysql.innodb.mutex_spin_waits',
-    'mysql.innodb.mutex_spin_rounds',
-    'mysql.innodb.mutex_os_waits',
+INNODB_ROW_LOCK_VARS = [
     'mysql.innodb.row_lock_waits',
     'mysql.innodb.row_lock_time',
     'mysql.innodb.row_lock_current_waits',
-    # 'mysql.innodb.current_row_locks', MariaDB status
+]
+
+# Only available in Mysql 5.6
+INNODB_MUTEX_VARS = [
+    'mysql.innodb.mutex_spin_waits',
+    'mysql.innodb.mutex_spin_rounds',
+    'mysql.innodb.mutex_os_waits',
 ]
 
 # Calculated from "SHOW MASTER LOGS;"
