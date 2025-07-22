@@ -721,14 +721,17 @@ class MySql(AgentCheck):
 
             metrics.update(additional_variable_dict)
 
-        # "synthetic" metrics
-        metrics.update(SYNTHETIC_VARS)
-        self._compute_synthetic_results(results)
+        # Only collect synthetic metrics if query cache is enabled
+        # Note: qcache metrics are disabled by default in 5.7 and removed in MySQL 8.0+
+        if self._get_variable_enabled(results, 'query_cache_type'):
+             # "synthetic" metrics
+            metrics.update(SYNTHETIC_VARS)
+            self._compute_synthetic_results(results)
 
-        # remove uncomputed metrics
-        for k in SYNTHETIC_VARS:
-            if k not in results:
-                metrics.pop(k, None)
+            # remove uncomputed metrics
+            for k in SYNTHETIC_VARS:
+                if k not in results:
+                    metrics.pop(k, None)
 
         # add duped metrics - reporting some as both rate and gauge
         dupes = [

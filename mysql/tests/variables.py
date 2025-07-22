@@ -49,6 +49,12 @@ STATUS_VARS = [
     'mysql.myisam.key_writes',
 ]
 
+STATUS_QCACHE_VARS = [
+    'mysql.performance.qcache_hits',
+    'mysql.performance.qcache_inserts',
+    'mysql.performance.qcache_lowmem_prunes',
+]
+
 COMPLEX_STATUS_VARS = [
     # Query Cache Metrics
     'mysql.performance.qcache_hits',
@@ -105,6 +111,20 @@ COMPLEX_INNODB_VARS = [
     # 'mysql.innodb.current_row_locks', MariaDB status
 ]
 
+
+INNODB_ROW_LOCK_VARS = [
+    'mysql.innodb.row_lock_waits',
+    'mysql.innodb.row_lock_time',
+    'mysql.innodb.row_lock_current_waits',
+]
+
+# Only available in 5.6
+INNODB_MUTEX_VARS = [
+    'mysql.innodb.mutex_spin_waits',
+    'mysql.innodb.mutex_spin_rounds',
+    'mysql.innodb.mutex_os_waits',
+]
+
 # Calculated from "SHOW MASTER LOGS;"
 BINLOG_VARS = [
     'mysql.binlog.disk_use',  # Only collected if log_bin is true
@@ -139,11 +159,6 @@ OPTIONAL_STATUS_VARS = [
     'mysql.performance.handler_update',
     'mysql.performance.handler_write',
     'mysql.performance.opened_tables',
-    'mysql.performance.qcache_total_blocks',
-    'mysql.performance.qcache_free_blocks',
-    'mysql.performance.qcache_free_memory',
-    'mysql.performance.qcache_not_cached',
-    'mysql.performance.qcache_queries_in_cache',
     'mysql.performance.select_full_join',
     'mysql.performance.select_full_range_join',
     'mysql.performance.select_range',
@@ -160,6 +175,14 @@ OPTIONAL_STATUS_VARS = [
 ]
 
 OPTIONAL_STATUS_VARS_5_6_6 = ['mysql.performance.table_cache_hits', 'mysql.performance.table_cache_misses']
+
+OPTIONAL_STATUS_QCACHE_VARS = [
+    'mysql.performance.qcache_total_blocks',
+    'mysql.performance.qcache_free_blocks',
+    'mysql.performance.qcache_free_memory',
+    'mysql.performance.qcache_not_cached',
+    'mysql.performance.qcache_queries_in_cache',
+]
 
 # Will collect if [FLAG NAME] is True
 OPTIONAL_INNODB_VARS = [

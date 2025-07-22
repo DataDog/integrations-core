@@ -174,32 +174,47 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             hostname=hostname,
             at_least=1,
         )
-    testable_metrics = (
+    testable_metrics = set(
         variables.STATUS_VARS
-        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
         + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
-        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
-        + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
-        + variables.SYNTHETIC_VARS
         + variables.TABLE_VARS
-        + variables.ROW_TABLE_STATS_VARS
         + variables.INDEX_SIZE_VARS
         + variables.INDEX_USAGE_VARS
     )
+
+    if Platform.is_linux():
+        testable_metrics.update(variables.SYSTEM_METRICS)
+
+    if MYSQL_FLAVOR == 'mariadb':
+        testable_metrics.update(variables.ROW_TABLE_STATS_VARS)
+        # MariaDB doesn't have this variable
+        testable_metrics.discard('mysql.innodb.os_log_fsyncs')
+    elif MYSQL_FLAVOR == 'mysql':
+        if MYSQL_VERSION_PARSED < parse_version('8.0'):
+            testable_metrics.update(variables.STATUS_QCACHE_VARS)
+            testable_metrics.update(variables.OPTIONAL_STATUS_QCACHE_VARS)
+    elif MYSQL_FLAVOR == 'percona':
+        testable_metrics.update(variables.ROW_TABLE_STATS_VARS)
+
+    if MYSQL_VERSION_PARSED >= parse_version('5.7'):
+        testable_metrics.update(variables.INNODB_ROW_LOCK_VARS)
+    else:
+        testable_metrics.update(variables.INNODB_MUTEX_VARS)
+        testable_metrics.update(variables.SYNTHETIC_VARS)
 
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
     # Initialize additional_tags for group replication
     additional_tags = ()
     if MYSQL_REPLICATION == 'group':
-        testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
+        testable_metrics.update(variables.GROUP_REPLICATION_VARS)
         additional_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
         if MYSQL_VERSION_PARSED >= parse_version('8.0'):
-            testable_metrics.extend(variables.GROUP_REPLICATION_VARS_8_0_2)
+            testable_metrics.update(variables.GROUP_REPLICATION_VARS_8_0_2)
             additional_tags += ('member_role:PRIMARY',)
         aggregator.assert_service_check(
             'mysql.replication.group.status',
@@ -212,61 +227,13 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         operation_time_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
-        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
+        testable_metrics.update(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
         operation_time_metrics.extend(
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
         )
 
     # Test metrics
     for mname in testable_metrics:
-        # These three are currently not guaranteed outside of a Linux
-        # environment.
-        if mname == 'mysql.performance.user_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.kernel_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.cpu_time' and not Platform.is_linux():
-            continue
-
-        # Skip metrics that are not available for certain flavors/versions
-        if MYSQL_FLAVOR.lower() == 'mariadb':
-            # MariaDB 10.8+: os_log_fsyncs removed
-            if MYSQL_VERSION_PARSED >= parse_version('10.8'):
-                if mname == 'mysql.innodb.os_log_fsyncs':
-                    continue
-            # MariaDB 10.2+: mutex_spin metrics removed
-            if MYSQL_VERSION_PARSED >= parse_version('10.2'):
-                if mname in (
-                    'mysql.innodb.mutex_spin_waits',
-                    'mysql.innodb.mutex_os_waits',
-                    'mysql.innodb.mutex_spin_rounds',
-                ):
-                    continue
-            # MariaDB doesn't have qcache.utilization.instant metric
-            if mname == 'mysql.performance.qcache.utilization.instant':
-                continue
-        elif MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
-            # MySQL/Percona 8.0+: Query Cache metrics removed
-            if MYSQL_VERSION_PARSED >= parse_version('8.0'):
-                if mname in (
-                    'mysql.performance.qcache_hits',
-                    'mysql.performance.qcache_inserts',
-                    'mysql.performance.qcache_lowmem_prunes',
-                    'mysql.performance.qcache_size',
-                    'mysql.performance.qcache.utilization',
-                ):
-                    continue
-            # MySQL/Percona 5.7+: mutex_spin metrics replaced with x_lock/s_lock metrics,
-            # qcache.utilization.instant not available
-            if MYSQL_VERSION_PARSED >= parse_version('5.7'):
-                if mname in (
-                    'mysql.innodb.mutex_spin_waits',
-                    'mysql.innodb.mutex_os_waits',
-                    'mysql.innodb.mutex_spin_rounds',
-                ):
-                    continue
-                if mname == 'mysql.performance.qcache.utilization.instant':
-                    continue
         if mname == 'mysql.performance.query_run_time.avg':
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:mysql',), count=1)
@@ -278,12 +245,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), count=1)
         elif mname in ('mysql.info.table.rows.read', 'mysql.info.table.rows.changed'):
             # Table rows stats metrics are only available on MariaDB and Percona (require userstat support)
-            if MYSQL_FLAVOR.lower() == 'mysql':
-                # MySQL doesn't support userstat, so these metrics should not be collected
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), count=0)
-            else:
-                # Table rows stats metrics are collected with schema and table tags
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users'), count=1)
         elif mname in ('mysql.index.size', 'mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes'):
             # Index metrics are collected with db, table, and index tags
             aggregator.assert_metric(mname, tags=metric_tags + ('db:testdb', 'table:users', 'index:id'), count=1)
@@ -317,6 +279,9 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
     )
+    if MYSQL_FLAVOR == 'mysql':
+        if MYSQL_VERSION_PARSED < parse_version('8.0'):
+            optional_metrics.extend(variables.OPTIONAL_STATUS_QCACHE_VARS)
     # Note, this assertion will pass even if some metrics are not present.
     # Manual testing is required for optional metrics
     _test_optional_metrics(aggregator, optional_metrics)
@@ -369,7 +334,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 
     testable_metrics = (
         variables.STATUS_VARS
-        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
         + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
@@ -454,6 +418,11 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
     )
+    if MYSQL_FLAVOR == 'mysql':
+        if MYSQL_VERSION_PARSED < parse_version('8.0'):
+            testable_metrics.extend(variables.STATUS_QCACHE_VARS)
+            optional_metrics.extend(variables.OPTIONAL_STATUS_QCACHE_VARS)
+
     # Note, this assertion will pass even if some metrics are not present.
     # Manual testing is required for optional metrics
     _test_optional_metrics(aggregator, optional_metrics)
