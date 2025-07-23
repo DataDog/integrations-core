@@ -54,6 +54,7 @@ jobs:
 
     - name: Testing dependency sizes
       run: |
+        cd /home/runner/work/integrations-core/integrations-core
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes sizes.json > size-dependency-sizes.txt
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes sizes.json --format png,csv,markdown
         cat size-dependency-sizes.txt
