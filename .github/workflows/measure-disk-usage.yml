@@ -12,14 +12,14 @@ jobs:
   measure-disk-usage:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -34,7 +34,7 @@ jobs:
           echo "hola" > hola.txt
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: hola.txt
           path: hola.txt
@@ -62,7 +62,8 @@ jobs:
 
           count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/temp-${{ github.head_ref }})
           count_plus_one=$((count + 1))
-          run_id=$(gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "${{ github.head_ref }}" --json databaseId,headSha,event \
+          echo "🔍 Count of commits between merge-base and PR branch: $count_plus_one" >> $GITHUB_STEP_SUMMARY
+          run_id=$(gh run list --workflow "Measure Disk Usage" --limit 100 --branch "${{ github.head_ref }}" --json databaseId,headSha,event \
             | jq -r --arg sha "$MERGE_BASE" '.[] | select(.headSha == $sha) | .databaseId' | head -n 1)
           if [ -z "$run_id" ]; then
             echo "❌ No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
