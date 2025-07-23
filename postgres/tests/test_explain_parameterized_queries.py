@@ -204,7 +204,6 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
         assert err is None
 
 
-@pytest.mark.unit
 def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
@@ -226,7 +225,6 @@ def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_
         assert prepared_statement_query == f"EXECUTE dd_{test_query_signature}"
 
 
-@pytest.mark.unit
 def test_generate_prepared_statement_query_three_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()

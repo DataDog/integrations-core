@@ -7,7 +7,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING, Optional, TypedDict
 
-from datadog_checks.postgres.config_models.defaults import instance_ignore_databases, instance_ignore_schemas_owned_by
+from datadog_checks.postgres.config_models.defaults import instance_dbstrict, instance_exclude_hostname, instance_ignore_databases, instance_ignore_schemas_owned_by, instance_port
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -42,7 +42,7 @@ class PostgresConfig:
         """
         validation_result = ValidationResult()
 
-        self.exclude_hostname = instance.get("exclude_hostname", False)
+        self.exclude_hostname = instance.get("exclude_hostname", instance_exclude_hostname())
         self.database_identifier = instance.get('database_identifier', {})
         self.reported_hostname = instance.get('reported_hostname', '')
 
@@ -50,7 +50,7 @@ class PostgresConfig:
         self.host = instance.get('host', '')
         if not self.host:
             validation_result.add_error('Specify a Postgres host to connect to.')
-        self.port = instance.get('port', '5432')
+        self.port = instance.get('port', instance_port())
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
@@ -60,7 +60,7 @@ class PostgresConfig:
 
         # Database discovery
         self.dbname = instance.get('dbname', 'postgres')
-        self.dbstrict = is_affirmative(instance.get('dbstrict', False))
+        self.dbstrict = is_affirmative(instance.get('dbstrict', instance_dbstrict()))
         self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
         if self.discovery_config['enabled'] and self.dbname != 'postgres':
             validation_result.add_error(
@@ -101,7 +101,7 @@ class PostgresConfig:
         self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.application_name.isascii():
-            validation_result.add_error("Application name can include only ASCII characters: %s", self.application_name)
+            validation_result.add_error(f"Application name can include only ASCII characters: {self.application_name}")
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
 
         # Relation metrics
@@ -130,7 +130,7 @@ class PostgresConfig:
             )
         validation_result.add_feature(
             FeatureKey.RELATION_METRICS,
-            self.relations,
+            bool(self.relations),
             "Relation metrics requires a value for `relations` in the configuration." if not self.relations else None,
         )
 
