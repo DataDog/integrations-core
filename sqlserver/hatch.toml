@@ -22,7 +22,7 @@ tz = ["newyork", "tokyo"]
 [[envs.default.matrix]]
 python = ["3.12"]
 os = ["windows"]
-driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
+driver = ["SQLOLEDB", "odbc"]
 version = ["2019", "2022"]
 setup = ["single"]
 
