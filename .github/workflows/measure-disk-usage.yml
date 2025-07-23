@@ -61,7 +61,7 @@ jobs:
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format png,csv,markdown
         cat size-dependency-sizes.txt
         echo "# Size (dependency sizes)" >> $GITHUB_STEP_SUMMARY
-        cat dependency_sizes_status.md >> $GITHUB_STEP_SUMMARY
+        cat size-dependency-sizes.txt >> $GITHUB_STEP_SUMMARY
 
     # - name: Measure disk usage (uncompressed)
     #   run: | 
