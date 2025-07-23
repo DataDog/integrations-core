@@ -54,6 +54,22 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
         return hostname
 
+    def _collect_ha_metrics(self):
+        ha_response = self.http.get(f"{self.config.proxmox_server}/cluster/ha/status/current")
+        ha_response_json = ha_response.json()
+        ha_statuses = ha_response_json.get('data', [])
+        for ha_status in ha_statuses:
+            if not ha_status.get('type') == 'quorum':
+                continue
+            status = ha_status.get('status')
+            quorate = ha_status.get('quorate')
+            status_value = status == "OK"
+            node = ha_status.get('node')
+            tags = [f'node_status:{status}']
+            self.gauge('ha.quorum', status_value, hostname=node, tags=tags)
+            if isinstance(quorate, int):
+                self.gauge('ha.quorate', quorate, hostname=node, tags=tags)
+
     def _collect_performance_metrics(self):
         metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
         metrics_response_json = metrics_response.json()
@@ -173,3 +189,4 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
         self._collect_resource_metrics()
         self._collect_performance_metrics()
+        self._collect_ha_metrics()
