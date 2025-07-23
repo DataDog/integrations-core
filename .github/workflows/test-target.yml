@@ -109,7 +109,7 @@ jobs:
       DD_ENV: "ci"
       DD_SERVICE: "ddev-integrations-${{ inputs.repo }}"
       DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
-      DD_TRACE_ANALYTICS_ENABLED: "true"
+      DD_TRACE_ANALYTICS_ENABLED: "false"
       # Capture traces for a separate job to do the submission
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
