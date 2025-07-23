@@ -56,7 +56,7 @@ jobs:
       run: |
         cd /home/runner/work/integrations-core/integrations-core
         echo "Contents ddev size:" >> $GITHUB_STEP_SUMMARY
-        ls -lR | grep sizes.json >> $GITHUB_STEP_SUMMARY
+        find "$(pwd)" -name "sizes.json" -exec ls -l {} \; >> $GITHUB_STEP_SUMMARY
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes sizes.json > size-dependency-sizes.txt
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes sizes.json --format png,csv,markdown
         cat size-dependency-sizes.txt
