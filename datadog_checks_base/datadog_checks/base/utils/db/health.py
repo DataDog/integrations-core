@@ -79,25 +79,3 @@ class Health:
                 }
             )
         )
-
-
-# Existing diagnosis model
-
-#     // run-time (pass, fail etc)
-#     Result DiagnosisResult
-#     // static-time (meta typically)
-#     Name string
-#     // run-time (actual diagnosis consumable by a user)
-#     Diagnosis string
-
-#     // --------------------------
-#     // optional fields
-
-#     // static-time (meta typically)
-#     Category string
-#     // static-time (meta typically, description of what being tested)
-#     Description string
-#     // run-time (what can be done of what docs need to be consulted to address the issue)
-#     Remediation string
-#     // run-time
-#     RawError error
