@@ -15,7 +15,7 @@ os = ["linux"]
 version = ["2022"]
 tz = ["newyork", "tokyo"]
 
-# test the full combination of python-version/driver against a the latest sql server version
+# test the full combination of python version/driver against a the latest sql server version
 # ideally we'd test this against all sql server versions but that makes the test take too long and time out.
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
@@ -71,6 +71,9 @@ matrix.driver.env-vars = [
 matrix.tz.env-vars = [
   { key = "TZ", value = "America/New_York", if = ["newyork"] },
   { key = "TZ", value = "Asia/Tokyo", if = ["tokyo"] },
+]
+matrix.os.env-vars = [
+  {key = "DD_TRACE_ANALYTICS_ENABLED", value = "false", if = ["windows"]}
 ]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
