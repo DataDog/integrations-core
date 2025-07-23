@@ -47,6 +47,7 @@ PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
 env.GITHUB_ACTIONS.e2e-env = { value = false, if = ["true"], platform = ["windows"] }
 platform.windows.env-vars = [
   "COMPOSE_FOLDER=compose-windows",
+  "DDEV_TEST_ENABLE_TRACING=0",
 ]
 matrix.os.platforms = [
   { value = "windows", if = ["windows"] },
