@@ -78,6 +78,7 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    if: ${{ inputs.skip-ddev-tests == false }}
   j6712d43:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -98,6 +99,7 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    if: ${{ inputs.skip-ddev-tests == false }}
   jb232c8c:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3624,7 +3626,7 @@ jobs:
       job-name: SQL Server on Windows
       target: sqlserver
       platform: windows
-      runner: '["windows-2025"]'
+      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
