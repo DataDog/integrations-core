@@ -53,9 +53,6 @@ matrix.os.platforms = [
   { value = "linux", if = ["linux"] },
   { value = "macos", if = ["linux"] },
 ]
-matrix.os.env-vars = [
-  {key = "DDEV_TEST_ENABLE_TRACING", value = "0", if = ["windows"]}
-]
 matrix.setup.env-vars = [
   { key = "COMPOSE_FOLDER", value = "compose-ha", if = ["ha"] },
 ]
