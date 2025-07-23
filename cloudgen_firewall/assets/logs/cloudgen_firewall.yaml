@@ -1,9 +1,5 @@
 id: "cloudgen_firewall"
-# See app_id in your integration's manifest.json file to learn more:
-# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: cloudgen-firewall
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
   - description: ""
@@ -105,9 +101,9 @@ pipeline:
         - timestamp
     - type: pipeline
       name: Box Authentication
-      enabled: false
+      enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:auth
+        query: source:barracuda_cloudgen_logs @component:*/box_Auth*
       processors:
         - type: grok-parser
           name: Box Auth Access
