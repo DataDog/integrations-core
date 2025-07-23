@@ -2,13 +2,18 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
+import time
+from functools import cache
+from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import urllib3
 from dotenv import dotenv_values
-from utils import extract_metadata, iter_wheels, normalize_project_name
+from utils import extract_metadata, iter_wheels, normalize_project_name, remove_test_files
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
@@ -54,6 +59,56 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
 
     return process
 
+@cache
+def get_wheel_hashes(project) -> dict[str, str]:
+    retry_wait = 2
+    while True:
+        try:
+            response = urllib3.request(
+                'GET',
+                f'https://pypi.org/simple/{project}',
+                headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            )
+        except urllib3.exceptions.HTTPError as e:
+            err_msg = f'Failed to fetch hashes for `{project}`: {e}'
+        else:
+            if response.status == 200:
+                break
+
+            err_msg = f'Failed to fetch hashes for `{project}`, status code: {response.status}'
+
+        print(err_msg)
+        print(f'Retrying in {retry_wait} seconds')
+        time.sleep(retry_wait)
+        retry_wait *= 2
+        continue
+
+    data = response.json()
+    return {
+        file['filename']: file['hashes']['sha256']
+        for file in data['files']
+        if file['filename'].endswith('.whl') and 'sha256' in file['hashes']
+    }
+
+
+def wheel_was_built(wheel: Path) -> bool:
+    project_metadata = extract_metadata(wheel)
+    project_name = normalize_project_name(project_metadata['Name'])
+    wheel_hashes = get_wheel_hashes(project_name)
+    if wheel.name not in wheel_hashes:
+        return True
+
+    file_hash = sha256(wheel.read_bytes()).hexdigest()
+    return file_hash != wheel_hashes[wheel.name]
+
+
+
+
+def add_dependency(dependencies: dict[str, str], wheel: Path) -> None:
+    project_metadata = extract_metadata(wheel)
+    project_name = normalize_project_name(project_metadata['Name'])
+    project_version = project_metadata['Version']
+    dependencies[project_name] = project_version
 
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
@@ -127,19 +182,11 @@ def main():
         check_process(command_args, env=env_vars)
 
         # Classify wheels
-        check_process(
-            [
-                sys.executable,
-                '-u',
-                str(MOUNT_DIR / 'scripts' / 'classify_wheels.py'),
-                '--source-dir',
-                str(staged_wheel_dir),
-                '--built-dir',
-                str(staged_built_wheels_dir),
-                '--external-dir',
-                str(staged_external_wheels_dir),
-            ]
-        )
+        for wheel in iter_wheels(staged_wheel_dir):
+            if wheel_was_built(wheel):
+                shutil.move(wheel, staged_built_wheels_dir)
+            else:
+                shutil.move(wheel, staged_external_wheels_dir)
 
         # Repair wheels
         check_process(
@@ -159,12 +206,21 @@ def main():
         )
 
     dependencies: dict[str, tuple[str, str]] = {}
-    for wheel_dir in wheels_dir.iterdir():
-        for wheel in iter_wheels(wheel_dir):
-            project_metadata = extract_metadata(wheel)
-            project_name = normalize_project_name(project_metadata['Name'])
-            project_version = project_metadata['Version']
-            dependencies[project_name] = project_version
+    # Handle wheels currently in the external directory and move them to the built directory if they were modified
+    for wheel in iter_wheels(external_wheels_dir):
+        was_modified = remove_test_files(wheel)
+        if was_modified:
+            # A modified wheel is no longer external → move it to built directory
+            new_path = built_wheels_dir / wheel.name
+            wheel.rename(new_path)
+            wheel = new_path
+
+        add_dependency(dependencies, wheel)
+
+    # Handle wheels already in the built directory
+    for wheel in iter_wheels(built_wheels_dir):
+        remove_test_files(wheel)
+        add_dependency(dependencies, wheel)
 
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:
