@@ -60,7 +60,20 @@ jobs:
         echo "# Size (dependency sizes)" >> $GITHUB_STEP_SUMMARY
         cat size-dependency-sizes.txt >> $GITHUB_STEP_SUMMARY
 
-    # - name: Measure disk usage (uncompressed)
+    
+    - name: Rename sizes.json to platform.json
+      run: |
+        mkdir -p sizes
+        cp "${{ inputs.platform }}/py3/sizes.json" "sizes/${{ inputs.platform }}.json"
+      shell: bash
+
+    - name: Upload platform.json artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: sizes/${{ inputs.platform }}.json
+        path: sizes/${{ inputs.platform }}.json
+        if-no-files-found: error
+        
     #   run: | 
     #     ddev size status --to-dd-key ${{secrets.DD_API_KEY}} > size-uncompressed.txt 
     #     ddev size status  --format png,csv,markdown
