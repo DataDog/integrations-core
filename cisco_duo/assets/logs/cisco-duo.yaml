@@ -311,10 +311,11 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `event_type`, `action` to `ocsf.metadata.event_code`
+          name: Map `event_type`, `action.name`, `action` to `ocsf.metadata.event_code`
           enabled: true
           sources:
             - event_type
+            - action.name
             - action
           sourceType: attribute
           target: ocsf.metadata.event_code
@@ -395,7 +396,7 @@ pipeline:
             matchRules: |
               description_json %{data:description:json}
     - type: pipeline
-      name: OCSF sub pipeline for devices enrichment
+      name: OCSF sub pipeline for device enrichment
       enabled: true
       ocsf:
         isOcsf: true
@@ -466,49 +467,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `auth_device.ip` to `ocsf.auth_factor.device.ip`
-          enabled: true
-          sources:
-            - auth_device.ip
-          sourceType: attribute
-          target: ocsf.auth_factor.device.ip
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `auth_device.key` to `ocsf.auth_factor.device.uid`
-          enabled: true
-          sources:
-            - auth_device.key
-          sourceType: attribute
-          target: ocsf.auth_factor.device.uid
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: string-builder-processor
-          name: Add auth device type id
-          enabled: true
-          template: "0"
-          target: ocsf.auth_factor.device.type_id
-          replaceMissing: false
-        - type: attribute-remapper
-          name: Map `ocsf.auth_factor.device.type_id` to `ocsf.auth_factor.device.type_id`
-          enabled: true
-          sources:
-            - ocsf.auth_factor.device.type_id
-          sourceType: attribute
-          target: ocsf.auth_factor.device.type_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
-        - type: string-builder-processor
-          name: Add auth device type
-          enabled: true
-          template: "Unknown"
-          target: ocsf.auth_factor.device.type
-          replaceMissing: false
         - type: string-builder-processor
           name: Add OCSF profiles
           enabled: true
@@ -656,11 +614,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `email`, `description.email`, `actor.details.email` to `ocsf.actor.user.email_addr`
+          name: Map `email`, `actor.details.email` to `ocsf.actor.user.email_addr`
           enabled: true
           sources:
             - email
-            - description.email
             - actor.details.email
           sourceType: attribute
           target: ocsf.actor.user.email_addr
@@ -751,11 +708,11 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `result`, `outcome` to `ocsf.status`
+          name: Map `result`, `outcome.result` to `ocsf.status`
           enabled: true
           sources:
             - result
-            - outcome
+            - outcome.result
           sourceType: attribute
           target: ocsf.status
           targetType: attribute
@@ -963,11 +920,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `email`, `description.email`, `actor.details.email` to `ocsf.actor.user.email_addr`
+          name: Map `email`, `actor.details.email` to `ocsf.actor.user.email_addr`
           enabled: true
           sources:
             - email
-            - description.email
             - actor.details.email
           sourceType: attribute
           target: ocsf.actor.user.email_addr
@@ -1160,11 +1116,11 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `result`, `outcome` to `ocsf.status`
+          name: Map `result`, `outcome.result` to `ocsf.status`
           enabled: true
           sources:
             - result
-            - outcome
+            - outcome.result
           sourceType: attribute
           target: ocsf.status
           targetType: attribute
@@ -1253,49 +1209,57 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+    - type: pipeline
+      name: OCSF sub pipeline for auth factor device enrichment
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.event_code:* @ocsf.class_name:Authentication @auth_device.ip:*"
+      processors:
         - type: attribute-remapper
-          name: Map `target.type` to `ocsf.user.type`
+          name: Map `auth_device.ip` to `ocsf.auth_factor.device.ip`
           enabled: true
           sources:
-            - target.type
+            - auth_device.ip
           sourceType: attribute
-          target: ocsf.user.type
+          target: ocsf.auth_factor.device.ip
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: category-processor
-          name: Target user type mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@ocsf.user.type:user"
-              name: "1"
-            - filter:
-                query: "@ocsf.user.type:admin"
-              name: "2"
-          target: ocsf.user.type_id
         - type: attribute-remapper
-          name: Map `ocsf.user.type_id` to `ocsf.user.type_id`
+          name: Map `auth_device.key` to `ocsf.auth_factor.device.uid`
           enabled: true
           sources:
-            - ocsf.user.type_id
+            - auth_device.key
           sourceType: attribute
-          target: ocsf.user.type_id
+          target: ocsf.auth_factor.device.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add auth device type id
+          enabled: true
+          template: "0"
+          target: ocsf.auth_factor.device.type_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.auth_factor.device.type_id` to `ocsf.auth_factor.device.type_id`
+          enabled: true
+          sources:
+            - ocsf.auth_factor.device.type_id
+          sourceType: attribute
+          target: ocsf.auth_factor.device.type_id
           targetType: attribute
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
-        - type: category-processor
-          name: Target user type name mapping
+        - type: string-builder-processor
+          name: Add auth device type
           enabled: true
-          categories:
-            - filter:
-                query: "@ocsf.user.type_id:1"
-              name: "User"
-            - filter:
-                query: "@ocsf.user.type_id:2"
-              name: "Admin"
-          target: ocsf.user.type
+          template: "Unknown"
+          target: ocsf.auth_factor.device.type
+          replaceMissing: false
     - type: pipeline
       name: OCSF sub pipeline for class User Access Management [3005]
       enabled: true
@@ -1378,16 +1342,6 @@ pipeline:
             - username
           sourceType: attribute
           target: ocsf.actor.user.name
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `description.email` to `ocsf.actor.user.email_addr`
-          enabled: true
-          sources:
-            - description.email
-          sourceType: attribute
-          target: ocsf.actor.user.email_addr
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
@@ -1526,11 +1480,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `actor.details.email`, `description.email` to `ocsf.actor.user.email_addr`
+          name: Map `actor.details.email` to `ocsf.actor.user.email_addr`
           enabled: true
           sources:
             - actor.details.email
-            - description.email
           sourceType: attribute
           target: ocsf.actor.user.email_addr
           targetType: attribute
@@ -1624,8 +1577,8 @@ pipeline:
           name: Map `access_device.ip.address`, `access_device.ip` to `ocsf.src_endpoint.ip`
           enabled: true
           sources:
-            - access_device.ip
             - access_device.ip.address
+            - access_device.ip
           sourceType: attribute
           target: ocsf.src_endpoint.ip
           targetType: attribute
@@ -1753,11 +1706,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `actor.details.email`, `description.email` to `ocsf.actor.user.email_addr`
+          name: Map `actor.details.email` to `ocsf.actor.user.email_addr`
           enabled: true
           sources:
             - actor.details.email
-            - description.email
           sourceType: attribute
           target: ocsf.actor.user.email_addr
           targetType: attribute
@@ -1828,10 +1780,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `outcome` to `ocsf.status`
+          name: Map `outcome.result` to `ocsf.status`
           enabled: true
           sources:
-            - outcome
+            - outcome.result
           sourceType: attribute
           target: ocsf.status
           targetType: attribute
