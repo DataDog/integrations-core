@@ -63,15 +63,14 @@ jobs:
     
     - name: Rename sizes.json to platform.json
       run: |
-        mkdir -p sizes
-        cp "${{ inputs.platform }}/py3/sizes.json" "sizes/${{ inputs.platform }}.json"
+        cp "${{ inputs.platform }}/py3/sizes.json" "${{ inputs.platform }}.json"
       shell: bash
 
     - name: Upload platform.json artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: sizes/${{ inputs.platform }}.json
-        path: sizes/${{ inputs.platform }}.json
+        name: ${{ inputs.platform }}.json
+        path: ${{ inputs.platform }}.json
         if-no-files-found: error
         
     #   run: | 
