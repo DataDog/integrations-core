@@ -56,11 +56,6 @@ on:
         required: false
         default: false
         type: boolean
-      enable-tracing:
-        description: "Enable tracing for tests"
-        required: false
-        type: string
-        default: ""
 
 jobs:
   jd316aba:
@@ -3644,7 +3639,6 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
-      enable-tracing: "0"
     secrets: inherit
   j3a8e004:
     uses: ./.github/workflows/test-target.yml
