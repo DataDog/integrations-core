@@ -73,7 +73,7 @@ matrix.tz.env-vars = [
   { key = "TZ", value = "Asia/Tokyo", if = ["tokyo"] },
 ]
 matrix.os.env-vars = [
-  {key = "DD_TRACE_ANALYTICS_ENABLED", value = "false", if = ["windows"]}
+  {key = "DDEV_TEST_ENABLE_TRACING", value = "false", if = ["windows"]}
 ]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"

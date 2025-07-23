@@ -228,8 +228,8 @@ jobs:
 
     - name: Run Unit & Integration tests
       if: inputs.standard && !inputs.minimum-base-package
-      # env:
-      #   DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+      env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
         echo "DD_TRACE_ANALYTICS_ENABLED: ${{ env.DD_TRACE_ANALYTICS_ENABLED }}"
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
