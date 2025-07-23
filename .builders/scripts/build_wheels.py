@@ -8,13 +8,13 @@ import shutil
 import subprocess
 import sys
 import time
+import tomllib
 from functools import cache
 from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
-import toml
 import urllib3
 from dotenv import dotenv_values
 from utils import iter_wheels
@@ -185,7 +185,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     '''
     files_to_remove_path = Path(__file__).parent / "files_to_remove.toml"
     with open(files_to_remove_path, "r", encoding="utf-8") as f:
-        config = toml.load(f)
+        config = tomllib.load(f)
     excluded_test_paths = [os.path.normpath(path) for path in config.get("excluded_test_paths", [])]
 
     type_annot_libraries = config.get("type_annot_libraries", [])
