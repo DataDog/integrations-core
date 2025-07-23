@@ -148,7 +148,7 @@ def remove_test_files(wheel_path: Path) -> None:
         # Nothing to strip, so skip rewriting the wheel
         return False
 
-    with tempfile.TemporaryDirectory() as td:
+    with TemporaryDirectory() as td:
         td_path = Path(td)
 
         # Unpack the wheel into temp dir
@@ -184,7 +184,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     the wheels still include them.
     '''
     files_to_remove_path = Path(__file__).parent / "files_to_remove.toml"
-    with open(files_to_remove_path, "rb", encoding="utf-8") as f:
+    with open(files_to_remove_path, "rb") as f:
         config = tomllib.load(f)
     excluded_test_paths = [os.path.normpath(path) for path in config.get("excluded_test_paths", [])]
 
