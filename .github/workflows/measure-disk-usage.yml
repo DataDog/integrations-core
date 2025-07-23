@@ -37,7 +37,7 @@ jobs:
         ddev config set repo core
 
     - name: Download dependency sizes artifact
-      run: gh run download ${{ inputs.run-id }} --name ${{ inputs.dependency_sizes_json }}
+      run: gh run download ${{ inputs.run-id }} --name target-${{ inputs.platform }}
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # uses: actions/download-artifact@v4
@@ -54,9 +54,6 @@ jobs:
 
     - name: Testing dependency sizes
       run: |
-        cd /home/runner/work/integrations-core/integrations-core
-        echo "Contents ddev size:" >> $GITHUB_STEP_SUMMARY
-        find "$(pwd)" -name "sizes.json" -exec ls -l {} \; >> $GITHUB_STEP_SUMMARY
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json > size-dependency-sizes.txt
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format png,csv,markdown
         cat size-dependency-sizes.txt
