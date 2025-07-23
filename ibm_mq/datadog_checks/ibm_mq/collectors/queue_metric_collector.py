@@ -75,9 +75,12 @@ class QueueMetricCollector(object):
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
-        _discover = (self._discover_queues_via_names if self.config.auto_discover_queues_via_names
-                     else self._discover_queues)
-        self.log.debug(f"Using {_discover.__name__} to discover queues")
+
+        _discover = (
+            self._discover_queues_via_names if self.config.auto_discover_queues_via_names else self._discover_queues
+        )
+        self.log.debug("Using %s to discover queues", _discover.__name__)
+
         discovered_queues = set()
         if self.config.auto_discover_queues and not self.config.queue_patterns or self.config.queue_regex:
             discovered_queues.update(_discover(queue_manager, '*'))
@@ -143,7 +146,6 @@ class QueueMetricCollector(object):
             self.warning("No matching queue of type MQQT_LOCAL or MQQT_REMOTE for pattern %s", mq_pattern_filter)
 
         return queues
-
 
     def _discover_queues_via_names(self, queue_manager, mq_pattern_filter):
         # type: (pymqi.QueueManager, str) -> List[str]
