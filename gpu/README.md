@@ -12,7 +12,7 @@ Supported vendors: NVIDIA.
 ## Requirements
 
 - NVIDIA driver version: 450.51 and above
-- Datadog agent version: 7.65 and above
+- Datadog agent version: latest
 - Supported OS: Linux only
 - Linux kernel version: 5.8 and above
 
@@ -192,9 +192,15 @@ spec:
   features:
     gpu:
       enabled: true
-  # for operator versions 1.14.x and 1.15.x  add this section
+  # For operator versions below 1.18, add this section
   override:
     nodeAgent:
+     volumes:
+        # Add this volume for operator version below 1.18, unless other system-probe features
+        # such as npm, cws, usm or oom_kill are enabled.
+        - name: debugfs
+          hostPath:
+            path: /sys/kernel/debug
       containers:
         agent:
           env:
@@ -204,6 +210,13 @@ spec:
             # add this env var, if using operator versions 1.14.x or 1.15.x
             - name: DD_COLLECT_GPU_TAGS
               value: "true"
+        system-probe:
+          volumeMounts:
+            # Add this volume for operator version below 1.18, unless other system-probe features
+            # such as Cloud Network Monitoring, Cloud Workload Security or Universal Service Monitoring
+            # are enabled.
+            - name: debugfs
+              mountPath: /sys/kernel/debug
 ```
 
 For **mixed environments**, use the [DatadogAgentProfiles (DAP) feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. Note that this feature is disabled by default, so it needs to be enabled. For more information, see [Enabling DatadogAgentProfiles](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md#enabling-datadogagentprofiles).
@@ -223,7 +236,9 @@ In summary, the changes that need to be applied to the DatadogAgent manifest are
 ```yaml
 spec:
   features:
-    oomKill: # Only enable this feature if there is nothing else that requires the system-probe container in all Agent pods
+    oomKill:
+      # Only enable this feature if there is nothing else that requires the system-probe container in all Agent pods
+      # Examples of system-probe features are npm, cws, usm
       enabled: true
 
 override:
