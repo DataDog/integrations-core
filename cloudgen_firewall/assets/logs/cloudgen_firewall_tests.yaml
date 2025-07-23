@@ -1,10 +1,16 @@
 id: cloudgen_firewall
 tests:
-  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-      boxconfig[7171]: Session localhost_sacumentestlocal: Closed"
-    result: null
-  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event:
-      [1070211] TCP worker 18227 exiting with -30"
-    result: null
+  -
+    sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[7171]: Session localhost_sacumentestlocal: Closed"
+    result:
+      custom: {}
+      message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[7171]: Session localhost_sacumentestlocal: Closed"
+      tags:
+      - "source:LOGS_SOURCE"
+  -
+    sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event: [1070211] TCP worker 18227 exiting with -30"
+    result:
+      custom: {}
+      message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event: [1070211] TCP worker 18227 exiting with -30"
+      tags:
+      - "source:LOGS_SOURCE"
