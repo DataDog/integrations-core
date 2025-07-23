@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import email
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -10,14 +12,19 @@ from functools import cache
 from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
+import toml
 import urllib3
 from dotenv import dotenv_values
-from utils import extract_metadata, iter_wheels, normalize_project_name, remove_test_files
+from utils import iter_wheels
+from wheel.cli.pack import pack
+from wheel.cli.unpack import unpack
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
+UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -58,6 +65,33 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
         sys.exit(process.returncode)
 
     return process
+
+
+def extract_metadata(wheel: Path) -> email.Message:
+    with ZipFile(str(wheel)) as zip_archive:
+        for path in zip_archive.namelist():
+            root = path.split('/', 1)[0]
+            if root.endswith('.dist-info'):
+                dist_info_dir = root
+                break
+        else:
+            message = f'Could not find the `.dist-info` directory in wheel: {wheel.name}'
+            raise RuntimeError(message)
+
+        try:
+            with zip_archive.open(f'{dist_info_dir}/METADATA') as zip_file:
+                metadata_file_contents = zip_file.read().decode('utf-8')
+        except KeyError:
+            message = f'Could not find a `METADATA` file in the `{dist_info_dir}` directory'
+            raise RuntimeError(message) from None
+
+    return email.message_from_string(metadata_file_contents)
+
+
+def normalize_project_name(name: str) -> str:
+    # https://peps.python.org/pep-0503/#normalized-names
+    return UNNORMALIZED_PROJECT_NAME_CHARS.sub('-', name).lower()
+
 
 @cache
 def get_wheel_hashes(project) -> dict[str, str]:
@@ -102,6 +136,75 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
+def remove_test_files(wheel_path: Path) -> None:
+    '''
+    Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
+    '''
+    # First, check whether the wheel contains any files that should be excluded. If not, leave it untouched.
+    with ZipFile(wheel_path, 'r') as zf:
+        excluded_members = [name for name in zf.namelist() if is_excluded_from_wheel(name)]
+
+    if not excluded_members:
+        # Nothing to strip, so skip rewriting the wheel
+        return False
+
+    with tempfile.TemporaryDirectory() as td:
+        td_path = Path(td)
+
+        # Unpack the wheel into temp dir
+        unpack(wheel_path, dest=td_path)
+        unpacked_dir = next(td_path.iterdir())
+
+        # Remove excluded files/folders
+        for root, dirs, files in os.walk(td, topdown=False):
+            for d in list(dirs):
+                full_dir = Path(root) / d
+                rel = full_dir.relative_to(unpacked_dir).as_posix()
+                if is_excluded_from_wheel(rel):
+                    shutil.rmtree(full_dir)
+                    dirs.remove(d)
+            for f in files:
+                rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
+                if is_excluded_from_wheel(rel):
+                    os.remove(Path(root) / f)
+
+        print(f'Tests removed from {wheel_path.name}')
+
+        # Repack to same directory, regenerating RECORD
+        pack(unpacked_dir, dest_dir=wheel_path.parent, build_number=None)
+
+    return True
+
+
+def is_excluded_from_wheel(path: str) -> bool:
+    '''
+    These files are excluded from the wheel in the agent build:
+    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
+    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
+    the wheels still include them.
+    '''
+    files_to_remove_path = Path(__file__).parent / "files_to_remove.toml"
+    with open(files_to_remove_path, "r", encoding="utf-8") as f:
+        config = toml.load(f)
+    excluded_test_paths = [os.path.normpath(path) for path in config.get("excluded_test_paths", [])]
+
+    type_annot_libraries = config.get("type_annot_libraries", [])
+    rel_path = Path(path).as_posix()
+
+    # Test folders
+    for test_folder in excluded_test_paths:
+        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
+            return True
+
+    # Python type annotations
+    path_parts = Path(rel_path).parts
+    if path_parts:
+        dependency_name = path_parts[0]
+        if dependency_name in type_annot_libraries:
+            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
+                return True
+
+    return False
 
 
 def add_dependency(dependencies: dict[str, str], wheel: Path) -> None:
@@ -109,6 +212,7 @@ def add_dependency(dependencies: dict[str, str], wheel: Path) -> None:
     project_name = normalize_project_name(project_metadata['Name'])
     project_version = project_metadata['Version']
     dependencies[project_name] = project_version
+
 
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
@@ -171,10 +275,16 @@ def main():
 
         # Fetch or build wheels
         command_args = [
-            str(python_path), '-m', 'pip', 'wheel',
-            '-r', str(MOUNT_DIR / 'requirements.in'),
-            '--wheel-dir', str(staged_wheel_dir),
-            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+            str(python_path),
+            '-m',
+            'pip',
+            'wheel',
+            '-r',
+            str(MOUNT_DIR / 'requirements.in'),
+            '--wheel-dir',
+            str(staged_wheel_dir),
+            '--extra-index-url',
+            CUSTOM_EXTERNAL_INDEX,
         ]
         if args.use_built_index:
             command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
