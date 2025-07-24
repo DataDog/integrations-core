@@ -1520,21 +1520,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-2.0
-        - py3.12-2.2
-        - py3.12-2.4
-        - py3.12-2.5
-        - py3.12-2.6
-        - py3.12-2.7
-        - py3.12-2.0-legacy
-      fail-fast: false
   j8a8c654:
     uses: ./.github/workflows/test-target.yml
     with:
