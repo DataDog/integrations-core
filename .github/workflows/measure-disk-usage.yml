@@ -72,7 +72,7 @@ jobs:
   calculate-diffs:
     needs: measure-disk-usage
     runs-on: ubuntu-22.04
-    uses: DataDog/integrations-core/.github/workflows/quality-gates.yml@lucia-sb/calculate-diffs
+    uses: DataDog/integrations-core/.github/workflows/quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ inputs.platform }}
       run-id: ${{ github.run_id }}
