@@ -12,6 +12,8 @@ import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
 
+from datadog_checks.postgres.config_models import InstanceConfig
+
 try:
     import datadog_agent
 except ImportError:
@@ -140,7 +142,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config: InstanceConfig, shutdown_callback):
         collection_interval = float(
             config.statement_samples_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -176,7 +178,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self.tags = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
-        self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
+        self._explain_function = config.query_samples.explain_function
         self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._explain_function)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         self._collect_raw_query_statement = config.collect_raw_query_statement.get("enabled", False)

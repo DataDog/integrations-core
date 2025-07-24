@@ -194,8 +194,11 @@ class QueryMetrics(BaseModel):
     baseline_metrics_expiry: Optional[float] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
     incremental_query_metrics: Optional[bool] = None
     pg_stat_statements_max_warning_threshold: Optional[float] = None
+    run_sync: Optional[bool] = None
 
 
 class QuerySamples(BaseModel):
@@ -209,6 +212,7 @@ class QuerySamples(BaseModel):
     explain_parameterized_queries: Optional[bool] = None
     explained_queries_cache_maxsize: Optional[int] = None
     explained_queries_per_hour_per_query: Optional[int] = None
+    run_sync: Optional[bool] = None
     samples_per_hour_per_query: Optional[int] = None
     seen_samples_cache_maxsize: Optional[int] = None
 
@@ -273,6 +277,7 @@ class InstanceConfig(BaseModel):
     obfuscator_options: Optional[ObfuscatorOptions] = None
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
+    pg_stat_activity_view: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
     port: Optional[int] = None
     propagate_agent_tags: Optional[bool] = None

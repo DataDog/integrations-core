@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
+
 from datadog_checks.postgres.config import FeatureKey, PostgresConfig, ValidationResult
+
 
 @pytest.fixture
 def mock_check():
@@ -10,17 +12,14 @@ def mock_check():
     check.warning = MagicMock()
     return check
 
+
 @pytest.fixture
 def minimal_instance():
-    return {
-        'host': 'localhost',
-        'port': 5432,
-        'username': 'testuser',
-        'password': 'testpass',
-        'dbname': 'testdb'
-    }
+    return {'host': 'localhost', 'port': 5432, 'username': 'testuser', 'password': 'testpass', 'dbname': 'testdb'}
+
 
 pytestmark = pytest.mark.unit
+
 
 def test_initialize_valid_config(mock_check, minimal_instance):
     config = PostgresConfig(mock_check, {})
@@ -28,6 +27,7 @@ def test_initialize_valid_config(mock_check, minimal_instance):
     assert isinstance(result, ValidationResult)
     assert result.valid
     assert not result.errors
+
 
 def test_initialize_missing_host(mock_check, minimal_instance):
     instance = minimal_instance.copy()
@@ -37,6 +37,7 @@ def test_initialize_missing_host(mock_check, minimal_instance):
     assert not result.valid
     assert any("Specify a Postgres host" in str(e) for e in result.errors)
 
+
 def test_initialize_missing_username(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance.pop('username')
@@ -44,6 +45,7 @@ def test_initialize_missing_username(mock_check, minimal_instance):
     result = config.initialize(instance)
     assert not result.valid
     assert any("specify a user" in str(e).lower() for e in result.errors)
+
 
 def test_initialize_invalid_ssl_mode(mock_check, minimal_instance):
     instance = minimal_instance.copy()
@@ -54,6 +56,7 @@ def test_initialize_invalid_ssl_mode(mock_check, minimal_instance):
     assert any("Invalid ssl option" in w for w in result.warnings)
     mock_check.warning.assert_called()
 
+
 def test_initialize_conflicting_collect_default_database_and_ignore_databases(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['collect_default_database'] = True
@@ -62,6 +65,7 @@ def test_initialize_conflicting_collect_default_database_and_ignore_databases(mo
     result = config.initialize(instance)
     assert result.valid
     assert any("cannot be ignored" in w for w in result.warnings)
+
 
 def test_initialize_collect_wal_metrics_without_data_directory(mock_check, minimal_instance):
     instance = minimal_instance.copy()
@@ -72,6 +76,7 @@ def test_initialize_collect_wal_metrics_without_data_directory(mock_check, minim
     assert not result.valid
     assert any("data_directory" in str(e) for e in result.errors)
 
+
 def test_initialize_non_ascii_application_name(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['application_name'] = 'datadog-агент'
@@ -80,19 +85,22 @@ def test_initialize_non_ascii_application_name(mock_check, minimal_instance):
     assert not result.valid
     assert any("ASCII characters" in str(e) for e in result.errors)
 
+
 def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
     # Enable all features
     instance = minimal_instance.copy()
-    instance.update({
-        'relations': ['public.table1'],
-        'dbm': True,
-        'query_samples': {'enabled': True},
-        'collect_settings': {'enabled': True},
-        'collect_schemas': {'enabled': True},
-        'collect_resources': {'enabled': True},
-        'query_activity': {'enabled': True},
-        'query_metrics': {'enabled': True},
-    })
+    instance.update(
+        {
+            'relations': ['public.table1'],
+            'dbm': True,
+            'query_samples': {'enabled': True},
+            'collect_settings': {'enabled': True},
+            'collect_schemas': {'enabled': True},
+            'collect_resources': {'enabled': True},
+            'query_activity': {'enabled': True},
+            'query_metrics': {'enabled': True},
+        }
+    )
     config = PostgresConfig(mock_check, {})
     result = config.initialize(instance)
     feature_keys = {f['key'] for f in result.features}
@@ -109,6 +117,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         print(feature)
         assert feature['enabled'] is True
 
+
 def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
     config = PostgresConfig(mock_check, {})
     result = config.initialize(minimal_instance)
@@ -120,6 +129,7 @@ def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
     assert features[FeatureKey.COLLECT_RESOURCES]['enabled'] is False
     assert features[FeatureKey.QUERY_ACTIVITY]['enabled'] is False
     assert features[FeatureKey.QUERY_METRICS]['enabled'] is False
+
 
 def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, minimal_instance):
     # Enable features that require dbm, but do not enable dbm
@@ -143,6 +153,7 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
     assert FeatureKey.QUERY_ACTIVITY in feature_keys
     assert FeatureKey.QUERY_METRICS in feature_keys
 
+
 def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['deep_database_monitoring'] = True
@@ -150,6 +161,7 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     config = PostgresConfig(mock_check, {})
     result = config.initialize(instance)
     assert any("deprecated" in w for w in result.warnings)
+
 
 def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
     instance = minimal_instance.copy()

@@ -132,6 +132,10 @@ def instance_only_custom_queries():
     return False
 
 
+def instance_pg_stat_activity_view():
+    return 'pg_stat_activity'
+
+
 def instance_pg_stat_statements_view():
     return 'pg_stat_statements'
 
@@ -150,6 +154,10 @@ def instance_query_timeout():
 
 def instance_relations():
     return []
+
+
+def instance_reported_hostname():
+    return None
 
 
 def instance_ssl():

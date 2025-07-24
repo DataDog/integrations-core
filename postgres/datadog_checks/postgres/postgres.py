@@ -39,7 +39,7 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
-from .config import PostgresConfig
+from .config import build_config
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -130,9 +130,8 @@ class PostgreSql(AgentCheck):
                 " Please use the new azure.managed_authentication option instead."
             )
 
-        # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
-        self._config = PostgresConfig(self, self.init_config)
-        validation_result = self._config.initialize(self.instance)
+        config, validation_result = build_config(check=self, init_config=self.init_config, instance=self.instance)
+        self._config = config
         # Log validation errors and warnings
         for error in validation_result.errors:
             self.log.error(error)
@@ -193,9 +192,8 @@ class PostgreSql(AgentCheck):
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
 
-
     def _build_autodiscovery(self):
-        if not self._config.discovery_config['enabled']:
+        if not self._config.database_autodiscovery.enabled:
             return None
 
         if not self._config.relations:
@@ -206,8 +204,8 @@ class PostgreSql(AgentCheck):
 
         discovery = PostgresAutodiscovery(
             self,
-            self._config.discovery_config.get('global_view_db', 'postgres'),
-            self._config.discovery_config,
+            self._config.database_autodiscovery.global_view_db,
+            self._config.database_autodiscovery,
             self._config.idle_connection_timeout,
         )
         return discovery

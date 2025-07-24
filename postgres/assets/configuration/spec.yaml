@@ -51,6 +51,7 @@ files:
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
       value:
         type: string
+        default: null
     - name: exclude_hostname
       description: |
         Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
@@ -79,7 +80,6 @@ files:
             - host: The provided host of the instance.
             - port: The port number of the instance.
             In addition, you can use any key from the `tags` section of the configuration.
-          default: "$resolved_hostname"
     - name: dbstrict
       description: |
         Whether to restrict the scope of the check to just the database in question.
@@ -348,6 +348,7 @@ files:
       value:
         type: string
         example: /usr/local/pgsql/data
+        display_default: null
         default: null
     - name: tag_replication_role
       hidden: true
@@ -359,7 +360,6 @@ files:
       description: The maximum number of tables to collect metrics from.
       value:
         type: integer
-        display_default: 200
         example: 200
     - template: instances/db
       overrides:
@@ -463,6 +463,15 @@ files:
         type: string
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
+    - name: pg_stat_activity_view
+      hidden: true
+      description: |
+        Set this value if you want to define a custom view or function to allow the datadog user to query the
+        `pg_stat_activity` table, which is useful for restricting the permissions given to the datadog agent.
+        Please note this is an ALPHA feature and is subject to change or deprecation without notice.
+      value:
+        type: string
+        display_default: pg_stat_activity
     - name: query_encodings
       description: |
         Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
@@ -503,6 +512,20 @@ files:
           value:
             type: number
             example: 10000
+        - name: full_statement_text_cache_max_size
+          hidden: true
+          description: |
+            Set the max size of the cache used for the full statement text.
+          value:
+            type: number
+            example: 10000
+        - name: full_statement_text_samples_per_hour_per_query
+          hidden: true
+          description: |
+            Set the max number of full statement text samples to collect per hour per query.
+          value:
+            type: number
+            example: 10000
         - name: incremental_query_metrics
           hidden: true
           description: |
@@ -521,6 +544,14 @@ files:
             type: number
             display_default: 300
             example: 300
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the query metrics collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
     - name: query_samples
       description: Configure collection of query samples
       options:
@@ -578,6 +609,14 @@ files:
           value:
             type: boolean
             example: true
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the query metrics collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
     - name: query_activity
       description: Configure collection of query activity
       options:
