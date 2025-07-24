@@ -170,12 +170,12 @@ jobs:
       with:
         name: target-${{ matrix.job.image }}
         path: output
-    - measure-disk-usage:
-      needs: build
-      uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
-      with:
-        platform: ${{ matrix.job.image }}
-        run-id: ${{ github.run_id }}
+  measure-disk-usage:
+    needs: build
+    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.job.image }}
+      run-id: ${{ github.run_id }}
 
   build-macos:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
