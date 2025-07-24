@@ -102,7 +102,7 @@ def ci(app: Application, sync: bool):
         }
         # We have to enforce a minimum on the number of target-envs to avoid exceeding the maximum GHA object size limit
         # This way we get the benefit of parallelization for the targets that need it most
-        if len(data.get('target-env', [])) > 4:
+        if len(data.get('target-env', [])) > 5:
             config['target-env'] = '${{ matrix.target-env }}'
 
         if is_core or is_marketplace:
@@ -134,7 +134,7 @@ def ci(app: Application, sync: bool):
         job_id = f'j{job_id}'
 
         job_config = {'uses': test_workflow, 'with': config, 'secrets': 'inherit'}
-        if len(data.get('target-env', [])) > 4:
+        if len(data.get('target-env', [])) > 5:
             job_config['strategy'] = {
                 'matrix': {'target-env': data['target-env']},
                 'fail-fast': False,
