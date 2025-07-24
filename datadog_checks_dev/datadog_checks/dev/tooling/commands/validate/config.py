@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import difflib
 import os
+import re
 
 import click
 import yaml
@@ -34,8 +35,6 @@ from datadog_checks.dev.tooling.utils import (
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
-
-TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
@@ -113,6 +112,7 @@ def config(ctx, check, sync, verbose):
 
         if not validate_default_template(spec_file_content):
             message = "Missing default template in init_config or instances section"
+            files_failed[spec_file_path] = True
             check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
             annotate_error(spec_file_path, message)
 
@@ -186,13 +186,13 @@ def validate_default_template(spec_file):
     if 'template: init_config' not in spec_file or 'template: instances' not in spec_file:
         # This config spec does not have init_config or instances
         return True
-    for line in spec_file.split('\n'):
-        has_default_templates = any("init_config/{}".format(template) in line for template in TEMPLATES) and any(
-            "instances/{}".format(template) in line for template in TEMPLATES
-        )
-        if has_default_templates:
-            return True
-    return False
+
+    templates = {
+        'intances': [f'template: init_config/{t}' for t in ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']],
+        'init_config': [f'template: init_config/{t}' for t in ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']],
+    }
+    # We want both instances and init_config to have at least one template present.
+    return all(any(re.search(t, spec_file) for t in tpls) for tpls in templates)
 
 
 def validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter):
