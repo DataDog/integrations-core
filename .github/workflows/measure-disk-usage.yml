@@ -40,8 +40,8 @@ jobs:
 
     - name: Measure disk usage
       run: |
-        echo "run-id inputs: ${{ inputs.run-id }}"
-        echo "run-id github: ${{ github.run_id }}"
+        echo "run-id inputs: ${{ inputs.run-id }}" >> $GITHUB_STEP_SUMMARY
+        echo "run-id github: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
         ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format json
         ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format json
     

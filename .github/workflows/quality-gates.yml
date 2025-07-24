@@ -26,8 +26,8 @@ jobs:
       - name: Get merge base commit
         id: merge_base
         run: |
-          echo "run-id inputs: ${{ inputs.run-id }}"
-          echo "run-id github: ${{ github.run_id }}"
+          echo "run-id inputs: ${{ inputs.run-id }}" >> $GITHUB_STEP_SUMMARY
+          echo "run-id github: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
           git fetch origin master:refs/remotes/origin/master
           git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
