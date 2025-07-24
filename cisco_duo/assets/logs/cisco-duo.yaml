@@ -622,7 +622,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.actor.user.email_addr
           targetType: attribute
-          preserveSource: true
+          preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `actor.type` to `ocsf.actor.user.type`
@@ -786,7 +786,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.user.email_addr
           targetType: attribute
-          preserveSource: true
+          preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `target.type` to `ocsf.user.type`
@@ -928,7 +928,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.actor.user.email_addr
           targetType: attribute
-          preserveSource: true
+          preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `actor.type` to `ocsf.actor.user.type`
@@ -1086,14 +1086,6 @@ pipeline:
                 query: "@ocsf.auth_factor.factor_type_id:10"
               name: "WebAuthn"
           target: ocsf.auth_factor.factor_type
-        - type: array-processor
-          name: Move attributes into auth_factors array
-          enabled: true
-          operation:
-            source: ocsf.auth_factor
-            target: ocsf.auth_factors
-            type: append
-            preserveSource: false
         - type: attribute-remapper
           name: Map `reasons` to `ocsf.message`
           enabled: true
@@ -1207,7 +1199,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.user.email_addr
           targetType: attribute
-          preserveSource: true
+          preserveSource: false
           overrideOnConflict: false
     - type: pipeline
       name: OCSF sub pipeline for auth factor device enrichment
@@ -1260,6 +1252,14 @@ pipeline:
           template: "Unknown"
           target: ocsf.auth_factor.device.type
           replaceMissing: false
+        - type: array-processor
+          name: Move attributes into auth_factors array
+          enabled: true
+          operation:
+            source: ocsf.auth_factor
+            target: ocsf.auth_factors
+            type: append
+            preserveSource: false
     - type: pipeline
       name: OCSF sub pipeline for class User Access Management [3005]
       enabled: true
