@@ -51,15 +51,7 @@ class Health:
         """
         self.check = check
 
-    def submit_health_event(
-        self,
-        name: HealthEvent,
-        status: HealthStatus,
-        tags: list[str] = None,
-        # errors: list[str] = None,
-        # warnings: list[str] = None,
-        **kwargs,
-    ):
+    def submit_health_event(self, name: HealthEvent, status: HealthStatus, tags: list[str] = None, **kwargs):
         """
         Submit a health event to the aggregator.
 
