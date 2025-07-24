@@ -15,8 +15,6 @@ env:
 
 jobs:
    get-merge-base:
-    needs: check-file-changes
-    if: needs.check-file-changes.outputs.builders_changed == 'false'
     runs-on: ubuntu-22.04
     outputs:
       run_id: ${{ steps.find_run.outputs.run_id }}
@@ -74,7 +72,11 @@ jobs:
           mv ${{ matrix.platform }}_compressed_status.json ${{ matrix.platform }}_curr_compressed_status.json
 
   calculate-diffs:
+    needs: download-artifacts
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     steps:
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
