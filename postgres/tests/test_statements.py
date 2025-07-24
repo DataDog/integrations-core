@@ -1968,7 +1968,10 @@ def test_statement_metrics_database_extension_errors(
         with superconn.cursor() as cur:
             cur.execute("DROP EXTENSION pg_stat_statements CASCADE;")
 
-    run_one_check(check)
+            run_one_check(check)
+
+            # Restore extension for next test
+            cur.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;")
 
     expected_tags = _get_expected_tags(
         check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
