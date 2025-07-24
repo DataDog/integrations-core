@@ -395,6 +395,16 @@ pipeline:
             supportRules: ""
             matchRules: |
               description_json %{data:description:json}
+        - type: grok-parser
+          name: Parsing target.details
+          enabled: true
+          source: target.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              target_details_json %{data:target.details:json}
     - type: pipeline
       name: OCSF sub pipeline for device enrichment
       enabled: true
@@ -778,11 +788,12 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `email`, `actor.details.email` to `ocsf.user.email_addr`
+          name: Map `email`, `actor.details.email`, `target.details.email` to `ocsf.user.email_addr`
           enabled: true
           sources:
             - email
             - actor.details.email
+            - target.details.email
           sourceType: attribute
           target: ocsf.user.email_addr
           targetType: attribute
@@ -1361,20 +1372,32 @@ pipeline:
             supportRules: ""
             matchRules: ProfileStrToArray %{data:ocsf.privileges:array("[]",",")}
         - type: attribute-remapper
-          name: Map `object` to `ocsf.user.name`
+          name: Map `target.key` to `ocsf.user.uid`
+          enabled: true
+          sources:
+            - target.key
+          sourceType: attribute
+          target: ocsf.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `object`, `target.name` to `ocsf.user.name`
           enabled: true
           sources:
             - object
+            - target.name
           sourceType: attribute
           target: ocsf.user.name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `description.email` to `ocsf.user.email_addr`
+          name: Map `description.email`, `target.details.email` to `ocsf.user.email_addr`
           enabled: true
           sources:
             - description.email
+            - target.details.email
           sourceType: attribute
           target: ocsf.user.email_addr
           targetType: attribute

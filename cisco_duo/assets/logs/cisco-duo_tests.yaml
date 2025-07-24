@@ -798,6 +798,10 @@ tests:
           severity_id: 1
           time: 1753269420210
           type_uid: 300501
+          user:
+            email_addr: "tuser@test.com"
+            name: "target_user"
+            uid: "111111"
         service: "activity"
         target:
           details: '{"email": "tuser@test.com", "role": "User", "status": "Active"}'
