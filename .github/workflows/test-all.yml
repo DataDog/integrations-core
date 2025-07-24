@@ -11,6 +11,10 @@ on:
         required: false
         default: ""
         type: string
+      standard:
+        required: false
+        default: false
+        type: boolean
       latest:
         required: false
         default: false
@@ -2640,6 +2644,7 @@ jobs:
         - py3.12-8.0-shard
         - py3.12-8.0-auth
         - py3.12-8.0-tls
+        - py3.12-8.0-standalone-newyork
       fail-fast: false
   j211906c:
     uses: ./.github/workflows/test-target.yml
@@ -3554,10 +3559,29 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jc8d61c2:
+  j31a95c8:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: SQL Server
+      job-name: SQL Server on Windows
+      target: sqlserver
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j3a8e004:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SQL Server on Linux
       target: sqlserver
       platform: linux
       runner: '["ubuntu-22.04"]'

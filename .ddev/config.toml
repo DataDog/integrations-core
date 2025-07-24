@@ -41,11 +41,8 @@ platforms = ["linux", "windows"]
 platforms = ["linux", "windows"]
 
 [overrides.ci.sqlserver]
-# Window is disabled until we can fix the misalignment of runner versions and the sqlserver image tag.
-# See the sqlserver hatch.toml for more details.
-platforms = ["linux"]
-# platforms = ["windows", "linux"]
-runners = { windows = ["windows-2025"] }
+platforms = ["windows", "linux"]
+runners = { windows = ["windows-2022"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
