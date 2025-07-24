@@ -110,14 +110,15 @@ def config(ctx, check, sync, verbose):
             version = get_version_string(check)
 
         spec_file_content = read_file(spec_file_path)
+        default_temp = validate_default_template(spec_file_content)
+        spec = ConfigSpec(spec_file_content, source=source, version=version)
+        spec.load()
 
-        if not validate_default_template(spec_file_content):
+        if not default_temp:
             message = "Missing default template in init_config or instances section"
             check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
             annotate_error(spec_file_path, message)
 
-        spec = ConfigSpec(spec_file_content, source=source, version=version)
-        spec.load()
         if spec.errors:
             files_failed[spec_file_path] = True
             for error in spec.errors:
@@ -183,14 +184,19 @@ def config(ctx, check, sync, verbose):
 
 
 def validate_default_template(spec_file):
+    init_config_default = False
+    instances_default = False
     if 'template: init_config' not in spec_file or 'template: instances' not in spec_file:
         # This config spec does not have init_config or instances
         return True
+
     for line in spec_file.split('\n'):
-        has_default_templates = any("init_config/{}".format(template) in line for template in TEMPLATES) and any(
-            "instances/{}".format(template) in line for template in TEMPLATES
-        )
-        if has_default_templates:
+        if any("init_config/{}".format(template) in line for template in TEMPLATES):
+            init_config_default = True
+        if any("instances/{}".format(template) in line for template in TEMPLATES):
+            instances_default = True
+
+        if instances_default and init_config_default:
             return True
     return False
 
