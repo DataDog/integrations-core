@@ -70,6 +70,8 @@ def mock_responses():
         if params:
             param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
             request_path = f'{url}?{param_string}'
+
+        print(request_path)
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
 
