@@ -37,6 +37,7 @@ from datadog_checks.postgres.relationsmanager import (
 )
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.config_models import InstanceConfig
 
 from .__about__ import __version__
 from .config import build_config
@@ -145,7 +146,7 @@ class PostgreSql(AgentCheck):
             else HealthStatus.OK,
             errors=[str(error) for error in validation_result.errors],
             warnings=validation_result.warnings,
-            config=sanitize(self._config.__dict__),
+            config=sanitize(self._config),
             features=validation_result.features,
         )
 
@@ -1126,8 +1127,9 @@ class PostgreSql(AgentCheck):
         self.tags_without_db = list(set(self.tags_without_db) | set(tags))
 
 
-def sanitize(dict: dict):
-    sanitized = {k: v for k, v in copy.deepcopy(dict).items() if k != "check"}
+def sanitize(config: InstanceConfig) -> dict:
+    # sanitized = {k: v for k, v in copy.deepcopy(dict).items() if k != "check"}
+    sanitized = config.model_dump()
     sanitized['password'] = '***' if sanitized.get('password') else None
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
 
