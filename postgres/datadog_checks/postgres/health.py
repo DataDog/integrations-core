@@ -37,8 +37,6 @@ class PostgresHealth(Health):
         self,
         name: HealthEvent | PostgresHealthEvent,
         status: HealthStatus,
-        # errors: list[str] = None,
-        # warnings: list[str] = None,
         **kwargs,
     ):
         """
@@ -56,7 +54,5 @@ class PostgresHealth(Health):
             # If we have an error parsing the config we may not have tags yet
             tags=self.check.tags if hasattr(self.check, 'tags') else [],
             database_instance=self.check.database_identifier,
-            # errors=errors,
-            # warnings=warnings,
             **kwargs,
         )
