@@ -51,7 +51,7 @@ def instance_disable_generic_tags():
 
 
 def instance_empty_default_hostname():
-    return False
+    return True
 
 
 def instance_kerberos_auth():

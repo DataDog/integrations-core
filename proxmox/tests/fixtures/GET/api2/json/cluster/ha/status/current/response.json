@@ -1,0 +1,23 @@
+{
+    "data": [
+        {
+            "status": "OK",
+            "type": "quorum",
+            "node": "ip-122-82-3-112",
+            "quorate": 1,
+            "id": "quorum"
+        },
+        {
+            "status": "OK",
+            "type": "lrm",
+            "node": "ip-122-82-3-112",
+            "id": "lrm"
+        },
+        {
+            "status": "OK",
+            "type": "quorum",
+            "node": "ip-122-82-3-112",
+            "id": "quorum"
+        }
+    ]
+}
