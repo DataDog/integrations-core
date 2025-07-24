@@ -38,14 +38,10 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Testing dependency sizes
+    - name: Measure disk usage
       run: |
-        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json > size-dependency-sizes.txt
-        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format png,csv,markdown
-        cat size-dependency-sizes.txt
-        echo "# Size (dependency sizes)" >> $GITHUB_STEP_SUMMARY
-        cat size-dependency-sizes.txt >> $GITHUB_STEP_SUMMARY
-
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format json
+        ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format json
     
     - name: Rename sizes.json to platform.json
       run: |
@@ -58,6 +54,21 @@ jobs:
         name: ${{ inputs.platform }}.json
         path: ${{ inputs.platform }}.json
         if-no-files-found: error
+    
+    - name: Upload JSON uncompressed sizes artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: ${{ inputs.platform }}_uncompressed_status.json
+        path: ${{ inputs.platform }}_uncompressed_status.json
+        if-no-files-found: error
+        
+    - name: Upload JSON compressed sizes artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: ${{ inputs.platform }}_compressed_status.json
+        path: ${{ inputs.platform }}_compressed_status.json
+        if-no-files-found: error
+    
         
     #   run: | 
     #     ddev size status --to-dd-key ${{secrets.DD_API_KEY}} > size-uncompressed.txt 

@@ -65,8 +65,8 @@ jobs:
           image: linux-aarch64
         - os: ubuntu-22.04
           image: linux-x86_64
-        # - os: windows-2022  # TODO: REMEMBER TO REENABLE THIS
-        #   image: windows-x86_64
+        - os: windows-2022 
+          image: windows-x86_64
 
     permissions:
       packages: write
@@ -170,11 +170,15 @@ jobs:
       with:
         name: target-${{ matrix.job.image }}
         path: output
+
   measure-disk-usage:
     needs: build
+    strategy:
+      matrix:
+        platform: [linux-x86_64, linux-aarch64, windows-x86_64]
     uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
     with:
-      platform: ${{ matrix.job.image }}
+      platform: ${{ matrix.platform }}
       run-id: ${{ github.run_id }}
 
   build-macos:
@@ -249,18 +253,16 @@ jobs:
       with:
         name: target-macos-${{ matrix.job.arch }}
         path: output
+        
 # ----------- CHANGE TO MASTER BRANCH ------------
-  measure-disk-usage-x86_64:
+  measure-disk-usage:
     needs: build-macos
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64]
     uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
     with:
-      platform: macos-x86_64
-      run-id: ${{ github.run_id }}
-  measure-disk-usage-aarch64:
-    needs: build-macos
-    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
-    with:
-      platform: macos-aarch64
+      platform: ${{ matrix.platform }}
       run-id: ${{ github.run_id }}
 
 
