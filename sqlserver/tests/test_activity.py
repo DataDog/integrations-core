@@ -60,6 +60,10 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+def test_dd_env():
+    assert os.environ.get("DDEV_TEST_ENABLE_TRACING") == "false"
+
+
 @pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
