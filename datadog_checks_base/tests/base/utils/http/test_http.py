@@ -14,7 +14,7 @@ import requests
 import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http import RequestsWrapper, quote_uds_url
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -191,17 +191,6 @@ class TestRequestSize:
 
 
 class TestUnixDomainSocket:
-    @pytest.mark.parametrize(
-        'value, expected',
-        [
-            pytest.param('http://example.org', False, id='non-uds-url'),
-            pytest.param('unix:///var/run/test.sock/info', True, id='unquoted'),
-            pytest.param('unix://%2Fvar%2Frun%2Ftest.sock', True, id='quoted'),
-        ],
-    )
-    def test_is_uds_url(self, value, expected):
-        # type: (str, bool) -> None
-        assert is_uds_url(value) == expected
 
     @pytest.mark.parametrize(
         'value, expected',
@@ -215,8 +204,14 @@ class TestUnixDomainSocket:
         ],
     )
     def test_quote_uds_url(self, value, expected):
-        # type: (str, str) -> None
-        assert quote_uds_url(value) == expected
+        fake_session = mock.create_autospec(requests.Session)
+        http = RequestsWrapper({}, {}, session=fake_session)
+        # http._create_session = mock.MagicMock(return_value=fake_session) either that or we persist connections
+        # we could also persist the connection just for the non-uds url
+        http.persist_connections = True
+        http.get(value)
+        assert fake_session.get.called
+        assert fake_session.get.call_args[0][0]  == expected
 
     def test_adapter_mounted(self):
         # type: () -> None
