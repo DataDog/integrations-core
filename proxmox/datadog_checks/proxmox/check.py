@@ -1,12 +1,16 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.proxmox.config_models import ConfigMixin
 
 from .constants import (
+    EVENT_TYPE_TO_TITLE,
     NODE_RESOURCE,
     OK_STATUS,
     PERF_METRIC_NAME,
@@ -14,6 +18,7 @@ from .constants import (
     RESOURCE_METRIC_NAME,
     RESOURCE_TYPE_MAP,
     VM_RESOURCE,
+    resource_type_for_event_type,
 )
 
 
@@ -22,8 +27,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(ProxmoxCheck, self).__init__(name, init_config, instances)
-        self.check_initializations.append(self._parse_config)
         self.all_resources = {}
+        self.last_event_collect_time = get_current_datetime()
+        self.check_initializations.append(self._parse_config)
 
     def _parse_config(self):
         self.base_tags = [f"proxmox_server:{self.config.proxmox_server}"]
@@ -53,6 +59,49 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             hostname_json = {}
         hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
         return hostname
+
+    def _event_for_task(self, task, node_name):
+        task_type = task.get('type')
+        status = "success" if task.get("status") == "OK" else "error"
+        id = task.get('id') if task.get('id') else node_name
+        user = task.get('user')
+        event_title = EVENT_TYPE_TO_TITLE.get(task_type, task_type)
+        resource_type = resource_type_for_event_type(task_type)
+        resource_id = f'{resource_type}/{id}'
+        self.log.debug(
+            "Creating event for task type: %s ID: %s, resource id %s on node %s",
+            task_type,
+            id,
+            resource_id,
+            node_name,
+        )
+
+        resource = self.all_resources.get(resource_id, {})
+
+        tags = copy.deepcopy(resource.get('tags', []))
+        tags.append(f'proxmox_event_type:{task_type}')
+        tags.append(f'proxmox_user:{user}')
+
+        timestamp = task.get('endtime', get_timestamp(get_current_datetime()))
+        hostname = resource.get('hostname', None)
+
+        if resource_type != 'node':
+            resource_type_format = resource.get('resource_type', '').capitalize()
+            event_message = f"{resource_type_format} {resource.get('resource_name')}: {event_title} on node {node_name}"
+        else:
+            event_message = f"{event_title} on node {node_name}"
+
+        event = {
+            'timestamp': timestamp,
+            'event_type': self.__NAMESPACE__,
+            'host': hostname,
+            'msg_text': event_message,
+            'msg_title': event_title,
+            'alert_type': status,
+            'source_type_name': self.__NAMESPACE__,
+            'tags': tags,
+        }
+        return event
 
     def _collect_performance_metrics(self):
         metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
@@ -139,7 +188,12 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             else:
                 external_tags.append((hostname, {self.__NAMESPACE__: self.base_tags + list(resource_tags)}))
 
-            all_resources[resource_id] = {'resource_type': resource_type_remapped, 'tags': tags, 'hostname': hostname}
+            all_resources[resource_id] = {
+                'resource_type': resource_type_remapped,
+                'resource_name': resource_name,
+                'tags': tags,
+                'hostname': hostname,
+            }
 
             if resource_type_remapped != "pool":
                 # pools don't have a status attribute
@@ -153,6 +207,33 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
         self.all_resources = all_resources
         self.set_external_tags(external_tags)
+
+    def _collect_tasks(self):
+        for resource in self.all_resources.values():
+            if resource.get('resource_type') != 'node':
+                continue
+
+            node_name = resource.get('hostname')
+            since = int(get_timestamp(self.last_event_collect_time))
+            self.log.debug("Collecting events for node %s since %s", node_name, since)
+
+            now = get_current_datetime()
+            params = {'since': since}
+            response = self.http.get(f"{self.config.proxmox_server}/nodes/{node_name}/tasks", params=params)
+            response.raise_for_status()
+
+            response_json = response.json().get("data", [])
+            self.last_event_collect_time = now
+
+            for task in response_json:
+                task_type = task.get('type')
+
+                if task_type not in self.config.collected_task_types:
+                    continue
+
+                event = self._event_for_task(task, node_name)
+                self.log.trace("Submitting event %s", event)
+                self.event(event)
 
     def check(self, _):
         try:
@@ -173,3 +254,5 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
         self._collect_resource_metrics()
         self._collect_performance_metrics()
+        if self.config.collect_tasks:
+            self._collect_tasks()

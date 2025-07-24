@@ -46,3 +46,28 @@ RESOURCE_METRIC_NAME = {
 }
 
 RESOURCE_COUNT_METRICS = ['uptime']
+
+EVENT_TYPE_TO_TITLE = {
+    'vzstart': 'Container Started',
+    'vzshutdown': 'Container Shutdown',
+    'vzsuspend': 'Container Suspened',
+    'qmstart': 'VM Started',
+    'qhstop': 'VM Stopped',
+    'qmshutdown': 'VM Shutdown',
+    'qmreboot': 'VM Rebooted',
+    'qmigrate': 'VM Migrated',
+    'qmsuspend': 'VM Hibernated',
+    'startall': 'Bulk start VMs and Containers',
+    'stopall': 'Bulk stop VMs and Containers',
+    'suspendall': 'Bulk suspend VMs and Containers',
+    'aptupdate': 'Update package database',
+    'vncproxy': 'Console started',
+}
+
+
+def resource_type_for_event_type(event_type):
+    if event_type.startswith('vz'):
+        return 'lxc'
+    elif event_type.startswith('qm') or event_type.startswith('vnc'):
+        return 'qemu'
+    return 'node'
