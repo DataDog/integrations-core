@@ -3,9 +3,6 @@ name: Measure Disk Usage
 on:
   workflow_call:
     inputs:
-      dependency_sizes_json:
-        required: true
-        type: string
       platform:
         required: true
         type: string
@@ -40,17 +37,6 @@ jobs:
       run: gh run download ${{ inputs.run-id }} --name target-${{ inputs.platform }}
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # uses: actions/download-artifact@v4
-    #   with:
-    #     name: ${{ inputs.dependency_sizes_json }}
-    #     run-id: ${{ inputs.run-id }}
-
-    - name: Debug artifact structure
-      run: |
-        echo "Current directory:" > $GITHUB_STEP_SUMMARY
-        pwd >> $GITHUB_STEP_SUMMARY
-        echo "Contents:" >> $GITHUB_STEP_SUMMARY
-        ls -lR | grep sizes.json >> $GITHUB_STEP_SUMMARY
 
     - name: Testing dependency sizes
       run: |
