@@ -17,7 +17,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-win_amd64.whl#sha256=0409917be29f5ad80a6772712fce954b5e81450555636e8523290ee9740a2dbb
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl#sha256=de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250218143924-py3-none-win_amd64.whl#sha256=02165c52665dfa139b6606bd802b996c51bcbc8c89f3c79801833d53e838d735
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250723215038-cp312-cp312-win_amd64.whl#sha256=8223fb2cfb4d24631e9c452258ed849e99227c65768ae34acc5539cc28a33a39
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250724161942-cp312-cp312-win_amd64.whl#sha256=9bc2e7cf18a7828153f06effc2248a11e89989478cbe6d65b331d3c177f4114d
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-45.0.4-cp311-abi3-win_amd64.whl#sha256=817ee05c6c9f7a69a16200f0c90ab26d23a87701e2a284bd15156783e46dbcc8
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.9.3-cp312-cp312-win_amd64.whl#sha256=5d8171be0bf47928037a5844bb0ca7820935b465d7bcec9fe022455f00b0f690
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
