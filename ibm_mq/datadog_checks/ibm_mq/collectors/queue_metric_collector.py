@@ -79,7 +79,7 @@ class QueueMetricCollector(object):
         _discover = (
             self._discover_queues_via_names if self.config.auto_discover_queues_via_names else self._discover_queues
         )
-        
+
         if self.config.auto_discover_queues_via_names:
             self.log.debug("Using _discover_queues_via_names to discover queues")
         else:
