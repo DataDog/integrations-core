@@ -258,6 +258,7 @@ files:
                 type: array
                 items:
                     type: string
+        default: []
         example:
           - relation_name: <TABLE_NAME>
             schemas:
@@ -287,7 +288,6 @@ files:
       value:
         type: boolean
         example: false
-        display_default: false
     - name: collect_activity_metrics
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
@@ -348,6 +348,7 @@ files:
       value:
         type: string
         example: /usr/local/pgsql/data
+        default: null
     - name: tag_replication_role
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.

@@ -7,7 +7,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING, Optional, TypedDict
 
-from datadog_checks.postgres.config_models.defaults import instance_dbstrict, instance_exclude_hostname, instance_ignore_databases, instance_ignore_schemas_owned_by, instance_port
+from datadog_checks.postgres.config_models.defaults import instance_activity_metrics_excluded_aggregations, instance_collect_activity_metrics, instance_collect_bloat_metrics, instance_collect_buffercache_metrics, instance_collect_checksum_metrics, instance_collect_count_metrics, instance_collect_database_size_metrics, instance_collect_function_metrics, instance_collect_wal_metrics, instance_data_directory, instance_dbstrict, instance_exclude_hostname, instance_ignore_databases, instance_ignore_schemas_owned_by, instance_max_relations, instance_min_collection_interval, instance_port, instance_relations, instance_table_count_limit
+from postgres.datadog_checks.postgres.config_models import InstanceConfig
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -20,7 +21,7 @@ SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'
 TABLE_COUNT_LIMIT = 200
 
 
-class PostgresConfig:
+class PostgresConfig(InstanceConfig):
     RATE = AgentCheck.rate
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
@@ -105,25 +106,25 @@ class PostgresConfig:
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
 
         # Relation metrics
-        self.min_collection_interval = instance.get('min_collection_interval', 15)
-        self.relations = instance.get('relations', [])
-        self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
-        self.collect_buffercache_metrics = is_affirmative(instance.get('collect_buffercache_metrics', False))
-        self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
+        self.min_collection_interval = instance.get('min_collection_interval', instance_min_collection_interval())
+        self.relations = instance.get('relations', instance_relations())
+        self.table_count_limit = instance.get('table_count_limit', instance_table_count_limit())
+        self.collect_buffercache_metrics = is_affirmative(instance.get('collect_buffercache_metrics', instance_collect_buffercache_metrics()))
+        self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', instance_collect_function_metrics()))
         # Default value for `count_metrics` is True for backward compatibility
-        self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
-        self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
-        self.collect_checksum_metrics = is_affirmative(instance.get('collect_checksum_metrics', False))
-        self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', [])
-        self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
-        self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
-        self.data_directory = instance.get('data_directory', None)
+        self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', instance_collect_count_metrics()))
+        self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', instance_collect_activity_metrics()))
+        self.collect_checksum_metrics = is_affirmative(instance.get('collect_checksum_metrics', instance_collect_checksum_metrics()))
+        self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', instance_activity_metrics_excluded_aggregations())
+        self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', instance_collect_database_size_metrics()))
+        self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics', instance_collect_wal_metrics()))
+        self.data_directory = instance.get('data_directory', instance_data_directory())
         if self.collect_wal_metrics and not self.data_directory:
             validation_result.add_error(
                 'The `data_directory` parameter must be set when `collect_wal_metrics` is enabled.'
             )
-        self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
-        self.max_relations = int(instance.get('max_relations', 300))
+        self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', instance_collect_bloat_metrics()))
+        self.max_relations = int(instance.get('max_relations', instance_max_relations()))
         if self.relations and not (self.dbname or self.discovery_config['enabled']):
             validation_result.add_error(
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
@@ -135,6 +136,10 @@ class PostgresConfig:
         )
 
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
+        if instance.get('custom_metrics', []):
+            validation_result.add_warning(
+                'The `custom_metrics` option is deprecated. Use `custom_queries` instead.'
+            )
 
         # database monitoring adds additional telemetry for query metrics & samples
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
