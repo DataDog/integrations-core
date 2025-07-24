@@ -12,23 +12,19 @@ setup = ["single", "ha"]
 [[envs.default.matrix]]
 python = ["3.12"]
 os = ["linux"]
-version = ["2019", "2022"]
+version = ["2022"]
 tz = ["newyork", "tokyo"]
 
 # test the full combination of python-version/driver against a the latest sql server version
 # ideally we'd test this against all sql server versions but that makes the test take too long and time out.
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
-
-# Windows tests are all broken due to misalighnment of runner versions and the sqlserver image tag.
-# Disabling for now but we should fix this
-
-# [[envs.default.matrix]]
-# python = ["3.12"]
-# os = ["windows"]
-# driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
-# version = ["2019", "2022"]
-# setup = ["single"]
+[[envs.default.matrix]]
+python = ["3.12"]
+os = ["windows"]
+driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
+version = ["2019", "2022"]
+setup = ["single"]
 
 # The high cardinality environment is meant to be used for local dev/testing
 # for example, when we want to do performance testing on local changes to the metrics
