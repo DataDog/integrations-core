@@ -335,7 +335,17 @@ tests:
           time: 1696913103639
           type_uid: 600399
         target:
-          details: '{"manufacturer": "-", "number": "+11234567890", "extension": "", "os_version": "13", "biometrics_status": "Configured", "os": "Android", "model": "-", "tampered_status": "Not tampered", "passcode_status": "Locked", "country_code": "1"}'
+          details:
+            biometrics_status: "Configured"
+            country_code: "1"
+            extension: ""
+            manufacturer: "-"
+            model: "-"
+            number: "+11234567890"
+            os: "Android"
+            os_version: "13"
+            passcode_status: "Locked"
+            tampered_status: "Not tampered"
           key: "SOMEKEY"
           name: "+1 123 456 7890"
           type: "phone"
@@ -804,7 +814,10 @@ tests:
             uid: "111111"
         service: "activity"
         target:
-          details: '{"email": "tuser@test.com", "role": "User", "status": "Active"}'
+          details:
+            email: "tuser@test.com"
+            role: "User"
+            status: "Active"
           key: "111111"
           name: "target_user"
           type: "admin"
