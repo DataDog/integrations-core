@@ -44,7 +44,7 @@ jobs:
           run_id=$(
             (
               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-              gh run list --workflow "Resolve Dependencies and Build Wheels" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
+              # gh run list --workflow "Resolve Dependencies and Build Wheels" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
             ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
           )
           if [ -z "$run_id" ]; then
