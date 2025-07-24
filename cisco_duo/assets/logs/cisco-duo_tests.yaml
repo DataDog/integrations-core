@@ -97,7 +97,6 @@ tests:
             country: "-"
             state: "-"
           name: "+1 123 456 7890"
-        email: "abc@example.com"
         evt:
           name: "authentication"
           outcome: "fraud"
@@ -112,12 +111,12 @@ tests:
               uid: "SOMEKEY"
           auth_factors:
             - factor_type: "Push Notification"
-              factor_type_id: 5
               device:
+                uid: "SOMEKEY"
+                type_id: 0
                 ip: "185.64.148.0"
                 type: "Unknown"
-                type_id: 0
-                uid: "SOMEKEY"
+              factor_type_id: 5
           category_name: "Identity & Access Management"
           category_uid: 3
           class_name: "Authentication"
@@ -150,7 +149,6 @@ tests:
           time: 1698828153314
           type_uid: 300201
           user:
-            email_addr: "abc@example.com"
             name: "abc"
             uid: "SOMEKEY"
         reason: "user_marked_fraud"
@@ -394,47 +392,52 @@ tests:
       custom:
         cisco:
           duo:
-            action: "ad_sync_by_user_begin"
+            action: "group_create"
         description:
-          Sync Ref:
-            " Code": "somecode"
-          directory: "AD Sync"
-          users: "xyz"
-        object: "xyz"
+          desc: "This is a group"
+          device: "11111"
+          name: "Target Group"
+        object: "Target Group"
         ocsf:
-          activity_id: 99
-          activity_name: "ad_sync_by_user_begin"
-          category_name: "Uncategorized"
-          category_uid: 0
-          class_name: "Base Event"
-          class_uid: 0
+          activity_id: 6
+          activity_name: "Create"
+          actor:
+            user:
+              name: "testuser"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Group Management"
+          class_uid: 3006
+          group:
+            desc: "This is a group"
+            name: "Target Group"
           metadata:
-            event_code: "ad_sync_by_user_begin"
+            event_code: "group_create"
             product:
               name: "Cisco Duo"
               vendor_name: "Cisco"
             version: "1.5.0"
           severity: "Informational"
           severity_id: 1
-          time: 1701067129000
-          type_uid: 99
-        timestamp: 1701067129
-        username: "abc"
+          time: 1753276320314
+          type_uid: 300606
+        timestamp: 1753276346
+        username: "testuser"
         usr:
-          name: "abc"
+          name: "testuser"
       message: |-
         {
-          "action" : "ad_sync_by_user_begin",
-          "description" : "{\"directory\": \"AD Sync\", \"Sync Ref. Code\": \"somecode\", \"users\": \"xyz\"}",
-          "isotimestamp" : "2023-11-27T06:38:49+00:00",
-          "object" : "xyz",
-          "timestamp" : 1701067129,
-          "username" : "abc"
+          "action" : "group_create",
+          "description" : "{\"desc\": \"This is a group\", \"name\": \"Target Group\", \"device\": \"11111\"}",
+          "isotimestamp" : "2025-07-23T13:12:00.314482+00:00",
+          "object" : "Target Group",
+          "username" : "testuser",
+          "timestamp" : 1753276346
         }
       service: "administrator"
       tags:
         - "source:LOGS_SOURCE"
-      timestamp: 1701067129000
+      timestamp: 1753276320314
   - sample: |-
       {
           "telephony_id" : "some-telephony-id",
@@ -580,7 +583,127 @@ tests:
           "ts": "2025-07-23T11:34:00.210770+00:00"
       }
     service: "activity"
-    result: null
+    result:
+      custom:
+        access_device:
+          browser: "Edge Chromium"
+          browser_version: "TEST_BROWSER_VERSION"
+          geoip: {}
+          ip:
+            address: "1.1.1.1"
+          location:
+            city: "TEST_CITY"
+            country: "TEST_COUNTRY"
+            state: "TEST_STATE"
+          os: "Mac OS X"
+          os_version: "10.15.7"
+        activity_id: "111111"
+        actor:
+          name: "source_user"
+          type: "admin_sync"
+        akey: "111111"
+        application:
+          name: "TEST_APP"
+        cisco:
+          duo:
+            action:
+              name: "user_create"
+        duo_target:
+          details: '{"created": null, "last_login": null, "email": "test", "status": null, "groups": null'
+          key: "222222"
+          name: "target_user"
+          type: "user"
+        ocsf:
+          activity_id: 1
+          activity_name: "Create"
+          actor:
+            app_name: "TEST_APP"
+            app_uid: "111111"
+            user:
+              email_addr: "test"
+              name: "source_user"
+              type: "Admin"
+              type_id: 2
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Account Change"
+          class_uid: 3001
+          device:
+            ip: "1.1.1.1"
+            location:
+              city: "TEST_CITY"
+            type: "Unknown"
+            type_id: 0
+          metadata:
+            event_code: "user_create"
+            log_name: "activity"
+            product:
+              name: "Cisco Duo"
+              vendor_name: "Cisco"
+            profiles:
+              - "host"
+            uid: "111111"
+            version: "1.5.0"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "1.1.1.1"
+          time: 1753270440210
+          type_uid: 300101
+          user:
+            name: "target_user"
+            type: "User"
+            type_id: 1
+            uid: "222222"
+        service: "activity"
+        target:
+          details: '{"created": null, "last_login": null, "email": "test", "status": null, "groups": null'
+          key: "222222"
+          name: "target_user"
+          type: "user"
+      message: |-
+        {
+          "actor" : {
+            "name" : "source_user",
+            "details" : "{\"created\": null, \"last_login\": null, \"email\": \"test\", \"status\": null, \"groups\": null}",
+            "type" : "admin_sync"
+          },
+          "access_device" : {
+            "os" : "Mac OS X",
+            "browser" : "Edge Chromium",
+            "ip" : {
+              "address" : "1.1.1.1"
+            },
+            "os_version" : "10.15.7",
+            "location" : {
+              "country" : "TEST_COUNTRY",
+              "city" : "TEST_CITY",
+              "state" : "TEST_STATE"
+            },
+            "browser_version" : "TEST_BROWSER_VERSION"
+          },
+          "akey" : "111111",
+          "application" : {
+            "name" : "TEST_APP",
+            "key" : "111111"
+          },
+          "service" : "activity",
+          "activity_id" : "111111",
+          "action" : {
+            "name" : "user_create"
+          },
+          "target" : {
+            "name" : "target_user",
+            "details" : "{\"created\": null, \"last_login\": null, \"email\": \"test\", \"status\": null, \"groups\": null",
+            "type" : "user",
+            "key" : "222222"
+          },
+          "ts" : "2025-07-23T11:34:00.210770+00:00"
+        }
+      service: "activity"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1753270440210
   - sample: |-
       {
           "actor": {
@@ -617,4 +740,106 @@ tests:
           "ts": "2025-07-23T11:17:00.210770+00:00"
       }
     service: "activity"
-    result: null
+    result:
+      custom:
+        access_device:
+          browser: "Edge Chromium"
+          browser_version: "TEST_BROWSER_VERSION"
+          geoip: {}
+          ip:
+            address: "1.1.1.1"
+          location:
+            city: "TEST_CITY"
+            country: "TEST_COUNTRY"
+            state: "TEST_STATE"
+          os: "Mac OS X"
+          os_version: "10.15.7"
+        activity_id: "111111"
+        actor:
+          details: '{"created": null, "last_login": null, "email": null, "status": null, "groups": null}'
+          name: "source_user"
+          type: "admin_sync"
+        akey: "111111"
+        cisco:
+          duo:
+            action:
+              name: "admin_create"
+        duo_target:
+          details: '{"email": "tuser@test.com", "role": "User", "status": "Active"}'
+          key: "111111"
+          name: "target_user"
+          type: "admin"
+        ocsf:
+          activity_id: 1
+          activity_name: "Assign Privileges"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "User Access Management"
+          class_uid: 3005
+          device:
+            ip: "1.1.1.1"
+            location:
+              city: "TEST_CITY"
+            type: "Unknown"
+            type_id: 0
+          metadata:
+            event_code: "admin_create"
+            log_name: "activity"
+            product:
+              name: "Cisco Duo"
+              vendor_name: "Cisco"
+            profiles:
+              - "host"
+            uid: "111111"
+            version: "1.5.0"
+          privileges:
+            - "ADMIN_PRIVILEGES_ASSIGNED"
+          severity: "Informational"
+          severity_id: 1
+          time: 1753269420210
+          type_uid: 300501
+        service: "activity"
+        target:
+          details: '{"email": "tuser@test.com", "role": "User", "status": "Active"}'
+          key: "111111"
+          name: "target_user"
+          type: "admin"
+      message: |-
+        {
+          "actor" : {
+            "name" : "source_user",
+            "details" : "{\"created\": null, \"last_login\": null, \"email\": null, \"status\": null, \"groups\": null}",
+            "type" : "admin_sync"
+          },
+          "access_device" : {
+            "os" : "Mac OS X",
+            "browser" : "Edge Chromium",
+            "ip" : {
+              "address" : "1.1.1.1"
+            },
+            "os_version" : "10.15.7",
+            "location" : {
+              "country" : "TEST_COUNTRY",
+              "city" : "TEST_CITY",
+              "state" : "TEST_STATE"
+            },
+            "browser_version" : "TEST_BROWSER_VERSION"
+          },
+          "akey" : "111111",
+          "service" : "activity",
+          "activity_id" : "111111",
+          "action" : {
+            "name" : "admin_create"
+          },
+          "target" : {
+            "name" : "target_user",
+            "details" : "{\"email\": \"tuser@test.com\", \"role\": \"User\", \"status\": \"Active\"}",
+            "type" : "admin",
+            "key" : "111111"
+          },
+          "ts" : "2025-07-23T11:17:00.210770+00:00"
+        }
+      service: "activity"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1753269420210
