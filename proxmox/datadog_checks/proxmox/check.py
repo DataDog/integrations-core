@@ -103,7 +103,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         }
         return event
 
-      def _collect_ha_metrics(self):
+    def _collect_ha_metrics(self):
         ha_response = self.http.get(f"{self.config.proxmox_server}/cluster/ha/status/current")
         ha_response_json = ha_response.json()
         ha_statuses = ha_response_json.get('data', [])
@@ -273,4 +273,3 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         self._collect_ha_metrics()
         if self.config.collect_tasks:
             self._collect_tasks()
-

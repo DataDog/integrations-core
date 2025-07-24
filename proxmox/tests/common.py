@@ -302,16 +302,6 @@ ALL_EVENTS = [
         ],
     },
     {
-        'timestamp': 1752604583,
-        'event_type': 'proxmox',
-        'host': None,
-        'msg_text': ' None: Console started on node ip-122-82-3-112',
-        'msg_title': 'Console started',
-        'alert_type': 'success',
-        'source_type_name': 'proxmox',
-        'tags': ['proxmox_event_type:vncproxy', 'proxmox_user:root@pam'],
-    },
-    {
         'timestamp': 1752854281,
         'event_type': 'proxmox',
         'host': 'debian',
@@ -320,16 +310,6 @@ ALL_EVENTS = [
         'alert_type': 'success',
         'source_type_name': 'proxmox',
         'tags': ['proxmox_event_type:qmshutdown', 'proxmox_user:root@pam'],
-    },
-    {
-        'timestamp': 1752854279,
-        'event_type': 'proxmox',
-        'host': 'debian',
-        'msg_text': 'Vm VM 100: Console started on node ip-122-82-3-112',
-        'msg_title': 'Console started',
-        'alert_type': 'success',
-        'source_type_name': 'proxmox',
-        'tags': ['proxmox_event_type:vncproxy', 'proxmox_user:root@pam'],
     },
 ]
 START_UPDATE_EVENTS = [
@@ -438,4 +418,3 @@ START_UPDATE_EVENTS = [
         ],
     },
 ]
-
