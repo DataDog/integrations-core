@@ -255,6 +255,7 @@ jobs:
         name: target-macos-${{ matrix.job.arch }}
         path: output
 
+  # ----------- CHANGE TO MASTER BRANCH ------------
   measure-disk-usage-macos:
     needs: build-macos
     strategy:
@@ -264,6 +265,15 @@ jobs:
     with:
       platform: ${{ matrix.platform }}
       run-id: ${{ github.run_id }}
+  
+  calculate-dep-sizes-macos:
+    needs: measure-disk-usage-macos
+    uses: DataDog/integrations-core/.github/workflows/quality-gates.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+      run-id: ${{ github.run_id }}
+
+
 
   publish:
     name: Publish artifacts and update lockfiles via PR
