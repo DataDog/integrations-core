@@ -26,11 +26,10 @@ jobs:
       - name: Get merge base commit
         id: merge_base
         run: |
-          echo "run-id inputs: ${{ inputs.run-id }}" >> $GITHUB_STEP_SUMMARY
-          echo "run-id github: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
           git fetch origin master:refs/remotes/origin/master
           git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
+
         # TODO: change to Resolve Dependencies and Build Wheels
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
@@ -38,20 +37,20 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MERGE_BASE=${{ steps.merge_base.outputs.sha }}
-
+          echo "merge base: ${{ steps.merge_base.outputs.sha }}" >> $GITHUB_STEP_SUMMARY
           count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
           count_plus_one=$((count + 1))
           run_id=$(
             (
               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-              # gh run list --workflow "Resolve Dependencies and Build Wheels" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
             ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
           )
           if [ -z "$run_id" ]; then
             echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-  
+          # gh run list --workflow "Resolve Dependencies and Build Wheels" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
+
   download-artifacts:
     needs: get-merge-base
     runs-on: ubuntu-22.04
