@@ -184,9 +184,9 @@ class QueueMetricCollector(object):
                         # Don't warn if no messages, see:
                         # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
                         if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
-                            self.log.debug("No queue info available for pattern %s", mq_pattern_filter)
+                            self.log.debug("No queue info available for queue %s", queue_name)
                         elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_UNKNOWN_OBJECT_NAME:
-                            self.log.debug("No matching queue of type %d for pattern %s", queue_type, mq_pattern_filter)
+                            self.log.debug("No matching queue of type %d for queue %s", queue_type, queue_name)
                         else:
                             self.log.debug("Error inquiring queue %s: %s", queue_name, e)
                             self._submit_discovery_error_metric(e, [f"queue:{queue_name}"])
