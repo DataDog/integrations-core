@@ -577,11 +577,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /watchguard_firebox/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
 /watchguard_firebox/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviews @DataDog/logs-core
 
-/kaspersky/                                                          @DataDog/agent-integrations
-/kaspersky/*.md                                                      @DataDog/agent-integrations @DataDog/documentation
-/kaspersky/manifest.json                                             @DataDog/agent-integrations @DataDog/documentation
-/kaspersky/assets/logs/                                              @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviews @DataDog/logs-core
-
 /dnsfilter/                                                          @DataDog/saas-integrations
 /dnsfilter/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /dnsfilter/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
