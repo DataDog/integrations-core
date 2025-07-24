@@ -232,6 +232,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             'PROCEDURE': self._run_explain_procedure,
             'FQ_PROCEDURE': self._run_fully_qualified_explain_procedure,
             'STATEMENT': self._run_explain,
+            'TIDB_STATEMENT': self._run_explain_tidb,
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
@@ -335,32 +336,94 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             raise
 
+    def _get_tidb_statement_samples(self):
+        """
+        Get statement samples from TiDB's cluster_statements_summary table.
+
+        TiDB doesn't have events_statements_current, but we can use cluster_statements_summary
+        with QUERY_SAMPLE_TEXT which contains a sample query for each digest.
+        """
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+            # TiDB-specific query to get statement samples
+            query = """
+            SELECT
+                SCHEMA_NAME as current_schema,
+                QUERY_SAMPLE_TEXT as sql_text,
+                DIGEST as digest,
+                DIGEST_TEXT as digest_text,
+                -- TiDB doesn't have these fields, so we'll use calculated values
+                0 as end_event_id,
+                unix_timestamp() * 1000000000 - AVG_LATENCY as timer_start,
+                0 as uptime,
+                unix_timestamp() as now,
+                unix_timestamp() * 1000000000 as timer_end,
+                AVG_LATENCY as timer_wait_ns,
+                0 as lock_time_ns,
+                AVG_AFFECTED_ROWS as rows_affected,
+                AVG_RESULT_ROWS as rows_sent,
+                -- TiDB doesn't track rows_examined separately, use AVG_PROCESSED_KEYS as approximation
+                AVG_PROCESSED_KEYS as rows_examined,
+                -- TiDB doesn't have these performance counters, set to 0
+                0 as select_full_join,
+                0 as select_full_range_join,
+                0 as select_range,
+                0 as select_range_check,
+                0 as select_scan,
+                0 as sort_merge_passes,
+                0 as sort_range,
+                0 as sort_rows,
+                0 as sort_scan,
+                0 as no_index_used,
+                0 as no_good_index_used,
+                SAMPLE_USER as processlist_user,
+                INSTANCE as processlist_host,
+                SCHEMA_NAME as processlist_db,
+                PLAN as execution_plan
+            FROM information_schema.cluster_statements_summary
+            WHERE QUERY_SAMPLE_TEXT IS NOT NULL
+                AND QUERY_SAMPLE_TEXT != ''
+                AND DIGEST_TEXT IS NOT NULL
+                AND DIGEST_TEXT NOT LIKE 'EXPLAIN %'
+                AND LAST_SEEN > DATE_SUB(NOW(), INTERVAL 1 MINUTE)
+            ORDER BY LAST_SEEN DESC
+            LIMIT 100
+            """
+            self._cursor_run(cursor, query)
+            return cursor.fetchall()
+
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def _get_new_events_statements_current(self):
         start = time.time()
-        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            self._cursor_run(
-                cursor,
-                "set @uptime = {}".format(UPTIME_SUBQUERY.format(global_status_table=self._global_status_table)),
-            )
-            self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY)
-            rows = cursor.fetchall()
-            tags = (
-                self._tags
-                + ["events_statements_table:{}".format(EVENTS_STATEMENTS_TABLE)]
-                + self._check._get_debug_tags()
-            )
-            self._check.histogram(
-                "dd.mysql.get_new_events_statements.time",
-                (time.time() - start) * 1000,
-                tags=tags,
-                hostname=self._check.reported_hostname,
-            )
-            self._check.histogram(
-                "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.reported_hostname
-            )
-            self._log.debug("Read %s rows from %s", len(rows), EVENTS_STATEMENTS_TABLE)
-            return rows
+
+        # Check if this is TiDB and use appropriate query
+        if self._check._get_is_tidb(self._db):
+            rows = self._get_tidb_statement_samples()
+        else:
+            with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+                self._cursor_run(
+                    cursor,
+                    "set @uptime = {}".format(UPTIME_SUBQUERY.format(global_status_table=self._global_status_table)),
+                )
+                self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY)
+                rows = cursor.fetchall()
+
+        table_name = (
+            "information_schema.cluster_statements_summary"
+            if self._check._get_is_tidb(self._db)
+            else EVENTS_STATEMENTS_TABLE
+        )
+        tags = self._tags + ["events_statements_table:{}".format(table_name)] + self._check._get_debug_tags()
+        self._check.histogram(
+            "dd.mysql.get_new_events_statements.time",
+            (time.time() - start) * 1000,
+            tags=tags,
+            hostname=self._check.reported_hostname,
+        )
+        self._check.histogram(
+            "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.reported_hostname
+        )
+        self._log.debug("Read %s rows from %s", len(rows), table_name)
+        return rows
 
     def _filter_valid_statement_rows(self, rows):
         num_sent = 0
@@ -406,10 +469,38 @@ class MySQLStatementSamples(DBMAsyncJob):
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
             return None
 
-        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
-            plan, error_states = self._explain_statement(
-                cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
-            )
+        # For TiDB, check if we already have the execution plan from cluster_statements_summary
+        tidb_plan_text = None
+        if self._check._get_is_tidb(self._db):
+            plan = None
+            error_states = []
+
+            # Use text PLAN if available
+            if not plan and 'execution_plan' in row and row['execution_plan']:
+                # TiDB's PLAN column contains text format, not JSON
+                # Store it separately to skip obfuscation later
+                tidb_plan_text = row['execution_plan']
+                # Handle both string and bytes
+                if isinstance(tidb_plan_text, bytes):
+                    tidb_plan_text = tidb_plan_text.decode('utf-8')
+                # Set plan to a special marker so we know we have a TiDB text plan
+                plan = "TIDB_TEXT_PLAN"
+                self._log.debug(
+                    'Using pre-fetched text execution plan from TiDB cluster_statements_summary for statement: %s',
+                    obfuscated_statement,
+                )
+
+            # If we couldn't get a plan from TiDB columns, fall through to normal explain
+            if not plan:
+                with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
+                    plan, error_states = self._explain_statement(
+                        cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
+                    )
+        else:
+            with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
+                plan, error_states = self._explain_statement(
+                    cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
+                )
 
         collection_errors = []
         if error_states:
@@ -430,15 +521,38 @@ class MySQLStatementSamples(DBMAsyncJob):
                 )
 
         normalized_plan, obfuscated_plan, plan_signature = None, None, None
+        tidb_native_plan = None  # Store the native TiDB plan for mysql.execution_plan
+
         if plan:
-            try:
-                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
-                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
-            except Exception as e:
-                if self._config.log_unobfuscated_plans:
-                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
-                raise e
-            plan_signature = compute_exec_plan_signature(normalized_plan)
+            # Special handling for TiDB text plans
+            if plan == "TIDB_TEXT_PLAN" and tidb_plan_text:
+                # Parse TiDB text plan into JSON format
+                tidb_native_plan = self._parse_tidb_text_plan(tidb_plan_text)
+                self._log.debug(
+                    "TiDB native plan type: %s, content: %s",
+                    type(tidb_native_plan),
+                    tidb_native_plan[:200] if len(tidb_native_plan) > 200 else tidb_native_plan,
+                )
+                # Convert to MySQL-compatible format for plan.definition
+                mysql_compatible_plan = self._convert_tidb_plan_to_mysql_format(tidb_native_plan)
+                self._log.debug(
+                    "MySQL-compatible plan type: %s, content: %s",
+                    type(mysql_compatible_plan),
+                    mysql_compatible_plan[:200] if len(mysql_compatible_plan) > 200 else mysql_compatible_plan,
+                )
+                normalized_plan = mysql_compatible_plan
+                obfuscated_plan = mysql_compatible_plan
+                # Create a signature from the MySQL-compatible plan
+                plan_signature = compute_sql_signature(mysql_compatible_plan)
+            else:
+                try:
+                    normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
+                    obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+                except Exception as e:
+                    if self._config.log_unobfuscated_plans:
+                        self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
+                    raise e
+                plan_signature = compute_exec_plan_signature(normalized_plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
@@ -447,7 +561,18 @@ class MySQLStatementSamples(DBMAsyncJob):
             if self._has_sampled_since_completion(row, event_timestamp):
                 return None
 
-            return {
+            # For TiDB, update execution_plan with the native JSON format
+            if tidb_native_plan:
+                # Create a copy of the row to avoid modifying the original
+                row = dict(row)
+                # Replace the text execution_plan with the native TiDB JSON array
+                # Ensure it's a string, not bytes
+                if isinstance(tidb_native_plan, bytes):
+                    row['execution_plan'] = tidb_native_plan.decode('utf-8')
+                else:
+                    row['execution_plan'] = tidb_native_plan
+
+            event = {
                 "timestamp": event_timestamp,
                 "dbm_type": "plan",
                 "host": self._check.reported_hostname,
@@ -481,6 +606,12 @@ class MySQLStatementSamples(DBMAsyncJob):
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
+
+            # For TiDB, add the node instance information
+            if self._check._get_is_tidb(self._db) and row.get('processlist_host'):
+                event['tidb'] = {'node_instance': row['processlist_host']}
+
+            return event
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def _collect_plans_for_statements(self, rows):
@@ -534,6 +665,18 @@ class MySQLStatementSamples(DBMAsyncJob):
         if cached_strategy:
             self._log.debug("Using cached events_statements_strategy: %s", cached_strategy)
             return cached_strategy
+
+        # Check if this is TiDB - it doesn't have performance_schema consumers
+        if self._check._get_is_tidb(self._db):
+            self._log.debug("TiDB detected, using TiDB statement samples strategy")
+            # For TiDB, use TIDB_STATEMENT strategy since it doesn't support FORMAT=json or stored procedures
+            self._preferred_explain_strategies = ['TIDB_STATEMENT']
+            collection_interval = self._configured_collection_interval
+            if collection_interval < 0:
+                collection_interval = 10  # Default 10 seconds for TiDB
+            strategy = ("information_schema.cluster_statements_summary", collection_interval)
+            self._collection_strategy_cache["events_statements_strategy"] = strategy
+            return strategy
 
         enabled_consumers = self._get_enabled_performance_schema_consumers()
         if len(enabled_consumers) < 3:
@@ -772,6 +915,37 @@ class MySQLStatementSamples(DBMAsyncJob):
         )
         return cursor.fetchone()[0]
 
+    def _run_explain_tidb(self, schema, cursor, statement, obfuscated_statement):
+        """
+        Run the explain for TiDB which uses FORMAT=tidb_json instead of FORMAT=json
+
+        TiDB EXPLAIN documentation: https://docs.pingcap.com/tidb/stable/sql-statement-explain/
+
+        Note: TiDB's cluster_statements_summary table stores normalized queries with placeholders (?).
+        Since TiDB EXPLAIN doesn't support parameterized queries, we cannot collect execution plans
+        when only the parameterized query is available.
+
+        Note: For TiDB, execution plans are primarily retrieved from the PLAN column in
+        information_schema.cluster_statements_summary table, which contains pre-collected
+        execution plans in text format. The execution statistics are embedded within this
+        text plan. This method is used as a fallback when the PLAN column is not available.
+        """
+        # Check if the statement contains placeholders
+        if '?' in statement:
+            self._log.debug(
+                'Skipping TiDB EXPLAIN for parameterized query (placeholders detected): %s', obfuscated_statement
+            )
+            # Return None to indicate we cannot collect the plan
+            return None
+
+        try:
+            cursor.execute('EXPLAIN FORMAT=tidb_json {}'.format(statement))
+            return cursor.fetchone()[0]
+        except Exception as e:
+            # Log with obfuscated statement for security
+            self._log.debug('TiDB EXPLAIN failed for statement: %s, error: %s', obfuscated_statement, e)
+            raise
+
     def _run_explain_procedure(self, schema, cursor, statement, obfuscated_statement):
         """
         Run the explain by calling the stored procedure if available.
@@ -829,6 +1003,10 @@ class MySQLStatementSamples(DBMAsyncJob):
             raise
 
     def _has_sampled_since_completion(self, row, event_timestamp):
+        # TiDB doesn't have end_event_id, so always return False for TiDB
+        if self._check._get_is_tidb(self._db):
+            return False
+
         # If the query has finished end_event_id will be set
         if row['end_event_id']:
             query_end_time = self._calculate_timer_end(row)
@@ -845,6 +1023,263 @@ class MySQLStatementSamples(DBMAsyncJob):
     @staticmethod
     def _can_explain(obfuscated_statement):
         return obfuscated_statement.split(' ', 1)[0].lower() in SUPPORTED_EXPLAIN_STATEMENTS
+
+    def _parse_tidb_text_plan(self, plan_text):
+        """
+        Parse TiDB text execution plan into a structured JSON format.
+
+        TiDB plan format has tab-separated columns:
+        id, task, estRows, operator info, actRows, execution info, memory, disk
+        """
+        try:
+            # Handle escaped newlines and tabs if present
+            if '\\n' in plan_text or '\\t' in plan_text:
+                plan_text = plan_text.replace('\\n', '\n').replace('\\t', '\t')
+
+            lines = plan_text.strip().split('\n')
+            if len(lines) < 2:  # Need at least header and one data line
+                return json.dumps({"raw_plan": plan_text})
+
+            # Skip the first line (header) and process data lines
+            # Parse header to understand column order
+            header_line = lines[0]
+            headers = header_line.split('\t')
+            self._log.debug("TiDB plan headers: %s", headers)
+            self._log.debug("TiDB plan header count: %d", len(headers))
+
+            # Based on the user's output showing the data is shifted left by 1,
+            # it seems like there might be an extra header column that doesn't have data
+            # Or the data has one less column than the headers
+
+            # Build flat array of nodes (TiDB format)
+            nodes = []
+
+            for i, line in enumerate(lines[1:]):  # Skip header line
+                if not line.strip():
+                    continue
+
+                # Split by tabs - TiDB uses tabs to separate columns
+                parts = line.split('\t')
+
+                # Debug first data line
+                if i == 0:
+                    self._log.debug("TiDB plan first data line parts: %s", parts)
+                    self._log.debug("TiDB plan parts count: %d, expected: %d", len(parts), len(headers))
+
+                # Based on the output, it seems the data columns are consistently shifted
+                # Let's check if we have the expected number of parts
+                if len(parts) < 8:
+                    self._log.debug("TiDB plan line has only %d columns, expected 8", len(parts))
+                    continue
+
+                # Try to detect if there's an empty first column
+                # If the first part is empty or just whitespace/tree chars, shift everything
+                if not parts[0].strip() or parts[0].strip() in ['', '└', '├', '│']:
+                    # Empty first column, shift all indices by 1
+                    if len(parts) < 9:
+                        self._log.debug("TiDB plan with empty first column has only %d columns, need 9", len(parts))
+                        continue
+                    id_value = parts[1]
+                    task_value = parts[2]
+                    estrows_value = parts[3]
+                    operator_value = parts[4]
+                    actrows_value = parts[5]
+                    execution_value = parts[6]
+                    memory_value = parts[7]
+                    disk_value = parts[8]
+                else:
+                    # Normal column positions
+                    id_value = parts[0]
+                    task_value = parts[1]
+                    estrows_value = parts[2]
+                    operator_value = parts[3]
+                    actrows_value = parts[4]
+                    execution_value = parts[5]
+                    memory_value = parts[6]
+                    disk_value = parts[7]
+
+                # Clean up the id field by removing tree prefixes (└─, ├─, spaces) and trailing spaces
+                clean_id = id_value.lstrip('└├─ \t').rstrip()
+
+                # Debug output to understand the mapping
+                if i == 0:
+                    self._log.debug(
+                        "TiDB plan mapping - id_value: %s, task_value: %s, estrows_value: %s",
+                        id_value,
+                        task_value,
+                        estrows_value,
+                    )
+
+                # Looking at the output, it seems the JSON field order doesn't match our mapping
+                # The output shows taskType:"Projection_7" when we set id: clean_id
+                # This suggests the fields are being reordered or renamed somewhere
+                # Let's create the node with the correct mapping based on the actual output
+
+                # Based on the output pattern, it appears that:
+                # What we call 'id' appears as 'taskType' in output
+                # What we call 'taskType' appears as 'estRows' in output
+                # And so on... everything is shifted
+
+                # Create node object with all values properly trimmed
+                node = {
+                    'id': clean_id,  # Already cleaned and trimmed
+                    'taskType': task_value.strip(),  # Remove all whitespace
+                    'estRows': estrows_value.strip(),  # Remove all whitespace
+                    'operatorInfo': operator_value.strip() if operator_value.strip() else None,  # camelCase
+                    'actRows': actrows_value.strip(),  # Remove all whitespace
+                    'executionInfo': execution_value.strip() if execution_value.strip() else None,  # camelCase
+                    'memory': memory_value.strip() if memory_value.strip() != 'N/A' else None,
+                    'disk': disk_value.strip() if disk_value.strip() != 'N/A' else None,
+                }
+
+                # Parse numeric values
+                for field in ['estRows', 'actRows']:
+                    value = node[field]
+                    if value and value != 'N/A':
+                        try:
+                            # Keep as string with decimal if present (matching TiDB format)
+                            if '.' in value:
+                                node[field] = value  # Keep as "1.00" format
+                            else:
+                                node[field] = str(int(value))  # Convert to string integer
+                        except ValueError:
+                            # Keep as string if can't parse
+                            pass
+                    elif value == 'N/A':
+                        node[field] = "0"
+
+                # Remove empty/None fields to match TiDB's compact format
+                node = {k: v for k, v in node.items() if v is not None and v != ''}
+
+                nodes.append(node)
+
+            # Return as flat array matching TiDB's FORMAT=tidb_json output
+            return json.dumps(nodes)
+
+        except Exception as e:
+            # If parsing fails, return the original text wrapped in JSON
+            self._log.debug("Failed to parse TiDB plan to JSON: %s", e)
+            return json.dumps({"raw_plan": plan_text, "parse_error": str(e)})
+
+    def _convert_tidb_plan_to_mysql_format(self, tidb_plan_json):
+        """
+        Convert TiDB plan JSON to MySQL-compatible format.
+
+        TiDB format: [{"id": "Point_Get_1", "taskType": "root", ...}]
+        MySQL format: {"query_block": {"select_id": 1, "table": {...}}}
+        """
+        try:
+            # Parse the TiDB plan if it's a string or bytes
+            if isinstance(tidb_plan_json, (str, bytes)):
+                if isinstance(tidb_plan_json, bytes):
+                    tidb_plan_json = tidb_plan_json.decode('utf-8')
+                tidb_nodes = json.loads(tidb_plan_json)
+            else:
+                tidb_nodes = tidb_plan_json
+
+            if not tidb_nodes or not isinstance(tidb_nodes, list):
+                self._log.debug("TiDB plan is not a list, returning original: %s", type(tidb_nodes))
+                return tidb_plan_json
+
+            # Find the actual data access node (usually the deepest one with table info)
+            table_node = None
+            root_node = tidb_nodes[0]
+
+            # Search through all nodes to find the one with table information
+            for node in tidb_nodes:
+                if 'table:' in node.get('operatorInfo', ''):
+                    table_node = node
+                    break
+
+            # If no table node found, use the last node (deepest in the tree)
+            if not table_node:
+                table_node = tidb_nodes[-1] if tidb_nodes else root_node
+                self._log.debug("No table node found, using last node: %s", table_node.get('id', 'unknown'))
+
+            # Extract table information from the table node
+            table_name = None
+            access_type = "unknown"
+            key_info = None
+
+            # Try to extract table name and access pattern
+            operator_info = table_node.get('operatorInfo', '')
+            if operator_info:
+                # Look for table name patterns
+                if 'table:' in operator_info:
+                    table_match = operator_info.split('table:')[1].split(',')[0].split()[0]
+                    table_name = table_match
+
+                # Determine access type based on operator id
+                op_id = table_node.get('id', '')
+                if 'Point_Get' in op_id:
+                    access_type = 'const'  # MySQL uses 'const' for point lookups
+                    # Extract key info if available
+                    if 'index:' in operator_info:
+                        key_info = operator_info.split('index:')[1].split(',')[0].split()[0]
+                    elif (
+                        'handle' in operator_info
+                        or 'PRIMARY' in operator_info
+                        or 'clustered index:PRIMARY' in operator_info
+                    ):
+                        key_info = 'PRIMARY'
+                elif 'IndexRangeScan' in op_id or 'IndexLookUp' in op_id:
+                    access_type = 'range'
+                    if 'index:' in operator_info:
+                        key_info = operator_info.split('index:')[1].split(',')[0].split()[0]
+                elif 'TableFullScan' in op_id:
+                    access_type = 'ALL'
+                elif 'TableRangeScan' in op_id:
+                    access_type = 'range'
+                elif 'IndexReader' in op_id:
+                    access_type = 'index'
+
+            # Build MySQL-compatible structure
+            mysql_format = {
+                "query_block": {
+                    "select_id": 1,
+                    "cost_info": {
+                        "query_cost": "0.00"  # TiDB doesn't provide cost in the same way
+                    },
+                }
+            }
+
+            # Add table information
+            table_info = {
+                "table_name": table_name or "unknown",
+                "access_type": access_type,
+                "rows_examined_per_scan": int(float(table_node.get('estRows', '0'))),
+                "rows_produced_per_join": int(float(table_node.get('actRows', '0'))),
+            }
+
+            # Add key information if available
+            if key_info:
+                table_info["key"] = key_info
+                table_info["used_key_parts"] = [key_info]
+
+            # Add execution info if available
+            if table_node.get('executionInfo'):
+                table_info["execution_info"] = table_node['executionInfo']
+
+            # Add operator info as a custom field
+            if table_node.get('operatorInfo'):
+                table_info["operator_info"] = table_node['operatorInfo']
+
+            mysql_format["query_block"]["table"] = table_info
+
+            # If there are multiple nodes, add them as a custom field
+            if len(tidb_nodes) > 1:
+                mysql_format["query_block"]["tidb_execution_tree"] = tidb_nodes
+
+            result = json.dumps(mysql_format)
+            self._log.debug("Converted TiDB plan to MySQL format successfully, type: %s", type(result))
+            return result
+
+        except Exception as e:
+            self._log.debug("Failed to convert TiDB plan to MySQL format: %s", e)
+            # Return original if conversion fails
+            if isinstance(tidb_plan_json, bytes):
+                return tidb_plan_json.decode('utf-8')
+            return tidb_plan_json
 
     @staticmethod
     def _calculate_timer_end(row):

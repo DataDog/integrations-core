@@ -17,7 +17,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import MySql, statements
-from datadog_checks.mysql.statement_samples import StatementTruncationState
+from datadog_checks.mysql.statement_samples import MySQLStatementSamples, StatementTruncationState
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
@@ -1093,3 +1093,1555 @@ def test_has_sampled_since_completion(
     event_timestamp = query_end_time + event_timestamp_offset
 
     assert mysql_check._statement_samples._has_sampled_since_completion(row, event_timestamp) == expected_result
+
+
+# TiDB-specific tests
+@pytest.mark.unit
+def test_tidb_statement_summary_query():
+    """Test TiDB statement summary query generation"""
+    from datadog_checks.mysql.statements import _get_tidb_statement_summary_query
+
+    # Test without recent statements filter
+    query, args = _get_tidb_statement_summary_query(only_query_recent_statements=False)
+    assert "information_schema.cluster_statements_summary" in query
+    assert "ORDER BY `EXEC_COUNT` DESC" in query
+    assert args is None
+
+    # Test with recent statements filter
+    last_seen = '2024-01-01 00:00:00'
+    query, args = _get_tidb_statement_summary_query(only_query_recent_statements=True, last_seen=last_seen)
+    assert "WHERE `LAST_SEEN` >= %s" in query
+    assert args == [last_seen]
+
+
+@pytest.mark.unit
+def test_normalize_tidb_statement_row():
+    """Test normalization of TiDB statement row to MySQL format"""
+    from datadog_checks.mysql.statements import _normalize_tidb_statement_row
+
+    tidb_row = {
+        'INSTANCE': '10.0.0.1:4000',
+        'SCHEMA_NAME': 'test_db',
+        'DIGEST': 'abc123',
+        'DIGEST_TEXT': 'SELECT * FROM users',
+        'EXEC_COUNT': 100,
+        'SUM_LATENCY': 50000000,  # 50ms in nanoseconds
+        'SUM_ERRORS': 2,
+        'AVG_AFFECTED_ROWS': 0.5,
+        'LAST_SEEN': '2024-01-01 00:00:00',
+        # TiDB specific columns
+        'AVG_LATENCY': 500000,
+        'MAX_LATENCY': 1000000,
+        'AVG_MEM': 1024,
+        'MAX_MEM': 2048,
+        'AVG_RESULT_ROWS': 10,
+        'MAX_RESULT_ROWS': 20,
+    }
+
+    normalized = _normalize_tidb_statement_row(tidb_row)
+
+    # Check standard MySQL columns
+    assert normalized['schema_name'] == 'test_db'
+    assert normalized['digest'] == 'abc123'
+    assert normalized['digest_text'] == 'SELECT * FROM users'
+    assert normalized['count_star'] == 100
+    assert normalized['sum_timer_wait'] == 50000000
+    assert normalized['sum_errors'] == 2
+    assert normalized['sum_rows_affected'] == 50  # 0.5 * 100
+    assert normalized['sum_rows_sent'] == 1000  # 10 * 100
+    assert normalized['last_seen'] == '2024-01-01 00:00:00'
+
+    # Check columns that TiDB doesn't have (should be 0)
+    assert normalized['sum_lock_time'] == 0
+    assert normalized['sum_rows_examined'] == 0
+    assert normalized['sum_select_scan'] == 0
+    assert normalized['sum_select_full_join'] == 0
+    assert normalized['sum_no_index_used'] == 0
+    assert normalized['sum_no_good_index_used'] == 0
+
+    # Check TiDB-specific metrics are preserved
+    assert normalized['_tidb_instance'] == '10.0.0.1:4000'
+    assert normalized['_tidb_avg_latency'] == 500000
+    assert normalized['_tidb_max_latency'] == 1000000
+    assert normalized['_tidb_avg_mem'] == 1024
+    assert normalized['_tidb_max_mem'] == 2048
+
+
+@pytest.mark.unit
+def test_is_tidb_statements_summary_available():
+    """Test checking if TiDB cluster_statements_summary is available"""
+    from datadog_checks.mysql.statements import _is_tidb_statements_summary_available
+
+    class MockCursor:
+        def __init__(self, has_table):
+            self.has_table = has_table
+
+        def execute(self, query):
+            pass
+
+        def fetchone(self):
+            if self.has_table:
+                return (1,)
+            return None
+
+    # Test when table exists
+    cursor = MockCursor(has_table=True)
+    assert _is_tidb_statements_summary_available(cursor) is True
+
+    # Test when table doesn't exist
+    cursor = MockCursor(has_table=False)
+    assert _is_tidb_statements_summary_available(cursor) is False
+
+
+@pytest.mark.unit
+def test_collect_tidb_statement_metrics_rows():
+    """Test collection of statement metrics from TiDB"""
+    from datadog_checks.mysql.statements import _collect_tidb_statement_metrics_rows
+
+    class MockCursor:
+        def __init__(self, rows):
+            self.rows = rows
+            self.executed_query = None
+            self.executed_args = None
+
+        def execute(self, query, args=None):
+            self.executed_query = query
+            self.executed_args = args
+
+        def fetchall(self):
+            return self.rows
+
+    # Sample TiDB rows
+    tidb_rows = [
+        {
+            'INSTANCE': '10.0.0.1:4000',
+            'SCHEMA_NAME': 'db1',
+            'DIGEST': 'digest1',
+            'DIGEST_TEXT': 'SELECT * FROM t1',
+            'EXEC_COUNT': 10,
+            'SUM_LATENCY': 1000000,
+            'SUM_ERRORS': 0,
+            'AVG_AFFECTED_ROWS': 0,
+            'LAST_SEEN': '2024-01-01 00:00:00',
+            'AVG_LATENCY': 100000,
+            'MAX_LATENCY': 200000,
+            'AVG_MEM': 100,
+            'MAX_MEM': 200,
+            'AVG_RESULT_ROWS': 1,
+            'MAX_RESULT_ROWS': 2,
+        }
+    ]
+
+    cursor = MockCursor(tidb_rows)
+
+    # Test collection without filters
+    rows = _collect_tidb_statement_metrics_rows(cursor)
+
+    assert len(rows) == 1
+    assert rows[0]['schema_name'] == 'db1'
+    assert rows[0]['digest'] == 'digest1'
+    assert rows[0]['count_star'] == 10
+    assert rows[0]['sum_timer_wait'] == 1000000
+
+    # Test collection with recent statements filter
+    last_seen = '2024-01-01 00:00:00'
+    rows = _collect_tidb_statement_metrics_rows(cursor, only_query_recent_statements=True, last_seen=last_seen)
+
+    assert cursor.executed_args == [last_seen]
+    assert "WHERE `LAST_SEEN` >= %s" in cursor.executed_query
+
+
+@pytest.mark.unit
+def test_tidb_statement_metrics_integration():
+    """Test TiDB statement metrics collection integration with main check"""
+    from datadog_checks.mysql import MySql
+
+    from . import common
+
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True, 'query_metrics': {'enabled': True}}],
+    )
+
+    # Mock the TiDB detection
+    with mock.patch.object(mysql_check, '_get_is_tidb', return_value=True):
+        # This test verifies the integration point exists
+        # Actual collection would require a real TiDB connection
+        assert hasattr(mysql_check, '_get_is_tidb')
+
+
+@pytest.mark.unit
+def test_is_tidb_statements_summary_available_mock():
+    """Test checking if TiDB cluster_statements_summary is available"""
+    from datadog_checks.mysql.statements import _is_tidb_statements_summary_available
+
+    # Test when table exists
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchone.return_value = (1,)
+    assert _is_tidb_statements_summary_available(mock_cursor) is True
+    mock_cursor.execute.assert_called_once()
+
+    # Test when table doesn't exist
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchone.return_value = None
+    assert _is_tidb_statements_summary_available(mock_cursor) is False
+
+    # Test when exception occurs
+    mock_cursor = mock.MagicMock()
+    mock_cursor.execute.side_effect = Exception("Table not found")
+    assert _is_tidb_statements_summary_available(mock_cursor) is False
+
+
+# TiDB-specific explain tests
+@pytest.mark.unit
+def test_tidb_explain_plan_from_cluster_statements():
+    """Test that EXPLAIN plans work for TiDB queries"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Mock database connection first
+    mock_db = mock.MagicMock()
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+    statement_samples._db = mock_db
+    # Initialize TiDB-specific strategies
+    statement_samples._get_sample_collection_strategy()
+
+    # Mock database connection and cursor
+    mock_cursor = mock.MagicMock()
+    mock_db.cursor.return_value.__enter__.return_value = mock_cursor
+
+    # Mock TiDB EXPLAIN output
+    tidb_explain_output = json.dumps(
+        {
+            "id": "TableReader_5",
+            "estRows": "10000.00",
+            "task": "root",
+            "access object": "",
+            "operator info": "data:TableFullScan_4",
+            "operatorInfo": "data:TableFullScan_4",
+            "childTasks": [
+                {
+                    "id": "TableFullScan_4",
+                    "estRows": "10000.00",
+                    "task": "cop[tikv]",
+                    "access object": "table:users",
+                    "operator info": "keep order:false, stats:pseudo",
+                }
+            ],
+        }
+    )
+
+    mock_cursor.fetchone.return_value = [tidb_explain_output]
+
+    # Test explain
+    statement = "SELECT * FROM users WHERE id = 1"
+    obfuscated_statement = "SELECT * FROM users WHERE id = ?"
+
+    plan = statement_samples._run_explain_tidb('test_db', mock_cursor, statement, obfuscated_statement)
+
+    # Verify EXPLAIN was called with tidb_json format for TiDB
+    mock_cursor.execute.assert_called_with('EXPLAIN FORMAT=tidb_json SELECT * FROM users WHERE id = 1')
+
+    # Verify plan was returned
+    assert plan == tidb_explain_output
+
+
+def test_tidb_rate_limiting():
+    """Test that rate limiting works for TiDB statement samples"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                    'samples_per_hour_per_query': 1,  # Very restrictive for testing
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Test rate limiter
+    query_cache_key = ('test_db', 'query_signature_123')
+
+    # First acquire should succeed
+    assert statement_samples._explained_statements_ratelimiter.acquire(query_cache_key) is True
+
+    # Second acquire should fail due to rate limiting
+    assert statement_samples._explained_statements_ratelimiter.acquire(query_cache_key) is False
+
+
+@pytest.mark.unit
+def test_tidb_node_instance_metadata():
+    """Test that TiDB node instance is included in statement samples"""
+    # Mock the connection before creating the check
+    with mock.patch('datadog_checks.mysql.util.connect_with_session_variables'):
+        mysql_check = MySql(
+            common.CHECK_NAME,
+            {},
+            instances=[
+                {
+                    'server': 'localhost',
+                    'user': 'datadog',
+                    'dbm': True,
+                    'statement_samples': {
+                        'enabled': True,
+                    },
+                }
+            ],
+        )
+
+        # Mock TiDB detection
+        mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+        # Create statement samples collector
+        statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+        # Initialize _tags and _tags_str which are normally set by the parent class
+        statement_samples._tags = []
+        statement_samples._tags_str = ""
+
+    # Mock database connection
+    mock_db = mock.MagicMock()
+    statement_samples._db = mock_db
+    statement_samples._explained_statements_ratelimiter = mock.MagicMock()
+    statement_samples._explained_statements_ratelimiter.acquire.return_value = True
+    statement_samples._seen_samples_ratelimiter = mock.MagicMock()
+    statement_samples._seen_samples_ratelimiter.acquire.return_value = True
+
+    # Test row with TiDB node instance
+    row = {
+        'sql_text': 'SELECT * FROM orders',
+        'digest_text': 'SELECT * FROM orders',
+        'current_schema': 'ecommerce',
+        'processlist_host': 'tidb-node-2.cluster.local:4000',
+        'timer_end': 123456789,
+        'timer_wait_ns': 1000000,
+        'rows_affected': 0,
+        'rows_sent': 100,
+        'rows_examined': 100,
+        'processlist_user': 'app_user',
+        'processlist_db': 'ecommerce',
+        'digest': 'test_digest',
+        'lock_time_ns': 0,
+        'select_full_join': 0,
+        'select_full_range_join': 0,
+        'select_range': 0,
+        'select_range_check': 0,
+        'select_scan': 1,
+        'sort_merge_passes': 0,
+        'sort_range': 0,
+        'sort_rows': 0,
+        'sort_scan': 0,
+        'no_index_used': 0,
+        'no_good_index_used': 0,
+    }
+
+    # Mock required methods
+    with mock.patch('datadog_checks.mysql.statement_samples.obfuscate_sql_with_metadata') as mock_obfuscate:
+        mock_obfuscate.return_value = {'query': 'SELECT * FROM orders', 'metadata': {'tables': ['orders']}}
+
+        with mock.patch('datadog_checks.mysql.statement_samples.compute_sql_signature') as mock_signature:
+            mock_signature.return_value = 'test_signature'
+
+            with mock.patch('datadog_checks.mysql.statement_samples.datadog_agent') as mock_agent:
+                mock_agent.obfuscate_sql_exec_plan.return_value = '{}'
+                mock_agent.get_version.return_value = '7.0.0'
+
+                with mock.patch('datadog_checks.mysql.statement_samples.compute_exec_plan_signature') as mock_plan_sig:
+                    mock_plan_sig.return_value = 'plan_signature'
+
+                    with mock.patch('datadog_checks.mysql.statement_samples.get_truncation_state') as mock_trunc:
+                        mock_trunc.return_value = mock.MagicMock(value='not_truncated')
+
+                        # Mock explain statement to return empty plan
+                        statement_samples._explain_statement = mock.MagicMock(return_value=('{}', []))
+
+                        # Call _collect_plan_for_statement
+                        event = statement_samples._collect_plan_for_statement(row)
+
+    # Verify event was created
+    assert event is not None
+
+    # Verify TiDB node instance is included
+    assert 'tidb' in event
+    assert 'node_instance' in event['tidb']
+    assert event['tidb']['node_instance'] == 'tidb-node-2.cluster.local:4000'
+
+    # Verify network.client.ip still contains the processlist_host for compatibility
+    assert event['network']['client']['ip'] == 'tidb-node-2.cluster.local:4000'
+
+
+def test_tidb_has_sampled_since_completion():
+    """Test that _has_sampled_since_completion handles TiDB correctly"""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True}])
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Mock database
+    mock_db = mock.MagicMock()
+    statement_samples._db = mock_db
+
+    # For TiDB, should always return False
+    row = {'end_event_id': 12345}  # Even with end_event_id set
+    result = statement_samples._has_sampled_since_completion(row, 1234567890)
+
+    assert result is False
+
+
+def test_tidb_use_prefetched_plan():
+    """Test that TiDB uses pre-fetched plan from cluster_statements_summary"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+    # Initialize _tags and _tags_str which are normally set by the parent class
+    statement_samples._tags = []
+    statement_samples._tags_str = ""
+
+    # Mock database connection
+    mock_db = mock.MagicMock()
+    statement_samples._db = mock_db
+    statement_samples._explained_statements_ratelimiter = mock.MagicMock()
+    statement_samples._explained_statements_ratelimiter.acquire.return_value = True
+    statement_samples._seen_samples_ratelimiter = mock.MagicMock()
+    statement_samples._seen_samples_ratelimiter.acquire.return_value = True
+
+    # Test row with execution plan from TiDB
+    row = {
+        'sql_text': 'SELECT * FROM users WHERE id = ?',
+        'digest_text': 'SELECT * FROM users WHERE id = ?',
+        'current_schema': 'test_db',
+        'execution_plan': 'id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk\n'
+        'Point_Get_1\troot\t1\ttable:users, handle:id\t1\ttime:500µs\tN/A\tN/A',
+        'timer_end': 123456789,
+        'timer_wait_ns': 1000000,
+        'rows_affected': 0,
+        'rows_sent': 1,
+        'rows_examined': 1,
+        'processlist_user': 'test_user',
+        'processlist_host': 'localhost',
+        'processlist_db': 'test_db',
+        # Add other required fields
+        'digest': 'test_digest',
+        'lock_time_ns': 0,
+        'select_full_join': 0,
+        'select_full_range_join': 0,
+        'select_range': 0,
+        'select_range_check': 0,
+        'select_scan': 0,
+        'sort_merge_passes': 0,
+        'sort_range': 0,
+        'sort_rows': 0,
+        'sort_scan': 0,
+        'no_index_used': 0,
+        'no_good_index_used': 0,
+    }
+
+    # Mock required methods
+    with mock.patch('datadog_checks.mysql.statement_samples.obfuscate_sql_with_metadata') as mock_obfuscate:
+        mock_obfuscate.return_value = {'query': 'SELECT * FROM users WHERE id = ?', 'metadata': {'tables': ['users']}}
+
+        with mock.patch('datadog_checks.mysql.statement_samples.compute_sql_signature') as mock_signature:
+            mock_signature.return_value = 'test_signature'
+
+            with mock.patch('datadog_checks.mysql.statement_samples.datadog_agent') as mock_agent:
+                mock_agent.obfuscate_sql_exec_plan.side_effect = lambda x, normalize=False: x
+                mock_agent.get_version.return_value = '7.0.0'
+
+                with mock.patch('datadog_checks.mysql.statement_samples.compute_exec_plan_signature') as mock_plan_sig:
+                    mock_plan_sig.return_value = 'plan_signature'
+
+                    with mock.patch('datadog_checks.mysql.statement_samples.get_truncation_state') as mock_trunc:
+                        mock_trunc.return_value = mock.MagicMock(value='not_truncated')
+
+                        # Call _collect_plan_for_statement
+                        event = statement_samples._collect_plan_for_statement(row)
+
+    # Should have successfully created an event with the pre-fetched plan
+    assert event is not None
+    # For TiDB text plans, obfuscate should NOT be called
+    mock_agent.obfuscate_sql_exec_plan.assert_not_called()
+    # The plan should be MySQL-compatible format in db.plan.definition
+    plan_def = event['db']['plan']['definition']
+    # Should be valid JSON
+    parsed = json.loads(plan_def)
+    # Should be MySQL-compatible format
+    assert 'query_block' in parsed
+    assert parsed['query_block']['table']['table_name'] == 'users'
+    assert parsed['query_block']['table']['access_type'] == 'const'
+
+    # The native TiDB format should be in mysql.execution_plan
+    assert 'mysql' in event
+    assert 'execution_plan' in event['mysql']
+    native_plan = json.loads(event['mysql']['execution_plan'])
+    assert isinstance(native_plan, list)
+    assert len(native_plan) == 1
+    assert native_plan[0]['id'] == 'Point_Get_1'
+
+    # Verify TiDB node instance is included
+    assert 'tidb' in event
+    assert 'node_instance' in event['tidb']
+    assert event['tidb']['node_instance'] == 'localhost'
+
+
+def test_tidb_prefetched_plan_bytes():
+    """Test that TiDB handles execution plan in bytes format"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+    # Initialize _tags and _tags_str which are normally set by the parent class
+    statement_samples._tags = []
+    statement_samples._tags_str = ""
+
+    # Mock database connection
+    mock_db = mock.MagicMock()
+    statement_samples._db = mock_db
+    statement_samples._explained_statements_ratelimiter = mock.MagicMock()
+    statement_samples._explained_statements_ratelimiter.acquire.return_value = True
+    statement_samples._seen_samples_ratelimiter = mock.MagicMock()
+    statement_samples._seen_samples_ratelimiter.acquire.return_value = True
+
+    # Test row with execution plan as string (what TiDB returns after decoding)
+    row = {
+        'sql_text': 'SELECT * FROM users WHERE id = ?',
+        'digest_text': 'SELECT * FROM users WHERE id = ?',
+        'current_schema': 'test_db',
+        'execution_plan': (
+            'id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk\n'
+            'Point_Get_1\troot\t1\ttable:users, handle:id\t1\ttime:500µs\tN/A\tN/A'
+        ),  # string format with header
+        'timer_end': 123456789,
+        'timer_wait_ns': 1000000,
+        'rows_affected': 0,
+        'rows_sent': 1,
+        'rows_examined': 1,
+        'processlist_user': 'test_user',
+        'processlist_host': 'localhost',
+        'processlist_db': 'test_db',
+        'digest': 'test_digest',
+        'lock_time_ns': 0,
+        'select_full_join': 0,
+        'select_full_range_join': 0,
+        'select_range': 0,
+        'select_range_check': 0,
+        'select_scan': 0,
+        'sort_merge_passes': 0,
+        'sort_range': 0,
+        'sort_rows': 0,
+        'sort_scan': 0,
+        'no_index_used': 0,
+        'no_good_index_used': 0,
+    }
+
+    # Mock required methods
+    with mock.patch('datadog_checks.mysql.statement_samples.obfuscate_sql_with_metadata') as mock_obfuscate:
+        mock_obfuscate.return_value = {'query': 'SELECT * FROM users WHERE id = ?', 'metadata': {'tables': ['users']}}
+
+        with mock.patch('datadog_checks.mysql.statement_samples.compute_sql_signature') as mock_signature:
+            mock_signature.return_value = 'test_signature'
+
+            with mock.patch('datadog_checks.mysql.statement_samples.datadog_agent') as mock_agent:
+                mock_agent.obfuscate_sql_exec_plan.side_effect = lambda x, normalize=False: x
+                mock_agent.get_version.return_value = '7.0.0'
+
+                with mock.patch('datadog_checks.mysql.statement_samples.compute_exec_plan_signature') as mock_plan_sig:
+                    mock_plan_sig.return_value = 'plan_signature'
+
+                    with mock.patch('datadog_checks.mysql.statement_samples.get_truncation_state') as mock_trunc:
+                        mock_trunc.return_value = mock.MagicMock(value='not_truncated')
+
+                        # Call _collect_plan_for_statement
+                        event = statement_samples._collect_plan_for_statement(row)
+
+    # Should have successfully created an event with the pre-fetched plan
+    assert event is not None
+    # For TiDB text plans, obfuscate should NOT be called
+    mock_agent.obfuscate_sql_exec_plan.assert_not_called()
+
+    # The plan definition should be a MySQL-compatible JSON string
+    plan_def = event['db']['plan']['definition']
+    # If it's bytes, decode it
+    if isinstance(plan_def, bytes):
+        plan_def = plan_def.decode('utf-8')
+    assert isinstance(plan_def, str)
+    # Parse it to verify MySQL-compatible structure
+    parsed_plan = json.loads(plan_def)
+    assert 'query_block' in parsed_plan
+    assert 'table' in parsed_plan['query_block']
+    assert parsed_plan['query_block']['table']['table_name'] == 'users'
+    assert parsed_plan['query_block']['table']['access_type'] == 'const'  # Point_Get maps to 'const'
+
+    # The mysql.execution_plan should contain the native TiDB JSON array
+    assert 'mysql' in event
+    assert 'execution_plan' in event['mysql']
+    exec_plan = event['mysql']['execution_plan']
+    assert isinstance(exec_plan, str)
+    # Parse to verify it's the native TiDB format
+    parsed_exec = json.loads(exec_plan)
+    assert isinstance(parsed_exec, list)
+    assert len(parsed_exec) == 1
+    assert parsed_exec[0]['id'] == 'Point_Get_1'
+    assert parsed_exec[0]['taskType'] == 'root'
+
+
+def test_tidb_plan_mysql_conversion():
+    """Test conversion of TiDB plan to MySQL-compatible format"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+    # Initialize _tags and _tags_str which are normally set by the parent class
+    statement_samples._tags = []
+    statement_samples._tags_str = ""
+
+    # Test various TiDB operator types
+    tidb_plans = [
+        {
+            "id": "Point_Get_1",
+            "taskType": "root",
+            "estRows": "1",
+            "actRows": "1",
+            "operatorInfo": "table:users, handle:1",
+        },
+        {
+            "id": "IndexRangeScan_10",
+            "taskType": "cop[tikv]",
+            "estRows": "100",
+            "actRows": "95",
+            "operatorInfo": "table:orders, index:idx_date(created_at)",
+        },
+        {
+            "id": "TableFullScan_5",
+            "taskType": "cop[tikv]",
+            "estRows": "10000",
+            "actRows": "10000",
+            "operatorInfo": "table:products",
+        },
+    ]
+
+    # Test Point_Get conversion
+    mysql_plan = statement_samples._convert_tidb_plan_to_mysql_format(json.dumps([tidb_plans[0]]))
+    parsed = json.loads(mysql_plan)
+    assert parsed['query_block']['table']['table_name'] == 'users'
+    assert parsed['query_block']['table']['access_type'] == 'const'
+    assert parsed['query_block']['table']['key'] == 'PRIMARY'
+
+    # Test IndexRangeScan conversion
+    mysql_plan = statement_samples._convert_tidb_plan_to_mysql_format(json.dumps([tidb_plans[1]]))
+    parsed = json.loads(mysql_plan)
+    assert parsed['query_block']['table']['table_name'] == 'orders'
+    assert parsed['query_block']['table']['access_type'] == 'range'
+    assert parsed['query_block']['table']['key'] == 'idx_date(created_at)'
+
+    # Test TableFullScan conversion
+    mysql_plan = statement_samples._convert_tidb_plan_to_mysql_format(json.dumps([tidb_plans[2]]))
+    parsed = json.loads(mysql_plan)
+    assert parsed['query_block']['table']['table_name'] == 'products'
+    assert parsed['query_block']['table']['access_type'] == 'ALL'
+
+
+def test_tidb_plan_json_string_format():
+    """Test that TiDB plan definition is a JSON string in the event, matching MySQL format"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Test plan text with multiple nodes
+    plan_text = (
+        "id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk\n"
+        "Projection_7\troot\t1\tmercari.items_order_datetime.order_datetime\t0\t"
+        "time:519.2µs, loops:1\t1016 Bytes\tN/A\n"
+        "└─TopN_8\troot\t1\tmercari.items_order_datetime.order_datetime:desc, offset:?, count:?\t0\t"
+        "time:516.7µs, loops:1\t0 Bytes\tN/A\n"
+        "  └─Point_Get_13\troot\t1.00\ttable:items_order_datetime, clustered index:PRIMARY(item_id)\t0\t"
+        "time:508.7µs, loops:2\tN/A\tN/A"
+    )
+
+    # Parse the plan
+    parsed_json_str = statement_samples._parse_tidb_text_plan(plan_text)
+
+    # The method returns a JSON string, parse it to verify it's valid
+    parsed_obj = json.loads(parsed_json_str)
+
+    # Verify it's a list of objects
+    assert isinstance(parsed_obj, list)
+    assert len(parsed_obj) == 3
+
+    # Check first node
+    assert parsed_obj[0]['id'] == 'Projection_7'
+    assert parsed_obj[0]['taskType'] == 'root'
+    assert parsed_obj[0]['estRows'] == '1'
+    assert parsed_obj[0]['operatorInfo'] == 'mercari.items_order_datetime.order_datetime'
+
+    # Check second node (with tree prefix removed)
+    assert parsed_obj[1]['id'] == 'TopN_8'
+    assert parsed_obj[1]['taskType'] == 'root'
+
+    # Check third node
+    assert parsed_obj[2]['id'] == 'Point_Get_13'
+    assert parsed_obj[2]['taskType'] == 'root'
+
+
+def test_tidb_plan_json_parsing():
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Test realistic TiDB plan text
+    plan_text = """\tid\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk
+\tProjection_6\troot\t1\tmercari.users.id, mercari.users.photo_id\t1\ttime:779.9µs, loops:2\t2.61 KB\tN/A
+\t└─HashJoin_8\troot\t1\tCARTESIAN left outer join\t1\ttime:765.2µs, loops:2\t50.2 KB\t0 Bytes
+\t  ├─Point_Get_9(Build)\troot\t1\ttable:users, handle:?\t1\ttime:545.5µs, loops:2\tN/A\tN/A
+\t  └─Point_Get_10(Probe)\troot\t1\ttable:user_personal_attributes, handle:?\t0\ttime:582.5µs, loops:1\tN/A\tN/A"""
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+
+    # Should be valid JSON
+    plan_json = json.loads(parsed)
+
+    # Should be a list of nodes
+    assert isinstance(plan_json, list)
+    assert len(plan_json) == 4  # 4 nodes in the plan
+
+    # Check root node (first in list)
+    assert plan_json[0]['id'] == 'Projection_6'
+    assert plan_json[0]['taskType'] == 'root'
+    assert plan_json[0]['estRows'] == '1'
+    assert plan_json[0]['actRows'] == '1'
+
+    # Check HashJoin node
+    hash_join = plan_json[1]
+    assert hash_join['id'] == 'HashJoin_8'
+    assert hash_join['taskType'] == 'root'
+    assert 'left outer join' in hash_join['operatorInfo']
+
+    # Check Point_Get nodes
+    assert plan_json[2]['id'] == 'Point_Get_9(Build)'
+    assert plan_json[3]['id'] == 'Point_Get_10(Probe)'
+
+
+def test_tidb_plan_json_parsing_escaped():
+    """Test TiDB plan text to JSON parsing with escaped characters"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Test TiDB plan text with escaped newlines and tabs (as seen in real data)
+    plan_text = (
+        "\\tid\\ttask\\testRows\\toperator info\\tactRows\\texecution info\\tmemory\\tdisk\\n"
+        "\\tUpdate_3\\troot\\t0\\tN/A\\t0\\ttime:2.38ms, loops:2\\t23.7 KB\\tN/A\\n"
+        "\\t└─Point_Get_1\\troot\\t1\\ttable:users, handle:?, lock\\t1\\t"
+        "time:766.2µs, loops:2\\tN/A\\tN/A"
+    )
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+
+    # Should be valid JSON
+    plan_json = json.loads(parsed)
+
+    # Should be a list of nodes
+    assert isinstance(plan_json, list)
+    assert len(plan_json) == 2  # 2 nodes in the plan
+
+    # Check root node
+    assert plan_json[0]['id'] == 'Update_3'
+    assert plan_json[0]['taskType'] == 'root'
+    assert plan_json[0]['operatorInfo'] == 'N/A'
+
+    # Check Point_Get child
+    point_get = plan_json[1]
+    assert point_get['id'] == 'Point_Get_1'
+    assert 'table:users' in point_get['operatorInfo']
+
+
+def test_tidb_explain_skip_parameterized_queries():
+    """Test that TiDB skips EXPLAIN for parameterized queries"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Mock database connection and cursor
+    mock_cursor = mock.MagicMock()
+    mock_db = mock.MagicMock()
+    mock_db.cursor.return_value.__enter__.return_value = mock_cursor
+    statement_samples._db = mock_db
+
+    # Test with parameterized query (contains ?)
+    statement = "select ? from information_schema.tables where table_schema = ? and table_name = ? limit ?"
+    obfuscated_statement = statement  # Same in this case
+
+    plan = statement_samples._run_explain_tidb('information_schema', mock_cursor, statement, obfuscated_statement)
+
+    # Should return None for parameterized queries
+    assert plan is None
+
+    # Verify no execute was called
+    mock_cursor.execute.assert_not_called()
+
+
+def test_tidb_explain_format_tidb_json():
+    """Test that TiDB uses FORMAT=tidb_json instead of FORMAT=json"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Mock database connection and cursor
+    mock_cursor = mock.MagicMock()
+    mock_db = mock.MagicMock()
+    mock_db.cursor.return_value.__enter__.return_value = mock_cursor
+    statement_samples._db = mock_db
+
+    # Mock TiDB EXPLAIN output with tidb_json format
+    tidb_json_output = json.dumps(
+        {
+            "SQL": (
+                "insert into auth ( uuid, access_token ) values ( ? ) "
+                "on duplicate key update access_token = access_token"
+            ),
+            "Plan": {"TP": "Insert", "Schema": "test"},
+        }
+    )
+
+    mock_cursor.fetchone.return_value = [tidb_json_output]
+
+    # Test explain with INSERT ON DUPLICATE KEY UPDATE
+    statement = (
+        "insert into auth ( uuid, access_token ) values ( 'test' ) on duplicate key update access_token = access_token"
+    )
+    obfuscated_statement = (
+        "insert into auth ( uuid, access_token ) values ( ? ) on duplicate key update access_token = access_token"
+    )
+
+    plan = statement_samples._run_explain_tidb('test_db', mock_cursor, statement, obfuscated_statement)
+
+    # Verify EXPLAIN FORMAT=tidb_json was called
+    expected_query = (
+        "EXPLAIN FORMAT=tidb_json insert into auth ( uuid, access_token ) values ( 'test' ) "
+        "on duplicate key update access_token = access_token"
+    )
+    mock_cursor.execute.assert_called_with(expected_query)
+
+    # Verify plan was returned
+    assert plan == tidb_json_output
+
+
+def test_tidb_plan_parsing_real_output():
+    """Test parsing of actual TiDB execution plan output with multiple lines"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+    # Initialize _tags and _tags_str which are normally set by the parent class
+    statement_samples._tags = []
+    statement_samples._tags_str = ""
+
+    # Real TiDB plan output - convert to tab-separated format
+    plan_text = (
+        "id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk\n"
+        "Projection_7\troot\t1\tmercari.items_order_datetime.order_datetime\t0\t"
+        "time:519.2µs, loops:1, Concurrency:OFF\t1016 Bytes\tN/A\n"
+        "└─TopN_8\troot\t1\tmercari.items_order_datetime.order_datetime:desc, offset:?, count:?\t0\t"
+        "time:516.7µs, loops:1\t0 Bytes\tN/A\n"
+        "  └─Point_Get_13\troot\t1.00\ttable:items_order_datetime, clustered index:PRIMARY(item_id)\t0\t"
+        "time:508.7µs, loops:2, Get:{num_rpc:1, total_time:470.9µs}, time_detail: "
+        "{total_process_time: 41µs, total_wait_time: 49.4µs, total_kv_read_wall_time: 96.9µs, "
+        "tikv_wall_time: 122.9µs}, scan_detail: {total_keys: 1, get_snapshot_time: 13.5µs, "
+        "rocksdb: {block: {cache_hit_count: 9}}}\tN/A\tN/A"
+    )
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+
+    # Should be valid JSON
+    plan_json = json.loads(parsed)
+
+    # Expected JSON structure - flat array like TiDB's FORMAT=tidb_json
+    expected_json = [
+        {
+            "id": "Projection_7",
+            "estRows": "1",
+            "taskType": "root",
+            "operatorInfo": "mercari.items_order_datetime.order_datetime",
+            "actRows": "0",
+            "executionInfo": "time:519.2µs, loops:1, Concurrency:OFF",
+            "memory": "1016 Bytes",
+        },
+        {
+            "id": "TopN_8",
+            "estRows": "1",
+            "taskType": "root",
+            "operatorInfo": "mercari.items_order_datetime.order_datetime:desc, offset:?, count:?",
+            "actRows": "0",
+            "executionInfo": "time:516.7µs, loops:1",
+            "memory": "0 Bytes",
+        },
+        {
+            "id": "Point_Get_13",
+            "estRows": "1.00",
+            "taskType": "root",
+            "operatorInfo": "table:items_order_datetime, clustered index:PRIMARY(item_id)",
+            "actRows": "0",
+            "executionInfo": (
+                "time:508.7µs, loops:2, Get:{num_rpc:1, total_time:470.9µs}, time_detail: "
+                "{total_process_time: 41µs, total_wait_time: 49.4µs, total_kv_read_wall_time: 96.9µs, "
+                "tikv_wall_time: 122.9µs}, scan_detail: {total_keys: 1, get_snapshot_time: 13.5µs, "
+                "rocksdb: {block: {cache_hit_count: 9}}}"
+            ),
+        },
+    ]
+
+    # Verify the parsed JSON matches expected structure
+    assert plan_json == expected_json
+
+
+def test_tidb_plan_parsing_edge_cases():
+    """Test edge cases in TiDB plan parsing"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Test 1: Empty plan
+    empty_plan = ""
+    parsed = statement_samples._parse_tidb_text_plan(empty_plan)
+    result = json.loads(parsed)
+    assert 'raw_plan' in result
+    assert result['raw_plan'] == ""
+
+    # Test 2: Only header, no data
+    header_only = "id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk"
+    parsed = statement_samples._parse_tidb_text_plan(header_only)
+    result = json.loads(parsed)
+    assert 'raw_plan' in result
+
+    # Test 3: Malformed line (fewer columns than expected)
+    malformed_plan = """id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk
+TableScan_1\troot\t100"""  # Only 3 columns instead of 8
+
+    parsed = statement_samples._parse_tidb_text_plan(malformed_plan)
+    result = json.loads(parsed)
+    # Should return empty array when no valid nodes
+    assert result == []  # No valid nodes due to column count mismatch
+
+    # Test 4: Plan with N/A values
+    plan_with_na = """id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk
+TableScan_1\troot\tN/A\ttable:test\tN/A\ttime:1ms\tN/A\tN/A"""
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_with_na)
+    result = json.loads(parsed)
+
+    # Should return flat array
+    assert len(result) == 1
+    node = result[0]
+    assert node['id'] == 'TableScan_1'
+    assert node['estRows'] == "0"  # N/A converted to "0" for numeric fields
+    assert node['actRows'] == "0"  # N/A converted to "0" for numeric fields
+    assert 'memory' not in node  # N/A fields are omitted
+    assert 'disk' not in node
+
+
+def test_tidb_plan_parsing_simple_flat_structure():
+    """Test parsing of simple TiDB plan without tree structure"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Simple plan with single node (no tree indicators)
+    simple_plan = """id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk
+Show_5\troot\t1\t\t13\ttime:10.8ms, loops:2\t1.23 KB\tN/A"""
+
+    parsed = statement_samples._parse_tidb_text_plan(simple_plan)
+    result = json.loads(parsed)
+
+    # Expected JSON - flat array like TiDB FORMAT=tidb_json
+    expected_json = [
+        {
+            "id": "Show_5",
+            "estRows": "1",
+            "taskType": "root",
+            "actRows": "13",
+            "executionInfo": "time:10.8ms, loops:2",
+            "memory": "1.23 KB",
+        }
+    ]
+
+    # Verify the parsed JSON matches expected structure
+    assert result == expected_json
+
+
+def test_tidb_plan_parsing_show_statement():
+    """Test parsing of TiDB SHOW statement execution plan"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Plan that was producing incorrect JSON in the original issue
+    plan_text = """id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk
+└─Show_5\troot\t1\t\t13\ttime:10.8ms, loops:2\t1.23 KB\tN/A"""
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+    result = json.loads(parsed)
+
+    # Expected correct JSON structure - flat array
+    expected_json = [
+        {
+            "id": "Show_5",
+            "estRows": "1",
+            "taskType": "root",
+            "actRows": "13",
+            "executionInfo": "time:10.8ms, loops:2",
+            "memory": "1.23 KB",
+        }
+    ]
+
+    # Verify the parsed JSON is correct (not the broken format from the issue)
+    assert result == expected_json
+
+    # This should NOT produce the broken format shown in the issue:
+    # {
+    #   "id":"",
+    #   "task":"└─Show_5",
+    #   "estRows":"root",
+    #   "operator":"1",
+    #   "actRows":"",
+    #   "execution":"13",
+    #   "memory":"time:10.8ms, loops:2",
+    #   "disk":null
+    # }
+
+
+def test_tidb_plan_parsing_reference_format():
+    """Test parsing matches TiDB's actual FORMAT=tidb_json output"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Simulate TiDB text plan for: SELECT * FROM auth WHERE uuid = 'test'
+    plan_text = """id\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk
+Point_Get_1\troot\t1.00\ttable:auth, clustered index:PRIMARY(uuid)\t1\ttime:500µs\tN/A\tN/A"""
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+    result = json.loads(parsed)
+
+    # Expected format matching TiDB's EXPLAIN FORMAT=tidb_json output
+    expected_json = [
+        {
+            "id": "Point_Get_1",
+            "estRows": "1.00",
+            "taskType": "root",
+            "operatorInfo": "table:auth, clustered index:PRIMARY(uuid)",
+            "actRows": "1",
+            "executionInfo": "time:500µs",
+        }
+    ]
+
+    # Verify matches TiDB's actual format
+    assert result == expected_json
+
+
+def test_tidb_plan_parsing_with_empty_first_column():
+    """Test parsing TiDB plan with empty first column (actual format from user)"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Real TiDB plan with empty first column before id
+    plan_text = (
+        "\tid\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk\n"
+        "\tPoint_Get_1\troot\t1\ttable:item_description, clustered index:PRIMARY(item_id)\t1\t"
+        "time:954.1µs, loops:2, Get:{num_rpc:1, total_time:922.7µs}, time_detail: "
+        "{total_process_time: 118.7µs, total_wait_time: 475.9µs, total_kv_read_wall_time: 599.8µs, "
+        "tikv_wall_time: 627.3µs}, scan_detail: {total_process_keys: 1, total_process_keys_size: 102, "
+        "total_keys: 1, get_snapshot_time: 442.9µs, rocksdb: {block: {cache_hit_count: 10}}}\tN/A\tN/A"
+    )
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+    result = json.loads(parsed)
+
+    # Expected JSON
+    expected_json = [
+        {
+            "id": "Point_Get_1",
+            "estRows": "1",
+            "taskType": "root",
+            "operatorInfo": "table:item_description, clustered index:PRIMARY(item_id)",
+            "actRows": "1",
+            "executionInfo": (
+                "time:954.1µs, loops:2, Get:{num_rpc:1, total_time:922.7µs}, time_detail: "
+                "{total_process_time: 118.7µs, total_wait_time: 475.9µs, total_kv_read_wall_time: 599.8µs, "
+                "tikv_wall_time: 627.3µs}, scan_detail: {total_process_keys: 1, total_process_keys_size: 102, "
+                "total_keys: 1, get_snapshot_time: 442.9µs, rocksdb: {block: {cache_hit_count: 10}}}"
+            ),
+        }
+    ]
+
+    # Verify correct parsing with empty first column
+    assert result == expected_json
+
+
+def test_tidb_plan_parsing_multi_level_with_empty_column():
+    """Test parsing multi-level TiDB plan with empty first column and tree structure"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Multi-level plan from user's example
+    plan_text = (
+        "\tid\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk\n"
+        "\tProjection_7\troot\t1\tmercari.items_order_datetime.order_datetime\t0\t"
+        "time:475.4µs, loops:1, Concurrency:OFF\t1016 Bytes\tN/A\n"
+        "\t└─TopN_8\troot\t1\tmercari.items_order_datetime.order_datetime:desc, offset:?, count:?\t0\t"
+        "time:471.9µs, loops:1\t0 Bytes\tN/A\n"
+        "\t  └─Point_Get_13\troot\t1.00\ttable:items_order_datetime, clustered index:PRIMARY(item_id)\t0\t"
+        "time:460.4µs, loops:2, Get:{num_rpc:1, total_time:426.5µs}, time_detail: "
+        "{total_process_time: 45.8µs, total_wait_time: 38.7µs, total_kv_read_wall_time: 87.5µs, "
+        "tikv_wall_time: 113.6µs}, scan_detail: {total_keys: 1, get_snapshot_time: 10µs, "
+        "rocksdb: {block: {cache_hit_count: 9}}}\tN/A\tN/A"
+    )
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+    result = json.loads(parsed)
+
+    # Expected flat array (no hierarchy)
+    expected_json = [
+        {
+            "id": "Projection_7",
+            "estRows": "1",
+            "taskType": "root",
+            "operatorInfo": "mercari.items_order_datetime.order_datetime",
+            "actRows": "0",
+            "executionInfo": "time:475.4µs, loops:1, Concurrency:OFF",
+            "memory": "1016 Bytes",
+        },
+        {
+            "id": "TopN_8",
+            "estRows": "1",
+            "taskType": "root",
+            "operatorInfo": "mercari.items_order_datetime.order_datetime:desc, offset:?, count:?",
+            "actRows": "0",
+            "executionInfo": "time:471.9µs, loops:1",
+            "memory": "0 Bytes",
+        },
+        {
+            "id": "Point_Get_13",
+            "estRows": "1.00",
+            "taskType": "root",
+            "operatorInfo": "table:items_order_datetime, clustered index:PRIMARY(item_id)",
+            "actRows": "0",
+            "executionInfo": (
+                "time:460.4µs, loops:2, Get:{num_rpc:1, total_time:426.5µs}, time_detail: "
+                "{total_process_time: 45.8µs, total_wait_time: 38.7µs, total_kv_read_wall_time: 87.5µs, "
+                "tikv_wall_time: 113.6µs}, scan_detail: {total_keys: 1, get_snapshot_time: 10µs, "
+                "rocksdb: {block: {cache_hit_count: 9}}}"
+            ),
+        },
+    ]
+
+    # Verify correct parsing with tree structure
+    assert result == expected_json
+
+
+def test_tidb_plan_parsing_stream_agg_with_empty_column():
+    """Test parsing StreamAgg plan with cop[tikv] tasks"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # StreamAgg plan from user's example
+    plan_text = (
+        "\tid\ttask\testRows\toperator info\tactRows\texecution info\tmemory\tdisk\n"
+        "\tStreamAgg_17\troot\t1\tfuncs:count(Column#9)->Column#7\t1\ttime:591.2µs, loops:2\t388 Bytes\tN/A\n"
+        "\t└─IndexReader_18\troot\t1\tindex:StreamAgg_9\t0\ttime:586.2µs, loops:1, cop_task: "
+        "{num: 1, max: 542.8µs, proc_keys: 0, tot_proc: 77.1µs, tot_wait: 32µs, copr_cache: disabled, "
+        "build_task_duration: 9.09µs, max_distsql_concurrency: 1}, rpc_info:{Cop:{num_rpc:1, "
+        "total_time:526.8µs}}\t280 Bytes\tN/A\n"
+        "\t  └─StreamAgg_9\tcop[tikv]\t1\tfuncs:count(?)->Column#9\t0\ttikv_task:{time:0s, loops:1}, "
+        "scan_detail: {total_keys: 1, get_snapshot_time: 8.69µs, rocksdb: {block: {cache_hit_count: 10}}}, "
+        "time_detail: {total_process_time: 77.1µs, total_wait_time: 32µs, tikv_wall_time: 215µs}\tN/A\tN/A\n"
+        "\t    └─IndexRangeScan_16\tcop[tikv]\t1.28\ttable:comments, index:idx_item_id_status(item_id, status), "
+        "range:[? ?,? ?], keep order:false\t0\ttikv_task:{time:0s, loops:1}\tN/A\tN/A"
+    )
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+    result = json.loads(parsed)
+
+    # Expected flat array with cop[tikv] tasks
+    expected_json = [
+        {
+            "id": "StreamAgg_17",
+            "estRows": "1",
+            "taskType": "root",
+            "operatorInfo": "funcs:count(Column#9)->Column#7",
+            "actRows": "1",
+            "executionInfo": "time:591.2µs, loops:2",
+            "memory": "388 Bytes",
+        },
+        {
+            "id": "IndexReader_18",
+            "estRows": "1",
+            "taskType": "root",
+            "operatorInfo": "index:StreamAgg_9",
+            "actRows": "0",
+            "executionInfo": (
+                "time:586.2µs, loops:1, cop_task: {num: 1, max: 542.8µs, proc_keys: 0, "
+                "tot_proc: 77.1µs, tot_wait: 32µs, copr_cache: disabled, build_task_duration: 9.09µs, "
+                "max_distsql_concurrency: 1}, rpc_info:{Cop:{num_rpc:1, total_time:526.8µs}}"
+            ),
+            "memory": "280 Bytes",
+        },
+        {
+            "id": "StreamAgg_9",
+            "estRows": "1",
+            "taskType": "cop[tikv]",
+            "operatorInfo": "funcs:count(?)->Column#9",
+            "actRows": "0",
+            "executionInfo": (
+                "tikv_task:{time:0s, loops:1}, scan_detail: {total_keys: 1, get_snapshot_time: 8.69µs, "
+                "rocksdb: {block: {cache_hit_count: 10}}}, time_detail: {total_process_time: 77.1µs, "
+                "total_wait_time: 32µs, tikv_wall_time: 215µs}"
+            ),
+        },
+        {
+            "id": "IndexRangeScan_16",
+            "estRows": "1.28",
+            "taskType": "cop[tikv]",
+            "operatorInfo": (
+                "table:comments, index:idx_item_id_status(item_id, status), range:[? ?,? ?], keep order:false"
+            ),
+            "actRows": "0",
+            "executionInfo": "tikv_task:{time:0s, loops:1}",
+        },
+    ]
+
+    # Verify correct parsing
+    assert result == expected_json
+
+
+def test_tidb_plan_parsing_empty_plan():
+    """Test parsing empty plan (row 16 from user's example)"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'dbm': True,
+                'statement_samples': {
+                    'enabled': True,
+                },
+            }
+        ],
+    )
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Empty plan
+    plan_text = ""
+
+    parsed = statement_samples._parse_tidb_text_plan(plan_text)
+    result = json.loads(parsed)
+
+    # Expected: raw_plan wrapper for empty plan
+    assert 'raw_plan' in result
+    assert result['raw_plan'] == ""
+
+
+@pytest.mark.unit
+def test_tidb_sample_collection_strategy():
+    """Test that TiDB uses the correct statement collection strategy"""
+    from datadog_checks.mysql.statement_samples import MySQLStatementSamples
+
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[{'server': 'localhost', 'user': 'datadog', 'dbm': True, 'statement_samples': {'enabled': True}}],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Create statement samples collector
+    statement_samples = MySQLStatementSamples(mysql_check, mysql_check._config, {})
+
+    # Mock database connection
+    mock_db = mock.MagicMock()
+    statement_samples._db = mock_db
+
+    # Get the collection strategy
+    table, interval = statement_samples._get_sample_collection_strategy()
+
+    # Should use TiDB cluster_statements_summary table
+    assert table == "information_schema.cluster_statements_summary"
+    assert interval > 0
+
+    # Should set TiDB explain strategies
+    assert statement_samples._preferred_explain_strategies == ['TIDB_STATEMENT']

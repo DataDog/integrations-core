@@ -7,7 +7,7 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
-from typing import Dict, List  # noqa: F401
+from typing import Dict, List, Tuple  # noqa: F401
 
 import pymysql
 
@@ -130,6 +130,37 @@ IDLE_BLOCKERS_SUBQUERY_MYSQL7 = """\
         )
 """
 
+# TiDB specific constants
+TIDB_ACTIVITY_QUERY_LIMIT = 100
+
+# TiDB specific activity query
+TIDB_ACTIVITY_QUERY = """\
+SELECT
+    ID as processlist_id,
+    USER as processlist_user,
+    HOST as processlist_host,
+    DB as processlist_db,
+    COMMAND as processlist_command,
+    STATE as processlist_state,
+    INFO as sql_text,
+    TIME as query_time,
+    MEM as memory_usage,
+    TxnStart as txn_start_time
+FROM INFORMATION_SCHEMA.CLUSTER_PROCESSLIST
+WHERE
+    COMMAND != 'Sleep'
+    AND INFO IS NOT NULL
+    AND INFO != ''
+    -- Exclude our own monitoring queries
+    AND INFO NOT LIKE '%CLUSTER_PROCESSLIST%'
+    AND INFO NOT LIKE '%datadog-agent%'
+    -- Exclude other system queries
+    AND INFO NOT LIKE '%INFORMATION_SCHEMA%'
+    AND INFO NOT LIKE '%performance_schema%'
+ORDER BY TIME DESC
+LIMIT {}
+""".format(TIDB_ACTIVITY_QUERY_LIMIT)
+
 
 class MySQLVersion(Enum):
     # 8.0
@@ -183,6 +214,12 @@ class MySQLActivity(DBMAsyncJob):
                 'Waiting for events_waits_current availability to be determined by the check, skipping run.'
             )
         if self._check.events_wait_current_enabled is False:
+            # Use TiDB-specific activity collection
+            if self._check._get_is_tidb(self._db):
+                self._log.debug("TiDB detected, using TiDB-specific activity collection")
+                self._collect_tidb_activity()
+                return
+
             azure_deployment_type = self._config.cloud_metadata.get("azure", {}).get("deployment_type")
             if azure_deployment_type != "flexible_server":
                 self._check.record_warning(
@@ -200,6 +237,170 @@ class MySQLActivity(DBMAsyncJob):
             return
         self._check_version()
         self._collect_activity()
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_tidb_activity(self):
+        # type: () -> None
+        """Collect activity data from TiDB CLUSTER_PROCESSLIST"""
+        tags = [t for t in self._tags if not t.startswith('dd.internal')]
+
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+            rows = self._get_tidb_activity(cursor)
+            rows = self._normalize_tidb_rows(rows)
+
+            # Group rows by TiDB node instance
+            rows_by_node = {}
+            for row in rows:
+                node_instance = row.get('processlist_host', 'unknown')
+                if node_instance not in rows_by_node:
+                    rows_by_node[node_instance] = []
+                rows_by_node[node_instance].append(row)
+
+            # Create and send separate events for each TiDB node
+            for node_instance, node_rows in rows_by_node.items():
+                event = self._create_tidb_activity_event(node_rows, tags, node_instance)
+                payload = json.dumps(event, default=self._json_event_encoding)
+                self._check.database_monitoring_query_activity(payload)
+                self._check.histogram(
+                    "dd.mysql.activity.collect_activity.payload_size",
+                    len(payload),
+                    tags=tags + ["tidb_node_instance:{}".format(node_instance)] + self._check._get_debug_tags(),
+                )
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _get_tidb_activity(self, cursor):
+        # type: (pymysql.cursor) -> List[Dict[str]]
+        """Execute TiDB activity query"""
+        self._log.debug("Running TiDB activity query [%s]", TIDB_ACTIVITY_QUERY)
+        cursor.execute(TIDB_ACTIVITY_QUERY)
+        return cursor.fetchall()
+
+    def _derive_tidb_wait_event(self, state):
+        # type: (str) -> Tuple[str, str]
+        """
+        Derive wait event and wait event group from TiDB processlist state.
+        Returns (wait_event, wait_event_group)
+        """
+        return 'N/A', 'N/A'
+
+    def _normalize_tidb_rows(self, rows):
+        # type: (List[Dict[str]]) -> List[Dict[str]]
+        """Normalize TiDB activity rows to match expected format"""
+        normalized_rows = []
+        estimated_size = 0
+
+        for row in rows:
+            # Generate unique identifiers for TiDB
+            thread_id = row.get('processlist_id', 0)
+
+            # Derive wait event from state
+            state = row.get('processlist_state', '')
+            wait_event, wait_event_group = self._derive_tidb_wait_event(state)
+
+            # Convert TiDB fields to match MySQL activity format
+            normalized_row = {
+                'thread_id': thread_id,
+                'processlist_id': row.get('processlist_id'),
+                'processlist_user': row.get('processlist_user'),
+                'processlist_host': row.get('processlist_host'),
+                'processlist_db': row.get('processlist_db'),
+                'processlist_command': row.get('processlist_command'),
+                'processlist_state': row.get('processlist_state'),
+                'sql_text': row.get('sql_text'),
+                'query_time': row.get('query_time', 0),
+                'memory_usage': row.get('memory_usage', 0),
+                'txn_start_time': row.get('txn_start_time'),
+                # Derived wait events
+                'wait_event': wait_event,
+                'wait_event_type': wait_event_group,
+            }
+
+            # Add query truncation state
+            if normalized_row['sql_text'] is not None:
+                normalized_row['query_truncated'] = get_truncation_state(normalized_row['sql_text']).value
+
+            # Obfuscate the query
+            normalized_row = self._obfuscate_and_sanitize_row(normalized_row)
+
+            estimated_size += self._get_estimated_row_size_bytes(normalized_row)
+            if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
+                return normalized_rows
+
+            normalized_rows.append(normalized_row)
+
+        return normalized_rows
+
+    def _create_tidb_activity_event(self, active_sessions, tags, node_instance):
+        # type: (List[Dict[str]], List[str], str) -> Dict[str]
+        """Create activity event payload for TiDB"""
+        # Convert rows to MySQL-compatible activity format
+        mysql_activity = []
+
+        for row in active_sessions:
+            # Calculate timing information
+            # Use milliseconds to avoid overflow issues
+            current_time_ms = int(time.time() * 1000)
+            query_time_s = row.get('query_time', 0)
+            query_time_ms = int(query_time_s * 1000) if query_time_s else 0
+            event_start_ms = max(0, current_time_ms - query_time_ms)
+
+            # Generate event IDs based on thread_id and timestamp
+            event_id = hash(str(row['thread_id']) + str(current_time_ms)) % (2**31)  # Keep it positive and reasonable
+
+            activity = {
+                # Essential identifiers
+                'thread_id': row['thread_id'],
+                'processlist_id': row['processlist_id'],
+                'processlist_user': row['processlist_user'],
+                'processlist_host': row['processlist_host'],
+                'processlist_db': row['processlist_db'],
+                'processlist_command': row['processlist_command'],
+                'processlist_state': row['processlist_state'],
+                'sql_text': row.get('sql_text'),
+                'current_schema': row.get('processlist_db'),
+                'query_signature': row.get('query_signature'),
+                'dd_commands': row.get('dd_commands', []),
+                'dd_tables': row.get('dd_tables', []),
+                'dd_comments': row.get('dd_comments', []),
+                'query_truncated': row.get('query_truncated'),
+                # Event identifiers
+                'event_id': event_id,
+                'end_event_id': event_id,  # Same as event_id for TiDB
+                # Timing information
+                'event_timer_start': event_start_ms * 1000000,  # Convert to nanoseconds
+                'event_timer_end': current_time_ms * 1000000,  # Convert to nanoseconds
+                'lock_time': 0,  # TiDB doesn't provide lock time in CLUSTER_PROCESSLIST
+                # Wait event info
+                'wait_event': row.get('wait_event', 'CPU'),
+                'wait_timer_start': event_start_ms * 1000000,  # Same as event timer
+                'wait_timer_end': current_time_ms * 1000000,
+                # Additional MySQL compatibility fields
+                'object_name': None,  # TiDB doesn't track file operations
+                'object_type': None,
+                'operation': None,
+                'source': '',
+            }
+
+            mysql_activity.append(activity)
+
+        event = {
+            "host": self._check.reported_hostname,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "mysql",
+            "dbm_type": "activity",
+            "collection_interval": self.collection_interval,
+            "ddtags": tags,
+            "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
+            "mysql_activity": mysql_activity,
+        }
+
+        # For TiDB, add the specific node instance for this activity event
+        if node_instance:
+            event['tidb'] = {'node_instance': node_instance}
+
+        return event
 
     def _check_version(self):
         # type: () -> None

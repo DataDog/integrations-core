@@ -31,7 +31,9 @@ def get_version(db):
         for data in parts:
             if data == "MariaDB":
                 flavor = "MariaDB"
-            if data != "MariaDB" and flavor == '':
+            if "TiDB" in data:
+                flavor = "TiDB"
+            if data != "MariaDB" and "TiDB" not in data and flavor == '':
                 flavor = "MySQL"
             if data in BUILDS:
                 build = data
@@ -41,6 +43,9 @@ def get_version(db):
             and to_native_string(version_comment[0]).lower().startswith('percona')
         ):
             flavor = 'Percona'
+        # Also check raw_version for TiDB
+        if flavor == '' and 'TiDB' in raw_version:
+            flavor = 'TiDB'
         if build == '':
             build = 'unspecified'
 

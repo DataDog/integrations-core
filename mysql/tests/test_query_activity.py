@@ -653,3 +653,421 @@ def _get_conn_for_user(user, _autocommit=False):
 def _load_test_activity_json(filename):
     with open(os.path.join(ACTIVITY_JSON_PLANS_DIR, filename), 'r') as f:
         return json.load(f)
+
+
+# TiDB-specific activity tests
+@pytest.mark.unit
+def test_tidb_activity_collection(caplog):
+    """Test TiDB activity collection from CLUSTER_PROCESSLIST"""
+    import logging
+
+    caplog.set_level(logging.DEBUG)
+
+    from datadog_checks.mysql import MySql
+    from datadog_checks.mysql.activity import MySQLActivity
+
+    from . import common
+
+    instance_config = {
+        'host': common.HOST,
+        'username': common.USER,
+        'password': common.PASS,
+        'port': common.PORT,
+    }
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_config])
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+    mysql_check._events_wait_current_enabled = False  # This triggers TiDB path
+    # Mock the property by replacing the instance's resolved_hostname
+    mysql_check._resolved_hostname = 'test-host'
+
+    config = mock.MagicMock()
+    config.activity_config = {'enabled': True, 'collection_interval': 10}
+    config.cloud_metadata = {}
+    config.service = 'test-service'
+    config.min_collection_interval = 1
+    config.obfuscator_options = {'replace_digits': True}
+
+    activity = MySQLActivity(mysql_check, config, {})
+    # Initialize _tags which is normally set by the parent class
+    activity._tags = ['test:tag']
+    # Initialize _db for the TiDB check
+    activity._db = mock.MagicMock()
+
+    # Mock database connection
+    mock_cursor = mock.MagicMock()
+
+    # Set up the mock cursor to return our test data
+    mock_cursor.fetchall.return_value = [
+        {
+            'processlist_id': 123,
+            'processlist_user': 'test_user',
+            'processlist_host': 'localhost',
+            'processlist_db': 'test_db',
+            'processlist_command': 'Query',
+            'processlist_state': 'Sending data',
+            'sql_text': 'SELECT * FROM users WHERE id = 123',
+            'query_time': 2.5,
+            'memory_usage': 1024000,
+            'txn_start_time': '2025-01-24 10:00:00',
+        },
+        {
+            'processlist_id': 456,
+            'processlist_user': 'app_user',
+            'processlist_host': '192.168.1.100',
+            'processlist_db': 'mercari',
+            'processlist_command': 'Query',
+            'processlist_state': 'Sorting',
+            'sql_text': 'SELECT * FROM orders ORDER BY price',
+            'query_time': 1.5,
+            'memory_usage': 2048000,
+            'txn_start_time': '2025-01-24 10:00:01',
+        },
+        {
+            'processlist_id': 789,
+            'processlist_user': 'batch_user',
+            'processlist_host': '192.168.1.200',
+            'processlist_db': 'mercari',
+            'processlist_command': 'Query',
+            'processlist_state': 'Updating',
+            'sql_text': 'UPDATE items SET status = 1 WHERE id = 2',
+            'query_time': 0.5,
+            'memory_usage': 512000,
+            'txn_start_time': '2025-01-24 10:00:02',
+        },
+    ]
+
+    mock_cursor.execute = mock.MagicMock()
+    mock_cursor.close = mock.MagicMock()
+
+    mock_conn = mock.MagicMock()
+    # Handle cursor(CommenterDictCursor) call - the cursor method returns the cursor directly, not a context manager
+    mock_conn.cursor.return_value = mock_cursor
+
+    activity._get_db_connection = mock.MagicMock(return_value=mock_conn)
+
+    # Mock the check's database_monitoring_query_activity method
+    mysql_check.database_monitoring_query_activity = mock.MagicMock()
+    mysql_check.histogram = mock.MagicMock()
+    mysql_check._get_debug_tags = mock.MagicMock(return_value=[])
+
+    # Mock obfuscation
+    def mock_obfuscate(row):
+        if 'sql_text' in row:
+            # Replace numbers with ?
+            obfuscated_query = row['sql_text'].replace('123', '?').replace('1', '?').replace('2', '?')
+
+            # Determine tables and commands based on query
+            if 'users' in row['sql_text']:
+                tables = ['users']
+            elif 'orders' in row['sql_text']:
+                tables = ['orders']
+            elif 'items' in row['sql_text']:
+                tables = ['items']
+            else:
+                tables = []
+
+            if 'SELECT' in row['sql_text']:
+                commands = ['SELECT']
+            elif 'UPDATE' in row['sql_text']:
+                commands = ['UPDATE']
+            else:
+                commands = []
+
+            row['sql_text'] = obfuscated_query
+            row['query_signature'] = 'test_signature'
+            row['dd_tables'] = tables
+            row['dd_commands'] = commands
+            row['dd_comments'] = []
+        return row
+
+    with mock.patch.object(activity, '_obfuscate_and_sanitize_row', side_effect=mock_obfuscate):
+        with mock.patch('datadog_checks.mysql.activity.datadog_agent') as mock_agent:
+            mock_agent.get_version.return_value = '7.0.0'
+            # Run TiDB activity collection
+            activity._collect_tidb_activity()
+
+    # Verify the activity event was sent - should be called 3 times, once for each node
+    assert mysql_check.database_monitoring_query_activity.call_count == 3
+
+    # Get all payloads that were sent
+    calls = mysql_check.database_monitoring_query_activity.call_args_list
+    events_by_node = {}
+
+    for call in calls:
+        payload = call[0][0]
+        event = json.loads(payload)
+
+        # Verify event structure
+        assert event['dbm_type'] == 'activity'
+        assert event['ddsource'] == 'mysql'
+        assert event['host'] == 'test-host'
+        assert event['collection_interval'] == 10
+        assert event['service'] == 'test-service'
+        assert 'tidb' in event
+        assert 'node_instance' in event['tidb']
+
+        node_instance = event['tidb']['node_instance']
+        events_by_node[node_instance] = event
+
+    # Verify we have events for 3 different nodes
+    assert len(events_by_node) == 3
+    assert 'localhost' in events_by_node
+    assert '192.168.1.100' in events_by_node
+    assert '192.168.1.200' in events_by_node
+
+    # Check localhost node activity
+    localhost_event = events_by_node['localhost']
+    assert 'mysql_activity' in localhost_event
+    assert len(localhost_event['mysql_activity']) == 1
+    activity = localhost_event['mysql_activity'][0]
+    assert activity['processlist_id'] == 123
+    assert activity['processlist_user'] == 'test_user'
+    assert activity['sql_text'] == 'SELECT * FROM users WHERE id = ?'
+    assert activity['query_signature'] == 'test_signature'
+    assert activity['dd_tables'] == ['users']
+    assert activity['dd_commands'] == ['SELECT']
+    assert activity['wait_event'] == 'N/A'  # TiDB uses N/A for wait events
+
+    # Check 192.168.1.100 node activity
+    node_100_event = events_by_node['192.168.1.100']
+    assert len(node_100_event['mysql_activity']) == 1
+    activity = node_100_event['mysql_activity'][0]
+    assert activity['processlist_id'] == 456
+    assert activity['processlist_user'] == 'app_user'
+    assert activity['sql_text'] == 'SELECT * FROM orders ORDER BY price'
+
+    # Check 192.168.1.200 node activity
+    node_200_event = events_by_node['192.168.1.200']
+    assert len(node_200_event['mysql_activity']) == 1
+    activity = node_200_event['mysql_activity'][0]
+    assert activity['processlist_id'] == 789
+    assert activity['processlist_user'] == 'batch_user'
+    assert activity['sql_text'] == 'UPDATE items SET status = ? WHERE id = ?'
+
+
+@pytest.mark.unit
+def test_tidb_activity_query():
+    """Test that TiDB activity query is correct"""
+    from datadog_checks.mysql.activity import TIDB_ACTIVITY_QUERY
+
+    # Verify the query contains expected fields
+    assert 'CLUSTER_PROCESSLIST' in TIDB_ACTIVITY_QUERY
+    assert 'processlist_id' in TIDB_ACTIVITY_QUERY
+    assert 'processlist_user' in TIDB_ACTIVITY_QUERY
+    assert 'sql_text' in TIDB_ACTIVITY_QUERY
+    assert "COMMAND != 'Sleep'" in TIDB_ACTIVITY_QUERY
+
+
+@pytest.mark.unit
+def test_tidb_activity_multiple_nodes():
+    """Test TiDB activity collection groups by node instance"""
+    from datadog_checks.mysql.activity import MySQLActivity
+
+    # Create activity collector
+    check = mock.MagicMock()
+    check._get_is_tidb = mock.MagicMock(return_value=True)
+    check._events_wait_current_enabled = False  # Force TiDB path
+    # Mock the property getter
+    check.events_wait_current_enabled = False
+    check.reported_hostname = 'test-host'  # Set this to avoid MagicMock in JSON
+    check.database_monitoring_query_activity = mock.MagicMock()
+    check.histogram = mock.MagicMock()
+    check._get_debug_tags = mock.MagicMock(return_value=[])
+
+    # Create a proper config object instead of MagicMock to avoid JSON serialization issues
+    class MockConfig:
+        def __init__(self):
+            self.activity_config = {'enabled': True, 'collection_interval': 10}
+            self.obfuscator_options = {'replace_digits': True}
+            self.cloud_metadata = {}
+            self.service = 'test-tidb'
+            self.min_collection_interval = 1
+
+    config = MockConfig()
+
+    activity_collector = MySQLActivity(check, config, {})
+    # Initialize _tags which is normally set by the parent class
+    activity_collector._tags = []
+
+    # Mock cursor with activity from multiple TiDB nodes
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = [
+        {
+            'processlist_id': 100,
+            'processlist_user': 'app_user',
+            'processlist_host': 'tidb-node-1:4000',
+            'processlist_db': 'test_db',
+            'processlist_command': 'Query',
+            'processlist_state': 'Sending data',
+            'sql_text': 'SELECT * FROM orders WHERE status = "pending"',
+            'query_time': 0.5,
+            'memory_usage': 1024,
+            'txn_start_time': '2024-01-01 12:00:00',
+        },
+        {
+            'processlist_id': 200,
+            'processlist_user': 'app_user',
+            'processlist_host': 'tidb-node-2:4000',
+            'processlist_db': 'test_db',
+            'processlist_command': 'Query',
+            'processlist_state': 'Sorting result',
+            'sql_text': 'SELECT * FROM products ORDER BY price',
+            'query_time': 1.2,
+            'memory_usage': 2048,
+            'txn_start_time': '2024-01-01 12:00:01',
+        },
+        {
+            'processlist_id': 300,
+            'processlist_user': 'admin',
+            'processlist_host': 'tidb-node-1:4000',  # Another query on node 1
+            'processlist_db': 'test_db',
+            'processlist_command': 'Query',
+            'processlist_state': 'Updating',
+            'sql_text': 'UPDATE users SET last_login = NOW() WHERE id = 123',
+            'query_time': 0.1,
+            'memory_usage': 512,
+            'txn_start_time': '2024-01-01 12:00:02',
+        },
+    ]
+
+    mock_db = mock.MagicMock()
+    mock_db.cursor.return_value = mock_cursor
+    mock_cursor.execute = mock.MagicMock()
+    mock_cursor.close = mock.MagicMock()
+
+    activity_collector._get_db_connection = mock.MagicMock(return_value=mock_db)
+    # Initialize _db for the TiDB check
+    activity_collector._db = mock_db
+
+    # Mock obfuscation to prevent issues with JSON serialization
+    def mock_obfuscate(row):
+        if 'sql_text' in row:
+            row['query_signature'] = 'test_signature'
+            row['dd_tables'] = []
+            row['dd_commands'] = ['SELECT'] if 'SELECT' in row['sql_text'] else ['UPDATE']
+            row['dd_comments'] = []
+        return row
+
+    # Run TiDB activity collection
+    with mock.patch.object(activity_collector, '_obfuscate_and_sanitize_row', side_effect=mock_obfuscate):
+        with mock.patch('datadog_checks.mysql.activity.datadog_agent') as mock_agent:
+            mock_agent.get_version.return_value = '7.0.0'
+            activity_collector._collect_tidb_activity()
+
+    # Verify that database_monitoring_query_activity was called twice (once per node)
+    assert check.database_monitoring_query_activity.call_count == 2
+
+    # Get the payloads
+    calls = check.database_monitoring_query_activity.call_args_list
+    payloads = [json.loads(call[0][0]) for call in calls]
+
+    # Sort payloads by node instance for consistent testing
+    payloads.sort(key=lambda p: p['tidb']['node_instance'])
+
+    # Verify first payload (tidb-node-1:4000)
+    payload1 = payloads[0]
+    assert payload1['tidb']['node_instance'] == 'tidb-node-1:4000'
+    assert len(payload1['mysql_activity']) == 2  # Two queries from node 1
+    activities1 = sorted(payload1['mysql_activity'], key=lambda a: a['processlist_id'])
+    assert activities1[0]['processlist_id'] == 100
+    assert activities1[1]['processlist_id'] == 300
+
+    # Verify second payload (tidb-node-2:4000)
+    payload2 = payloads[1]
+    assert payload2['tidb']['node_instance'] == 'tidb-node-2:4000'
+    assert len(payload2['mysql_activity']) == 1  # One query from node 2
+    assert payload2['mysql_activity'][0]['processlist_id'] == 200
+
+    # Verify histogram calls include node instance tags
+    histogram_calls = check.histogram.call_args_list
+    assert any('tidb_node_instance:tidb-node-1:4000' in str(call) for call in histogram_calls)
+    assert any('tidb_node_instance:tidb-node-2:4000' in str(call) for call in histogram_calls)
+
+
+def test_tidb_activity_collection_flow():
+    """Test TiDB activity collection flow"""
+    from datadog_checks.mysql.activity import MySQLActivity
+
+    # Create activity collector
+    check = mock.MagicMock()
+    check._get_is_tidb = mock.MagicMock(return_value=True)
+    check._events_wait_current_enabled = False
+    # Mock the property getter
+    check.events_wait_current_enabled = False
+    check.reported_hostname = 'test-host'
+    check.log = mock.MagicMock()
+    check.database_monitoring_query_activity = mock.MagicMock()
+    check.histogram = mock.MagicMock()
+    check._get_debug_tags = mock.MagicMock(return_value=[])
+
+    config = mock.MagicMock()
+    config.dbm_enabled = True
+    config.activity_config = {'enabled': True, 'collection_interval': 10}
+    config.obfuscator_options = {'replace_digits': True}
+    config.cloud_metadata = {}
+    config.service = 'test-tidb'
+    config.min_collection_interval = 1
+
+    activity_collector = MySQLActivity(check, config, {})
+    activity_collector._tags = ['test:tag']
+
+    # Mock database connection
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = [
+        {
+            'processlist_id': 123,
+            'processlist_user': 'test_user',
+            'processlist_host': 'localhost',
+            'processlist_db': 'testdb',
+            'processlist_command': 'Query',
+            'processlist_state': 'executing',
+            'sql_text': 'SELECT * FROM users',
+            'query_time': 1.5,
+            'memory_usage': 1024,
+            'txn_start_time': '2024-01-01 12:00:00',
+        }
+    ]
+
+    mock_db = mock.MagicMock()
+    mock_db.cursor.return_value = mock_cursor
+    mock_cursor.execute = mock.MagicMock()
+    mock_cursor.close = mock.MagicMock()
+
+    activity_collector._get_db_connection = mock.MagicMock(return_value=mock_db)
+    # Initialize _db for the TiDB check
+    activity_collector._db = mock_db
+
+    # Mock obfuscation to prevent issues with JSON serialization
+    def mock_obfuscate(row):
+        if 'sql_text' in row:
+            row['query_signature'] = 'test_signature'
+            row['dd_tables'] = []
+            row['dd_commands'] = ['SELECT']
+            row['dd_comments'] = []
+        return row
+
+    # Run TiDB activity collection
+    with mock.patch.object(activity_collector, '_obfuscate_and_sanitize_row', side_effect=mock_obfuscate):
+        with mock.patch('datadog_checks.mysql.activity.datadog_agent') as mock_agent:
+            mock_agent.get_version.return_value = '7.0.0'
+            activity_collector._collect_tidb_activity()
+
+    # Verify activity was collected and sent
+    check.database_monitoring_query_activity.assert_called_once()
+
+    # Verify the payload was created
+    call_args = check.database_monitoring_query_activity.call_args[0]
+    payload = json.loads(call_args[0])
+
+    assert 'mysql_activity' in payload
+    assert len(payload['mysql_activity']) == 1
+    # TiDB activity doesn't have 'id' field, check for processlist_id instead
+    assert payload['mysql_activity'][0]['processlist_id'] == 123
+
+    # Verify TiDB node instance is included
+    assert 'tidb' in payload
+    assert 'node_instance' in payload['tidb']
+    # The node instance comes from processlist_host which is 'localhost' in our test data
+    assert payload['tidb']['node_instance'] == 'localhost'
