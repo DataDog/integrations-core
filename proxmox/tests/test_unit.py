@@ -479,6 +479,14 @@ def test_perf_metrics_error(dd_run_check, caplog, instance):
     dd_run_check(check)
     assert "Invalid metric entry found; metric name: disk.used, resource id: storage/ip-122-82-3-112" in caplog.text
 
+    
+@pytest.mark.usefixtures('mock_http_get')
+def test_ha_metrics(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.ha.quorum', hostname='ip-122-82-3-112', tags=['node_status:OK'])
+    aggregator.assert_metric('proxmox.ha.quorate', hostname='ip-122-82-3-112', tags=['node_status:OK'])
+
 
 @pytest.mark.parametrize(
     ('collect_tasks, task_types, expected_events'),
