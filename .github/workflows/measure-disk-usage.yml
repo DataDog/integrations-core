@@ -61,13 +61,23 @@ jobs:
         name: ${{ inputs.platform }}_uncompressed_status.json
         path: ${{ inputs.platform }}_uncompressed_status.json
         if-no-files-found: error
-        
+
     - name: Upload JSON compressed sizes artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: ${{ inputs.platform }}_compressed_status.json
         path: ${{ inputs.platform }}_compressed_status.json
         if-no-files-found: error
+    
+  calculate-diffs:
+    needs: measure-disk-usage
+    runs-on: ubuntu-22.04
+    uses: DataDog/integrations-core/.github/workflows/quality-gates.yml@lucia-sb/calculate-diffs
+    with:
+      platform: ${{ inputs.platform }}
+      run-id: ${{ github.run_id }}
+
+    
     
         
     #   run: | 
