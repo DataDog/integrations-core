@@ -255,7 +255,6 @@ jobs:
         name: target-macos-${{ matrix.job.arch }}
         path: output
 
-  # ----------- CHANGE TO MASTER BRANCH ------------
   measure-disk-usage-macos:
     needs: build-macos
     strategy:
@@ -265,8 +264,6 @@ jobs:
     with:
       platform: ${{ matrix.platform }}
       run-id: ${{ github.run_id }}
-
-
 
   publish:
     name: Publish artifacts and update lockfiles via PR
