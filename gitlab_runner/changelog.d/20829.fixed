@@ -1,0 +1,1 @@
+Fix schema issue on `ignore_metrics_by_labels` field
