@@ -923,29 +923,17 @@ clusterAgent:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
-metadata:
-  name: "<APPLICATION_NAME>"
-  namespace: default
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: "<APPLICATION_NAME>"
+  #(...)
   template:
-    metadata:
-      labels:
-        app: "<APPLICATION_NAME>"
+    #(...)
     spec:
-      serviceAccountName: datadog-agent
       # Empty dir to keep track of logging timestamps in case of agent restart
       volumes:
         - name: agent-option
           emptyDir: {}
       containers:
-        # Your original container
-        - name: "<CONTAINER_NAME>"
-          image: "<CONTAINER_IMAGE>"
-
+        #(...)
         # Running the Agent as a side-car
         - name: datadog-agent
           image: gcr.io/datadoghq/agent:7
@@ -955,22 +943,7 @@ spec:
               mountPath: /opt/datadog-agent/run
               readOnly: false
           env:
-            - name: DD_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: api-key
-                  name: datadog-secret
-            - name: DD_SITE
-              value: "<DATADOG_SITE>"
-            - name: DD_EKS_FARGATE
-              value: "true"
-            - name: DD_CLUSTER_NAME
-              value: "<CLUSTER_NAME>"
-            - name: DD_KUBERNETES_KUBELET_NODENAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
+            #(...)
             - name: DD_LOGS_ENABLED
               value: "true"
             - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_KUBELET_API
@@ -988,7 +961,7 @@ spec:
 
 2. Configure logging
 
-You can configure the injected Agents to automatically log all containers except the Agent itself. Alternatively, logging can be configured via the Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
+You can configure the injected Agents to automatically log all containers by enabling `CONTAINER_COLLECT_ALL`. Alternatively, logging can be configured via the Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Configure Injected Agent Log Collection - Datadog Operator" xxx -->
