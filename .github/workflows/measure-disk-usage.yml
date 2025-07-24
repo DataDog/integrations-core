@@ -63,7 +63,7 @@ jobs:
           count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
           count_plus_one=$((count + 1))
           echo "🔍 Count of commits between merge-base and PR branch: $count_plus_one" >> $GITHUB_STEP_SUMMARY
-          run_id=$(gh run list --workflow "Measure Disk Usage" --limit 100 --branch "master" --json databaseId,headSha,event \
+          run_id=$(gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event \
             | jq -r --arg sha "$MERGE_BASE" '.[] | select(.headSha == $sha) | .databaseId' | head -n 1)
           if [ -z "$run_id" ]; then
             echo "❌ No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
