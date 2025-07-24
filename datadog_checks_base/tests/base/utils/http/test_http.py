@@ -14,7 +14,7 @@ import requests
 import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper, quote_uds_url
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -191,7 +191,6 @@ class TestRequestSize:
 
 
 class TestUnixDomainSocket:
-
     @pytest.mark.parametrize(
         'value, expected',
         [
@@ -211,7 +210,7 @@ class TestUnixDomainSocket:
         http.persist_connections = True
         http.get(value)
         assert fake_session.get.called
-        assert fake_session.get.call_args[0][0]  == expected
+        assert fake_session.get.call_args[0][0] == expected
 
     def test_adapter_mounted(self):
         # type: () -> None
