@@ -992,8 +992,6 @@ You can configure the injected Agents to automatically log all containers except
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Configure Injected Agent Log Collection - Datadog Operator" xxx -->
-Turn on logging for all containers except for the Agent.
-
 ```yaml
 #(...)
 spec:
@@ -1004,16 +1002,13 @@ spec:
         #(...)
         profiles:
           - env:
-          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-            value: "true"
-          - name: DD_CONTAINER_EXCLUDE
-            value: "name:datadog-agent-injected"
+            # Collect all container logs
+            - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+              value: "true"
 ```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Configure Injected Agent Log Collection - Helm" xxx -->
-Turn on logging for all containers except for the Agent.
-
 ```yaml
 clusterAgent:
   admissionController:
@@ -1021,16 +1016,13 @@ clusterAgent:
       # (...)
       profiles:
         - env:
+          # Collect all container logs
           - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
             value: "true"
-          - name: DD_CONTAINER_EXCLUDE
-            value: "name:datadog-agent-injected"
 ```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Manual" xxx -->
-Turn on logging for all containers except for the Agent.
-
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -1048,10 +1040,9 @@ spec:
         - name: datadog-agent
           image: gcr.io/datadoghq/agent:7
           env:
+            # Collect all container logs
             - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
               value: "true"
-            - name: DD_CONTAINER_EXCLUDE
-              value: "name:datadog-agent"
           #(...)
 ```
 
