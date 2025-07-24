@@ -42,7 +42,7 @@ platforms = ["linux", "windows"]
 
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2025"] }
+runners = { windows = ["windows-2022"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
