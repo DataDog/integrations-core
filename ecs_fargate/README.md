@@ -201,7 +201,7 @@ partial -->
 
 ```hcl
 module "ecs_fargate_task" {
-  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "DataDog/ecs-datadog/aws//modules/ecs_fargate"
   version = "1.0.0"
 
   # Configure Datadog
@@ -1038,7 +1038,7 @@ To enable logging through the [Datadog ECS Fargate Terraform][71] module, config
 
 ```hcl
 module "ecs_fargate_task" {
-  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "DataDog/ecs-datadog/aws//modules/ecs_fargate"
   version = "1.0.0"
 
   # Configure Datadog
