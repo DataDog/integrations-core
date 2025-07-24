@@ -1197,20 +1197,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-elasticsearch-7.2
-        - py3.12-elasticsearch-7.7
-        - py3.12-elasticsearch-7.9
-        - py3.12-elasticsearch-7.10
-        - py3.12-elasticsearch-8.8
-        - py3.12-opensearch-1.1
-      fail-fast: false
   j93163a5:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3202,20 +3191,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-3.7-mgmt
-        - py3.12-3.7-openmetrics
-        - py3.12-3.11-mgmt
-        - py3.12-3.11-openmetrics
-        - py3.12-4.0-mgmt
-        - py3.12-4.0-openmetrics
-      fail-fast: false
   jcc172a7:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3555,20 +3533,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-windows-SQLOLEDB-2019-single
-        - py3.12-windows-SQLOLEDB-2022-single
-        - py3.12-windows-MSOLEDBSQL-2019-single
-        - py3.12-windows-MSOLEDBSQL-2022-single
-        - py3.12-windows-odbc-2019-single
-        - py3.12-windows-odbc-2022-single
-      fail-fast: false
   j3a8e004:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3942,20 +3909,9 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-    strategy:
-      matrix:
-        target-env:
-        - py3.12-9.0-standalone
-        - py3.12-9.0-embedded
-        - py3.12-10.0-standalone
-        - py3.12-10.0-embedded
-        - py3.12-10.1-standalone
-        - py3.12-10.1-embedded
-      fail-fast: false
   j4baeba2:
     uses: ./.github/workflows/test-target.yml
     with:
