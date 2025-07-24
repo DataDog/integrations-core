@@ -4,7 +4,7 @@
 
 import copy
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 import mock
 import pytest
@@ -530,7 +530,7 @@ def test_events(get_current_datetime, dd_run_check, aggregator, instance, collec
     instance['collect_tasks'] = collect_tasks
     if task_types is not None:
         instance['collected_task_types'] = task_types
-    get_current_datetime.return_value = datetime.fromtimestamp(1752552000)
+    get_current_datetime.return_value = datetime.fromtimestamp(1752552000, timezone.utc)
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
 
