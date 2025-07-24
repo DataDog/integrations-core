@@ -65,7 +65,7 @@ The Bitdefender integration uses a webhook to ingest Bitdefender EDR logs. The i
     curl -X POST -k "<control_center_apis_access_url>/v1.0/jsonrpc/push" --header "Authorization: Basic <bitdefender-encoded-api-key>" --header "Content-Type: application/json" --data "{\"params\": {\"status\": 1,\"serviceType\": \"jsonRPC\",\"serviceSettings\": {\"url\": \"<webhook_url>\",\"requireValidSslCertificate\": false,\"authorization\": \"<dd-api-key>\"},\"subscribeToEventTypes\": {\"<event-type>\": true}},\"jsonrpc\": \"2.0\",\"method\": \"setPushEventSettings\",\"id\": 1}"
     ```
 
-10. Repeat steps 5–9 for each supported event type you want to push to Datadog.
+10. Repeat steps 5-9 for each supported event type you want to push to Datadog.
 
 ## Data Collected
 
