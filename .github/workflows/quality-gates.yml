@@ -31,7 +31,7 @@ jobs:
           git fetch origin master:refs/remotes/origin/master
           git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
-        
+        # TODO: change to Resolve Dependencies and Build Wheels
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
         env:
@@ -44,7 +44,7 @@ jobs:
           run_id=$(
             (
               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-              gh run list --workflow "Fetch Previous Sizes JSON" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
+              gh run list --workflow "Resolve Dependencies and Build Wheels" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
             ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
           )
           if [ -z "$run_id" ]; then
