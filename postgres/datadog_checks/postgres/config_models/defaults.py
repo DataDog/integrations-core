@@ -148,6 +148,10 @@ def instance_propagate_agent_tags():
     return False
 
 
+def instance_query_encodings():
+    return ['utf8']
+
+
 def instance_query_timeout():
     return 5000
 

@@ -118,17 +118,6 @@ class PostgreSql(AgentCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
-        # Deprecate custom_metrics in favor of custom_queries
-        if 'custom_metrics' in self.instance:
-            self.warning(
-                "DEPRECATION NOTICE: Please use the new custom_queries option "
-                "rather than the now deprecated custom_metrics"
-            )
-        if 'managed_identity' in self.instance:
-            self.warning(
-                "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
-                " Please use the new azure.managed_authentication option instead."
-            )
 
         config, validation_result = build_config(check=self, init_config=self.init_config, instance=self.instance)
         self._config = config
@@ -138,7 +127,11 @@ class PostgreSql(AgentCheck):
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self.cloud_metadata = self._config.cloud_metadata
+        self.cloud_metadata = {
+            "aws": self._config.aws,
+            "gcp": self._config.gcp,
+            "azure": self._config.azure,
+        }
         self.tags = self._config.tags
         self.add_core_tags()
 
@@ -545,7 +538,7 @@ class PostgreSql(AgentCheck):
     def database_identifier(self):
         # type: () -> str
         if self._database_identifier is None:
-            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
+            template = Template(self._config.database_identifier.template)
             tag_dict = {}
             tags = self.tags.copy()
             # sort tags to ensure consistent ordering

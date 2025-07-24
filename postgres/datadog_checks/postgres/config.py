@@ -36,16 +36,19 @@ from datadog_checks.postgres.config_models.defaults import (
     instance_max_connections,
     instance_max_relations,
     instance_min_collection_interval,
+    instance_only_custom_queries,
     instance_pg_stat_activity_view,
     instance_pg_stat_statements_view,
     instance_port,
     instance_propagate_agent_tags,
+    instance_query_encodings,
     instance_query_timeout,
     instance_relations,
     instance_reported_hostname,
     instance_ssl,
     instance_table_count_limit,
     instance_tag_replication_role,
+    instance_use_global_custom_queries,
     shared_propagate_agent_tags,
 )
 
@@ -553,9 +556,13 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "ssl_key": instance.get('ssl_key'),
         "ssl_password": instance.get('ssl_password'),
         # Database configuration
-        "dbm": instance.get('dbm', instance_dbm()),
-        "deep_database_monitoring": instance.get('deep_database_monitoring', False),  # Deprecated, use `dbm` instead
-        "custom_metrics": instance.get('custom_metrics', []),
+        "dbm": instance.get(
+            'dbm', instance.get('deep_database_monitoring', instance_dbm())
+        ),  # Deprecated, use `dbm` instead
+        "custom_metrics": map_custom_metrics(instance.get('custom_metrics', [])), # Deprecated, use `custom_queries` instead
+        "custom_queries": instance.get('custom_queries', []),
+        "use_global_custom_queries": instance.get("use_global_custom_queries", instance_use_global_custom_queries()),
+        "only_custom_queries": instance.get('only_custom_queries', instance_only_custom_queries()),
         "application_name": instance.get('application_name', instance_application_name()),
         "exclude_hostname": instance.get('exclude_hostname', instance_exclude_hostname()),
         "database_identifier": instance.get('database_identifier', {"template": "$resolved_hostname"}),
@@ -604,6 +611,18 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         # Statement samples and explain plans
         "pg_stat_statements_view": instance.get('pg_stat_statements_view', instance_pg_stat_statements_view()),
         "pg_stat_activity_view": instance.get('pg_stat_activity_view', instance_pg_stat_activity_view()),
+        "query_metrics": {
+            **{
+                "collection_interval": 10,
+                "pg_stat_statements_max_warning_threshold": 10000,
+                "full_statement_text_cache_max_size": 10000,
+                "full_statement_text_samples_per_hour_per_query": 10000,
+                "incremental_query_metrics": False,
+                "baseline_metrics_expiry": 300,
+                "run_sync": False,
+            },
+            **(instance.get('query_metrics', {})),
+        },
         "query_samples": {
             **{
                 "enabled": True,
@@ -619,6 +638,15 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             **(instance.get('statement_samples', {})),  # Deprecated, use `query_samples` instead
             **(instance.get('query_samples', {})),
         },
+        "query_activity": {
+            **{
+                "enabled": True,
+                "collection_interval": 10,
+                "payload_row_limit": 3500,
+            },
+            **(instance.get('query_activity', {})),
+        },
+        "query_encodings": instance.get('query_encodings', instance_query_encodings()),
         # Metadata collection
         "collect_settings": {
             **{
@@ -702,11 +730,12 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "database_instance_collection_interval": instance.get(
             'database_instance_collection_interval', instance_database_instance_collection_interval()
         ),
-        "incremental_query_metrics": instance.get('incremental_query_metrics', False),
-        "baseline_metrics_expiry": instance.get('baseline_metrics_expiry', 300),
         "propagate_agent_tags": instance.get('propagate_agent_tags', instance_propagate_agent_tags())
         or init_config.get('propagate_agent_tags', shared_propagate_agent_tags()),
         "empty_default_hostname": instance.get('empty_default_hostname', instance_empty_default_hostname()),
+        "service": instance.get('service', init_config.get('service', None)),
+        # Metric filtering by pattern is implemented downstream, theoretically
+        "metric_patterns": instance.get('metric_patterns', None),
     }
 
     validation_result = ValidationResult()
@@ -730,14 +759,14 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             f"Missing: {missing_fields}, Extra: {extra_fields}"
         )
 
-    if not args.collect_default_database:
-        args.ignore_databases = [d for d in args.ignore_databases if d != 'postgres']
+    if not args.get('collect_default_database'):
+        args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
 
     # Validate config arguments for invalid or deprecated options
-    if args.ssl not in SSL_MODES:
-        warning = f"Invalid ssl option '{args.ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'."
+    if args['ssl'] not in SSL_MODES:
+        warning = f"Invalid ssl option '{args['ssl']}', should be one of {SSL_MODES}. Defaulting to 'allow'."
         validation_result.add_warning(warning)
-        args.ssl = "allow"
+        args['ssl'] = "allow"
 
     if instance.get('custom_metrics'):
         validation_result.add_warning('The `custom_metrics` option is deprecated. Use `custom_queries` instead.')
@@ -785,32 +814,26 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "Relation metrics requires a value for `relations` in the configuration." if not config.relations else None,
     )
 
-    statement_samples_config = config.query_samples or config.statement_samples or {}
-    if config.statement_samples:
-        validation_result.add_warning('The `statement_samples` option is deprecated. Use `query_samples` instead.')
-    validation_result.add_feature(FeatureKey.QUERY_SAMPLES, statement_samples_config.get('enabled', False))
-    if statement_samples_config.get('enabled', False) and not config.dbm:
-        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
-
-    settings_metadata_config = config.collect_settings or {}
-    validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, settings_metadata_config.get('enabled', False))
-    if settings_metadata_config.get('enabled', False) and not config.dbm:
-        validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
-
-    schemas_metadata_config = config.collect_schemas or {"enabled": False}
-    validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, schemas_metadata_config.get('enabled', False))
-    if schemas_metadata_config.get('enabled', False) and not config.dbm:
-        validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
-
-    statement_activity_config = config.query_activity or {"enabled": True}
-    validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, statement_activity_config.get('enabled', False))
-    if statement_activity_config.get('enabled', False) and not config.dbm:
+    validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, config.query_activity.enabled and config.dbm)
+    if config.query_activity.enabled and not config.dbm:
         validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
 
-    statement_metrics_config = config.query_metrics or {"enabled": True}
-    validation_result.add_feature(FeatureKey.QUERY_METRICS, statement_metrics_config.get('enabled', False))
-    if statement_metrics_config.get('enabled', False) and not config.dbm:
+    validation_result.add_feature(FeatureKey.QUERY_SAMPLES, config.query_samples.enabled and config.dbm)
+    if config.query_samples.enabled and not config.dbm:
+        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')        
+
+    validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
+    if config.query_metrics.enabled and not config.dbm:
         validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
+
+    validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
+    if config.collect_settings.enabled and not config.dbm:
+        validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
+
+    validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
+    if config.collect_schemas.enabled and not config.dbm:
+        validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
+
 
     return config, validation_result
 
@@ -853,3 +876,36 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
     tags.extend(["raw_query_statement:enabled"] if config.get('collect_raw_query_statement', {}).get("enabled") else [])
 
     return tags, errors
+
+
+def map_custom_metrics(custom_metrics):
+    # Pre-process custom metrics and verify definition
+    required_parameters = ("descriptors", "metrics", "query", "relation")
+
+    for m in custom_metrics:
+        for param in required_parameters:
+            if param not in m:
+                raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
+
+        # Old formatting to new formatting. The first params is always the columns names from which to
+        # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
+        # relations names.
+        if m['relation']:
+            m['query'] = m['query'] % ('{metrics_columns}', '{relations_names}')
+        else:
+            m['query'] = m['query'] % '{metrics_columns}'
+
+        try:
+            for ref, (_, mtype) in m['metrics'].items():
+                cap_mtype = mtype.upper()
+                if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
+                    raise ConfigurationError(
+                        'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(
+                            cap_mtype
+                        )
+                    )
+
+                m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)
+        except Exception as e:
+            raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
+    return custom_metrics

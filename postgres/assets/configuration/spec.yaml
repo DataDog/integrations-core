@@ -373,6 +373,12 @@ files:
             tags:
               - test:postgresql
             metric_prefix: postgresql
+    - name: custom_metrics
+      description: This option is deprecated. Use `custom_queries` instead.
+      value:
+        type: array
+        items:
+          type: object
     - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
@@ -487,6 +493,8 @@ files:
         example:
           - utf8
           - latin1
+        display_default:
+          - utf8
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -912,35 +920,6 @@ files:
             - name: identity_scope
               type: string
               example: https://ossrdbms-aad.database.windows.net/.default
-
-    - name: managed_identity
-      description: |
-        DEPRECATED: Please use `azure.managed_authentication` instead.
-
-        Configuration section used for Azure AD Authentication.
-
-        This supports using System or User assigned managed identities.
-        If this section is set, then the `username` and `password` fields will be ignored.
-
-        For more information on Managed Identities, see the Azure docs
-        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
-      options:
-        - name: client_id
-          description: |
-            Client ID of the Managed Identity.
-          value:
-            type: string
-        - name: identity_scope
-          description: |
-            The permission scope from where to access the identity token. This value is optional if using the default
-            identity scope for Azure managed databases.
-
-            For more information on scopes, see the Azure docs
-            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
-          value:
-            type: string
-            example: https://ossrdbms-aad.database.windows.net/.default
-
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.

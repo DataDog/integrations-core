@@ -136,15 +136,6 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
-class ManagedIdentity(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    client_id: Optional[str] = None
-    identity_scope: Optional[str] = None
-
-
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -251,6 +242,7 @@ class InstanceConfig(BaseModel):
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
+    custom_metrics: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
@@ -269,7 +261,6 @@ class InstanceConfig(BaseModel):
     ignore_schemas_owned_by: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
-    managed_identity: Optional[ManagedIdentity] = None
     max_connections: Optional[int] = None
     max_relations: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
@@ -296,7 +287,7 @@ class InstanceConfig(BaseModel):
     ssl_root_cert: Optional[str] = None
     table_count_limit: Optional[int] = None
     tag_replication_role: Optional[bool] = None
-    tags: Optional[tuple[str, ...]] = None
+    tags: Optional[list[str]] = None
     use_global_custom_queries: Optional[str] = None
     username: str
 
@@ -308,7 +299,7 @@ class InstanceConfig(BaseModel):
     def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
-        if field_name in info.context['configured_fields']:
+        if info.context and field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
