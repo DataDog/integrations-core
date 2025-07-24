@@ -49,43 +49,43 @@ jobs:
             exit 1
           fi
   
-  download-artifacts:
-    needs: get-merge-base
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
-    steps:
-      - name: Download artifact from merge-base run
-        run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name ${{ matrix.platform }}_compressed_status.json
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Rename previous sizes artifact
-        run: |
-          mv ${{ matrix.platform }}_compressed_status.json ${{ matrix.platform }}_prev_compressed_status.json
-      - name: Download current sizes artifact
-        run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}_compressed_status.json
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Rename current sizes artifact
-        run: |
-          mv ${{ matrix.platform }}_compressed_status.json ${{ matrix.platform }}_curr_compressed_status.json
+    download-artifacts:
+      needs: get-merge-base
+      runs-on: ubuntu-22.04
+      strategy:
+        matrix:
+          platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+      steps:
+        - name: Download artifact from merge-base run
+          run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name ${{ matrix.platform }}_compressed_status.json
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Rename previous sizes artifact
+          run: |
+            mv ${{ matrix.platform }}_compressed_status.json ${{ matrix.platform }}_prev_compressed_status.json
+        - name: Download current sizes artifact
+          run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}_compressed_status.json
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Rename current sizes artifact
+          run: |
+            mv ${{ matrix.platform }}_compressed_status.json ${{ matrix.platform }}_curr_compressed_status.json
 
-  calculate-diffs:
-    needs: download-artifacts
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
-    steps:
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Calculate diffs
-        run: |
-          python -m ddev.cli.size.utils.gha_diff --prev-sizes ${{ matrix.platform }}_prev_compressed_status.json --curr-sizes ${{ matrix.platform }}_curr_compressed_status.json > $GITHUB_STEP_SUMMARY
-      
+    calculate-diffs:
+      needs: download-artifacts
+      runs-on: ubuntu-22.04
+      strategy:
+        matrix:
+          platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+      steps:
+        - name: Set up Python ${{ env.PYTHON_VERSION }}
+          uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+          with:
+            python-version: ${{ env.PYTHON_VERSION }}
+        - name: Calculate diffs
+          run: |
+            python -m ddev.cli.size.utils.gha_diff --prev-sizes ${{ matrix.platform }}_prev_compressed_status.json --curr-sizes ${{ matrix.platform }}_curr_compressed_status.json > $GITHUB_STEP_SUMMARY
+        
       
 
 
