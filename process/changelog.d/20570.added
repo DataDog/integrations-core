@@ -1,1 +1,0 @@
-Add reset_cache_on_process_changes configuration option to control when the shared process list cache is reset
