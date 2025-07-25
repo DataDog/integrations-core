@@ -10,12 +10,15 @@ import mock
 import pytest
 from confluent_kafka import TopicPartition
 from google.protobuf import descriptor_pb2
+from google.protobuf.message import DecodeError
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import (
     DATA_STREAMS_MESSAGES_CACHE_KEY,
     _get_interpolated_timestamp,
+    build_avro_schema,
+    build_protobuf_schema,
     build_schema,
     deserialize_message,
     resolve_start_offsets,
@@ -607,9 +610,6 @@ def test_deserialize_message():
         None,
     )
 
-    # Message with extra bytes (this might still work due to Avro's permissiveness)
-    # Note: This might still succeed due to Avro's permissiveness with extra bytes
-
     # Completely invalid Avro message (random bytes)
     invalid_avro = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
     assert deserialize_message(MockedMessage(invalid_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
@@ -637,12 +637,6 @@ def test_deserialize_message():
         None,
     )
 
-    # Corrupted message (truncated) - this might still work due to Protobuf's permissiveness
-    # Note: This might still succeed because Protobuf can handle missing optional fields
-
-    # Wrong field number (field 9 instead of 8) - this might still work due to Protobuf's permissiveness
-    # Note: This might still succeed because Protobuf ignores unknown fields
-
     # Random bytes
     random_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
     assert deserialize_message(MockedMessage(random_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', '') == (
@@ -651,9 +645,6 @@ def test_deserialize_message():
         None,
         None,
     )
-
-    # Message with extra bytes (this might still work due to Protobuf's permissiveness)
-    # Note: This might still succeed due to Protobuf's permissiveness with extra bytes
 
     # Completely invalid Protobuf message (random bytes)
     invalid_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
@@ -674,9 +665,6 @@ def test_deserialize_message():
     assert deserialize_message(
         MockedMessage(truncated_varint_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', ''
     ) == (None, None, None, None)
-
-    # Protobuf message with length-delimited field that's too short
-    # Note: This might still succeed because "Short" is a valid string
 
 
 def mocked_time():
@@ -967,7 +955,7 @@ def test_build_schema_error_cases():
 
     # Valid base64 but invalid protobuf schema
     # This is a valid base64 string that doesn't represent a valid FileDescriptorSet
-    with pytest.raises(Exception):  # Will be a protobuf DecodeError or similar
+    with pytest.raises(DecodeError):  # Will be a protobuf DecodeError
         build_schema('protobuf', 'SGVsbG8gV29ybGQ=')  # "Hello World" in base64
 
     # Valid base64 but empty schema (should cause IndexError)
@@ -982,11 +970,11 @@ def test_build_schema_error_cases():
 
 def test_build_schema_none_handling():
     """Test that build_schema functions properly handle None values."""
-    from datadog_checks.kafka_consumer.kafka_consumer import build_avro_schema
 
     # Test Avro schema with None - should raise TypeError
     with pytest.raises(TypeError):
         build_avro_schema(None)
 
-    # Note: Protobuf schemas are base64 encoded, so passing None would fail earlier
-    # with base64.binascii.Error before reaching the None check in build_protobuf_schema
+    # Test Protobuf schema with None - should raise TypeError or base64.binascii.Error
+    with pytest.raises((TypeError, base64.binascii.Error)):
+        build_protobuf_schema(None)
