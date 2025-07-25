@@ -86,6 +86,12 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
         with caplog.at_level(logging.DEBUG):
             collector.discover_queues(queue_manager)
 
+        # Debug: Print all captured log records
+        print(f"\nDEBUG: Captured log records for {auto_discover_queues_via_names=}, {error_code=}")
+        for record in caplog.records:
+            print(f"  {record.levelname}: {record.message}")
+        print("DEBUG\n")
+
         if error_code == 2033:
             assert any(
                 "No queue info available" in record.message for record in caplog.records if record.levelname == "DEBUG"
