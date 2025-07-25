@@ -72,20 +72,14 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
     # Test direct discovery method (_discover_queues) with known MQ errors
     # Should not raise, should log debug, should not call _submit_discovery_error_metric
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
-    instance['auto_discover_queues'] = True  # Enable auto discovery so the methods are called
-    instance['queues'] = []  # Ensure no user-provided queues
+    instance['auto_discover_queues'] = True
+    instance['queues'] = []
 
-    # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq')
-    logger.setLevel(logging.DEBUG)  # Set to DEBUG to capture all log levels
-
-    # Create a real warning function that logs to our logger
-    def warning_func(message, *args):
-        logger.warning(message, *args)
+    logger.setLevel(logging.DEBUG)
 
     collector = make_collector(instance, logger)
-    # Replace the mock warning with our real warning function
-    collector.warning = warning_func
+    collector.warning = Mock(side_effect=lambda msg, *args: logger.warning(msg, *args))
     queue_manager = Mock()
     pcf_mock = Mock()
     error = pymqi.MQMIError(2, error_code)
@@ -97,7 +91,7 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
 
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
         collector._submit_discovery_error_metric = Mock()
-        with caplog.at_level(logging.DEBUG):  # Capture all levels including WARNING
+        with caplog.at_level(logging.DEBUG):
             collector.discover_queues(queue_manager)
 
         if error_code == 2033:
@@ -107,7 +101,6 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
-                # Via_names method calls _submit_discovery_error_metric for ALL errors
                 assert collector._submit_discovery_error_metric.called
             else:
                 assert any(
@@ -115,7 +108,6 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
-                # Direct method doesn't call _submit_discovery_error_metric for known errors
                 assert not collector._submit_discovery_error_metric.called
         elif error_code == 2085:  # MQRC_UNKNOWN_OBJECT_NAME
             if auto_discover_queues_via_names:
@@ -124,7 +116,6 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
-                # Via_names method calls _submit_discovery_error_metric for ALL errors
                 assert collector._submit_discovery_error_metric.called
             else:
                 assert any(
@@ -132,7 +123,6 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
-                # Direct method doesn't call _submit_discovery_error_metric for known errors
                 assert not collector._submit_discovery_error_metric.called
         else:
             if auto_discover_queues_via_names:
@@ -152,21 +142,17 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
 
 
 @pytest.mark.parametrize(
-    "auto_discover_queues_via_names, patch_method, side_effect_attr",
+    "auto_discover_queues_via_names, side_effect_attr",
     [
-        (False, "MQCMD_INQUIRE_Q", "MQCMD_INQUIRE_Q"),
-        (True, "MQCMD_INQUIRE_Q_NAMES", "MQCMD_INQUIRE_Q_NAMES"),
+        (False, "MQCMD_INQUIRE_Q"),
+        (True, "MQCMD_INQUIRE_Q_NAMES"),
     ],
     ids=["direct_method", "via_names_method"],
 )
-def test_discover_queues_disconnects_on_exception(
-    instance, auto_discover_queues_via_names, patch_method, side_effect_attr
-):
-    # Test both direct and via_names discovery methods disconnect on exception
+def test_discover_queues_disconnects_on_exception(instance, auto_discover_queues_via_names, side_effect_attr):
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
-    instance['auto_discover_queues'] = True  # Enable auto discovery so the methods are called
+    instance['auto_discover_queues'] = True
 
-    # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq_disconnect')
     logger.setLevel(logging.DEBUG)
 
@@ -174,12 +160,9 @@ def test_discover_queues_disconnects_on_exception(
     queue_manager = Mock()
     pcf_mock = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
-        # Simulate MQMIError in queue discovery (both methods handle this)
-        error = pymqi.MQMIError(2, 9999)  # Use an unexpected error code
+        error = pymqi.MQMIError(2, 9999)
         setattr(pcf_mock, side_effect_attr, Mock(side_effect=error))
-        # The exception should be caught and handled gracefully
         collector.discover_queues(queue_manager)
-        # Verify that disconnect was called even when an exception occurred
         assert pcf_mock.disconnect.called
 
 
@@ -194,41 +177,33 @@ def test_discover_queues_disconnects_on_exception(
 def test_discover_queues_warns_when_no_queues_found(
     instance, auto_discover_queues_via_names, patch_method, return_value, caplog
 ):
-    # Test both direct and via_names discovery methods warn when no queues found
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
-    instance['auto_discover_queues'] = True  # Enable auto discovery so the methods are called
-    instance['queues'] = []  # Ensure no user-provided queues
+    instance['auto_discover_queues'] = True
+    instance['queues'] = []
 
-    # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq_no_queues')
     logger.setLevel(logging.DEBUG)
 
-    # Create a real warning function that logs to our logger
-    def warning_func(message, *args):
-        logger.warning(message, *args)
-
     collector = make_collector(instance, logger)
-    # Replace the mock warning with our real warning function
-    collector.warning = warning_func
+    collector.warning = Mock(side_effect=lambda msg, *args: logger.warning(msg, *args))
 
     queue_manager = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute') as PCFExecute:
         getattr(PCFExecute.return_value, patch_method).return_value = return_value
         with caplog.at_level(logging.DEBUG):
             result = collector.discover_queues(queue_manager)
-        # Check that warning was called by looking for the warning message in logs
         assert any(
             "No matching queue of type MQQT_LOCAL or MQQT_REMOTE for pattern" in record.message
             for record in caplog.records
             if record.levelname == "WARNING"
         )
-        assert result == set()  # discover_queues returns a set
+        assert result == set()
 
 
 @pytest.mark.parametrize(
     "auto_discover_queues_via_names, expected_method, not_expected_method, expected_queue",
     [
-        (False, "_discover_queues", "_discover_queues_via_names", "queue1"),
+        (False, "_discover_queues", "_discover_queues", "queue1"),
         (True, "_discover_queues_via_names", "_discover_queues", "queue2"),
     ],
     ids=["direct_method", "via_names_method"],
@@ -236,12 +211,10 @@ def test_discover_queues_warns_when_no_queues_found(
 def test_discover_queues_uses_correct_method_based_on_config(
     instance, auto_discover_queues_via_names, expected_method, not_expected_method, expected_queue
 ):
-    # Test that the correct discovery method is chosen based on configuration
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
-    instance['auto_discover_queues'] = True  # Enable auto discovery so the methods are called
-    instance['queues'] = []  # Ensure no user-provided queues
+    instance['auto_discover_queues'] = True
+    instance['queues'] = []
 
-    # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq_method_selection')
     logger.setLevel(logging.DEBUG)
 
