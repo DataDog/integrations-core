@@ -85,6 +85,7 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
         collector.log = Mock()
         with caplog.at_level(logging.DEBUG):
             collector.discover_queues(queue_manager)
+
         if error_code == 2033:
             assert any(
                 "No queue info available" in record.message for record in caplog.records if record.levelname == "DEBUG"
@@ -100,7 +101,7 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
         else:
             if auto_discover_queues_via_names:
                 assert any(
-                    "Error inquiring queue" in record.message
+                    "Error inquiring queue names for pattern" in record.message
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
