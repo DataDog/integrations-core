@@ -58,8 +58,10 @@
       "Proxmox Overview": "assets/dashboards/overview.json"
     },
     "monitors":{
-      "CPU Usage is High on Proxmox VM": "vm_cpu_usage.json",
-      "CPU Usage is High on Proxmox Node": "node_cpu_usage.json"
+      "CPU Usage is High on Proxmox VM": "assets/monitors/vm_cpu_usage.json",
+      "CPU Usage is High on Proxmox Node": "assets/monitors/node_cpu_usage.json",
+      "Memory Usage is High on Proxmox VM": "assets/monitors/vm_memory_usage.json",
+      "Memory Usage is High on Proxmox Node": "assets/monitors/node_memory_usage.json"
     }
   },
   "author": {
