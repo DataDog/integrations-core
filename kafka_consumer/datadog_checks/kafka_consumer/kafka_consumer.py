@@ -423,9 +423,9 @@ class KafkaCheck(AgentCheck):
             cluster = kafka["cluster"]
             config_id = cfg["id"]
             value_format = kafka["value_format"]
-            value_schema_str = kafka["value_schema"]
+            value_schema_str = kafka.get("value_schema", "")
             key_format = kafka["key_format"]
-            key_schema_str = kafka["key_schema"]
+            key_schema_str = kafka.get("key_schema", "")
             if self._messages_have_been_retrieved(config_id):
                 continue
             if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
