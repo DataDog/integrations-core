@@ -76,7 +76,7 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
 
     # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq')
-    logger.setLevel(logging.WARNING)  # Set to WARNING to capture warning messages
+    logger.setLevel(logging.DEBUG)  # Set to DEBUG to capture all log levels
 
     # Create a real warning function that logs to our logger
     def warning_func(message, *args):
