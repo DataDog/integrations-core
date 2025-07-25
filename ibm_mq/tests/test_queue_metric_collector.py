@@ -76,12 +76,21 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
 
     # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARNING)  # Set to WARNING to capture warning messages
+
+    # Create a real warning function that logs to our logger
+    def warning_func(message, *args):
+        logger.warning(message, *args)
 
     collector = make_collector(instance, logger)
+    # Replace the mock warning with our real warning function
+    collector.warning = warning_func
     queue_manager = Mock()
     pcf_mock = Mock()
     error = pymqi.MQMIError(2, error_code)
+
+    print(f"Created error: {error}")
+    print(f"Error comp: {error.comp}, reason: {error.reason}")
 
     if auto_discover_queues_via_names:
         pcf_mock.MQCMD_INQUIRE_Q_NAMES.side_effect = error
@@ -90,7 +99,7 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
 
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
         collector._submit_discovery_error_metric = Mock()
-        with caplog.at_level(logging.DEBUG):
+        with caplog.at_level(logging.DEBUG):  # Capture all levels including WARNING
             collector.discover_queues(queue_manager)
 
         # Debug: Print all captured log records for direct method failures
