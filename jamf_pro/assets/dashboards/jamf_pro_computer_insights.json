@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -136,7 +136,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -190,7 +190,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -260,7 +260,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -339,7 +339,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -435,7 +435,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -505,7 +505,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR ComputerPushCapabilityChanged) $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -594,7 +594,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -664,7 +664,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -707,7 +707,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -778,7 +778,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -858,7 +858,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -941,7 +941,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1024,7 +1024,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
+                                        "query_string": "source:jamf-pro service:ComputerAdded $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1086,7 +1086,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1156,7 +1156,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1210,7 +1210,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1268,7 +1268,7 @@
                     {
                         "id": 8755368005332821,
                         "definition": {
-                            "title": "Check-In Activity by User",
+                            "title": "Check-In Activities by User",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1279,7 +1279,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1349,7 +1349,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1418,7 +1418,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1489,7 +1489,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1572,7 +1572,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1658,7 +1658,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1735,7 +1735,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
+                                        "query_string": "source:jamf-pro service:ComputerCheckIn $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1797,7 +1797,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1867,7 +1867,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1911,7 +1911,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1980,7 +1980,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2051,7 +2051,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2134,7 +2134,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2220,7 +2220,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2297,7 +2297,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
+                                        "query_string": "source:jamf-pro service:ComputerInventoryCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2359,7 +2359,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2429,7 +2429,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2484,7 +2484,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2553,7 +2553,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2624,7 +2624,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2704,7 +2704,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished @event.successful:false $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished @event.successful:false $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2780,7 +2780,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2850,7 +2850,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2933,7 +2933,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3016,7 +3016,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
+                                        "query_string": "source:jamf-pro service:ComputerPolicyFinished $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -3078,7 +3078,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3148,7 +3148,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3203,7 +3203,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3272,7 +3272,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3343,7 +3343,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3402,7 +3402,7 @@
                     {
                         "id": 1224136946405154,
                         "definition": {
-                            "title": "Patch Completions by Version Deployed",
+                            "title": "Patch Completions by Deployed Version",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3413,7 +3413,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3482,7 +3482,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3552,7 +3552,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3622,7 +3622,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3702,7 +3702,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted @event.successful:false $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted @event.successful:false $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3779,7 +3779,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3862,7 +3862,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3945,7 +3945,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
+                                        "query_string": "source:jamf-pro service:ComputerPatchPolicyCompleted $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -4007,7 +4007,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4077,7 +4077,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4121,7 +4121,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4190,7 +4190,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4261,7 +4261,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4344,7 +4344,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4430,7 +4430,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
+                                                "query": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4507,7 +4507,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $Model $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
+                                        "query_string": "source:jamf-pro service:ComputerPushCapabilityChanged $Event-Type $Device-Name $IP-Address $OS-Version $User-Name $User-Email $Department $Building $Room",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -4555,13 +4555,7 @@
         },
         {
             "name": "Device-Name",
-            "prefix": "@computer.deviceName",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "Model",
-            "prefix": "@event.computer.model",
+            "prefix": "@event.computer.deviceName",
             "available_values": [],
             "default": "*"
         },
@@ -4573,7 +4567,7 @@
         },
         {
             "name": "OS-Version",
-            "prefix": "@computer.osVersion",
+            "prefix": "@event.computer.osVersion",
             "available_values": [],
             "default": "*"
         },
@@ -4591,13 +4585,13 @@
         },
         {
             "name": "Department",
-            "prefix": "@computer.department",
+            "prefix": "@event.computer.department",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Building",
-            "prefix": "@computer.building",
+            "prefix": "@event.computer.building",
             "available_values": [],
             "default": "*"
         },

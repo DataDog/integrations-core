@@ -1,6 +1,6 @@
 {
     "title": "Jamf Pro - System, Server & Miscellaneous Events",
-    "description": "- This dashboard provides key insights into system and server events, including DEP enrolments, server status, patch updates, push notifications, API activity, SCEP challenges, and smart group changes.",
+    "description": "- This dashboard provides key insights into system and server events, including DEP enrollments, server status, patch updates, push notifications, API activity, SCEP challenges, and smart group changes.",
     "widgets": [
         {
             "id": 1556295814255214,
@@ -25,7 +25,7 @@
             "id": 2889378903874205,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides key insights into system and server events, including DEP enrolments, server status, patch updates, push notifications, API activity, SCEP challenges, and smart group changes.\n\nFor more information, see the [Jamf Pro Integration Documentation](https://docs.datadoghq.com/integrations/jamf_pro/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides key insights into system and server events, including DEP enrollments, server status, patch updates, push notifications, API activity, SCEP challenges, and smart group changes.\n\nFor more information, see the [Jamf Pro Integration Documentation](https://docs.datadoghq.com/integrations/jamf_pro/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -1294,7 +1294,7 @@
                     {
                         "id": 2158384773991214,
                         "definition": {
-                            "title": "Total Patch Software Tile Update Events",
+                            "title": "Total Patch Software Title Updated",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2111,7 +2111,7 @@
                     {
                         "id": 2728891920375429,
                         "definition": {
-                            "title": "Top API Operations by User",
+                            "title": "Top Users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2530,7 +2530,7 @@
                     {
                         "id": 8185802306692820,
                         "definition": {
-                            "title": "Top Username",
+                            "title": "Top Users",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2598,7 +2598,7 @@
                     {
                         "id": 5768927736689426,
                         "definition": {
-                            "title": "Top Email",
+                            "title": "Top Emails",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2752,7 +2752,7 @@
                     {
                         "id": 2256509659720273,
                         "definition": {
-                            "title": "Top Device Name",
+                            "title": "Top Devices",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2821,7 +2821,7 @@
                     {
                         "id": 5440470891528410,
                         "definition": {
-                            "title": "Top Device Product",
+                            "title": "Top Device Products",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3288,7 +3288,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:SmartGroupComputerMembershipChange $Event-Type"
+                                                "query": "source:jamf-pro service:SmartGroupMobileDeviceMembershipChange $Event-Type"
                                             },
                                             "indexes": [
                                                 "*"

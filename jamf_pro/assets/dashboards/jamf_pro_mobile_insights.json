@@ -1,6 +1,6 @@
 {
     "title": "Jamf Pro - Mobile Insights",
-    "description": "This dashboard provides insights into mobile device activities.",
+    "description": "This dashboard offers detailed monitoring of mobile device activity such as check-ins, command completions, enrollments, inventory updates, push notifications, and unenrollments across your mobile devices.",
     "widgets": [
         {
             "id": 7768460652575278,
@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -136,7 +136,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -180,7 +180,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -249,7 +249,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -319,7 +319,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -389,7 +389,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -459,7 +459,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -529,7 +529,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -615,7 +615,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -698,7 +698,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address",
+                                        "query_string": "source:jamf-pro service:MobileDeviceCheckIn $Device-Name $OS-Version $User-Name $Room $IP-Address",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -760,7 +760,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -830,7 +830,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -874,7 +874,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -943,7 +943,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1013,7 +1013,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1083,7 +1083,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1153,7 +1153,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1223,7 +1223,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1309,7 +1309,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1392,7 +1392,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address",
+                                        "query_string": "source:jamf-pro service:MobileDeviceCommandCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1454,7 +1454,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1524,7 +1524,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1568,7 +1568,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1637,7 +1637,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1707,7 +1707,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1777,7 +1777,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1847,7 +1847,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1917,7 +1917,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2003,7 +2003,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2086,7 +2086,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address",
+                                        "query_string": "source:jamf-pro service:MobileDeviceEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2148,7 +2148,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2218,7 +2218,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2262,7 +2262,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2331,7 +2331,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2401,7 +2401,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2471,7 +2471,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2541,7 +2541,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2611,7 +2611,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2697,7 +2697,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2780,7 +2780,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address",
+                                        "query_string": "source:jamf-pro service:MobileDeviceInventoryCompleted $Device-Name $OS-Version $User-Name $Room $IP-Address",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2842,7 +2842,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2912,7 +2912,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2956,7 +2956,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3025,7 +3025,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3095,7 +3095,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3165,7 +3165,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3235,7 +3235,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3305,7 +3305,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3391,7 +3391,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3474,7 +3474,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $Model-Display $IP-Address",
+                                        "query_string": "source:jamf-pro service:MobileDevicePushSent $Device-Name $OS-Version $User-Name $Room $IP-Address",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -3536,7 +3536,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3606,7 +3606,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3650,7 +3650,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3719,7 +3719,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3789,7 +3789,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3859,7 +3859,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3929,7 +3929,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3999,7 +3999,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4085,7 +4085,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address"
+                                                "query": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4168,7 +4168,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $User-Name $Room $Model-Display $IP-Address",
+                                        "query_string": "source:jamf-pro service:MobileDeviceUnEnrolled $Device-Name $OS-Version $User-Name $Room $IP-Address",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -4211,12 +4211,6 @@
         {
             "name": "Device-Name",
             "prefix": "@event.deviceName",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "Model-Display",
-            "prefix": "@event.modelDisplay",
             "available_values": [],
             "default": "*"
         },
