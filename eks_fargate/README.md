@@ -900,11 +900,11 @@ metadata:
   name: datadog
   namespace: datadog
 spec:
-  clusterAgent:
-    enabled: true
-    env:
-      - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
-        value: true
+  overrides:
+    clusterAgent:
+      env:
+        - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
+          value: "true"
 ```
 
 <!-- xxz tab xxx -->
