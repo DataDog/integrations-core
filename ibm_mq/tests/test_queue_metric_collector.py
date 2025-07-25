@@ -72,6 +72,7 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
     # Test direct discovery method (_discover_queues) with known MQ errors
     # Should not raise, should log debug, should not call _submit_discovery_error_metric
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
+    instance['auto_discover_queues'] = True  # Enable auto discovery so the methods are called
 
     # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq')
