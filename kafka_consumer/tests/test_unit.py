@@ -1,12 +1,15 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
+import json
 import logging
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
 from confluent_kafka import TopicPartition
+from google.protobuf import descriptor_pb2
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
@@ -568,6 +571,113 @@ def test_deserialize_message():
         None,
     )
 
+    # Test invalid Avro messages
+    # Empty message (returns empty string, not None)
+    assert deserialize_message(MockedMessage(b'', key), 'avro', parsed_avro_schema, 'json', '') == (
+        '',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
+    # Corrupted message (truncated)
+    corrupted_avro = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language'  # Missing author field
+    assert deserialize_message(MockedMessage(corrupted_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Wrong data type (string instead of long for isbn)
+    wrong_type_avro = b'\x02\x12\x1bThe Go Programming Language\x18Alan Donovan'  # Wrong encoding for isbn
+    assert deserialize_message(MockedMessage(wrong_type_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Random bytes
+    random_avro = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(MockedMessage(random_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Message with extra bytes (this might still work due to Avro's permissiveness)
+    # Note: This might still succeed due to Avro's permissiveness with extra bytes
+
+    # Completely invalid Avro message (random bytes)
+    invalid_avro = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(MockedMessage(invalid_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Avro message with wrong data types (string where long expected)
+    wrong_type_avro = b'\x02\x12\x1bThe Go Programming Language\x18Alan Donovan'  # Wrong encoding for isbn
+    assert deserialize_message(MockedMessage(wrong_type_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Test invalid Protobuf messages
+    # Empty message (returns empty string, not None)
+    assert deserialize_message(MockedMessage(b'', key), 'protobuf', parsed_protobuf_schema, 'json', '') == (
+        '',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
+    # Corrupted message (truncated) - this might still work due to Protobuf's permissiveness
+    # Note: This might still succeed because Protobuf can handle missing optional fields
+
+    # Wrong field number (field 9 instead of 8) - this might still work due to Protobuf's permissiveness
+    # Note: This might still succeed because Protobuf ignores unknown fields
+
+    # Random bytes
+    random_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(MockedMessage(random_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Message with extra bytes (this might still work due to Protobuf's permissiveness)
+    # Note: This might still succeed due to Protobuf's permissiveness with extra bytes
+
+    # Completely invalid Protobuf message (random bytes)
+    invalid_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(
+        MockedMessage(invalid_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (None, None, None, None)
+
+    # Protobuf message with wrong field number (field 99 instead of 1)
+    wrong_field_protobuf = (
+        b'\x99\x01\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1bThe Go Programming Language\x1a\x0cAlan Donovan'
+    )
+    assert deserialize_message(
+        MockedMessage(wrong_field_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (None, None, None, None)
+
+    # Protobuf message with truncated varint
+    truncated_varint_protobuf = b'\x08\xff\xff\xff\xff\xff\xff\xff\xff\xff'  # Incomplete varint
+    assert deserialize_message(
+        MockedMessage(truncated_varint_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (None, None, None, None)
+
+    # Protobuf message with length-delimited field that's too short
+    # Note: This might still succeed because "Short" is a valid string
+
 
 def mocked_time():
     return 400
@@ -800,3 +910,83 @@ def test_data_streams_messages(
     for content in expected_persistent_cache_writes:
         assert mock.call(DATA_STREAMS_MESSAGES_CACHE_KEY, content) in check.write_persistent_cache.mock_calls
     assert [mock.call(log) for log in expected_logs] == check.send_log.mock_calls
+
+
+def test_build_schema():
+    """Test build_schema function with various valid and invalid schemas."""
+
+    # Test JSON format (should return None)
+    assert build_schema('json', '') is None
+    assert build_schema('json', '{"some": "json"}') is None
+    assert build_schema('json', None) is None
+
+    # Test valid Avro schema
+    valid_avro_schema = (
+        '{"type": "record", "name": "Book", "namespace": "com.book", '
+        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+        '{"name": "author", "type": "string"}]}'
+    )
+    avro_result = build_schema('avro', valid_avro_schema)
+    assert avro_result is not None
+    assert avro_result['type'] == 'record'
+    assert avro_result['name'] == 'Book'
+    assert avro_result['namespace'] == 'com.book'
+
+    # Test valid Protobuf schema
+    valid_protobuf_schema = (
+        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
+        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
+    )
+    protobuf_result = build_schema('protobuf', valid_protobuf_schema)
+    assert protobuf_result is not None
+    # The result should be a protobuf message class instance
+    assert hasattr(protobuf_result, 'isbn')
+    assert hasattr(protobuf_result, 'title')
+    assert hasattr(protobuf_result, 'author')
+
+    # Test unknown format
+    assert build_schema('unknown_format', 'some_schema') is None
+
+
+def test_build_schema_error_cases():
+    """Test build_schema with various error cases and edge cases."""
+
+    # Test Avro error cases
+    # Invalid JSON syntax
+    with pytest.raises(json.JSONDecodeError):
+        build_schema('avro', '{"invalid": json}')
+
+    # Valid JSON but incomplete schema (fastavro is permissive)
+    result = build_schema('avro', '{"type": "record"}')  # Missing name and fields
+    assert result is not None
+
+    # Test Protobuf error cases
+    # Invalid base64 encoding
+    with pytest.raises(base64.binascii.Error):
+        build_schema('protobuf', 'invalid-base64!')
+
+    # Valid base64 but invalid protobuf schema
+    # This is a valid base64 string that doesn't represent a valid FileDescriptorSet
+    with pytest.raises(Exception):  # Will be a protobuf DecodeError or similar
+        build_schema('protobuf', 'SGVsbG8gV29ybGQ=')  # "Hello World" in base64
+
+    # Valid base64 but empty schema (should cause IndexError)
+    # Create a minimal but empty FileDescriptorSet
+    empty_descriptor = descriptor_pb2.FileDescriptorSet()
+    empty_descriptor_bytes = empty_descriptor.SerializeToString()
+    empty_descriptor_b64 = base64.b64encode(empty_descriptor_bytes).decode('utf-8')
+
+    with pytest.raises(IndexError):  # Should fail when trying to access file[0]
+        build_schema('protobuf', empty_descriptor_b64)
+
+
+def test_build_schema_none_handling():
+    """Test that build_schema functions properly handle None values."""
+    from datadog_checks.kafka_consumer.kafka_consumer import build_avro_schema
+
+    # Test Avro schema with None - should raise TypeError
+    with pytest.raises(TypeError):
+        build_avro_schema(None)
+
+    # Note: Protobuf schemas are base64 encoded, so passing None would fail earlier
+    # with base64.binascii.Error before reaching the None check in build_protobuf_schema

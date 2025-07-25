@@ -11,6 +11,7 @@ from confluent_kafka import TopicPartition
 from fastavro import schemaless_reader
 from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
 from google.protobuf.json_format import MessageToJson
+from google.protobuf.message import DecodeError, EncodeError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
@@ -446,17 +447,29 @@ class KafkaCheck(AgentCheck):
                 )
                 continue
 
-            print(
-                "Starting live messages for config_id: {}, topic: {}, partition: {}, "
-                "start_offset: {}, n_messages: {}".format(config_id, topic, partition, start_offset, n_messages)
-            )
-            print("value_schema", value_schema_str)
-            print("key_format", value_format)
-
-            value_schema, key_schema = (
-                build_schema(value_format, value_schema_str),
-                build_schema(key_format, key_schema_str),
-            )
+            try:
+                value_schema, key_schema = (
+                    build_schema(value_format, value_schema_str),
+                    build_schema(key_format, key_schema_str),
+                )
+            except (
+                ValueError,
+                json.JSONDecodeError,
+                base64.binascii.Error,
+                IndexError,
+                KeyError,
+                TypeError,
+                DecodeError,
+                EncodeError,
+            ) as e:
+                self.log.error(
+                    "Failed to build schemas for config_id: %s, topic: %s, partition: %s. Error: %s",
+                    config_id,
+                    topic,
+                    partition,
+                    e,
+                )
+                continue
 
             self.client.start_collecting_messages(start_offsets)
             for _ in range(n_messages):
@@ -561,19 +574,19 @@ def deserialize_message(message, value_format, value_schema, key_format, key_sch
         decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(
             message.value(), value_format, value_schema
         )
-    except (UnicodeDecodeError, json.JSONDecodeError):
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return None, None, None, None
     try:
         decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(message.key(), key_format, key_schema)
         return decoded_value, value_schema_id, decoded_key, key_schema_id
-    except (UnicodeDecodeError, json.JSONDecodeError):
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return decoded_value, value_schema_id, None, None
 
 
 def _deserialize_bytes_maybe_schema_registry(message, message_format, schema):
     try:
         return _deserialize_bytes(message, message_format, schema), None
-    except (UnicodeDecodeError, json.JSONDecodeError) as e:
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as e:
         # If the message is not a valid JSON, it might be a schema registry message, that is prefixed
         # with a magic byte and a schema ID.
         if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
@@ -607,15 +620,21 @@ def _deserialize_json(message):
 
 
 def _deserialize_protobuf(message, schema):
-    schema.ParseFromString(message)
-    return MessageToJson(schema)
+    """Deserialize a Protobuf message using google.protobuf."""
+    try:
+        schema.ParseFromString(message)
+        return MessageToJson(schema)
+    except Exception as e:
+        raise ValueError(f"Failed to deserialize Protobuf message: {e}")
 
 
 def _deserialize_avro(message, schema):
     """Deserialize an Avro message using fastavro."""
-    # The schema is expected to be a parsed schema object
-    data = schemaless_reader(BytesIO(message), schema)
-    return json.dumps(data)
+    try:
+        data = schemaless_reader(BytesIO(message), schema)
+        return json.dumps(data)
+    except Exception as e:
+        raise ValueError(f"Failed to deserialize Avro message: {e}")
 
 
 def build_schema(message_format, schema_str):
@@ -628,9 +647,12 @@ def build_schema(message_format, schema_str):
 
 def build_avro_schema(schema_str):
     """Build an Avro schema from a JSON string."""
-    if isinstance(schema_str, str):
-        return json.loads(schema_str)
-    return schema_str
+    schema = json.loads(schema_str)
+
+    if schema is None:
+        raise ValueError("Avro schema cannot be None")
+
+    return schema
 
 
 def build_protobuf_schema(schema_str):
@@ -659,4 +681,9 @@ def build_protobuf_schema(schema_str):
     # # Get the message descriptor
     message_descriptor = pool.FindMessageTypeByName(full_name)
     # Create a dynamic message class
-    return message_factory.GetMessageClass(message_descriptor)()
+    schema = message_factory.GetMessageClass(message_descriptor)()
+
+    if schema is None:
+        raise ValueError("Protobuf schema cannot be None")
+
+    return schema
