@@ -40,17 +40,24 @@ def test_regex_precedes_autodiscovery(instance):
     assert discovered_queues == {'pattern_queue', 'DEV.QUEUE.1'}
 
 
-def make_collector(instance=None):
+def make_collector(instance=None, logger=None):
     if instance is None:
         instance = {'queues': []}
     config = IBMMQConfig(instance, {})
-    return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+    if logger is None:
+        logger = Mock()
+    return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), logger)
 
 
 def test_debug_logging_simple(instance, caplog):
     """Simple test to debug logging issues"""
     instance['auto_discover_queues_via_names'] = False
-    collector = make_collector(instance)
+
+    # Create a real logger that can be captured by caplog
+    logger = logging.getLogger('test_ibm_mq')
+    logger.setLevel(logging.DEBUG)
+
+    collector = make_collector(instance, logger)
     queue_manager = Mock()
     pcf_mock = Mock()
 
