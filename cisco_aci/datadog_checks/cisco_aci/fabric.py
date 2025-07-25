@@ -10,7 +10,7 @@ from . import aci_metrics, exceptions, helpers, ndm
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
 DEVICE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_device_user_tags"
-INTERFACE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_interface_user_tags"
+INTERFACE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_interface"
 
 
 class Fabric:
