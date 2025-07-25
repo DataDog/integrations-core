@@ -1,15 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import base64
 import json
 from collections import defaultdict
+from io import BytesIO
 from time import time
 
-import base64
 from confluent_kafka import TopicPartition
+from fastavro import schemaless_reader
 from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
 from google.protobuf.json_format import MessageToJson
-from fastavro import schemaless_reader
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
@@ -445,13 +446,17 @@ class KafkaCheck(AgentCheck):
                 )
                 continue
 
-            print("Starting live messages for config_id: {}, topic: {}, partition: {}, start_offset: {}, n_messages: {}".format(
-                config_id, topic, partition, start_offset, n_messages
-            ))
+            print(
+                "Starting live messages for config_id: {}, topic: {}, partition: {}, "
+                "start_offset: {}, n_messages: {}".format(config_id, topic, partition, start_offset, n_messages)
+            )
             print("value_schema", value_schema_str)
             print("key_format", value_format)
 
-            value_schema, key_schema = build_schema(value_format, value_schema_str), build_schema(key_format, key_schema_str)
+            value_schema, key_schema = (
+                build_schema(value_format, value_schema_str),
+                build_schema(key_format, key_schema_str),
+            )
 
             self.client.start_collecting_messages(start_offsets)
             for _ in range(n_messages):
@@ -479,7 +484,9 @@ class KafkaCheck(AgentCheck):
                     'partition': str(message.partition()),
                     'offset': str(message.offset()),
                 }
-                decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(message, value_format, value_schema, key_format, key_schema)
+                decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(
+                    message, value_format, value_schema, key_format, key_schema
+                )
                 if decoded_value:
                     data['message_value'] = decoded_value
                 else:
@@ -551,7 +558,9 @@ def resolve_start_offsets(highwater_offsets, target_topic, target_partition, sta
 
 def deserialize_message(message, value_format, value_schema, key_format, key_schema):
     try:
-        decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(message.value(), value_format, value_schema)
+        decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(
+            message.value(), value_format, value_schema
+        )
     except (UnicodeDecodeError, json.JSONDecodeError):
         return None, None, None, None
     try:
@@ -590,27 +599,39 @@ def _deserialize_bytes(message, message_format, schema):
     else:
         return _deserialize_json(message)
 
+
 def _deserialize_json(message):
     decoded = message.decode('utf-8')
     json.loads(decoded)
     return decoded
 
+
 def _deserialize_protobuf(message, schema):
     schema.ParseFromString(message)
     return MessageToJson(schema)
 
+
 def _deserialize_avro(message, schema):
     """Deserialize an Avro message using fastavro."""
-    # The schema is expected to be in a format that fastavro can read
-    return schemaless_reader(message, schema)
+    # The schema is expected to be a parsed schema object
+    data = schemaless_reader(BytesIO(message), schema)
+    return json.dumps(data)
+
 
 def build_schema(message_format, schema_str):
     if message_format == 'protobuf':
         return build_protobuf_schema(schema_str)
     elif message_format == 'avro':
-        # For Avro, we expect the schema to be in a format that fastavro can read
-        return schema_str
+        return build_avro_schema(schema_str)
     return None
+
+
+def build_avro_schema(schema_str):
+    """Build an Avro schema from a JSON string."""
+    if isinstance(schema_str, str):
+        return json.loads(schema_str)
+    return schema_str
+
 
 def build_protobuf_schema(schema_str):
     # schema is encoded in base64, decode it before passing it to ParseFromString

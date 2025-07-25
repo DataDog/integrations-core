@@ -13,6 +13,7 @@ from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import (
     DATA_STREAMS_MESSAGES_CACHE_KEY,
     _get_interpolated_timestamp,
+    build_schema,
     deserialize_message,
     resolve_start_offsets,
 )
@@ -533,6 +534,40 @@ def test_deserialize_message():
     invalid_utf8 = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"\xff'
     assert deserialize_message(MockedMessage(invalid_utf8, key), 'json', '', 'json', '') == (None, None, None, None)
 
+    # Test Avro deserialization
+    avro_schema = (
+        '{"type": "record", "name": "Book", "namespace": "com.book", '
+        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+        '{"name": "author", "type": "string"}]}'
+    )
+    avro_message = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
+    parsed_avro_schema = build_schema('avro', avro_schema)
+    assert deserialize_message(MockedMessage(avro_message, key), 'avro', parsed_avro_schema, 'json', '') == (
+        '{"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
+    # Test Protobuf deserialization
+    protobuf_schema = (
+        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
+        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
+    )
+    protobuf_message = (
+        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
+        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
+    )
+    parsed_protobuf_schema = build_schema('protobuf', protobuf_schema)
+    assert deserialize_message(
+        MockedMessage(protobuf_message, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (
+        '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  "author": "Alan Donovan"\n}',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
 
 def mocked_time():
     return 400
@@ -540,7 +575,8 @@ def mocked_time():
 
 @mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
 @pytest.mark.parametrize(
-    'messages, value_format, value_schema, persistent_cache_read_content, expected_persistent_cache_writes, expected_logs',
+    'messages, value_format, value_schema, persistent_cache_read_content, '
+    'expected_persistent_cache_writes, expected_logs',
     [
         pytest.param(
             [
@@ -620,7 +656,6 @@ def mocked_time():
         # This is the serialized Protobuf representing:
         # syntax = "proto3";
         # package com.book;
-
         # message Book {
         #     int64 isbn = 1;
         #     string title = 2;
@@ -648,7 +683,10 @@ def mocked_time():
                     'topic': 'marvel',
                     'partition': '0',
                     'offset': '12',
-                    'message_value': '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  "author": "Alan Donovan"\n}',
+                    'message_value': (
+                        '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  '
+                        '"author": "Alan Donovan"\n}'
+                    ),
                     'message_key': '{"name": "Peter Parker"}',
                 },
                 {
@@ -666,23 +704,18 @@ def mocked_time():
         pytest.param(
             [
                 MockedMessage(
-                    b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e',
+                    b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan',
                     b'{"name": "Peter Parker"}',
                     12,
                 ),
                 None,
             ],
             'avro',
-            '''
-            {
-              "type": "record",
-              "name": "User",
-              "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "age", "type": "int"}
-              ]
-            }
-            '''
+            (
+                '{"type": "record", "name": "Book", "namespace": "com.book", '
+                '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+                '{"name": "author", "type": "string"}]}'
+            ),
             "",
             ["config_1_id"],
             [
@@ -694,7 +727,9 @@ def mocked_time():
                     'topic': 'marvel',
                     'partition': '0',
                     'offset': '12',
-                    'message_value': '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  "author": "Alan Donovan"\n}',
+                    'message_value': (
+                        '{"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}'
+                    ),
                     'message_key': '{"name": "Peter Parker"}',
                 },
                 {
@@ -707,7 +742,7 @@ def mocked_time():
                     'live_messages_error': 'No more messages to retrieve',
                 },
             ],
-            id='Retrieves Protobuf messages from Kafka',
+            id='Retrieves Avro messages from Kafka',
         ),
     ],
 )
