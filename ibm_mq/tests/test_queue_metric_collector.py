@@ -82,7 +82,6 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
 
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
         collector._submit_discovery_error_metric = Mock()
-        collector.log = Mock()
         with caplog.at_level(logging.DEBUG):
             collector.discover_queues(queue_manager)
 
