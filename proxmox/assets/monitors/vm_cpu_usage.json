@@ -3,7 +3,7 @@
 	"created_at": "2025-07-25T12:18:22.788-04:00",
 	"last_updated_at": "2025-07-25T12:18:22.788-04:00",
 	"title": "CPU Usage is High on Proxmox VM",
-	"description": "CPU usage measures the percentage of processing capacity that is in use and provides insights into the overall health and efficiency of the VM. This monitor alerts if the average CPU usage goes above 90%, suggesting potential performance issues",
+	"description": "Notify your team when the CPU usage is too high on a Proxmox VM.",
 	"definition": {
 		"name": "[Proxmox] CPU Usage is High on VM {{host.host}} on Node {{host.proxmox_node}}",
 		"type": "query alert",
