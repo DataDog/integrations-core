@@ -36,7 +36,10 @@
       },
       "metrics": {
         "prefix": "proxmox.",
-        "check": "proxmox.api.up",
+        "check": [
+          "proxmox.api.up",
+          "proxmox.cpu"
+        ],
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
