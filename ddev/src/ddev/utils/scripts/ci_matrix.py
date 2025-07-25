@@ -279,7 +279,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 config['python-support'] = ''.join(supported_python_versions)
 
             job_name = normalize_job_name(config['name'])
-            if target_envs.get(platform_id):
+            if platform_id in target_envs:
                 for target_env in target_envs[platform_id]:
                     if target_env != target:
                         config['name'] = f'{copy.copy(job_name)} ({target_env})'

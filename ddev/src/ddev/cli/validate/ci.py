@@ -76,8 +76,8 @@ def ci(app: Application, sync: bool):
         if target_name not in job_dict:
             job_dict[target_name] = job
             job_dict[target_name]['name'] = target_name
-            job_dict[target_name]['target-env'] = [job.get('target-env')] if job.get('target-env') else []
-        elif job.get('target-env'):
+            job_dict[target_name]['target-env'] = [job['target-env']] if 'target-env' in job else []
+        elif 'target-env' in job:
             job_dict[target_name]['target-env'].append(job['target-env'])
     job_matrix = list(job_dict.values())
 
