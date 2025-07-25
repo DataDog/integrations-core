@@ -3,7 +3,7 @@
 	"created_at": "2025-07-25",
 	"last_updated_at": "2025-07-25",
 	"title": "Memory Usage High on Proxmox VM",
-	"description": "Notify your team when the Memory usage is too high on a Proxmox VM.",
+	"description": "Memory usage measures the percentage of memory used of the total available memory. High memory usage can lead to degraded performance of your Proxmox VM.",
 	"definition": {
 		"name": "Memory Usage High on Proxmox VM {{host.host}} on Node {{host.proxmox_node}}",
 		"type": "query alert",
