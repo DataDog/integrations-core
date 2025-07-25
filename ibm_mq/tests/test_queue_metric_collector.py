@@ -94,16 +94,32 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
             collector.discover_queues(queue_manager)
 
         if error_code == 2033:
-            assert any(
-                "No queue info available" in record.message for record in caplog.records if record.levelname == "DEBUG"
-            )
+            if auto_discover_queues_via_names:
+                assert any(
+                    "Error inquiring queue names for pattern" in record.message
+                    for record in caplog.records
+                    if record.levelname == "DEBUG"
+                )
+            else:
+                assert any(
+                    "No queue info available" in record.message
+                    for record in caplog.records
+                    if record.levelname == "DEBUG"
+                )
             assert not collector._submit_discovery_error_metric.called
         elif error_code == 2034:
-            assert any(
-                "No matching queue of type" in record.message
-                for record in caplog.records
-                if record.levelname == "DEBUG"
-            )
+            if auto_discover_queues_via_names:
+                assert any(
+                    "Error inquiring queue names for pattern" in record.message
+                    for record in caplog.records
+                    if record.levelname == "DEBUG"
+                )
+            else:
+                assert any(
+                    "No matching queue of type" in record.message
+                    for record in caplog.records
+                    if record.levelname == "DEBUG"
+                )
             assert not collector._submit_discovery_error_metric.called
         else:
             if auto_discover_queues_via_names:
