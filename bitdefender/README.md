@@ -19,7 +19,6 @@ The Bitdefender integration uses a webhook to ingest Bitdefender EDR logs. The i
 | Antiexploit Event             | Advanced Anti-Exploit triggers a detection                                                                                                                        |
 | Network Attack Defense Event  | Network Attack Defense module triggers a detection                                                                                                                |
 | User Control/Content Control  | User activity, such as web browsing of software application, is blocked on the endpoint according to the applied policy                                           |
-| Storage Antimalware Event     | SVA detects a new threat among the protected storage (NAS)                                                                                                        |
 | Ransomware activity detection | Endpoint agent blocks ransomware attack                                                                                                                           |
 | New Incident                  | New Root Cause Analysis (RCA) is displayed under the Incidents section of Control Center. The event contains a list of relevant items extracted from the RCA JSON |
 
@@ -59,7 +58,7 @@ The Bitdefender integration uses a webhook to ingest Bitdefender EDR logs. The i
     - **\<webhook_url>**:  The URL you copied in previous section `Retrieve the Datadog Webhook URL`
         - **Note**: If you're using Windows, add `^` before `&ddsource` and `&service` in the **webhook_url** parameter.
     - **\<event-type>**: The event type for which logs need to be pushed to Datadog, e.g. `av` for Antimalware
-        - Supported event types: `aph` (Antiphishing), `av` (Antimalware), `avc` (Advanced Threat Control), `dp` (Data Protection), `exchange-malware` (Exchange Malware Detection), `fw` (Firewall), `hd` (Hyper Detect event), `network-sandboxing` (Sandbox Analyzer Detection), `antiexploit`, `network-monitor` (Network Attack Defense Event), `uc` (User Control/Content Control), `storage-antimalware`, `ransomware-mitigation` (Ransomware activity detection), `new-incident`
+        - Supported event types: `aph` (Antiphishing), `av` (Antimalware), `avc` (Advanced Threat Control), `dp` (Data Protection), `exchange-malware` (Exchange Malware Detection), `fw` (Firewall), `hd` (Hyper Detect event), `network-sandboxing` (Sandbox Analyzer Detection), `antiexploit`, `network-monitor` (Network Attack Defense Event), `uc` (User Control/Content Control), `ransomware-mitigation` (Ransomware activity detection), `new-incident`
     
     ```bash
     curl -X POST -k "<control_center_apis_access_url>/v1.0/jsonrpc/push" --header "Authorization: Basic <bitdefender-encoded-api-key>" --header "Content-Type: application/json" --data "{\"params\": {\"status\": 1,\"serviceType\": \"jsonRPC\",\"serviceSettings\": {\"url\": \"<webhook_url>\",\"requireValidSslCertificate\": false,\"authorization\": \"<dd-api-key>\"},\"subscribeToEventTypes\": {\"<event-type>\": true}},\"jsonrpc\": \"2.0\",\"method\": \"setPushEventSettings\",\"id\": 1}"
@@ -87,4 +86,3 @@ For further assistance, contact [Datadog Support][2].
 
 [1]: https://www.bitdefender.com/en-in/business/products/endpoint-detection-response
 [2]: https://docs.datadoghq.com/help/
-[3]: https://www.bitdefender.com/business/support/en/77209-125277-public-api.html#UUID-2a74c3b5-6159-831d-4f8a-ca42797ce3b0_section-idm4640169987334432655171029621
