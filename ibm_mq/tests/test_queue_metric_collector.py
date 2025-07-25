@@ -174,8 +174,9 @@ def test_discover_queues_disconnects_on_exception(
     queue_manager = Mock()
     pcf_mock = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
-        # Simulate exception in queue discovery
-        setattr(pcf_mock, side_effect_attr, Mock(side_effect=Exception("fail")))
+        # Simulate MQMIError in queue discovery (both methods handle this)
+        error = pymqi.MQMIError(2, 9999)  # Use an unexpected error code
+        setattr(pcf_mock, side_effect_attr, Mock(side_effect=error))
         # The exception should be caught and handled gracefully
         collector.discover_queues(queue_manager)
         # Verify that disconnect was called even when an exception occurred
