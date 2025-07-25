@@ -49,9 +49,29 @@ def make_collector(instance=None, logger=None):
     return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), logger)
 
 
-def test_debug_logging_simple(instance, caplog):
-    """Simple test to debug logging issues"""
-    instance['auto_discover_queues_via_names'] = False
+@pytest.mark.parametrize(
+    "auto_discover_queues_via_names, error_code",
+    [
+        (False, 2033),
+        (False, 2034),
+        (False, 9999),
+        (True, 2033),
+        (True, 2034),
+        (True, 9999),
+    ],
+    ids=[
+        "false_msg_available",
+        "false_unknown_object_name",
+        "false_unknown_error",
+        "true_msg_available",
+        "true_unknown_object_name",
+        "true_unknown_error",
+    ],
+)
+def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_names, error_code, caplog):
+    # Test direct discovery method (_discover_queues) with known MQ errors
+    # Should not raise, should log debug, should not call _submit_discovery_error_metric
+    instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
 
     # Create a real logger that can be captured by caplog
     logger = logging.getLogger('test_ibm_mq')
@@ -60,100 +80,45 @@ def test_debug_logging_simple(instance, caplog):
     collector = make_collector(instance, logger)
     queue_manager = Mock()
     pcf_mock = Mock()
+    error = pymqi.MQMIError(2, error_code)
 
-    # Create a simple error
-    error = pymqi.MQMIError(2, 2033)  # MQRC_NO_MSG_AVAILABLE
-    pcf_mock.MQCMD_INQUIRE_Q.side_effect = error
-
-    print(f"Collector log object: {collector.log}")
-    print(f"Collector log type: {type(collector.log)}")
+    if auto_discover_queues_via_names:
+        pcf_mock.MQCMD_INQUIRE_Q_NAMES.side_effect = error
+    else:
+        pcf_mock.MQCMD_INQUIRE_Q.side_effect = error
 
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
         collector._submit_discovery_error_metric = Mock()
         with caplog.at_level(logging.DEBUG):
-            print("About to call discover_queues...")
             collector.discover_queues(queue_manager)
-            print("discover_queues called")
 
-    print(f"Number of log records captured: {len(caplog.records)}")
-    for i, record in enumerate(caplog.records):
-        print(f"Record {i}: {record.levelname} - {record.message}")
-
-    # Just assert we have some records for now
-    assert len(caplog.records) > 0, "No log records captured"
-
-
-# @pytest.mark.parametrize(
-#     "auto_discover_queues_via_names, error_code",
-#     [
-#         (False, 2033),
-#         (False, 2034),
-#         (False, 9999),
-#         (True, 2033),
-#         (True, 2034),
-#         (True, 9999),
-#     ],
-#     ids=[
-#         "false_msg_available",
-#         "false_unknown_object_name",
-#         "false_unknown_error",
-#         "true_msg_available",
-#         "true_unknown_object_name",
-#         "true_unknown_error",
-#     ],
-# )
-# def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_names, error_code, caplog):
-#     # Test direct discovery method (_discover_queues) with known MQ errors
-#     # Should not raise, should log debug, should not call _submit_discovery_error_metric
-#     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
-#     collector = make_collector(instance)
-#     queue_manager = Mock()
-#     pcf_mock = Mock()
-#     error = pymqi.MQMIError(2, error_code)
-
-#     if auto_discover_queues_via_names:
-#         pcf_mock.MQCMD_INQUIRE_Q_NAMES.side_effect = error
-#     else:
-#         pcf_mock.MQCMD_INQUIRE_Q.side_effect = error
-
-#     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
-#         collector._submit_discovery_error_metric = Mock()
-#         with caplog.at_level(logging.DEBUG):
-#             collector.discover_queues(queue_manager)
-
-#         # Debug: Print all captured log records
-#         print(f"\nDEBUG: Captured log records for {auto_discover_queues_via_names=}, {error_code=}")
-#         for record in caplog.records:
-#             print(f"  {record.levelname}: {record.message}")
-#         print("DEBUG\n")
-
-#         if error_code == 2033:
-#             assert any(
-#               "No queue info available" in record.message for record in caplog.records if record.levelname == "DEBUG"
-#             )
-#             assert not collector._submit_discovery_error_metric.called
-#         elif error_code == 2034:
-#             assert any(
-#                 "No matching queue of type" in record.message
-#                 for record in caplog.records
-#                 if record.levelname == "DEBUG"
-#             )
-#             assert not collector._submit_discovery_error_metric.called
-#         else:
-#             if auto_discover_queues_via_names:
-#                 assert any(
-#                     "Error inquiring queue names for pattern" in record.message
-#                     for record in caplog.records
-#                     if record.levelname == "DEBUG"
-#                 )
-#                 assert collector._submit_discovery_error_metric.called
-#             else:
-#                 assert any(
-#                     "Error discovering queue" in record.message
-#                     for record in caplog.records
-#                     if record.levelname == "WARNING"
-#                 )
-#                 assert not collector._submit_discovery_error_metric.called
+        if error_code == 2033:
+            assert any(
+                "No queue info available" in record.message for record in caplog.records if record.levelname == "DEBUG"
+            )
+            assert not collector._submit_discovery_error_metric.called
+        elif error_code == 2034:
+            assert any(
+                "No matching queue of type" in record.message
+                for record in caplog.records
+                if record.levelname == "DEBUG"
+            )
+            assert not collector._submit_discovery_error_metric.called
+        else:
+            if auto_discover_queues_via_names:
+                assert any(
+                    "Error inquiring queue names for pattern" in record.message
+                    for record in caplog.records
+                    if record.levelname == "DEBUG"
+                )
+                assert collector._submit_discovery_error_metric.called
+            else:
+                assert any(
+                    "Error discovering queue" in record.message
+                    for record in caplog.records
+                    if record.levelname == "WARNING"
+                )
+                assert not collector._submit_discovery_error_metric.called
 
 
 # @pytest.mark.parametrize(
