@@ -5,7 +5,11 @@ import json
 from collections import defaultdict
 from time import time
 
+import base64
 from confluent_kafka import TopicPartition
+from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
+from google.protobuf.json_format import MessageToJson
+from fastavro import schemaless_reader
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
@@ -416,6 +420,10 @@ class KafkaCheck(AgentCheck):
             n_messages = kafka["n_messages"]
             cluster = kafka["cluster"]
             config_id = cfg["id"]
+            value_format = kafka["value_format"]
+            value_schema_str = kafka["value_schema"]
+            key_format = kafka["key_format"]
+            key_schema_str = kafka["key_schema"]
             if self._messages_have_been_retrieved(config_id):
                 continue
             if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
@@ -436,6 +444,14 @@ class KafkaCheck(AgentCheck):
                     }
                 )
                 continue
+
+            print("Starting live messages for config_id: {}, topic: {}, partition: {}, start_offset: {}, n_messages: {}".format(
+                config_id, topic, partition, start_offset, n_messages
+            ))
+            print("value_schema", value_schema_str)
+            print("key_format", value_format)
+
+            value_schema, key_schema = build_schema(value_format, value_schema_str), build_schema(key_format, key_schema_str)
 
             self.client.start_collecting_messages(start_offsets)
             for _ in range(n_messages):
@@ -463,7 +479,7 @@ class KafkaCheck(AgentCheck):
                     'partition': str(message.partition()),
                     'offset': str(message.offset()),
                 }
-                decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(message)
+                decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(message, value_format, value_schema, key_format, key_schema)
                 if decoded_value:
                     data['message_value'] = decoded_value
                 else:
@@ -533,21 +549,21 @@ def resolve_start_offsets(highwater_offsets, target_topic, target_partition, sta
     return [TopicPartition(target_topic, target_partition, start_offset)]
 
 
-def deserialize_message(message):
+def deserialize_message(message, value_format, value_schema, key_format, key_schema):
     try:
-        decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(message.value())
+        decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(message.value(), value_format, value_schema)
     except (UnicodeDecodeError, json.JSONDecodeError):
         return None, None, None, None
     try:
-        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(message.key())
+        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(message.key(), key_format, key_schema)
         return decoded_value, value_schema_id, decoded_key, key_schema_id
     except (UnicodeDecodeError, json.JSONDecodeError):
         return decoded_value, value_schema_id, None, None
 
 
-def _deserialize_bytes_maybe_schema_registry(message):
+def _deserialize_bytes_maybe_schema_registry(message, message_format, schema):
     try:
-        return _deserialize_bytes(message), None
+        return _deserialize_bytes(message, message_format, schema), None
     except (UnicodeDecodeError, json.JSONDecodeError) as e:
         # If the message is not a valid JSON, it might be a schema registry message, that is prefixed
         # with a magic byte and a schema ID.
@@ -555,10 +571,10 @@ def _deserialize_bytes_maybe_schema_registry(message):
             raise e
         schema_id = int.from_bytes(message[1:5], 'big')
         message = message[5:]  # Skip the schema ID bytes
-        return _deserialize_bytes(message), schema_id
+        return _deserialize_bytes(message, message_format, schema), schema_id
 
 
-def _deserialize_bytes(message):
+def _deserialize_bytes(message, message_format, schema):
     """Deserialize a message from Kafka. Supports JSON format.
     Args:
         message: Raw message bytes from Kafka
@@ -567,6 +583,59 @@ def _deserialize_bytes(message):
     """
     if not message:
         return ""
+    if message_format == 'protobuf':
+        return _deserialize_protobuf(message, schema)
+    elif message_format == 'avro':
+        return _deserialize_avro(message, schema)
+    else:
+        return _deserialize_json(message)
+
+def _deserialize_json(message):
     decoded = message.decode('utf-8')
     json.loads(decoded)
     return decoded
+
+def _deserialize_protobuf(message, schema):
+    schema.ParseFromString(message)
+    return MessageToJson(schema)
+
+def _deserialize_avro(message, schema):
+    """Deserialize an Avro message using fastavro."""
+    # The schema is expected to be in a format that fastavro can read
+    return schemaless_reader(message, schema)
+
+def build_schema(message_format, schema_str):
+    if message_format == 'protobuf':
+        return build_protobuf_schema(schema_str)
+    elif message_format == 'avro':
+        # For Avro, we expect the schema to be in a format that fastavro can read
+        return schema_str
+    return None
+
+def build_protobuf_schema(schema_str):
+    # schema is encoded in base64, decode it before passing it to ParseFromString
+    schema_str = base64.b64decode(schema_str)
+    descriptor_set = descriptor_pb2.FileDescriptorSet()
+    descriptor_set.ParseFromString(schema_str)
+
+    # Register all the file descriptors in a descriptor pool
+    pool = descriptor_pool.DescriptorPool()
+    for fd_proto in descriptor_set.file:
+        pool.Add(fd_proto)
+
+    # Pick the first message type from the first file descriptor
+    first_fd = descriptor_set.file[0]
+    # The file descriptor contains a list of message types (DescriptorProto)
+    first_message_proto = first_fd.message_type[0]
+
+    # The fully qualified name includes the package name + message name
+    package = first_fd.package
+    message_name = first_message_proto.name
+    if package:
+        full_name = f"{package}.{message_name}"
+    else:
+        full_name = message_name
+    # # Get the message descriptor
+    message_descriptor = pool.FindMessageTypeByName(full_name)
+    # Create a dynamic message class
+    return message_factory.GetMessageClass(message_descriptor)()
