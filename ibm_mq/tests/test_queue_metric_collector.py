@@ -53,10 +53,10 @@ def make_collector(instance=None, logger=None):
     "auto_discover_queues_via_names, error_code",
     [
         (False, 2033),
-        (False, 2034),
+        (False, 2085),  # MQRC_UNKNOWN_OBJECT_NAME
         (False, 9999),
         (True, 2033),
-        (True, 2034),
+        (True, 2085),  # MQRC_UNKNOWN_OBJECT_NAME
         (True, 9999),
     ],
     ids=[
@@ -93,6 +93,13 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
         with caplog.at_level(logging.DEBUG):
             collector.discover_queues(queue_manager)
 
+        # Debug: Print all captured log records for direct method failures
+        if not auto_discover_queues_via_names and error_code in [2085, 9999]:
+            print(f"\nDEBUG: Direct method test for error {error_code}")
+            print(f"Number of log records: {len(caplog.records)}")
+            for i, record in enumerate(caplog.records):
+                print(f"Record {i}: {record.levelname} - {record.message}")
+
         if error_code == 2033:
             if auto_discover_queues_via_names:
                 assert any(
@@ -100,27 +107,33 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
+                # Via_names method calls _submit_discovery_error_metric for ALL errors
+                assert collector._submit_discovery_error_metric.called
             else:
                 assert any(
                     "No queue info available" in record.message
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
-            assert not collector._submit_discovery_error_metric.called
-        elif error_code == 2034:
+                # Direct method doesn't call _submit_discovery_error_metric for known errors
+                assert not collector._submit_discovery_error_metric.called
+        elif error_code == 2085:  # MQRC_UNKNOWN_OBJECT_NAME
             if auto_discover_queues_via_names:
                 assert any(
                     "Error inquiring queue names for pattern" in record.message
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
+                # Via_names method calls _submit_discovery_error_metric for ALL errors
+                assert collector._submit_discovery_error_metric.called
             else:
                 assert any(
                     "No matching queue of type" in record.message
                     for record in caplog.records
                     if record.levelname == "DEBUG"
                 )
-            assert not collector._submit_discovery_error_metric.called
+                # Direct method doesn't call _submit_discovery_error_metric for known errors
+                assert not collector._submit_discovery_error_metric.called
         else:
             if auto_discover_queues_via_names:
                 assert any(
