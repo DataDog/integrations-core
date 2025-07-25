@@ -53,25 +53,25 @@ def test_debug_logging_simple(instance, caplog):
     collector = make_collector(instance)
     queue_manager = Mock()
     pcf_mock = Mock()
-    
+
     # Create a simple error
     error = pymqi.MQMIError(2, 2033)  # MQRC_NO_MSG_AVAILABLE
     pcf_mock.MQCMD_INQUIRE_Q.side_effect = error
-    
+
     print(f"Collector log object: {collector.log}")
     print(f"Collector log type: {type(collector.log)}")
-    
+
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
         collector._submit_discovery_error_metric = Mock()
         with caplog.at_level(logging.DEBUG):
             print("About to call discover_queues...")
             collector.discover_queues(queue_manager)
             print("discover_queues called")
-    
+
     print(f"Number of log records captured: {len(caplog.records)}")
     for i, record in enumerate(caplog.records):
         print(f"Record {i}: {record.levelname} - {record.message}")
-    
+
     # Just assert we have some records for now
     assert len(caplog.records) > 0, "No log records captured"
 
@@ -122,7 +122,7 @@ def test_debug_logging_simple(instance, caplog):
 
 #         if error_code == 2033:
 #             assert any(
-#                 "No queue info available" in record.message for record in caplog.records if record.levelname == "DEBUG"
+#               "No queue info available" in record.message for record in caplog.records if record.levelname == "DEBUG"
 #             )
 #             assert not collector._submit_discovery_error_metric.called
 #         elif error_code == 2034:
