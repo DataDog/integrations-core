@@ -10,7 +10,6 @@ The logic is also imported by ddev to perform the CI validation on 3.8 which wor
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import os
 import re
@@ -240,6 +239,17 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 # Generate all combinations of values
                 from itertools import product
 
+                # This maps the lists of target envs into all their permutations
+                # For example, if the env matrix is:
+                # { 'foo': ['bar', 'baz'], 'python': ['3.8', '3.9'] }
+                # The permutations would be:
+                # - bar-py3.8
+                # - bar-py3.9
+                # - baz-py3.8
+                # - baz-py3.9
+                # If 'os' is one of the keys, we use it to put the combinations into the right platform
+                # so that we can get the correct runner for the target-env
+
                 os_index = list(keys).index('os') if 'os' in keys else -1
                 for combination in product(*values):
                     os = combination[os_index] if os_index != -1 else platform_ids[0]
@@ -282,7 +292,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             if platform_id in target_envs:
                 for target_env in target_envs[platform_id]:
                     if target_env != target:
-                        config['name'] = f'{copy.copy(job_name)} ({target_env})'
+                        config['name'] = f'{job_name} ({target_env})'
                     job_matrix.append({**config, 'target-env': target_env})
             else:
                 config['name'] = job_name
