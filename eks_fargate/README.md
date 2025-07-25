@@ -889,8 +889,6 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
 
 You can take advantage of the Cluster Agent's Admission Controller sidecar injection feature to automatically configure logging, or you can configure it manually in your Application's manifest.
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Enable Injected Agent Log Collection - Datadog Operator" xxx -->
 Enable sidecar Agent logging by setting the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`.
 
 ```yaml
@@ -907,8 +905,6 @@ spec:
           value: "true"
 ```
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Enable Injected Agent Log Collection - Helm" xxx -->
 Enable sidecar Agent logging by setting the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`.
 
 ```yaml
@@ -918,8 +914,6 @@ clusterAgent:
       value: true
 ```
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Manual" xxx -->
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -963,8 +957,7 @@ spec:
 
 You can configure the injected Agents to automatically log all containers by enabling `CONTAINER_COLLECT_ALL`. Alternatively, logging can be configured via the Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Configure Injected Agent Log Collection - Datadog Operator" xxx -->
+
 ```yaml
 #(...)
 spec:
@@ -980,8 +973,7 @@ spec:
               value: "true"
 ```
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Configure Injected Agent Log Collection - Helm" xxx -->
+
 ```yaml
 clusterAgent:
   admissionController:
@@ -994,8 +986,6 @@ clusterAgent:
             value: "true"
 ```
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Manual" xxx -->
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
