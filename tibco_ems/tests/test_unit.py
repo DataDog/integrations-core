@@ -149,3 +149,17 @@ def test_parse_factory(data, regex, expected_result):
     result = check._parse_factory(data.decode('utf-8'), regex)
 
     assert result == expected_result
+
+
+def test_base_tags(dd_run_check, instance):
+    check = TibcoEMSCheck('tibco_ems', {}, [instance])
+    check.run_tibco_command = MagicMock(return_value=mock_output('show_all'))
+    dd_run_check(check)
+    assert len(check.tags) == 3
+
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    # assert the lenght of tags does not grow indefinitely
+    assert len(check.tags) == 3
