@@ -64,13 +64,29 @@ jobs:
         run: gh run download ${{ needs.get-merge-base.outputs.run_id_base }} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debug
+        run: |
+          echo "Downloading artifact from merge-base run" >> $GITHUB_STEP_SUMMARY
+
       - name: Rename previous sizes artifact
         run: |
           mv compressed_status.csv ${{ inputs.platform }}_prev_compressed_status.csv
+      - name: Debug
+        run: |
+          echo "Renamed previous sizes artifact" >> $GITHUB_STEP_SUMMARY
+          ls -la ${{ inputs.platform }}_prev_compressed_status.csv >> $GITHUB_STEP_SUMMARY
+
       - name: Download current sizes artifact
         run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}_compressed_status.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debug
+        run: |
+          echo "Downloaded current sizes artifact" >> $GITHUB_STEP_SUMMARY
+          ls -la ${{ inputs.platform }}_curr_compressed_status.json >> $GITHUB_STEP_SUMMARY
+
       - name: Rename current sizes artifact
         run: |
           mv ${{ inputs.platform }}_compressed_status.json ${{ inputs.platform }}_curr_compressed_status.json
