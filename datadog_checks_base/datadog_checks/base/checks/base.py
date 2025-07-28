@@ -486,6 +486,9 @@ class AgentCheck(object):
                 If True, ensure each tag key has a unique value by replacing existing tags with the same key.
                 If False (default), append new tags allowing multiple values per key.
         """
+        if not isinstance(tags, list):
+            raise TypeError("tags must be a list, got {}".format(type(tags).__name__))
+
         for tag in tags:
             self.add_tag(tag, unique=unique)
 

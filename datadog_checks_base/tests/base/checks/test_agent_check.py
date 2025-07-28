@@ -1514,3 +1514,18 @@ class TestTagManagement:
 
         # Tags should persist
         assert check.get_tags() == ['env:production', 'service:web']
+
+    def test_add_tags_requires_list(self):
+        check = AgentCheck()
+
+        # Should raise TypeError for string
+        with pytest.raises(TypeError, match="tags must be a list, got str"):
+            check.add_tags('env:production')
+
+        # Should raise TypeError for tuple
+        with pytest.raises(TypeError, match="tags must be a list, got tuple"):
+            check.add_tags(('env:production', 'service:web'))
+
+        # Should work fine with list
+        check.add_tags(['env:production'])
+        assert check.get_tags() == ['env:production']
