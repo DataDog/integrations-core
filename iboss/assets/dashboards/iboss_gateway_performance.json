@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Gateway Performance",
+    "title": "iboss - Gateway Performance Metrics",
     "description": "This dashboard provides a comprehensive overview of gateway performance metrics",
     "widgets": [
         {
@@ -26,7 +26,7 @@
             "id": 5360273995473091,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a comprehensive overview of gateway performance metrics. \n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Note**: `region` filter applies only to Region Insights, and `gateway` filter applies only to Gateway Insights.\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides a comprehensive overview of gateway performance metrics. \n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -40,6 +40,27 @@
                 "x": 4,
                 "y": 0,
                 "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 2916866394306197,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using metrics. Please follow the Configuration steps [here](/integrations/iboss) to enable metrics collection. Ensure the `Collect gateway performance metrics` option is enabled to collect these metrics.\n- Filters:\n  - `reporter_node` applies to all widgets\n  - `region` applies to widgets in `Region Insights` and `Summary` groups\n  - `gateway` applies to widgets in `Gateway Insights` and `Summary` groups",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
                 "height": 3
             }
         },
@@ -66,7 +87,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.total_request_count{gateway_name:all_gateways}.rollup(sum, 300)",
+                                            "query": "sum:iboss.gateway_performance.total_request_count{gateway_name:all_gateways,$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -138,7 +159,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.total_request_count{gateway_name:all_gateways}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.total_request_count{gateway_name:all_gateways,$reporter_node}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -173,7 +194,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.total_block_count{gateway_name:all_gateways}.rollup(sum, 300)",
+                                            "query": "sum:iboss.gateway_performance.total_block_count{gateway_name:all_gateways,$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -255,7 +276,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.gateway_performance.total_request_count{gateway_name:all_gateways}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.total_request_count{gateway_name:all_gateways,$reporter_node}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -290,7 +311,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.total_proxy_request_count{gateway_name:all_gateways}.rollup(sum, 300)",
+                                            "query": "sum:iboss.gateway_performance.total_proxy_request_count{gateway_name:all_gateways,$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -366,7 +387,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.proxy_error_count{gateway_name:all_gateways}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.proxy_error_count{gateway_name:all_gateways,$reporter_node}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -401,7 +422,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.proxy_error_count{gateway_name:all_gateways}.rollup(sum, 300)",
+                                            "query": "sum:iboss.gateway_performance.proxy_error_count{gateway_name:all_gateways,$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -482,7 +503,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.gateway_performance.cpu_utilization{gateway_name:all_gateways}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.cpu_utilization{gateway_name:all_gateways,$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -541,7 +562,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.gateway_performance.proxy_time_average{gateway_name:all_gateways}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.proxy_time_average{gateway_name:all_gateways,$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -600,7 +621,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.gateway_performance.dns_time_average{gateway_name:all_gateways}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.dns_time_average{gateway_name:all_gateways,$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -625,7 +646,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 6,
                 "width": 12,
                 "height": 16
             }
@@ -674,7 +695,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.gateway_performance.total_request_count{!region:none,$region} by {region}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.total_request_count{!region:none,$region,$reporter_node} by {region}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -728,7 +749,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!region:none,$region} by {region}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!region:none,$region,$reporter_node} by {region}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -783,7 +804,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.total_request_count{!region:none,$region} by {region}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.total_request_count{!region:none,$region,$reporter_node} by {region}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -838,7 +859,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.proxy_error_count{!region:none,$region} by {region}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.proxy_error_count{!region:none,$region,$reporter_node} by {region}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -892,7 +913,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.proxy_time_average{!region:none,$region} by {region}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.proxy_time_average{!region:none,$region,$reporter_node} by {region}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -946,7 +967,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.dns_time_average{!region:none,$region} by {region}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.dns_time_average{!region:none,$region,$reporter_node} by {region}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -971,7 +992,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 22,
                 "width": 12,
                 "height": 10
             }
@@ -1020,7 +1041,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.gateway_performance.total_request_count{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.total_request_count{!gateway_name:none,!gateway_name:all_gateways,$gateway,$reporter_node} by {gateway_name}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1074,7 +1095,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.cpu_utilization{!gateway_name:none,!gateway_name:all_gateways,$gateway,$reporter_node} by {gateway_name}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1128,7 +1149,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.total_request_count{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.total_request_count{!gateway_name:none,!gateway_name:all_gateways,$gateway,$reporter_node} by {gateway_name}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1182,7 +1203,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.gateway_performance.proxy_error_count{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(sum, 300)"
+                                            "query": "sum:iboss.gateway_performance.proxy_error_count{!gateway_name:none,!gateway_name:all_gateways,$gateway,$reporter_node} by {gateway_name}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1236,7 +1257,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.proxy_time_average{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.proxy_time_average{!gateway_name:none,!gateway_name:all_gateways,$gateway,$reporter_node} by {gateway_name}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1290,7 +1311,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:iboss.gateway_performance.dns_time_average{!gateway_name:none,!gateway_name:all_gateways,$gateway} by {gateway_name}.rollup(avg, 300)"
+                                            "query": "avg:iboss.gateway_performance.dns_time_average{!gateway_name:none,!gateway_name:all_gateways,$gateway,$reporter_node} by {gateway_name}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1315,188 +1336,212 @@
             },
             "layout": {
                 "x": 0,
-                "y": 29,
+                "y": 32,
                 "width": 12,
                 "height": 10
             }
         },
         {
-            "id": 7790565194688894,
+            "id": 4656729684691366,
             "definition": {
-                "title": "Gateway Performance Summary",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_table",
-                "requests": [
+                "title": "Summary",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:iboss.gateway_performance.total_request_count{*} by {gateway_name,region}.rollup(sum, 300)",
-                                "aggregator": "sum"
-                            },
-                            {
-                                "data_source": "metrics",
-                                "name": "query2",
-                                "query": "sum:iboss.gateway_performance.total_block_count{*} by {gateway_name,region}.rollup(sum, 300)",
-                                "aggregator": "sum"
-                            },
-                            {
-                                "data_source": "metrics",
-                                "name": "query3",
-                                "query": "avg:iboss.gateway_performance.cpu_utilization{*} by {gateway_name,region}.rollup(avg, 300)",
-                                "aggregator": "avg"
-                            },
-                            {
-                                "data_source": "metrics",
-                                "name": "query4",
-                                "query": "avg:iboss.gateway_performance.proxy_time_average{*} by {gateway_name,region}.rollup(avg, 300)",
-                                "aggregator": "avg"
-                            },
-                            {
-                                "data_source": "metrics",
-                                "name": "query5",
-                                "query": "avg:iboss.gateway_performance.dns_time_average{*} by {gateway_name,region}.rollup(avg, 300)",
-                                "aggregator": "avg"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "text_formats": [
-                            [
+                        "id": 7790565194688894,
+                        "definition": {
+                            "title": "Gateway Performance Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
                                 {
-                                    "match": {
-                                        "type": "is",
-                                        "value": "none"
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.gateway_performance.total_request_count{$reporter_node,$region,$gateway} by {gateway_name,region}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:iboss.gateway_performance.total_block_count{$reporter_node,$region,$gateway} by {gateway_name,region}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:iboss.gateway_performance.cpu_utilization{$reporter_node,$region,$gateway} by {gateway_name,region}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:iboss.gateway_performance.proxy_time_average{$reporter_node,$region,$gateway} by {gateway_name,region}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:iboss.gateway_performance.dns_time_average{$reporter_node,$region,$gateway} by {gateway_name,region}.rollup(avg, 300)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "none"
+                                                },
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "-"
+                                                }
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "none"
+                                                },
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "-"
+                                                }
+                                            }
+                                        ]
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     },
-                                    "replace": {
-                                        "type": "all",
-                                        "with": "-"
-                                    }
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Requests",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "request"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Blocked Requests",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_red"
+                                                }
+                                            ],
+                                            "formula": "query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "request"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "CPU Utilization",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "yellow_on_white"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Average Proxy Time",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Average DNS Time",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "green_on_white"
+                                                }
+                                            ],
+                                            "formula": "query5"
+                                        }
+                                    ]
                                 }
                             ],
-                            [
-                                {
-                                    "match": {
-                                        "type": "is",
-                                        "value": "none"
-                                    },
-                                    "replace": {
-                                        "type": "all",
-                                        "with": "-"
-                                    }
-                                }
-                            ]
-                        ],
-                        "sort": {
-                            "count": 500,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
+                            "has_search_bar": "always"
                         },
-                        "formulas": [
-                            {
-                                "cell_display_mode": "number",
-                                "alias": "Total Requests",
-                                "conditional_formats": [
-                                    {
-                                        "comparator": ">",
-                                        "value": 0,
-                                        "palette": "black_on_light_green"
-                                    }
-                                ],
-                                "formula": "query1",
-                                "number_format": {
-                                    "unit": {
-                                        "type": "canonical_unit",
-                                        "unit_name": "request"
-                                    }
-                                }
-                            },
-                            {
-                                "cell_display_mode": "number",
-                                "alias": "Total Blocked Requests",
-                                "conditional_formats": [
-                                    {
-                                        "comparator": ">",
-                                        "value": 0,
-                                        "palette": "black_on_light_red"
-                                    }
-                                ],
-                                "formula": "query2",
-                                "number_format": {
-                                    "unit": {
-                                        "type": "canonical_unit",
-                                        "unit_name": "request"
-                                    }
-                                }
-                            },
-                            {
-                                "cell_display_mode": "number",
-                                "alias": "CPU Utilization",
-                                "conditional_formats": [
-                                    {
-                                        "comparator": ">",
-                                        "value": 0,
-                                        "palette": "yellow_on_white"
-                                    }
-                                ],
-                                "formula": "query3"
-                            },
-                            {
-                                "cell_display_mode": "number",
-                                "alias": "Average Proxy Time",
-                                "number_format": {
-                                    "unit": {
-                                        "type": "canonical_unit",
-                                        "unit_name": "second"
-                                    }
-                                },
-                                "conditional_formats": [
-                                    {
-                                        "comparator": ">",
-                                        "value": 0,
-                                        "palette": "black_on_light_yellow"
-                                    }
-                                ],
-                                "formula": "query4"
-                            },
-                            {
-                                "cell_display_mode": "number",
-                                "alias": "Average DNS Time",
-                                "number_format": {
-                                    "unit": {
-                                        "type": "canonical_unit",
-                                        "unit_name": "second"
-                                    }
-                                },
-                                "conditional_formats": [
-                                    {
-                                        "comparator": ">",
-                                        "value": 0,
-                                        "palette": "green_on_white"
-                                    }
-                                ],
-                                "formula": "query5"
-                            }
-                        ]
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
                     }
-                ],
-                "has_search_bar": "always"
+                ]
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 42,
                 "width": 12,
-                "height": 4
+                "height": 5
             }
         }
     ],
     "template_variables": [
+        {
+            "name": "reporter_node",
+            "prefix": "reporting_node_name",
+            "available_values": [],
+            "default": "*"
+        },
         {
             "name": "region",
             "prefix": "region",
