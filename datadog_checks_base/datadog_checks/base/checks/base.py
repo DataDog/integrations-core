@@ -215,7 +215,7 @@ class AgentCheck(object):
         # Initialize managed tags - tags that can be dynamically added/removed during check execution
         self._managed_tags = []  # type: List[str]
         # Store tags by key for efficient unique key management
-        self._managed_tags_dict = {}  # type: Dict[str, str]
+        self._managed_tags_dict = {}  # type: Dict[str, List[str]]
         # Control whether tags are automatically cleared at the beginning of each check run
         self._auto_clear_tags = True  # type: bool
         if self.init_config is not None:
@@ -436,34 +436,58 @@ class AgentCheck(object):
             self._diagnosis = Diagnosis(sanitize=self.sanitize)
         return self._diagnosis
 
-    def add_tags(self, tags):
-        # type: (Union[str, List[str]]) -> None
+    def add_tag(self, tag, unique=False):
+        # type: (str, bool) -> None
+        """Add a single tag to the managed tags list.
+
+        Parameters:
+            tag (str):
+                A tag in the format 'key:value' or just 'key'.
+            unique (bool):
+                If True, ensure the tag key has a unique value by replacing existing tags with the same key.
+                If False (default), append the tag allowing multiple values per key.
+        """
+        if not tag:
+            return
+
+        if ':' in tag:
+            key, _ = tag.split(':', 1)
+        else:
+            # Handle tags without values
+            key = tag
+
+        if unique or key not in self._managed_tags_dict:
+            # Unique mode or first tag for this key
+            self._managed_tags_dict[key] = [tag]
+        else:
+            # Multi-value mode - add if not already present
+            if tag not in self._managed_tags_dict[key]:
+                self._managed_tags_dict[key].append(tag)
+
+        # Rebuild the flat list
+        self._managed_tags = []
+        for tag_list in self._managed_tags_dict.values():
+            self._managed_tags.extend(tag_list)
+
+    def add_tags(self, tags, unique=False):
+        # type: (List[str], bool) -> None
         """Add one or more tags to the managed tags list.
 
         These tags will be automatically included with all metrics submitted by this check.
-        If a tag with the same key already exists, it will be replaced with the new value.
+
+        By default, multiple values for the same key are supported (e.g., 'team:backend', 'team:frontend').
+        Use unique=True to ensure each key has only one value.
 
         Parameters:
-            tags (str or list[str]):
-                A single tag or list of tags to add.
-                Each tag should be in the format 'key:value'.
+            tags (list[str]):
+                A list of tags to add.
+                Each tag should be in the format 'key:value' or just 'key'.
+            unique (bool):
+                If True, ensure each tag key has a unique value by replacing existing tags with the same key.
+                If False (default), append new tags allowing multiple values per key.
         """
-        if isinstance(tags, str):
-            tags = [tags]
-
         for tag in tags:
-            if not tag:
-                continue
-
-            if ':' in tag:
-                key, value = tag.split(':', 1)
-                self._managed_tags_dict[key] = tag
-            else:
-                # Handle tags without values
-                self._managed_tags_dict[tag] = tag
-
-        # Update the list representation
-        self._managed_tags = list(self._managed_tags_dict.values())
+            self.add_tag(tag, unique=unique)
 
     def remove_tags(self, tags):
         # type: (Union[str, List[str]]) -> None
@@ -488,14 +512,19 @@ class AgentCheck(object):
             if ':' in tag:
                 # Remove by exact key:value match
                 key = tag.split(':', 1)[0]
-                if key in self._managed_tags_dict and self._managed_tags_dict[key] == tag:
-                    del self._managed_tags_dict[key]
+                if key in self._managed_tags_dict and tag in self._managed_tags_dict[key]:
+                    self._managed_tags_dict[key].remove(tag)
+                    # If no more tags for this key, remove the key
+                    if not self._managed_tags_dict[key]:
+                        del self._managed_tags_dict[key]
             else:
                 # Remove by key only
                 self._managed_tags_dict.pop(tag, None)
 
         # Update the list representation
-        self._managed_tags = list(self._managed_tags_dict.values())
+        self._managed_tags = []
+        for tag_list in self._managed_tags_dict.values():
+            self._managed_tags.extend(tag_list)
 
     def clear_tags(self):
         # type: () -> None
@@ -503,13 +532,22 @@ class AgentCheck(object):
         self._managed_tags_dict.clear()
         self._managed_tags.clear()
 
-    def get_tags(self):
-        # type: () -> List[str]
+    def get_tags(self, sort=True):
+        # type: (bool) -> List[str]
         """Get a copy of the current managed tags list.
 
+        Parameters:
+            sort (bool):
+                If True (default), return the tags sorted alphabetically.
+                If False, return the tags in the order they were added.
+
         Returns:
-            list[str]: A copy of the managed tags list.
+            list[str]: A copy of the managed tags list, optionally sorted.
         """
+
+        if sort:
+            return sorted(self._managed_tags.copy())
+
         return self._managed_tags.copy()
 
     def set_auto_clear_tags(self, enabled):
@@ -1381,6 +1419,11 @@ class AgentCheck(object):
 
     def run(self):
         # type: () -> str
+
+        # Clear managed tags at the beginning of each check run to prevent accumulation
+        if self._auto_clear_tags:
+            self.clear_tags()
+
         try:
             self._clear_diagnosis()
             # Ignore check initializations if running in a separate process
@@ -1398,10 +1441,6 @@ class AgentCheck(object):
                         raise
 
                 instance = copy.deepcopy(self.instances[0])
-
-                # Clear managed tags at the beginning of each check run to prevent accumulation
-                if self._auto_clear_tags:
-                    self.clear_tags()
 
                 if 'set_breakpoint' in self.init_config:
                     from datadog_checks.base.utils.agent.debug import enter_pdb

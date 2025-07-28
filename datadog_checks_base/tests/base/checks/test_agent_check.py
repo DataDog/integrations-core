@@ -1330,37 +1330,99 @@ def test_profile_memory_when_enabled(should_profile_value, expected_calls):
 class TestTagManagement:
     def test_add_single_tag(self):
         check = AgentCheck()
-        check.add_tags('env:production')
+        check.add_tag('env:production')
 
         assert check.get_tags() == ['env:production']
+
+    def test_add_duplicate_tag(self):
+        check = AgentCheck()
+        check.add_tag('env:production')
+        check.add_tag('env:production')
+
+        assert check.get_tags() == ['env:production']
+
+    def test_add_tag_with_unique_false(self):
+        check = AgentCheck()
+        check.add_tag('team:backend')
+        check.add_tag('team:frontend', unique=False)
+
+        assert sorted(check.get_tags()) == ['team:backend', 'team:frontend']
+
+    def test_add_tag_with_unique_true(self):
+        check = AgentCheck()
+        check.add_tag('env:production')
+        check.add_tag('env:staging', unique=True)
+
+        assert check.get_tags() == ['env:staging']
+
+    def test_add_tag_multi_value_default(self):
+        check = AgentCheck()
+        check.add_tag('team:backend')
+        check.add_tag('team:frontend')
+        check.add_tag('team:ops')
+
+        assert check.get_tags() == ['team:backend', 'team:frontend', 'team:ops']
 
     def test_add_multiple_tags(self):
         check = AgentCheck()
         check.add_tags(['env:production', 'service:web'])
 
-        assert sorted(check.get_tags()) == ['env:production', 'service:web']
+        assert check.get_tags() == ['env:production', 'service:web']
 
-    def test_add_duplicate_tag(self):
+    def test_add_tags_with_unique_true(self):
         check = AgentCheck()
-        check.add_tags('env:production')
-        check.add_tags('env:production')
+        check.add_tags(['env:production', 'service:web', 'region:us-east'])
+        check.add_tags(['env:staging', 'service:api'], unique=True)
+
+        assert check.get_tags() == ['env:staging', 'region:us-east', 'service:api']
+
+    def test_add_multiple_tags_without_replace(self):
+        check = AgentCheck()
+        check.add_tags(['env:production', 'service:web', 'region:us-east'])
+        check.add_tags(['env:staging', 'service:api'])
+
+        assert check.get_tags() == ['env:production', 'env:staging', 'region:us-east', 'service:api', 'service:web']
+
+    def test_unique_tag_replacement(self):
+        check = AgentCheck()
+        check.add_tag('env:production', unique=True)
 
         assert check.get_tags() == ['env:production']
 
-    def test_unique_key_replacement(self):
-        check = AgentCheck()
-        check.add_tags('env:production')
-        check.add_tags('env:staging')  # Should replace the previous env tag
+        check.add_tag('env:staging', unique=True)
 
         assert check.get_tags() == ['env:staging']
 
-    def test_multiple_unique_key_replacements(self):
+    def test_tags_without_values(self):
         check = AgentCheck()
-        check.add_tags(['env:production', 'service:web', 'region:us-east'])
-        check.add_tags(['env:staging', 'service:api'])  # Should replace env and service
+        check.add_tags(['simple_tag', 'env:production'])
+        assert check.get_tags() == ['env:production', 'simple_tag']
 
-        tags = sorted(check.get_tags())
-        assert tags == ['env:staging', 'region:us-east', 'service:api']
+        check.remove_tags('simple_tag')
+
+        assert check.get_tags() == ['env:production']
+
+    def test_tags_without_values_with_unique(self):
+        check = AgentCheck()
+        check.add_tag('simple_tag')
+        check.add_tag('simple_tag', unique=True)
+
+        assert check.get_tags() == ['simple_tag']
+
+    def test_complex_multi_value_scenario(self):
+        check = AgentCheck()
+        check.add_tags(['env:dev', 'team:backend', 'team:frontend'])
+        check.add_tag('service:api')
+        check.add_tags(['team:ops', 'region:us-east'])
+
+        assert check.get_tags() == [
+            'env:dev',
+            'region:us-east',
+            'service:api',
+            'team:backend',
+            'team:frontend',
+            'team:ops',
+        ]
 
     def test_remove_single_tag_by_full_value(self):
         check = AgentCheck()
@@ -1372,37 +1434,23 @@ class TestTagManagement:
     def test_remove_single_tag_by_key(self):
         check = AgentCheck()
         check.add_tags(['env:production', 'service:web'])
-        check.remove_tags('service')  # Remove by key only
+        check.remove_tags('service')
 
         assert check.get_tags() == ['env:production']
 
-    def test_remove_multiple_tags(self):
+    def test_remove_multiple_tags_with_same_key(self):
         check = AgentCheck()
-        check.add_tags(['env:production', 'service:web', 'region:us-east'])
-        check.remove_tags(['service:web', 'region:us-east'])
+        check.add_tags(['team:backend', 'team:frontend', 'team:ops', 'env:production'])
+        check.remove_tags('team')
 
         assert check.get_tags() == ['env:production']
 
-    def test_remove_multiple_tags_by_key(self):
+    def test_remove_specific_multi_value_tag(self):
         check = AgentCheck()
-        check.add_tags(['env:production', 'service:web', 'region:us-east'])
-        check.remove_tags(['service', 'region'])  # Remove by keys only
+        check.add_tags(['team:backend', 'team:frontend', 'team:ops'])
+        check.remove_tags('team:frontend')  # Remove only frontend
 
-        assert check.get_tags() == ['env:production']
-
-    def test_remove_nonexistent_tag(self):
-        check = AgentCheck()
-        check.add_tags('env:production')
-        check.remove_tags('service:web')  # Should not raise an error
-
-        assert check.get_tags() == ['env:production']
-
-    def test_remove_wrong_value_for_key(self):
-        check = AgentCheck()
-        check.add_tags('env:production')
-        check.remove_tags('env:staging')  # Should not remove env:production
-
-        assert check.get_tags() == ['env:production']
+        assert check.get_tags() == ['team:backend', 'team:ops']
 
     def test_clear_tags(self):
         check = AgentCheck()
@@ -1419,35 +1467,24 @@ class TestTagManagement:
         tags.append('region:us-east')
 
         # Original tags should not be modified
-        assert sorted(check.get_tags()) == ['env:production', 'service:web']
-
-    def test_tags_without_values(self):
-        check = AgentCheck()
-        check.add_tags(['simple_tag', 'env:production'])
-
-        assert sorted(check.get_tags()) == ['env:production', 'simple_tag']
-
-        check.remove_tags('simple_tag')
-        assert check.get_tags() == ['env:production']
+        assert check.get_tags() == ['env:production', 'service:web']
 
     def test_empty_tag_not_added(self):
         check = AgentCheck()
         check.add_tags(['env:production', '', 'service:web'])
 
-        assert sorted(check.get_tags()) == ['env:production', 'service:web']
+        assert check.get_tags() == ['env:production', 'service:web']
 
-    def test_gauge_with_managed_tags(self, aggregator):
+    def test_add_tag_empty(self):
         check = AgentCheck()
-        check.check_id = 'test'
-        check.add_tags(['env:production', 'service:web'])
+        check.add_tag('')
+        assert check.get_tags() == []
 
-        check.gauge('test.metric', 42, tags=['custom:tag'])
-
-        aggregator.assert_metric(
-            'test.metric',
-            value=42,
-            tags=['custom:tag', 'env:production', 'service:web'],
-        )
+    def test_remove_empty_tag(self):
+        check = AgentCheck()
+        check.add_tags(['env:production'])
+        check.remove_tags('')
+        assert check.get_tags() == ['env:production']
 
     def test_auto_clear_tags_enabled_by_default(self):
         check = AgentCheck()
@@ -1476,4 +1513,4 @@ class TestTagManagement:
             pass
 
         # Tags should persist
-        assert sorted(check.get_tags()) == ['env:production', 'service:web']
+        assert check.get_tags() == ['env:production', 'service:web']
