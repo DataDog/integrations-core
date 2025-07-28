@@ -40,13 +40,13 @@ jobs:
           echo "merge base: ${{ steps.merge_base.outputs.sha }}" >> $GITHUB_STEP_SUMMARY
           count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
           count_plus_one=$((count + 1))
-          run_id=$(
+          run_id_base=$(
             (
               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
             ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
           )
-          echo "run_id=$run_id" >> $GITHUB_OUTPUT
-          if [ -z "$run_id" ]; then
+          echo "run_id_base=$run_id_base" >> $GITHUB_OUTPUT
+          if [ -z "$run_id_base" ]; then
             echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
@@ -56,13 +56,17 @@ jobs:
     needs: get-merge-base
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
       - name: Download artifact from merge-base run
-        run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
+        run: gh run download ${{ needs.get-merge-base.outputs.run_id_base }} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Rename previous sizes artifact
         run: |
-          mv ${{ inputs.platform }}_compressed_status.json ${{ inputs.platform }}_prev_compressed_status.json
+          mv compressed_status.csv ${{ inputs.platform }}_prev_compressed_status.csv
       - name: Download current sizes artifact
         run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}_compressed_status.json
         env:
