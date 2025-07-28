@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download artifact from merge-base run
-        run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name ${{ inputs.platform }}_compressed_status.json
+        run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Rename previous sizes artifact
