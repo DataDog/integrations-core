@@ -885,7 +885,7 @@ spec:
 
 Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubelet and ship them to Datadog.
 
-1. The most convenient way to enable kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers will automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
+1. The most convenient way to enable native kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers will automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
 
   <!-- xxx tabs xxx -->
   <!-- xxx tab "Enable Logging - Datdog Operator" xxx -->
@@ -957,13 +957,13 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
                 value: "true"
               - name: DD_LOGS_CONFIG_RUN_PATH
                 value: "/opt/datadog-agent/run"
-              resources:
-                requests:
-                  memory: "256Mi"
-                  cpu: "200m"
-                limits:
-                  memory: "256Mi"
-                  cpu: "200m"
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "200m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
   ```
 
   <!-- xxz tab xxx -->
