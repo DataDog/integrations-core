@@ -212,6 +212,12 @@ class AgentCheck(object):
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
         self.debug_metrics = {}
+        # Initialize managed tags - tags that can be dynamically added/removed during check execution
+        self._managed_tags = []  # type: List[str]
+        # Store tags by key for efficient unique key management
+        self._managed_tags_dict = {}  # type: Dict[str, str]
+        # Control whether tags are automatically cleared at the beginning of each check run
+        self._auto_clear_tags = True  # type: bool
         if self.init_config is not None:
             self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
         if self.instance is not None:
@@ -429,6 +435,95 @@ class AgentCheck(object):
 
             self._diagnosis = Diagnosis(sanitize=self.sanitize)
         return self._diagnosis
+
+    def add_tags(self, tags):
+        # type: (Union[str, List[str]]) -> None
+        """Add one or more tags to the managed tags list.
+
+        These tags will be automatically included with all metrics submitted by this check.
+        If a tag with the same key already exists, it will be replaced with the new value.
+
+        Parameters:
+            tags (str or list[str]):
+                A single tag or list of tags to add.
+                Each tag should be in the format 'key:value'.
+        """
+        if isinstance(tags, str):
+            tags = [tags]
+
+        for tag in tags:
+            if not tag:
+                continue
+
+            if ':' in tag:
+                key, value = tag.split(':', 1)
+                self._managed_tags_dict[key] = tag
+            else:
+                # Handle tags without values
+                self._managed_tags_dict[tag] = tag
+
+        # Update the list representation
+        self._managed_tags = list(self._managed_tags_dict.values())
+
+    def remove_tags(self, tags):
+        # type: (Union[str, List[str]]) -> None
+        """Remove one or more tags from the managed tags list.
+
+        Tags can be removed by:
+        - Full tag (key:value) - removes exact match
+        - Key only - removes all tags with that key
+
+        Parameters:
+            tags (str or list[str]):
+                A single tag or list of tags to remove.
+                Can be either 'key:value' or just 'key'.
+        """
+        if isinstance(tags, str):
+            tags = [tags]
+
+        for tag in tags:
+            if not tag:
+                continue
+
+            if ':' in tag:
+                # Remove by exact key:value match
+                key = tag.split(':', 1)[0]
+                if key in self._managed_tags_dict and self._managed_tags_dict[key] == tag:
+                    del self._managed_tags_dict[key]
+            else:
+                # Remove by key only
+                self._managed_tags_dict.pop(tag, None)
+
+        # Update the list representation
+        self._managed_tags = list(self._managed_tags_dict.values())
+
+    def clear_tags(self):
+        # type: () -> None
+        """Clear all managed tags."""
+        self._managed_tags_dict.clear()
+        self._managed_tags.clear()
+
+    def get_tags(self):
+        # type: () -> List[str]
+        """Get a copy of the current managed tags list.
+
+        Returns:
+            list[str]: A copy of the managed tags list.
+        """
+        return self._managed_tags.copy()
+
+    def set_auto_clear_tags(self, enabled):
+        # type: (bool) -> None
+        """Configure whether tags should be automatically cleared at the beginning of each check run.
+
+        By default, tags are automatically cleared to prevent accumulation between check runs.
+
+        Parameters:
+            enabled (bool):
+                If True, tags will be cleared automatically at the beginning of each check run.
+                If False, tags will persist between check runs until manually cleared.
+        """
+        self._auto_clear_tags = enabled
 
     def get_tls_context(self, refresh=False, overrides=None):
         # type: (bool, Dict[AnyStr, Any]) -> ssl.SSLContext
@@ -731,6 +826,12 @@ class AgentCheck(object):
         if not self.should_send_metric(name):
             return
 
+        # Merge managed tags with provided tags
+        if self._managed_tags:
+            merged_tags = list(tags or [])
+            merged_tags.extend(self._managed_tags)
+            tags = merged_tags
+
         tags = self._normalize_tags_type(tags or [], device_name, name)
         if hostname is None:
             hostname = ''
@@ -968,6 +1069,12 @@ class AgentCheck(object):
             raw (bool):
                 whether to ignore any defined namespace prefix
         """
+        # Merge managed tags with provided tags
+        if self._managed_tags:
+            merged_tags = list(tags or [])
+            merged_tags.extend(self._managed_tags)
+            tags = merged_tags
+
         tags = self._normalize_tags_type(tags or [])
         if hostname is None:
             hostname = ''
@@ -1292,6 +1399,10 @@ class AgentCheck(object):
 
                 instance = copy.deepcopy(self.instances[0])
 
+                # Clear managed tags at the beginning of each check run to prevent accumulation
+                if self._auto_clear_tags:
+                    self.clear_tags()
+
                 if 'set_breakpoint' in self.init_config:
                     from datadog_checks.base.utils.agent.debug import enter_pdb
 
@@ -1368,7 +1479,17 @@ class AgentCheck(object):
                 return
 
         if event.get('tags'):
-            event['tags'] = self._normalize_tags_type(event['tags'])
+            # Merge managed tags with event tags
+            if self._managed_tags:
+                event_tags = list(event['tags'])
+                event_tags.extend(self._managed_tags)
+                event['tags'] = self._normalize_tags_type(event_tags)
+            else:
+                event['tags'] = self._normalize_tags_type(event['tags'])
+        elif self._managed_tags:
+            # If no tags provided but we have managed tags, use them
+            event['tags'] = self._normalize_tags_type(self._managed_tags)
+
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
