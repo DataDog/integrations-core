@@ -18,9 +18,11 @@
       "Category::OS & System",
       "Category::Cloud",
       "Category::Network",
+      "Category::Event Management",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Events"
     ]
   },
   "assets": {
