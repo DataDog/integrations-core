@@ -260,7 +260,7 @@ class ValidationResult:
         :param features: A list of features that were validated.
         """
         self.valid = valid
-        self.features = []
+        self.features: list[Feature] = []
         self.errors: list[ConfigurationError] = []
         self.warnings: list[str] = []
 
@@ -271,7 +271,7 @@ class ValidationResult:
         :param enabled: Whether the feature is enabled.
         """
         self.features.append(
-            {"key": feature, "name": FeatureNames[feature], "enabled": enabled, "description": description}
+                {"key": feature, "name": FeatureNames[feature], "enabled": enabled, "description": description}            
         )
 
     def add_error(self, error: str | ConfigurationError):
@@ -377,6 +377,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "pg_stat_activity_view": instance.get('pg_stat_activity_view', instance_pg_stat_activity_view()),
         "query_metrics": {
             **{
+                "enabled": True,
                 "collection_interval": DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL,
                 "pg_stat_statements_max_warning_threshold": 10000,
                 "incremental_query_metrics": False,
