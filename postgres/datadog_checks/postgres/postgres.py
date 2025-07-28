@@ -1005,7 +1005,10 @@ class PostgreSql(AgentCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': payload_pg_version(self.version),
                 'integration_version': __version__,
-                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
+                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')] + [
+                    f"agent_version:{datadog_agent.get_version()}",
+                    f"agent_hostname:{datadog_agent.get_hostname()}",
+                ],
                 "timestamp": time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {
