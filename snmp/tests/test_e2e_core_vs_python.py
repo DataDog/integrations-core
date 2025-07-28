@@ -657,7 +657,6 @@ def test_e2e_discovery(dd_agent_check):
         'datadog.snmp.check_interval',
         'datadog.snmp.submitted_metrics',
         'datadog.snmp.check_duration',
-        'datadog.snmp.requests'
     ]
     # we don't assert count, since the count might be off by 1 due to devices not being discovered at first check run
     assert_python_vs_core(
