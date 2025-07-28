@@ -49,7 +49,6 @@ jobs:
             echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          # gh run list --workflow "Resolve Dependencies and Build Wheels" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
 
       - name: Debug
         run: |
