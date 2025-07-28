@@ -18,6 +18,7 @@
       "Category::OS & System",
       "Category::Cloud",
       "Category::Network",
+      "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
