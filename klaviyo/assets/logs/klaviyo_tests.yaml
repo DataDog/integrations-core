@@ -1,0 +1,404 @@
+id: klaviyo
+tests:
+  - sample: |-
+      {
+        "metric_name": "Received Email",
+        "profile_id": "01JXZDTRS5ZWET33T7930NVH2X",
+        "attributes": {
+          "datetime": "2025-07-10T20:41:13+00:00",
+          "uuid": "37d77a80-5dce-11f0-8001-1ce63ac70994",
+          "timestamp": 1752180073,
+          "event_properties": {
+            "_ip": "166.137.246.54",
+            "$event_id": "1752180073",
+            "Email Domain": "klaviyo-demo.com",
+            "Subject": "Internal Klaviyo - Subject Line",
+            "Campaign Name": "Internal Klaviyo - Test Campaign Name"
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6jsMbujVKTe/"
+        },
+        "id": "6jsMbujVKTe",
+        "type": "event"
+      }
+    result:
+        custom:
+            attributes:
+                datetime: "2025-07-10T20:41:13+00:00"
+                event_properties:
+                    $event_id: "1752180073"
+                    Campaign Name: "Internal Klaviyo - Test Campaign Name"
+                    Email Domain: "klaviyo-demo.com"
+                    Subject: "Internal Klaviyo - Subject Line"
+                    _ip: "166.137.246.54"
+                timestamp: 1752180073
+                uuid: "37d77a80-5dce-11f0-8001-1ce63ac70994"
+            id: "6jsMbujVKTe"
+            klaviyo:
+                campaign_name: "Internal Klaviyo - Test Campaign Name"
+            links:
+                self: "https://a.klaviyo.com/api/events/6jsMbujVKTe/"
+            metric_name: "Received Email"
+            network:
+                client:
+                    geoip: { }
+            profile_id: "01JXZDTRS5ZWET33T7930NVH2X"
+            service: "marketing-events"
+            status: "info"
+            type: "event"
+        message: |-
+            {
+              "metric_name" : "Received Email",
+              "profile_id" : "01JXZDTRS5ZWET33T7930NVH2X",
+              "attributes" : {
+                "datetime" : "2025-07-10T20:41:13+00:00",
+                "uuid" : "37d77a80-5dce-11f0-8001-1ce63ac70994",
+                "timestamp" : 1752180073,
+                "event_properties" : {
+                  "_ip" : "166.137.246.54",
+                  "$event_id" : "1752180073",
+                  "Email Domain" : "klaviyo-demo.com",
+                  "Subject" : "Internal Klaviyo - Subject Line",
+                  "Campaign Name" : "Internal Klaviyo - Test Campaign Name"
+                }
+              },
+              "links" : {
+                "self" : "https://a.klaviyo.com/api/events/6jsMbujVKTe/"
+              },
+              "id" : "6jsMbujVKTe",
+              "type" : "event"
+            }
+        service: "marketing-events"
+        status: "info"
+        tags:
+            - "source:LOGS_SOURCE"
+        timestamp: 1752180073000
+  - sample: >-
+      {
+        "metric_name": "Reset Password",
+        "profile_id": "01JXFPJ6GZBSW06VGH5YC1BZ2R",
+        "attributes": {
+          "datetime": "2025-07-10T20:40:34+00:00",
+          "uuid": "20988d00-5dce-11f0-8001-abb877364eba",
+          "timestamp": 1752180034,
+          "event_properties": {
+            "$value": 0,
+            "$event_id": "1752180034",
+            "action": "Reset Password",
+            "PasswordResetLink": "https://www.website.com/reset/1234567890987654321"
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6jsMdJ68urY/"
+        },
+        "id": "6jsMdJ68urY",
+        "type": "event"
+      }
+    result:
+        custom:
+            attributes:
+                datetime: "2025-07-10T20:40:34+00:00"
+                event_properties:
+                    $event_id: "1752180034"
+                    $value: 0
+                    PasswordResetLink: "https://www.website.com/reset/1234567890987654321"
+                    action: "Reset Password"
+                timestamp: 1752180034
+                uuid: "20988d00-5dce-11f0-8001-abb877364eba"
+            id: "6jsMdJ68urY"
+            links:
+                self: "https://a.klaviyo.com/api/events/6jsMdJ68urY/"
+            metric_name: "Reset Password"
+            profile_id: "01JXFPJ6GZBSW06VGH5YC1BZ2R"
+            service: "other-events"
+            type: "event"
+        message: |-
+            {
+              "metric_name" : "Reset Password",
+              "profile_id" : "01JXFPJ6GZBSW06VGH5YC1BZ2R",
+              "attributes" : {
+                "datetime" : "2025-07-10T20:40:34+00:00",
+                "uuid" : "20988d00-5dce-11f0-8001-abb877364eba",
+                "timestamp" : 1752180034,
+                "event_properties" : {
+                  "$value" : 0,
+                  "$event_id" : "1752180034",
+                  "action" : "Reset Password",
+                  "PasswordResetLink" : "https://www.website.com/reset/1234567890987654321"
+                }
+              },
+              "links" : {
+                "self" : "https://a.klaviyo.com/api/events/6jsMdJ68urY/"
+              },
+              "id" : "6jsMdJ68urY",
+              "type" : "event"
+            }
+        service: "other-events"
+        tags:
+            - "source:LOGS_SOURCE"
+        timestamp: 1752180034000
+  - sample: |-
+      {
+        "metric_name": "Placed Order",
+        "profile_id": "01JXZDTSG33JAJB9JRXRA0VGVV",
+        "attributes": {
+          "datetime": "2025-07-10T20:40:33+00:00",
+          "uuid": "1ffff680-5dce-11f0-8001-be92381409b3",
+          "timestamp": 1752180033,
+          "event_properties": {
+            "BillingAddress": {
+              "Zip": "02111",
+              "Company": "",
+              "RegionCode": "MA",
+              "Phone": "5005550006",
+              "FirstName": "Matt",
+              "Address2": "6th floor",
+              "Country": "USA",
+              "Region": "Massachusetts",
+              "LastName": "Kemp (Sample)",
+              "City": "Boston",
+              "Address1": "125 Summer St",
+              "CountryCode": "US"
+            },
+            "Categories": [
+              "Fiction",
+              "Classics",
+              "Children"
+            ],
+            "$value": 29.98,
+            "ShippingAddress": {
+              "Zip": "02111",
+              "Company": "",
+              "RegionCode": "MA",
+              "Phone": "5005550006",
+              "FirstName": "Matt",
+              "Address2": "6th floor",
+              "Country": "USA",
+              "Region": "Massachusetts",
+              "LastName": "Kemp (Sample)",
+              "City": "Boston",
+              "Address1": "125 Summer St",
+              "CountryCode": "US"
+            },
+            "$event_id": "1752180033",
+            "Brands": [
+              "Kids Books",
+              "Harcourt Classics"
+            ],
+            "Items": [
+              {
+                "Brand": "Kids Books",
+                "RowTotal": 9.99,
+                "ProductName": "Winnie the Pooh",
+                "Categories": [
+                  "Fiction",
+                  "Children"
+                ],
+                "ItemPrice": 9.99,
+                "Quantity": 1,
+                "ImageURL": "http://www.example.com/path/to/product/image.png",
+                "ProductID": "1111",
+                "SKU": "WINNIEPOOH",
+                "ProductURL": "http://www.example.com/path/to/product"
+              },
+              {
+                "Brand": "Harcourt Classics",
+                "RowTotal": 19.99,
+                "ProductName": "A Tale of Two Cities",
+                "Categories": [
+                  "Fiction",
+                  "Classics"
+                ],
+                "ItemPrice": 19.99,
+                "Quantity": 1,
+                "ImageURL": "http://www.example.com/path/to/product/image2.png",
+                "ProductID": "1112",
+                "SKU": "TALEOFTWO",
+                "ProductURL": "http://www.example.com/path/to/product2"
+              }
+            ],
+            "DiscountCode": "Free Shipping",
+            "DiscountValue": 5,
+            "OrderId": "1234",
+            "ItemNames": [
+              "Winnie the Pooh",
+              "A Tale of Two Cities"
+            ]
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6jsMbvMP9e5/"
+        },
+        "id": "6jsMbvMP9e5",
+        "type": "event",
+        "status": "info"
+      }
+    result:
+        custom:
+            attributes:
+                datetime: "2025-07-10T20:40:33+00:00"
+                event_properties:
+                    $event_id: "1752180033"
+                    $value: 29.98
+                    BillingAddress:
+                        Address1: "125 Summer St"
+                        Address2: "6th floor"
+                        City: "Boston"
+                        Company: ""
+                        Country: "USA"
+                        CountryCode: "US"
+                        FirstName: "Matt"
+                        LastName: "Kemp (Sample)"
+                        Phone: "5005550006"
+                        Region: "Massachusetts"
+                        RegionCode: "MA"
+                        Zip: "02111"
+                    Brands:
+                        - "Kids Books"
+                        - "Harcourt Classics"
+                    Categories:
+                        - "Fiction"
+                        - "Classics"
+                        - "Children"
+                    DiscountCode: "Free Shipping"
+                    DiscountValue: 5
+                    ItemNames:
+                        - "Winnie the Pooh"
+                        - "A Tale of Two Cities"
+                    Items:
+                        - Brand: "Kids Books"
+                          RowTotal: 9.99
+                          ProductName: "Winnie the Pooh"
+                          Categories:
+                              - "Fiction"
+                              - "Children"
+                          ItemPrice: 9.99
+                          Quantity: 1
+                          ImageURL: "http://www.example.com/path/to/product/image.png"
+                          ProductID: "1111"
+                          SKU: "WINNIEPOOH"
+                          ProductURL: "http://www.example.com/path/to/product"
+                        - Brand: "Harcourt Classics"
+                          RowTotal: 19.99
+                          ProductName: "A Tale of Two Cities"
+                          Categories:
+                              - "Fiction"
+                              - "Classics"
+                          ItemPrice: 19.99
+                          Quantity: 1
+                          ImageURL: "http://www.example.com/path/to/product/image2.png"
+                          ProductID: "1112"
+                          SKU: "TALEOFTWO"
+                          ProductURL: "http://www.example.com/path/to/product2"
+                    OrderId: "1234"
+                    ShippingAddress:
+                        Address1: "125 Summer St"
+                        Address2: "6th floor"
+                        City: "Boston"
+                        Company: ""
+                        Country: "USA"
+                        CountryCode: "US"
+                        FirstName: "Matt"
+                        LastName: "Kemp (Sample)"
+                        Phone: "5005550006"
+                        Region: "Massachusetts"
+                        RegionCode: "MA"
+                        Zip: "02111"
+                timestamp: 1752180033
+                uuid: "1ffff680-5dce-11f0-8001-be92381409b3"
+            id: "6jsMbvMP9e5"
+            klaviyo:
+                billing_region_code: "US-MA"
+                product_categories: "Fiction,Classics,Children"
+                products: "1111,1112 - Winnie the Pooh,A Tale of Two Cities"
+                shipping_region_code: "US-MA"
+            links:
+                self: "https://a.klaviyo.com/api/events/6jsMbvMP9e5/"
+            metric_name: "Placed Order"
+            profile_id: "01JXZDTSG33JAJB9JRXRA0VGVV"
+            service: "ecommerce-events"
+            status: "info"
+            type: "event"
+        message: |-
+            {
+              "metric_name" : "Placed Order",
+              "profile_id" : "01JXZDTSG33JAJB9JRXRA0VGVV",
+              "attributes" : {
+                "datetime" : "2025-07-10T20:40:33+00:00",
+                "uuid" : "1ffff680-5dce-11f0-8001-be92381409b3",
+                "timestamp" : 1752180033,
+                "event_properties" : {
+                  "BillingAddress" : {
+                    "Zip" : "02111",
+                    "Company" : "",
+                    "RegionCode" : "MA",
+                    "Phone" : "5005550006",
+                    "FirstName" : "Matt",
+                    "Address2" : "6th floor",
+                    "Country" : "USA",
+                    "Region" : "Massachusetts",
+                    "LastName" : "Kemp (Sample)",
+                    "City" : "Boston",
+                    "Address1" : "125 Summer St",
+                    "CountryCode" : "US"
+                  },
+                  "Categories" : [ "Fiction", "Classics", "Children" ],
+                  "$value" : 29.98,
+                  "ShippingAddress" : {
+                    "Zip" : "02111",
+                    "Company" : "",
+                    "RegionCode" : "MA",
+                    "Phone" : "5005550006",
+                    "FirstName" : "Matt",
+                    "Address2" : "6th floor",
+                    "Country" : "USA",
+                    "Region" : "Massachusetts",
+                    "LastName" : "Kemp (Sample)",
+                    "City" : "Boston",
+                    "Address1" : "125 Summer St",
+                    "CountryCode" : "US"
+                  },
+                  "$event_id" : "1752180033",
+                  "Brands" : [ "Kids Books", "Harcourt Classics" ],
+                  "Items" : [ {
+                    "Brand" : "Kids Books",
+                    "RowTotal" : 9.99,
+                    "ProductName" : "Winnie the Pooh",
+                    "Categories" : [ "Fiction", "Children" ],
+                    "ItemPrice" : 9.99,
+                    "Quantity" : 1,
+                    "ImageURL" : "http://www.example.com/path/to/product/image.png",
+                    "ProductID" : "1111",
+                    "SKU" : "WINNIEPOOH",
+                    "ProductURL" : "http://www.example.com/path/to/product"
+                  }, {
+                    "Brand" : "Harcourt Classics",
+                    "RowTotal" : 19.99,
+                    "ProductName" : "A Tale of Two Cities",
+                    "Categories" : [ "Fiction", "Classics" ],
+                    "ItemPrice" : 19.99,
+                    "Quantity" : 1,
+                    "ImageURL" : "http://www.example.com/path/to/product/image2.png",
+                    "ProductID" : "1112",
+                    "SKU" : "TALEOFTWO",
+                    "ProductURL" : "http://www.example.com/path/to/product2"
+                  } ],
+                  "DiscountCode" : "Free Shipping",
+                  "DiscountValue" : 5,
+                  "OrderId" : "1234",
+                  "ItemNames" : [ "Winnie the Pooh", "A Tale of Two Cities" ]
+                }
+              },
+              "links" : {
+                "self" : "https://a.klaviyo.com/api/events/6jsMbvMP9e5/"
+              },
+              "id" : "6jsMbvMP9e5",
+              "type" : "event",
+              "status" : "info"
+            }
+        service: "ecommerce-events"
+        status: "info"
+        tags:
+            - "source:LOGS_SOURCE"
+        timestamp: 1752180033000
