@@ -29,7 +29,7 @@ jobs:
           git fetch origin master:refs/remotes/origin/master
           git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
-
+          echo "sha=$base" >> $GITHUB_OUTPUT
         # TODO: change to Resolve Dependencies and Build Wheels
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
@@ -45,6 +45,7 @@ jobs:
               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
             ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
           )
+          echo "run_id=$run_id" >> $GITHUB_OUTPUT
           if [ -z "$run_id" ]; then
             echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
             exit 1
