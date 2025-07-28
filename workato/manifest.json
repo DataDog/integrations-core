@@ -54,6 +54,7 @@
     },
     "monitors": {
       "Critical recipe is offline" : "assets/monitors/critical_recipe_offline.json",
+      "Critical recipe is offline with cause unknown" : "assets/monitors/critical_recipe_offline_cause_unknown.json",
       "Connection with active recipes is down" : "assets/monitors/connection_with_active_recipes.json",
       "Connection is lost" : "assets/monitors/connection_lost.json",
       "Connection auth failure" : "assets/monitors/connection_auth_failure.json",
