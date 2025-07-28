@@ -37,7 +37,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MERGE_BASE=${{ steps.merge_base.outputs.sha }}
-          echo "merge base: ${{ steps.merge_base.outputs.sha }}" >> $GITHUB_STEP_SUMMARY
           count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
           count_plus_one=$((count + 1))
           run_id_base=$(
@@ -60,6 +59,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Debug
+        run: |
+          echo "Downloading artifact from merge-base run" >> $GITHUB_STEP_SUMMARY
+         
       - name: Download artifact from merge-base run
         run: gh run download ${{ needs.get-merge-base.outputs.run_id_base }} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
         env:
@@ -67,7 +70,7 @@ jobs:
 
       - name: Debug
         run: |
-          echo "Downloading artifact from merge-base run" >> $GITHUB_STEP_SUMMARY
+          echo "Downloaded artifact from merge-base run" >> $GITHUB_STEP_SUMMARY
 
       - name: Rename previous sizes artifact
         run: |
