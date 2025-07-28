@@ -51,6 +51,12 @@ from datadog_checks.postgres.config_models.defaults import (
     instance_use_global_custom_queries,
     shared_propagate_agent_tags,
 )
+from datadog_checks.postgres.statement_samples import (
+    DEFAULT_ACTIVITY_COLLECTION_INTERVAL as DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL,
+)
+from datadog_checks.postgres.statement_samples import (
+    DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL,
+)
 from datadog_checks.postgres.statements import DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
 
 if TYPE_CHECKING:
@@ -618,10 +624,10 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             **{
                 "collection_interval": DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL,
                 "pg_stat_statements_max_warning_threshold": 10000,
-                "full_statement_text_cache_max_size": 10000,
-                "full_statement_text_samples_per_hour_per_query": 10000,
                 "incremental_query_metrics": False,
                 "baseline_metrics_expiry": 300,
+                "full_statement_text_cache_max_size": 10000,
+                "full_statement_text_samples_per_hour_per_query": 10000,
                 "run_sync": False,
                 "batch_max_content_size": init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000),
             },
@@ -630,7 +636,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "query_samples": {
             **{
                 "enabled": True,
-                "collection_interval": 1,
+                "collection_interval": DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL,
                 "explain_function": "datadog.explain_statement",
                 "explained_queries_per_hour_per_query": 60,
                 "samples_per_hour_per_query": 15,
@@ -645,7 +651,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "query_activity": {
             **{
                 "enabled": True,
-                "collection_interval": 10,
+                "collection_interval": DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL,
                 "payload_row_limit": 3500,
             },
             **(instance.get('query_activity', {})),
@@ -755,6 +761,20 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         validation_result.add_warning(
             "query_metrics.collection_interval must be greater than 0, defaulting to"
             f"{DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL} seconds."
+        )
+
+    if args['query_samples']['collection_interval'] <= 0:
+        args['query_samples']['collection_interval'] = DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL
+        validation_result.add_warning(
+            "query_samples.collection_interval must be greater than 0, defaulting to"
+            f"{DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL} seconds."
+        )
+
+    if args['query_activity']['collection_interval'] <= 0:
+        args['query_activity']['collection_interval'] = DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL
+        validation_result.add_warning(
+            "query_activity.collection_interval must be greater than 0, defaulting to"
+            f"{DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL} seconds."
         )
 
     tags, tag_errors = build_tags(instance=instance, init_config=init_config, config=args)
