@@ -85,6 +85,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/beyondtrust_password_safe:
+- beyondtrust_password_safe/**/*
 integration/bitdefender:
 - bitdefender/**/*
 integration/bitwarden:
@@ -337,8 +339,6 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
-integration/kaspersky:
-- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
@@ -529,6 +529,8 @@ integration/prometheus:
 - prometheus/**/*
 integration/proofpoint_on_demand:
 - proofpoint_on_demand/**/*
+integration/proofpoint_tap:
+- proofpoint_tap/**/*
 integration/proxmox:
 - proxmox/**/*
 integration/proxysql:

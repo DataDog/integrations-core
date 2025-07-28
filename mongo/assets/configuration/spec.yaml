@@ -309,7 +309,6 @@ files:
             type: boolean
             example: false
     - name: schemas
-      hidden: true
       deprecation:
         Agent version: 7.69.0
         Migration: Use `collect_schemas` instead.

@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Real-Time Threat Analytics",
+    "title": "iboss - Real-Time Threat Log Analytics",
     "description": "This dashboards offers insights into threat counts, affected assets and users, threat types, and geographical sources and destinations using logs.",
     "widgets": [
         {
@@ -44,6 +44,27 @@
             }
         },
         {
+            "id": 958449835691915,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 880749371009748,
             "definition": {
                 "title": "Threats Overview",
@@ -67,7 +88,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -136,7 +157,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -207,7 +228,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -278,7 +299,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) @action:Blocked $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) @action:Blocked $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -334,7 +355,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) @action:Blocked $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) @action:Blocked $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -388,7 +409,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -457,7 +478,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -483,7 +504,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -567,7 +588,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@mde:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@mde:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -593,7 +614,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@mde:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@mde:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -677,7 +698,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -703,7 +724,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -787,7 +808,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@sandBoxDecoded:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@sandBoxDecoded:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -813,7 +834,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@sandBoxDecoded:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@sandBoxDecoded:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -887,7 +908,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 12,
                 "height": 18
             }
@@ -941,7 +962,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -985,7 +1006,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1031,7 +1052,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\"-\" OR \"\") @action:Blocked $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\"-\" OR \"\") @action:Blocked $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1159,7 +1180,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1203,7 +1224,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1229,7 +1250,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@usr.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1303,7 +1324,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 21,
+                "y": 23,
                 "width": 12,
                 "height": 7,
                 "is_column_break": true
@@ -1353,7 +1374,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1379,7 +1400,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1463,7 +1484,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.ip:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.ip:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1489,7 +1510,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.ip:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.client.ip:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1594,7 +1615,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1620,7 +1641,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.geoip.country.name:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1704,7 +1725,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.ip:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.ip:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1730,7 +1751,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.ip:(\"-\" OR \"\") $action $sub_type $domain $user"
+                                                "query": "source:iboss @action:Blocked @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@network.destination.ip:(\"-\" OR \"\") $action $sub_type $domain $user $computer_name $asset_id $location $source_country $destination_country $source_ip $destination_ip $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1804,13 +1825,19 @@
             },
             "layout": {
                 "x": 0,
-                "y": 28,
+                "y": 30,
                 "width": 12,
                 "height": 7
             }
         }
     ],
     "template_variables": [
+        {
+            "name": "host",
+            "prefix": "@hostname",
+            "available_values": [],
+            "default": "*"
+        },
         {
             "name": "action",
             "prefix": "@action",
@@ -1832,6 +1859,48 @@
         {
             "name": "user",
             "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "asset_id",
+            "prefix": "@assetId",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "computer_name",
+            "prefix": "@computerName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "location",
+            "prefix": "@location",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "source_country",
+            "prefix": "@network.client.geoip.country.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "destination_country",
+            "prefix": "@network.destination.geoip.country.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "source_ip",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "destination_ip",
+            "prefix": "@network.destination.ip",
             "available_values": [],
             "default": "*"
         }
