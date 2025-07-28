@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import difflib
 import os
+import re
 
 import click
 import yaml
@@ -34,8 +35,6 @@ from datadog_checks.dev.tooling.utils import (
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
-
-TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
@@ -85,7 +84,7 @@ def config(ctx, check, sync, verbose):
                 files_failed[spec_file_path] = True
 
             check_display_queue.append(
-                lambda spec_file_path=spec_file_path, check=check: (echo_failure if is_core_check else echo_failure)(
+                lambda spec_file_path=spec_file_path, check=check: echo_failure(
                     f"Did not find spec file {spec_file_path} for check {check}"
                 )
             )
@@ -110,15 +109,15 @@ def config(ctx, check, sync, verbose):
             version = get_version_string(check)
 
         spec_file_content = read_file(spec_file_path)
-        default_temp = validate_default_template(spec_file_content)
-        spec = ConfigSpec(spec_file_content, source=source, version=version)
-        spec.load()
 
-        if not default_temp:
+        if not validate_default_template(spec_file_content):
             message = "Missing default template in init_config or instances section"
+            files_failed[spec_file_path] = True
             check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
             annotate_error(spec_file_path, message)
 
+        spec = ConfigSpec(spec_file_content, source=source, version=version)
+        spec.load()
         if spec.errors:
             files_failed[spec_file_path] = True
             for error in spec.errors:
@@ -184,21 +183,16 @@ def config(ctx, check, sync, verbose):
 
 
 def validate_default_template(spec_file):
-    init_config_default = False
-    instances_default = False
     if 'template: init_config' not in spec_file or 'template: instances' not in spec_file:
         # This config spec does not have init_config or instances
         return True
 
-    for line in spec_file.split('\n'):
-        if any("init_config/{}".format(template) in line for template in TEMPLATES):
-            init_config_default = True
-        if any("instances/{}".format(template) in line for template in TEMPLATES):
-            instances_default = True
-
-        if instances_default and init_config_default:
-            return True
-    return False
+    templates = {
+        'intances': [f'template: init_config/{t}' for t in ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']],
+        'init_config': [f'template: init_config/{t}' for t in ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']],
+    }
+    # We want both instances and init_config to have at least one template present.
+    return all(any(re.search(t, spec_file) for t in tpls) for tpls in templates)
 
 
 def validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter):

@@ -26,7 +26,7 @@ def fake_consumer_offsets_for_times(partitions):
     return [(t, p, 80) for t, p in partitions]
 
 
-def seed_mock_client():
+def seed_mock_client(cluster_id="cluster_id"):
     """Set some common defaults for the mock client to kafka."""
     client = mock.create_autospec(KafkaClient)
     client.list_consumer_groups.return_value = ["consumer_group1"]
@@ -34,7 +34,7 @@ def seed_mock_client():
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
     client.describe_consumer_group.return_value = 'STABLE'
     client.consumer_get_cluster_id_and_list_topics.return_value = (
-        "cluster_id",
+        cluster_id,
         # topics
         [
             # Used in unit tets
@@ -618,7 +618,7 @@ def test_data_streams_messages(
             }
         ),
     )
-    mock_client = seed_mock_client()
+    mock_client = seed_mock_client(cluster_id="Cluster_id")
     mock_client.get_next_message.side_effect = [
         MockedMessage(
             b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
