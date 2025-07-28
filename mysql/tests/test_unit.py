@@ -309,6 +309,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -320,6 +321,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -330,6 +332,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -341,6 +344,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
     ],
