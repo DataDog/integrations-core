@@ -183,6 +183,7 @@ class QueryMetrics(BaseModel):
         frozen=True,
     )
     baseline_metrics_expiry: Optional[float] = None
+    batch_max_content_size: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     full_statement_text_cache_max_size: Optional[float] = None
@@ -287,7 +288,7 @@ class InstanceConfig(BaseModel):
     ssl_root_cert: Optional[str] = None
     table_count_limit: Optional[int] = None
     tag_replication_role: Optional[bool] = None
-    tags: Optional[list[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: str
 

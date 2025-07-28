@@ -560,6 +560,14 @@ files:
           value:
             type: boolean
             example: false
+        - name: batch_max_content_size
+          hidden: true
+          description: |
+            This is a stub option for type hints. This value is actually set in the datadog.yaml config using
+            database_monitoring.metrics.batch_max_content_size. For details on this parameter, see statements.py.
+          value:
+            type: integer
+            example: 20_000_000
     - name: query_samples
       description: Configure collection of query samples
       options:

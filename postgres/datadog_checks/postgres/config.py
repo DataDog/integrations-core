@@ -51,6 +51,7 @@ from datadog_checks.postgres.config_models.defaults import (
     instance_use_global_custom_queries,
     shared_propagate_agent_tags,
 )
+from datadog_checks.postgres.statements import DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -615,13 +616,14 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "pg_stat_activity_view": instance.get('pg_stat_activity_view', instance_pg_stat_activity_view()),
         "query_metrics": {
             **{
-                "collection_interval": 10,
+                "collection_interval": DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL,
                 "pg_stat_statements_max_warning_threshold": 10000,
                 "full_statement_text_cache_max_size": 10000,
                 "full_statement_text_samples_per_hour_per_query": 10000,
                 "incremental_query_metrics": False,
                 "baseline_metrics_expiry": 300,
                 "run_sync": False,
+                "batch_max_content_size": init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000),
             },
             **(instance.get('query_metrics', {})),
         },
@@ -747,6 +749,13 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     }
 
     validation_result = ValidationResult()
+
+    if args['query_metrics']['collection_interval'] <= 0:
+        args['query_metrics']['collection_interval'] = DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
+        validation_result.add_warning(
+            "query_metrics.collection_interval must be greater than 0, defaulting to"
+            f"{DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL} seconds."
+        )
 
     tags, tag_errors = build_tags(instance=instance, init_config=init_config, config=args)
     args['tags'] = tags

@@ -156,11 +156,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     """Collects telemetry for SQL statements"""
 
     def __init__(self, check, config: InstanceConfig, shutdown_callback):
-        collection_interval = float(
-            config.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
-        )
-        if collection_interval <= 0:
-            collection_interval = DEFAULT_COLLECTION_INTERVAL
+        collection_interval = float(config.query_metrics.collection_interval)
         super(PostgresStatementMetrics, self).__init__(
             check,
             run_sync=config.query_metrics.run_sync,
@@ -183,7 +179,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # NB: This value should always match the datadog.yaml value, whose default is set
         # https://github.com/DataDog/datadog-agent/blob/96d253e8b91326c2418302b13a73b420ad5a6d92/comp/forwarder/eventplatform/eventplatformimpl/epforwarder.go#L79
         # If that default changes, this should be updated
-        self.batch_max_content_size = config.init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000)
+        self.batch_max_content_size = config.query_metrics.batch_max_content_size
         self._tags_no_db = None
         self.tags = None
         self._state = StatementMetrics()
@@ -192,7 +188,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._baseline_metrics = {}
         self._last_baseline_metrics_expiry = None
         self._track_io_timing_cache = None
-        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        self._obfuscate_options = to_native_string(self._config.obfuscator_options.model_dump_json())
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.query_metrics.full_statement_text_cache_max_size,

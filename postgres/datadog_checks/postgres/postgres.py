@@ -128,7 +128,7 @@ class PostgreSql(AgentCheck):
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self.tags = self._config.tags
+        self.tags = list(self._config.tags)
         self.add_core_tags()
 
         # Handle the config validation result after we've set tags so those tags are included in the health event
