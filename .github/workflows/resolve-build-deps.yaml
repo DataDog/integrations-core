@@ -180,6 +180,16 @@ jobs:
     with:
       platform: ${{ matrix.platform }}
       run-id: ${{ github.run_id }}
+  
+  calculate-dep-sizes:
+    needs: measure-disk-usage
+    strategy:
+      matrix:
+        platform: [linux-x86_64, linux-aarch64, windows-x86_64]
+    uses: DataDog/integrations-core/.github/workflows/quality-gates.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+      run-id: ${{ github.run_id }}
 
 
   build-macos:
@@ -268,6 +278,9 @@ jobs:
   
   calculate-dep-sizes-macos:
     needs: measure-disk-usage-macos
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64]
     uses: DataDog/integrations-core/.github/workflows/quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
