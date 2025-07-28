@@ -881,133 +881,157 @@ spec:
 
 ## Log collection
 
-### Collecting logs from EKS on Fargate with the Agent
+### Collecting logs from EKS on Fargate natively with the Agent
 
-Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubelet and ship them to Datadog. 
+Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubelet and ship them to Datadog.
 
-1. Enable Agent Logging
+1. The most convenient way to enable kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers will automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
 
-You can take advantage of the Cluster Agent's Admission Controller sidecar injection feature to automatically configure logging, or you can configure it manually in your Application's manifest.
+  <!-- xxx tabs xxx -->
+  <!-- xxx tab "Enable Logging - Datdog Operator" xxx -->
 
-Enable sidecar Agent logging by setting the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`.
+  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true` so newly injected Agent containers will have kubelet logging enabled.
 
-```yaml
-apiVersion: datadoghq.com/v2alpha1
-kind: DatadogAgent
-metadata:
-  name: datadog
-  namespace: datadog
-spec:
-  overrides:
-    clusterAgent:
-      env:
-        - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
-          value: "true"
-```
+  ```yaml
+  apiVersion: datadoghq.com/v2alpha1
+  kind: DatadogAgent
+  metadata:
+    name: datadog
+    namespace: datadog
+  spec:
+    overrides:
+      clusterAgent:
+        env:
+          - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
+            value: "true"
+  ```
 
-Enable sidecar Agent logging by setting the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`.
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Enable Logging - Helm" xxx -->
 
-```yaml
-clusterAgent:
-  env:
-    - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
-      value: true
-```
+  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true` so newly injected Agent containers will have kubelet logging enabled.
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-spec:
-  #(...)
-  template:
+  ```yaml
+  clusterAgent:
+    env:
+      - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
+        value: true
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Enable Logging - Manual" xxx -->
+
+  To enable Agent logging manually, you must:
+  1. Attach an [emptyDir][29] volume to your pod and mount it inside the Agent container. This prevents duplicate logs should the Agent container restart.
+  2. Set `DD_LOGS_ENABLED` to `"true"` - this instructs the Agent to collect logs.
+  3. Set `DD_LOGS_CONFIG_RUN_PATH` to the emptyDir mount path.
+  4. Set `DD_LOGS_CONFIG_K8S_CONTAINER_USE_KUBELET_API` to `"true"` - this instructs the Agent on which logging method to use. 
+
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  spec:
     #(...)
-    spec:
-      # Empty dir to keep track of logging timestamps in case of agent restart
-      volumes:
-        - name: agent-option
-          emptyDir: {}
-      containers:
-        #(...)
-        # Running the Agent as a side-car
-        - name: datadog-agent
-          image: gcr.io/datadoghq/agent:7
-          # Mount the empty dir to the Agent
-          volumeMounts:
-            - name: agent-option
-              mountPath: /opt/datadog-agent/run
-              readOnly: false
-          env:
-            #(...)
-            - name: DD_LOGS_ENABLED
-              value: "true"
-            - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_KUBELET_API
-              value: "true"
-            - name: DD_LOGS_CONFIG_RUN_PATH
-              value: "/opt/datadog-agent/run"
-            resources:
-              requests:
-                memory: "256Mi"
-                cpu: "200m"
-              limits:
-                memory: "256Mi"
-                cpu: "200m"
-```
+    template:
+      #(...)
+      spec:
+        # Empty dir to keep track of logging timestamps in case of agent restart
+        volumes:
+          - name: agent-option
+            emptyDir: {}
+        containers:
+          #(...)
+          # Running the Agent as a side-car
+          - name: datadog-agent
+            image: gcr.io/datadoghq/agent:7
+            # Mount the empty dir to the Agent
+            volumeMounts:
+              - name: agent-option
+                mountPath: /opt/datadog-agent/run
+                readOnly: false
+            env:
+              #(...)
+              - name: DD_LOGS_ENABLED
+                value: "true"
+              - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_KUBELET_API
+                value: "true"
+              - name: DD_LOGS_CONFIG_RUN_PATH
+                value: "/opt/datadog-agent/run"
+              resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "200m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "200m"
+  ```
 
-2. Configure logging
+  <!-- xxz tab xxx -->
+  <!-- xxz tabs xxx -->
 
-You can configure the injected Agents to automatically log all containers by enabling `CONTAINER_COLLECT_ALL`. Alternatively, logging can be configured via the Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
+2. You can configure the injected Agents to automatically collect logs for all containers by enabling `CONTAINER_COLLECT_ALL`. Alternatively, logs can be filtered via the standard Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
 
+  <!-- xxx tabs xxx -->
+  <!-- xxx tab "Configure Logging - Datdog Operator" xxx -->
 
-```yaml
-#(...)
-spec:
+  ```yaml
   #(...)
-  features:
+  spec:
+    #(...)
+    features:
+      admissionController:
+        agentSidecarInjection:
+          #(...)
+          profiles:
+            - env:
+              # Collect all container logs
+              - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+                value: "true"
+  ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Configure Logging - Helm" xxx -->
+
+  ```yaml
+  clusterAgent:
     admissionController:
       agentSidecarInjection:
-        #(...)
+        # (...)
         profiles:
           - env:
             # Collect all container logs
             - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
               value: "true"
-```
+  ```
 
+  <!-- xxz tab xxx -->
+  <!-- xxx tab "Configure Logging - Manual" xxx -->
 
-```yaml
-clusterAgent:
-  admissionController:
-    agentSidecarInjection:
-      # (...)
-      profiles:
-        - env:
-          # Collect all container logs
-          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-            value: "true"
-```
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: "<APPLICATION_NAME>"
-  namespace: default
-spec:
-  #(...)
-  template:
-   #(...)
+  ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: "<APPLICATION_NAME>"
+      namespace: default
     spec:
       #(...)
-      containers:
-        # Running the Agent as a side-car
-        - name: datadog-agent
-          image: gcr.io/datadoghq/agent:7
-          env:
-            # Collect all container logs
-            - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-              value: "true"
+      template:
+      #(...)
+        spec:
           #(...)
-```
+          containers:
+            # Running the Agent as a side-car
+            - name: datadog-agent
+              image: gcr.io/datadoghq/agent:7
+              env:
+                # Collect all container logs
+                - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+                  value: "true"
+              #(...)
+    ```
+
+  <!-- xxz tab xxx -->
+  <!-- xxz tabs xxx -->
 
 ### Collecting logs from EKS on Fargate with Fluent Bit
 
@@ -1234,3 +1258,4 @@ Additional helpful documentation, links, and articles:
 [26]: https://kubernetes.io/docs/concepts/configuration/secret/
 [27]: https://helm.sh/docs/intro/install/
 [28]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
+[29]: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
