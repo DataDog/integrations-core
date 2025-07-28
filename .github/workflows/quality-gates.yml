@@ -53,7 +53,7 @@ jobs:
 
       - name: Debug
         run: |
-          echo "Starting download-artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "steps.find_run.outputs.run_id_base: ${{ steps.find_run.outputs.run_id_base }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Download artifact from merge-base run
         run: gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
@@ -77,10 +77,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug
-        run: |
-          echo "Downloaded current sizes artifact" >> $GITHUB_STEP_SUMMARY
-          ls -la ${{ inputs.platform }}_curr_compressed_status.json >> $GITHUB_STEP_SUMMARY
 
       - name: Rename current sizes artifact
         run: |
