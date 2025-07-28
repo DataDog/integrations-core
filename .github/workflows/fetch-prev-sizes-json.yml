@@ -80,44 +80,48 @@ jobs:
 
   measure-disk-usage:
     needs: download-artifacts
-    runs-on: ubuntu-22.04
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     env:
       PYTHON_VERSION: "3.12"
-    steps:
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    - name: Install ddev
-      run: |
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+    uses: DataDog/integrations-core/.github/workflows/measure-disk-usage.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+      run-id: ${{ github.run_id }}
+      resolved-deps: false
 
-    - name: Configure ddev
-      run: |
-        ddev config set repos.core .
-        ddev config set repo core
+    #   - name: Set up Python ${{ env.PYTHON_VERSION }}
+    #   uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+    #   with:
+    #     python-version: ${{ env.PYTHON_VERSION }}
+    # - name: Install ddev
+    #   run: |
+    #     pip install -e ./datadog_checks_dev[cli]
+    #     pip install -e ./ddev
 
-    - name: Measure disk usage
-      run: |
-        ddev size status --platform ${{ matrix.platform }} --dependency-sizes ${{ matrix.platform }}.json --format json
-        ddev size status --platform ${{ matrix.platform }} --compressed --dependency-sizes ${{ matrix.platform }}.json --format json
+    # - name: Configure ddev
+    #   run: |
+    #     ddev config set repos.core .
+    #     ddev config set repo core
+
+    # - name: Measure disk usage
+    #   run: |
+    #     ddev size status --platform ${{ matrix.platform }} --dependency-sizes ${{ matrix.platform }}.json --format json
+    #     ddev size status --platform ${{ matrix.platform }} --compressed --dependency-sizes ${{ matrix.platform }}.json --format json
     
-    - name: Upload JSON uncompressed sizes artifact
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: ${{ matrix.platform }}_uncompressed_status.json
-        path: ${{ matrix.platform }}_uncompressed_status.json
-        if-no-files-found: error
-    - name: Upload JSON compressed sizes artifact
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: ${{ matrix.platform }}_compressed_status.json
-        path: ${{ matrix.platform }}_compressed_status.json
-        if-no-files-found: error
+    # - name: Upload JSON uncompressed sizes artifact
+    #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+    #   with:
+    #     name: ${{ matrix.platform }}_uncompressed_status.json
+    #     path: ${{ matrix.platform }}_uncompressed_status.json
+    #     if-no-files-found: error
+    # - name: Upload JSON compressed sizes artifact
+    #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+    #   with:
+    #     name: ${{ matrix.platform }}_compressed_status.json
+    #     path: ${{ matrix.platform }}_compressed_status.json
+    #     if-no-files-found: error
 
   calculate-diffs:
     needs: measure-disk-usage

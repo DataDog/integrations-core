@@ -9,6 +9,9 @@ on:
       run-id:
         required: true
         type: string
+      resolved-deps:
+        required: true
+        type: boolean
 env:
   PYTHON_VERSION: "3.12"
 
@@ -33,8 +36,21 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
-    - name: Download dependency sizes artifact
+    - name: Download dependency sizes artifact - resolved-deps
+      if: ${{ inputs.resolved-deps }}
       run: gh run download ${{ inputs.run-id }} --name target-${{ inputs.platform }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Rename sizes.json to platform.json
+      if: ${{ inputs.resolved-deps }}
+      run: |
+        cp "${{ inputs.platform }}/py3/sizes.json" "${{ inputs.platform }}.json"
+      shell: bash
+
+    - name: Download dependency sizes artifact - no resolved-deps
+      if: ${{ !inputs.resolved-deps }}
+      run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}.json
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -42,13 +58,9 @@ jobs:
       run: |
         echo "run-id inputs: ${{ inputs.run-id }}" >> $GITHUB_STEP_SUMMARY
         echo "run-id github: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
-        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format json
-        ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes ${{ inputs.platform }}/py3/sizes.json --format json
-    
-    - name: Rename sizes.json to platform.json
-      run: |
-        cp "${{ inputs.platform }}/py3/sizes.json" "${{ inputs.platform }}.json"
-      shell: bash
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}.json --format json
+        ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes ${{ inputs.platform }}.json --format json
+  
 
     - name: Upload platform.json artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
