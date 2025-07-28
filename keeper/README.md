@@ -2,7 +2,7 @@
 
 [Keeper][1] is a zero-knowledge password management solution that helps organizations securely store, share, and manage credentials across users, devices, and applications.
 
-Integrate Keeper with Datadog to gain insights into reporting event logs using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate Keeper with Datadog to gain insights into reporting event logs using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
@@ -18,7 +18,7 @@ Integrate Keeper with Datadog to gain insights into reporting event logs using p
 2. Go to **Reporting & Alerts** from the navigation panel on the left side.
 3. Select **External Logging** from tabs on top.
 4. Under **Datadog**, click **Setup**.
-5. On the pop-up form, configure fields as follows:
+5. On the pop-up form, configure the fields as follows:
       1. Enter your [Datadog site][4] under **URL** (e.g., `datadoghq.com`).
       2. Enter your [Datadog API key][5] under **API Key**.
       3. You can test the connection by clicking **Test Connection**.
