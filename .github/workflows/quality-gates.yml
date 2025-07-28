@@ -84,7 +84,7 @@ jobs:
           
       - name: Calculate diffs
         run: |
-          python -m ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes ${{ inputs.platform }}_prev_compressed_status.json --curr-sizes ${{ inputs.platform }}_curr_compressed_status.json > $GITHUB_STEP_SUMMARY
+          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes ${{ inputs.platform }}_prev_compressed_status.json --curr-sizes ${{ inputs.platform }}_curr_compressed_status.json > $GITHUB_STEP_SUMMARY
         
       
 
