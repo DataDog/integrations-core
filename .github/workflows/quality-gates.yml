@@ -55,6 +55,9 @@ jobs:
     needs: get-merge-base
     runs-on: ubuntu-22.04
     steps:
+      - name: Debug
+        run: |
+          echo "Starting download-artifacts" >> $GITHUB_STEP_SUMMARY
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
