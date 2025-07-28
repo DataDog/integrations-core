@@ -559,7 +559,9 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "dbm": instance.get(
             'dbm', instance.get('deep_database_monitoring', instance_dbm())
         ),  # Deprecated, use `dbm` instead
-        "custom_metrics": map_custom_metrics(instance.get('custom_metrics', [])), # Deprecated, use `custom_queries` instead
+        "custom_metrics": map_custom_metrics(
+            instance.get('custom_metrics', [])
+        ),  # Deprecated, use `custom_queries` instead
         "custom_queries": instance.get('custom_queries', []),
         "use_global_custom_queries": instance.get("use_global_custom_queries", instance_use_global_custom_queries()),
         "only_custom_queries": instance.get('only_custom_queries', instance_only_custom_queries()),
@@ -692,13 +694,19 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         },
         "azure": {
             **{
-                "client_id": "",
-                "identity_scope": "",
-                "enabled": False,
+                "deployment_type": "",
+                "fully_qualified_domain_name": "",
+                "managed_authentication": {
+                    **{
+                        "enabled": False,
+                        "client_id": "",
+                        "identity_scope": "",
+                    },
+                    # Handle legacy managed_authentication
+                    **instance.get('managed_authentication', {}),
+                },
             },
-            **(
-                instance.get('azure', instance.get('managed_authentication', {}))
-            ),  # managed_authentication is deprecated
+            **(instance.get('azure', {})),
         },
         # Obfuscation and query logging
         "obfuscator_options": {
@@ -746,6 +754,29 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         # If there are errors in the tags, we add them to the validation result
         # but we don't raise an exception here, as we want to validate the rest of the configuration
         validation_result.add_error(error)
+
+    # AWS backfill and validation
+    if (
+        not instance.get("aws", {}).get("managed_authentication", None)
+        and args['aws']['region']
+        and not args['aws']['password']
+    ):
+        # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
+        args['aws']['managed_authentication']['enabled'] = True
+
+    if args['aws']['managed_authentication']['enabled'] and not args['aws']['region']:
+        validation_result.add_error('AWS region must be set when using AWS managed authentication')
+
+    # Azure backfill and validation
+    if (
+        not instance.get("azure", {}).get("managed_authentication", None)
+        and args['azure']['managed_authentication']['client_id']
+    ):
+        # if managed_authentication is not set, we assume it is enabled if client_id is set
+        args['azure']['managed_authentication']['enabled'] = True
+
+    if args['azure']['managed_authentication']['enabled'] and not args['azure']['managed_authentication']['client_id']:
+        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
 
     # Validate that the keys of args match the fields of InstanceConfig
     instance_config_fields = set(InstanceConfig.__annotations__.keys())
@@ -820,7 +851,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
 
     validation_result.add_feature(FeatureKey.QUERY_SAMPLES, config.query_samples.enabled and config.dbm)
     if config.query_samples.enabled and not config.dbm:
-        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')        
+        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
 
     validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
     if config.query_metrics.enabled and not config.dbm:
@@ -833,7 +864,6 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
     if config.collect_schemas.enabled and not config.dbm:
         validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
-
 
     return config, validation_result
 
@@ -900,9 +930,7 @@ def map_custom_metrics(custom_metrics):
                 cap_mtype = mtype.upper()
                 if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                     raise ConfigurationError(
-                        'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(
-                            cap_mtype
-                        )
+                        'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
                     )
 
                 m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)

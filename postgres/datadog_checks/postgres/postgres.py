@@ -22,6 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
+from datadog_checks.postgres.config_models import InstanceConfig
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
@@ -37,7 +38,6 @@ from datadog_checks.postgres.relationsmanager import (
 )
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
-from datadog_checks.postgres.config_models import InstanceConfig
 
 from .__about__ import __version__
 from .config import build_config
@@ -128,11 +128,6 @@ class PostgreSql(AgentCheck):
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self.cloud_metadata = {
-            "aws": self._config.aws,
-            "gcp": self._config.gcp,
-            "azure": self._config.azure,
-        }
         self.tags = self._config.tags
         self.add_core_tags()
 
@@ -212,31 +207,29 @@ class PostgreSql(AgentCheck):
         self.tags.append("database_instance:{}".format(self.database_identifier))
 
     def set_resource_tags(self):
-        if self.cloud_metadata.get("gcp") is not None:
+        if self._config.gcp.project_id and self._config.gcp.instance_id:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
+                    self._config.gcp.project_id, self._config.gcp.instance_id
                 )
             )
-        if self.cloud_metadata.get("aws") is not None and 'instance_endpoint' in self.cloud_metadata.get("aws"):
+        if self._config.aws.instance_endpoint:
             self.tags.append(
                 "dd.internal.resource:aws_rds_instance:{}".format(
-                    self.cloud_metadata.get("aws")["instance_endpoint"],
+                    self._config.aws.instance_endpoint,
                 )
             )
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
-            self.cloud_metadata["aws"] = self.cloud_metadata.get("aws", {})
-            self.cloud_metadata["aws"]["instance_endpoint"] = self.resolved_hostname
-        if self.cloud_metadata.get("azure") is not None:
-            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+        if self._config.azure.deployment_type and self._config.azure.fully_qualified_domain_name:
+            deployment_type = self._config.azure.deployment_type
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
                 self.tags.append(
-                    "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
+                    "dd.internal.resource:{}:{}".format(resource_type, self._config.azure.fully_qualified_domain_name)
                 )
         # finally, tag the `database_instance` resource for this instance
         # metrics intake will use this tag to add all the tags for the instance
@@ -894,25 +887,18 @@ class PostgreSql(AgentCheck):
             conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=CommenterCursor)
         else:
             password = self._config.password
-            if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
-                # if we are running on AWS, check if IAM auth is enabled
-                aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
-                if aws_managed_authentication['enabled']:
-                    # if IAM auth is enabled, region must be set. Validation is done in the config
-                    region = self.cloud_metadata['aws']['region']
-                    password = aws.generate_rds_iam_token(
-                        host=self._config.host,
-                        username=self._config.user,
-                        port=self._config.port,
-                        region=region,
-                        role_arn=aws_managed_authentication.get('role_arn'),
-                    )
-            elif 'azure' in self.cloud_metadata:
-                azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
-                if azure_managed_authentication['enabled']:
-                    client_id = azure_managed_authentication['client_id']
-                    identity_scope = azure_managed_authentication.get('identity_scope', None)
-                    password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
+            if self._config.aws.managed_authentication.enabled:
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.user,
+                    port=self._config.port,
+                    region=self._config.aws.region,
+                    role_arn=self._config.aws.managed_authentication.role_arn,
+                )
+            elif self._config.azure.managed_authentication.enabled:
+                client_id = self._config.azure.managed_authentication.client_id
+                identity_scope = self._config.azure.managed_authentication.identity_scope
+                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
 
             self.log.debug(
                 "Try to connect to %s with %s",
@@ -1032,7 +1018,11 @@ class PostgreSql(AgentCheck):
                 'integration_version': __version__,
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
-                "cloud_metadata": self.cloud_metadata,
+                "cloud_metadata": {
+                    "aws": self._config.aws,
+                    "azure": self._config.azure,
+                    "gcp": self._config.gcp,
+                },
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.host,
