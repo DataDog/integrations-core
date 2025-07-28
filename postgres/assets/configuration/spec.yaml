@@ -16,13 +16,13 @@ files:
   - template: instances
     options:
     - name: host
-      required: true
       description: |
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
         e.g. `/var/run/postgresql/.s.PGSQL.5432`.
       value:
         example: "localhost"
         type: string
+        default: ""
     - name: port
       description: The port to use when connecting to PostgreSQL.
       value:
@@ -30,10 +30,10 @@ files:
         example: 5432
     - name: username
       description: The Datadog username created to connect to PostgreSQL.
-      required: true
       value:
         type: string
         example: datadog
+        default: ""
     - name: password
       description: The password associated with the Datadog user.
       value:

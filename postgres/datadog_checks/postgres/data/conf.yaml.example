@@ -31,21 +31,22 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional - default: localhost
     ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
     ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
     #
-  - host: localhost
+    # host: localhost
 
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
     # port: 5432
 
-    ## @param username - string - required
+    ## @param username - string - optional - default: datadog
     ## The Datadog username created to connect to PostgreSQL.
     #
-    username: datadog
+    # username: datadog
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.

@@ -555,7 +555,6 @@ def dbm_instance(pg_instance):
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': CLOSE_TO_ZERO_INTERVAL}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -568,7 +567,6 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -1164,7 +1162,6 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1292,7 +1289,6 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     dbm_instance['dbstrict'] = True
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     dbm_instance['collect_raw_query_statement'] = {'enabled': True}
     check = integration_check(dbm_instance)
     check._connect()
@@ -1788,7 +1784,6 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 

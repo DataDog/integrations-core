@@ -51,6 +51,11 @@ from datadog_checks.postgres.config_models.defaults import (
     instance_use_global_custom_queries,
     shared_propagate_agent_tags,
 )
+from datadog_checks.postgres.metadata import (
+    DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
+    DEFAULT_SETTINGS_COLLECTION_INTERVAL,
+    DEFAULT_SETTINGS_IGNORED_PATTERNS,
+)
 from datadog_checks.postgres.statement_samples import (
     DEFAULT_ACTIVITY_COLLECTION_INTERVAL as DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL,
 )
@@ -78,256 +83,6 @@ class PostgresConfig(InstanceConfig):
     def __init__(self, check: PostgreSql, init_config: dict):
         self._check = check
         self._init_config = init_config
-
-    def initialize(self, instance):
-        # type: (dict) -> ValidationResult
-        """
-        Initialize the Postgres configuration.
-        :param instance: dict
-            The instance configuration for the Postgres check.
-        :param init_config: dict
-            The init_config for the Postgres check.
-        :return: ConfigResult
-            The result of the configuration initialization.
-        """
-        validation_result = ValidationResult()
-
-        self.exclude_hostname = instance.get("exclude_hostname", instance_exclude_hostname())
-        self.database_identifier = instance.get('database_identifier', {})
-        self.reported_hostname = instance.get('reported_hostname', '')
-
-        # Connection parameters
-        self.host = instance.get('host', '')
-        if not self.host:
-            validation_result.add_error('Specify a Postgres host to connect to.')
-        self.port = instance.get('port', instance_port())
-        if self.port != '':
-            self.port = int(self.port)
-        self.user = instance.get('username', '')
-        if not self.user:
-            validation_result.add_error('Please specify a user to connect to Postgres.')
-        self.password = instance.get('password', '')
-
-        # Database discovery
-        self.dbname = instance.get('dbname', 'postgres')
-        self.dbstrict = is_affirmative(instance.get('dbstrict', instance_dbstrict()))
-        self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
-        if self.discovery_config['enabled'] and self.dbname != 'postgres':
-            validation_result.add_error(
-                "'dbname' parameter should not be set when `database_autodiscovery` is enabled."
-                "To monitor more databases, add them to the `database_autodiscovery` includelist."
-            )
-        self.ignore_databases = instance.get('ignore_databases', instance_ignore_databases())
-        self.collect_default_database = is_affirmative(instance.get('collect_default_database', True))
-        if instance.get('collect_default_database') and 'postgres' in instance.get('ignore_databases', []):
-            # Our default settings conflict, so we only warn the user if they've explicitly set these values to conflict
-            validation_result.add_warning(
-                'The `postgres` database cannot be ignored when `collect_default_database` is enabled.'
-            )
-        if not self.collect_default_database:
-            self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
-        self.ignore_schemas_owned_by = instance.get('ignore_schemas_owned_by', instance_ignore_schemas_owned_by())
-
-        # Connection details
-        self.query_timeout = int(instance.get('query_timeout', 5000))
-        self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
-        self.max_connections = instance.get('max_connections', 30)
-
-        # SSL configuration
-        ssl = instance.get('ssl', "allow")
-        if ssl in SSL_MODES:
-            self.ssl_mode = ssl
-        else:
-            warning = f"Invalid ssl option '{ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'."
-            self._check.warning(warning)
-            validation_result.add_warning(warning)
-            self.ssl_mode = "allow"
-        self.ssl_cert = instance.get('ssl_cert', None)
-        self.ssl_root_cert = instance.get('ssl_root_cert', None)
-        self.ssl_key = instance.get('ssl_key', None)
-        self.ssl_password = instance.get('ssl_password', None)
-
-        # Tags and metadata
-        self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
-        self.application_name = instance.get('application_name', 'datadog-agent')
-        if not self.application_name.isascii():
-            validation_result.add_error(f"Application name can include only ASCII characters: {self.application_name}")
-        self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
-
-        # Relation metrics
-        self.min_collection_interval = instance.get('min_collection_interval', instance_min_collection_interval())
-        self.relations = instance.get('relations', instance_relations())
-        self.table_count_limit = instance.get('table_count_limit', instance_table_count_limit())
-        self.collect_buffercache_metrics = is_affirmative(
-            instance.get('collect_buffercache_metrics', instance_collect_buffercache_metrics())
-        )
-        self.collect_function_metrics = is_affirmative(
-            instance.get('collect_function_metrics', instance_collect_function_metrics())
-        )
-        # Default value for `count_metrics` is True for backward compatibility
-        self.collect_count_metrics = is_affirmative(
-            instance.get('collect_count_metrics', instance_collect_count_metrics())
-        )
-        self.collect_activity_metrics = is_affirmative(
-            instance.get('collect_activity_metrics', instance_collect_activity_metrics())
-        )
-        self.collect_checksum_metrics = is_affirmative(
-            instance.get('collect_checksum_metrics', instance_collect_checksum_metrics())
-        )
-        self.activity_metrics_excluded_aggregations = instance.get(
-            'activity_metrics_excluded_aggregations', instance_activity_metrics_excluded_aggregations()
-        )
-        self.collect_database_size_metrics = is_affirmative(
-            instance.get('collect_database_size_metrics', instance_collect_database_size_metrics())
-        )
-        self.collect_wal_metrics = self._should_collect_wal_metrics(
-            instance.get('collect_wal_metrics', instance_collect_wal_metrics())
-        )
-        self.data_directory = instance.get('data_directory', instance_data_directory())
-        if self.collect_wal_metrics and not self.data_directory:
-            validation_result.add_error(
-                'The `data_directory` parameter must be set when `collect_wal_metrics` is enabled.'
-            )
-        self.collect_bloat_metrics = is_affirmative(
-            instance.get('collect_bloat_metrics', instance_collect_bloat_metrics())
-        )
-        self.max_relations = int(instance.get('max_relations', instance_max_relations()))
-        if self.relations and not (self.dbname or self.discovery_config['enabled']):
-            validation_result.add_error(
-                '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
-            )
-        validation_result.add_feature(
-            FeatureKey.RELATION_METRICS,
-            bool(self.relations),
-            "Relation metrics requires a value for `relations` in the configuration." if not self.relations else None,
-        )
-
-        self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
-        if instance.get('custom_metrics', []):
-            validation_result.add_warning('The `custom_metrics` option is deprecated. Use `custom_queries` instead.')
-
-        # database monitoring adds additional telemetry for query metrics & samples
-        self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
-        if instance.get('deep_database_monitoring'):
-            validation_result.add_warning('The `deep_database_monitoring` option is deprecated. Use `dbm` instead.')
-
-        # Statement samples and explain plans
-        self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
-        self.full_statement_text_samples_per_hour_per_query = instance.get(
-            'full_statement_text_samples_per_hour_per_query', 1
-        )
-        # Support a custom view when datadog user has insufficient privilege to see queries
-        self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
-        self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
-        self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
-        if instance.get('statement_samples'):
-            validation_result.add_warning('The `statement_samples` option is deprecated. Use `query_samples` instead.')
-        validation_result.add_feature(FeatureKey.QUERY_SAMPLES, self.statement_samples_config.get('enabled', False))
-        if self.statement_samples_config.get('enabled', False) and not self.dbm_enabled:
-            validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
-        self.settings_metadata_config = instance.get('collect_settings', {}) or {}
-        validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, self.settings_metadata_config.get('enabled', False))
-        if self.settings_metadata_config.get('enabled', False) and not self.dbm_enabled:
-            validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
-        self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
-        validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, self.schemas_metadata_config.get('enabled', False))
-        if self.schemas_metadata_config.get('enabled', False) and not self.dbm_enabled:
-            validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
-        self.statement_activity_config = instance.get('query_activity', {"enabled": True}) or {}
-        validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, self.statement_activity_config.get('enabled', False))
-        if self.statement_activity_config.get('enabled', False) and not self.dbm_enabled:
-            validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
-        self.statement_metrics_config = instance.get('query_metrics', {"enabled": True}) or {}
-        validation_result.add_feature(FeatureKey.QUERY_METRICS, self.statement_metrics_config.get('enabled', False))
-        if self.statement_metrics_config.get('enabled', False) and not self.dbm_enabled:
-            validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
-        self.query_encodings = instance.get('query_encodings')
-        self.managed_identity = instance.get('managed_identity', {})
-        self.cloud_metadata = {}
-        aws = instance.get('aws', {})
-        gcp = instance.get('gcp', {})
-        azure = instance.get('azure', {})
-        # Remap fully_qualified_domain_name to name
-        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
-        if aws:
-            try:
-                aws['managed_authentication'] = self._aws_managed_authentication(aws, self.password)
-            except ConfigurationError as e:
-                validation_result.add_error(e)
-            self.cloud_metadata.update({'aws': aws})
-        if gcp:
-            self.cloud_metadata.update({'gcp': gcp})
-        if azure:
-            try:
-                azure['managed_authentication'] = self._azure_managed_authentication(azure, self.managed_identity)
-            except ConfigurationError as e:
-                validation_result.add_error(e)
-            self.cloud_metadata.update({'azure': azure})
-        obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
-        self.obfuscator_options = {
-            # Valid values for this can be found at
-            # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
-            'dbms': 'postgresql',
-            'replace_digits': is_affirmative(
-                obfuscator_options_config.get(
-                    'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
-                )
-            ),
-            'dollar_quoted_func': is_affirmative(obfuscator_options_config.get('keep_dollar_quoted_func', True)),
-            'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', True)),
-            'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
-            'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
-            'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
-            'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
-            # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
-            # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
-            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', 'obfuscate_and_normalize'),
-            'remove_space_between_parentheses': is_affirmative(
-                obfuscator_options_config.get('remove_space_between_parentheses', False)
-            ),
-            'keep_null': is_affirmative(obfuscator_options_config.get('keep_null', False)),
-            'keep_boolean': is_affirmative(obfuscator_options_config.get('keep_boolean', False)),
-            'keep_positional_parameter': is_affirmative(
-                obfuscator_options_config.get('keep_positional_parameter', False)
-            ),
-            'keep_trailing_semicolon': is_affirmative(obfuscator_options_config.get('keep_trailing_semicolon', False)),
-            'keep_identifier_quotation': is_affirmative(
-                obfuscator_options_config.get('keep_identifier_quotation', False)
-            ),
-            'keep_json_path': is_affirmative(obfuscator_options_config.get('keep_json_path', False)),
-        }
-        collect_raw_query_statement_config: dict = instance.get('collect_raw_query_statement', {}) or {}
-        self.collect_raw_query_statement = {
-            "enabled": is_affirmative(collect_raw_query_statement_config.get('enabled', False)),
-            "cache_max_size": int(collect_raw_query_statement_config.get('cache_max_size', 10000)),
-            "samples_per_hour_per_query": int(collect_raw_query_statement_config.get('samples_per_hour_per_query', 1)),
-        }
-        self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
-        self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
-        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
-        self.incremental_query_metrics = is_affirmative(
-            self.statement_metrics_config.get('incremental_query_metrics', False)
-        )
-        self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
-        self.service = instance.get('service') or self._init_config.get('service') or ''
-
-        try:
-            self.tags = self._build_tags(
-                custom_tags=instance.get('tags', []),
-                propagate_agent_tags=self._should_propagate_agent_tags(instance, self._init_config),
-                additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
-            )
-        except ConfigurationError as e:
-            validation_result.add_error(e)
-
-        # Add warnings for common extraneous values
-        if instance.get('empty_default_hostname'):
-            validation_result.add_warning(
-                'The `empty_default_hostname` option has no effect in the Postgres check.'
-                'Use the `exclude_hostname` option instead.'
-            )
-
-        return validation_result
 
     def _build_tags(self, custom_tags, propagate_agent_tags, additional_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -661,8 +416,8 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "collect_settings": {
             **{
                 "enabled": False,
-                "collection_interval": 600,
-                "ignored_settings_patterns": ["plpgsql%"],
+                "collection_interval": DEFAULT_SETTINGS_COLLECTION_INTERVAL,
+                "ignored_settings_patterns": DEFAULT_SETTINGS_IGNORED_PATTERNS,
             },
             **(instance.get('collect_settings') or {}),
         },
@@ -671,7 +426,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
                 "enabled": False,
                 "max_tables": 300,
                 "max_columns": 50,
-                "collection_interval": 600,
+                "collection_interval": DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
                 "include_databases": [],
                 "exclude_databases": [],
                 "include_schemas": [],
@@ -848,6 +603,13 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         )
 
     config = InstanceConfig(**args)
+
+    # Validate required fields
+    if not config.host:
+        validation_result.add_error("Please specify a valid host to connect to using the `host` parameter.")
+
+    if not config.username:
+        validation_result.add_error("Please specify a user to connect to the database using the `username` parameter.")
 
     # Validate config after defaults have been applied
     if not config.application_name.isascii():

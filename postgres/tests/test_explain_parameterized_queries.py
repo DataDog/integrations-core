@@ -27,7 +27,6 @@ def dbm_instance(pg_instance):
     }
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 

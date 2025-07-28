@@ -34,6 +34,7 @@ INSTANCE = {
     'username': USER,
     'password': PASSWORD,
     'dbname': DB_NAME,
+    'dbm': True,
     'tags': ['foo:bar'],
     'disable_generic_tags': True,
 }
@@ -130,5 +131,4 @@ def metrics_cache_replica(pg_replica_instance):
 def e2e_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['dbm'] = True
-    instance['collect_resources'] = {'collection_interval': 0.1}
     return instance

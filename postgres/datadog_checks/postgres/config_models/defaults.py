@@ -88,6 +88,10 @@ def instance_exclude_hostname():
     return False
 
 
+def instance_host():
+    return ''
+
+
 def instance_idle_connection_timeout():
     return 60000
 
@@ -178,3 +182,7 @@ def instance_tag_replication_role():
 
 def instance_use_global_custom_queries():
     return 'true'
+
+
+def instance_username():
+    return ''
