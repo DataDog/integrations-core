@@ -61,7 +61,7 @@ SELECT mode,
 }
 
 
-# This is similaar to pg_stat_user_indexes view
+# This is similar to pg_stat_user_indexes view
 IDX_METRICS = {
     'name': 'pg_index',
     'query': """
@@ -74,6 +74,8 @@ SELECT
   idx_scan,
   idx_tup_read,
   idx_tup_fetch,
+  idx_blks_read,
+  idx_blks_hit,
   index_size
 FROM (SELECT
       N.nspname AS schemaname,
@@ -83,6 +85,8 @@ FROM (SELECT
       pg_stat_get_numscans(I.oid) AS idx_scan,
       pg_stat_get_tuples_returned(I.oid) AS idx_tup_read,
       pg_stat_get_tuples_fetched(I.oid) AS idx_tup_fetch,
+      pg_stat_get_blocks_fetched(I.oid) - pg_stat_get_blocks_hit(I.oid) AS idx_blks_read,
+      pg_stat_get_blocks_hit(I.oid) AS idx_blks_hit,
       pg_relation_size(indexrelid) as index_size
     FROM pg_class C JOIN
       pg_index X ON C.oid = X.indrelid JOIN
@@ -101,6 +105,8 @@ FROM (SELECT
         {'name': 'index_scans', 'type': 'rate'},
         {'name': 'index_rows_read', 'type': 'rate'},
         {'name': 'index_rows_fetched', 'type': 'rate'},
+        {'name': 'index.index_blocks_read', 'type': 'rate'},
+        {'name': 'index.index_blocks_hit', 'type': 'rate'},
         {'name': 'individual_index_size', 'type': 'gauge'},
     ],
 }
