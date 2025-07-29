@@ -8,7 +8,7 @@
 		"name": "Memory Usage High on Proxmox Node {{host.name}} ",
 		"type": "query alert",
 		"query": "avg(last_5m):avg:proxmox.mem.used{proxmox_type:node} by {host} / avg:proxmox.mem.total{proxmox_type:node} by {host} * 100 > 90",
-		"message": "{{#is_alert}}Node {{host.name}} is reporting high memory usage (at or above 90%).{{/is_alert}}{{#is_warning}}VM {{host.name}} is reporting higher memory usage (at or above 80%).{{/is_warning}}{{#is_recovery}}Memory usage for Node {{host.name}} is back to normal.{{/is_recovery}}",
+		"message": "{{#is_alert}}Node {{host.name}} is reporting high memory usage (at or above 90%).{{/is_alert}}{{#is_warning}}Node {{host.name}} is reporting higher memory usage (at or above 80%).{{/is_warning}}{{#is_recovery}}Memory usage for Node {{host.name}} is back to normal.{{/is_recovery}}",
 		"tags": [],
 		"options": {
 			"thresholds": {
