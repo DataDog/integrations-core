@@ -62,7 +62,6 @@ class Etcd(OpenMetricsBaseCheck):
     }
 
     def __init__(self, name, init_config, instances):
-
         self.HTTP_CONFIG_REMAPPER = {
             'ssl_cert': {'name': 'tls_cert'},
             'ssl_private_key': {'name': 'tls_private_key'},

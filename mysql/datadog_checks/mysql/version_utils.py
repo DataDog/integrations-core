@@ -16,6 +16,9 @@ def get_version(db):
         cursor.execute('SELECT VERSION()')
         result = cursor.fetchone()
 
+        cursor.execute('SELECT @@version_comment')
+        version_comment = cursor.fetchone()
+
         # Version might include a build, a flavor, or both
         # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
         # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
@@ -32,6 +35,12 @@ def get_version(db):
                 flavor = "MySQL"
             if data in BUILDS:
                 build = data
+        if (
+            version_comment
+            and len(version_comment) > 0
+            and to_native_string(version_comment[0]).lower().startswith('percona')
+        ):
+            flavor = 'Percona'
         if build == '':
             build = 'unspecified'
 
@@ -42,13 +51,12 @@ class MySQLVersion(namedtuple('MySQLVersion', ['version', 'flavor', 'build'])):
     def version_compatible(self, compat_version):
         # some patch version numbers contain letters (e.g. 5.0.51a)
         # so let's be careful when we compute the version number
-        log = get_check_logger()
         try:
             mysql_version = self.version.split('.')
         except Exception as e:
-            log.warning("Cannot compute mysql version, assuming it's older.: %s", e)
+            log = get_check_logger()
+            log.warning("Cannot compute MySQL version, assuming it's older: %s", e)
             return False
-        log.debug("MySQL version %s", mysql_version)
 
         patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)

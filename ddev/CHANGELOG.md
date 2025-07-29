@@ -2,6 +2,41 @@
 
 <!-- towncrier release notes start -->
 
+## 12.1.0 / 2025-07-15
+
+***Added***:
+
+* Add back F401 rule to the linter ([#20661](https://github.com/DataDog/integrations-core/pull/20661))
+* Update ci validation command to account for the new ddev test skip params ([#20705](https://github.com/DataDog/integrations-core/pull/20705))
+* Add the skip-ddev option to ci validation script ([#20708](https://github.com/DataDog/integrations-core/pull/20708))
+
+***Fixed***:
+
+* Add rule to lint for relative imports from non parent packages ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* [MINPROC-2319] remove the integration exception mapper ([#20697](https://github.com/DataDog/integrations-core/pull/20697))
+
+## 12.0.0 / 2025-07-01
+
+***Changed***:
+
+* Replaced multiple format flags with a single `--format` option in the `ddev size` command. ([#20330](https://github.com/DataDog/integrations-core/pull/20330))
+* Remove Black dependency from the hatch environment collector in favor of Ruff ([#20451](https://github.com/DataDog/integrations-core/pull/20451))
+
+***Added***:
+
+* Update style dependencies. ([#20312](https://github.com/DataDog/integrations-core/pull/20312))
+* - Added `ddev size create-dashboard` to visualize size metrics on the Datadog platform
+  - Added `--to-dd-org` option to `ddev size status` to send metrics to Datadog ([#20330](https://github.com/DataDog/integrations-core/pull/20330))
+* Add nanodollar as valid metric units ([#20341](https://github.com/DataDog/integrations-core/pull/20341))
+* - Adds the required logic to upload historical size metrics to a specified Datadog organization.
+  - Updates the CI pipeline to send metrics to Datadog on pushes to the master branch. Note that the metrics may not be fully accurate yet, as dependency sizes could be outdated since the lockfile updates are handled in a separate PR. ([#20431](https://github.com/DataDog/integrations-core/pull/20431))
+* Add --fmt-unsafe and --lint-unsafe options to ddev test ([#20451](https://github.com/DataDog/integrations-core/pull/20451))
+
+***Fixed***:
+
+* Update ddev metadata validator to only error on required headers ([#20419](https://github.com/DataDog/integrations-core/pull/20419))
+* Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors ([#20435](https://github.com/DataDog/integrations-core/pull/20435))
+
 ## 11.4.0 / 2025-05-27
 
 ***Added***:

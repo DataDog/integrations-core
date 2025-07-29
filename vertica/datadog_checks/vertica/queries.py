@@ -61,9 +61,7 @@ SELECT
       -1
   END
 FROM {schema}.{table}
-""".format(
-            schema=self.catalog_schema, table=name
-        )
+""".format(schema=self.catalog_schema, table=name)
 
         return [
             {
@@ -87,9 +85,7 @@ SELECT
   used / size * 100 as utilized
 FROM {schema}.{table} WHERE audited_data = 'Total'
 ORDER BY audit_start_timestamp DESC LIMIT 1
-""".format(
-            schema=self.catalog_schema, table=name
-        )
+""".format(schema=self.catalog_schema, table=name)
 
         return [
             {
@@ -125,9 +121,7 @@ SELECT
   license_query.node_restriction::INT as allowed_nodes,
   CASE WHEN allowed_nodes IS NULL THEN NULL ELSE allowed_nodes - node_count END
 FROM {schema}.{table} CROSS JOIN license_query
-""".format(
-            schema=self.monitor_schema, table=name, catalog_schema=self.catalog_schema
-        )
+""".format(schema=self.monitor_schema, table=name, catalog_schema=self.catalog_schema)
 
         return [
             {
@@ -208,9 +202,7 @@ SELECT
     ELSE unsafe_projections.count / total_projections.count * 100
   END
 FROM total_projections CROSS JOIN unsegmented_projections CROSS JOIN unsafe_projections
-'''.format(
-            schema=self.catalog_schema, table=name
-        )
+'''.format(schema=self.catalog_schema, table=name)
 
         return [
             {
@@ -359,9 +351,7 @@ SELECT
   total_swap - usable_swap as used_swap,
   CASE WHEN total_swap = 0 THEN 0 ELSE used_swap / total_swap * 100 END as utilized_swap
 FROM {schema}.{table}
-""".format(
-            schema=self.monitor_schema, table=name
-        )
+""".format(schema=self.monitor_schema, table=name)
 
         return [
             {
@@ -400,9 +390,7 @@ FROM {schema}.{table}
       running_query_count,
       executed_query_count
     FROM {schema}.{table}
-    """.format(
-            schema=self.monitor_schema, table=name
-        )
+    """.format(schema=self.monitor_schema, table=name)
 
         return [
             {
@@ -432,9 +420,7 @@ SELECT
   memory_inuse_kb * 1000,
   running_query_count
 FROM {schema}.{table}
-""".format(
-            schema=self.monitor_schema, table=name
-        )
+""".format(schema=self.monitor_schema, table=name)
 
         return [
             {
@@ -471,9 +457,7 @@ SELECT
   CASE WHEN throughput = 0 THEN 0 ELSE 1 / throughput END as throughput_reciprocal,
   latency_reciprocal + throughput_reciprocal
 FROM {schema}.{table}
-""".format(
-            schema=self.monitor_schema, table=name
-        )
+""".format(schema=self.monitor_schema, table=name)
 
         return [
             {
