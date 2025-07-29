@@ -1,0 +1,1 @@
+Cancel inflight queries before closing Postgres connections
