@@ -203,7 +203,7 @@ def test_discover_queues_warns_when_no_queues_found(
 @pytest.mark.parametrize(
     "auto_discover_queues_via_names, expected_method, not_expected_method, expected_queue",
     [
-        (False, "_discover_queues", "_discover_queues", "queue1"),
+        (False, "_discover_queues", "_discover_queues_via_names", "queue1"),
         (True, "_discover_queues_via_names", "_discover_queues", "queue2"),
     ],
     ids=["direct_method", "via_names_method"],
