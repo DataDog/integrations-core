@@ -25,7 +25,7 @@ class BaseCommenterCursor(psycopg.ClientCursor):
         query = add_sql_comment(query, prepand=True, **self.__attributes)
         if ignore_query_metric:
             query = '{} {}'.format('/* DDIGNORE */', query)
-        
+
         if super().connection.closed:
             raise psycopg.OperationalError('Connection is closed')
         return super().execute(query, params, binary=binary, prepare=prepare)
