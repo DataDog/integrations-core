@@ -80,9 +80,9 @@ def display_diffs(diffs, platform, python_version):
         for entry in diffs["added"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size", 0)
+            size = entry.get("Size_Bytes", 0)
             typ = entry.get("Type", "")
-            print(f"  + [{typ}] {name} {version}: + {size}")
+            print(f"  + [{typ}] {name} {version}: + {convert_to_human_readable_size(size)}")
         print()
     else:
         print("Added: None\n")
@@ -93,9 +93,9 @@ def display_diffs(diffs, platform, python_version):
             print(entry)
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size", 0)
+            size = entry.get("Size_Bytes", 0)
             typ = entry.get("Type", "")
-            print(f"  - [{typ}] {name} {version}: - {size}")
+            print(f"  - [{typ}] {name} {version}: - {convert_to_human_readable_size(size)}")
         print()
     else:
         print("Removed: None\n")

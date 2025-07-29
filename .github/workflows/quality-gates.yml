@@ -62,26 +62,16 @@ jobs:
             exit 1
           fi
 
-      - name: Debug
-        run: |
-          echo "steps.find_run.outputs.run_id_base: ${{ steps.find_run.outputs.run_id_base }}" >> $GITHUB_STEP_SUMMARY
-
+  
       - name: Download artifact from merge-base run
         run: gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug
-        run: |
-          echo "Downloaded artifact from merge-base run" >> $GITHUB_STEP_SUMMARY
-
       - name: Rename previous sizes artifact
         run: |
           mv compressed_status.csv ${{ inputs.platform }}_prev_compressed_status.csv
-      - name: Debug
-        run: |
-          echo "Renamed previous sizes artifact" >> $GITHUB_STEP_SUMMARY
-          ls -la ${{ inputs.platform }}_prev_compressed_status.csv >> $GITHUB_STEP_SUMMARY
+
 
       - name: Download current sizes artifact
         run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}_compressed_status.json
@@ -97,7 +87,7 @@ jobs:
         run: |
           python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes ${{ inputs.platform }}_prev_compressed_status.csv --curr-sizes ${{ inputs.platform }}_curr_compressed_status.json > $GITHUB_STEP_SUMMARY
         
-      
+      #  upload artifact with the curr sizes json and the artifact with the diffs
 
 
   
