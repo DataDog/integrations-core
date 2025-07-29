@@ -534,7 +534,12 @@ class MySQLStatementSamples(DBMAsyncJob):
                     tidb_native_plan[:200] if len(tidb_native_plan) > 200 else tidb_native_plan,
                 )
                 # Convert to MySQL-compatible format for plan.definition
-                mysql_compatible_plan = self._convert_tidb_plan_to_mysql_format(tidb_native_plan)
+                # This is because the datadog server currently rigidly reads MySQL's explain output
+                # —for example, it can only interpret MySQL-specific access_type values.
+                # It attempts to map TiDB's explain output to MySQL's format, which may lead to inaccuracies.
+                # In the future, it would be preferable to remove this functionality and enable
+                # datadog server to display TiDB's explain output directly.
+                mysql_compatible_plan = self._convert_tidb_plan_to_mysql_format(tidb_native_plan, tidb_plan_text)
                 self._log.debug(
                     "MySQL-compatible plan type: %s, content: %s",
                     type(mysql_compatible_plan),
@@ -561,16 +566,12 @@ class MySQLStatementSamples(DBMAsyncJob):
             if self._has_sampled_since_completion(row, event_timestamp):
                 return None
 
-            # For TiDB, update execution_plan with the native JSON format
+            # For TiDB, we keep the execution_plan in mysql block for compatibility
+            # The native TiDB plan is stored here as a JSON string
             if tidb_native_plan:
-                # Create a copy of the row to avoid modifying the original
+                # Create a copy of the row and set the execution_plan
                 row = dict(row)
-                # Replace the text execution_plan with the native TiDB JSON array
-                # Ensure it's a string, not bytes
-                if isinstance(tidb_native_plan, bytes):
-                    row['execution_plan'] = tidb_native_plan.decode('utf-8')
-                else:
-                    row['execution_plan'] = tidb_native_plan
+                row['execution_plan'] = tidb_native_plan
 
             event = {
                 "timestamp": event_timestamp,
@@ -1026,10 +1027,13 @@ class MySQLStatementSamples(DBMAsyncJob):
 
     def _parse_tidb_text_plan(self, plan_text):
         """
-        Parse TiDB text execution plan into a structured JSON format.
+        Parse TiDB text execution plan into a flat JSON array format.
 
         TiDB plan format has tab-separated columns:
         id, task, estRows, operator info, actRows, execution info, memory, disk
+
+        The output is a flat array of nodes, similar to TiDB's FORMAT=tidb_json.
+        Tree prefixes like "├─" and "└─" are stripped from the id field.
         """
         try:
             # Handle escaped newlines and tabs if present
@@ -1041,18 +1045,13 @@ class MySQLStatementSamples(DBMAsyncJob):
                 return json.dumps({"raw_plan": plan_text})
 
             # Skip the first line (header) and process data lines
-            # Parse header to understand column order
             header_line = lines[0]
             headers = header_line.split('\t')
             self._log.debug("TiDB plan headers: %s", headers)
             self._log.debug("TiDB plan header count: %d", len(headers))
 
-            # Based on the user's output showing the data is shifted left by 1,
-            # it seems like there might be an extra header column that doesn't have data
-            # Or the data has one less column than the headers
-
-            # Build flat array of nodes (TiDB format)
-            nodes = []
+            # List to store all nodes in flat array format
+            root_nodes = []
 
             for i, line in enumerate(lines[1:]):  # Skip header line
                 if not line.strip():
@@ -1098,27 +1097,8 @@ class MySQLStatementSamples(DBMAsyncJob):
                     memory_value = parts[6]
                     disk_value = parts[7]
 
-                # Clean up the id field by removing tree prefixes (└─, ├─, spaces) and trailing spaces
-                clean_id = id_value.lstrip('└├─ \t').rstrip()
-
-                # Debug output to understand the mapping
-                if i == 0:
-                    self._log.debug(
-                        "TiDB plan mapping - id_value: %s, task_value: %s, estrows_value: %s",
-                        id_value,
-                        task_value,
-                        estrows_value,
-                    )
-
-                # Looking at the output, it seems the JSON field order doesn't match our mapping
-                # The output shows taskType:"Projection_7" when we set id: clean_id
-                # This suggests the fields are being reordered or renamed somewhere
-                # Let's create the node with the correct mapping based on the actual output
-
-                # Based on the output pattern, it appears that:
-                # What we call 'id' appears as 'taskType' in output
-                # What we call 'taskType' appears as 'estRows' in output
-                # And so on... everything is shifted
+                # Clean up the id field by removing all tree prefixes
+                clean_id = id_value.lstrip('└├─│ \t').rstrip()
 
                 # Create node object with all values properly trimmed
                 node = {
@@ -1151,22 +1131,572 @@ class MySQLStatementSamples(DBMAsyncJob):
                 # Remove empty/None fields to match TiDB's compact format
                 node = {k: v for k, v in node.items() if v is not None and v != ''}
 
-                nodes.append(node)
+                # Add to flat array
+                root_nodes.append(node)
 
-            # Return as flat array matching TiDB's FORMAT=tidb_json output
-            return json.dumps(nodes)
+            # Return flat array structure like TiDB's FORMAT=tidb_json
+            result = json.dumps(root_nodes)
+            # Ensure we always return a string, not bytes
+            if isinstance(result, bytes):
+                result = result.decode('utf-8')
+            return result
 
         except Exception as e:
             # If parsing fails, return the original text wrapped in JSON
             self._log.debug("Failed to parse TiDB plan to JSON: %s", e)
-            return json.dumps({"raw_plan": plan_text, "parse_error": str(e)})
+            result = json.dumps({"raw_plan": plan_text, "parse_error": str(e)})
+            # Ensure we always return a string, not bytes
+            if isinstance(result, bytes):
+                result = result.decode('utf-8')
+            return result
 
-    def _convert_tidb_plan_to_mysql_format(self, tidb_plan_json):
+    def _find_actual_scan_node(self, node):
+        """
+        Find the actual table/index scan node within a tree
+        """
+        # Check if this node has table info
+        if 'table:' in node.get('operatorInfo', ''):
+            return node
+
+        # Look in children
+        if 'children' in node:
+            for child in node['children']:
+                result = self._find_actual_scan_node(child)
+                if result:
+                    return result
+
+        return None
+
+    def _collect_projection_columns(self, node, projection_columns=None):
+        """
+        Collect column information from Projection nodes in the tree
+        """
+        if projection_columns is None:
+            projection_columns = {}
+
+        if 'Projection' in node.get('id', ''):
+            op_info = node.get('operatorInfo', '')
+            if op_info:
+                parts = op_info.split(', ')
+                for part in parts:
+                    if '.' in part:
+                        table_col = part.strip()
+                        table_part = table_col.split('.')[0]
+                        col_part = table_col.split('.')[-1]
+                        if table_part not in projection_columns:
+                            projection_columns[table_part] = []
+                        projection_columns[table_part].append(col_part)
+
+        # Recursively check children
+        if 'children' in node:
+            for child in node['children']:
+                self._collect_projection_columns(child, projection_columns)
+
+        return projection_columns
+
+    def _convert_tree_to_nested_loop(self, node, projection_columns=None):
+        """
+        Convert TiDB tree structure to MySQL nested_loop format
+        """
+        # Skip non-table nodes (like Sort, Projection, Selection)
+        operator_info = node.get('operatorInfo', '')
+        op_id = node.get('id', '')
+
+        # Check if this is a join node
+        # In TiDB, look for specific join operators in the ID
+        join_operators = ['IndexJoin', 'IndexHashJoin', 'IndexNestedLoopHashJoin', 'HashJoin', 'MergeJoin']
+        is_join = any(join_op in op_id for join_op in join_operators)
+
+        # Also check operator info for join keywords
+        if not is_join and operator_info:
+            join_keywords = ['inner join', 'left join', 'right join', 'outer join', 'semi join', 'anti join']
+            is_join = any(keyword in operator_info.lower() for keyword in join_keywords)
+
+        if is_join and 'children' in node:
+            # This is a join - need to properly structure it
+            # In TiDB, joins typically have Build (outer) and Probe (inner) children
+            build_child = None
+            probe_child = None
+
+            for child in node['children']:
+                child_id = child.get('id', '')
+                if 'Build' in child_id:
+                    build_child = child
+                elif 'Probe' in child_id:
+                    probe_child = child
+
+            if build_child and probe_child:
+                # Process the build (outer) side
+                outer_result = self._convert_tree_to_nested_loop(build_child, projection_columns)
+                # Process the probe (inner) side
+                inner_result = self._convert_tree_to_nested_loop(probe_child, projection_columns)
+
+                if outer_result and inner_result:
+                    # Create MySQL-style hierarchical structure for joins
+                    # The outer table should contain nested_loop with inner table(s)
+
+                    if 'table' in outer_result:
+                        # Simple case: outer is a single table
+                        result = {"table": outer_result['table']}
+
+                        # Add join type information to the outer table
+                        if 'left' in operator_info.lower():
+                            result['table']['join_type'] = 'LEFT JOIN'
+                        elif 'inner' in operator_info.lower():
+                            result['table']['join_type'] = 'INNER JOIN'
+                        elif 'cartesian' in operator_info.lower():
+                            result['table']['join_type'] = 'CARTESIAN JOIN'
+                        elif 'anti' in operator_info.lower():
+                            result['table']['join_type'] = 'ANTI JOIN'
+                        elif 'semi' in operator_info.lower():
+                            result['table']['join_type'] = 'SEMI JOIN'
+
+                        # Add join condition and create nested_loop
+                        inner_tables = []
+                        if 'table' in inner_result:
+                            inner_table = inner_result['table'].copy()
+                            # Add join condition to the inner table
+                            if 'equal cond:' in operator_info:
+                                start = operator_info.find('equal cond:') + 11
+                                inner_table['attached_condition'] = operator_info[start:].strip()
+                            elif 'CARTESIAN' in operator_info:
+                                inner_table['attached_condition'] = "1=1"  # No join condition for cartesian
+                            inner_tables.append({"table": inner_table})
+                        elif 'nested_loop' in inner_result:
+                            inner_tables.extend(inner_result['nested_loop'])
+
+                        if inner_tables:
+                            result['nested_loop'] = inner_tables
+
+                        return result
+                    elif 'nested_loop' in outer_result:
+                        # Complex case: outer already has nested structure
+                        # Find the deepest table and add the inner tables there
+                        # For simplicity, create flat structure
+                        nested_loop = []
+                        nested_loop.extend(outer_result['nested_loop'])
+
+                        if 'table' in inner_result:
+                            inner_table = inner_result['table'].copy()
+                            if 'equal cond:' in operator_info:
+                                start = operator_info.find('equal cond:') + 11
+                                inner_table['attached_condition'] = operator_info[start:].strip()
+                            nested_loop.append({"table": inner_table})
+                        elif 'nested_loop' in inner_result:
+                            nested_loop.extend(inner_result['nested_loop'])
+
+                        return {"nested_loop": nested_loop}
+
+            # Fallback to simple processing if structure is unexpected
+            nested_loop = []
+            for child in node['children']:
+                child_result = self._convert_tree_to_nested_loop(child, projection_columns)
+                if child_result:
+                    if isinstance(child_result, dict) and 'table' in child_result:
+                        nested_loop.append(child_result)
+                    elif isinstance(child_result, dict) and 'nested_loop' in child_result:
+                        nested_loop.extend(child_result['nested_loop'])
+
+            if nested_loop:
+                return {"nested_loop": nested_loop}
+
+        # Check if this is a table access node
+        if 'table:' in operator_info or 'accessObject' in node or self._get_access_type_from_op_id(op_id) != 'unknown':
+            # This is a table access node
+            table_info = self._process_tidb_node(node)
+            if table_info:
+                # Add projection columns if available
+                if projection_columns and table_info.get('table_name') in projection_columns:
+                    table_info['used_columns'] = projection_columns[table_info['table_name']]
+
+                # Check if this node has table children (like IndexLookUp with scan nodes)
+                if 'children' in node:
+                    # Look for actual scan nodes in children
+                    for child in node['children']:
+                        child_info = self._process_tidb_node(child)
+                        if child_info and child_info.get('table_name'):
+                            # Add projection columns if available
+                            if projection_columns and child_info.get('table_name') in projection_columns:
+                                child_info['used_columns'] = projection_columns[child_info['table_name']]
+                            # Use the child's table info but keep parent's execution info
+                            if 'execution_info' in table_info and 'execution_info' not in child_info:
+                                child_info['execution_info'] = table_info['execution_info']
+                            return {"table": child_info}
+
+                return {"table": table_info}
+
+        # Special handling for IndexReader nodes
+        if 'IndexReader' in op_id and 'children' in node:
+            # IndexReader wraps index operations - look for the actual index scan in children
+            for child in node['children']:
+                # Look deeper for the actual index scan
+                actual_scan = self._find_actual_scan_node(child)
+                if actual_scan:
+                    scan_info = self._process_tidb_node(actual_scan)
+                    if scan_info:
+                        # Copy execution info from IndexReader
+                        if node.get('executionInfo'):
+                            scan_info['execution_info'] = node['executionInfo']
+                        # Mark as coming from IndexReader
+                        scan_info['operator_id'] = op_id
+                        # If we still have "unknown" table name, try to extract from child operator info
+                        if scan_info.get('table_name') == 'unknown' and child.get('operatorInfo'):
+                            child_op_info = child['operatorInfo']
+                            if 'table:' in child_op_info:
+                                table_match = child_op_info.split('table:')[1].split(',')[0].split()[0]
+                                scan_info['table_name'] = table_match
+                        return {"table": scan_info}
+
+        # Special handling for TableReader nodes
+        if 'TableReader' in op_id and 'children' in node:
+            # TableReader wraps table operations
+            for child in node['children']:
+                child_result = self._convert_tree_to_nested_loop(child, projection_columns)
+                if child_result:
+                    # Copy execution info from TableReader
+                    if 'table' in child_result and node.get('executionInfo'):
+                        child_result['table']['execution_info'] = node['executionInfo']
+                    # If we have "unknown" table name, try to extract from child
+                    if 'table' in child_result and child_result['table'].get('table_name') == 'unknown':
+                        # Look for table info in child's operator info
+                        if child.get('operatorInfo') and 'table:' in child['operatorInfo']:
+                            table_match = child['operatorInfo'].split('table:')[1].split(',')[0].split()[0]
+                            child_result['table']['table_name'] = table_match
+                    return child_result
+
+        # Special handling for UnionScan nodes
+        if 'UnionScan' in op_id and 'children' in node:
+            # UnionScan merges transaction buffer with storage data
+            # Pass through to child to get actual access pattern
+            for child in node['children']:
+                child_result = self._convert_tree_to_nested_loop(child, projection_columns)
+                if child_result:
+                    # Preserve UnionScan's execution info if available
+                    if 'table' in child_result and node.get('executionInfo'):
+                        # Merge execution info - UnionScan adds overhead
+                        if 'execution_info' not in child_result['table']:
+                            child_result['table']['execution_info'] = node['executionInfo']
+                    return child_result
+
+        # For other nodes, check children
+        if 'children' in node:
+            if len(node['children']) == 1:
+                # Single child - pass through
+                return self._convert_tree_to_nested_loop(node['children'][0], projection_columns)
+            else:
+                # Multiple children - NOT a join unless explicitly marked
+                # Just return the first table access we find
+                for child in node['children']:
+                    child_result = self._convert_tree_to_nested_loop(child, projection_columns)
+                    if child_result:
+                        return child_result
+
+        return None
+
+    def _get_access_type_from_op_id(self, op_id):
+        """
+        Extract access type from operator ID
+        """
+        if 'Point_Get' in op_id or 'Batch_Point_Get' in op_id:
+            return 'const'
+        elif 'TableRowIDScan' in op_id:
+            return 'ref'
+        elif 'IndexRangeScan' in op_id or 'TableRangeScan' in op_id:
+            return 'range'
+        elif 'IndexLookUp' in op_id:
+            return 'ref'
+        elif 'IndexFullScan' in op_id or 'IndexScan' in op_id or 'IndexReader' in op_id:
+            return 'index'
+        elif 'TableFullScan' in op_id or 'TableScan' in op_id:
+            return 'ALL'
+        elif 'UnionScan' in op_id:
+            return 'unknown'  # Actual type depends on child node
+        return 'unknown'
+
+    def _flatten_tree(self, node, result=None):
+        """
+        Flatten a tree structure into a list of nodes
+        """
+        if result is None:
+            result = []
+
+        result.append(node)
+
+        if 'children' in node:
+            for child in node['children']:
+                self._flatten_tree(child, result)
+
+        return result
+
+    def _process_tidb_node(self, node):
+        """
+        Process a single TiDB node and extract relevant information
+        """
+        table_name = None
+        access_type = "unknown"
+        key_info = None
+        join_info = None
+
+        operator_info = node.get('operatorInfo', '')
+        op_id = node.get('id', '')
+
+        # Check for accessObject field (used in some TiDB plans)
+        if 'accessObject' in node:
+            access_obj = node['accessObject']
+            if 'table:' in access_obj:
+                table_name = access_obj.split('table:')[1].split(',')[0].strip()
+
+        # Extract table name if present
+        if not table_name and 'table:' in operator_info:
+            table_match = operator_info.split('table:')[1].split(',')[0].split()[0]
+            table_name = table_match
+
+        # If we still don't have a table name, try to extract from operator info patterns
+        if not table_name and operator_info:
+            # Try to extract table name from patterns like "mercari.coupon_owners.created:desc"
+            # or from join conditions
+            parts = operator_info.split('.')
+            if len(parts) >= 2:
+                # Pattern: database.table.column or table.column
+                if len(parts) >= 3:
+                    table_name = parts[1]  # Middle part is table name
+                else:
+                    # Could be table.column - check if it's a known pattern
+                    for part in parts[:-1]:  # Exclude last part which is likely column
+                        if part and not part.startswith('eq(') and not part.startswith('Column#'):
+                            table_name = part
+                            break
+
+        # Extract index info from operator info (for all types, not just specific operators)
+        if 'index:' in operator_info:
+            # Pattern: "index:idx_name(columns)" or "index:idx_name"
+            index_start = operator_info.find('index:') + 6
+            # Find the end of the index name - stop at parenthesis, comma, or space
+            index_end = len(operator_info)
+            for delimiter in ['(', ',', ' ']:
+                pos = operator_info.find(delimiter, index_start)
+                if pos != -1 and pos < index_end:
+                    index_end = pos
+
+            index_name = operator_info[index_start:index_end].strip()
+            if index_name and index_name != 'N/A':
+                key_info = index_name
+
+        # Map TiDB operator types to MySQL-compatible access types
+        if 'Point_Get' in op_id or 'Batch_Point_Get' in op_id:
+            access_type = 'const'
+            # Point_Get uses PRIMARY key unless specified otherwise
+            if not key_info and (
+                'handle' in operator_info.lower()
+                or 'primary' in operator_info.lower()
+                or 'clustered index:primary' in operator_info.lower()
+            ):
+                key_info = 'PRIMARY'
+        elif 'TableRowIDScan' in op_id:
+            # TableRowIDScan is typically used after index lookup
+            access_type = 'eq_ref'  # More accurate than 'ref' for unique key lookups
+            if not key_info:
+                key_info = 'PRIMARY'  # rowid typically refers to primary key
+        elif 'IndexRangeScan' in op_id:
+            access_type = 'range'
+            # IndexRangeScan always uses an index
+        elif 'TableRangeScan' in op_id:
+            # TableRangeScan on clustered index/primary key
+            access_type = 'range'
+            if 'primary' in operator_info.lower() or not key_info:
+                key_info = 'PRIMARY'
+        elif 'IndexLookUp' in op_id:
+            # IndexLookUp uses index to find rows, then fetches from table
+            access_type = 'ref'
+        elif 'IndexFullScan' in op_id:
+            # Full scan of index
+            access_type = 'index'
+        elif 'IndexScan' in op_id or 'IndexReader' in op_id:
+            # Index scan operations
+            access_type = 'index'
+        elif 'TableFullScan' in op_id or 'TableScan' in op_id:
+            access_type = 'ALL'
+        elif 'TableReader' in op_id:
+            # TableReader wraps table operations - look at children for actual access type
+            access_type = 'ALL'  # Default, but will be overridden by child nodes
+        elif 'UnionScan' in op_id:
+            # UnionScan merges data from storage with uncommitted transaction data
+            # The actual access type depends on the underlying scan operation
+            # We should look at the child node to determine the real access type
+            access_type = 'unknown'  # Will be determined by child nodes
+
+        # Only process nodes that have actual table information
+        # Skip nodes without operator info or table reference
+        if not operator_info:
+            return None
+
+        # Check if this is a join node (these should be handled separately)
+        join_operators = ['IndexJoin', 'IndexHashJoin', 'IndexNestedLoopHashJoin', 'HashJoin', 'MergeJoin']
+        is_join = any(join_op in op_id for join_op in join_operators)
+
+        if not is_join and operator_info:
+            join_keywords = ['inner join', 'left join', 'right join', 'outer join', 'semi join', 'anti join']
+            is_join = any(keyword in operator_info.lower() for keyword in join_keywords)
+
+        if is_join:
+            # Return None for join nodes as they don't represent table access
+            return None
+
+        if 'table:' not in operator_info and access_type == 'unknown':
+            return None
+
+        # Build node information
+        node_info = {
+            "table_name": table_name if table_name else "unknown",
+            "access_type": access_type,
+            "rows_examined_per_scan": int(float(node.get('estRows', '0'))),
+            "rows_produced_per_join": int(float(node.get('actRows', '0'))),
+        }
+
+        # Add key information if available
+        if key_info:
+            node_info["key"] = key_info
+            node_info["used_key_parts"] = [key_info]
+
+        # Extract additional information from operatorInfo
+        if operator_info:
+            # Check if this is a join node
+            join_keywords = ['inner join', 'left join', 'right join', 'outer join', 'semi join', 'anti join']
+            is_join = any(keyword in operator_info.lower() for keyword in join_keywords)
+
+            if is_join:
+                # Extract join type and condition
+                join_info = {"type": None, "condition": None, "outer_key": None, "inner_key": None}
+
+                # Extract join type
+                for keyword in join_keywords:
+                    if keyword in operator_info.lower():
+                        join_info["type"] = keyword
+                        break
+
+                # Extract join condition (equal:[...])
+                if 'equal:[' in operator_info:
+                    start = operator_info.find('equal:[') + 7
+                    end = operator_info.find(']', start)
+                    if end != -1:
+                        join_info["condition"] = operator_info[start:end]
+
+                # Extract outer and inner keys
+                if 'outer key:' in operator_info:
+                    start = operator_info.find('outer key:') + 10
+                    end = operator_info.find(',', start)
+                    if end != -1:
+                        join_info["outer_key"] = operator_info[start:end].strip()
+
+                if 'inner key:' in operator_info:
+                    start = operator_info.find('inner key:') + 10
+                    end = operator_info.find(',', start)
+                    if end != -1:
+                        join_info["inner_key"] = operator_info[start:end].strip()
+
+                node_info["join_info"] = join_info
+            else:
+                # Extract condition/filter information for non-join nodes
+                condition_patterns = ['eq(', 'ne(', 'gt(', 'ge(', 'lt(', 'le(', 'or(', 'and(', 'in(', 'like(']
+                for pattern in condition_patterns:
+                    if pattern in operator_info:
+                        # Extract the condition part
+                        condition_start = operator_info.find(pattern)
+                        if condition_start != -1:
+                            # Find matching closing parenthesis
+                            paren_count = 0
+                            i = condition_start
+                            while i < len(operator_info):
+                                if operator_info[i] == '(':
+                                    paren_count += 1
+                                elif operator_info[i] == ')':
+                                    paren_count -= 1
+                                    if paren_count == 0:
+                                        node_info["attached_condition"] = operator_info[condition_start : i + 1]
+                                        break
+                                i += 1
+                        break
+
+            # Add full operator info as well
+            node_info["operator_info"] = operator_info
+
+        # Add execution info if available
+        if node.get('executionInfo'):
+            node_info["execution_info"] = node['executionInfo']
+
+        # Add operator ID for identification
+        node_info["operator_id"] = op_id
+
+        return node_info
+
+    def _analyze_join_info(self, node):
+        """
+        Analyze the tree to extract join type and algorithm information
+        """
+        join_info = {}
+
+        def find_joins(n):
+            op_id = n.get('id', '')
+            operator_info = n.get('operatorInfo', '')
+
+            # Check for join operators
+            if 'IndexHashJoin' in op_id:
+                join_info['join_algorithm'] = 'hash join'
+                if 'inner join' in operator_info.lower():
+                    join_info['join_type'] = 'INNER'
+                elif 'left' in operator_info.lower():
+                    join_info['join_type'] = 'LEFT'
+                elif 'right' in operator_info.lower():
+                    join_info['join_type'] = 'RIGHT'
+                elif 'anti' in operator_info.lower():
+                    join_info['join_type'] = 'ANTI'
+                elif 'semi' in operator_info.lower():
+                    join_info['join_type'] = 'SEMI'
+            elif 'IndexJoin' in op_id or 'IndexNestedLoopHashJoin' in op_id:
+                join_info['join_algorithm'] = 'nested loop'
+                if 'inner join' in operator_info.lower():
+                    join_info['join_type'] = 'INNER'
+                elif 'left' in operator_info.lower():
+                    join_info['join_type'] = 'LEFT'
+                elif 'right' in operator_info.lower():
+                    join_info['join_type'] = 'RIGHT'
+            elif 'HashJoin' in op_id:
+                join_info['join_algorithm'] = 'hash join'
+                if 'inner join' in operator_info.lower():
+                    join_info['join_type'] = 'INNER'
+                elif 'left' in operator_info.lower():
+                    join_info['join_type'] = 'LEFT'
+                elif 'right' in operator_info.lower():
+                    join_info['join_type'] = 'RIGHT'
+                elif 'cartesian' in operator_info.lower():
+                    join_info['join_type'] = 'CARTESIAN'
+            elif 'MergeJoin' in op_id:
+                join_info['join_algorithm'] = 'merge join'
+                if 'inner join' in operator_info.lower():
+                    join_info['join_type'] = 'INNER'
+                elif 'left' in operator_info.lower():
+                    join_info['join_type'] = 'LEFT'
+
+            # Recurse through children
+            if 'children' in n:
+                for child in n['children']:
+                    find_joins(child)
+
+        find_joins(node)
+        return join_info if join_info else None
+
+    def _convert_tidb_plan_to_mysql_format(self, tidb_plan_json, original_text_plan=None):
         """
         Convert TiDB plan JSON to MySQL-compatible format.
 
         TiDB format: [{"id": "Point_Get_1", "taskType": "root", ...}]
         MySQL format: {"query_block": {"select_id": 1, "table": {...}}}
+
+        Note on attached_subqueries:
+        - Used for actual subqueries (SELECT within SELECT), not JOINs
+        - Examples: scalar subqueries, EXISTS, IN, NOT EXISTS
+        - JOINs use nested_loop structure instead
+        - TiDB doesn't clearly distinguish subqueries in flat JSON format
         """
         try:
             # Parse the TiDB plan if it's a string or bytes
@@ -1177,61 +1707,19 @@ class MySQLStatementSamples(DBMAsyncJob):
             else:
                 tidb_nodes = tidb_plan_json
 
-            if not tidb_nodes or not isinstance(tidb_nodes, list):
-                self._log.debug("TiDB plan is not a list, returning original: %s", type(tidb_nodes))
+            # Handle both single object and array formats from TiDB
+            if isinstance(tidb_nodes, dict):
+                # Single node tree
+                tidb_tree = tidb_nodes
+            elif isinstance(tidb_nodes, list):
+                # Array of root nodes - wrap in a virtual root
+                if len(tidb_nodes) == 1:
+                    tidb_tree = tidb_nodes[0]
+                else:
+                    tidb_tree = {"id": "root", "children": tidb_nodes}
+            else:
+                self._log.debug("TiDB plan is neither dict nor list, returning original: %s", type(tidb_nodes))
                 return tidb_plan_json
-
-            # Find the actual data access node (usually the deepest one with table info)
-            table_node = None
-            root_node = tidb_nodes[0]
-
-            # Search through all nodes to find the one with table information
-            for node in tidb_nodes:
-                if 'table:' in node.get('operatorInfo', ''):
-                    table_node = node
-                    break
-
-            # If no table node found, use the last node (deepest in the tree)
-            if not table_node:
-                table_node = tidb_nodes[-1] if tidb_nodes else root_node
-                self._log.debug("No table node found, using last node: %s", table_node.get('id', 'unknown'))
-
-            # Extract table information from the table node
-            table_name = None
-            access_type = "unknown"
-            key_info = None
-
-            # Try to extract table name and access pattern
-            operator_info = table_node.get('operatorInfo', '')
-            if operator_info:
-                # Look for table name patterns
-                if 'table:' in operator_info:
-                    table_match = operator_info.split('table:')[1].split(',')[0].split()[0]
-                    table_name = table_match
-
-                # Determine access type based on operator id
-                op_id = table_node.get('id', '')
-                if 'Point_Get' in op_id:
-                    access_type = 'const'  # MySQL uses 'const' for point lookups
-                    # Extract key info if available
-                    if 'index:' in operator_info:
-                        key_info = operator_info.split('index:')[1].split(',')[0].split()[0]
-                    elif (
-                        'handle' in operator_info
-                        or 'PRIMARY' in operator_info
-                        or 'clustered index:PRIMARY' in operator_info
-                    ):
-                        key_info = 'PRIMARY'
-                elif 'IndexRangeScan' in op_id or 'IndexLookUp' in op_id:
-                    access_type = 'range'
-                    if 'index:' in operator_info:
-                        key_info = operator_info.split('index:')[1].split(',')[0].split()[0]
-                elif 'TableFullScan' in op_id:
-                    access_type = 'ALL'
-                elif 'TableRangeScan' in op_id:
-                    access_type = 'range'
-                elif 'IndexReader' in op_id:
-                    access_type = 'index'
 
             # Build MySQL-compatible structure
             mysql_format = {
@@ -1243,32 +1731,57 @@ class MySQLStatementSamples(DBMAsyncJob):
                 }
             }
 
-            # Add table information
-            table_info = {
-                "table_name": table_name or "unknown",
-                "access_type": access_type,
-                "rows_examined_per_scan": int(float(table_node.get('estRows', '0'))),
-                "rows_produced_per_join": int(float(table_node.get('actRows', '0'))),
-            }
+            # Analyze the tree to identify join types and algorithms at query block level
+            join_info = self._analyze_join_info(tidb_tree)
+            if join_info:
+                if join_info.get('join_type'):
+                    mysql_format["query_block"]["join_type"] = join_info['join_type']
+                if join_info.get('join_algorithm'):
+                    mysql_format["query_block"]["join_algorithm"] = join_info['join_algorithm']
 
-            # Add key information if available
-            if key_info:
-                table_info["key"] = key_info
-                table_info["used_key_parts"] = [key_info]
+            # First collect projection columns from the tree
+            projection_columns = self._collect_projection_columns(tidb_tree)
 
-            # Add execution info if available
-            if table_node.get('executionInfo'):
-                table_info["execution_info"] = table_node['executionInfo']
+            # Convert tree structure to MySQL nested_loop format
+            nested_result = self._convert_tree_to_nested_loop(tidb_tree, projection_columns)
 
-            # Add operator info as a custom field
-            if table_node.get('operatorInfo'):
-                table_info["operator_info"] = table_node['operatorInfo']
+            if nested_result:
+                # Check if the top-level operation is ordering
+                if 'Sort' in tidb_tree.get('id', ''):
+                    # For TiDB Sort operations, we shouldn't assume it's a filesort
+                    # MySQL's using_filesort has a specific meaning that doesn't directly map
+                    # Instead, just structure the query with ordering_operation
+                    mysql_format["query_block"]["ordering_operation"] = {}
 
-            mysql_format["query_block"]["table"] = table_info
+                    # Add the underlying table/join structure
+                    if 'table' in nested_result:
+                        mysql_format["query_block"]["ordering_operation"]["table"] = nested_result["table"]
+                    elif 'nested_loop' in nested_result:
+                        mysql_format["query_block"]["ordering_operation"]["nested_loop"] = nested_result["nested_loop"]
+                    elif 'table' in nested_result.get('table', {}):
+                        # Handle case where we have a table with nested_loop
+                        mysql_format["query_block"]["ordering_operation"].update(nested_result)
+                else:
+                    # No sorting
+                    if 'table' in nested_result and 'nested_loop' in nested_result:
+                        # This is a join result with proper structure
+                        mysql_format["query_block"].update(nested_result)
+                    elif 'table' in nested_result:
+                        # Single table query
+                        mysql_format["query_block"]["table"] = nested_result["table"]
+                    elif 'nested_loop' in nested_result:
+                        # Multi-table query
+                        mysql_format["query_block"]["nested_loop"] = nested_result["nested_loop"]
+            else:
+                # No table access found - this might be a simple query
+                self._log.debug("No table access found in TiDB plan")
 
-            # If there are multiple nodes, add them as a custom field
-            if len(tidb_nodes) > 1:
-                mysql_format["query_block"]["tidb_execution_tree"] = tidb_nodes
+            # Include TiDB-specific fields for debugging
+            mysql_format["query_block"]["tidb_execution_tree"] = tidb_tree
+
+            # Include original text plan if available
+            if original_text_plan:
+                mysql_format["query_block"]["tidb_original_text_plan"] = original_text_plan
 
             result = json.dumps(mysql_format)
             self._log.debug("Converted TiDB plan to MySQL format successfully, type: %s", type(result))

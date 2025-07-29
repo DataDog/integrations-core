@@ -1810,7 +1810,7 @@ def test_tidb_plan_mysql_conversion():
     parsed = json.loads(mysql_plan)
     assert parsed['query_block']['table']['table_name'] == 'orders'
     assert parsed['query_block']['table']['access_type'] == 'range'
-    assert parsed['query_block']['table']['key'] == 'idx_date(created_at)'
+    assert parsed['query_block']['table']['key'] == 'idx_date'
 
     # Test TableFullScan conversion
     mysql_plan = statement_samples._convert_tidb_plan_to_mysql_format(json.dumps([tidb_plans[2]]))
@@ -2645,3 +2645,443 @@ def test_tidb_sample_collection_strategy():
 
     # Should set TiDB explain strategies
     assert statement_samples._preferred_explain_strategies == ['TIDB_STATEMENT']
+
+
+class TestTiDBPlanParsing:
+    """Test TiDB execution plan parsing functionality."""
+
+    def test_parse_tidb_text_plan_with_tree_structure(self):
+        """Test parsing TiDB text plan with tree structure preserved."""
+        # Sample TiDB execution plan text with tree structure
+        # ruff: noqa: E501
+        plan_text = """id	task	estRows	operator info	actRows	execution info	memory	disk
+Sort_13	root	0.40	test.orders.created_at:desc	0	time:3.66ms, loops:1	0 Bytes	0 Bytes
+└─Projection_15	root	0.40	test.orders.id, test.orders.status, test.orders.user_id, test.orders.product_id, test.orders.quantity, test.orders.created_at, test.products.price, test.products.discount, test.products.stock, test.products.category, test.products.brand, test.products.weight, test.products.dimensions, test.products.color, test.products.size, test.products.material, test.products.rating, test.products.name, test.products.description, test.products.sku, test.products.available, test.products.manufacturer, test.products.warranty, test.products.type, test.products.notes, test.products.tags, test.products.updated_at	0	time:3.64ms, loops:1, Concurrency:OFF	14.1 KB	N/A
+  └─Selection_16	root	0.40	or(eq(test.orders.user_id, ?), and(isnull(test.orders.user_id), Column#55))	0	time:3.64ms, loops:1	14.1 KB	N/A
+    └─HashJoin_17	root	0.50	anti left outer semi join, equal:[eq(test.orders.product_id, test.order_history.product_id)]	0	time:3.64ms, loops:1, build_hash_table:{total:587.5µs, fetch:587.5µs, build:0s}	0 Bytes	0 Bytes
+      ├─IndexLookUp_75(Build)	root	1.11		0	time:576.9µs, loops:1	233 Bytes	N/A
+      │ ├─IndexRangeScan_73(Build)	cop[tikv]	1.11	table:oh, index:idx_user_created(user_id, created_at), range:[?,?], keep order:false	0	time:522.1µs, loops:1, cop_task: {num: 1, max: 481.2µs, proc_keys: 0, tot_proc: 100.9µs, tot_wait: 34.2µs, copr_cache: disabled, build_task_duration: 7.44µs, max_distsql_concurrency: 1}, rpc_info:{Cop:{num_rpc:1, total_time:469.8µs}}, tikv_task:{time:0s, loops:1}, scan_detail: {total_keys: 1, get_snapshot_time: 9.15µs, rocksdb: {block: {cache_hit_count: 10}}}, time_detail: {total_process_time: 100.9µs, total_wait_time: 34.2µs, tikv_wall_time: 215.1µs}	N/A	N/A
+      │ └─TableRowIDScan_74(Probe)	cop[tikv]	1.11	table:oh, keep order:false	0		N/A	N/A
+      └─IndexHashJoin_27(Probe)	root	0.50	inner join, inner:TableReader_21, outer key:test.orders.product_id, inner key:test.products.id, equal cond:eq(test.orders.product_id, test.products.id)	0	time:3.49ms, loops:1	0 Bytes	N/A
+        ├─IndexLookUp_61(Build)	root	0.50		0	time:3.39ms, loops:1, index_task: {total_time: 1.7ms, fetch_handle: 1.69ms, build: 1.11µs, wait: 7.35µs}, table_task: {total_time: 1.6ms, num: 1, concurrency: 5}, next: {wait_index: 1.76ms, wait_table_lookup_build: 139.4µs, wait_table_lookup_resp: 1.46ms}	7.74 KB	N/A
+        │ ├─IndexRangeScan_58(Build)	cop[tikv]	51.40	table:o, index:idx_user_created(user_id, created_at), range:[?,?], [?,?], keep order:false	48	time:1.69ms, loops:3, cop_task: {num: 2, max: 1.62ms, min: 790.5µs, avg: 1.21ms, p95: 1.62ms, max_proc_keys: 48, p95_proc_keys: 48, tot_proc: 1.23ms, tot_wait: 123.5µs, copr_cache: disabled, build_task_duration: 17.3µs, max_distsql_concurrency: 2}, rpc_info:{Cop:{num_rpc:2, total_time:2.37ms}}, tikv_task:{proc max:1ms, min:0s, avg: 500µs, p80:1ms, p95:1ms, iters:3, tasks:2}, scan_detail: {total_process_keys: 48, total_process_keys_size: 2208, total_keys: 50, get_snapshot_time: 45.9µs, rocksdb: {key_skipped_count: 48, block: {cache_hit_count: 19, read_count: 1, read_byte: 13.0 KB, read_time: 878.1µs}}}, time_detail: {total_process_time: 1.23ms, total_wait_time: 123.5µs, total_kv_read_wall_time: 1ms, tikv_wall_time: 1.61ms}	N/A	N/A
+        │ └─Selection_60(Probe)	cop[tikv]	0.50	eq(test.orders.status, ?), or(gt(test.orders.quantity, ?), ?)	0	time:1.44ms, loops:1, cop_task: {num: 3, max: 901.4µs, min: 673.5µs, avg: 749.9µs, p95: 901.4µs, max_proc_keys: 37, p95_proc_keys: 37, tot_proc: 763.3µs, tot_wait: 122.2µs, copr_cache: disabled, build_task_duration: 57.9µs, max_distsql_concurrency: 1, max_extra_concurrency: 1}, rpc_info:{Cop:{num_rpc:3, total_time:2.21ms}}, tikv_task:{proc max:1ms, min:0s, avg: 333.3µs, p80:1ms, p95:1ms, iters:4, tasks:3}, scan_detail: {total_process_keys: 48, total_process_keys_size: 3912, total_keys: 54, get_snapshot_time: 35.7µs, rocksdb: {key_skipped_count: 16, block: {cache_hit_count: 339}}}, time_detail: {total_process_time: 763.3µs, total_wait_time: 122.2µs, total_kv_read_wall_time: 1ms, tikv_wall_time: 1.28ms}	N/A	N/A
+        │   └─TableRowIDScan_59	cop[tikv]	51.40	table:o, keep order:false	48	tikv_task:{proc max:1ms, min:0s, avg: 333.3µs, p80:1ms, p95:1ms, iters:4, tasks:3}	N/A	N/A
+        └─TableReader_21(Probe)	root	0.25	data:Selection_20	0		N/A	N/A
+          └─Selection_20	cop[tikv]	0.25	eq(test.products.available, ?), eq(test.products.type, ?), or(le(test.products.created_at, ?), isnull(test.products.created_at))	0		N/A	N/A
+            └─TableRangeScan_19	cop[tikv]	0.50	table:p, range: decided by [test.orders.product_id], keep order:false	0		N/A	N/A"""
+
+        # Create instance and MySQLStatementSamples object
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        # Parse the plan
+        result_json = statement_samples._parse_tidb_text_plan(plan_text)
+        result = json.loads(result_json)
+
+        # Verify it's a flat array
+        assert isinstance(result, list)
+        assert len(result) > 0
+
+        # Verify the first node is Sort_13
+        assert result[0]['id'] == 'Sort_13'
+        assert result[0]['taskType'] == 'root'
+        assert result[0]['estRows'] == '0.40'
+
+        # Find Projection_15 in the array
+        projection = next((n for n in result if n['id'] == 'Projection_15'), None)
+        assert projection is not None
+        assert projection['taskType'] == 'root'
+
+        # Find Selection_16 in the array
+        selection = next((n for n in result if n['id'] == 'Selection_16'), None)
+        assert selection is not None
+        assert selection['taskType'] == 'root'
+
+        # Find HashJoin_17 in the array
+        hash_join = next((n for n in result if n['id'] == 'HashJoin_17'), None)
+        assert hash_join is not None
+
+        # Find IndexLookUp_75(Build) in the array
+        index_lookup = next((n for n in result if n['id'] == 'IndexLookUp_75(Build)'), None)
+        assert index_lookup is not None
+
+        # Find IndexRangeScan_73(Build) and TableRowIDScan_74(Probe) in the array
+        index_range_scan = next((n for n in result if n['id'] == 'IndexRangeScan_73(Build)'), None)
+        assert index_range_scan is not None
+        table_row_scan = next((n for n in result if n['id'] == 'TableRowIDScan_74(Probe)'), None)
+        assert table_row_scan is not None
+
+        # Find IndexHashJoin_27(Probe) in the array
+        index_hash_join = next((n for n in result if n['id'] == 'IndexHashJoin_27(Probe)'), None)
+        assert index_hash_join is not None
+
+    def test_parse_tidb_text_plan_empty(self):
+        """Test parsing empty TiDB text plan."""
+        plan_text = ""
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        result_json = statement_samples._parse_tidb_text_plan(plan_text)
+        result = json.loads(result_json)
+
+        assert 'raw_plan' in result
+        assert result['raw_plan'] == ""
+
+    def test_parse_tidb_text_plan_with_escaped_chars(self):
+        """Test parsing TiDB text plan with escaped newlines and tabs."""
+        plan_text = (
+            "id\\ttask\\testRows\\toperator info\\tactRows\\texecution info\\tmemory\\tdisk\\n"
+            "Sort_13\\troot\\t0.40\\ttest.orders.created_at:desc\\t0\\t"
+            "time:3.66ms, loops:1\\t0 Bytes\\t0 Bytes"
+        )
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        result_json = statement_samples._parse_tidb_text_plan(plan_text)
+        result = json.loads(result_json)
+
+        # Should parse successfully as a flat array
+        assert isinstance(result, list)
+        assert len(result) > 0
+        assert result[0]['id'] == 'Sort_13'
+        assert result[0]['taskType'] == 'root'
+        assert result[0]['estRows'] == '0.40'
+
+    def test_parse_tidb_text_plan_with_na_values(self):
+        """Test parsing TiDB text plan with N/A values."""
+        plan_text = """id	task	estRows	operator info	actRows	execution info	memory	disk
+Sort_13	root	N/A		N/A		N/A	N/A"""
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        result_json = statement_samples._parse_tidb_text_plan(plan_text)
+        result = json.loads(result_json)
+
+        # Should be a flat array
+        assert isinstance(result, list)
+        assert len(result) == 1
+        node = result[0]
+
+        # N/A values should be converted to "0" for numeric fields
+        assert node['estRows'] == '0'
+        assert node['actRows'] == '0'
+        # N/A for memory and disk should be omitted
+        assert 'memory' not in node
+        assert 'disk' not in node
+
+    def test_parse_tidb_text_plan_numeric_formatting(self):
+        """Test parsing TiDB text plan preserves numeric formatting."""
+        plan_text = """id	task	estRows	operator info	actRows	execution info	memory	disk
+Sort_13	root	1.00		100		0 Bytes	0 Bytes
+└─Projection_15	root	0.40		0		14.1 KB	N/A"""
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        result_json = statement_samples._parse_tidb_text_plan(plan_text)
+        result = json.loads(result_json)
+
+        # Should be a flat array
+        assert isinstance(result, list)
+        assert len(result) == 2
+
+        # Verify numeric formatting is preserved
+        sort_node = result[0]
+        assert sort_node['estRows'] == '1.00'  # Decimal preserved
+        assert sort_node['actRows'] == '100'  # Integer as string
+
+        projection_node = result[1]
+        assert projection_node['estRows'] == '0.40'  # Decimal preserved
+        assert projection_node['actRows'] == '0'  # Integer as string
+
+    def test_convert_tidb_to_mysql_format_improved_table_extraction(self):
+        """Test improved table name extraction from various patterns."""
+        # Test case with table name in join condition
+        tidb_plan_json = [
+            {
+                "id": "IndexHashJoin_21",
+                "taskType": "root",
+                "estRows": "0.50",
+                "operatorInfo": (
+                    "inner join, inner:TableReader_16, outer key:test.orders.product_id, inner key:test.products.id"
+                ),
+                "actualRows": 0,
+                "executionInfo": "time:3.49ms",
+            },
+            {
+                "id": "├─Point_Get_1(Build)",
+                "taskType": "root",
+                "estRows": "1.00",
+                "operatorInfo": "table:users, handle:1",
+                "actualRows": 1,
+                "executionInfo": "time:2.14ms",
+            },
+            {
+                "id": "└─TableReader_16(Probe)",
+                "taskType": "root",
+                "estRows": "0.25",
+                "operatorInfo": "data:Selection_15",
+                "actualRows": 0,
+                "executionInfo": "",
+            },
+            {
+                "id": "  └─Selection_15",
+                "taskType": "cop[tikv]",
+                "estRows": "0.25",
+                "operatorInfo": "eq(test.products.available, 1)",
+                "actualRows": 0,
+                "executionInfo": "",
+            },
+            {
+                "id": "    └─TableRangeScan_14",
+                "taskType": "cop[tikv]",
+                "estRows": "0.50",
+                "operatorInfo": "table:products, range: decided by [test.orders.product_id]",
+                "actualRows": 0,
+                "executionInfo": "",
+            },
+        ]
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        # Convert to MySQL format directly using the tidb_plan_json
+        result_json = statement_samples._convert_tidb_plan_to_mysql_format(tidb_plan_json)
+        result = json.loads(result_json)
+
+        # Verify table names are extracted correctly
+        query_block = result['query_block']
+
+        # Check that we have proper structure
+        assert 'table' in query_block or 'nested_loop' in query_block
+
+        # Extract all table names
+        table_names = []
+
+        def extract_tables(obj):
+            if isinstance(obj, dict):
+                if 'table' in obj and 'table_name' in obj['table']:
+                    table_names.append(obj['table']['table_name'])
+                if 'nested_loop' in obj:
+                    for item in obj['nested_loop']:
+                        extract_tables(item)
+                # Also extract from operatorInfo in tidb_execution_tree
+                if 'operatorInfo' in obj and isinstance(obj['operatorInfo'], str):
+                    import re
+
+                    # Extract table names from patterns like "table:products"
+                    matches = re.findall(r'table:(\w+)', obj['operatorInfo'])
+                    table_names.extend(matches)
+                for v in obj.values():
+                    if isinstance(v, (dict, list)) and v not in [obj.get('table'), obj.get('nested_loop')]:
+                        extract_tables(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    extract_tables(item)
+
+        extract_tables(query_block)
+
+        # Should find both table names
+        assert 'users' in table_names
+        assert 'products' in table_names
+        # Should not have 'unknown' tables
+        assert 'unknown' not in table_names
+
+    def test_convert_tidb_to_mysql_format_improved_access_types(self):
+        """Test improved access_type mapping to MySQL conventions."""
+        tidb_plan_json = [
+            {
+                "id": "Point_Get_1",
+                "taskType": "root",
+                "estRows": "1.00",
+                "operatorInfo": "table:users, handle:1",
+                "actualRows": 1,
+            },
+            {
+                "id": "TableRowIDScan_2",
+                "taskType": "cop[tikv]",
+                "estRows": "1.11",
+                "operatorInfo": "table:orders, keep order:false",
+                "actualRows": 0,
+            },
+            {
+                "id": "IndexRangeScan_3",
+                "taskType": "cop[tikv]",
+                "estRows": "10.00",
+                "operatorInfo": "table:products, index:idx_price(price), range:[100,200]",
+                "actualRows": 5,
+            },
+            {
+                "id": "TableRangeScan_4",
+                "taskType": "cop[tikv]",
+                "estRows": "20.00",
+                "operatorInfo": "table:items, range: decided by [items.id], keep order:false",
+                "actualRows": 15,
+            },
+        ]
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        # Test each operator individually
+        access_types = {}
+        for node in tidb_plan_json:
+            node_info = statement_samples._process_tidb_node(node)
+            if node_info:
+                access_types[node['id']] = node_info['access_type']
+
+        # Verify correct access_type mappings
+        assert access_types['Point_Get_1'] == 'const'  # Point_Get -> const
+        assert access_types['TableRowIDScan_2'] == 'eq_ref'  # TableRowIDScan -> eq_ref (not ref)
+        assert access_types['IndexRangeScan_3'] == 'range'  # IndexRangeScan -> range
+        assert access_types['TableRangeScan_4'] == 'range'  # TableRangeScan -> range
+
+    def test_convert_tidb_to_mysql_format_index_name_extraction(self):
+        """Test extraction of actual index names instead of operator names."""
+        tidb_plan_json = [
+            {
+                "id": "IndexRangeScan_1",
+                "taskType": "cop[tikv]",
+                "estRows": "10.00",
+                "operatorInfo": "table:orders, index:idx_user_created(user_id, created_at), range:[1,1]",
+                "actualRows": 5,
+            },
+            {
+                "id": "IndexFullScan_2",
+                "taskType": "cop[tikv]",
+                "estRows": "100.00",
+                "operatorInfo": "table:products, index:idx_category(category_id)",
+                "actualRows": 100,
+            },
+            {
+                "id": "Point_Get_3",
+                "taskType": "root",
+                "estRows": "1.00",
+                "operatorInfo": "table:users, index:uk_email(email)",
+                "actualRows": 1,
+            },
+        ]
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        # Test index extraction
+        keys = {}
+        for node in tidb_plan_json:
+            node_info = statement_samples._process_tidb_node(node)
+            if node_info and 'key' in node_info:
+                keys[node['id']] = node_info['key']
+
+        # Verify correct index names are extracted
+        assert keys['IndexRangeScan_1'] == 'idx_user_created'  # Not "IndexRangeScan"
+        assert keys['IndexFullScan_2'] == 'idx_category'  # Not "IndexFullScan"
+        assert keys['Point_Get_3'] == 'uk_email'  # Not "Point_Get"
+
+    def test_convert_tidb_to_mysql_format_query_block_join_info(self):
+        """Test join_type and join_algorithm at query_block level."""
+        tidb_plan_json = {
+            "id": "HashJoin_11",
+            "estRows": "5.00",
+            "taskType": "root",
+            "operatorInfo": "CARTESIAN inner join",
+            "actualRows": 10,
+            "children": [
+                {
+                    "id": "Point_Get_1(Build)",
+                    "taskType": "root",
+                    "estRows": "1.00",
+                    "operatorInfo": "table:users, handle:1",
+                    "actualRows": 1,
+                },
+                {
+                    "id": "TableFullScan_2(Probe)",
+                    "taskType": "cop[tikv]",
+                    "estRows": "5.00",
+                    "operatorInfo": "table:products, keep order:false",
+                    "actualRows": 10,
+                },
+            ],
+        }
+
+        instance = {'server': 'localhost', 'user': 'datadog'}
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        config = mysql_check._config
+        connection_args = {}
+
+        statement_samples = MySQLStatementSamples(mysql_check, config, connection_args)
+
+        # Convert to MySQL format
+        result_json = statement_samples._convert_tidb_plan_to_mysql_format(tidb_plan_json)
+        result = json.loads(result_json)
+
+        # Verify query_block has join info
+        query_block = result['query_block']
+        assert 'join_type' in query_block
+        assert query_block['join_type'] == 'INNER'  # Extracts 'inner' from 'CARTESIAN inner join'
+        assert 'join_algorithm' in query_block
+        assert query_block['join_algorithm'] == 'hash join'
+
+        # Test with IndexHashJoin
+        tidb_plan_json2 = {
+            "id": "IndexHashJoin_21",
+            "taskType": "root",
+            "estRows": "0.50",
+            "operatorInfo": "left outer join, inner:TableReader_16",
+            "children": [
+                {
+                    "id": "TableScan_1(Build)",
+                    "taskType": "cop[tikv]",
+                    "estRows": "10.00",
+                    "operatorInfo": "table:orders",
+                },
+                {
+                    "id": "IndexScan_2(Probe)",
+                    "taskType": "cop[tikv]",
+                    "estRows": "5.00",
+                    "operatorInfo": "table:items, index:idx_order(order_id)",
+                },
+            ],
+        }
+
+        result_json2 = statement_samples._convert_tidb_plan_to_mysql_format(tidb_plan_json2)
+        result2 = json.loads(result_json2)
+
+        query_block2 = result2['query_block']
+        assert query_block2['join_type'] == 'LEFT'
+        assert query_block2['join_algorithm'] == 'hash join'
