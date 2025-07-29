@@ -14,6 +14,8 @@ def calculate_diffs(prev_sizes, curr_sizes):
             entry.get("Type"),
         )
 
+    print(prev_sizes)
+
     prev_map = {key(e): e for e in prev_sizes}
     curr_map = {key(e): e for e in curr_sizes}
 
