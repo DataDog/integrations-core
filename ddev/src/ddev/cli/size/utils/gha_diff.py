@@ -34,6 +34,7 @@ def calculate_diffs(prev_sizes, curr_sizes):
             prev_entry = prev_map[curr_key]
             prev_size = int(prev_entry.get("Size_Bytes", 0))
             curr_size = int(curr_entry.get("Size_Bytes", 0))
+            print(f"prev_size: {prev_size}, curr_size: {curr_size}")
             if prev_size != curr_size:
                 percentage = ((curr_size - prev_size) / prev_size) * 100 if prev_size != 0 else 0
                 changed.append(
