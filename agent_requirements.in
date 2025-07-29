@@ -33,6 +33,8 @@ prometheus-client==0.22.1
 protobuf==6.31.1
 psutil==6.0.0
 psycopg[binary]==3.2.9
+psycopg2-binary==2.9.9
+psycopg[binary]==3.2.9
 pyasn1==0.4.8
 pycryptodomex==3.23.0
 pydantic==2.11.7
