@@ -71,7 +71,7 @@ pipeline:
     - type: grok-parser
       name: NID separator
       enabled: true
-      source: message
+      source: lustre.nid
       samples:
         - 172.31.38.176@tcp
       grok:
