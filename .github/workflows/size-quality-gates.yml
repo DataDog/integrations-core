@@ -11,7 +11,7 @@ name: Quality Gates
 #         type: string
 on:
   workflow_run:
-    workflows: ["size-qg-measure-disk-use"]        # or ["WF2"] if you only care about that one
+    workflows: ["Measure Disk Usage"] 
     types:
       - completed
 env:
