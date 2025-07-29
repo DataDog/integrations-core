@@ -209,6 +209,8 @@ class MultiDatabaseConnectionPool(object):
         if db is not None:
             try:
                 self._stats.connection_closed += 1
+                # Cancel any ongoing queries before closing
+                db.cancel_safe()
                 db.close()
             except Exception:
                 self._stats.connection_closed_failed += 1
