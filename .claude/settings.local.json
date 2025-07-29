@@ -5,7 +5,9 @@
       "WebFetch(domain:mskb.pkisolutions.com)",
       "WebFetch(domain:windowstechno.com)",
       "Bash(ls:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(find:*)",
+      "Bash(python:*)"
     ],
     "deny": []
   }
