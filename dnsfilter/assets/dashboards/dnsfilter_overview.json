@@ -257,70 +257,6 @@
                             "width": 3,
                             "height": 4
                         }
-                    },
-                    {
-                        "id": 3266930543309828,
-                        "definition": {
-                            "title": "Log Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:dnsfilter service:traffic-logs $application $domain $fqdn $event_outcome $user_name",
-                                        "indexes": [],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "dns.question.name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "fqdn",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "@evt.outcome",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "threat",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "protocol",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "compact"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 12,
-                            "height": 4
-                        }
                     }
                 ]
             },
@@ -328,7 +264,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 9
+                "height": 5
             }
         },
         {
@@ -1305,7 +1241,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 8,
                 "width": 12,
                 "height": 33
             }
@@ -1973,7 +1909,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 45,
+                "y": 41,
                 "width": 12,
                 "height": 14,
                 "is_column_break": true
@@ -2017,7 +1953,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 59,
+                "y": 55,
                 "width": 12,
                 "height": 5
             }
