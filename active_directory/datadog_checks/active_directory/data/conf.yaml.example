@@ -56,8 +56,14 @@ instances:
     # force_all_metrics: false
     
     ## @param emit_service_status - boolean - optional - default: false
-    ## Emit Datadog service checks for each Windows service.
-    ## Allows monitoring of AD service availability.
+    ## Emit Datadog service checks for core Active Directory services:
+    ## - NTDS (NT Directory Services)
+    ## - DNS (DNS Service)
+    ## - Kdc (Key Distribution Center)
+    ## - Netlogon (Net Logon)
+    ## - W32Time (Windows Time)
+    ## - DFSR (Distributed File System Replication)
+    ## - ADWS (Active Directory Web Services)
     #
     # emit_service_status: false
     

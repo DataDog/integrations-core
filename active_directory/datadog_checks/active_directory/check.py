@@ -5,6 +5,7 @@
 
 from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBaseCheckWithLegacySupport
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.windows_service import is_service_running, STATE_TO_STATUS
 import platform
 import time
 
@@ -14,6 +15,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
 
     # Service to Performance Object mapping
     SERVICE_METRIC_MAP = {
+        'NTDS': ['NTDS'],  # Core AD service - always collect these metrics
         'Netlogon': ['Netlogon', 'Security System-Wide Statistics'],
         'DHCPServer': ['DHCP Server'],
         'DFSR': ['DFS Replicated Folders'],
@@ -22,9 +24,6 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         'ADWS': [],  # Service monitoring only for now
         'Kdc': [],  # Service monitoring only for now
     }
-
-    # Services that should always have their metrics collected
-    REQUIRED_METRICS = ['NTDS']  # Core AD metrics
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
@@ -88,6 +87,12 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
 
         # Check each service
         for service in services_to_check:
+            # NTDS is always considered running (core AD service)
+            if service == 'NTDS':
+                self._service_cache[service] = True
+                self.log.debug("Service NTDS: always collected (core AD service)")
+                continue
+                
             try:
                 is_running = self._is_service_running(service)
                 self._service_cache[service] = is_running
@@ -99,49 +104,22 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
 
     def _is_service_running(self, service_name):
         """Check if a Windows service is running."""
-        # On non-Windows platforms, always return True
-        if not self._is_windows:
-            if not self._platform_warning_logged:
-                self.log.info("Running on non-Windows platform, assuming all services are available")
-                self._platform_warning_logged = True
+        # Use shared utility function
+        is_running, state, error = is_service_running(service_name, self.log)
+        
+        if error:
+            # Log error but optimistically assume service is available
+            self.log.warning("Failed to check service {}: {}".format(service_name, error))
             return True
-
-        try:
-            # Import Windows-specific modules
-            import win32service  # type: ignore
-            import win32serviceutil  # type: ignore
-
-            # Query service status with timeout
-            status = win32serviceutil.QueryServiceStatus(service_name)
-
-            # status[1] is the current state
-            # SERVICE_RUNNING = 4
-            is_running = status[1] == win32service.SERVICE_RUNNING
-
-            return is_running
-
-        except ImportError as e:
-            self.log.error("pywin32 not available: {}".format(e))
-            self.log.info("Install pywin32 to enable service detection")
-            return True  # Assume available if we can't check
-
-        except Exception as e:
-            # Re-raise as this is an actual error
-            raise Exception("Service check failed for {}: {}".format(service_name, str(e)))
+            
+        return is_running
 
     def _build_config_from_cache(self, metrics_config):
         """Build configuration using cached service states."""
         filtered_config = {'metrics': {}}
-
-        # Always include required metrics
-        for metric_name in self.REQUIRED_METRICS:
-            if metric_name in metrics_config:
-                filtered_config['metrics'][metric_name] = metrics_config[metric_name]
-                self.log.debug("Including required metric: {}".format(metric_name))
+        metrics_added = set()
 
         # Add metrics based on service availability
-        metrics_added = set(self.REQUIRED_METRICS)
-
         for service, metric_names in self.SERVICE_METRIC_MAP.items():
             service_running = self._service_cache.get(service, True)  # Default to True
 
@@ -186,50 +164,48 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         if not self._is_windows:
             return
 
-        # Define service descriptions
-        service_descriptions = {
-            'Netlogon': 'AD Authentication Service',
-            'DHCPServer': 'DHCP Server',
-            'DFSR': 'DFS Replication',
-            'DNS': 'DNS Server',
+        # Define AD services to monitor
+        AD_SERVICES = {
+            'NTDS': 'NT Directory Services',
+            'DNS': 'DNS Service',
+            'Kdc': 'Key Distribution Center',
+            'Netlogon': 'Net Logon',
             'W32Time': 'Windows Time Service',
-            'ADWS': 'AD Web Services',
-            'Kdc': 'Kerberos Key Distribution Center',
+            'DFSR': 'Distributed File System Replication',
+            'ADWS': 'Active Directory Web Services',
         }
 
-        # Check each service we care about
-        for service in self.SERVICE_METRIC_MAP.keys():
-            check_name = "{}.service.{}".format(self.__NAMESPACE__, service.lower())
-
-            try:
-                # Use cached value if available and fresh
-                current_time = time.time()
-                if (service in self._service_cache and
-                    current_time - self._last_service_check < self._cache_duration):
-                    is_running = self._service_cache[service]
-                else:
-                    is_running = self._is_service_running(service)
-
-                # Emit service check
-                if is_running:
+        # Check each service efficiently using direct lookups
+        for service_name, description in AD_SERVICES.items():
+            check_name = "{}.service.{}".format(self.__NAMESPACE__, service_name.lower())
+            
+            # Use shared utility to get service state
+            is_running, state, error = is_service_running(service_name, self.log)
+            
+            if error:
+                if "not found" in error.lower():
+                    # Service doesn't exist on this system
                     self.service_check(
                         check_name,
-                        ServiceCheck.OK,
-                        message="{} is running".format(service_descriptions.get(service, service)),
+                        ServiceCheck.UNKNOWN,
+                        message="{} not found".format(description),
                         tags=[]
                     )
                 else:
+                    # Other error (permissions, etc.)
                     self.service_check(
                         check_name,
-                        ServiceCheck.WARNING,
-                        message="{} is not running".format(service_descriptions.get(service, service)),
+                        ServiceCheck.UNKNOWN,
+                        message="Failed to check {}: {}".format(description, error),
                         tags=[]
                     )
-
-            except Exception as e:
-                self.service_check(
-                    check_name,
-                    ServiceCheck.UNKNOWN,
-                    message="Failed to check {}: {}".format(service, str(e)),
-                    tags=[]
-                )
+            else:
+                # Map state to service check status
+                status = STATE_TO_STATUS.get(state, ServiceCheck.UNKNOWN)
+                
+                if status == ServiceCheck.OK:
+                    message = "{} is running".format(description)
+                else:
+                    message = "{} is not running (state: {})".format(description, state)
+                
+                self.service_check(check_name, status, message=message, tags=[])
