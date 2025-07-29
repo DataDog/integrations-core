@@ -22,7 +22,6 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
-from datadog_checks.postgres.config_models import InstanceConfig
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
@@ -164,7 +163,9 @@ class PostgreSql(AgentCheck):
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
-        self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
+        self.check_initializations.append(
+            lambda: RelationsManager.validate_relations_config(list(self._config.relations))
+        )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
@@ -1115,5 +1116,3 @@ class PostgreSql(AgentCheck):
     def _update_tag_sets(self, tags):
         self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
         self.tags_without_db = list(set(self.tags_without_db) | set(tags))
-
-

@@ -334,7 +334,7 @@ class DBMAsyncJob(object):
         try:
             self._log.info("[%s] Starting job loop", self._job_tags_str)
             while True:
-                if self._cancel_event.isSet():
+                if self._cancel_event.is_set():
                     self._log.info("[%s] Job loop cancelled", self._job_tags_str)
                     self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
                     break

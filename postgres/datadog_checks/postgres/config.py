@@ -51,6 +51,12 @@ from datadog_checks.postgres.config_models.defaults import (
     instance_use_global_custom_queries,
     shared_propagate_agent_tags,
 )
+from datadog_checks.postgres.discovery import (
+    DEFAULT_MAX_DATABASES,
+)
+from datadog_checks.postgres.discovery import (
+    DEFAULT_REFRESH as DEFAULT_AUTODISCOVERY_REFRESH_INTERVAL,
+)
 from datadog_checks.postgres.metadata import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     DEFAULT_SETTINGS_COLLECTION_INTERVAL,
@@ -271,7 +277,7 @@ class ValidationResult:
         :param enabled: Whether the feature is enabled.
         """
         self.features.append(
-                {"key": feature, "name": FeatureNames[feature], "enabled": enabled, "description": description}            
+            {"key": feature, "name": FeatureNames[feature], "enabled": enabled, "description": description}
         )
 
     def add_error(self, error: str | ConfigurationError):
@@ -336,10 +342,10 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             **{
                 "enabled": False,
                 "global_view_db": "postgres",
-                "max_databases": 100,
+                "max_databases": DEFAULT_MAX_DATABASES,
                 "include": [".*"],
                 "exclude": ["cloudsqladmin"],
-                "refresh": 600,
+                "refresh": DEFAULT_AUTODISCOVERY_REFRESH_INTERVAL,
             },
             **(instance.get('database_autodiscovery', {})),
         },
@@ -735,5 +741,5 @@ def sanitize(config: InstanceConfig) -> dict:
     sanitized = config.model_dump(exclude=['custom_metrics', 'custom_queries'])
     sanitized['password'] = '***' if sanitized.get('password') else None
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
-    
+
     return sanitized

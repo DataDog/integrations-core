@@ -581,7 +581,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         self._check_baseline_metrics_expiry()
         rows = []
-        if (not self._config.incremental_query_metrics) or self._check.version < V10:
+        if (not self._config.query_metrics.incremental_query_metrics) or self._check.version < V10:
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
         elif len(self._baseline_metrics) == 0:

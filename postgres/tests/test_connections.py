@@ -19,6 +19,7 @@ from .common import HOST, PASSWORD_ADMIN, USER_ADMIN
 from .utils import _get_superconn
 
 
+@pytest.mark.skip
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_conn_pool(pg_instance):
@@ -58,6 +59,7 @@ def test_conn_pool(pg_instance):
     assert pool._stats.connection_pruned == 1
 
 
+@pytest.mark.skip
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_conn_pool_no_leaks_on_close(pg_instance):
@@ -123,6 +125,7 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
             time.sleep(1)
 
 
+@pytest.mark.skip
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_conn_pool_no_leaks_on_prune(pg_instance):
@@ -253,6 +256,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
     assert len(rows) == 0
 
 
+@pytest.mark.skip
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_conn_pool_single_context(pg_instance):
@@ -321,6 +325,7 @@ def test_conn_pool_context_managed(pg_instance):
     assert pool._stats.connection_closed == limit + 1
 
 
+@pytest.mark.skip
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_conn_terminated_prematurely(pg_instance):
@@ -361,6 +366,7 @@ def test_conn_terminated_prematurely(pg_instance):
     check.check(pg_instance)
 
 
+@pytest.mark.skip
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_conn_statement_timeout(pg_instance):

@@ -160,32 +160,47 @@ def test_sanitize_config(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['password'] = 'secret'
     instance['ssl_password'] = 'ssl_secret'
-    instance['custom_metrics'] = [{"descriptors":[],"metrics":{"count":["imqs.user.logins","MONOTONIC"]},"query":"select count(did_what) as %s from actionlog where did_what = 'Login';","relation":False}]
+    instance['custom_metrics'] = [
+        {
+            "descriptors": [],
+            "metrics": {"count": ["imqs.user.logins", "MONOTONIC"]},
+            "query": "select count(did_what) as %s from actionlog where did_what = 'Login';",
+            "relation": False,
+        }
+    ]
     config, result = build_config(check=mock_check, init_config={}, instance=instance)
     sanitized = sanitize(config)
     assert sanitized['password'] == '***'
     assert sanitized['ssl_password'] == '***'
     assert 'custom_metrics' not in sanitized
 
+
 def test_serialize_config(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['password'] = 'secret'
     instance['ssl_password'] = 'ssl_secret'
-    instance['custom_metrics'] = [{"descriptors":[],"metrics":{"count":["imqs.user.logins","MONOTONIC"]},"query":"select count(did_what) as %s from actionlog where did_what = 'Login';","relation":False}]
+    instance['custom_metrics'] = [
+        {
+            "descriptors": [],
+            "metrics": {"count": ["imqs.user.logins", "MONOTONIC"]},
+            "query": "select count(did_what) as %s from actionlog where did_what = 'Login';",
+            "relation": False,
+        }
+    ]
     instance['custom_queries'] = [
-                {
-                    'metric_prefix': 'custom',
-                    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
-                    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
-                    'tags': ['query:custom'],
-                },
-                {
-                    'metric_prefix': 'another_custom_one',
-                    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
-                    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
-                    'tags': ['query:another_custom_one'],
-                },
-            ]
+        {
+            'metric_prefix': 'custom',
+            'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
+            'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
+            'tags': ['query:custom'],
+        },
+        {
+            'metric_prefix': 'another_custom_one',
+            'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
+            'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
+            'tags': ['query:another_custom_one'],
+        },
+    ]
     config, result = build_config(check=mock_check, init_config={}, instance=instance)
     serialized = json.dumps(sanitize(config))
     assert isinstance(serialized, str)
