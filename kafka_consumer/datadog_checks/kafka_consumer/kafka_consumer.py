@@ -418,7 +418,7 @@ class KafkaCheck(AgentCheck):
             config_id = cfg["id"]
             if self._messages_have_been_retrieved(config_id):
                 continue
-            if cluster != cluster_id:
+            if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
                 continue
             start_offsets = resolve_start_offsets(highwater_offsets, topic, partition, start_offset, n_messages)
 

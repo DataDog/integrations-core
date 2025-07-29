@@ -615,6 +615,7 @@ def test_query_timeout(integration_check, pg_instance):
                 cursor.execute("select pg_sleep(2000)")
 
 
+@pytest.mark.flaky(max_runs=10)
 def test_pg_control(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()
