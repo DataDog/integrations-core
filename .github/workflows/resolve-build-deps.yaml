@@ -171,16 +171,28 @@ jobs:
         name: target-${{ matrix.job.image }}
         path: output
 
+  # measure-disk-usage:
+  #   needs: build
+  #   strategy:
+  #     matrix:
+  #       platform: [linux-x86_64, linux-aarch64, windows-x86_64]
+  #   uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
+  #   with:
+  #     platform: ${{ matrix.platform }}
+  #     run-id: ${{ github.run_id }}
+  #     resolved-deps: true
+
   measure-disk-usage:
     needs: build
     strategy:
       matrix:
         platform: [linux-x86_64, linux-aarch64, windows-x86_64]
-    uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
-    with:
-      platform: ${{ matrix.platform }}
-      run-id: ${{ github.run_id }}
-      resolved-deps: true
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Measure disk usage
+        run: gh workflow run Measure\ Disk\ Usage --ref ${{ github.head_ref }} --field platform=${{ matrix.platform }} --field run-id=${{ github.run_id }} --field resolved-deps=true
   
   # calculate-dep-sizes:
   #   needs: measure-disk-usage
@@ -267,17 +279,29 @@ jobs:
         path: output
 
   # ----------- CHANGE TO MASTER BRANCH ------------
+  # measure-disk-usage-macos:
+  #   needs: build-macos
+  #   strategy:
+  #     matrix:
+  #       platform: [macos-x86_64, macos-aarch64]
+  #   uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
+  #   with:
+  #     platform: ${{ matrix.platform }}
+  #     run-id: ${{ github.run_id }}
+  #     resolved-deps: true
+
   measure-disk-usage-macos:
     needs: build-macos
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64]
-    uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
-    with:
-      platform: ${{ matrix.platform }}
-      run-id: ${{ github.run_id }}
-      resolved-deps: true
-  
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Measure disk usage
+        run: gh workflow run Measure\ Disk\ Usage --ref ${{ github.head_ref }} --field platform=${{ matrix.platform }} --field run-id=${{ github.run_id }} --field resolved-deps=true
+
   # calculate-dep-sizes-macos:
   #   needs: measure-disk-usage-macos
   #   strategy:
