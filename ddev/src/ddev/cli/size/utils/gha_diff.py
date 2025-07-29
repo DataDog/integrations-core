@@ -67,7 +67,6 @@ def calculate_diffs(prev_sizes, curr_sizes):
 
 
 def display_diffs(diffs, platform, python_version):
-    # Print a well-formatted summary of the diffs
     sign = "+" if diffs['total_diff'] > 0 else "-"
     print("=" * 60)
     print(f"Dependency Size Differences for {platform} and Python {python_version}")
@@ -80,7 +79,7 @@ def display_diffs(diffs, platform, python_version):
         for entry in diffs["added"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size_Bytes", 0)
+            size = int(entry.get("Size_Bytes", 0))
             typ = entry.get("Type", "")
             print(f"  + [{typ}] {name} {version}: + {convert_to_human_readable_size(size)}")
         print()
@@ -93,7 +92,7 @@ def display_diffs(diffs, platform, python_version):
             print(entry)
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size_Bytes", 0)
+            size = int(entry.get("Size_Bytes", 0))
             typ = entry.get("Type", "")
             print(f"  - [{typ}] {name} {version}: - {convert_to_human_readable_size(size)}")
         print()
@@ -106,7 +105,7 @@ def display_diffs(diffs, platform, python_version):
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             typ = entry.get("Type", "")
-            prev_size = entry.get("prev_Size_Bytes", 0)
+            prev_size = int(entry.get("prev_Size_Bytes", 0))
             # curr_size = entry.get("curr_Size_Bytes", 0)
             diff = entry.get("diff", 0)
             percentage = (diff / prev_size) * 100 if prev_size != 0 else 0
@@ -137,64 +136,6 @@ def main():
         # prev_sizes = json.load(f)
     with open(args.curr_sizes, "r") as f:
         curr_sizes = json.load(f)
-
-    # prev_sizes = [
-    #     {
-    #         "Name": "cryptography",
-    #         "Version": "45.0.5",
-    #         "Size_Bytes": 21933835,
-    #         "Size": "20.92 MB",
-    #         "Type": "Dependency",
-    #         "Platform": "macos-x86_64",
-    #         "Python_Version": "3.12",
-    #     },
-    #     {
-    #         "Name": "PyYAML",
-    #         "Version": "6.0.1",
-    #         "Size_Bytes": 1234567,
-    #         "Size": "1.18 MB",
-    #         "Type": "Dependency",
-    #         "Platform": "macos-x86_64",
-    #         "Python_Version": "3.12",
-    #     },
-    #     {
-    #         "Name": "hola",
-    #         "Version": "3.9.10",
-    #         "Size_Bytes": 2345678,
-    #         "Size": "2.24 MB",
-    #         "Type": "Dependency",
-    #     },
-    # ]
-
-    # curr_sizes = [
-    #     {
-    #         "Name": "cryptography",
-    #         "Version": "45.0.6",
-    #         "Size_Bytes": 22933835,  # Increased size
-    #         "Size": "21.88 MB",
-    #         "Type": "Dependency",
-    #         "Platform": "macos-x86_64",
-    #         "Python_Version": "3.12",
-    #     },
-    #     {
-    #         "Name": "PyYAML",
-    #         "Version": "6.0.1",
-    #         "Size_Bytes": 1234567,
-    #         "Size": "1.18 MB",
-    #         "Type": "Dependency",
-    #         "Platform": "macos-x86_64",
-    #         "Python_Version": "3.12",
-    #     },
-    #     {
-    #         "Name": "orjson",
-    #         "Version": "3.9.10",
-    #         "Size_Bytes": 2345678,
-    #         "Size": "2.24 MB",
-    #         "Type": "Dependency",
-    #         "Platform": "macos-x86_64",
-    #         "Python_Version": "3.12",
-    #     },
-    # ]
 
     diffs, platform, python_version = calculate_diffs(prev_sizes, curr_sizes)
 
