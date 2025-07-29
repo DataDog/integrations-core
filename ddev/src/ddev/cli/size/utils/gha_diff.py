@@ -1,6 +1,7 @@
 import argparse
 import csv
 import json
+import os
 
 from ddev.cli.size.utils.common_funcs import convert_to_human_readable_size
 
@@ -34,6 +35,7 @@ def calculate_diffs(prev_sizes, curr_sizes):
             prev_size = int(prev_entry.get("Size_Bytes", 0))
             curr_size = int(curr_entry.get("Size_Bytes", 0))
             if prev_size != curr_size:
+                percentage = (curr_size - prev_size) / prev_size * 100 if prev_size != 0 else 0
                 changed.append(
                     {
                         "Name": curr_entry.get("Name"),
@@ -42,9 +44,10 @@ def calculate_diffs(prev_sizes, curr_sizes):
                         "Platform": curr_entry.get("Platform"),
                         "Python_Version": curr_entry.get("Python_Version"),
                         "Type": curr_entry.get("Type"),
-                        "prev_Size_Bytes": prev_size,
-                        "curr_Size_Bytes": curr_size,
-                        "diff": curr_size - prev_size,
+                        "Prev_Size_Bytes": prev_size,
+                        "Curr_Size_Bytes": curr_size,
+                        "Diff": curr_size - prev_size,
+                        "Percentage": percentage,
                     }
                 )
             total_diff += curr_size - prev_size
@@ -56,9 +59,9 @@ def calculate_diffs(prev_sizes, curr_sizes):
 
     return (
         {
-            "added": added,
-            "removed": removed,
-            "changed": changed,
+            "added": order_by(added, "Size_Bytes"),
+            "removed": order_by(removed, "Size_Bytes"),
+            "changed": order_by(changed, "Percentage"),
             "total_diff": total_diff,
         },
         platform,
@@ -66,11 +69,15 @@ def calculate_diffs(prev_sizes, curr_sizes):
     )
 
 
+def order_by(diffs, key):
+    return sorted(diffs, key=lambda x: x[key], reverse=True)
+
+
 def display_diffs(diffs, platform, python_version):
-    sign = "+" if diffs['total_diff'] > 0 else "-"
-    print("=" * 60)
+    sign = "+" if diffs['total_diff'] > 0 else ""
+    print("=" * 52)
     print(f"Dependency Size Differences for {platform} and Python {python_version}")
-    print("=" * 60)
+    print("=" * 52)
     print(f"Total size difference: {sign}{convert_to_human_readable_size(diffs['total_diff'])}")
     print()
 
@@ -104,10 +111,9 @@ def display_diffs(diffs, platform, python_version):
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             typ = entry.get("Type", "")
-            prev_size = int(entry.get("prev_Size_Bytes", 0))
-            # curr_size = entry.get("curr_Size_Bytes", 0)
-            diff = entry.get("diff", 0)
-            percentage = (diff / prev_size) * 100 if prev_size != 0 else 0
+            # curr_size = entry.get("Curr_Size_Bytes", 0)
+            percentage = entry.get("Percentage", 0)
+            diff = entry.get("Diff", 0)
             sign = "+" if diff > 0 else "-"
             version_diff = (
                 f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)} "
@@ -128,6 +134,7 @@ def main():
     parser = argparse.ArgumentParser(prog='gha_diff', allow_abbrev=False)
     parser.add_argument('--prev-sizes', required=True)
     parser.add_argument('--curr-sizes', required=True)
+    parser.add_argument('--output', required=False)  # path to a file to export the diffs to
     args = parser.parse_args()
 
     with open(args.prev_sizes, "r") as f:
@@ -139,6 +146,13 @@ def main():
     diffs, platform, python_version = calculate_diffs(prev_sizes, curr_sizes)
 
     display_diffs(diffs, platform, python_version)
+
+    if args.output:
+        output_dir = os.path.dirname(args.output)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir, exist_ok=True)
+        with open(args.output, "w") as f:
+            f.write(json.dumps(diffs, indent=2))
 
 
 if __name__ == "__main__":
