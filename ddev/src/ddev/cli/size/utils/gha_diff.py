@@ -14,10 +14,10 @@ def calculate_diffs(prev_sizes, curr_sizes):
             entry.get("Type"),
         )
 
-    print(prev_sizes)
-
     prev_map = {key(e): e for e in prev_sizes}
     curr_map = {key(e): e for e in curr_sizes}
+    platform = curr_sizes[0]['Platform']
+    python_version = curr_sizes[0]['Python_Version']
 
     added = []
     removed = []
@@ -54,22 +54,23 @@ def calculate_diffs(prev_sizes, curr_sizes):
             removed.append(prev_entry)
             total_diff -= int(prev_entry.get("Size_Bytes", 0))
 
-    return {
-        "added": added,
-        "removed": removed,
-        "changed": changed,
-        "total_diff": total_diff,
-    }
+    return (
+        {
+            "added": added,
+            "removed": removed,
+            "changed": changed,
+            "total_diff": total_diff,
+        },
+        platform,
+        python_version,
+    )
 
 
-def display_diffs(diffs):
+def display_diffs(diffs, platform, python_version):
     # Print a well-formatted summary of the diffs
     sign = "+" if diffs['total_diff'] > 0 else "-"
     print("=" * 60)
-    print(
-        f"Dependency Size Differences for {diffs['added'][0]['Platform']} and"
-        f" Python {diffs['added'][0]['Python_Version']}"
-    )
+    print(f"Dependency Size Differences for {platform} and Python {python_version}")
     print("=" * 60)
     print(f"Total size difference: {sign}{convert_to_human_readable_size(diffs['total_diff'])}")
     print()
@@ -194,9 +195,9 @@ def main():
     #     },
     # ]
 
-    diffs = calculate_diffs(prev_sizes, curr_sizes)
+    diffs, platform, python_version = calculate_diffs(prev_sizes, curr_sizes)
 
-    display_diffs(diffs)
+    display_diffs(diffs, platform, python_version)
 
 
 if __name__ == "__main__":
