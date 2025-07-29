@@ -194,7 +194,8 @@ jobs:
           fetch-depth: 0
       - name: Measure disk usage
         run: gh workflow run Measure\ Disk\ Usage --ref ${{ github.head_ref }} --field platform=${{ matrix.platform }} --field run-id=${{ github.run_id }} --field resolved-deps=true
-  
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # calculate-dep-sizes:
   #   needs: measure-disk-usage
   #   strategy:
@@ -303,6 +304,8 @@ jobs:
           fetch-depth: 0
       - name: Measure disk usage
         run: gh workflow run Measure\ Disk\ Usage --ref ${{ github.head_ref }} --field platform=${{ matrix.platform }} --field run-id=${{ github.run_id }} --field resolved-deps=true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # calculate-dep-sizes-macos:
   #   needs: measure-disk-usage-macos
