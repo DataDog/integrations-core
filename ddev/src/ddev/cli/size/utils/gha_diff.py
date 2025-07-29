@@ -1,7 +1,7 @@
 import argparse
 import json
 
-from ddev.src.ddev.cli.size.utils.common_funcs import convert_to_human_readable_size
+from ddev.cli.size.utils.common_funcs import convert_to_human_readable_size
 
 
 def calculate_diffs(prev_sizes, curr_sizes):
