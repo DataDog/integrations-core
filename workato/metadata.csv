@@ -1,0 +1,4 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+workato.connections.failure,gauge,,,,Whether a Workato connection is in a failed state,0,workato,Connection Failure,,
+workato.recipes.failure,gauge,,,,Whether a Workato recipe is offline due to configuration or failure,0,workato,Recipe Failure,,
+workato.recipes.task_count,gauge,,,,The lifetime task count for recipe,0,workato,Task Count,,

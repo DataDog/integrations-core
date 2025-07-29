@@ -18,9 +18,7 @@
       "notify_no_data": false,
       "renotify_interval": 0,
       "require_full_window": false,
-      "silenced": {
-        "*": null
-      },
+      "silenced": {},
       "thresholds": {
         "critical": 85
       }

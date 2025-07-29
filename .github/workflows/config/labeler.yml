@@ -87,6 +87,8 @@ integration/azure_iot_edge:
 - azure_iot_edge/**/*
 integration/beyondtrust_identity_security_insights:
 - beyondtrust_identity_security_insights/**/*
+integration/beyondtrust_password_safe:
+- beyondtrust_password_safe/**/*
 integration/bitdefender:
 - bitdefender/**/*
 integration/bitwarden:
@@ -339,8 +341,6 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
-integration/kaspersky:
-- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
@@ -405,6 +405,8 @@ integration/linux_proc_extras:
 - linux_proc_extras/**/*
 integration/litellm:
 - litellm/**/*
+integration/lustre:
+- lustre/**/*
 integration/mac_audit_logs:
 - mac_audit_logs/**/*
 integration/mailchimp:
@@ -527,6 +529,10 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
+integration/proofpoint_on_demand:
+- proofpoint_on_demand/**/*
+integration/proofpoint_tap:
+- proofpoint_tap/**/*
 integration/proxmox:
 - proxmox/**/*
 integration/proxysql:

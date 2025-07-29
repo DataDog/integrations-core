@@ -1,0 +1,20 @@
+job_stats:
+- job_id:          vim.0
+  snapshot_time:   1749555918.867061397 secs.nsecs
+  start_time:      1748941594.152552987 secs.nsecs
+  elapsed_time:    614324.714508410 secs.nsecs
+  read_bytes:      { samples:           0, unit: bytes, min:        0, max:        0, sum:                0, sumsq:                  0, hist: {  } }
+  write_bytes:     { samples:           6, unit: bytes, min:       27, max:    26759, sum:            69957, sumsq:         1599861835, hist: { 32: 2, 4K: 1, 16K: 1, 32K: 2 } }
+  read:            { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  write:           { samples:           6, unit: usecs, min:       31, max:     2314, sum:             4761, sumsq:           10672811 }
+  getattr:         { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  setattr:         { samples:           4, unit: usecs, min:       10, max:       51, sum:              110, sumsq:               4166 }
+  punch:           { samples:           4, unit: usecs, min:       16, max:       36, sum:              111, sumsq:               3353 }
+  sync:            { samples:           5, unit: usecs, min:     1806, max:     2041, sum:             9536, sumsq:           18240618 }
+  destroy:         { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  create:          { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  statfs:          { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  get_info:        { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  set_info:        { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  quotactl:        { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  prealloc:        { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
