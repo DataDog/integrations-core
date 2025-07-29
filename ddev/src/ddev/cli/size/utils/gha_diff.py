@@ -90,6 +90,7 @@ def display_diffs(diffs, platform, python_version):
     if diffs["removed"]:
         print("Removed:")
         for entry in diffs["removed"]:
+            print(entry)
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             size = entry.get("Size", 0)
@@ -113,7 +114,7 @@ def display_diffs(diffs, platform, python_version):
             version_diff = (
                 f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)} "
                 if entry.get('Prev Version', version) != entry.get('Version', version)
-                else "version unchanged"
+                else version
             )
             print(
                 f"  * [{typ}] {name} {version_diff}: "
