@@ -100,6 +100,10 @@
   value:
     example: disabled
     type: string
+    enum: 
+      - required
+      - optional
+      - disabled
   description: |
     If your services use Kerberos authentication, you can specify the Kerberos
     strategy to use between:
