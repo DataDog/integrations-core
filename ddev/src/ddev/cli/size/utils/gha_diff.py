@@ -28,11 +28,11 @@ def calculate_diffs(prev_sizes, curr_sizes):
     for curr_key, curr_entry in curr_map.items():
         if curr_key not in prev_map:
             added.append(curr_entry)
-            total_diff += curr_entry.get("Size_Bytes", 0)
+            total_diff += int(curr_entry.get("Size_Bytes", 0))
         else:
             prev_entry = prev_map[curr_key]
-            prev_size = prev_entry.get("Size_Bytes", 0)
-            curr_size = curr_entry.get("Size_Bytes", 0)
+            prev_size = int(prev_entry.get("Size_Bytes", 0))
+            curr_size = int(curr_entry.get("Size_Bytes", 0))
             if prev_size != curr_size:
                 changed.append(
                     {
@@ -52,7 +52,7 @@ def calculate_diffs(prev_sizes, curr_sizes):
     for prev_key, prev_entry in prev_map.items():
         if prev_key not in curr_map:
             removed.append(prev_entry)
-            total_diff -= prev_entry.get("Size_Bytes", 0)
+            total_diff -= int(prev_entry.get("Size_Bytes", 0))
 
     return {
         "added": added,
