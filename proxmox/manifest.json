@@ -19,6 +19,8 @@
       "Category::Cloud",
       "Category::Network",
       "Category::Event Management",
+      "Category::Metrics",
+      "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
@@ -38,7 +40,10 @@
       },
       "metrics": {
         "prefix": "proxmox.",
-        "check": "proxmox.api.up",
+        "check": [
+          "proxmox.api.up",
+          "proxmox.cpu"
+        ],
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
