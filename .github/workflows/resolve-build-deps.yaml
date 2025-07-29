@@ -184,6 +184,7 @@ jobs:
 
   measure-disk-usage:
     needs: build
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         platform: [linux-x86_64, linux-aarch64, windows-x86_64]
@@ -292,6 +293,7 @@ jobs:
 
   measure-disk-usage-macos:
     needs: build-macos
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64]
