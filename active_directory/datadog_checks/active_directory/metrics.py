@@ -50,6 +50,9 @@ METRICS_CONFIG = {
                 'LDAP Bind Time': {'metric_name': 'ldap.bind_time'},
                 'LDAP Successful Binds/sec': {'metric_name': 'ldap.successful_binds_persec'},
                 'LDAP Searches/sec': {'metric_name': 'ldap.searches_persec'},
+                'LDAP Writes/sec': {'metric_name': 'ldap.writes_persec', 'type': 'rate'},
+                'LDAP Active Threads': {'metric_name': 'ldap.active_threads'},
+                'DS Client Binds/sec': {'metric_name': 'ds.client_binds_persec', 'type': 'rate'},
             }
         ],
     },
@@ -62,6 +65,7 @@ METRICS_CONFIG = {
                 'Semaphore Acquires': {'name': 'semaphore_acquires', 'type': 'count'},
                 'Semaphore Timeouts': {'name': 'semaphore_timeouts', 'type': 'count'},
                 'Average Semaphore Hold Time': 'semaphore_hold_time',
+                'Last Authentication Time': {'name': 'last_authentication_time', 'type': 'time_elapsed'},
             }
         ],
     },
@@ -71,6 +75,29 @@ METRICS_CONFIG = {
             {
                 'NTLM Authentications': {'name': 'ntlm_authentications', 'type': 'rate'},
                 'Kerberos Authentications': {'name': 'kerberos_authentications', 'type': 'rate'},
+            }
+        ],
+    },
+    'DHCP Server': {
+        'name': 'dhcp',
+        'counters': [
+            {
+                'Binding Updates Dropped': {'name': 'binding_updates_dropped', 'type': 'count'},
+                'Failover: Update pending messages': 'failover.update_pending_messages',
+                'Failover: Messages received/sec': {'name': 'failover.messages_received', 'type': 'rate'},
+                'Failover: Messages sent/sec': {'name': 'failover.messages_sent', 'type': 'rate'},
+            }
+        ],
+    },
+    'DFS Replicated Folders': {
+        'name': 'dfsr',
+        'tag_name': 'replication_group',  # Instance names are replication group names
+        'counters': [
+            {
+                'Size of Files Deleted': {'name': 'deleted_files_size', 'unit': 'byte'},
+                'Staging Space In Use': {'name': 'staging_folder_size', 'unit': 'byte'},
+                'File Installs Retried': {'name': 'file_installs_retried', 'type': 'count'},
+                'Conflict Folder Size': {'name': 'conflict_files_size', 'unit': 'byte'},
             }
         ],
     },
