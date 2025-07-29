@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from datadog_checks.postgres.config import FeatureKey, ValidationResult, build_config
+from datadog_checks.postgres.config import FeatureKey, ValidationResult, build_config, sanitize
 
 
 @pytest.fixture
@@ -153,3 +153,15 @@ def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
     instance['empty_default_hostname'] = True
     config, result = build_config(check=mock_check, init_config={}, instance=instance)
     assert any("empty_default_hostname" in w for w in result.warnings)
+
+
+def test_sanitize_config(mock_check, minimal_instance):
+    instance = minimal_instance.copy()
+    instance['password'] = 'secret'
+    instance['ssl_password'] = 'ssl_secret'
+    instance['custom_metrics'] = [{"descriptors":[],"metrics":{"count":["imqs.user.logins","MONOTONIC"]},"query":"select count(did_what) as %s from actionlog where did_what = 'Login';","relation":False}]
+    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    sanitized = sanitize(config)
+    assert sanitized['password'] == '***'
+    assert sanitized['ssl_password'] == '***'
+    assert 'custom_metrics' not in sanitized

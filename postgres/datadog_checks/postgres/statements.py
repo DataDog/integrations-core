@@ -561,7 +561,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _check_baseline_metrics_expiry(self):
         if (
             self._last_baseline_metrics_expiry is None
-            or self._last_baseline_metrics_expiry + self._config.baseline_metrics_expiry < time.time()
+            or self._last_baseline_metrics_expiry + self._config.query_metrics.baseline_metrics_expiry < time.time()
             or len(self._baseline_metrics) > 3 * int(self._check.pg_settings.get("pg_stat_statements.max", 10000))
         ):
             self._baseline_metrics = {}

@@ -66,8 +66,8 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
     """
     unique_id = str(uuid.uuid4())  # Used to isolate this test from others on the DB
 
+    pg_instance['application_name'] = unique_id
     check = PostgreSql('postgres', {}, [pg_instance])
-    check._config.application_name = unique_id
 
     # Used to make verification queries
     pool2 = MultiDatabaseConnectionPool(
@@ -132,8 +132,8 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
     """
     unique_id = str(uuid.uuid4())  # Used to isolate this test from others on the DB
 
+    pg_instance['application_name'] = unique_id
     check = PostgreSql('postgres', {}, [pg_instance])
-    check._config.application_name = unique_id
 
     pool = MultiDatabaseConnectionPool(check._new_connection)
     # Used to make verification queries

@@ -40,7 +40,7 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
-from .config import build_config
+from .config import build_config, sanitize
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -385,7 +385,7 @@ class PostgreSql(AgentCheck):
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
             queries.append(QUERY_PG_STAT_RECOVERY_PREFETCH)
         if self.version >= V16:
-            if self._config.dbm_enabled:
+            if self._config.dbm:
                 queries.append(STAT_IO_METRICS)
 
         if not queries:
@@ -415,7 +415,7 @@ class PostgreSql(AgentCheck):
         """
         Cancels and sends cancel signal to all threads.
         """
-        if self._config.dbm_enabled:
+        if self._config.dbm:
             self.statement_samples.cancel()
             self.statement_metrics.cancel()
             self.metadata_samples.cancel()
@@ -908,10 +908,10 @@ class PostgreSql(AgentCheck):
 
             args = {
                 'host': self._config.host,
-                'user': self._config.user,
+                'user': self._config.username,
                 'password': password,
                 'dbname': dbname,
-                'sslmode': self._config.ssl_mode,
+                'sslmode': self._config.ssl,
                 'application_name': self._config.application_name,
             }
             if self._config.port:
@@ -1019,12 +1019,12 @@ class PostgreSql(AgentCheck):
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
                 "cloud_metadata": {
-                    "aws": self._config.aws,
-                    "azure": self._config.azure,
-                    "gcp": self._config.gcp,
+                    "aws": self._config.aws.model_dump(),
+                    "azure": self._config.azure.model_dump(),
+                    "gcp": self._config.gcp.model_dump(),
                 },
                 "metadata": {
-                    "dbm": self._config.dbm_enabled,
+                    "dbm": self._config.dbm,
                     "connection_host": self._config.host,
                 },
             }
@@ -1078,7 +1078,7 @@ class PostgreSql(AgentCheck):
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
-            if self._config.dbm_enabled:
+            if self._config.dbm:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
                 self.metadata_samples.run_job_loop(tags)
@@ -1117,10 +1117,3 @@ class PostgreSql(AgentCheck):
         self.tags_without_db = list(set(self.tags_without_db) | set(tags))
 
 
-def sanitize(config: InstanceConfig) -> dict:
-    # sanitized = {k: v for k, v in copy.deepcopy(dict).items() if k != "check"}
-    sanitized = config.model_dump()
-    sanitized['password'] = '***' if sanitized.get('password') else None
-    sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
-
-    return sanitized

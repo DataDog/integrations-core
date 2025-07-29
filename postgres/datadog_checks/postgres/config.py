@@ -729,3 +729,11 @@ def map_custom_metrics(custom_metrics):
         except Exception as e:
             raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
     return custom_metrics
+
+
+def sanitize(config: InstanceConfig) -> dict:
+    sanitized = config.model_dump(exclude=['custom_metrics'])
+    sanitized['password'] = '***' if sanitized.get('password') else None
+    sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
+    
+    return sanitized

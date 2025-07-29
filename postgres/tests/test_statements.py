@@ -86,7 +86,7 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
         dbm_instance.pop(k, None)
     dbm_instance[dbm_enabled_key] = dbm_enabled
     check = integration_check(dbm_instance)
-    assert check._config.dbm_enabled == dbm_enabled
+    assert check._config.dbm == dbm_enabled
 
 
 @requires_over_10
