@@ -552,7 +552,7 @@ spec:
         - name: "<CONTAINER_NAME>"
           image: "<CONTAINER_IMAGE>"
 
-        # Running the Agent as a side-car
+        # Running the Agent as a sidecar
         - name: datadog-agent
           image: gcr.io/datadoghq/agent:7
           env:
@@ -689,7 +689,7 @@ spec:
       - name: "<CONTAINER_NAME>"
         image: "<CONTAINER_IMAGE>"
 
-      # Running the Agent as a side-car
+      # Running the Agent as a sidecar
       - name: datadog-agent
         image: gcr.io/datadoghq/agent:7
         env:
@@ -852,7 +852,7 @@ spec:
       - name: "<CONTAINER_NAME>"
         image: "<CONTAINER_IMAGE>"
 
-      # Running the Agent as a side-car
+      # Running the Agent as a sidecar
       - name: datadog-agent
         image: gcr.io/datadoghq/agent:7
         env:
@@ -885,12 +885,12 @@ spec:
 
 Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubelet and ship them to Datadog.
 
-1. The most convenient way to enable native kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers will automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
+1. The most convenient way to enable native kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
 
   <!-- xxx tabs xxx -->
   <!-- xxx tab "Enable Logging - Datdog Operator" xxx -->
 
-  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true` so newly injected Agent containers will have kubelet logging enabled.
+  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`, so newly injected Agent containers will have kubelet logging enabled.
 
   ```yaml
   apiVersion: datadoghq.com/v2alpha1
@@ -909,7 +909,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   <!-- xxz tab xxx -->
   <!-- xxx tab "Enable Logging - Helm" xxx -->
 
-  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true` so newly injected Agent containers will have kubelet logging enabled.
+  Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`, so newly injected Agent containers will have kubelet logging enabled.
 
   ```yaml
   clusterAgent:
@@ -941,7 +941,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
             emptyDir: {}
         containers:
           #(...)
-          # Running the Agent as a side-car
+          # Running the Agent as a sidecar
           - name: datadog-agent
             image: gcr.io/datadoghq/agent:7
             # Mount the empty dir to the Agent
@@ -969,7 +969,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   <!-- xxz tab xxx -->
   <!-- xxz tabs xxx -->
 
-2. You can configure the injected Agents to automatically collect logs for all containers by enabling `CONTAINER_COLLECT_ALL`. Alternatively, logs can be filtered via the standard Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
+2. You can configure the injected Agents to automatically collect logs for all containers by enabling `CONTAINER_COLLECT_ALL`. Alternatively, logs can be filtered through the standard Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
 
   <!-- xxx tabs xxx -->
   <!-- xxx tab "Configure Logging - Datdog Operator" xxx -->
@@ -1020,7 +1020,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
         spec:
           #(...)
           containers:
-            # Running the Agent as a side-car
+            # Running the Agent as a sidecar
             - name: datadog-agent
               image: gcr.io/datadoghq/agent:7
               env:
@@ -1088,7 +1088,7 @@ spec:
       - name: "<CONTAINER_NAME>"
         image: "<CONTAINER_IMAGE>"
 
-      # Running the Agent as a side-car
+      # Running the Agent as a sidecar
       - name: datadog-agent
         image: gcr.io/datadoghq/agent:7
         # (...)
