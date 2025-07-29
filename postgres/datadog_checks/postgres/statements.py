@@ -426,7 +426,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
-            if (isinstance(e, psycopg.errors.ObjectNotInPrerequisiteState)) and 'pg_stat_statements' in str(e):
+            if (
+                isinstance(e, psycopg.errors.ObjectNotInPrerequisiteState)
+            ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
                 self._check.record_warning(
                     DatabaseConfigurationError.pg_stat_statements_not_loaded,
@@ -442,7 +444,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
                     ),
                 )
-            elif isinstance(e, psycopg.errors.UndefinedTable) and 'pg_stat_statements' in str(e):
+            elif isinstance(e, psycopg.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
                 self._check.record_warning(
                     DatabaseConfigurationError.pg_stat_statements_not_created,
