@@ -732,7 +732,7 @@ def map_custom_metrics(custom_metrics):
 
 
 def sanitize(config: InstanceConfig) -> dict:
-    sanitized = config.model_dump(exclude=['custom_metrics'])
+    sanitized = config.model_dump(exclude=['custom_metrics', 'custom_queries'])
     sanitized['password'] = '***' if sanitized.get('password') else None
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
     
