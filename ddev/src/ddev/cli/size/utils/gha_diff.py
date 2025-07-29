@@ -131,7 +131,7 @@ def main():
     args = parser.parse_args()
 
     with open(args.prev_sizes, "r") as f:
-        prev_sizes = csv.DictReader(f)
+        prev_sizes = list(csv.DictReader(f))
         # prev_sizes = json.load(f)
     with open(args.curr_sizes, "r") as f:
         curr_sizes = json.load(f)
