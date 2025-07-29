@@ -35,7 +35,7 @@ def calculate_diffs(prev_sizes, curr_sizes):
             prev_size = int(prev_entry.get("Size_Bytes", 0))
             curr_size = int(curr_entry.get("Size_Bytes", 0))
             if prev_size != curr_size:
-                percentage = (curr_size - prev_size) / prev_size * 100 if prev_size != 0 else 0
+                percentage = ((curr_size - prev_size) / prev_size) * 100 if prev_size != 0 else 0
                 changed.append(
                     {
                         "Name": curr_entry.get("Name"),

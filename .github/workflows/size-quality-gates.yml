@@ -1,15 +1,19 @@
 name: Quality Gates
 
+# on:
+#   workflow_call:
+#     inputs:
+#       platform:
+#         required: true
+#         type: string
+#       run-id:
+#         required: true
+#         type: string
 on:
-  workflow_call:
-    inputs:
-      platform:
-        required: true
-        type: string
-      run-id:
-        required: true
-        type: string
-
+  workflow_run:
+    workflows: ["size-qg-measure-disk-use"]        # or ["WF2"] if you only care about that one
+    types:
+      - completed
 env:
   PYTHON_VERSION: "3.12"
 
@@ -17,7 +21,10 @@ jobs:
   get-diff:
     runs-on: ubuntu-22.04
     outputs:
-      run_id: ${{ steps.find_run.outputs.run_id }}
+      run_id_base: ${{ steps.find_run.outputs.run_id_base }}
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -42,7 +49,6 @@ jobs:
           git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
           echo "sha=$base" >> $GITHUB_OUTPUT
-        # TODO: change to Resolve Dependencies and Build Wheels
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
         env:
@@ -64,30 +70,40 @@ jobs:
 
   
       - name: Download artifact from merge-base run
-        run: gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
+        run: gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # ${{ matrix.platform }}_compressed_status.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename previous sizes artifact
         run: |
-          mv compressed_status.csv ${{ inputs.platform }}_prev_compressed_status.csv
+          mv compressed_status.csv ${{ matrix.platform }}_prev_compressed_status.csv
 
 
       - name: Download current sizes artifact
-        run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}_compressed_status.json
+        run: gh run download ${{ github.event.workflow_run.id }} --name ${{ matrix.platform }}_compressed_status.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Rename current sizes artifact
         run: |
-          mv ${{ inputs.platform }}_compressed_status.json ${{ inputs.platform }}_curr_compressed_status.json
+          mv ${{ matrix.platform }}_compressed_status.json ${{ matrix.platform }}_curr_compressed_status.json
           
       - name: Calculate diffs
         run: |
-          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes ${{ inputs.platform }}_prev_compressed_status.csv --curr-sizes ${{ inputs.platform }}_curr_compressed_status.json > $GITHUB_STEP_SUMMARY
-        
-      #  upload artifact with the curr sizes json and the artifact with the diffs
+          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes ${{ matrix.platform }}_prev_compressed_status.csv --curr-sizes ${{ matrix.platform }}_curr_compressed_status.json --output ${{ matrix.platform }}_diffs.json > $GITHUB_STEP_SUMMARY
+
+      - name: Upload diffs artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ matrix.platform }}_diffs.json
+          path: ${{ matrix.platform }}_diffs.json
+
+      - name: Upload current sizes artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ matrix.platform }}_curr_compressed_status.json
+          path: ${{ matrix.platform }}_compressed_status.json
 
 
   
