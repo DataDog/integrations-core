@@ -36,7 +36,7 @@ pipeline:
   name: Lustre
   enabled: true
   filter:
-    query: source:lustre OR service:lustre
+    query: source:lustre
   processors:
     - type: grok-parser
       name: Main parser
