@@ -13,7 +13,8 @@
     "@log_lustre.operation_type",
     "@log_lustre.job_id",
     "@log_lustre.open_mode",
-    "@log_lustre.user",
+    "@usr.id",
+    "@log_lustre.group",
     "@network.client.ip"
   ],
   "options": {
@@ -24,7 +25,8 @@
       "@log_lustre.operation_type",
       "@log_lustre.open_mode",
       "@log_lustre.job_id",
-      "@log_lustre.user",
+      "@usr.id",
+      "@log_lustre.group",
       "@log_lustre.target_name"
     ],
     "show_date_column": true,

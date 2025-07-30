@@ -27,10 +27,16 @@ facets:
     type: string
   - groups:
       - Lustre
-    name: User
-    path: lustre.user
+    name: Group
+    path: lustre.group
     source: log
-    type: string
+    type: integer
+  - groups:
+      - Other
+    name: User
+    path: usr.id
+    source: log
+    type: integer
 pipeline:
   type: pipeline
   name: Lustre
@@ -77,7 +83,7 @@ pipeline:
         - 123:456
       grok:
         supportRules: ""
-        matchRules: rule %{integer:usr.id}:%{integer}
+        matchRules: rule %{integer:usr.id}:%{integer:lustre.group}
     - type: attribute-remapper
       name: Operation Type
       enabled: true
@@ -124,7 +130,7 @@ pipeline:
       sources:
         - u
       sourceType: attribute
-      target: lustre.user
+      target: lustre.uid_gid
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
