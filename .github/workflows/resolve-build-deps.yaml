@@ -190,7 +190,6 @@ jobs:
     uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
-      run-id: ${{ github.run_id }}
 
 
   build-macos:
@@ -286,7 +285,6 @@ jobs:
     uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
-      run-id: ${{ github.run_id }}
 
 
 
