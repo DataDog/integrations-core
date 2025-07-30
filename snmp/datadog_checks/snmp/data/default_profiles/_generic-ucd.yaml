@@ -6,47 +6,40 @@ metrics:
   - MIB: UCD-SNMP-MIB
     symbol:
       name: memory.total
-      scale_factor: 1000
+      scale_factor: 1024
       OID: 1.3.6.1.4.1.2021.4.5.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: memory.free
-      scale_factor: 1000
+      scale_factor: 1024
       OID: 1.3.6.1.4.1.2021.4.6.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.memTotalSwap
-      scale_factor: 1000
       OID: 1.3.6.1.4.1.2021.4.3.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.memAvailSwap
-      scale_factor: 1000
       OID: 1.3.6.1.4.1.2021.4.4.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.memTotalFree
-      scale_factor: 1000
       OID: 1.3.6.1.4.1.2021.4.11.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.memMinimumSwap
-      scale_factor: 1000
       OID: 1.3.6.1.4.1.2021.4.12.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.memShared
-      scale_factor: 1000
       OID: 1.3.6.1.4.1.2021.4.13.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.memBuffer
-      scale_factor: 1000
       OID: 1.3.6.1.4.1.2021.4.14.0
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.memCached
-      scale_factor: 1000
       OID: 1.3.6.1.4.1.2021.4.15.0
   - MIB: UCD-SNMP-MIB
     table:
