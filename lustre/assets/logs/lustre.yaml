@@ -61,15 +61,6 @@ pipeline:
 
           single_rule %{key_value}(\s%{regex("[^=]*"):target_name})?
     - type: grok-parser
-      name: User
-      enabled: true
-      source: u
-      samples:
-        - 123:456
-      grok:
-        supportRules: ""
-        matchRules: rule %{number:user.id}:%{number}
-    - type: grok-parser
       name: NID separator
       enabled: true
       source: nid

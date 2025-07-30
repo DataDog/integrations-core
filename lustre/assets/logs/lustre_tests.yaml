@@ -15,8 +15,6 @@ tests:
         client:
           ip: "172.31.38.176"
           protocol: "tcp"
-      user:
-        id: 0.0
     message: "t=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] some_dir"
     tags:
      - "source:LOGS_SOURCE"
@@ -36,8 +34,6 @@ tests:
         client:
           ip: "172.31.38.176"
           protocol: "tcp"
-      user:
-        id: 0.0
     message: "t=[0x200000bd1:0x14:0x0] j=vim.0 ef=0x1b u=0:0 nid=172.31.38.176@tcp x=user.job p=[0x200000007:0x1:0x0]"
     tags:
      - "source:LOGS_SOURCE"
@@ -60,8 +56,6 @@ tests:
         client:
           ip: "172.31.38.176"
           protocol: "tcp"
-      user:
-        id: 0.0
     message: "t=[0:0x0:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] vim_edited_file.txt~ s=[0x200000bd1:0x26:0x0] sp=[0x200000007:0x1:0x0] vim_edited_file.txt"
     tags:
      - "source:LOGS_SOURCE"
@@ -79,8 +73,6 @@ tests:
         client:
           ip: "172.31.38.176"
           protocol: "tcp"
-      user:
-        id: 0.0
     message: "t=[0x200000bd1:0x2b:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp"
     tags:
      - "source:LOGS_SOURCE"
