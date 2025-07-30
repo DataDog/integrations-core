@@ -47,25 +47,25 @@ jobs:
     - name: Rename sizes.json to platform.json
       if: ${{ inputs.resolved-deps }}
       run: |
-        cp "${{ inputs.platform }}/py3/sizes.json" "dependency_sizes/${{ inputs.platform }}.json"
+        cp "${{ inputs.platform }}/py3/sizes.json" "${{ inputs.platform }}.json"
       shell: bash
 
     - name: Download dependency sizes artifact - no resolved-deps
       if: ${{ !inputs.resolved-deps }}
-      run: gh run download ${{ inputs.run-id }} --name dependency_sizes/${{ inputs.platform }}.json
+      run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}.json
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Measure disk usage
       run: |
-        ddev size status --platform ${{ inputs.platform }} --dependency-sizes dependency_sizes/${{ inputs.platform }}.json --format json
-        ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes dependency_sizes/${{ inputs.platform }}.json --format json
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}.json --format json
+        ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes ${{ inputs.platform }}.json --format json
 
     - name: Upload platform.json artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: dependency_sizes/${{ inputs.platform }}.json
-        path: dependency_sizes/${{ inputs.platform }}.json
+        name: ${{ inputs.platform }}.json
+        path: dependency_sizes/
         if-no-files-found: error
     
     - name: Upload JSON uncompressed sizes artifact
