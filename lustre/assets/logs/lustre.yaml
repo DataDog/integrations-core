@@ -32,11 +32,10 @@ facets:
     source: log
     type: integer
   - groups:
-      - Other
-    name: User
+      - User
+    name: User ID
     path: usr.id
     source: log
-    type: integer
 pipeline:
   type: pipeline
   name: Lustre
