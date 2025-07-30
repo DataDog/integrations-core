@@ -73,7 +73,7 @@ jobs:
           mv compressed_status.csv status_compressed_${{ inputs.platform }}_prev.csv
 
       - name: Download current sizes artifact
-        run: gh run download ${{ github.event.workflow_run.id }} --name status_compressed_${{ inputs.platform }}.json
+        run: gh run download ${{ github.run_id }} --name status_compressed_${{ inputs.platform }}.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
