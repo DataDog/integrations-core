@@ -1,19 +1,20 @@
 name: Quality Gates
 
-# on:
-#   workflow_call:
-#     inputs:
-#       platform:
-#         required: true
-#         type: string
-#       run-id:
-#         required: true
-#         type: string
 on:
-  workflow_run:
-    workflows: ["Measure Disk Usage"] 
-    types:
-      - completed
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      run-id:
+        required: true
+        type: string
+# on:
+#   workflow_run:
+#     workflows: 
+#       - "Measure Disk Usage" 
+#     types:
+#       - completed
 env:
   PYTHON_VERSION: "3.12"
 
