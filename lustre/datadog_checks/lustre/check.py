@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import subprocess
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
@@ -503,7 +502,7 @@ class LustreCheck(AgentCheck):
                     data = {
                         'message': ' '.join(parts[1:]),
                     }
-                except IndexError and ValueError:
+                except (IndexError, ValueError):
                     self.log.debug('Skipping changelog due to unexpected format: %s', line)
                     continue
                 self.send_log(data, {'index': str(next_index)}, stream=target)
