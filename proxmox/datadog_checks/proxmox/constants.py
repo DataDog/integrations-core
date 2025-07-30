@@ -63,11 +63,3 @@ EVENT_TYPE_TO_TITLE = {
     'aptupdate': 'Update package database',
     'vncproxy': 'Console started',
 }
-
-
-def resource_type_for_event_type(event_type):
-    if event_type.startswith('vz'):
-        return 'lxc'
-    elif event_type.startswith('qm') or event_type.startswith('vnc'):
-        return 'qemu'
-    return 'node'

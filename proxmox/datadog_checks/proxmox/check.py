@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
@@ -18,8 +17,15 @@ from .constants import (
     RESOURCE_METRIC_NAME,
     RESOURCE_TYPE_MAP,
     VM_RESOURCE,
-    resource_type_for_event_type,
 )
+
+
+def resource_type_for_event_type(event_type):
+    if event_type.startswith('vz'):
+        return 'lxc'
+    elif event_type.startswith('qm') or event_type.startswith('vnc'):
+        return 'qemu'
+    return 'node'
 
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
@@ -78,7 +84,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
         resource = self.all_resources.get(resource_id, {})
 
-        tags = copy.deepcopy(resource.get('tags', []))
+        tags = list(resource.get('tags', []))
         tags.append(f'proxmox_event_type:{task_type}')
         tags.append(f'proxmox_user:{user}')
 
@@ -86,7 +92,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         hostname = resource.get('hostname', None)
 
         if resource_type != 'node':
-            resource_type_format = resource.get('resource_type', '').capitalize()
+            resource_type_format = resource.get('resource_type', 'node').capitalize()
             event_message = f"{resource_type_format} {resource.get('resource_name')}: {event_title} on node {node_name}"
         else:
             event_message = f"{event_title} on node {node_name}"
