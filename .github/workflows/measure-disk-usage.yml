@@ -89,7 +89,7 @@ jobs:
 
       - name: add comment to PR
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "Disk usage"
+          gh pr comment ${{ github.event.pull_request.number }} --body ${{ github.step_summary }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
