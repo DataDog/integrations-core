@@ -1,7 +1,6 @@
 import argparse
 import csv
 import json
-import os
 
 from ddev.cli.size.utils.common_funcs import convert_to_human_readable_size
 
@@ -148,9 +147,6 @@ def main():
     display_diffs(diffs, platform, python_version)
 
     if args.output:
-        output_dir = os.path.dirname(args.output)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir, exist_ok=True)
         with open(args.output, "w") as f:
             f.write(json.dumps(diffs, indent=2))
 
