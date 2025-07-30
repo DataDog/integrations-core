@@ -45,42 +45,55 @@ jobs:
     - name: Rename sizes.json to platform.json
       if: ${{ inputs.resolved-deps }}
       run: |
-        cp "${{ inputs.platform }}/py3/sizes.json" "${{ inputs.platform }}.json"
+        cp "${{ inputs.platform }}/py3/sizes.json" "dependency_sizes/${{ inputs.platform }}.json"
       shell: bash
 
     - name: Download dependency sizes artifact - no resolved-deps
       if: ${{ !inputs.resolved-deps }}
-      run: gh run download ${{ inputs.run-id }} --name ${{ inputs.platform }}.json
+      run: gh run download ${{ inputs.run-id }} --name dependency_sizes/${{ inputs.platform }}.json
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Measure disk usage
       run: |
-        ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}.json --format json
-        ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes ${{ inputs.platform }}.json --format json
+        ddev size status --platform ${{ inputs.platform }} --dependency-sizes dependency_sizes/${{ inputs.platform }}.json --format json
+        ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes dependency_sizes/${{ inputs.platform }}.json --format json
   
 
     - name: Upload platform.json artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: ${{ inputs.platform }}.json
-        path: ${{ inputs.platform }}.json
+        name: dependency_sizes/${{ inputs.platform }}.json
+        path: dependency_sizes/${{ inputs.platform }}.json
         if-no-files-found: error
     
     - name: Upload JSON uncompressed sizes artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: ${{ inputs.platform }}_uncompressed_status.json
-        path: ${{ inputs.platform }}_uncompressed_status.json
+        name: status_uncompressed_${{ inputs.platform }}.json
+        path: status_uncompressed_${{ inputs.platform }}.json
         if-no-files-found: error
 
     - name: Upload JSON compressed sizes artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: ${{ inputs.platform }}_compressed_status.json
-        path: ${{ inputs.platform }}_compressed_status.json
+        name: status_compressed_${{ inputs.platform }}.json
+        path: status_compressed_${{ inputs.platform }}.json
         if-no-files-found: error
+
+    send-metrics:
+      needs: measure-disk-usage
+      name: Send metrics to Datadog
+      if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
+      runs-on: ubuntu-22.04
+      steps:
+        - name: Send metrics to Datadog
+          run: |
+            ddev size status --platform ${{ inputs.platform }} --dependency-sizes ${{ inputs.platform }}.json --to-dd-key ${{secrets.DD_API_KEY}}
+            ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes ${{ inputs.platform }}.json --to-dd-key ${{secrets.DD_API_KEY}}
+
     
+
   # calculate-diffs:
   #   needs: measure-disk-usage
   #   runs-on: ubuntu-22.04

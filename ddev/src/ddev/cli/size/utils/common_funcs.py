@@ -541,47 +541,22 @@ def export_format(
     compressed: bool,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
+    name = f"{mode}_{size_type}"
+    if platform:
+        name += f"_{platform}"
+    if version:
+        name += f"_{version}"
     for output_format in format:
         if output_format == "csv":
-            csv_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.csv"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.csv"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.csv"
-                    if platform
-                    else f"{size_type}_{mode}.csv"
-                )
-            )
+            csv_filename = f"{name}.csv"
             save_csv(app, modules, csv_filename)
 
         elif output_format == "json":
-            json_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.json"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.json"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.json"
-                    if platform
-                    else f"{size_type}_{mode}.json"
-                )
-            )
+            json_filename = f"{name}.json"
             save_json(app, json_filename, modules)
 
         elif output_format == "markdown":
-            markdown_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.md"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.md"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.md"
-                    if platform
-                    else f"{size_type}_{mode}.md"
-                )
-            )
+            markdown_filename = f"{name}.md"
             save_markdown(app, "Status", modules, markdown_filename)
 
 

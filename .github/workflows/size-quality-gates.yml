@@ -75,31 +75,31 @@ jobs:
 
       - name: Rename previous sizes artifact
         run: |
-          mv compressed_status.csv ${{ matrix.platform }}_prev_compressed_status.csv
+          mv compressed_status.csv status_compressed_${{ matrix.platform }}_prev.csv
       - name: Download current sizes artifact
-        run: gh run download ${{ github.event.workflow_run.id }} --name ${{ matrix.platform }}_compressed_status.json
+        run: gh run download ${{ github.event.workflow_run.id }} --name status_compressed_${{ matrix.platform }}.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Rename current sizes artifact
         run: |
-          mv ${{ matrix.platform }}_compressed_status.json ${{ matrix.platform }}_curr_compressed_status.json
+          mv status_compressed_${{ matrix.platform }}.json status_compressed_${{ matrix.platform }}_curr.json
           
       - name: Calculate diffs
         run: |
-          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes ${{ matrix.platform }}_prev_compressed_status.csv --curr-sizes ${{ matrix.platform }}_curr_compressed_status.json --output ${{ matrix.platform }}_diffs.json > $GITHUB_STEP_SUMMARY
+          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ matrix.platform }}_prev.csv --curr-sizes status_compressed_${{ matrix.platform }}_curr.json --output ${{ matrix.platform }}_diffs.json > size_diffs_output.txt
       - name: Upload diffs artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: ${{ matrix.platform }}_diffs.json
-          path: ${{ matrix.platform }}_diffs.json
+          name: diffs_${{ matrix.platform }}.json
+          path: diffs_${{ matrix.platform }}.json
 
       - name: Upload current sizes artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: ${{ matrix.platform }}_curr_compressed_status.json
-          path: ${{ matrix.platform }}_compressed_status.json
+          name: status_compressed_${{ matrix.platform }}_curr.json
+          path: status_compressed_${{ matrix.platform }}.json
 
 
 
