@@ -84,7 +84,7 @@ jobs:
           
       - name: Calculate diffs
         run: |
-          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output ${{ inputs.platform }}_diffs.json > size_diffs_output.txt
+          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json > size_diffs_output.txt
       - name: Upload diffs artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -94,8 +94,8 @@ jobs:
       - name: Upload current sizes artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: status_compressed_${{ inputs.platform }}_curr.json
-          path: status_compressed_${{ inputs.platform }}.json
+          name: status_compressed_${{ inputs.platform }}.json
+          path: status_compressed_${{ inputs.platform }}_curr.json
 
 
 
