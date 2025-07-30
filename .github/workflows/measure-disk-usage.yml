@@ -71,7 +71,7 @@ jobs:
           fi
 
           # echo "Found run_id=$run_id" >> $GITHUB_STEP_SUMMARY 
-          # echo "run_id=$run_id" >> $GITHUB_OUTPUT
+          echo "run_id=$run_id" >> $GITHUB_OUTPUT
           # echo "run_id=$run_id" >> $GITHUB_STEP_SUMMARY
 
       - name: Download artifact from merge-base run
