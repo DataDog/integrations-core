@@ -255,6 +255,8 @@ class PostgresMetadata(DBMAsyncJob):
             job_name="database-metadata",
             shutdown_callback=shutdown_callback,
         )
+        print("metadata enabled", self._enabled)
+        print("metadata run sync", self._run_sync)
         self._check = check
         self._config = config
         self.db_pool = self._check.db_pool
@@ -283,9 +285,11 @@ class PostgresMetadata(DBMAsyncJob):
         return t
 
     def run_job(self):
+        print('run')
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
         self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
+        print('metadat')
         self.report_postgres_metadata()
         self.report_postgres_extensions()
         self._check.db_pool.prune_connections()
@@ -383,6 +387,8 @@ class PostgresMetadata(DBMAsyncJob):
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
 
+            print("Collecting schema metadata for {} databases".format(len(schema_metadata)))
+
             for database in schema_metadata:
                 dbname = database["name"]
                 if not self._should_collect_metadata(dbname, "database"):
@@ -450,12 +456,13 @@ class PostgresMetadata(DBMAsyncJob):
         # We get the config as a dict so we can use string interpolation
         # to iterate over object types
         schemas_config = self._config.collect_schemas.model_dump()
-        for re_str in schemas_config.get(
+        excludes = schemas_config.get(
             "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
-        ):
+        )
+        for re_str in excludes:
             regex = re.compile(re_str)
             if regex.search(name):
-                self._log.debug(
+                self._log.warning(
                     "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
                         metadata_type=metadata_type, name=name, re_str=re_str
                     )
@@ -470,12 +477,17 @@ class PostgresMetadata(DBMAsyncJob):
         for re_str in includes:
             regex = re.compile(re_str)
             if regex.search(name):
-                self._log.debug(
+                self._log.warning(
                     "Including {metadata_type} {name} in metadata collection because of {re_str}".format(
                         metadata_type=metadata_type, name=name, re_str=re_str
                     )
                 )
                 return True
+            self._log.warning(
+                "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
+                    metadata_type=metadata_type, name=name, re_str=re_str
+                )
+            )
         return False
 
     def _flush_schema(self, base_event, database, schema, tables):

@@ -1048,6 +1048,7 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
+        print("check")
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
@@ -1087,9 +1088,11 @@ class PostgreSql(AgentCheck):
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
+            print("dbm enabled", self._config.dbm)
             if self._config.dbm:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
+                print("loop")
                 self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled

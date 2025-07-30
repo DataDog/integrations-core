@@ -344,6 +344,7 @@ def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
         print(check._config.collect_schemas)
         run_one_check(check, dbm_instance)
         dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+        print(dbm_metadata)
 
         tables_got = []
 
