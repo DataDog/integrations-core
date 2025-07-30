@@ -45,12 +45,18 @@ class MultiDatabaseConnectionPool(object):
     however the usage patterns of the Agent application should aim to have minimal footprint
     and reuse a single connection as much as possible.
 
+    Even when limited to a single connection per database, an instance with hundreds of
+    databases still present a connection overhead risk. This class provides a mechanism
+    to prune connections to a database which were not used in the time specified by their
+    TTL.
+
     If max_conns is specified, the connection pool will limit concurrent connections.
     """
 
     class Stats(object):
         def __init__(self):
             self.connection_opened = 0
+            # self.connection_pruned = 0
             self.connection_closed = 0
             self.connection_closed_failed = 0
 
@@ -65,8 +71,6 @@ class MultiDatabaseConnectionPool(object):
         self._stats = self.Stats()
         self._mu = threading.RLock()
         self._conns: Dict[str, ConnectionInfo] = {}
-        # Optimistically try setting idle_session_timeout, which is only supporting in 14+
-        self._is_idle_session_timeout_supported = True
 
         if hasattr(inspect, 'signature'):
             connect_sig = inspect.signature(connect_fn)
@@ -80,7 +84,7 @@ class MultiDatabaseConnectionPool(object):
     def _get_connection_raw(
         self,
         dbname: str,
-        ttl_ms: int = 60000,
+        ttl_ms: int,
         timeout: int = None,
         startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
@@ -91,6 +95,7 @@ class MultiDatabaseConnectionPool(object):
         when re-establishing it.
         """
         start = datetime.datetime.now()
+        # self.prune_connections()
         with self._mu:
             conn = self._conns.pop(dbname, None)
             db = conn.connection if conn else None
@@ -98,6 +103,7 @@ class MultiDatabaseConnectionPool(object):
                 if self.max_conns is not None:
                     # try to free space until we succeed
                     while len(self._conns) >= self.max_conns:
+                        # self.prune_connections()
                         self.evict_lru()
                         if timeout is not None and (datetime.datetime.now() - start).total_seconds() > timeout:
                             raise ConnectionPoolFullError(self.max_conns, timeout)
@@ -115,12 +121,7 @@ class MultiDatabaseConnectionPool(object):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
 
-            db.execute(f"SET statement_timeout = {ttl_ms}; SET idle_in_transaction_session_timeout = {ttl_ms*10};")
-            # if self._is_idle_session_timeout_supported:
-            #     try:
-            #         db.execute(f"SET idle_session_timeout = {ttl_ms*10};")
-            #     except:
-            #         self._is_idle_session_timeout_supported = False
+            # db.execute(f"SET statement_timeout = {ttl_ms}; SET idle_in_transaction_session_timeout = {ttl_ms*10};")
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
             self._conns[dbname] = ConnectionInfo(
@@ -138,7 +139,7 @@ class MultiDatabaseConnectionPool(object):
     def get_connection(
         self,
         dbname: str,
-        ttl_ms: int = 60000,
+        ttl_ms: int,
         timeout: int = None,
         startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
@@ -165,6 +166,21 @@ class MultiDatabaseConnectionPool(object):
                 except KeyError:
                     # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
                     pass
+
+    # def prune_connections(self):
+    #     """
+    #     This function should be called periodically to prune all connections which have not been
+    #     accessed since their TTL. This means that connections which are actually active on the
+    #     server can still be closed with this function. For instance, if a connection is opened with
+    #     ttl 1000ms, but the query it's running takes 5000ms, this function will still try to close
+    #     the connection mid-query.
+    #     """
+    #     with self._mu:
+    #         now = datetime.datetime.now()
+    #         for dbname, conn in list(self._conns.items()):
+    #             if conn.deadline < now:
+    #                 self._stats.connection_pruned += 1
+    #                 self._terminate_connection_unsafe(dbname)
 
     def close_all_connections(self):
         success = True
@@ -195,7 +211,6 @@ class MultiDatabaseConnectionPool(object):
         if db is not None:
             try:
                 self._stats.connection_closed += 1
-                db.cancel()
                 db.close()
             except Exception:
                 self._stats.connection_closed_failed += 1
