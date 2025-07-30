@@ -41,7 +41,6 @@ jobs:
       repo: core
 
       # Options
-      standard: true
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       agent-image: "${{ inputs.agent-image }}"
