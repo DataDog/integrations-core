@@ -1,7 +1,7 @@
 id: lustre
 metric_id: lustre
 backend_only: false
-facets:
+facets: null
   - groups:
       - Web Access
     name: Client IP
@@ -36,47 +36,68 @@ pipeline:
   name: Lustre
   enabled: true
   filter:
-    query: source:lustre
+    query: source:lustre OR service:lustre
   processors:
     - type: grok-parser
       name: Main parser
       enabled: true
       source: message
       samples:
-        - 07RMDIR 12:47:32.913242547 2025.06.02 0x1 t=[0x200000bd1:0x3:0x0]
-          ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] some_dir
-        - 23GXATR 14:57:42.650942657 2025.06.02 0x0 t=[0x200000bd1:0x14:0x0]
-          j=vim.0 ef=0x1b u=0:0 nid=172.31.38.176@tcp x=user.job
-          p=[0x200000007:0x1:0x0]
+        - t=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp
+          p=[0x200000007:0x1:0x0] some_dir
+        - t=[0x200000bd1:0x14:0x0] j=vim.0 ef=0x1b u=0:0 nid=172.31.38.176@tcp
+          x=user.job p=[0x200000007:0x1:0x0]
         - >
-          08RENME 07:59:40.665687763 2025.06.11 0x0 t=[0:0x0:0x0] j=vim.0
-          ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0]
-          vim_edited_file.txt~ s=[0x200000bd1:0x26:0x0] sp=[0x200000007:0x1:0x0]
-          vim_edited_file.txt
-        - >
-          14SATTR 08:25:55.811908329 2025.06.19 0x14 t=[0x200000bd1:0x2b:0x0]
-          j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp
+          t=[0:0x0:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp
+          p=[0x200000007:0x1:0x0] vim_edited_file.txt~ s=[0x200000bd1:0x26:0x0]
+          sp=[0x200000007:0x1:0x0] vim_edited_file.txt
+        - |
+          t=[0x200000bd1:0x2b:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp
       grok:
-        supportRules: >-
-          standard_fields
-          %{integer}%{notSpace:lustre.operation_type}\s+%{date("HH:mm:ss.SSSSSSSSS
-          yyyy.MM.dd"):date}\s+%{word:lustre.flags}
-
-          key_value %{data::keyvalue("=", ":\\[\\]")}
+        supportRules: key_value %{data::keyvalue("=", ":\\[\\]")}
         matchRules: >-
           double_rule
-          %{standard_fields}\s+%{key_value}\s+%{regex("[^=]*"):target_name}\s+%{key_value}\s+%{regex("[^=]*"):source_name}
+          %{key_value}\s%{regex("[^=]*"):target_name}\s%{key_value}\s%{regex("[^=]*"):source_name}
 
-          single_rule %{standard_fields}\s+%{key_value}(\s+%{regex("[^=]*"):target_name})?
+          single_rule %{key_value}(\s%{regex("[^=]*"):target_name})?
+    - type: grok-parser
+      name: User
+      enabled: true
+      source: u
+      samples:
+        - 123:456
+      grok:
+        supportRules: ""
+        matchRules: rule %{number:user.id}:%{number}
     - type: grok-parser
       name: NID separator
       enabled: true
-      source: lustre.nid
+      source: nid
       samples:
         - 172.31.38.176@tcp
       grok:
         supportRules: ""
         matchRules: rule %{ip:network.client.ip}@%{word:network.client.protocol}
+    - type: attribute-remapper
+      name: Operation Type
+      enabled: true
+      sources:
+        - operation_type
+      sourceType: attribute
+      target: lustre.operation_type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Flags
+      enabled: true
+      sources:
+        - flags
+      sourceType: attribute
+      target: lustre.flags
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: attribute-remapper
       name: Target FID
       enabled: true
@@ -207,8 +228,3 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
-    - type: date-remapper
-      name: Date
-      enabled: true
-      sources:
-        - date
