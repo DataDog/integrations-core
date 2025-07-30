@@ -1,7 +1,7 @@
 id: lustre
 metric_id: lustre
 backend_only: false
-facets: null
+facets:
   - groups:
       - Web Access
     name: Client IP
