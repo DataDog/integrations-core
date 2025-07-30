@@ -231,7 +231,7 @@ class PostgresMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check: PostgreSql, config: InstanceConfig, shutdown_callback):
-        self.pg_settings_ignored_patterns = config.collect_settings.ignored_settings_patterns
+        self.pg_settings_ignored_patterns = list(config.collect_settings.ignored_settings_patterns)
         self.pg_settings_collection_interval = config.collect_settings.collection_interval
         # Extensions currently doesn't have a separate collection interval option
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
@@ -247,7 +247,7 @@ class PostgresMetadata(DBMAsyncJob):
         super(PostgresMetadata, self).__init__(
             check,
             rate_limit=1 / float(self.collection_interval),
-            run_sync=False,
+            run_sync=config.collect_settings.run_sync,
             enabled=config.collect_settings.enabled or config.collect_schemas.enabled,
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
@@ -447,7 +447,10 @@ class PostgresMetadata(DBMAsyncJob):
             datadog_agent.emit_agent_telemetry("postgres", "schema_tables_count", total_tables, "gauge")
 
     def _should_collect_metadata(self, name, metadata_type):
-        for re_str in self._config.schemas_metadata_config.get(
+        # We get the config as a dict so we can use string interpolation
+        # to iterate over object types
+        schemas_config = self._config.collect_schemas.model_dump()
+        for re_str in schemas_config.get(
             "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
         ):
             regex = re.compile(re_str)
@@ -459,7 +462,7 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 return False
 
-        includes = self._config.schemas_metadata_config.get(
+        includes = schemas_config.get(
             "include_{metadata_type}s".format(metadata_type=metadata_type), []
         )
         if len(includes) == 0:
@@ -559,7 +562,7 @@ class PostgresMetadata(DBMAsyncJob):
         rows = cursor.fetchall()
         table_info = [dict(row) for row in rows]
 
-        limit = self._config.schemas_metadata_config.get("max_tables", 300)
+        limit = self._config.collect_schemas.max_tables
 
         if len(table_info) <= limit:
             return table_info
@@ -587,8 +590,8 @@ class PostgresMetadata(DBMAsyncJob):
         return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
     def _get_tables_filter(self):
-        includes = self._config.schemas_metadata_config.get("include_tables", [])
-        excludes = self._config.schemas_metadata_config.get("exclude_tables", [])
+        includes = self._config.collect_schemas.include_tables
+        excludes = self._config.collect_schemas.exclude_tables
         if len(includes) == 0 and len(excludes) == 0:
             return ""
 

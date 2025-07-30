@@ -425,6 +425,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
                 "enabled": False,
                 "collection_interval": DEFAULT_SETTINGS_COLLECTION_INTERVAL,
                 "ignored_settings_patterns": DEFAULT_SETTINGS_IGNORED_PATTERNS,
+                "run_sync": False,
             },
             **(instance.get('collect_settings') or {}),
         },
@@ -642,26 +643,24 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         bool(config.relations),
         "Relation metrics requires a value for `relations` in the configuration." if not config.relations else None,
     )
-
     validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, config.query_activity.enabled and config.dbm)
-    if config.query_activity.enabled and not config.dbm:
-        validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
-
     validation_result.add_feature(FeatureKey.QUERY_SAMPLES, config.query_samples.enabled and config.dbm)
-    if config.query_samples.enabled and not config.dbm:
-        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
-
     validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
-    if config.query_metrics.enabled and not config.dbm:
-        validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
-
     validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
-    if config.collect_settings.enabled and not config.dbm:
-        validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
-
     validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
-    if config.collect_schemas.enabled and not config.dbm:
+
+    # If instance config explicitly enables these features, we add a warning if dbm is not enabled
+    if instance.get('query_activity', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
+    if instance.get('query_samples', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
+    if instance.get('query_metrics', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
+    if instance.get('collect_settings', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
+    if instance.get('collect_schemas', {}).get('enabled') and not config.dbm:
         validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
+
 
     return config, validation_result
 

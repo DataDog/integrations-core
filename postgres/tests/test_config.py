@@ -104,15 +104,12 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.QUERY_METRICS,
     }
     for feature in result.features:
-        print(feature)
         assert feature['enabled'] is True
 
 
 def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
     config, result = build_config(check=mock_check, init_config={}, instance=minimal_instance)
-    print(result.features)
     features = {f['key']: f for f in result.features}
-    print(features[FeatureKey.QUERY_METRICS])
     assert features[FeatureKey.RELATION_METRICS]['enabled'] is False
     assert features[FeatureKey.QUERY_SAMPLES]['enabled'] is False
     assert features[FeatureKey.COLLECT_SETTINGS]['enabled'] is False

@@ -501,6 +501,4 @@ class RelationsManager(object):
                 if len(config.get(SCHEMAS) or []) == 0:
                     config[SCHEMAS] = [ALL_SCHEMAS]
             relations.append(config)
-        print(yamlconfig)
-        print(relations)
         return relations

@@ -44,6 +44,7 @@ def dbm_instance(pg_instance):
 )
 def test_explain_parameterized_queries(integration_check, dbm_instance, query, expected_explain_err_code):
     check = integration_check(dbm_instance)
+
     check._connect()
 
     check.check(dbm_instance)

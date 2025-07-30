@@ -685,6 +685,14 @@ files:
                 - plpgsql%
               default:
                 - plpgsql%
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the metadata collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
     - name: collect_schemas
       description: |
         Enable collection of database schemas. In order to collect schemas from all user databases,

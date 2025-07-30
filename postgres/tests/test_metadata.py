@@ -6,6 +6,7 @@ from typing import List
 
 import mock
 import pytest
+import time
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
@@ -80,9 +81,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
     dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
-    check = integration_check(dbm_instance)
     if not use_default_ignore_schemas_owned_by:
-        check._config.ignore_schemas_owned_by = ['rds_superuser']
+        dbm_instance["ignore_schemas_owned_by"] = ['rds_superuser']
+    check = integration_check(dbm_instance)
     run_one_check(check, dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 

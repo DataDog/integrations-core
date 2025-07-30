@@ -34,7 +34,6 @@ INSTANCE = {
     'username': USER,
     'password': PASSWORD,
     'dbname': DB_NAME,
-    'dbm': True,
     'tags': ['foo:bar'],
     'disable_generic_tags': True,
 }
