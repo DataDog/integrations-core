@@ -227,7 +227,7 @@ class LustreCheck(AgentCheck):
                 self.log.debug('No jobstats metrics found for %s', jobstats_param)
                 continue
             for job in jobstats_metrics:
-                job_id = job.get('job_id') or "unknown"
+                job_id = job.get('job_id', "unknown") 
                 tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
                 for metric_name, metric_values in job.items():
                     if not isinstance(metric_values, dict):
@@ -279,7 +279,7 @@ class LustreCheck(AgentCheck):
         '''
         lnet_metrics = self._get_lnet_metrics('stats')
         if 'statistics' not in lnet_metrics:
-            self.log.debug('Got unexpected output for lnet stats. Keys: %s', lnet_metrics.keys())
+            self.log.debug('Could not find `statistics` property in the output of lnet stats. Output: %s', lnet_metrics)
             return
         lnet_metrics = lnet_metrics['statistics']
         for metric in lnet_metrics:
