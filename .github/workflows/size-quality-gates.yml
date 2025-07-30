@@ -38,7 +38,6 @@ jobs:
         run: |
           pip install -e ./datadog_checks_dev[cli]
           pip install -e ./ddev
-
       - name: Configure ddev
         run: |
           ddev config set repos.core .
@@ -68,7 +67,6 @@ jobs:
             echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-
   
       - name: Download artifact from merge-base run
         run: gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # ${{ matrix.platform }}_compressed_status.json
@@ -78,8 +76,6 @@ jobs:
       - name: Rename previous sizes artifact
         run: |
           mv compressed_status.csv ${{ matrix.platform }}_prev_compressed_status.csv
-
-
       - name: Download current sizes artifact
         run: gh run download ${{ github.event.workflow_run.id }} --name ${{ matrix.platform }}_compressed_status.json
         env:
@@ -93,7 +89,6 @@ jobs:
       - name: Calculate diffs
         run: |
           python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes ${{ matrix.platform }}_prev_compressed_status.csv --curr-sizes ${{ matrix.platform }}_curr_compressed_status.json --output ${{ matrix.platform }}_diffs.json > $GITHUB_STEP_SUMMARY
-
       - name: Upload diffs artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -105,13 +100,6 @@ jobs:
         with:
           name: ${{ matrix.platform }}_curr_compressed_status.json
           path: ${{ matrix.platform }}_compressed_status.json
-
-
-  
-
-
-
-
 
 
 

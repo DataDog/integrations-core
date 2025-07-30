@@ -87,9 +87,9 @@ def display_diffs(diffs, platform, python_version):
         for entry in diffs["added"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = int(entry.get("Size_Bytes", 0))
+            size = entry.get("Size", 0)
             typ = entry.get("Type", "")
-            print(f"  + [{typ}] {name} {version}: +{convert_to_human_readable_size(size)}")
+            print(f"  + [{typ}] {name} {version}: +{size}")
         print()
     else:
         print("Added: None\n")
@@ -99,9 +99,9 @@ def display_diffs(diffs, platform, python_version):
         for entry in diffs["removed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = int(entry.get("Size_Bytes", 0))
+            size = entry.get("Size", 0)
             typ = entry.get("Type", "")
-            print(f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}")
+            print(f"  - [{typ}] {name} {version}: -{size}")
         print()
     else:
         print("Removed: None\n")
@@ -112,18 +112,17 @@ def display_diffs(diffs, platform, python_version):
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             typ = entry.get("Type", "")
-            # curr_size = entry.get("Curr_Size_Bytes", 0)
             percentage = entry.get("Percentage", 0)
             diff = entry.get("Diff", 0)
             sign = "+" if diff > 0 else "-"
             version_diff = (
-                f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)} "
+                f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)}"
                 if entry.get('Prev Version', version) != entry.get('Version', version)
                 else version
             )
             print(
                 f"  * [{typ}] {name} ({version_diff}): "
-                f"{sign}{convert_to_human_readable_size(diff)} ({sign}{percentage:.2f}%)"
+                f"{sign}{convert_to_human_readable_size(abs(diff))} ({sign}{percentage:.2f}%)"
             )
         print()
     else:
