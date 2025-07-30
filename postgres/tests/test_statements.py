@@ -86,7 +86,7 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
         dbm_instance.pop(k, None)
     dbm_instance[dbm_enabled_key] = dbm_enabled
     check = integration_check(dbm_instance)
-    assert check._config.dbm_enabled == dbm_enabled
+    assert check._config.dbm == dbm_enabled
 
 
 @requires_over_10
@@ -555,7 +555,6 @@ def dbm_instance(pg_instance):
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': CLOSE_TO_ZERO_INTERVAL}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -568,7 +567,6 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -1142,7 +1140,6 @@ def test_statement_reported_hostname(
         ),
     ],
 )
-@pytest.mark.unit
 def test_activity_snapshot_collection(
     aggregator,
     integration_check,
@@ -1165,7 +1162,6 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1293,7 +1289,6 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     dbm_instance['dbstrict'] = True
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     dbm_instance['collect_raw_query_statement'] = {'enabled': True}
     check = integration_check(dbm_instance)
     check._connect()
@@ -1789,7 +1784,6 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1888,79 +1882,9 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
-class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
-    """
-    A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
-    has it as read-only and not settable at construction-time
-    """
-
-    def __init__(self, pg_error):
-        self.pg_error = pg_error
-
-    def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
-        else:
-            return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
-
-    def __str__(self):
-        return self.pg_error
-
-
-class UndefinedTable(psycopg.errors.UndefinedTable):
-    """
-    A fake UndefinedTable that allows setting pg_error on construction since UndefinedTable
-    has it as read-only and not settable at construction-time
-    """
-
-    def __init__(self, pg_error):
-        self.pg_error = pg_error
-
-    def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
-        else:
-            return super(UndefinedTable, self).__getattribute__(attr)
-
-    def __str__(self):
-        return self.pg_error
-
-
 @pytest.mark.parametrize(
     "error,metric_columns,expected_error_tag,expected_warnings",
     [
-        (
-            ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
-            [],
-            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
-            [
-                'Unable to collect statement metrics because pg_stat_statements extension is '
-                "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statements-not-loaded'
-                ' for more details\ncode=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
-            ],
-        ),
-        (
-            UndefinedTable('ERROR:  relation "pg_stat_statements" does not exist'),
-            [],
-            'error:database-UndefinedTable-pg_stat_statements_not_created',
-            [
-                'Unable to collect statement metrics because pg_stat_statements is not '
-                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
-                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
-            ],
-        ),
-        (
-            ObjectNotInPrerequisiteState('cannot insert into view'),
-            [],
-            'error:database-ObjectNotInPrerequisiteState',
-            [
-                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
-                "See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: cannot insert into view\n"
-                "dbname=datadog_test host=stubbed.hostname"
-            ],
-        ),
         (
             psycopg.errors.DatabaseError('connection reset'),
             [],
@@ -1996,6 +1920,52 @@ def test_statement_metrics_database_errors(
         side_effect=error,
     ):
         run_one_check(check)
+
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + [expected_error_tag]
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )
+
+    assert check.warnings == expected_warnings
+
+
+@pytest.mark.parametrize(
+    "error,metric_columns,expected_error_tag,expected_warnings",
+    [
+        (
+            'not-created',
+            [],
+            'error:database-UndefinedTable-pg_stat_statements_not_created',
+            [
+                'Unable to collect statement metrics because pg_stat_statements is not '
+                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
+                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
+            ],
+        ),
+    ],
+)
+def test_statement_metrics_database_extension_errors(
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
+):
+    # don't need samples for this test
+    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
+    check = integration_check(dbm_instance)
+
+    # Break databased on purpose to simulate the extension not being loaded or created
+    if error == 'not-created':
+        superconn = _get_superconn(dbm_instance)
+        with superconn.cursor() as cur:
+            cur.execute("DROP EXTENSION pg_stat_statements CASCADE;")
+
+            run_one_check(check)
+
+            # Restore extension for next test
+            cur.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;")
 
     expected_tags = _get_expected_tags(
         check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'

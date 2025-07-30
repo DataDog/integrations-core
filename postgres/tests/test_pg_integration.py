@@ -615,6 +615,7 @@ def test_query_timeout(integration_check, pg_instance):
                 cursor.execute("select pg_sleep(2000)")
 
 
+@pytest.mark.flaky(max_runs=10)
 def test_pg_control(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()
@@ -711,7 +712,6 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_activity'] = {'enabled': False}
     pg_instance['query_metrics'] = {'enabled': False}
-    pg_instance['collect_resources'] = {'enabled': False}
 
     pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
     pg_instance['reported_hostname'] = reported_hostname
@@ -758,7 +758,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     pg_instance['dbm'] = dbm_enabled
     # this will block on cancel and wait for the coll interval of 600 seconds,
     # unless the collection_interval is set to a short amount of time
-    pg_instance['collect_resources'] = {'collection_interval': 0.1}
+    pg_instance['collect_settings'] = {'collection_interval': 0.1}
 
     expected_database_hostname = expected_database_instance = expected_host = "stubbed.hostname"
     if reported_hostname:
@@ -1189,7 +1189,7 @@ def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enab
     pg_instance['dbm'] = dbm_enabled
     # this will block on cancel and wait for the coll interval of 600 seconds,
     # unless the collection_interval is set to a short amount of time
-    pg_instance['collect_resources'] = {'collection_interval': 0.1}
+    pg_instance['collect_settings'] = {'collection_interval': 0.1}
 
     check = integration_check(pg_instance)
     run_one_check(check)

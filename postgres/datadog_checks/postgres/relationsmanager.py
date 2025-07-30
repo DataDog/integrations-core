@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Union  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.postgres.config_models.instance import Relations
 
 ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
@@ -488,17 +489,18 @@ class RelationsManager(object):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 
     @staticmethod
-    def _build_relations_config(yamlconfig):
-        # type:  (List[Union[str, Dict]]) -> List[Dict[str, Any]]
+    def _build_relations_config(yamlconfig: list[str | Relations]) -> List[Dict[str, Any]]:
         """Builds a list from relations configuration while maintaining compatibility"""
         relations = []
         for element in yamlconfig:
             config = {}
             if isinstance(element, str):
                 config = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
-            elif isinstance(element, dict):
-                config = element.copy()
-                if len(config.get(SCHEMAS, [])) == 0:
+            elif isinstance(element, Relations):
+                config = element.model_dump()
+                if len(config.get(SCHEMAS) or []) == 0:
                     config[SCHEMAS] = [ALL_SCHEMAS]
             relations.append(config)
+        print(yamlconfig)
+        print(relations)
         return relations

@@ -4,6 +4,8 @@
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 import logging
 
+from datadog_checks.postgres.config_models import InstanceConfig
+
 from .util import (
     ACTIVITY_DD_METRICS,
     ACTIVITY_METRICS_8_3,
@@ -36,7 +38,7 @@ logger = logging.getLogger(__name__)
 class PostgresMetricsCache:
     """Maintains a cache of metrics to collect"""
 
-    def __init__(self, config):
+    def __init__(self, config: InstanceConfig):
         self.config = config
         self.instance_metrics = None
         self.bgw_metrics = None
@@ -74,7 +76,7 @@ class PostgresMetricsCache:
         if metrics is None:
             # if DBM enabled, do not collect postgresql.connections metric in the main check
             c_metrics = COMMON_METRICS
-            if not self.config.dbm_enabled:
+            if not self.config.dbm:
                 c_metrics = dict(c_metrics, **DBM_MIGRATED_METRICS)
             # select the right set of metrics to collect depending on postgres version
             self.instance_metrics = dict(c_metrics)

@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import json
 import re
 import time
-from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
+from typing import Dict, List, Union
 
 import psycopg
 from psycopg.rows import dict_row
@@ -14,9 +16,14 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from datadog_checks.base import is_affirmative
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.config_models import InstanceConfig
 from datadog_checks.postgres.util import get_list_chunks
 
 from .util import payload_pg_version
@@ -26,7 +33,6 @@ from .version_utils import VersionUtils
 DEFAULT_EXTENSIONS_COLLECTION_INTERVAL = 600
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
-DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
 DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 
 # PG_EXTENSION_INFO_QUERY is used to collect extension names and versions from
@@ -224,26 +230,15 @@ class PostgresMetadata(DBMAsyncJob):
         2. collection of pg_settings
     """
 
-    def __init__(self, check, config, shutdown_callback):
-        self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
-            "ignored_settings_patterns", DEFAULT_SETTINGS_IGNORED_PATTERNS
-        )
-        self.pg_extensions_collection_interval = config.settings_metadata_config.get(
-            "collection_interval", DEFAULT_EXTENSIONS_COLLECTION_INTERVAL
-        )
-        self.pg_settings_collection_interval = config.settings_metadata_config.get(
-            "collection_interval", DEFAULT_SETTINGS_COLLECTION_INTERVAL
-        )
-        self.schemas_collection_interval = config.schemas_metadata_config.get(
-            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
-        )
-        resources_collection_interval = config.resources_metadata_config.get(
-            "collection_interval", DEFAULT_RESOURCES_COLLECTION_INTERVAL
-        )
+    def __init__(self, check: PostgreSql, config: InstanceConfig, shutdown_callback):
+        self.pg_settings_ignored_patterns = config.collect_settings.ignored_settings_patterns
+        self.pg_settings_collection_interval = config.collect_settings.collection_interval
+        # Extensions currently doesn't have a separate collection interval option
+        self.pg_extensions_collection_interval = self.pg_settings_collection_interval
+        self.schemas_collection_interval = config.collect_schemas.collection_interval
 
         # by default, send resources every 10 minutes
         self.collection_interval = min(
-            resources_collection_interval,
             self.pg_extensions_collection_interval,
             self.pg_settings_collection_interval,
             self.schemas_collection_interval,
@@ -252,8 +247,8 @@ class PostgresMetadata(DBMAsyncJob):
         super(PostgresMetadata, self).__init__(
             check,
             rate_limit=1 / float(self.collection_interval),
-            run_sync=is_affirmative(config.settings_metadata_config.get("run_sync", False)),
-            enabled=is_affirmative(config.resources_metadata_config.get("enabled", True)),
+            run_sync=False,
+            enabled=config.collect_settings.enabled or config.collect_schemas.enabled,
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
@@ -263,9 +258,9 @@ class PostgresMetadata(DBMAsyncJob):
         self._check = check
         self._config = config
         self.db_pool = self._check.db_pool
-        self._collect_extensions_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
-        self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
-        self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
+        self._collect_pg_settings_enabled = config.collect_settings.enabled
+        self._collect_extensions_enabled = self._collect_pg_settings_enabled
+        self._collect_schemas_enabled = config.collect_schemas.enabled
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
         self._extensions_cached = None

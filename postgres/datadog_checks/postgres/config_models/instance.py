@@ -136,15 +136,6 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
-class ManagedIdentity(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    client_id: Optional[str] = None
-    identity_scope: Optional[str] = None
-
-
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -192,10 +183,14 @@ class QueryMetrics(BaseModel):
         frozen=True,
     )
     baseline_metrics_expiry: Optional[float] = None
+    batch_max_content_size: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
     incremental_query_metrics: Optional[bool] = None
     pg_stat_statements_max_warning_threshold: Optional[float] = None
+    run_sync: Optional[bool] = None
 
 
 class QuerySamples(BaseModel):
@@ -209,6 +204,7 @@ class QuerySamples(BaseModel):
     explain_parameterized_queries: Optional[bool] = None
     explained_queries_cache_maxsize: Optional[int] = None
     explained_queries_per_hour_per_query: Optional[int] = None
+    run_sync: Optional[bool] = None
     samples_per_hour_per_query: Optional[int] = None
     seen_samples_cache_maxsize: Optional[int] = None
 
@@ -247,6 +243,7 @@ class InstanceConfig(BaseModel):
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
+    custom_metrics: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
@@ -259,13 +256,12 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
-    host: str
+    host: Optional[str] = None
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
     ignore_schemas_owned_by: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
-    managed_identity: Optional[ManagedIdentity] = None
     max_connections: Optional[int] = None
     max_relations: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
@@ -273,6 +269,7 @@ class InstanceConfig(BaseModel):
     obfuscator_options: Optional[ObfuscatorOptions] = None
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
+    pg_stat_activity_view: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
     port: Optional[int] = None
     propagate_agent_tags: Optional[bool] = None
@@ -293,7 +290,7 @@ class InstanceConfig(BaseModel):
     tag_replication_role: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
-    username: str
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
@@ -303,9 +300,9 @@ class InstanceConfig(BaseModel):
     def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
-        if field_name in info.context['configured_fields']:
+        if info.context and field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-        else:
+        elif not value:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
         return validation.utils.make_immutable(value)
