@@ -89,7 +89,124 @@ jobs:
 
       - name: add comment to PR
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body $GITHUB_STEP_SUMMARY
+          gh pr comment ${{ github.event.pull_request.number }} --body "Removed:
+{'Name': 'botocore', 'Version': '1.38.41', 'Size_Bytes': '13343171', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+
+[Dependency] botocore 1.38.41: - 0
+{'Name': 'lxml', 'Version': '5.1.1', 'Size_Bytes': '8761615', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] lxml 5.1.1: - 0
+{'Name': 'cryptography', 'Version': '45.0.4', 'Size_Bytes': '7038592', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] cryptography 45.0.4: - 0
+{'Name': 'ddtrace', 'Version': '3.9.3', 'Size_Bytes': '6807288', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] ddtrace 3.9.3: - 0
+{'Name': 'confluent-kafka', 'Version': '2.8.0', 'Size_Bytes': '4133925', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] confluent-kafka 2.8.0: - 0
+{'Name': 'psycopg-binary', 'Version': '3.2.9', 'Size_Bytes': '4079775', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] psycopg-binary 3.2.9: - 0
+{'Name': 'pysnmp-mibs', 'Version': '0.1.6', 'Size_Bytes': '2279246', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pysnmp-mibs 0.1.6: - 0
+{'Name': 'pycryptodomex', 'Version': '3.23.0', 'Size_Bytes': '2045269', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pycryptodomex 3.23.0: - 0
+{'Name': 'pydantic-core', 'Version': '2.33.2', 'Size_Bytes': '1846658', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pydantic-core 2.33.2: - 0
+{'Name': 'kubernetes', 'Version': '33.1.0', 'Size_Bytes': '1798645', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] kubernetes 33.1.0: - 0
+{'Name': 'krb5', 'Version': '0.7.1', 'Size_Bytes': '990486', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] krb5 0.7.1: - 0
+{'Name': 'snowflake-connector-python', 'Version': '3.15.0', 'Size_Bytes': '944171', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] snowflake-connector-python 3.15.0: - 0
+{'Name': 'setuptools', 'Version': '80.9.0', 'Size_Bytes': '931588', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] setuptools 80.9.0: - 0
+{'Name': 'openstacksdk', 'Version': '4.6.0', 'Size_Bytes': '821630', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] openstacksdk 4.6.0: - 0
+{'Name': 'pymongo', 'Version': '4.8.0', 'Size_Bytes': '684954', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pymongo 4.8.0: - 0
+{'Name': 'cm-client', 'Version': '45.0.4', 'Size_Bytes': '667552', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] cm-client 45.0.4: - 0
+{'Name': 'gssapi', 'Version': '1.9.0', 'Size_Bytes': '628916', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] gssapi 1.9.0: - 0
+{'Name': 'bcrypt', 'Version': '4.3.0', 'Size_Bytes': '497807', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] bcrypt 4.3.0: - 0
+{'Name': 'pyvmomi', 'Version': '8.0.3.0.1', 'Size_Bytes': '463021', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pyvmomi 8.0.3.0.1: - 0
+{'Name': 'pydantic', 'Version': '2.11.7', 'Size_Bytes': '430388', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pydantic 2.11.7: - 0
+{'Name': 'pytz', 'Version': '2025.2', 'Size_Bytes': '427795', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pytz 2025.2: - 0
+{'Name': 'protobuf', 'Version': '6.31.1', 'Size_Bytes': '417108', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] protobuf 6.31.1: - 0
+{'Name': 'ldap3', 'Version': '2.9.1', 'Size_Bytes': '416414', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] ldap3 2.9.1: - 0
+{'Name': 'hazelcast-python-client', 'Version': '5.5.0', 'Size_Bytes': '388360', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] hazelcast-python-client 5.5.0: - 0
+{'Name': 'pynacl', 'Version': '1.5.0', 'Size_Bytes': '345286', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pynacl 1.5.0: - 0
+{'Name': 'jellyfish', 'Version': '1.2.0', 'Size_Bytes': '321747', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] jellyfish 1.2.0: - 0
+{'Name': 'dnspython', 'Version': '2.7.0', 'Size_Bytes': '296346', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] dnspython 2.7.0: - 0
+{'Name': 'redis', 'Version': '6.2.0', 'Size_Bytes': '268701', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] redis 6.2.0: - 0
+{'Name': 'pysnmp', 'Version': '5.1.0', 'Size_Bytes': '266528', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pysnmp 5.1.0: - 0
+{'Name': 'orjson', 'Version': '3.10.18', 'Size_Bytes': '247930', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] orjson 3.10.18: - 0
+{'Name': 'tokumx', 'Version': '3.2.1', 'Size_Bytes': '231174', 'Type': 'Integration', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Integration] tokumx 3.2.1: - 0
+{'Name': 'python-dateutil', 'Version': '', 'Size_Bytes': '226544', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] python-dateutil : - 0
+{'Name': 'datadog_checks_base', 'Version': '37.16.0', 'Size_Bytes': '224259', 'Type': 'Integration', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Integration] datadog_checks_base 37.16.0: - 0
+{'Name': 'paramiko', 'Version': '3.5.1', 'Size_Bytes': '221224', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] paramiko 3.5.1: - 0
+{'Name': 'snmp', 'Version': '10.1.1', 'Size_Bytes': '204360', 'Type': 'Integration', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Integration] snmp 10.1.1: - 0
+{'Name': 'clickhouse-driver', 'Version': '0.2.9', 'Size_Bytes': '203794', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] clickhouse-driver 0.2.9: - 0
+{'Name': 'azure-core', 'Version': '1.35.0', 'Size_Bytes': '199034', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] azure-core 1.35.0: - 0
+{'Name': 'keystoneauth1', 'Version': '5.11.1', 'Size_Bytes': '197413', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] keystoneauth1 5.11.1: - 0
+{'Name': 'charset-normalizer', 'Version': '3.4.2', 'Size_Bytes': '196298', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] charset-normalizer 3.4.2: - 0
+{'Name': 'psycopg', 'Version': '3.2.9', 'Size_Bytes': '192245', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] psycopg 3.2.9: - 0
+{'Name': 'supervisor', 'Version': '4.2.5', 'Size_Bytes': '190180', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] supervisor 4.2.5: - 0
+{'Name': 'lz4', 'Version': '4.4.4', 'Size_Bytes': '187543', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] lz4 4.4.4: - 0
+{'Name': 'cffi', 'Version': '1.17.1', 'Size_Bytes': '175176', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] cffi 1.17.1: - 0
+{'Name': 'azure-identity', 'Version': '1.23.0', 'Size_Bytes': '171143', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] azure-identity 1.23.0: - 0
+{'Name': 'pyyaml', 'Version': '6.0.2', 'Size_Bytes': '170240', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pyyaml 6.0.2: - 0
+{'Name': 'pyasn1-modules', 'Version': '0.4.1', 'Size_Bytes': '163959', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pyasn1-modules 0.4.1: - 0
+{'Name': 'certifi', 'Version': '2025.7.9', 'Size_Bytes': '157908', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] certifi 2025.7.9: - 0
+{'Name': 'rethinkdb', 'Version': '', 'Size_Bytes': '155550', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] rethinkdb : - 0
+{'Name': 'oauthlib', 'Version': '3.3.1', 'Size_Bytes': '147031', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] oauthlib 3.3.1: - 0
+{'Name': 'psutil', 'Version': '6.0.0', 'Size_Bytes': '134638', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] psutil 6.0.0: - 0
+{'Name': 'boto3', 'Version': '1.38.41', 'Size_Bytes': '131540', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] boto3 1.38.41: - 0
+{'Name': 'pyspnego', 'Version': '0.11.2', 'Size_Bytes': '125981', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pyspnego 0.11.2: - 0
+{'Name': 'securesystemslib', 'Version': '0.28.0', 'Size_Bytes': '125937', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] securesystemslib 0.28.0: - 0
+{'Name': 'urllib3', 'Version': '2.5.0', 'Size_Bytes': '124367', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] urllib3 2.5.0: - 0
+{'Name': 'vertica-python', 'Version': '1.4.0', 'Size_Bytes': '120823', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] vertica-python 1.4.0: - 0
+{'Name': 'sqlserver', 'Version': '22.7.1', 'Size_Bytes': '115554', 'Type': 'Integration', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Integration] sqlserver 22.7.1: - 0
+{'Name': 'pycparser', 'Version': '2.22', 'Size_Bytes': '114674', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] pycparser 2.22: - 0
+{'Name': 'msal', 'Version': '1.32.3', 'Size_Bytes': '111856', 'Type': 'Dependency', 'Platform': 'macos-aarch64', 'Python_Version': '3.12'}
+[Dependency] msal 1.32.3: - 0"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
