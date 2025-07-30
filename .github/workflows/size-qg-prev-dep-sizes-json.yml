@@ -123,10 +123,10 @@ jobs:
     #     path: ${{ matrix.platform }}_compressed_status.json
     #     if-no-files-found: error
 
-  # calculate-diffs:
-  #   needs: measure-disk-usage
-  #   runs-on: ubuntu-22.04
-  #   uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
-  #   with:
-  #     platform: ${{ matrix.platform }}
-  #     run-id: ${{ github.run_id }}
+  calculate-diffs:
+    needs: measure-disk-usage
+    runs-on: ubuntu-22.04
+    uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+      run-id: ${{ github.run_id }}
