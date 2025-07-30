@@ -790,7 +790,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             # we should directly jump into self._explain_parameterized_queries.explain_statement
             # instead of trying to explain it then failing
             if self._explain_parameterized_queries._is_parameterized_query(statement):
-                if is_affirmative(self._config.query_samplesexplain_parameterized_queries):
+                if is_affirmative(self._config.query_samples.explain_parameterized_queries):
                     return self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement, query_signature
                     )

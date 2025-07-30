@@ -10,7 +10,7 @@ from semver import VersionInfo
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.config import PostgresConfig
+from datadog_checks.postgres.config import PostgresConfig, build_config
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
 from .common import (
@@ -116,8 +116,7 @@ def pg_replica_logical():
 
 @pytest.fixture
 def metrics_cache(pg_instance):
-    config = PostgresConfig(init_config={}, check={'warning': print})
-    config.initialize(pg_instance)
+    config = build_config(check={'warning': print}, init_config={}, instance=pg_instance)
     return PostgresMetricsCache(config)
 
 
