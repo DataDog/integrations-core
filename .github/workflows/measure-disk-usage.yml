@@ -66,13 +66,13 @@ jobs:
           run_id=$(gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event \
             | jq -r --arg sha "$MERGE_BASE" '.[] | select(.headSha == $sha) | .databaseId' | head -n 1)
           if [ -z "$run_id" ]; then
-            echo "❌ No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
+            echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
-          echo "✅ Found run_id=$run_id" >> $GITHUB_STEP_SUMMARY 
-          echo "run_id=$run_id" >> $GITHUB_OUTPUT
-          echo "run_id=$run_id" >> $GITHUB_STEP_SUMMARY
+          # echo "Found run_id=$run_id" >> $GITHUB_STEP_SUMMARY 
+          # echo "run_id=$run_id" >> $GITHUB_OUTPUT
+          # echo "run_id=$run_id" >> $GITHUB_STEP_SUMMARY
 
       - name: Download artifact from merge-base run
         run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
@@ -83,6 +83,10 @@ jobs:
         run: |
           echo "Downloaded files:" >> $GITHUB_STEP_SUMMARY
           ls -lh >> $GITHUB_STEP_SUMMARY
+
+      - name: add comment to PR
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "Disk usage"
 
     # run: gh run download ${{ steps.find_run.outputs.run_id }} --name uncompressed_status.csv
 
