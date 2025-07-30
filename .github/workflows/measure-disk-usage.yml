@@ -90,18 +90,16 @@ jobs:
       - name: add comment to PR
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
-          gh pr comment ${{ github.event.pull_request.number }} --body $'
-              <details>
+          gh pr comment ${{ github.event.pull_request.number }} --body '<details>
                 <summary>Removed dependencies (click to expand)</summary>
 
-              > • botocore 1.38.41 (13343171 bytes)  
-              > • lxml 5.1.1 (8761615 bytes)  
-              > • cryptography 45.0.4 (7038592 bytes)  
-              > • ddtrace 3.9.3 (6807288 bytes)  
+              > • botocore 1.38.41 (13343171bytes)  
+              > • lxml 5.1.1 (8761615bytes)  
+              > • cryptography 45.0.4 (7038592bytes)  
+              > • ddtrace 3.9.3 (6807288bytes)  
               > • confluent-kafka 2.8.0 (4133925bytes)
 
-              </details>
-              '
+              </details>'
           
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
