@@ -121,7 +121,7 @@ class MultiDatabaseConnectionPool(object):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
 
-            # db.execute(f"SET statement_timeout = {ttl_ms}; SET idle_in_transaction_session_timeout = {ttl_ms*10};")
+            db.execute(f"SET statement_timeout = {ttl_ms}; SET idle_in_transaction_session_timeout = {ttl_ms*10};")
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
             self._conns[dbname] = ConnectionInfo(
