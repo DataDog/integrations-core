@@ -97,8 +97,7 @@ class MultiDatabaseConnectionPool(object):
         start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
-            # conn = self._conns.pop(dbname, None)
-            conn = None
+            conn = self._conns.pop(dbname, None)
             db = conn.connection if conn else None
             if db is None or db.closed:
                 if self.max_conns is not None:

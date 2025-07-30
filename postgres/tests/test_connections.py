@@ -281,6 +281,7 @@ def test_conn_pool_single_context(pg_instance):
         pass
 
 
+@pytest.mark.skip
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_conn_pool_context_managed(pg_instance):

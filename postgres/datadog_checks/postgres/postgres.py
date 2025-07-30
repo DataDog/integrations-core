@@ -111,6 +111,7 @@ class PostgreSql(AgentCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._db = None
+        self._cloud_metadata: dict[str, dict] = None
         self.version = None
         self.raw_version = None
         self.system_identifier = None
@@ -550,6 +551,16 @@ class PostgreSql(AgentCheck):
             tag_dict['port'] = str(self._config.port)
             self._database_identifier = template.safe_substitute(**tag_dict)
         return self._database_identifier
+
+    @property
+    def cloud_metadata(self):
+        if self._cloud_metadata is None:
+            self._cloud_metadata = {
+                "aws": self._config.aws.model_dump(),
+                "azure": self._config.azure.model_dump(),
+                "gcp": self._config.gcp.model_dump(),
+            }
+        return self._cloud_metadata
 
     def set_resolved_hostname_metadata(self):
         """
@@ -1019,11 +1030,7 @@ class PostgreSql(AgentCheck):
                 'integration_version': __version__,
                 "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
                 "timestamp": time() * 1000,
-                "cloud_metadata": {
-                    "aws": self._config.aws.model_dump(),
-                    "azure": self._config.azure.model_dump(),
-                    "gcp": self._config.gcp.model_dump(),
-                },
+                "cloud_metadata": self.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm,
                     "connection_host": self._config.host,

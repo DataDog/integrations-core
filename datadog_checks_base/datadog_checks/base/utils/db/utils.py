@@ -353,7 +353,7 @@ class DBMAsyncJob(object):
                 else:
                     self._run_job_rate_limited()
         except Exception as e:
-            if self._cancel_event.isSet():
+            if self._cancel_event.is_set():
                 # canceling can cause exceptions if the connection is closed the middle of the check run
                 # in this case we still want to report it as a cancellation instead of a crash
                 self._log.debug("[%s] Job loop error after cancel: %s", self._job_tags_str, e)
@@ -400,7 +400,7 @@ class DBMAsyncJob(object):
         except:
             raise
         finally:
-            if not self._cancel_event.isSet():
+            if not self._cancel_event.is_set():
                 self._rate_limiter.update_last_time_and_sleep()
             else:
                 self._rate_limiter.update_last_time()
