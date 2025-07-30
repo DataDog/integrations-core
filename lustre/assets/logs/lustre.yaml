@@ -69,6 +69,15 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: rule %{ip:network.client.ip}@%{word:network.client.protocol}
+    - type: grok-parser
+      name: User
+      enabled: true
+      source: u
+      samples:
+        - 123:456
+      grok:
+        supportRules: ""
+        matchRules: rule %{integer:usr.id}:%{integer}
     - type: attribute-remapper
       name: Operation Type
       enabled: true
