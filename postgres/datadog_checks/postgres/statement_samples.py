@@ -462,7 +462,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_statement_samples()
-        self.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):

@@ -105,7 +105,6 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
         pool.close_all_connections()
         assert pool._stats.connection_closed == conn_count
         assert pool._stats.connection_closed_failed == 0
-        # assert pool._stats.connection_pruned == 0
 
         # Ensure all the connections have been terminated on the server
         attempts = 10

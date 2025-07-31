@@ -46,9 +46,7 @@ class MultiDatabaseConnectionPool(object):
     and reuse a single connection as much as possible.
 
     Even when limited to a single connection per database, an instance with hundreds of
-    databases still present a connection overhead risk. This class provides a mechanism
-    to prune connections to a database which were not used in the time specified by their
-    TTL.
+    databases still present a connection overhead risk.
 
     If max_conns is specified, the connection pool will limit concurrent connections.
     """
@@ -56,7 +54,6 @@ class MultiDatabaseConnectionPool(object):
     class Stats(object):
         def __init__(self):
             self.connection_opened = 0
-            # self.connection_pruned = 0
             self.connection_closed = 0
             self.connection_closed_failed = 0
 
@@ -95,7 +92,6 @@ class MultiDatabaseConnectionPool(object):
         when re-establishing it.
         """
         start = datetime.datetime.now()
-        # self.prune_connections()
         with self._mu:
             conn = self._conns.pop(dbname, None)
             db = conn.connection if conn else None
@@ -103,7 +99,6 @@ class MultiDatabaseConnectionPool(object):
                 if self.max_conns is not None:
                     # try to free space until we succeed
                     while len(self._conns) >= self.max_conns:
-                        # self.prune_connections()
                         self.evict_lru()
                         if timeout is not None and (datetime.datetime.now() - start).total_seconds() > timeout:
                             raise ConnectionPoolFullError(self.max_conns, timeout)
@@ -166,22 +161,7 @@ class MultiDatabaseConnectionPool(object):
                 except KeyError:
                     # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
                     pass
-
-    # def prune_connections(self):
-    #     """
-    #     This function should be called periodically to prune all connections which have not been
-    #     accessed since their TTL. This means that connections which are actually active on the
-    #     server can still be closed with this function. For instance, if a connection is opened with
-    #     ttl 1000ms, but the query it's running takes 5000ms, this function will still try to close
-    #     the connection mid-query.
-    #     """
-    #     with self._mu:
-    #         now = datetime.datetime.now()
-    #         for dbname, conn in list(self._conns.items()):
-    #             if conn.deadline < now:
-    #                 self._stats.connection_pruned += 1
-    #                 self._terminate_connection_unsafe(dbname)
-
+    
     def close_all_connections(self):
         success = True
         with self._mu:
