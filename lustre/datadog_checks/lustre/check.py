@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import subprocess
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
@@ -499,23 +498,13 @@ class LustreCheck(AgentCheck):
                     continue
                 parts = line.split()
                 try:
-                    date_time = parts[3] + ' ' + parts[2]
-                    # The time has nanoseconds, so we need to truncate the last three digits
-                    timestamp = (
-                        datetime.strptime(date_time[:-3], '%Y.%m.%d %H:%M:%S.%f')
-                        .replace(tzinfo=timezone.utc)
-                        .timestamp()
-                    )
+                    next_index = int(parts[0]) + 1
                     data = {
-                        'operation_type': parts[1],
-                        'timestamp': timestamp,
-                        'flags': parts[4],
-                        'message': ' '.join(parts[5:]),
+                        'message': ' '.join(parts[1:]),
                     }
-                except IndexError:
+                except (IndexError, ValueError):
                     self.log.debug('Skipping changelog due to unexpected format: %s', line)
                     continue
-                next_index = int(parts[0]) + 1
                 self.send_log(data, {'index': str(next_index)}, stream=target)
 
     def _get_changelog(self, target: str, lines: int) -> str:
