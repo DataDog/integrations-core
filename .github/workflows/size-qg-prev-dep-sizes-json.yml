@@ -68,14 +68,14 @@ jobs:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     steps:
       - name: Download artifact from merge-base run
-        run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name ${{ matrix.platform }}.json
+        run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name dependency_sizes_${{ matrix.platform }}.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload platform.json artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ matrix.platform }}.json
-          path: ${{ matrix.platform }}.json
+          name: dependency_sizes_${{ matrix.platform }}.json
+          path: dependency_sizes_${{ matrix.platform }}.json
           if-no-files-found: error
 
   measure-disk-usage:
