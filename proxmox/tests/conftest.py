@@ -66,10 +66,9 @@ def mock_responses():
     def method(method, url, file='response', headers=None, params=None):
         filename = file
         request_path = url
-        request_path = request_path.replace('?', '/')
         if params:
             param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
-            request_path = f'{url}/{param_string}'
+            request_path = f'{url}?{param_string}'
 
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
