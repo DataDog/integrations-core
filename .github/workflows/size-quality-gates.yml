@@ -85,7 +85,9 @@ jobs:
       - name: Calculate diffs
         run: |
           python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json > size_diffs_output.txt
-          echo "Comparing base [\${{ steps.merge_base.outputs.sha::7 }}](https://github.com/\${{ github.repository }}/commit/\${{ steps.merge_base.outputs.sha }}) to head [\${{ github.sha::7 }}](https://github.com/\${{ github.repository }}/commit/\${{ github.sha }})" \
+          MERGE_BASE_SHORT=$(echo "${{ steps.merge_base.outputs.sha }}" | cut -c1-7)
+          HEAD_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "Comparing base [$MERGE_BASE_SHORT](https://github.com/${{ github.repository }}/commit/${{ steps.merge_base.outputs.sha }}) to head [$HEAD_SHORT](https://github.com/${{ github.repository }}/commit/${{ github.sha }})" \
             >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output.txt >> $GITHUB_STEP_SUMMARY
 
