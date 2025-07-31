@@ -23,10 +23,9 @@ jobs:
       with:
         fetch-depth: 0
     - name: Add label
-      uses: actions-ecosystem/action-add-label@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
       if: github.event.pull_request.draft == false
-      with:
-        labels: "show-size-delta"
+      run: |
+        gh pr edit ${{ github.event.pull_request.number }} --add-label "show-size-delta"
 
   measure-disk-usage:
     runs-on: ubuntu-22.04
