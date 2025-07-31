@@ -97,7 +97,7 @@ def display_diffs(diffs, platform, python_version):
         for entry in diffs["removed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size_Bytes", 0)
+            size = int(entry.get("Size_Bytes", 0))
             typ = entry.get("Type", "")
             print(f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}")
         print()
@@ -149,7 +149,7 @@ def display_diffs_to_html(diffs, platform, python_version):
         for entry in diffs["removed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size_Bytes", 0)
+            size = int(entry.get("Size_Bytes", 0))
             typ = entry.get("Type", "")
             # TODO: change to normal size
             text += f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}\n"
