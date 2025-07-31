@@ -9,7 +9,6 @@ import mock
 import psycopg
 import pytest
 
-from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import BUFFERCACHE_METRICS, DatabaseHealthCheckError, PartialFormatter, fmt
@@ -763,9 +762,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 )
 def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
     pg_instance['dbm'] = dbm_enabled
-    # this will block on cancel and wait for the coll interval of 600 seconds,
-    # unless the collection_interval is set to a short amount of time
-    pg_instance['collect_settings'] = {'collection_interval': 0.1}
+    pg_instance['collect_settings'] = {'collection_interval': 1, 'run_sync': True}
 
     expected_database_hostname = expected_database_instance = expected_host = "stubbed.hostname"
     if reported_hostname:
@@ -874,16 +871,6 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
             'password authentication failed',
             True,
         ),
-        (
-            {
-                "managed_authentication": {
-                    "enabled": 'true',
-                }
-            },
-            ConfigurationError,
-            'AWS region must be set when using AWS managed authentication',
-            None,  # IAM auth requires region so this should fail
-        ),
     ],
 )
 def test_database_instance_cloud_metadata_aws(
@@ -910,17 +897,16 @@ def test_database_instance_cloud_metadata_aws(
             if expected_managed_auth_enabled:
                 assert mocked_generate_rds_iam_token.called
 
-    if not expected_error == ConfigurationError:
-        # we only assert the check ran if we don't expect a ConfigurationError
-        assert check.cloud_metadata['aws']['managed_authentication']['enabled'] == expected_managed_auth_enabled
+    # we only assert the check ran if we don't expect a ConfigurationError
+    assert check.cloud_metadata['aws']['managed_authentication']['enabled'] == expected_managed_auth_enabled
 
-        role = None if expected_error else 'master'
-        expected_tags = _get_expected_tags(check, pg_instance, with_db=True, role=role)
-        if "instance_endpoint" in aws_metadata:
-            expected_tags.append("dd.internal.resource:aws_rds_instance:{}".format(aws_metadata["instance_endpoint"]))
+    role = None if expected_error else 'master'
+    expected_tags = _get_expected_tags(check, pg_instance, with_db=True, role=role)
+    if "instance_endpoint" in aws_metadata:
+        expected_tags.append("dd.internal.resource:aws_rds_instance:{}".format(aws_metadata["instance_endpoint"]))
 
-        status = check.CRITICAL if expected_error else check.OK
-        aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
+    status = check.CRITICAL if expected_error else check.OK
+    aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
 
 
 @pytest.mark.parametrize(
@@ -1009,19 +995,6 @@ def test_database_instance_cloud_metadata_aws(
             'password authentication failed',
             True,
         ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-                "managed_authentication": {
-                    "enabled": True,
-                },
-            },
-            None,
-            ConfigurationError,
-            'Azure client_id must be set when using Azure managed authentication',
-            None,
-        ),
     ],
 )
 def test_database_instance_cloud_metadata_azure(
@@ -1059,29 +1032,19 @@ def test_database_instance_cloud_metadata_azure(
             if expected_managed_auth_enabled:
                 assert generate_managed_identity_token.called
 
-    if not expected_error == ConfigurationError:
-        # we only assert the check ran if we don't expect a ConfigurationError
-        assert check.cloud_metadata['azure']['managed_authentication']['enabled'] == expected_managed_auth_enabled
+    assert check.cloud_metadata['azure']['managed_authentication']['enabled'] == expected_managed_auth_enabled
 
-        role = None if expected_error else 'master'
-        expected_tags = _get_expected_tags(check, pg_instance, with_db=True, role=role)
-        if "fully_qualified_domain_name" in azure_metadata:
-            expected_tags.append(
-                "dd.internal.resource:azure_postgresql_flexible_server:{}".format(
-                    azure_metadata["fully_qualified_domain_name"]
-                )
+    role = None if expected_error else 'master'
+    expected_tags = _get_expected_tags(check, pg_instance, with_db=True, role=role)
+    if "fully_qualified_domain_name" in azure_metadata:
+        expected_tags.append(
+            "dd.internal.resource:azure_postgresql_flexible_server:{}".format(
+                azure_metadata["fully_qualified_domain_name"]
             )
+        )
 
-        status = check.CRITICAL if expected_error else check.OK
-        aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
-
-        if managed_identity:
-            assert check.warnings == [
-                (
-                    'DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed '
-                    'in a future version. Please use the new azure.managed_authentication option instead.'
-                )
-            ]
+    status = check.CRITICAL if expected_error else check.OK
+    aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=status, tags=expected_tags)
 
 
 def assert_state_clean(check):

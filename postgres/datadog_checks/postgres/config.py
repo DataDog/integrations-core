@@ -473,8 +473,6 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
                         "client_id": "",
                         "identity_scope": "",
                     },
-                    # Handle legacy managed_authentication
-                    **instance.get('managed_authentication', {}),
                 },
             },
             **(instance.get('azure', {})),
@@ -550,8 +548,8 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     # AWS backfill and validation
     if (
         not instance.get("aws", {}).get("managed_authentication", None)
-        and args['aws']['region']
-        and not args['aws']['password']
+        and args['aws'].get('region')
+        and not args['password']
     ):
         # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
         args['aws']['managed_authentication']['enabled'] = True
@@ -560,14 +558,25 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         validation_result.add_error('AWS region must be set when using AWS managed authentication')
 
     # Azure backfill and validation
-    if (
-        not instance.get("azure", {}).get("managed_authentication", None)
-        and args['azure']['managed_authentication']['client_id']
+    if not instance.get("azure", {}).get("managed_authentication", None) and (
+        args['azure'].get('managed_authentication', {}).get('client_id')
+        or instance.get('managed_identity', {}).get('client_id')
     ):
         # if managed_authentication is not set, we assume it is enabled if client_id is set
         args['azure']['managed_authentication']['enabled'] = True
 
-    if args['azure']['managed_authentication']['enabled'] and not args['azure']['managed_authentication']['client_id']:
+    if instance.get("managed_identity"):
+        validation_result.add_warning(
+            'The `managed_identity` option is deprecated. Use `azure.managed_authentication` instead.'
+        )
+        args['azure']['managed_authentication'] = {
+            **args['azure']['managed_authentication'],
+            **instance.get('managed_identity', {}),
+        }
+
+    if args['azure'].get('managed_authentication', {}).get('enabled') and not args['azure'].get(
+        'managed_authentication', {}
+    ).get('client_id'):
         validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
 
     # Validate that the keys of args match the fields of InstanceConfig

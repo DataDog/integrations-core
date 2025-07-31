@@ -117,7 +117,7 @@ files:
     - name: ignore_schemas_owned_by
       description: |
         A list of database users which own schemas to ignore.
-        No metrics or statement samples will be collected for these schemas.
+        No metrics will be collected for these schemas.
         Each value can be a plain string or a Postgres pattern.
       value:
         type: array
@@ -1105,7 +1105,6 @@ files:
       value:
         type: number
         example: 300
-        display_default: false
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.

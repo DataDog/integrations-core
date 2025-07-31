@@ -61,7 +61,7 @@ def instance_data_directory():
 
 
 def instance_database_instance_collection_interval():
-    return False
+    return 300
 
 
 def instance_dbm():
