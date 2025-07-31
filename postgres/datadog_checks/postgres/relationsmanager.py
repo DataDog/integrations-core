@@ -466,24 +466,26 @@ class RelationsManager(object):
     def validate_relations_config(yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         for element in yamlconfig:
+            if isinstance(element, Relations):
+                element = element.model_dump()
             if isinstance(element, dict):
-                if not (RELATION_NAME in element or RELATION_REGEX in element):
+                if not (element.get(RELATION_NAME) or element.get(RELATION_REGEX)):
                     raise ConfigurationError(
                         "Parameter '%s' or '%s' is required for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                if RELATION_NAME in element and RELATION_REGEX in element:
+                if element.get(RELATION_NAME) and element.get(RELATION_REGEX):
                     raise ConfigurationError(
                         "Expecting only of parameters '%s', '%s' for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                if not isinstance(element.get(SCHEMAS, []), list):
+                if not isinstance(element.get(SCHEMAS, []) or [], list):
                     raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
-                if not isinstance(element.get(RELKIND, []), list):
+                if not isinstance(element.get(RELKIND, []) or [], list):
                     raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
             elif not isinstance(element, str):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
