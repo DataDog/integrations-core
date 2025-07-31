@@ -16,7 +16,7 @@ from . import common
 def dd_environment():
     conditions = []
 
-    for i in range(6):
+    for i in range(common.CLICKHOUSE_NODE_NUM):
         conditions.append(CheckEndpoints(['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i)]))
         conditions.append(
             CheckDockerLogs(
