@@ -582,7 +582,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             f"Missing: {missing_fields}, Extra: {extra_fields}"
         )
 
-    if not args.get('collect_default_database'):
+    if args.get('collect_default_database'):
         args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
 
     # Validate config arguments for invalid or deprecated options

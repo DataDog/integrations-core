@@ -303,7 +303,7 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if info.context and field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-        elif not value:
+        elif value is None:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
         return validation.utils.make_immutable(value)

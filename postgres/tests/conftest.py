@@ -79,7 +79,7 @@ def check():
 
 
 @pytest.fixture
-def integration_check():
+def integration_check() -> PostgreSql:
     def _check(instance, init_config=None):
         c = PostgreSql('postgres', init_config or {}, [instance])
         return c

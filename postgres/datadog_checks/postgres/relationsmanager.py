@@ -434,7 +434,6 @@ class RelationsManager(object):
         """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
         for r in self.config:
-            print(r)
             relation_filter = []
             if r.get(RELATION_NAME):
                 relation_filter.append("( relname = '{}'".format(r[RELATION_NAME]))
@@ -497,10 +496,13 @@ class RelationsManager(object):
         relations = []
         for element in yamlconfig:
             config = {}
+            if isinstance(element, Relations):
+                element = element.model_dump()
+
             if isinstance(element, str):
                 config = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
-            elif isinstance(element, Relations):
-                config = element.model_dump()
+            elif isinstance(element, dict):
+                config = element.copy()
                 if len(config.get(SCHEMAS) or []) == 0:
                     config[SCHEMAS] = [ALL_SCHEMAS]
             relations.append(config)

@@ -340,13 +340,10 @@ def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
 
     for tc in test_cases:
         dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 600, **tc[0]}
-        print(dbm_instance)
         check = integration_check(dbm_instance)
-        print(check._config.collect_schemas)
         run_one_check(check, dbm_instance)
         dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-        print(dbm_metadata)
-
+        
         tables_got = []
 
         for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):

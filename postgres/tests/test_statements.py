@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.config import PostgresConfig
+from datadog_checks.postgres.config import PostgresConfig, build_config
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
@@ -2130,7 +2130,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 
 @pytest.mark.unit
 def test_get_query_metrics_payload_rows():
-    config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
+    config, _ = build_config(check={}, init_config={}, instance={"host": "host", "username": "user"})
     statement_metrics = PostgresStatementMetrics({}, config, None)
     wrapper = {}
 

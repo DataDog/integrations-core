@@ -192,6 +192,7 @@ def test_partition_relation(aggregator, integration_check, pg_instance):
     ]
 
     check = integration_check(pg_instance)
+    print(check._config)
     check.check(pg_instance)
 
     part_1_tags = _get_expected_tags(

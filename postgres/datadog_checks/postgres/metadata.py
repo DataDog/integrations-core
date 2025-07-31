@@ -255,8 +255,6 @@ class PostgresMetadata(DBMAsyncJob):
             job_name="database-metadata",
             shutdown_callback=shutdown_callback,
         )
-        print("metadata enabled", self._enabled)
-        print("metadata run sync", self._run_sync)
         self._check = check
         self._config = config
         self.db_pool = self._check.db_pool
@@ -285,11 +283,9 @@ class PostgresMetadata(DBMAsyncJob):
         return t
 
     def run_job(self):
-        print('run')
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
         self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
-        print('metadat')
         self.report_postgres_metadata()
         self.report_postgres_extensions()
         self._check.db_pool.prune_connections()
