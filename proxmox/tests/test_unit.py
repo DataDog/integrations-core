@@ -513,7 +513,7 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
             True,
             [],
             [],
-            id='tasks collected and empty task types specified',
+            id='collect_tasks enabled and task_types not set',
         ),
         pytest.param(
             True,
