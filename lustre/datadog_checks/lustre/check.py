@@ -164,6 +164,7 @@ class LustreCheck(AgentCheck):
                     filesystem = match.group(0)
                     filesystems.append(filesystem)
             self.filesystems = list(set(filesystems))  # Remove duplicates
+            assert self.filesystems, f'Nothing matched regex `{filesystem_regex}` in params {lines}'
             self.log.debug('Found filesystem(s): %s', self.filesystems)
         except Exception as e:
             self.log.error('Failed to find filesystems: %s', e)
