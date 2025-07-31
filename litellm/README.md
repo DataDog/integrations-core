@@ -8,7 +8,7 @@ Use LLM Observability to investigate the root cause of issues, monitor operation
 
 See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
 
-Integrating with Datadog Metrics provides real-time monitoring, alerting, and analytics for all LLM API usage through LiteLLM, helping customers optimize performance, manage costs, and ensure reliability across their AI-powered applications.
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [LiteLLM][1] Python library requests using Datadog metrics and APM.
 
 Key metrics such as request/response counts, latency, error rates, token usage, and spend per provider or deployment are monitored. This data enables customers to track usage patterns, detect anomalies, control costs, and troubleshoot issues quickly, ensuring efficient and reliable LLM operations through LiteLLM's health check and Prometheus endpoints.
 
@@ -111,6 +111,73 @@ If you encounter issues during setup, enable debug logging by passing the `--deb
 This will display any errors related to data transmission or instrumentation, including issues with LiteLLM traces.
 
 
+### APM: Get Usage Metrics for your python Applications
+
+1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
+
+   ```shell
+   docker run -d --cgroupns host \
+                 --pid host \
+                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
+                 -v /proc/:/host/proc/:ro \
+                 -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+                 -e DD_API_KEY=<DATADOG_API_KEY> \
+                 -p 127.0.0.1:8126:8126/tcp \
+                 -p 127.0.0.1:8125:8125/udp \
+                 -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+                 -e DD_APM_ENABLED=true \
+                 gcr.io/datadoghq/agent:latest
+   ```
+
+2. Install the Datadog APM Python library.
+
+   ```shell
+   pip install ddtrace>=1.17
+   ```
+
+3. Prefix your LiteLLM Python application command with `ddtrace-run`.
+
+   ```shell
+   DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
+   ```
+
+**Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+
+See the [APM Python library documentation][12] for more advanced usage.
+
+#### Configuration
+
+See the [APM Python library documentation][13] for all the available configuration options.
+
+#### Validation
+
+Validate that the APM Python library can communicate with your Agent using:
+
+   ```shell
+   ddtrace-run --info
+   ```
+
+You should see the following output:
+
+   ```
+       Agent error: None
+   ```
+
+#### Debugging
+
+Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
+
+   ```shell
+   ddtrace-run --debug
+   ```
+
+This displays any errors sending data:
+
+   ```
+   ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
+   ```
+
+
 ### Datadog Metrics
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
@@ -179,17 +246,17 @@ LiteLLM can send logs to Datadog through its callback system. You can configure 
 
 Run the Agent's status subcommand ([see documentation][6]) and look for `litellm` under the Checks section.
 
-#### Data Collected
+## Data Collected
 
-##### Metrics
+### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-##### Events
+### Events
 
 The LiteLLM integration does not include any events.
 
-##### Service Checks
+### Service Checks
 
 The LiteLLM integration does not include any service checks.
 
@@ -211,3 +278,5 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.litellm.ai/docs/proxy/prometheus
 [11]: https://docs.litellm.ai/docs/proxy/logging
+[12]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
+[13]: https://ddtrace.readthedocs.io/en/stable/integrations.html#litellm
