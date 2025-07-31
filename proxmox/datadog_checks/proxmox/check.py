@@ -66,7 +66,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
         return hostname
 
-    def _event_for_task(self, task, node_name):
+    def _create_dd_event_for_task(self, task, node_name):
         task_type = task.get('type')
         status = "success" if task.get("status") == "OK" else "error"
         id = task.get('id') if task.get('id') else node_name
@@ -253,8 +253,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 if task_type not in self.config.collected_task_types:
                     continue
 
-                event = self._event_for_task(task, node_name)
-                self.log.trace("Submitting event %s", event)
+                event = self._create_dd_event_for_task(task, node_name)
+                self.log.debug("Submitting event %s", event)
                 self.event(event)
 
     def check(self, _):
