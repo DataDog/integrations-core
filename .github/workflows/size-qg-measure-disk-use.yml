@@ -23,7 +23,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Add label
-      if: github.event.pull_request.draft == true # change to false
+      if: github.event.pull_request.draft == false
       run: |
         gh pr edit ${{ github.event.pull_request.number }} --add-label "show-size-delta"
       env:
