@@ -446,31 +446,31 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         # Cloud
         "aws": {
             **{
-                "instance_endpoint": "",
+                "instance_endpoint": None,
                 "region": None,
                 "managed_authentication": {
-                    "enabled": False,
-                    "role_arn": "",
+                    "enabled": None,
+                    "role_arn": None,
                 },
             },
             **(instance.get('aws', {})),
         },
         "gcp": {
             **{
-                "project_id": "",
-                "instance_id": "",
+                "project_id": None,
+                "instance_id": None,
             },
             **(instance.get('gcp', {})),
         },
         "azure": {
             **{
-                "deployment_type": "",
-                "fully_qualified_domain_name": "",
+                "deployment_type": None,
+                "fully_qualified_domain_name": None,
                 "managed_authentication": {
                     **{
-                        "enabled": False,
-                        "client_id": "",
-                        "identity_scope": "",
+                        "enabled": None,
+                        "client_id": None,
+                        "identity_scope": None,
                     },
                 },
             },
