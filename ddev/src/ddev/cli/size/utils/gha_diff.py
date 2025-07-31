@@ -33,7 +33,6 @@ def calculate_diffs(prev_sizes, curr_sizes):
             prev_entry = prev_map[curr_key]
             prev_size = int(prev_entry.get("Size_Bytes", 0))
             curr_size = int(curr_entry.get("Size_Bytes", 0))
-            print(f"prev_size: {prev_size}, curr_size: {curr_size}")
             if prev_size != curr_size:
                 percentage = ((curr_size - prev_size) / prev_size) * 100 if prev_size != 0 else 0
                 changed.append(
@@ -98,9 +97,9 @@ def display_diffs(diffs, platform, python_version):
         for entry in diffs["removed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size", 0)
+            size = entry.get("Size_Bytes", 0)
             typ = entry.get("Type", "")
-            print(f"  - [{typ}] {name} {version}: -{size}")
+            print(f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}")
         print()
     else:
         print("Removed: None\n")
@@ -129,6 +128,58 @@ def display_diffs(diffs, platform, python_version):
     print("=" * 60)
 
 
+def display_diffs_to_html(diffs, platform, python_version):
+    sign = "+" if diffs['total_diff'] > 0 else ""
+    text = f"<details><summary>Dependency Size Differences for {platform} and Python {python_version}: "
+    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</summary>\n"
+    if diffs["added"]:
+        text += "<details><summary>Added</summary>\n"
+        for entry in diffs["added"]:
+            name = entry.get("Name", "")
+            version = entry.get("Version", "")
+            size = entry.get("Size", 0)
+            typ = entry.get("Type", "")
+            text += f"  + [{typ}] {name} {version}: +{size}\n"
+        text += "</details>\n"
+    else:
+        text += "No added dependencies/integrations\n"
+
+    if diffs["removed"]:
+        text += "<details><summary>Removed</summary>\n"
+        for entry in diffs["removed"]:
+            name = entry.get("Name", "")
+            version = entry.get("Version", "")
+            size = entry.get("Size_Bytes", 0)
+            typ = entry.get("Type", "")
+            # TODO: change to normal size
+            text += f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}\n"
+        text += "</details>\n"
+    else:
+        text += "No removed dependencies/integrations\n"
+
+    if diffs["changed"]:
+        text += "<details><summary>Changed</summary>\n"
+        for entry in diffs["changed"]:
+            name = entry.get("Name", "")
+            version = entry.get("Version", "")
+            typ = entry.get("Type", "")
+            percentage = entry.get("Percentage", 0)
+            diff = entry.get("Diff", 0)
+            sign = "+" if diff > 0 else "-"
+            version_diff = (
+                f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)}"
+                if entry.get('Prev Version', version) != entry.get('Version', version)
+                else version
+            )
+            text += f"  * [{typ}] {name} ({version_diff}): "
+            text += f"{sign}{convert_to_human_readable_size(abs(diff))} ({sign}{percentage:.2f}%)\n"
+        text += "</details>\n"
+    else:
+        text += "No changed dependencies/integrations\n"
+    text += "</details>\n"
+    print(text)
+
+
 def main():
     parser = argparse.ArgumentParser(prog='gha_diff', allow_abbrev=False)
     parser.add_argument('--prev-sizes', required=True)
@@ -144,7 +195,7 @@ def main():
 
     diffs, platform, python_version = calculate_diffs(prev_sizes, curr_sizes)
 
-    display_diffs(diffs, platform, python_version)
+    display_diffs_to_html(diffs, platform, python_version)
 
     if args.output:
         with open(args.output, "w") as f:
