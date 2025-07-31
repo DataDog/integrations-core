@@ -295,7 +295,7 @@ class LustreCheck(AgentCheck):
         '''
         lnet_local_stats = self._get_lnet_metrics('net')
         if 'net' not in lnet_local_stats:
-            self.log.debug('Got unexpected output for lnet local stats. Keys: %s', lnet_local_stats.keys())
+            self.log.debug('Could not find `net` property in the output of lnet stats. Output: %s', lnet_local_stats)
             return
         lnet_local_stats = lnet_local_stats['net']
         for net in lnet_local_stats:
@@ -316,7 +316,7 @@ class LustreCheck(AgentCheck):
         '''
         lnet_peer_stats = self._get_lnet_metrics('peer')
         if 'peer' not in lnet_peer_stats:
-            self.log.debug('Got unexpected output for lnet peer stats. Keys: %s', lnet_peer_stats.keys())
+            self.log.debug('Could not find `peer` property in the output of lnet stats. Output: %s', lnet_peer_stats)
             return
         lnet_peer_stats = lnet_peer_stats['peer']
         for peer in lnet_peer_stats:
