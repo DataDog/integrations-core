@@ -501,13 +501,13 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
             False,
             ['startall'],
             [],
-            id='tasks not collected and task types specified',
+            id='tasks not collected and task_types set',
         ),
         pytest.param(
             True,
             None,
             ALL_EVENTS,
-            id='tasks collected and no task types specified',
+            id='tasks collected and task_types not set',
         ),
         pytest.param(
             True,
@@ -519,7 +519,7 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
             True,
             ['vzstart', 'aptupdate'],
             START_UPDATE_EVENTS,
-            id='tasks collected and task types specified',
+            id='tasks collected and task_types set',
         ),
     ],
 )
