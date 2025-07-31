@@ -200,7 +200,9 @@ class LustreCheck(AgentCheck):
             self.log.debug('Running command: %s', cmd)
             output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
             if not output.returncode == 0 and output.stderr:
-                self.log.debug('Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr)
+                self.log.debug(
+                    'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
+                )
                 return ''
             if output.stdout is None:
                 self.log.debug(
@@ -231,7 +233,7 @@ class LustreCheck(AgentCheck):
                 self.log.debug('No jobstats metrics found for %s', jobstats_param)
                 continue
             for job in jobstats_metrics:
-                job_id = job.get('job_id', "unknown") 
+                job_id = job.get('job_id', "unknown")
                 tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
                 for metric_name, metric_values in job.items():
                     if not isinstance(metric_values, dict):

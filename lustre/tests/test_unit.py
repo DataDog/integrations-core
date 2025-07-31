@@ -481,31 +481,84 @@ def test_run_command_exceptions():
         assert check._run_command('lctl', 'test') == ''
 
 
-def test_logging(caplog, mock_lustre_commands):
-    """Test that the most useful debug logs are emitted correctly."""
+def test_node_type_determination_logging(caplog, mock_lustre_commands):
+    """Test logging for node type determination errors."""
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
-        'lctl list_param mdt.*.job_stats': 'mdt.filesystem-MDT0000.job_stats',
-        'lctl list_param some.*.param.mds': 'some.wrongfilesystem-MDT0000.param.mds',
-        'lnetctl stats show': 'invalid yaml',
-        'lfs changelog': 'test_changelog',
     }
 
     with mock_lustre_commands(mapping):
         with caplog.at_level(logging.DEBUG):
-            # Test node type determination with error
             with mock.patch.object(LustreCheck, '_update_devices', side_effect=Exception("Device error")):
-                check = LustreCheck('lustre', {}, [{}])
+                LustreCheck('lustre', {}, [{}])
 
-            # Test filesystem discovery for MDS (will trigger filesystem finding)
-            check = LustreCheck('lustre', {}, [{'node_type': 'mds'}])
+        log_text = caplog.text
+        assert 'Failed to determine node type:' in log_text
 
-            # Test lnet data retrieval error by mocking yaml.safe_load
+
+def test_filesystem_discovery_logging(caplog, mock_lustre_commands):
+    """Test logging for filesystem discovery."""
+    filesystem = 'testfilesystem'
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lctl list_param mdt.*.job_stats': f'mdt.{filesystem}-MDT0000.job_stats',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            LustreCheck('lustre', {}, [{'node_type': 'mds'}]).update()
+
+        log_text = caplog.text
+        assert 'Finding filesystems...' in log_text
+        assert f'Found filesystem(s): [\'{filesystem}\']' in log_text
+
+    mapping.update(
+        {
+            'lctl list_param mdt.*.job_stats': 'mdt.000.job_stats',
+        }
+    )
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            LustreCheck('lustre', {}, [{'node_type': 'mds'}]).update()
+
+        log_text = caplog.text
+        assert 'Finding filesystems...' in log_text
+        assert 'Failed to find filesystems: Nothing matched regex' in log_text
+
+
+def test_lnet_error_logging(caplog, mock_lustre_commands):
+    """Test logging for LNET data retrieval errors."""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lnetctl stats show': 'invalid yaml',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            check = LustreCheck('lustre', {}, [{}])
             with mock.patch('yaml.safe_load', side_effect=Exception("YAML error")):
                 check._get_lnet_metrics('stats')
 
-            # Test parameter skipping for wrong node type
+        log_text = caplog.text
+        assert 'Could not get lnet stats, caught exception:' in log_text
+
+
+def test_parameter_filtering_logging(caplog, mock_lustre_commands):
+    """Test logging for parameter filtering based on node type and filesystem."""
+    wrong_filesystem_param = 'some.wrongfilesystem-MDT0000.param.mds'
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lctl list_param some.*.param.mds': wrong_filesystem_param,
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            check = LustreCheck('lustre', {}, [{'node_type': 'mds'}])
             params = {
                 LustreParam(
                     regex="some.*.param.client",
@@ -524,25 +577,28 @@ def test_logging(caplog, mock_lustre_commands):
             }
             check.submit_param_data(params, ['lustre'])
 
-            # Test changelog cursor error and fetching
+        log_text = caplog.text
+        assert 'Skipping param some.*.param.client for node type mds' in log_text
+        assert f'Skipping param {wrong_filesystem_param} as it did not match any filesystem' in log_text
+
+
+def test_changelog_logging(caplog, mock_lustre_commands):
+    """Test logging for changelog operations."""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lfs changelog': 'test_changelog',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            check = LustreCheck('lustre', {}, [{}])
+
+            # Test changelog cursor error
             with mock.patch.object(check, 'get_log_cursor', side_effect=Exception("Cursor error")):
                 check._get_changelog('lustre-MDT0000', 100)
 
         log_text = caplog.text
-
-        # Critical error logs (should be present)
-        assert 'Failed to determine node type:' in log_text
-        assert 'Could not get lnet stats, caught exception:' in log_text
         assert 'Could not retrieve log cursor, assuming initialization' in log_text
-
-        # Important debug logs (should be present)
-        assert 'Determining node type...' in log_text
-        assert 'Updating device list...' in log_text
         assert 'Fetching changelog from index 0 to 100' in log_text
-
-        # Verify we captured important operational logs
         assert 'Collecting changelogs for:' in log_text
-
-        # Parameter filtering logs (if applicable)
-        assert 'Skipping param some.*.param.client for node type mds' in log_text
-        assert 'Skipping param some.wrongfilesystem-MDT0000.param.mds as it did not match any filesystem' in log_text
