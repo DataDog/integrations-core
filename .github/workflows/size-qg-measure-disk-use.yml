@@ -26,6 +26,8 @@ jobs:
       if: github.event.pull_request.draft == true # change to false
       run: |
         gh pr edit ${{ github.event.pull_request.number }} --add-label "show-size-delta"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   measure-disk-usage:
     runs-on: ubuntu-22.04
