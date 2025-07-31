@@ -1,0 +1,241 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+import time
+import threading
+from collections import OrderedDict
+from contextlib import AbstractContextManager
+from dataclasses import dataclass
+from typing import Any, Optional, Dict, Tuple
+
+from psycopg import Connection
+from psycopg_pool import ConnectionPool
+
+from .cursor import CommenterCursor, SQLASCIITextLoader
+
+
+@dataclass(frozen=True)
+class PostgresConnectionArgs:
+    """
+    Immutable PostgreSQL connection arguments.
+    """
+    application_name: str
+    user: str
+    password: str
+    host: str
+    port: int
+    ssl_mode: Optional[str] = "allow"
+    ssl_cert: Optional[str] = None
+    ssl_root_cert: Optional[str] = None
+    ssl_key: Optional[str] = None
+    ssl_password: Optional[str] = None
+    dbname: Optional[str] = None  # Not used directly by the pool manager
+
+    def as_kwargs(self, dbname: Optional[str] = None) -> Dict[str, str]:
+        """
+        Return a dictionary of connection arguments for psycopg, optionally overriding dbname.
+        """
+        kwargs = {
+            "application_name": self.application_name,
+            "user": self.user,
+            "password": self.password,
+            "host": self.host,
+            "port": self.port,
+            "dbname": dbname or self.dbname,
+            "sslmode": self.ssl_mode,
+        }
+        if self.ssl_cert:
+            kwargs["sslcert"] = self.ssl_cert
+        if self.ssl_root_cert:
+            kwargs["sslrootcert"] = self.ssl_root_cert
+        if self.ssl_key:
+            kwargs["sslkey"] = self.ssl_key
+        if self.ssl_password:
+            kwargs["sslpassword"] = self.ssl_password
+        return kwargs
+
+
+class ConnectionProxy(AbstractContextManager):
+    """
+    A context manager that wraps psycopg_pool.ConnectionPool.connection(),
+    ensuring that the connection is properly acquired and released.
+
+    Used to provide a safe interface for the get_connection() method in the pool manager.
+    """
+
+    def __init__(self, pool: ConnectionPool) -> None:
+        self.pool = pool
+        self._ctx = None
+        self._conn: Optional[Connection] = None
+
+    def __enter__(self) -> Connection:
+        self._ctx = self.pool.connection()
+        self._conn = self._ctx.__enter__()
+        return self._conn
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> Optional[bool]:
+        return self._ctx.__exit__(exc_type, exc_val, exc_tb)
+
+
+class LRUConnectionPoolManager:
+    """
+    Manages a fixed-size set of psycopg3 ConnectionPools, one per database name (dbname),
+    evicting the least recently used pool when the limit is exceeded.
+
+    Each dbname is assigned its own psycopg_pool.ConnectionPool instance. Only one pool
+    is maintained per dbname, and the total number of active pools is capped by `max_db`.
+
+    Pools are reused across calls, and usage is tracked to enforce LRU eviction. When a
+    new dbname is accessed beyond the pool limit, the least recently used pool is closed
+    and removed to make room.
+
+    Optionally supports runtime inspection of pool stats and last-used times.
+    """
+
+    def __init__(
+        self,
+        max_db: int,
+        base_conn_args: PostgresConnectionArgs,
+        pool_config: Optional[Dict[str, object]] = None,
+        statement_timeout: Optional[int] = None,  # milliseconds
+        sqlascii_encodings: Optional[list[str]] = None,
+    ) -> None:
+        """
+        Initialize the pool manager.
+
+        Args:
+            max_db (int): Maximum number of unique dbname pools to maintain.
+            base_conn_args (PostgresConnectionArgs): Common connection parameters.
+            pool_config (dict, optional): Additional ConnectionPool settings (min_size, max_size, etc).
+        """
+        self.max_db = max_db
+        self.base_conn_args = base_conn_args
+        self.statement_timeout = statement_timeout
+        self.sqlascii_encodings = sqlascii_encodings
+
+        self.pool_config = {
+            **(pool_config or {}),
+            "min_size": 0,
+            "max_size": 1,
+            "open": True,
+        }
+        self.lock = threading.Lock()
+        self.pools: OrderedDict[str, Tuple[ConnectionPool, float]] = OrderedDict()
+
+    def _configure_connection(self, conn: Connection) -> None:
+        conn.autocommit = True
+
+        if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
+            loader = SQLASCIITextLoader(encodings=self.sqlascii_encodings) # TODO: We should probably warn if encoding is ascii but utf-8 is set
+            for typ in ["text", "varchar", "name", "regclass"]:
+                conn.adapters.register_loader(typ, loader)
+
+        conn.cursor_factory = CommenterCursor
+
+        with conn.cursor() as cur:
+            if self.statement_timeout is not None:
+                cur.execute("SET statement_timeout = %s", (self.statement_timeout,))
+
+    def _create_pool(self, dbname: str) -> ConnectionPool:
+        """
+        Create a new ConnectionPool for a given dbname using a kwargs.
+
+        Args:
+            dbname (str): The target database name.
+
+        Returns:
+            ConnectionPool: A new pool instance configured for the dbname.
+        """
+        kwargs = self.base_conn_args.as_kwargs(dbname=dbname)
+
+        return ConnectionPool(kwargs=kwargs, configure=self._configure_connection, **self.pool_config)
+
+    def get_pool(self, dbname: str) -> ConnectionPool:
+        """
+        Get or create a ConnectionPool for the given dbname.
+
+        If a pool already exists for the dbname, it is reused and marked as recently used.
+        If it does not exist and the pool limit has been reached, the least recently used
+        pool is evicted to make space.
+
+        Args:
+            dbname (str): The database name to get a pool for.
+
+        Returns:
+            ConnectionPool: The pool for the requested dbname.
+        """
+        with self.lock:
+            now = time.monotonic()
+            if dbname in self.pools:
+                pool, _ = self.pools.pop(dbname)
+                self.pools[dbname] = (pool, now)
+                return pool
+
+            if len(self.pools) >= self.max_db:
+                old_dbname, (old_pool, _) = self.pools.popitem(last=False)
+                old_pool.close()
+
+            new_pool = self._create_pool(dbname)
+            self.pools[dbname] = (new_pool, now)
+            return new_pool
+
+    def get_connection(self, dbname: str) -> ConnectionProxy:
+        """
+        Context-managed access to a single connection from the pool associated with the given dbname.
+
+        Ensures that the connection is returned to its pool after use. Internally wraps
+        `pool.connection()` to safely manage resource cleanup.
+
+        Usage:
+            with manager.get_connection("mydb") as conn:
+                with conn.cursor() as cur:
+                    cur.execute(...)
+
+        Args:
+            dbname (str): The database name to get a connection for.
+
+        Returns:
+            ConnectionProxy: A context manager yielding a psycopg.Connection.
+        """
+        pool = self.get_pool(dbname)
+        return ConnectionProxy(pool)
+
+    def get_pool_stats(self, dbname: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieve runtime statistics and metadata for the ConnectionPool associated with the given dbname.
+
+        Includes:
+            - used: Connections currently in use
+            - available: Idle connections ready for use
+            - total: Total connections managed by the pool
+            - waiters: Threads waiting for a connection
+            - last_used: Monotonic timestamp of last access
+
+        Args:
+            dbname (str): The database name to fetch stats for.
+
+        Returns:
+            dict: Dictionary of pool stats and metadata, or None if the pool does not exist.
+        """
+        with self.lock:
+            entry = self.pools.get(dbname)
+            if not entry:
+                return None
+            pool, last_used = entry
+            stats = pool.get_stats()
+            return {
+                **stats,
+                "last_used": last_used,
+            }
+
+    def close_all(self) -> None:
+        """
+        Gracefully close all active pools and release all underlying connections.
+
+        This clears the pool manager state and should be called during shutdown or cleanup.
+        """
+        with self.lock:
+            for pool, _ in self.pools.values():
+                pool.close()
+            self.pools.clear()

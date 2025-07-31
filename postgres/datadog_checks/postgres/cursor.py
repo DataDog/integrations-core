@@ -32,26 +32,26 @@ class CommenterCursor(BaseCommenterCursor, psycopg.ClientCursor):
     pass
 
 
-class CommenterDictCursor(BaseCommenterCursor, psycopg.ClientCursor):
-    pass
-
-
 class SQLASCIITextLoader(psycopg.adapt.Loader):
     """
     Custom loader for SQLASCII encoding.
     """
 
-    encodings = ['utf-8']
     format = psycopg.pq.Format.TEXT
 
+    def __init__(self, encodings=None):
+        self.encodings = encodings or ['utf-8'] # TODO: The previous way this was done looks like it would be None if not set in config but using ASCII
+
     def load(self, data):
+        if data is None:
+            return data
         if isinstance(data, memoryview):
             # Convert memoryview to bytes
             data = data.tobytes()
-        if not isinstance(data, bytes) or data is None:
+        if not isinstance(data, bytes):
             return data
         try:
             return decode_with_encodings(data, self.encodings)
-        except:
+        except Exception:
             # Fallback to utf8 with replacement
             return data.decode('utf-8', errors='backslashreplace')
