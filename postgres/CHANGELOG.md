@@ -2,13 +2,6 @@
 
 <!-- towncrier release notes start -->
 
-## 22.16.0 / 2025-07-29
-
-***Added***:
-
-* Reverts upgrade to psycopg3 ([#20885](https://github.com/DataDog/integrations-core/pull/20885))
-* Reverts the fix to the `e.pgerror` ([#20883](https://github.com/DataDog/integrations-core/pull/20883))
-
 ## 22.15.1 / 2025-07-25
 
 ***Fixed***:
@@ -21,7 +14,7 @@
 
 * PG: Add recovery prefetch metrics ([#20464](https://github.com/DataDog/integrations-core/pull/20464))
 * Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
-* PG: Add wait events counts from `pg_stat_activity` ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
+* PG: Add wait events counts from pg_stat_activity ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
 * Upgrade psycopg to version 3 for Postgres integration ([#20617](https://github.com/DataDog/integrations-core/pull/20617))
 
 ***Fixed***:

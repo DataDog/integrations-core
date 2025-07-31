@@ -8,7 +8,7 @@ import threading
 import time
 from typing import Callable, Dict
 
-import psycopg2
+import psycopg
 
 
 class ConnectionPoolFullError(Exception):
@@ -23,7 +23,7 @@ class ConnectionPoolFullError(Exception):
 class ConnectionInfo:
     def __init__(
         self,
-        connection: psycopg2.extensions.connection,
+        connection: psycopg.Connection,
         deadline: int,
         active: bool,
         last_accessed: int,
@@ -46,9 +46,7 @@ class MultiDatabaseConnectionPool(object):
     and reuse a single connection as much as possible.
 
     Even when limited to a single connection per database, an instance with hundreds of
-    databases still present a connection overhead risk. This class provides a mechanism
-    to prune connections to a database which were not used in the time specified by their
-    TTL.
+    databases still present a connection overhead risk.
 
     If max_conns is specified, the connection pool will limit concurrent connections.
     """
@@ -56,7 +54,6 @@ class MultiDatabaseConnectionPool(object):
     class Stats(object):
         def __init__(self):
             self.connection_opened = 0
-            self.connection_pruned = 0
             self.connection_closed = 0
             self.connection_closed_failed = 0
 
@@ -86,16 +83,15 @@ class MultiDatabaseConnectionPool(object):
         dbname: str,
         ttl_ms: int,
         timeout: int = None,
-        startup_fn: Callable[[psycopg2.extensions.connection], None] = None,
+        startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
-    ) -> psycopg2.extensions.connection:
+    ) -> psycopg.Connection:
         """
         Return a connection from the pool.
         Pass a function to startup_func if there is an action needed with the connection
         when re-establishing it.
         """
         start = datetime.datetime.now()
-        self.prune_connections()
         with self._mu:
             conn = self._conns.pop(dbname, None)
             db = conn.connection if conn else None
@@ -103,7 +99,6 @@ class MultiDatabaseConnectionPool(object):
                 if self.max_conns is not None:
                     # try to free space until we succeed
                     while len(self._conns) >= self.max_conns:
-                        self.prune_connections()
                         self.evict_lru()
                         if timeout is not None and (datetime.datetime.now() - start).total_seconds() > timeout:
                             raise ConnectionPoolFullError(self.max_conns, timeout)
@@ -117,9 +112,11 @@ class MultiDatabaseConnectionPool(object):
                 # if already in pool, retain persistence status
                 persistent = conn.persistent
 
-            if db.status != psycopg2.extensions.STATUS_READY:
+            if db.info.status != psycopg.pq.ConnStatus.OK:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
+
+            db.execute(f"SET statement_timeout = {ttl_ms}; SET idle_in_transaction_session_timeout = {ttl_ms*10};")
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
             self._conns[dbname] = ConnectionInfo(
@@ -130,6 +127,7 @@ class MultiDatabaseConnectionPool(object):
                 thread=threading.current_thread(),
                 persistent=persistent,
             )
+
             return db
 
     @contextlib.contextmanager
@@ -138,7 +136,7 @@ class MultiDatabaseConnectionPool(object):
         dbname: str,
         ttl_ms: int,
         timeout: int = None,
-        startup_fn: Callable[[psycopg2.extensions.connection], None] = None,
+        startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
     ):
         """
@@ -147,12 +145,14 @@ class MultiDatabaseConnectionPool(object):
         make a new connection if the max_conn limit hasn't been reached.
         Blocks until a connection can be added to the pool,
         and optionally takes a timeout in seconds.
-        Note that leaving a connection context here does NOT close the connection in psycopg2;
+        Note that leaving a connection context here does NOT close the connection in psycopg;
         connections must be manually closed by `close_all_connections()`.
         """
         try:
             with self._mu:
-                db = self._get_connection_raw(dbname, ttl_ms, timeout, startup_fn, persistent)
+                db = self._get_connection_raw(
+                    dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, startup_fn=startup_fn, persistent=persistent
+                )
             yield db
         finally:
             with self._mu:
@@ -161,22 +161,7 @@ class MultiDatabaseConnectionPool(object):
                 except KeyError:
                     # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
                     pass
-
-    def prune_connections(self):
-        """
-        This function should be called periodically to prune all connections which have not been
-        accessed since their TTL. This means that connections which are actually active on the
-        server can still be closed with this function. For instance, if a connection is opened with
-        ttl 1000ms, but the query it's running takes 5000ms, this function will still try to close
-        the connection mid-query.
-        """
-        with self._mu:
-            now = datetime.datetime.now()
-            for dbname, conn in list(self._conns.items()):
-                if conn.deadline < now:
-                    self._stats.connection_pruned += 1
-                    self._terminate_connection_unsafe(dbname)
-
+    
     def close_all_connections(self):
         success = True
         with self._mu:
