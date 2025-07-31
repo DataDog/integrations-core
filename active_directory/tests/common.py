@@ -13,10 +13,11 @@ for object_name, instances in (
     ('Netlogon', ['_Total']),
     ('Security System-Wide Statistics', ['_Total']),
     ('DHCP Server', ['_Total']),
-    ('DFS Replicated Folders', ['Domain System Volume', 'Public Share', 'Department Files'])
+    ('DFS Replicated Folders', ['Domain System Volume', 'Public Share', 'Department Files']),
 ):
     if object_name in METRICS_CONFIG:
         PERFORMANCE_OBJECTS[object_name] = (
             instances,
             {counter: [9000] for counter in METRICS_CONFIG[object_name]['counters'][0]},
         )
+

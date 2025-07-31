@@ -1,13 +1,15 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 from unittest import mock
+
+import pytest
 
 from datadog_checks.active_directory.check import ActiveDirectoryCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
 # --- Fixtures ---
+
 
 @pytest.fixture
 def core_performance_objects():
@@ -56,6 +58,7 @@ def core_performance_objects():
         )
     }
 
+
 @pytest.fixture
 def optional_performance_objects():
     """Mock performance objects for optional, service-dependent components."""
@@ -98,9 +101,13 @@ def optional_performance_objects():
         ),
     }
 
+
 # --- Test Cases ---
 
-def test_core_ntds_metrics(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, core_performance_objects):
+
+def test_core_ntds_metrics(
+    aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, core_performance_objects
+):
     """
     Tests the collection of required NTDS metrics, which should always be collected
     regardless of service availability.
@@ -110,17 +117,25 @@ def test_core_ntds_metrics(aggregator, dd_default_hostname, dd_run_check, mock_p
     dd_run_check(check)
 
     global_tags = [f'server:{dd_default_hostname}']
-    
+
     aggregator.assert_service_check('active_directory.windows.perf.health', ServiceCheck.OK, tags=global_tags)
     # NTDS metrics that use metric_name don't include the ntds prefix
     aggregator.assert_metric('active_directory.ds.threads_in_use', 5, tags=global_tags)
     aggregator.assert_metric('active_directory.ldap.client_sessions', 10, tags=global_tags)
     aggregator.assert_metric('active_directory.ldap.bind_time', 50, tags=global_tags)
-    
+
     aggregator.assert_all_metrics_covered()
 
+
 @mock.patch('datadog_checks.active_directory.check.ActiveDirectoryCheckV2._is_service_running', return_value=True)
-def test_optional_metrics_when_services_are_running(mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, optional_performance_objects):
+def test_optional_metrics_when_services_are_running(
+    mock_is_service_running,
+    aggregator,
+    dd_default_hostname,
+    dd_run_check,
+    mock_performance_objects,
+    optional_performance_objects,
+):
     """
     Tests that all optional metrics are collected when their corresponding services are detected as running.
     """
@@ -138,7 +153,7 @@ def test_optional_metrics_when_services_are_running(mock_is_service_running, agg
     aggregator.assert_metric('active_directory.netlogon.semaphore_timeouts', 5, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.netlogon.semaphore_hold_time', 0.5, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.netlogon.last_authentication_time', 300, tags=total_instance_tags)
-    
+
     # Assert Security metrics (controlled by 'Netlogon' service)
     aggregator.assert_metric('active_directory.security.ntlm_authentications', 50, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.security.kerberos_authentications', 200, tags=total_instance_tags)
@@ -152,21 +167,30 @@ def test_optional_metrics_when_services_are_running(mock_is_service_running, agg
     # Assert DFSR metrics (controlled by 'DFSR' service)
     domain_tags = global_tags + ['replication_group:Domain System Volume']
     public_tags = global_tags + ['replication_group:Public Share']
-    
+
     # Domain System Volume metrics
     aggregator.assert_metric('active_directory.dfsr.deleted_files_size', 1048576, tags=domain_tags)
     aggregator.assert_metric('active_directory.dfsr.staging_folder_size', 5242880, tags=domain_tags)
     aggregator.assert_metric('active_directory.dfsr.file_installs_retried', 10, tags=domain_tags)
     aggregator.assert_metric('active_directory.dfsr.conflict_files_size', 524288, tags=domain_tags)
-    
+
     # Public Share metrics
     aggregator.assert_metric('active_directory.dfsr.deleted_files_size', 2097152, tags=public_tags)
     aggregator.assert_metric('active_directory.dfsr.staging_folder_size', 10485760, tags=public_tags)
     aggregator.assert_metric('active_directory.dfsr.file_installs_retried', 25, tags=public_tags)
     aggregator.assert_metric('active_directory.dfsr.conflict_files_size', 1048576, tags=public_tags)
 
+
 @mock.patch('datadog_checks.active_directory.check.ActiveDirectoryCheckV2._is_service_running')
-def test_service_aware_collection_skips_metrics(mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, core_performance_objects, optional_performance_objects):
+def test_service_aware_collection_skips_metrics(
+    mock_is_service_running,
+    aggregator,
+    dd_default_hostname,
+    dd_run_check,
+    mock_performance_objects,
+    core_performance_objects,
+    optional_performance_objects,
+):
     """
     Tests that metric collection is dynamically skipped if a service is not running.
     """
@@ -176,6 +200,7 @@ def test_service_aware_collection_skips_metrics(mock_is_service_running, aggrega
     # Configure the mock to simulate that the DFSR service is NOT running
     def service_side_effect(service_name):
         return service_name != 'DFSR'  # Return True for all services except DFSR
+
     mock_is_service_running.side_effect = service_side_effect
 
     check = ActiveDirectoryCheckV2('active_directory', {}, [{'host': dd_default_hostname}])
@@ -183,15 +208,18 @@ def test_service_aware_collection_skips_metrics(mock_is_service_running, aggrega
 
     # NTDS metrics should ALWAYS be collected (it's a required metric set)
     aggregator.assert_metric('active_directory.ds.threads_in_use', 5, count=1)
-    
+
     # Netlogon metrics SHOULD be collected (service is mocked as running)
     aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', 2, count=1)
-    
+
     # DFSR metrics should NOT be collected (service is mocked as not running)
     aggregator.assert_metric('active_directory.dfsr.staging_folder_size', count=0)
 
+
 @mock.patch('datadog_checks.base.utils.windows_service.is_service_running')
-def test_emits_service_checks(mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):
+def test_emits_service_checks(
+    mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects
+):
     """
     Tests that service checks are emitted correctly based on service status.
     """
@@ -203,6 +231,7 @@ def test_emits_service_checks(mock_is_service_running, aggregator, dd_default_ho
             return True, 4, None  # Running state
         else:
             return False, 1, None  # Stopped state
+
     mock_is_service_running.side_effect = service_side_effect
 
     instance_config = [{'host': dd_default_hostname, 'emit_service_status': True}]
@@ -219,12 +248,21 @@ def test_emits_service_checks(mock_is_service_running, aggregator, dd_default_ho
     aggregator.assert_service_check('active_directory.service.netlogon', ServiceCheck.OK, tags=global_tags)
     aggregator.assert_service_check('active_directory.service.w32time', ServiceCheck.OK, tags=global_tags)
     aggregator.assert_service_check('active_directory.service.adws', ServiceCheck.OK, tags=global_tags)
-    
+
     # Service that is stopped (DFSR is not in the running list)
     aggregator.assert_service_check('active_directory.service.dfsr', ServiceCheck.CRITICAL, tags=global_tags)
 
+
 @mock.patch('datadog_checks.active_directory.check.ActiveDirectoryCheckV2._is_service_running', return_value=True)
-def test_all_metrics_comprehensive(mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, core_performance_objects, optional_performance_objects):
+def test_all_metrics_comprehensive(
+    mock_is_service_running,
+    aggregator,
+    dd_default_hostname,
+    dd_run_check,
+    mock_performance_objects,
+    core_performance_objects,
+    optional_performance_objects,
+):
     """
     Comprehensive test that ensures ALL metrics defined in metrics.py are properly collected
     when all services are running. This serves as a safety net for any future metric additions.
@@ -232,13 +270,13 @@ def test_all_metrics_comprehensive(mock_is_service_running, aggregator, dd_defau
     # Combine all performance objects
     all_performance_objects = {**core_performance_objects, **optional_performance_objects}
     mock_performance_objects(all_performance_objects)
-    
+
     check = ActiveDirectoryCheckV2('active_directory', {}, [{'host': dd_default_hostname}])
     dd_run_check(check)
-    
+
     global_tags = [f'server:{dd_default_hostname}']
     total_instance_tags = global_tags + ['instance:_Total']
-    
+
     # Assert all NTDS metrics (core metrics, always collected)
     # DRA Inbound metrics
     aggregator.assert_metric('active_directory.dra.inbound.bytes.after_compression', 1000, tags=global_tags)
@@ -255,7 +293,7 @@ def test_all_metrics_comprehensive(mock_is_service_running, aggregator, dd_defau
     aggregator.assert_metric('active_directory.dra.inbound.properties.total_persec', 55, tags=global_tags)
     aggregator.assert_metric('active_directory.dra.inbound.values.dns_persec', 20, tags=global_tags)
     aggregator.assert_metric('active_directory.dra.inbound.values.total_persec', 30, tags=global_tags)
-    
+
     # DRA Outbound metrics
     aggregator.assert_metric('active_directory.dra.outbound.bytes.after_compression', 500, tags=global_tags)
     aggregator.assert_metric('active_directory.dra.outbound.bytes.before_compression', 1000, tags=global_tags)
@@ -266,7 +304,7 @@ def test_all_metrics_comprehensive(mock_is_service_running, aggregator, dd_defau
     aggregator.assert_metric('active_directory.dra.outbound.properties.persec', 25, tags=global_tags)
     aggregator.assert_metric('active_directory.dra.outbound.values.dns_persec', 10, tags=global_tags)
     aggregator.assert_metric('active_directory.dra.outbound.values.total_persec', 15, tags=global_tags)
-    
+
     # Other NTDS metrics
     aggregator.assert_metric('active_directory.dra.replication.pending_synchronizations', 0, tags=global_tags)
     aggregator.assert_metric('active_directory.dra.sync_requests_made', 100, tags=global_tags)
@@ -278,7 +316,7 @@ def test_all_metrics_comprehensive(mock_is_service_running, aggregator, dd_defau
     aggregator.assert_metric('active_directory.ldap.writes_persec', 15, tags=global_tags)
     aggregator.assert_metric('active_directory.ldap.active_threads', 4, tags=global_tags)
     aggregator.assert_metric('active_directory.ds.client_binds_persec', 25, tags=global_tags)
-    
+
     # Assert all Netlogon metrics
     aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', 2, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.netlogon.semaphore_holders', 1, tags=total_instance_tags)
@@ -286,25 +324,28 @@ def test_all_metrics_comprehensive(mock_is_service_running, aggregator, dd_defau
     aggregator.assert_metric('active_directory.netlogon.semaphore_timeouts', 5, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.netlogon.semaphore_hold_time', 0.5, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.netlogon.last_authentication_time', 300, tags=total_instance_tags)
-    
+
     # Assert all Security metrics
     aggregator.assert_metric('active_directory.security.ntlm_authentications', 50, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.security.kerberos_authentications', 200, tags=total_instance_tags)
-    
+
     # Assert all DHCP metrics
     aggregator.assert_metric('active_directory.dhcp.binding_updates_dropped', 15, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.dhcp.failover.update_pending_messages', 3, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.dhcp.failover.messages_received', 10.5, tags=total_instance_tags)
     aggregator.assert_metric('active_directory.dhcp.failover.messages_sent', 12.3, tags=total_instance_tags)
-    
+
     # Assert all DFSR metrics for both replication groups
-    for group_name, values in [('Domain System Volume', [1048576, 5242880, 10, 524288]), 
-                               ('Public Share', [2097152, 10485760, 25, 1048576])]:
+    for group_name, values in [
+        ('Domain System Volume', [1048576, 5242880, 10, 524288]),
+        ('Public Share', [2097152, 10485760, 25, 1048576]),
+    ]:
         group_tags = global_tags + [f'replication_group:{group_name}']
         aggregator.assert_metric('active_directory.dfsr.deleted_files_size', values[0], tags=group_tags)
         aggregator.assert_metric('active_directory.dfsr.staging_folder_size', values[1], tags=group_tags)
         aggregator.assert_metric('active_directory.dfsr.file_installs_retried', values[2], tags=group_tags)
         aggregator.assert_metric('active_directory.dfsr.conflict_files_size', values[3], tags=group_tags)
-    
+
     # Ensure no metrics were missed
     aggregator.assert_all_metrics_covered()
+

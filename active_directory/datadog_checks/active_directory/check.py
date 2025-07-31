@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # datadog_checks/active_directory/check.py
 
-from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBaseCheckWithLegacySupport
-from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.utils.windows_service import is_service_running, STATE_TO_STATUS
 import platform
 import time
+
+from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBaseCheckWithLegacySupport
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.windows_service import STATE_TO_STATUS, is_service_running
 
 
 class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
@@ -65,7 +66,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         # Use cached results if recent
         current_time = time.time()
         if current_time - self._last_service_check < self._cache_duration:
-            self.log.debug("Using cached service states (age: {:.1f}s)".format(current_time - self._last_service_check))
+            self.log.debug("Using cached service states (age: %.1fs)", current_time - self._last_service_check)
             return self._build_config_from_cache(METRICS_CONFIG)
 
         # Refresh cache
@@ -92,13 +93,13 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                 self._service_cache[service] = True
                 self.log.debug("Service NTDS: always collected (core AD service)")
                 continue
-                
+
             try:
                 is_running = self._is_service_running(service)
                 self._service_cache[service] = is_running
-                self.log.debug("Service {}: {}".format(service, 'running' if is_running else 'not running'))
+                self.log.debug("Service %s: %s", service, 'running' if is_running else 'not running')
             except Exception as e:
-                self.log.warning("Failed to check service {}: {}".format(service, e))
+                self.log.warning("Failed to check service %s: %s", service, e)
                 # Optimistically assume service is available on error
                 self._service_cache[service] = True
 
@@ -106,12 +107,12 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         """Check if a Windows service is running."""
         # Use shared utility function
         is_running, state, error = is_service_running(service_name, self.log)
-        
+
         if error:
             # Log error but optimistically assume service is available
-            self.log.warning("Failed to check service {}: {}".format(service_name, error))
+            self.log.warning("Failed to check service %s: %s", service_name, error)
             return True
-            
+
         return is_running
 
     def _build_config_from_cache(self, metrics_config):
@@ -128,9 +129,9 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     if metric_name in metrics_config and metric_name not in metrics_added:
                         filtered_config['metrics'][metric_name] = metrics_config[metric_name]
                         metrics_added.add(metric_name)
-                        self.log.debug("Including {} (service {} is running)".format(metric_name, service))
+                        self.log.debug("Including %s (service %s is running)", metric_name, service)
             else:
-                self.log.info("Excluding metrics {} (service {} not running)".format(metric_names, service))
+                self.log.info("Excluding metrics %s (service %s not running)", metric_names, service)
 
         # Add any metrics not controlled by services
         # This ensures backward compatibility if new metrics are added
@@ -145,7 +146,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
 
                 if not controlled:
                     filtered_config['metrics'][metric_name] = metric_config
-                    self.log.debug("Including uncontrolled metric: {}".format(metric_name))
+                    self.log.debug("Including uncontrolled metric: %s", metric_name)
 
         return filtered_config
 
@@ -178,18 +179,15 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         # Check each service efficiently using direct lookups
         for service_name, description in AD_SERVICES.items():
             check_name = "{}.service.{}".format(self.__NAMESPACE__, service_name.lower())
-            
+
             # Use shared utility to get service state
             is_running, state, error = is_service_running(service_name, self.log)
-            
+
             if error:
                 if "not found" in error.lower():
                     # Service doesn't exist on this system
                     self.service_check(
-                        check_name,
-                        ServiceCheck.UNKNOWN,
-                        message="{} not found".format(description),
-                        tags=[]
+                        check_name, ServiceCheck.UNKNOWN, message="{} not found".format(description), tags=[]
                     )
                 else:
                     # Other error (permissions, etc.)
@@ -197,15 +195,16 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                         check_name,
                         ServiceCheck.UNKNOWN,
                         message="Failed to check {}: {}".format(description, error),
-                        tags=[]
+                        tags=[],
                     )
             else:
                 # Map state to service check status
                 status = STATE_TO_STATUS.get(state, ServiceCheck.UNKNOWN)
-                
+
                 if status == ServiceCheck.OK:
                     message = "{} is running".format(description)
                 else:
                     message = "{} is not running (state: {})".format(description, state)
-                
+
                 self.service_check(check_name, status, message=message, tags=[])
+
