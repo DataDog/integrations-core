@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.config import PostgresConfig, build_config
+from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,

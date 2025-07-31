@@ -893,7 +893,7 @@ class PostgreSql(AgentCheck):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
             connection_string = "dbname=%s user=%s application_name=%s" % (
-                self._config.user,
+                self._config.username,
                 dbname,
                 self._config.application_name,
             )
@@ -903,7 +903,7 @@ class PostgreSql(AgentCheck):
             if self._config.aws.managed_authentication.enabled:
                 password = aws.generate_rds_iam_token(
                     host=self._config.host,
-                    username=self._config.user,
+                    username=self._config.username,
                     port=self._config.port,
                     region=self._config.aws.region,
                     role_arn=self._config.aws.managed_authentication.role_arn,

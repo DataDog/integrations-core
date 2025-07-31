@@ -452,9 +452,7 @@ class PostgresMetadata(DBMAsyncJob):
         # We get the config as a dict so we can use string interpolation
         # to iterate over object types
         schemas_config = self._config.collect_schemas.model_dump()
-        excludes = schemas_config.get(
-            "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
-        )
+        excludes = schemas_config.get("exclude_{metadata_type}s".format(metadata_type=metadata_type), [])
         for re_str in excludes:
             regex = re.compile(re_str)
             if regex.search(name):
@@ -465,9 +463,7 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 return False
 
-        includes = schemas_config.get(
-            "include_{metadata_type}s".format(metadata_type=metadata_type), []
-        )
+        includes = schemas_config.get("include_{metadata_type}s".format(metadata_type=metadata_type), [])
         if len(includes) == 0:
             return True
         for re_str in includes:

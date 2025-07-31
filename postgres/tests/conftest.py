@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
+from collections.abc import Callable
+from typing import Optional
 
 import psycopg
 import pytest
@@ -79,8 +81,8 @@ def check():
 
 
 @pytest.fixture
-def integration_check() -> PostgreSql:
-    def _check(instance, init_config=None):
+def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
+    def _check(instance: dict, init_config: dict = None):
         c = PostgreSql('postgres', init_config or {}, [instance])
         return c
 

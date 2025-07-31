@@ -6,7 +6,6 @@ from typing import List
 
 import mock
 import pytest
-import time
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
@@ -343,7 +342,7 @@ def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
         check = integration_check(dbm_instance)
         run_one_check(check, dbm_instance)
         dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-        
+
         tables_got = []
 
         for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):

@@ -661,7 +661,6 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     if instance.get('collect_schemas', {}).get('enabled') and not config.dbm:
         validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
 
-
     return config, validation_result
 
 

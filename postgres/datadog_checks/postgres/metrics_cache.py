@@ -191,7 +191,7 @@ class PostgresMetricsCache:
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
-            excluded_aggregations = self.config.activity_metrics_excluded_aggregations
+            excluded_aggregations = list(self.config.activity_metrics_excluded_aggregations)
             if version < V9:
                 excluded_aggregations.append('application_name')
 
@@ -234,7 +234,7 @@ class PostgresMetricsCache:
 
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
-                    metrics_query[i] = q.format(dd__user=self.config.user)
+                    metrics_query[i] = q.format(dd__user=self.config.username)
 
             metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS))
 
