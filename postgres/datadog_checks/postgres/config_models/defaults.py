@@ -53,7 +53,7 @@ def instance_collect_function_metrics():
 
 
 def instance_collect_wal_metrics():
-    return False
+    return True
 
 
 def instance_data_directory():

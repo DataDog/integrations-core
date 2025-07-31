@@ -112,7 +112,7 @@ instances:
 
     ## @param ignore_schemas_owned_by - list of strings - optional
     ## A list of database users which own schemas to ignore.
-    ## No metrics or statement samples will be collected for these schemas.
+    ## No metrics will be collected for these schemas.
     ## Each value can be a plain string or a Postgres pattern.
     #
     # ignore_schemas_owned_by:
@@ -269,17 +269,17 @@ instances:
     #
     collect_bloat_metrics: false
 
-    ## @param collect_wal_metrics - boolean - optional - default: false
+    ## @param collect_wal_metrics - boolean - optional - default: true
     ## Collect metrics about WAL file age.
     ## NOTE:
     ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
     ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
     #
-    # collect_wal_metrics: false
+    # collect_wal_metrics: true
 
     ## @param data_directory - string - optional
     ## The data directory of your postgres installation
-    ## Required when collecting WAL metrics.
+    ## Required when collecting WAL metrics on Postgres 9.6.
     #
     # data_directory: /usr/local/pgsql/data
 

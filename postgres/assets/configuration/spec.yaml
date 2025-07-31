@@ -340,11 +340,11 @@ files:
         Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
         type: boolean
-        example: false
+        example: true
     - name: data_directory
       description: |
         The data directory of your postgres installation
-        Required when collecting WAL metrics.
+        Required when collecting WAL metrics on Postgres 9.6.
       value:
         type: string
         example: /usr/local/pgsql/data

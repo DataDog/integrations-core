@@ -90,6 +90,8 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
         check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
         # check_file_wal_metrics(aggregator, expected_tags=expected_tags)
         check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
+        if float(POSTGRES_VERSION) >= 10.0:
+            check_file_wal_metrics(aggregator, expected_tags=expected_tags)
     check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     check_logical_replication_slots(aggregator, expected_tags)
@@ -1139,8 +1141,8 @@ def test_propagate_agent_tags(
     agent_tags = ["my-env:test-env", "random:tag", "bar:foo"]
 
     with mock.patch('datadog_checks.postgres.config.get_agent_host_tags', return_value=agent_tags):
-        check = integration_check(pg_instance, init_config)
-        assert check._config._should_propagate_agent_tags(pg_instance, init_config) == should_propagate_agent_tags
+        check = integration_check(instance=pg_instance, init_config=init_config)
+        assert check._config.propagate_agent_tags == should_propagate_agent_tags
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
             check.run()

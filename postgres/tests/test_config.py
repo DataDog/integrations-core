@@ -62,15 +62,6 @@ def test_initialize_conflicting_collect_default_database_and_ignore_databases(mo
     assert any("cannot be ignored" in w for w in result.warnings)
 
 
-def test_initialize_collect_wal_metrics_without_data_directory(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
-    instance['collect_wal_metrics'] = True
-    instance.pop('data_directory', None)
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
-    assert not result.valid
-    assert any("data_directory" in str(e) for e in result.errors)
-
-
 def test_initialize_non_ascii_application_name(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['application_name'] = 'datadog-агент'
@@ -151,6 +142,26 @@ def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
     instance['empty_default_hostname'] = True
     config, result = build_config(check=mock_check, init_config={}, instance=instance)
     assert any("empty_default_hostname" in w for w in result.warnings)
+
+
+@pytest.mark.parametrize(
+    'instance, init_config, should_propagate',
+    [
+        (True, True, True),
+        (False, False, False),
+        (True, False, True),
+        (False, True, False),
+        (None, True, True),
+        (None, False, False),
+        (False, None, False),
+        (True, None, True),
+    ],
+)
+def test_propagate_agent_tags(instance, init_config, should_propagate, mock_check, minimal_instance):
+    minimal_instance['propagate_agent_tags'] = instance
+    init_config = {'propagate_agent_tags': init_config}
+    config, _ = build_config(instance=minimal_instance, init_config=init_config, check=mock_check)
+    assert config.propagate_agent_tags == should_propagate
 
 
 def test_sanitize_config(mock_check, minimal_instance):

@@ -49,7 +49,6 @@ from datadog_checks.postgres.config_models.defaults import (
     instance_table_count_limit,
     instance_tag_replication_role,
     instance_use_global_custom_queries,
-    shared_propagate_agent_tags,
 )
 from datadog_checks.postgres.discovery import (
     DEFAULT_MAX_DATABASES,
@@ -507,8 +506,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         "database_instance_collection_interval": instance.get(
             'database_instance_collection_interval', instance_database_instance_collection_interval()
         ),
-        "propagate_agent_tags": instance.get('propagate_agent_tags', instance_propagate_agent_tags())
-        or init_config.get('propagate_agent_tags', shared_propagate_agent_tags()),
+        "propagate_agent_tags": should_propagate_agent_tags(instance=instance, init_config=init_config),
         "empty_default_hostname": instance.get('empty_default_hostname', instance_empty_default_hostname()),
         "service": instance.get('service', init_config.get('service', None)),
         # Metric filtering by pattern is implemented downstream, theoretically
@@ -632,9 +630,6 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     if not config.application_name.isascii():
         validation_result.add_error(f"Application name can include only ASCII characters: {config.application_name}")
 
-    if config.collect_wal_metrics and not config.data_directory:
-        validation_result.add_error('The `data_directory` parameter must be set when `collect_wal_metrics` is enabled.')
-
     if config.relations and not (config.dbname or config.database_autodiscovery.get('enabled', False)):
         validation_result.add_error(
             '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
@@ -697,7 +692,7 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
         tags.extend(rds_tags)
 
     errors = []
-    if instance.get('propagate_agent_tags'):
+    if config.get('propagate_agent_tags'):
         try:
             agent_tags = get_agent_host_tags()
             tags.extend(agent_tags)
@@ -742,6 +737,23 @@ def map_custom_metrics(custom_metrics):
         except Exception as e:
             raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
     return custom_metrics
+
+
+def should_propagate_agent_tags(instance, init_config) -> bool:
+    '''
+    return True if the agent tags should be propagated to the check
+    '''
+    instance_propagate = instance.get('propagate_agent_tags')
+    init_config_propagate = init_config.get('propagate_agent_tags')
+
+    if instance_propagate is not None:
+        # if the instance has explicitly set the value, return the boolean
+        return instance_propagate
+    if init_config_propagate is not None:
+        # if the init_config has explicitly set the value, return the boolean
+        return init_config_propagate
+    # if neither the instance nor the init_config has set the value, return default for instance
+    return instance_propagate_agent_tags()
 
 
 def sanitize(config: InstanceConfig) -> dict:

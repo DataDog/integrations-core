@@ -456,7 +456,7 @@ class PostgresMetadata(DBMAsyncJob):
         for re_str in excludes:
             regex = re.compile(re_str)
             if regex.search(name):
-                self._log.warning(
+                self._log.debug(
                     "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
                         metadata_type=metadata_type, name=name, re_str=re_str
                     )
@@ -469,7 +469,7 @@ class PostgresMetadata(DBMAsyncJob):
         for re_str in includes:
             regex = re.compile(re_str)
             if regex.search(name):
-                self._log.warning(
+                self._log.debug(
                     "Including {metadata_type} {name} in metadata collection because of {re_str}".format(
                         metadata_type=metadata_type, name=name, re_str=re_str
                     )
