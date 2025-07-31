@@ -3,7 +3,7 @@ otel.system.cpu.time,count,,second,,Total CPU seconds broken down by different s
 otel.system.cpu.load_average.1m,gauge,,unit,,Average CPU Load over 1 minute,0,otel,load norm 1,
 otel.system.cpu.load_average.5m,gauge,,unit,,Average CPU Load over 5 minutes,0,otel,load norm 5,
 otel.system.cpu.load_average.15m,gauge,,unit,,Average CPU Load over 15 minutes,0,otel,load norm 15,
-otel.system.memory.usage,count,,byte,,Bytes of memory in use,0,otel,mem usage,
+otel.system.memory.usage,gauge,,byte,,Bytes of memory in use,0,otel,mem usage,
 otel.system.disk.io,count,,byte,,Disk bytes transferred,0,otel,disk io,
 otel.system.disk.operations,count,,unit,,Disk operations count,0,otel,disk ops,
 otel.system.disk.io_time,count,,unit,,Time disk spent activated,0,otel,disk io time,
