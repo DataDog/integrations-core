@@ -207,4 +207,3 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     message = "{} is not running (state: {})".format(description, state)
 
                 self.service_check(check_name, status, message=message, tags=[])
-

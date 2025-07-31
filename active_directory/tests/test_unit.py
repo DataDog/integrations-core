@@ -348,4 +348,3 @@ def test_all_metrics_comprehensive(
 
     # Ensure no metrics were missed
     aggregator.assert_all_metrics_covered()
-

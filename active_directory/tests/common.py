@@ -20,4 +20,3 @@ for object_name, instances in (
             instances,
             {counter: [9000] for counter in METRICS_CONFIG[object_name]['counters'][0]},
         )
-
