@@ -130,11 +130,11 @@ def display_diffs(diffs, platform, python_version):
 
 def display_diffs_to_html(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
-    text = f"<details><summary>Size Delta for {platform} and Python {python_version}: "
+    text = f"<details><summary><h3>Size Delta for {platform} and Python {python_version}: </h3></summary>\n"
     text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</summary>\n\n"
 
     if diffs["added"]:
-        text += "<details><summary><h3>Added</h3></summary>\n"
+        text += "<details><summary>Added</summary>\n"
         text += "<table>\n"
         text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th></tr>\n"
         for entry in diffs["added"]:
@@ -149,7 +149,7 @@ def display_diffs_to_html(diffs, platform, python_version):
         text += "No added dependencies/integrations\n\n"
 
     if diffs["removed"]:
-        text += "<details><summary><h3>Removed</h3></summary>\n"
+        text += "<details><summary>Removed</summary>\n"
         text += "<table>\n"
         text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th></tr>\n"
         for entry in diffs["removed"]:
@@ -165,7 +165,7 @@ def display_diffs_to_html(diffs, platform, python_version):
         text += "No removed dependencies/integrations\n\n"
 
     if diffs["changed"]:
-        text += "<details><summary><h3>Changed</h3></summary>\n"
+        text += "<details><summary>Changed</summary>\n"
         text += "<table>\n"
         text += "<tr><th>Type</th><th>Name</th><th>Version</th>"
         text += "<th>Size Delta</th><th>Percentage</th></tr>\n"
