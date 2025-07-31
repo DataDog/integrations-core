@@ -75,7 +75,7 @@ def order_by(diffs, key):
 def display_diffs(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
     print("=" * 52)
-    print(f"Dependency Size Differences for {platform} and Python {python_version}")
+    print(f"Size Delta for {platform} and Python {python_version}")
     print("=" * 52)
     print(f"Total size difference: {sign}{convert_to_human_readable_size(diffs['total_diff'])}")
     print()
@@ -130,35 +130,45 @@ def display_diffs(diffs, platform, python_version):
 
 def display_diffs_to_html(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
-    text = f"<details><summary>Dependency Size Differences for {platform} and Python {python_version}: "
-    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</summary>\n"
+    text = f"<details><summary>Size Delta for {platform} and Python {python_version}: "
+    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</summary>\n\n"
+
     if diffs["added"]:
         text += "<details><summary>Added</summary>\n"
+        text += "<table>\n"
+        text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Size</th></tr>\n"
         for entry in diffs["added"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             size = entry.get("Size", 0)
             typ = entry.get("Type", "")
-            text += f"  + [{typ}] {name} {version}: +{size}\n"
-        text += "</details>\n"
+            text += f"<tr><td>{typ}</td><td>{name}</td><td>{version}</td><td>+{size}</td></tr>\n"
+        text += "</table>\n"
+        text += "</details>\n\n"
     else:
-        text += "No added dependencies/integrations\n"
+        text += "No added dependencies/integrations\n\n"
 
     if diffs["removed"]:
         text += "<details><summary>Removed</summary>\n"
+        text += "<table>\n"
+        text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Size</th></tr>\n"
         for entry in diffs["removed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             size = int(entry.get("Size_Bytes", 0))
             typ = entry.get("Type", "")
-            # TODO: change to normal size
-            text += f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}\n"
-        text += "</details>\n"
+            text += f"<tr><td>{typ}</td><td>{name}</td>"
+            text += f"<td>{version}</td><td>-{convert_to_human_readable_size(size)}</td></tr>\n"
+        text += "</table>\n"
+        text += "</details>\n\n"
     else:
-        text += "No removed dependencies/integrations\n"
+        text += "No removed dependencies/integrations\n\n"
 
     if diffs["changed"]:
         text += "<details><summary>Changed</summary>\n"
+        text += "<table>\n"
+        text += "<tr><th>Type</th><th>Name</th><th>Version</th>"
+        text += "<th>Size Change</th><th>Percentage</th></tr>\n"
         for entry in diffs["changed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
@@ -167,15 +177,19 @@ def display_diffs_to_html(diffs, platform, python_version):
             diff = entry.get("Diff", 0)
             sign = "+" if diff > 0 else "-"
             version_diff = (
-                f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)}"
+                f"{entry.get('Prev Version', version)} → {entry.get('Version', version)}"
                 if entry.get('Prev Version', version) != entry.get('Version', version)
                 else version
             )
-            text += f"  * [{typ}] {name} ({version_diff}): "
-            text += f"{sign}{convert_to_human_readable_size(abs(diff))} ({sign}{percentage:.2f}%)\n"
-        text += "</details>\n"
+            text += (
+                f"<tr><td>{typ}</td><td>{name}</td><td>{version_diff}</td>"
+                f"<td>{sign}{convert_to_human_readable_size(abs(diff))}</td>"
+                f"<td>{sign}{percentage:.2f}%</td></tr>\n"
+            )
+        text += "</table>\n"
+        text += "</details>\n\n"
     else:
-        text += "No changed dependencies/integrations\n"
+        text += "No changed dependencies/integrations\n\n"
     text += "</details>\n"
     print(text)
 

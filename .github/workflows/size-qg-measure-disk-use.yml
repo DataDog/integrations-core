@@ -16,6 +16,18 @@ env:
   PYTHON_VERSION: "3.12"
 
 jobs:
+  label:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        fetch-depth: 0
+    - name: Add label
+      uses: actions-ecosystem/action-add-label@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
+      if: github.event.pull_request.draft == false
+      with:
+        labels: "show-size-delta"
+
   measure-disk-usage:
     runs-on: ubuntu-22.04
     steps:
