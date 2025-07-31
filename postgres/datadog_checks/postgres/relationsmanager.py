@@ -434,6 +434,7 @@ class RelationsManager(object):
         """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
         for r in self.config:
+            print(r)
             relation_filter = []
             if r.get(RELATION_NAME):
                 relation_filter.append("( relname = '{}'".format(r[RELATION_NAME]))
