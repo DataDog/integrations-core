@@ -94,6 +94,9 @@ class ProcessCheck(AgentCheck):
         self.pid_cache = {}
         self.pid_cache_duration = int(init_config.get('pid_cache_duration', DEFAULT_PID_CACHE_DURATION))
 
+        # Control whether to reset the shared process list cache on process changes
+        self.reset_cache_on_process_changes = is_affirmative(init_config.get('reset_cache_on_process_changes', True))
+
         self._conflicting_procfs = False
         self._deprecated_init_procfs = False
         if Platform.is_linux():
@@ -288,7 +291,8 @@ class ProcessCheck(AgentCheck):
                     self.log.debug('Process %s disappeared while scanning', pid)
                     # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
-                    self.process_list_cache.reset()
+                    if self.reset_cache_on_process_changes:
+                        self.process_list_cache.reset()
                     continue
 
             p = self.process_cache[name][pid]
@@ -461,7 +465,8 @@ class ProcessCheck(AgentCheck):
             self.log.debug("No matching process '%s' was found", self.name)
             # reset the process caches now, something changed
             self.last_pid_cache_ts[self.name] = 0
-            self.process_list_cache.reset()
+            if self.reset_cache_on_process_changes:
+                self.process_list_cache.reset()
 
         for attr, mname in ATTR_TO_METRIC.items():
             vals = [x for x in proc_state[attr] if x is not None]

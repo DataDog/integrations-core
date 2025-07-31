@@ -253,6 +253,13 @@ DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
 ]
 
+TABLE_SIZE_METRICS = [
+    ('sqlserver.table.row_count', 'sys.dm_db_partition_stats', 'row_count'),
+    ('sqlserver.table.total_size', 'sys.dm_db_partition_stats', 'total_size'),
+    ('sqlserver.table.used_size', 'sys.dm_db_partition_stats', 'used_size'),
+    ('sqlserver.table.data_size', 'sys.dm_db_partition_stats', 'data_size'),
+]
+
 TEMPDB_FILE_SPACE_USAGE_METRICS = [
     ('sqlserver.tempdb.file_space_usage.free_space', 'sys.dm_db_file_space_usage', 'free_space'),
     (

@@ -19,17 +19,15 @@ def mock_timeline():
         patch("ddev.cli.size.timeline.GitRepo.sparse_checkout_commit"),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
-        patch("os.walk", return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])]),
-        patch("os.path.exists", return_value=True),
+        patch("ddev.cli.size.timeline.os.walk", return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.size.timeline.plt.show"),
-        patch("ddev.cli.size.timeline.plt.savefig"),
-        patch("ddev.cli.size.timeline.plt.figure"),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 
@@ -42,27 +40,66 @@ def app():
 
 
 def test_timeline_integration(ddev, mock_timeline, app):
-    assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--compressed", obj=app).exit_code == 0
-    assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--csv", obj=app).exit_code == 0
-    assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--markdown", obj=app).exit_code == 0
-    assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--json", obj=app).exit_code == 0
     assert (
         ddev(
             "size",
             "timeline",
             "integration",
             "int1",
+            "--initial-commit",
             "commit1",
+            "--final-commit",
             "commit2",
-            "--save_to_png_path",
-            "out_int.png",
+            "--compressed",
             obj=app,
         ).exit_code
         == 0
     )
-    assert ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--show_gui", obj=app).exit_code == 0
     assert (
-        ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--threshold", "1000", obj=app).exit_code
+        ddev(
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--format",
+            "csv,markdown,json,png",
+            obj=app,
+        ).exit_code
+        == 0
+    )
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--show-gui",
+            obj=app,
+        ).exit_code
+        == 0
+    )
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "integration",
+            "int1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--threshold",
+            "1000",
+            obj=app,
+        ).exit_code
         == 0
     )
 
@@ -80,13 +117,13 @@ def mock_timeline_dependencies():
         patch("ddev.cli.size.timeline.GitRepo.sparse_checkout_commit"),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_.utils.common_funcs.64", "linux-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
-        patch("os.path.exists", return_value=True),
-        patch("os.path.isdir", return_value=True),
-        patch("os.listdir", return_value=["linux-x86_64-3.12"]),
-        patch("os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
         patch("ddev.cli.size.timeline.get_gitignore_files", return_value=set()),
         patch(
             "ddev.cli.size.timeline.get_dependencies",
@@ -101,9 +138,7 @@ def mock_timeline_dependencies():
         ),
         patch("ddev.cli.size.timeline.format_modules", side_effect=lambda m, *_: m),
         patch("ddev.cli.size.timeline.trim_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.size.timeline.plt.show"),
-        patch("ddev.cli.size.timeline.plt.savefig"),
-        patch("ddev.cli.size.timeline.plt.figure"),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 
@@ -111,18 +146,43 @@ def mock_timeline_dependencies():
 def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
-            "size", "timeline", "dependency", "dep1", "commit1", "commit2", "--platform", "linux-x86_64", obj=app
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--platform",
+            "linux-x86_64",
+            obj=app,
         ).exit_code
         == 0
     )
-    assert ddev("size", "timeline", "dependency", "dep1", "commit1", "commit2", obj=app).exit_code == 0
     assert (
         ddev(
             "size",
             "timeline",
             "dependency",
             "dep1",
+            "--initial-commit",
             "commit1",
+            "--final-commit",
+            "commit2",
+            obj=app,
+        ).exit_code
+        == 0
+    )
+    assert (
+        ddev(
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
             "commit2",
             "--platform",
             "linux-x86_64",
@@ -137,57 +197,14 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
             "timeline",
             "dependency",
             "dep1",
+            "--initial-commit",
             "commit1",
+            "--final-commit",
             "commit2",
             "--platform",
             "linux-x86_64",
-            "--csv",
-            obj=app,
-        ).exit_code
-        == 0
-    )
-    assert (
-        ddev(
-            "size",
-            "timeline",
-            "dependency",
-            "dep1",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-x86_64",
-            "--markdown",
-            obj=app,
-        ).exit_code
-        == 0
-    )
-    assert (
-        ddev(
-            "size",
-            "timeline",
-            "dependency",
-            "dep1",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-x86_64",
-            "--json",
-            obj=app,
-        ).exit_code
-        == 0
-    )
-    assert (
-        ddev(
-            "size",
-            "timeline",
-            "dependency",
-            "dep1",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-x86_64",
-            "--save_to_png_path",
-            "out2.png",
+            "--format",
+            "csv,markdown,json,png",
             obj=app,
         ).exit_code
         == 0
@@ -199,18 +216,32 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
             "timeline",
             "dependency",
             "dep1",
+            "--initial-commit",
             "commit1",
+            "--final-commit",
             "commit2",
             "--platform",
             "linux-x86_64",
-            "--show_gui",
+            "--show-gui",
             obj=app,
         ).exit_code
         == 0
     )
     assert (
         ddev(
-            "size", "timeline", "dependency", "dep1", "--platform", "linux-x86_64", "--threshold", "1000", obj=app
+            "size",
+            "timeline",
+            "dependency",
+            "dep1",
+            "--initial-commit",
+            "commit1",
+            "--final-commit",
+            "commit2",
+            "--platform",
+            "linux-x86_64",
+            "--threshold",
+            "1000",
+            obj=app,
         ).exit_code
         == 0
     )
@@ -227,7 +258,7 @@ def test_timeline_invalid_platform(ddev):
         patch("ddev.cli.size.timeline.GitRepo", return_value=mock_git_repo),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
     ):
         result = ddev(
@@ -235,7 +266,9 @@ def test_timeline_invalid_platform(ddev):
             "timeline",
             "dependency",
             "dep1",
+            "--initial-commit",
             "commit1",
+            "--final-commit",
             "commit2",
             "--compressed",
             "--platform",
@@ -254,64 +287,115 @@ def test_timeline_integration_no_changes(ddev):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("os.path.exists", return_value=True),
-        patch("os.path.isdir", return_value=True),
-        patch("os.listdir", return_value=[]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=[]),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
     ):
         assert (
             "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--compressed")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--csv")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--markdown")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--json")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
             in (
                 result := ddev(
-                    "size", "timeline", "integration", "int1", "commit1", "commit2", "--save_to_png_path", "out.png"
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
                 )
             ).output
             and result.exit_code == 0
         )
         assert (
             "No changes found"
-            in (result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--show_gui")).output
-            and result.exit_code == 0
-        )
-        assert (
-            "No changes found"
             in (
-                result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--time", "2025-04-01")
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--compressed",
+                )
             ).output
             and result.exit_code == 0
         )
         assert (
             "No changes found"
             in (
-                result := ddev("size", "timeline", "integration", "int1", "commit1", "commit2", "--threshold", "1000")
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--format",
+                    "csv,markdown,json,png",
+                )
+            ).output
+            and result.exit_code == 0
+        )
+        assert (
+            "No changes found"
+            in (
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--show-gui",
+                )
+            ).output
+            and result.exit_code == 0
+        )
+        assert (
+            "No changes found"
+            in (
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--threshold",
+                    "1000",
+                )
+            ).output
+            and result.exit_code == 0
+        )
+        assert (
+            "No changes found"
+            in (
+                result := ddev(
+                    "size",
+                    "timeline",
+                    "integration",
+                    "int1",
+                    "--initial-commit",
+                    "commit1",
+                    "--final-commit",
+                    "commit2",
+                    "--threshold",
+                    "1000",
+                )
             ).output
             and result.exit_code == 0
         )
@@ -330,13 +414,20 @@ def test_timeline_integration_not_found(ddev):
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.module_exists", return_value=False),
-        patch("matplotlib.pyplot.show"),
-        patch("matplotlib.pyplot.savefig"),
     ):
-        result = ddev("size", "timeline", "integration", "missing_module", "c123456", "c2345667")
+        result = ddev(
+            "size",
+            "timeline",
+            "integration",
+            "missing_module",
+            "--initial-commit",
+            "c123456",
+            "--final-commit",
+            "c2345667",
+        )
         assert result.exit_code != 0
         assert "not found" in result.output
 
@@ -352,13 +443,28 @@ def test_timeline_dependency_missing_no_platform(ddev):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
-        result = ddev("size", "timeline", "dependency", "missing_module", "c123456", "c2345667")
+        result = ddev(
+            "size",
+            "timeline",
+            "dependency",
+            "missing_module",
+            "--initial-commit",
+            "c123456",
+            "--final-commit",
+            "c2345667",
+        )
         assert result.exit_code != 0
         assert "Dependency missing_module not found in latest commit" in result.output
 
@@ -374,18 +480,26 @@ def test_timeline_dependency_missing_for_platform(ddev, app):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value=set()),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "size",
             "timeline",
             "dependency",
             "missing_module",
+            "--initial-commit",
             "c123456",
+            "--final-commit",
             "c2345667",
             "--platform",
             "linux-x86_64",
@@ -409,23 +523,30 @@ def test_timeline_dependency_no_changes(ddev, app):
     with (
         patch("ddev.cli.size.timeline.GitRepo.__enter__", return_value=mock_repo),
         patch("ddev.cli.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
             "ddev.cli.size.timeline.get_valid_platforms",
-            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "windows-x86_64"}),
+            return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch("ddev.cli.size.timeline.get_dependency_list", return_value={"dep1"}),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "size",
             "timeline",
             "dependency",
             "dep1",
+            "--initial-commit",
             "c123456",
+            "--final-commit",
             "c2345667",
             "--platform",
             "linux-x86_64",
             obj=app,
         )
-
         assert result.exit_code == 0
         assert "no changes found" in result.output.lower()

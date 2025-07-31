@@ -4,29 +4,28 @@
 
 import os
 from datetime import datetime
-from typing import Literal, Optional, overload
+from typing import Optional
 
 import click
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.common_params import common_params
 
-from .common import (
+from .utils.common_funcs import (
     CLIParameters,
     FileDataEntry,
     FileDataEntryPlatformVersion,
     GitRepo,
     convert_to_human_readable_size,
+    export_format,
     format_modules,
     get_dependencies,
     get_files,
     get_valid_platforms,
     get_valid_versions,
     plot_treemap,
-    print_csv,
-    print_json,
-    print_markdown,
     print_table,
 )
 
@@ -38,20 +37,8 @@ MINIMUM_LENGTH_COMMIT = 7
 @click.command()
 @click.argument("first_commit")
 @click.argument("second_commit")
-@click.option(
-    "--platform", help="Target platform (e.g. linux-aarch64). If not specified, all platforms will be analyzed"
-)
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
-@click.option("--compressed", is_flag=True, help="Measure compressed size")
-@click.option("--csv", is_flag=True, help="Output in CSV format")
-@click.option("--markdown", is_flag=True, help="Output in Markdown format")
-@click.option("--json", is_flag=True, help="Output in JSON format")
-@click.option("--save_to_png_path", help="Path to save the treemap as PNG")
-@click.option(
-    "--show_gui",
-    is_flag=True,
-    help="Display a pop-up window with a treemap showing size differences between the two commits.",
-)
+@common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
     app: Application,
@@ -60,10 +47,7 @@ def diff(
     platform: Optional[str],
     version: Optional[str],
     compressed: bool,
-    csv: bool,
-    markdown: bool,
-    json: bool,
-    save_to_png_path: str,
+    format: list[str],
     show_gui: bool,
 ) -> None:
     """
@@ -78,8 +62,6 @@ def diff(
         console=console,
     ) as progress:
         task = progress.add_task("[cyan]Calculating differences...", total=None)
-        if sum([csv, markdown, json]) > 1:
-            raise click.BadParameter("Only one output format can be selected: --csv, --markdown, or --json")
         if len(first_commit) < MINIMUM_LENGTH_COMMIT and len(second_commit) < MINIMUM_LENGTH_COMMIT:
             raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
         elif len(first_commit) < MINIMUM_LENGTH_COMMIT:
@@ -94,7 +76,10 @@ def diff(
             )
         if first_commit == second_commit:
             raise click.BadParameter("Commit hashes must be different")
-
+        if format:
+            for fmt in format:
+                if fmt not in ["png", "csv", "markdown", "json"]:
+                    raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
         repo_url = app.repo.path
 
         with GitRepo(repo_url) as gitRepo:
@@ -103,110 +88,50 @@ def diff(
                 date = datetime.strptime(date_str, "%b %d %Y").date()
                 if date < MINIMUM_DATE:
                     raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
-                valid_platforms = get_valid_platforms(gitRepo.repo_dir)
                 valid_versions = get_valid_versions(gitRepo.repo_dir)
+                valid_platforms = get_valid_platforms(gitRepo.repo_dir, valid_versions)
                 if platform and platform not in valid_platforms:
                     raise ValueError(f"Invalid platform: {platform}")
                 elif version and version not in valid_versions:
                     raise ValueError(f"Invalid version: {version}")
-                if platform is None or version is None:
-                    modules_plat_ver: list[FileDataEntryPlatformVersion] = []
-                    platforms = valid_platforms if platform is None else [platform]
-                    versions = valid_versions if version is None else [version]
-                    progress.remove_task(task)
-                    combinations = [(p, v) for p in platforms for v in versions]
-                    for plat, ver in combinations:
-                        path = None
-                        if save_to_png_path:
-                            base, ext = os.path.splitext(save_to_png_path)
-                            path = f"{base}_{plat}_{ver}{ext}"
-                        parameters: CLIParameters = {
-                            "app": app,
-                            "platform": plat,
-                            "version": ver,
-                            "compressed": compressed,
-                            "csv": csv,
-                            "markdown": markdown,
-                            "json": json,
-                            "save_to_png_path": path,
-                            "show_gui": show_gui,
-                        }
-                        multiple_plats_and_vers: Literal[True] = True
-                        modules_plat_ver.extend(
-                            diff_mode(
-                                gitRepo,
-                                first_commit,
-                                second_commit,
-                                parameters,
-                                progress,
-                                multiple_plats_and_vers,
-                            )
-                        )
-                    if csv:
-                        print_csv(app, modules_plat_ver)
-                    elif json:
-                        print_json(app, modules_plat_ver)
-                else:
-                    progress.remove_task(task)
-                    modules: list[FileDataEntry] = []
-                    multiple_plat_and_ver: Literal[False] = False
-                    base_parameters: CLIParameters = {
+                modules_plat_ver: list[FileDataEntryPlatformVersion] = []
+                platforms = valid_platforms if platform is None else [platform]
+                versions = valid_versions if version is None else [version]
+                progress.remove_task(task)
+                combinations = [(p, v) for p in platforms for v in versions]
+                for plat, ver in combinations:
+                    parameters: CLIParameters = {
                         "app": app,
-                        "platform": platform,
-                        "version": version,
+                        "platform": plat,
+                        "version": ver,
                         "compressed": compressed,
-                        "csv": csv,
-                        "markdown": markdown,
-                        "json": json,
-                        "save_to_png_path": save_to_png_path,
+                        "format": format,
                         "show_gui": show_gui,
                     }
-                    modules.extend(
+                    modules_plat_ver.extend(
                         diff_mode(
                             gitRepo,
                             first_commit,
                             second_commit,
-                            base_parameters,
+                            parameters,
                             progress,
-                            multiple_plat_and_ver,
                         )
                     )
-                    if csv:
-                        print_csv(app, modules)
-                    elif json:
-                        print_json(app, modules)
+                if format:
+                    export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
         return None
 
 
-@overload
 def diff_mode(
     gitRepo: GitRepo,
     first_commit: str,
     second_commit: str,
     params: CLIParameters,
     progress: Progress,
-    multiple_plats_and_vers: Literal[True],
-) -> list[FileDataEntryPlatformVersion]: ...
-@overload
-def diff_mode(
-    gitRepo: GitRepo,
-    first_commit: str,
-    second_commit: str,
-    params: CLIParameters,
-    progress: Progress,
-    multiple_plats_and_vers: Literal[False],
-) -> list[FileDataEntry]: ...
-def diff_mode(
-    gitRepo: GitRepo,
-    first_commit: str,
-    second_commit: str,
-    params: CLIParameters,
-    progress: Progress,
-    multiple_plats_and_vers: bool,
-) -> list[FileDataEntryPlatformVersion] | list[FileDataEntry]:
+) -> list[FileDataEntryPlatformVersion]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
         gitRepo, params["platform"], params["version"], first_commit, second_commit, params["compressed"], progress
     )
@@ -215,34 +140,33 @@ def diff_mode(
     dependencies = get_diff(dependencies_b, dependencies_a, "Dependency")
 
     if integrations + dependencies == []:
-        params["app"].display_error(
+        params["app"].display(
             f"No size differences were detected between the selected commits for {params['platform']}"
         )
-        formatted_modules = format_modules(
-            integrations + dependencies, params["platform"], params["version"], multiple_plats_and_vers
-        )
+        return []
     else:
-        formatted_modules = format_modules(
-            integrations + dependencies, params["platform"], params["version"], multiple_plats_and_vers
-        )
+        formatted_modules = format_modules(integrations + dependencies, params["platform"], params["version"])
         formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
         for module in formatted_modules:
             if module["Size_Bytes"] > 0:
                 module["Size"] = f"+{module['Size']}"
 
-        if params["markdown"]:
-            print_markdown(params["app"], "Differences between selected commits", formatted_modules)
-        elif not params["csv"] and not params["json"]:
-            print_table(params["app"], "Differences between selected commits", formatted_modules)
+    if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
+        print_table(params["app"], "Diff", formatted_modules)
 
-        if params["show_gui"] or params["save_to_png_path"]:
-            plot_treemap(
-                formatted_modules,
-                f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
-                params["show_gui"],
-                "diff",
-                params["save_to_png_path"],
-            )
+    treemap_path = None
+    if params["format"] and "png" in params["format"]:
+        treemap_path = os.path.join("size_diff_visualizations", f"treemap_{params['platform']}_{params['version']}.png")
+
+    if params["show_gui"] or treemap_path:
+        plot_treemap(
+            params["app"],
+            formatted_modules,
+            f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
+            params["show_gui"],
+            "diff",
+            treemap_path,
+        )
 
     return formatted_modules
 

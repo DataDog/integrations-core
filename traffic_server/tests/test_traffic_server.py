@@ -51,7 +51,6 @@ def test_check_cant_reach_url(aggregator, instance_bad_url, dd_run_check):
 
 
 def test_invalid_config(instance_no_url):
-
     with pytest.raises(Exception, match='Must specify a traffic_server_url'):
         TrafficServerCheck('traffic_server', {}, [instance_no_url])
 

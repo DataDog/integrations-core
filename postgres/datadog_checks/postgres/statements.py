@@ -18,6 +18,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+from datadog_checks.postgres.encoding import decode_with_encodings
 
 from .query_calls_cache import QueryCallsCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
@@ -26,7 +27,7 @@ from .version_utils import V9_4, V10, V14
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 QUERYID_TO_CALLS_QUERY = """
 SELECT queryid, calls
@@ -317,7 +318,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             else:
                 if len(current) == 1:
                     self._log.warning(
-                        "A single query is too large to send to Datadog. This query will be dropped. " "size=%d",
+                        "A single query is too large to send to Datadog. This query will be dropped. size=%d",
                         size,
                     )
                     continue
@@ -401,6 +402,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 params = params + tuple(self._config.ignore_databases)
             with self._check._get_main_db() as conn:
                 with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+                    if conn.encoding == "SQLASCII":
+                        # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
+                        # so we need to read in the data as bytes and then decode as best we can
+                        psycopg2.extensions.register_type(psycopg2.extensions.BYTES, cursor)
                     if len(self._query_calls_cache.cache) > 0:
                         return self._execute_query(
                             cursor,
@@ -625,11 +630,19 @@ class PostgresStatementMetrics(DBMAsyncJob):
         return rows
 
     def _normalize_queries(self, rows):
+        with self._check._get_main_db() as conn:
+            encoding = conn.encoding if conn.encoding != "SQLASCII" else 'utf-8'
+
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
+                query_text = (
+                    decode_with_encodings(row['query'], self._config.query_encodings)
+                    if type(row['query']) is bytes
+                    else row['query']
+                )
+                statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
                     self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
@@ -640,6 +653,22 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+            for key in ['datname', 'rolname']:
+                value = row[key]
+                if type(value) is not bytes:
+                    normalized_row[key] = value
+                    continue
+                try:
+                    # Decode other columns as database encoding, or default to utf-8
+                    try:
+                        normalized_row[key] = value.decode(encoding)
+                    except Exception:
+                        # Fallback to trying utf-8
+                        normalized_row[key] = value.decode('utf-8', 'backslashreplace')
+                except Exception as e:
+                    self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
+                    normalized_row[key] = "unknown"
+
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)
             normalized_row['dd_commands'] = metadata.get('commands', None)

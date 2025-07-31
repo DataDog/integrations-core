@@ -34,7 +34,7 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
 IMAGE_NAME = "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)
 PORTS = [AGENT_PORT, OPERATOR_PORT]
-CLUSTER_NAME = 'cluster-{}-{}'.format('cilium', get_active_env())
+CLUSTER_NAME = "cluster-{}-{}".format("cilium", get_active_env())
 
 
 def setup_cilium():
@@ -110,7 +110,7 @@ def setup_cilium():
     )
     if result.stderr:
         raise Exception(result.stderr)
-    pods = result.stdout.split(' ')
+    pods = result.stdout.split(" ")
 
     for pod in pods:
         result = run_command(
@@ -135,35 +135,35 @@ def setup_cilium():
 
 def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):
     return {
-        'instances': [
+        "instances": [
             {
-                'agent_endpoint': 'http://{}:{}/metrics'.format(agent_host, agent_port),
-                'use_openmetrics': use_openmetrics,
+                "agent_endpoint": "http://{}:{}/metrics".format(agent_host, agent_port),
+                "use_openmetrics": use_openmetrics,
             },
             {
-                'operator_endpoint': 'http://{}:{}/metrics'.format(operator_host, operator_port),
-                'use_openmetrics': use_openmetrics,
+                "operator_endpoint": "http://{}:{}/metrics".format(operator_host, operator_port),
+                "use_openmetrics": use_openmetrics,
             },
         ]
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def dd_environment():
-    use_openmetrics = CILIUM_LEGACY == 'false'
-    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
-    with TempDir('helm_dir') as helm_dir:
+    use_openmetrics = CILIUM_LEGACY == "false"
+    kind_config = os.path.join(HERE, "kind", "kind-config.yaml")
+    with TempDir("helm_dir") as helm_dir:
         with kind_run(
             conditions=[setup_cilium],
             kind_config=kind_config,
             env_vars={
-                "HELM_CACHE_HOME": path_join(helm_dir, 'Caches'),
-                "HELM_CONFIG_HOME": path_join(helm_dir, 'Preferences'),
+                "HELM_CACHE_HOME": path_join(helm_dir, "Caches"),
+                "HELM_CONFIG_HOME": path_join(helm_dir, "Preferences"),
             },
         ) as kubeconfig:
             with ExitStack() as stack:
                 ip_ports = [
-                    stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
+                    stack.enter_context(port_forward(kubeconfig, "cilium", port, "deployment", "cilium-operator"))
                     for port in PORTS
                 ]
 
@@ -176,36 +176,36 @@ def dd_environment():
 
 @pytest.fixture(scope="session")
 def check():
-    return lambda instance: CiliumCheck('cilium', {}, [instance])
+    return lambda instance: CiliumCheck("cilium", {}, [instance])
 
 
 @pytest.fixture(scope="session")
 def agent_instance_use_openmetrics():
     return lambda use_openmetrics: {
-        'agent_endpoint': AGENT_URL,
-        'tags': ['pod_test'],
-        'use_openmetrics': use_openmetrics,
+        "agent_endpoint": AGENT_URL,
+        "tags": ["pod_test"],
+        "use_openmetrics": use_openmetrics,
     }
 
 
 @pytest.fixture
 def operator_instance_use_openmetrics():
     return lambda use_openmetrics: {
-        'operator_endpoint': OPERATOR_URL,
-        'tags': ['operator_test'],
-        'use_openmetrics': use_openmetrics,
+        "operator_endpoint": OPERATOR_URL,
+        "tags": ["operator_test"],
+        "use_openmetrics": use_openmetrics,
     }
 
 
 @pytest.fixture()
 def mock_agent_data():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'agent_metrics.txt')
-    with open(f_name, 'r') as f:
+    f_name = os.path.join(os.path.dirname(__file__), "fixtures", "agent_metrics.txt")
+    with open(f_name, "r") as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
         ),
     ):
         yield
@@ -213,13 +213,13 @@ def mock_agent_data():
 
 @pytest.fixture()
 def mock_operator_data():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'operator_metrics.txt')
-    with open(f_name, 'r') as f:
+    f_name = os.path.join(os.path.dirname(__file__), "fixtures", "operator_metrics.txt")
+    with open(f_name, "r") as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
         ),
     ):
         yield

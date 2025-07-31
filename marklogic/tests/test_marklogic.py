@@ -21,7 +21,12 @@ from .common import (
     assert_metrics,
     assert_service_checks,
 )
-from .metrics import RESOURCE_STATUS_DATABASE_METRICS, RESOURCE_STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
+from .metrics import (
+    OPTIONAL_METRICS,
+    RESOURCE_STATUS_DATABASE_METRICS,
+    RESOURCE_STORAGE_FOREST_METRICS,
+    STORAGE_HOST_METRICS,
+)
 
 
 @pytest.mark.integration
@@ -67,7 +72,6 @@ def test_check_simple_user(aggregator):
 
 
 @pytest.mark.integration
-@pytest.mark.flaky
 @pytest.mark.usefixtures("dd_environment")
 def test_check_with_filters(aggregator):
     # type: (AggregatorStub) -> None
@@ -88,6 +92,9 @@ def test_check_with_filters(aggregator):
         'marklogic.requests.update-count',
     ]:
         aggregator.assert_metric(metric, tags=COMMON_TAGS + ['server_name:Admin', 'group_name:Default'], count=1)
+
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
 

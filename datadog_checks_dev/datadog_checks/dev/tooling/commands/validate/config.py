@@ -3,35 +3,38 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import difflib
 import os
+import re
 
 import click
 import yaml
 
-from ....fs import basepath, file_exists, path_exists, path_join, read_file, write_file
-from ...config_validator.validator import validate_config
-from ...config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
-from ...configuration import ConfigSpec
-from ...configuration.consumers import ExampleConsumer
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
-from ..console import (
+from datadog_checks.dev.fs import basepath, file_exists, path_exists, path_join, read_file, write_file
+from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
     annotate_error,
-    echo_debug,
     echo_failure,
     echo_info,
     echo_success,
     echo_waiting,
     echo_warning,
 )
+from datadog_checks.dev.tooling.config_validator.validator import validate_config
+from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
+from datadog_checks.dev.tooling.configuration import ConfigSpec
+from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import (
+    complete_valid_checks,
+    get_config_files,
+    get_data_directory,
+    get_version_string,
+)
 
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
-
-TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
@@ -60,14 +63,18 @@ def config(ctx, check, sync, verbose):
 
     echo_waiting(f'Validating default configuration files for {len(checks)} checks...')
     for check in checks:
+        if check in (
+            'ddev',
+            'datadog_checks_dev',
+            'datadog_checks_base',
+            'datadog_checks_dependency_provider',
+            'datadog_checks_downloader',
+        ):
+            echo_info(f'Skipping {check}, it does not need an Agent-level config.')
+            continue
         check_display_queue = []
 
-        manifest = Manifest.load_manifest(check)
-        if not manifest:
-            echo_debug(f"Skipping validation for check: {check}; can't process manifest")
-            continue
-
-        spec_file_path = manifest.get_config_spec()
+        spec_file_path = path_join(get_root(), check, 'assets', 'configuration', 'spec.yaml')
         if not file_exists(spec_file_path):
             example_location = get_data_directory(check)
 
@@ -77,7 +84,7 @@ def config(ctx, check, sync, verbose):
                 files_failed[spec_file_path] = True
 
             check_display_queue.append(
-                lambda spec_file_path=spec_file_path, check=check: (echo_failure if is_core_check else echo_failure)(
+                lambda spec_file_path=spec_file_path, check=check: echo_failure(
                     f"Did not find spec file {spec_file_path} for check {check}"
                 )
             )
@@ -95,35 +102,27 @@ def config(ctx, check, sync, verbose):
 
         # source is the default file name
         if check == 'agent':
-            display_name = 'Datadog Agent'
             source = 'datadog'
             version = None
         else:
-            display_name = manifest.get_display_name()
             source = check
             version = get_version_string(check)
 
         spec_file_content = read_file(spec_file_path)
-        default_temp = validate_default_template(spec_file_content)
-        spec = ConfigSpec(spec_file_content, source=source, version=version)
-        spec.load()
 
-        if not default_temp:
+        if not validate_default_template(spec_file_content):
             message = "Missing default template in init_config or instances section"
+            files_failed[spec_file_path] = True
             check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
             annotate_error(spec_file_path, message)
 
+        spec = ConfigSpec(spec_file_content, source=source, version=version)
+        spec.load()
         if spec.errors:
             files_failed[spec_file_path] = True
             for error in spec.errors:
                 check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
         else:
-            if spec.data['name'] != display_name:
-                files_failed[spec_file_path] = True
-                message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
-                check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
-                annotate_error(spec_file_path, message)
-
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
             for example_file, (contents, errors) in example_consumer.render().items():
@@ -184,21 +183,16 @@ def config(ctx, check, sync, verbose):
 
 
 def validate_default_template(spec_file):
-    init_config_default = False
-    instances_default = False
     if 'template: init_config' not in spec_file or 'template: instances' not in spec_file:
         # This config spec does not have init_config or instances
         return True
 
-    for line in spec_file.split('\n'):
-        if any("init_config/{}".format(template) in line for template in TEMPLATES):
-            init_config_default = True
-        if any("instances/{}".format(template) in line for template in TEMPLATES):
-            instances_default = True
-
-        if instances_default and init_config_default:
-            return True
-    return False
+    templates = {
+        'intances': [f'template: init_config/{t}' for t in ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']],
+        'init_config': [f'template: init_config/{t}' for t in ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']],
+    }
+    # We want both instances and init_config to have at least one template present.
+    return all(any(re.search(t, spec_file) for t in tpls) for tpls in templates)
 
 
 def validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter):

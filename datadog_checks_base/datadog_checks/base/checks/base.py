@@ -29,31 +29,23 @@ from typing import (  # noqa: F401
 import lazy_loader
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.agent.utils import should_profile_memory
+from datadog_checks.base.utils.common import ensure_bytes, to_native_string
+from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.tagging import GENERIC_TAGS
+from datadog_checks.base.utils.tracing import traced_class
 
-from ..config import is_affirmative
-from ..constants import ServiceCheck
-from ..errors import ConfigurationError
-from ..types import (
-    AgentConfigType,  # noqa: F401
-    Event,  # noqa: F401
-    ExternalTagType,  # noqa: F401
-    InitConfigType,  # noqa: F401
-    InstanceType,  # noqa: F401
-    ProxySettings,  # noqa: F401
-    ServiceCheckStatus,  # noqa: F401
-)
-from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, to_native_string
-from ..utils.fips import enable_fips
-from ..utils.tagging import GENERIC_TAGS
-from ..utils.tracing import traced_class
+from ._config_ast import parse as _parse_ast_config
 
 if AGENT_RUNNING:
-    from ..log import CheckLoggingAdapter, init_logging
+    from datadog_checks.base.log import CheckLoggingAdapter, init_logging
 
 else:
-    from ..stubs.log import CheckLoggingAdapter, init_logging
+    from datadog_checks.base.stubs.log import CheckLoggingAdapter, init_logging
 
 init_logging()
 
@@ -146,12 +138,12 @@ class AgentCheck(object):
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
 
-    FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
-    ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
-    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
-    TAG_REPLACEMENT = re.compile(br'[,\+\*\-/()\[\]{}\s]')
-    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(br'__+')
-    DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
+    FIRST_CAP_RE = re.compile(rb'(.)([A-Z][a-z]+)')
+    ALL_CAP_RE = re.compile(rb'([a-z0-9])([A-Z])')
+    METRIC_REPLACEMENT = re.compile(rb'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    TAG_REPLACEMENT = re.compile(rb'[,\+\*\-/()\[\]{}\s]')
+    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(rb'__+')
+    DOT_UNDERSCORE_CLEANUP = re.compile(rb'_*\._*')
 
     # allows to set a limit on the number of metric name and tags combination
     # this check can send per run. This is useful for checks that have an unbounded
@@ -1145,10 +1137,10 @@ class AgentCheck(object):
         And substitute illegal metric characters
         """
         name = ensure_bytes(name)
-        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', name)
-        metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
-        metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
-        return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
+        metric_name = self.FIRST_CAP_RE.sub(rb'\1_\2', name)
+        metric_name = self.ALL_CAP_RE.sub(rb'\1_\2', metric_name).lower()
+        metric_name = self.METRIC_REPLACEMENT.sub(rb'_', metric_name)
+        return self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', metric_name).strip(b'_')
 
     def warning(self, warning_message, *args, **kwargs):
         # type: (str, *Any, **Any) -> None
@@ -1242,10 +1234,10 @@ class AgentCheck(object):
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = self.METRIC_REPLACEMENT.sub(br'_', metric)
-            name = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', name).strip(b'_')
+            name = self.METRIC_REPLACEMENT.sub(rb'_', metric)
+            name = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', name).strip(b'_')
 
-        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', name)
+        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', name)
 
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
@@ -1261,9 +1253,9 @@ class AgentCheck(object):
         """
         if isinstance(tag, str):
             tag = tag.encode('utf-8', 'ignore')
-        tag = self.TAG_REPLACEMENT.sub(br'_', tag)
-        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
-        tag = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', tag).strip(b'_')
+        tag = self.TAG_REPLACEMENT.sub(rb'_', tag)
+        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', tag)
+        tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)
 
     def check(self, instance):
@@ -1286,7 +1278,7 @@ class AgentCheck(object):
             self._clear_diagnosis()
             # Ignore check initializations if running in a separate process
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
-                from ..utils.replay.execute import run_with_isolation
+                from datadog_checks.base.utils.replay.execute import run_with_isolation
 
                 run_with_isolation(self, aggregator, datadog_agent)
             else:
@@ -1301,11 +1293,11 @@ class AgentCheck(object):
                 instance = copy.deepcopy(self.instances[0])
 
                 if 'set_breakpoint' in self.init_config:
-                    from ..utils.agent.debug import enter_pdb
+                    from datadog_checks.base.utils.agent.debug import enter_pdb
 
                     enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
                 elif self.should_profile_memory():
-                    # self.init_config.get('profile_memory') could be `/tmp/datadog-agent-memory-profiler*`
+                    # The 'profile_memory' key in self.init_config could be `/tmp/datadog-agent-memory-profiler*`
                     # that is generated by Datadog Agent.
                     # If we use `--m-dir` for `agent check` command, a hidden flag, it should be same as a given value.
                     namespaces = [self.init_config.get('profile_memory')]
@@ -1456,7 +1448,7 @@ class AgentCheck(object):
 
     def profile_memory(self, func, namespaces=None, args=(), kwargs=None, extra_tags=None):
         # type: (Callable[..., Any], Optional[Sequence[str]], Sequence[Any], Optional[Dict[str, Any]], Optional[List[str]]) -> None  # noqa: E501
-        from ..utils.agent.memory import profile_memory
+        from datadog_checks.base.utils.agent.memory import profile_memory
 
         if namespaces is None:
             namespaces = self.check_id.split(':', 1)
@@ -1488,9 +1480,4 @@ class AgentCheck(object):
         if process.returncode != 0:
             raise ValueError(f'Failed to load config: {stderr.decode()}')
 
-        decoded = stdout.strip().decode()
-        try:
-            return eval(decoded)
-        # a single, literal unquoted string
-        except Exception:
-            return decoded
+        return _parse_ast_config(stdout.strip().decode())

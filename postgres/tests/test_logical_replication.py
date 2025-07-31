@@ -17,6 +17,7 @@ from .common import (
     check_db_count,
     check_file_wal_metrics,
     check_performance_metrics,
+    check_recovery_prefetch_metrics,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_wal_metrics,
@@ -24,6 +25,7 @@ from .common import (
     check_subscription_state_metrics,
     check_subscription_stats_metrics,
     check_uptime_metrics,
+    check_wait_event_metrics,
     check_wal_receiver_metrics,
 )
 from .utils import requires_over_10, requires_over_11, requires_over_14, requires_over_15
@@ -51,6 +53,15 @@ def test_common_logical_replica_metrics(aggregator, integration_check, pg_replic
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_file_wal_metrics(aggregator, expected_tags=expected_tags)
+    check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
+    expected_wait_event_tags = expected_tags + [
+        'app:datadog-agent',
+        'user:datadog',
+        'db:datadog_test',
+        'backend_type:client backend',
+        'wait_event:NoWaitEvent',
+    ]
+    check_wait_event_metrics(aggregator, expected_tags=expected_wait_event_tags)
 
     check_wal_receiver_metrics(aggregator, connected=False, expected_tags=expected_tags)
     check_subscription_metrics(aggregator, expected_tags=expected_tags + ['subscription_name:subscription_cities'])

@@ -40,6 +40,8 @@ Run powershell.exe as admin and execute the following command:
         sourcecategory: windowsevent
     ```
 
+See the [sample microsoft_sysmon.d/conf.yaml][11] for available configuration options.
+
 3. [Restart the Agent][3].
 
 #### Configure Sysmon
@@ -118,3 +120,4 @@ Need help? Contact [Datadog support][1].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/olafhartong/sysmon-modular/tree/master
 [10]: https://github.com/SwiftOnSecurity/sysmon-config/tree/master
+[11]: https://github.com/DataDog/integrations-core/blob/master/microsoft_sysmon/datadog_checks/microsoft_sysmon/data/conf.yaml.example

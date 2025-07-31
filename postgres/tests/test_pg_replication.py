@@ -19,11 +19,13 @@ from .common import (
     check_file_wal_metrics,
     check_metrics_metadata,
     check_performance_metrics,
+    check_recovery_prefetch_metrics,
     check_replication_delay,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_wal_metrics,
     check_uptime_metrics,
+    check_wait_event_metrics,
     check_wal_receiver_metrics,
 )
 from .utils import _get_superconn, _wait_for_value, requires_over_10
@@ -53,6 +55,15 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
     check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
     check_file_wal_metrics(aggregator, expected_tags=expected_tags)
+    check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
+    expected_wait_event_tags = expected_tags + [
+        'app:datadog-agent',
+        'user:datadog',
+        'db:datadog_test',
+        'backend_type:client backend',
+        'wait_event:NoWaitEvent',
+    ]
+    check_wait_event_metrics(aggregator, expected_tags=expected_wait_event_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'])
 

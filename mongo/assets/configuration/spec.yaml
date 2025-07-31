@@ -261,8 +261,60 @@ files:
           value:
             type: string
             example: queryPlanner
-    - name: schemas
+    - name: collect_schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of schemas. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the schemas collection interval in seconds. Each collection involves sampling documents
+            from collections and inferring schemas.
+          value:
+            type: number
+            example: 3600
+        - name: sample_size
+          description: |
+            Set the sample size for each collection. The sample size is the number of documents to sample
+            from each collection.
+            NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
+          value:
+            type: number
+            example: 10
+        - name: max_collections
+          description: |
+            Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+            per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
+            are adding an additional limit to the total number of collections across all monitored databases that schemas
+            will be collected from. By default, this option is not set.
+          value:
+            type: number
+            display_default: null
+            example: 300
+        - name: max_depth
+          description: |
+            Set the maximum depth of nested documents to sample.
+          value:
+            type: number
+            example: 5
+        - name: collect_search_indexes
+          description: |
+            Set to `true` to collect search indexes for each collection.
+            NOTE: This option is only applicable to MongoDB Atlas clusters.
+          value:
+            type: boolean
+            example: false
+    - name: schemas
+      deprecation:
+        Agent version: 7.69.0
+        Migration: Use `collect_schemas` instead.
+      description: |
+        DEPRECATED: Use `collect_schemas` instead.
+        Configure collection of MongoDB schemas (inferred) by sampling documents.
       options:
         - name: enabled
           description: |
