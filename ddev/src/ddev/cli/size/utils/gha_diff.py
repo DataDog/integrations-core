@@ -130,8 +130,8 @@ def display_diffs(diffs, platform, python_version):
 
 def display_diffs_to_html(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
-    text = f"<details><summary><h3>Size Delta for {platform} and Python {python_version}: </h3></summary>\n"
-    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</summary>\n\n"
+    text = f"<details><summary><h3>Size Delta for {platform} and Python {python_version}:\n"
+    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h3></summary>\n\n"
 
     if diffs["added"]:
         text += "<details><summary>Added</summary>\n"
