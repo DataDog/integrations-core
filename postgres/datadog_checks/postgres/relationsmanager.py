@@ -443,13 +443,13 @@ class RelationsManager(object):
                 # Stub filter to allow for appending
                 relation_filter.append("( 1=1")
 
-            if ALL_SCHEMAS not in r[SCHEMAS]:
-                schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])
+            if ALL_SCHEMAS not in r.get(SCHEMAS, []):
+                schema_filter = ','.join("'{}'".format(s) for s in r.get(SCHEMAS, []))
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
             # TODO: explicitly declare `relkind` compatiblity in the query rather than implicitly checking query text
             if r.get(RELKIND) and 'FROM pg_locks' in query:
-                relkind_filter = ','.join("'{}'".format(s) for s in r[RELKIND])
+                relkind_filter = ','.join("'{}'".format(s) for s in r.get(RELKIND, []))
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
             relation_filter.append(')')
