@@ -198,6 +198,9 @@ class LustreCheck(AgentCheck):
         try:
             self.log.debug('Running command: %s', cmd)
             output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
+            if not output.returncode == 0 and output.stderr:
+                self.log.debug('Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr)
+                return ''
             if output.stdout is None:
                 self.log.debug(
                     'Command %s returned no output, check if dd-agent is running\
