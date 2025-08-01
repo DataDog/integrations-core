@@ -668,3 +668,93 @@ def test_concurrent_access_and_thread_safety(pg_instance: Dict[str, str]):
     finally:
         manager.close_all()
         assert len(manager.pools) == 0, "All pools should be closed"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_commenter_cursor_functionality(pg_instance: Dict[str, str]):
+    """
+    Test that CommenterCursor properly prepends SQL comments and handles ignore_query_metric parameter
+    when used with LRUConnectionPoolManager.
+    """
+    conn_args = PostgresConnectionArgs(
+        application_name="test_commenter_cursor",
+        user=pg_instance["username"],
+        password=pg_instance["password"],
+        host=pg_instance["host"],
+        port=int(pg_instance["port"]),
+    )
+
+    manager = LRUConnectionPoolManager(max_db=1, base_conn_args=conn_args)
+
+    try:
+        dbname = pg_instance["dbname"]
+
+        # Test normal query execution with CommenterCursor
+        with manager.get_connection(dbname) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT generate_series(1, 5) AS number")
+                result = cur.fetchall()
+                assert len(result) == 5
+                assert all(isinstance(row[0], int) for row in result)
+
+        # Verify SQL comment is prepended
+        _verify_sql_comment_prepended(pg_instance, "generate_series", False)
+
+        # Test query with ignore_query_metric=True
+        with manager.get_connection(dbname) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT generate_series(1, 3) AS number", ignore_query_metric=True)
+                result = cur.fetchall()
+                assert len(result) == 3
+                assert all(isinstance(row[0], int) for row in result)
+
+        # Verify SQL comment with DDIGNORE is prepended
+        _verify_sql_comment_prepended(pg_instance, "generate_series", True)
+
+        # Test multiple queries to ensure CommenterCursor works consistently
+        with manager.get_connection(dbname) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT current_database()")
+                result = cur.fetchone()
+                assert result[0] == dbname
+
+        _verify_sql_comment_prepended(pg_instance, "current_database", False)
+
+    finally:
+        manager.close_all()
+
+
+def _verify_sql_comment_prepended(pg_instance, query_pattern, ignore_query_metric):
+    """
+    Verify that SQL comments are properly prepended to queries in pg_stat_activity.
+    """
+    super_conn = _get_superconn(pg_instance)
+    try:
+        with super_conn.cursor() as cursor:
+            cursor.execute(
+                (
+                    "SELECT query FROM pg_stat_activity WHERE query LIKE %s "
+                    "AND query NOT LIKE '%%pg_stat_activity%%' "
+                    "ORDER BY query_start DESC LIMIT 1"
+                ),
+                (f"%{query_pattern}%",),
+            )
+            result = cursor.fetchall()
+            assert len(result) > 0, f"No queries found matching pattern '{query_pattern}'"
+
+            query_text = result[0][0]
+            # Decode bytes to string if necessary
+            if isinstance(query_text, bytes):
+                query_text = query_text.decode('utf-8')
+
+            expected_comment = "/* service='datadog-agent' */"
+
+            if ignore_query_metric:
+                expected_comment = f"/* DDIGNORE */ {expected_comment}"
+
+            assert query_text.startswith(expected_comment), (
+                f"Query should start with '{expected_comment}', but got: {query_text[:100]}..."
+            )
+    finally:
+        super_conn.close()
