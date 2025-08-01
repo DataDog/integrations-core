@@ -15,7 +15,7 @@ on:
         description: "Specific target env to run"
         required: false
         default: ""
-        type: string      
+        type: string
       platform:
         required: true
         type: string

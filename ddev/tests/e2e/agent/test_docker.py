@@ -63,6 +63,18 @@ class TestStart:
                 True,
                 id='Specific stable release with jmx exact',
             ),
+            pytest.param(
+                'datadog/agent:latest',
+                'datadog/agent:latest',
+                False,
+                id='Latest stable release',
+            ),
+            pytest.param(
+                'datadog/agent-dev:master-jmx-win-servercore',
+                'datadog/agent-dev:master-py3-jmx-win-servercore',
+                False,
+                id='Servercore without version',
+            ),
         ],
     )
     def test_agent_build(
