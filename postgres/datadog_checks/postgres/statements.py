@@ -400,26 +400,29 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
-                if len(self._query_calls_cache.cache) > 0:
-                    return self._execute_query(
-                        statements_query(
-                            cols=', '.join(query_columns),
-                            pg_stat_statements_view=self._config.pg_stat_statements_view,
-                            filters=filters,
-                            called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
-                        ),
-                        params=params,
-                        row_factory=dict_row,
-                    )
-                else:
-                    return self._execute_query(
-                        statements_query(
-                            cols=', '.join(query_columns),
-                            pg_stat_statements_view=self._config.pg_stat_statements_view,
-                            filters=filters,
-                        ),
-                        params=params,
-                    )
+            if len(self._query_calls_cache.cache) > 0:
+                rows, _ = self._execute_query(
+                    statements_query(
+                        cols=', '.join(query_columns),
+                        pg_stat_statements_view=self._config.pg_stat_statements_view,
+                        filters=filters,
+                        called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
+                    ),
+                    params=params,
+                    row_factory=dict_row,
+                )
+                return rows
+            else:
+                rows, _ = self._execute_query(
+                    statements_query(
+                        cols=', '.join(query_columns),
+                        pg_stat_statements_view=self._config.pg_stat_statements_view,
+                        filters=filters,
+                    ),
+                    params=params,
+                    row_factory=dict_row,
+                )
+                return rows
         except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 

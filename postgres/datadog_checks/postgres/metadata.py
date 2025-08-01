@@ -417,7 +417,7 @@ class PostgresMetadata(DBMAsyncJob):
                     tables_buffer = []
 
                     for tables in table_chunks:
-                        table_info = self._query_table_information(schema['name'], tables)
+                        table_info = self._query_table_information(dbname, tables)
 
                         tables_buffer = [*tables_buffer, *table_info]
                         for t in table_info:
@@ -514,7 +514,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._last_schemas_query_time = time.time()
         return metadata
 
-    def _query_database_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, Union[str, int]]:
+    def _query_database_information(self, dbname: str) -> Dict[str, Union[str, int]]:
         """
         Collect database info. Returns
             description: str
@@ -523,7 +523,7 @@ class PostgresMetadata(DBMAsyncJob):
             encoding: str
             owner: str
         """
-        with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+        with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 try:
                     cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
@@ -559,19 +559,21 @@ class PostgresMetadata(DBMAsyncJob):
                 with conn.cursor(row_factory=dict_row) as cursor:
                     cursor.execute(schema_query_)
                     rows = cursor.fetchall()
+
+                    schemas = []
+                    for row in rows:
+                        schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
+
+                    self._log.debug(
+                        "Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows)
+                    )
+                    return schemas
         except psycopg.Error as e:
             self._log.error(
                 "Error while executing query: %s. ",
                 e,
             )
             return []
-
-        schemas = []
-        for row in rows:
-            schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
-
-        self._log.debug("Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows))
-        return schemas
 
     def _get_table_info(self, dbname, schema_id):
         """
@@ -711,7 +713,7 @@ class PostgresMetadata(DBMAsyncJob):
         return table_payloads
 
     def _query_table_information(
-        self, cursor: psycopg.Cursor, schema_name: str, table_info: List[Dict[str, Union[str, bool]]]
+        self, dbname: str, table_info: List[Dict[str, Union[str, bool]]]
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information . Returns a dictionary
@@ -750,45 +752,50 @@ class PostgresMetadata(DBMAsyncJob):
 
         # Get indexes
         try:
-            cursor.execute(PG_INDEXES_QUERY.format(table_ids=table_ids))
+            with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    query = PG_INDEXES_QUERY.format(table_ids=table_ids)
+                    cursor.execute(query)
 
-            rows = cursor.fetchall()
-            for row in rows:
-                # Partition indexes in some versions of Postgres have appended digits for each partition
-                table_name = table_name_lookup.get(str(row.get("table_id")))
-                while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
-                    table_name = table_name[0:-1]
-                if tables.get(table_name) is not None:
-                    tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        # Partition indexes in some versions of Postgres have appended digits for each partition
+                        table_name = table_name_lookup.get(str(row.get("table_id")))
+                        while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
+                            table_name = table_name[0:-1]
+                        if tables.get(table_name) is not None:
+                            tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
 
-            # Get partitions
-            if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-                cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
-                rows = cursor.fetchall()
-                for row in rows:
-                    tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
+                    # Get partitions
+                    if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
+                        cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
+                        rows = cursor.fetchall()
+                        for row in rows:
+                            tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
 
-                cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
-                rows = cursor.fetchall()
-                for row in rows:
-                    table_name = table_name_lookup.get(str(row.get("id")))
-                    tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
+                        cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
+                        rows = cursor.fetchall()
+                        for row in rows:
+                            table_name = table_name_lookup.get(str(row.get("id")))
+                            tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
 
-            # Get foreign keys
-            cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
-            rows = cursor.fetchall()
-            for row in rows:
-                table_name = table_name_lookup.get(str(row.get("id")))
-                tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
+                    # Get foreign keys
+                    cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        table_name = table_name_lookup.get(str(row.get("id")))
+                        tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [
+                            dict(row)
+                        ]
 
-            # Get columns
-            cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
-            rows = cursor.fetchall()
-            for row in rows:
-                table_name = table_name_lookup.get(str(row.get("id")))
-                tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
+                    # Get columns
+                    cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        table_name = table_name_lookup.get(str(row.get("id")))
+                        tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
 
-            return tables.values()
+                    return tables.values()
         except psycopg.Error as e:
             self._log.error(
                 "Error while executing query: %s. ",

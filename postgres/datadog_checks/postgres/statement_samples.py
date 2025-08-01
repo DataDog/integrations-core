@@ -757,8 +757,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                         return None
                     return result[0][0]
             except psycopg.errors.Error as e:
-                self._log.error("Failed to collect execution plan for dbname=%s: %s", dbname, repr(e))
-                return None
+                # We reraise the error to be handled by _run_explain_safe
+                raise e
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
@@ -861,6 +861,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                 # dynamically by the user. the goal here is to cache only those queries which there is no reason to
                 # retry
                 self._explain_errors_cache[query_signature] = error_response
+            return error_response
+        except psycopg.Error as e:
+            self._log.debug("Failed to collect execution plan: %s", repr(e))
+            error_response = None, DBExplainError.unknown_error, '{}'.format(type(e))
+            self._explain_errors_cache[query_signature] = error_response
+            self._emit_run_explain_error(dbname, DBExplainError.unknown_error, e)
             return error_response
 
     def _emit_run_explain_error(self, dbname, err_code, err):
