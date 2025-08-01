@@ -26,6 +26,8 @@ services:
     command: ["run", "-d", "-c", "/etc/krakend/krakend.json"]
     depends_on:
       - api
+    labels:
+      com.datadoghq.ad.checks: '{"krakend": {"instances": [{"openmetrics_endpoint": "http://localhost:9090/metrics"}], "logs": [{"source": "krakend", "service": "test-api", "type": "docker"}]}}'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/__health"]
       interval: 30s

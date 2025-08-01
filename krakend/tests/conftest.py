@@ -43,7 +43,18 @@ def dd_environment(dd_save_state):
     ):
         asyncio.run(generate_sample_traffic())
 
-        yield {"instances": [{"openmetrics_endpoint": OPEN_METRICS_ENDPOINT}]}
+        yield (
+            {
+                "instances": [{"openmetrics_endpoint": OPEN_METRICS_ENDPOINT}],
+            },
+            {
+                "docker_volumes": [
+                    "/var/run/docker.sock:/var/run/docker.sock:ro",
+                    "/var/lib/docker/containers:/var/lib/docker/containers:ro",
+                    "/opt/datadog-agent/run:/opt/datadog-agent/run:rw",
+                ],
+            },
+        )
 
 
 @pytest.fixture
