@@ -82,7 +82,9 @@ class ConnectionProxy(AbstractContextManager):
         self._conn = self._ctx.__enter__()
         return self._conn
 
-    def __exit__(self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[Any]) -> Optional[bool]:
+    def __exit__(
+        self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[Any]
+    ) -> Optional[bool]:
         return self._ctx.__exit__(exc_type, exc_val, exc_tb)
 
 

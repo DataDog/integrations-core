@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import queue
+import threading
 import time
 from typing import Dict
-import threading
-import queue
 
 import pytest
 from psycopg import Connection
@@ -651,7 +651,9 @@ def test_concurrent_access_and_thread_safety(pg_instance: Dict[str, str]):
                 error_count += 1
                 print(f"Thread error: {result}")
 
-        assert success_count == 10, f"Expected all 10 operations to succeed, got {success_count} successes and {error_count} errors"
+        assert success_count == 10, (
+            f"Expected all 10 operations to succeed, got {success_count} successes and {error_count} errors"
+        )
 
         # Verify pool limits are respected
         assert len(manager.pools) <= 5, f"Expected max 5 pools, got {len(manager.pools)}"
