@@ -1,85 +1,81 @@
 id: barracuda_secure_edge
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: barracuda-secure-edge
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
-  - description: "Action taken by the Barracuda SecureEdge"
-    facetType: list
-    groups:
-      - Barracuda SecureEdge
-    name: action
-    path: secure_edge.action
-    source: log
-    type: string
-  - description: "Destination IP address"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: dest_ip
-    path: secure_edge.dest_ip
+    path: dest_ip
     source: log
     type: string
-  - description: "Event id of the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: event_id
-    path: secure_edge.event_id
+    path: event_id
     source: log
     type: string
-  - description: "Event name of the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: eventname
-    path: secure_edge.eventname
+    path: eventname
     source: log
     type: string
-  - description: "Severity level of the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: level
-    path: secure_edge.level
+    path: level
     source: log
     type: string
-  - description: "Module of the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: module
-    path: secure_edge.module
+    path: module
     source: log
     type: string
-  - description: "Product Name of the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: productname
-    path: secure_edge.productname
+    path: productname
     source: log
     type: string
-  - description: "Protocol used in the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: protocol
-    path: secure_edge.protocol
+    path: protocol
     source: log
     type: string
-  - description: "Rule applied in the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: rule
-    path: secure_edge.rule
+    path: rule
     source: log
     type: string
-  - description: "Source IP address of the Barracuda SecureEdge Events"
+  - description: ""
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: src_ip
-    path: secure_edge.src_ip
+    path: src_ip
     source: log
     type: string
 pipeline:
@@ -90,27 +86,27 @@ pipeline:
     query: source:barracuda_secure_edge
   processors:
     - type: attribute-remapper
-      name: Map `timestamp` to `syslog.timestamp`
+      name: " Map timestamp to syslog.timestamp"
       enabled: true
       sources:
         - timestamp
       sourceType: attribute
       target: syslog.timestamp
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: status-remapper
-      name: Define `level` as the official status of the log
+      name: Status Remapper from Level to Status
       enabled: true
       sources:
         - level
     - type: status-remapper
-      name: Define `level` as the official status of the log
+      name: Remapper level to status
       enabled: true
       sources:
         - level
     - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+      name: "Define `timestamp` as the official date of the log "
       enabled: true
       sources:
         - timestamp
@@ -118,7 +114,7 @@ pipeline:
       name: Box Auth Access
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:auth
+        query: service:auth
       processors:
         - type: grok-parser
           name: Box Auth Access
@@ -154,7 +150,7 @@ pipeline:
       name: Box Firewall Activity
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:firewall
+        query: service:firewall
       processors:
         - type: grok-parser
           name: Box Firewall Activity
@@ -207,7 +203,7 @@ pipeline:
       name: "SSH "
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:ssh
+        query: service:ssh
       processors:
         - type: grok-parser
           name: Box SSH sshd
@@ -532,3 +528,5 @@ pipeline:
 
 
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{data:message}
+              
+              
