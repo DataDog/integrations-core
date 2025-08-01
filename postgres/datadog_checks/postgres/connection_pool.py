@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import time
 import threading
+import time
 from collections import OrderedDict
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import Any, Optional, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from psycopg import Connection
 from psycopg_pool import ConnectionPool
@@ -132,7 +132,9 @@ class LRUConnectionPoolManager:
         conn.autocommit = True
 
         if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
-            loader = SQLASCIITextLoader(encodings=self.sqlascii_encodings) # TODO: We should probably warn if encoding is ascii but utf-8 is set
+            loader = SQLASCIITextLoader(
+                encodings=self.sqlascii_encodings
+            )  # TODO: We should probably warn if encoding is ascii but utf-8 is set
             for typ in ["text", "varchar", "name", "regclass"]:
                 conn.adapters.register_loader(typ, loader)
 
