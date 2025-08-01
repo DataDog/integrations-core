@@ -50,6 +50,14 @@ from datadog_checks.postgres.config_models.defaults import (
     instance_tag_replication_role,
     instance_use_global_custom_queries,
 )
+from datadog_checks.postgres.config_models.instance import (
+    Aws,
+    Azure,
+    Gcp,
+    ManagedAuthentication,
+    ManagedAuthentication1,
+    Union,
+)
 from datadog_checks.postgres.discovery import (
     DEFAULT_MAX_DATABASES,
 )
@@ -445,35 +453,15 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         },
         # Cloud
         "aws": {
-            **{
-                "instance_endpoint": None,
-                "region": None,
-                "managed_authentication": {
-                    "enabled": None,
-                    "role_arn": None,
-                },
-            },
+            **Aws(managed_authentication=ManagedAuthentication()).model_dump(),
             **(instance.get('aws', {})),
         },
         "gcp": {
-            **{
-                "project_id": None,
-                "instance_id": None,
-            },
+            **Gcp().model_dump(),
             **(instance.get('gcp', {})),
         },
         "azure": {
-            **{
-                "deployment_type": None,
-                "fully_qualified_domain_name": None,
-                "managed_authentication": {
-                    **{
-                        "enabled": None,
-                        "client_id": None,
-                        "identity_scope": None,
-                    },
-                },
-            },
+            **Azure(managed_authentication=ManagedAuthentication1()).model_dump(),
             **(instance.get('azure', {})),
         },
         # Obfuscation and query logging
@@ -515,21 +503,21 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
 
     validation_result = ValidationResult()
 
-    if args['query_metrics']['collection_interval'] <= 0:
+    if safefloat(args['query_metrics']['collection_interval']) <= 0:
         args['query_metrics']['collection_interval'] = DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
         validation_result.add_warning(
             "query_metrics.collection_interval must be greater than 0, defaulting to"
             f"{DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL} seconds."
         )
 
-    if args['query_samples']['collection_interval'] <= 0:
+    if safefloat(args['query_samples']['collection_interval']) <= 0:
         args['query_samples']['collection_interval'] = DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL
         validation_result.add_warning(
             "query_samples.collection_interval must be greater than 0, defaulting to"
             f"{DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL} seconds."
         )
 
-    if args['query_activity']['collection_interval'] <= 0:
+    if safefloat(args['query_activity']['collection_interval']) <= 0:
         args['query_activity']['collection_interval'] = DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL
         validation_result.add_warning(
             "query_activity.collection_interval must be greater than 0, defaulting to"
@@ -762,3 +750,13 @@ def sanitize(config: InstanceConfig) -> dict:
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
 
     return sanitized
+
+
+def safefloat(value: Union[str, float, None]) -> float:
+    if value is None:
+        return 0.0
+    if isinstance(value, float):
+        return value
+    if isinstance(value, str) and value.isnumeric():
+        return float(value)
+    return 0.0

@@ -3,7 +3,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from datadog_checks.postgres.config import FeatureKey, ValidationResult, build_config, sanitize
+from datadog_checks.postgres.config import (
+    DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL,
+    FeatureKey,
+    ValidationResult,
+    build_config,
+    sanitize,
+)
 
 
 @pytest.fixture
@@ -214,3 +220,19 @@ def test_serialize_config(mock_check, minimal_instance):
     assert isinstance(serialized, str)
     assert '"password": "***"' in serialized
     assert '"ssl_password": "***"' in serialized
+
+
+def test_valid_string_numbers(mock_check, minimal_instance):
+    instance = minimal_instance.copy()
+    instance['query_metrics'] = {'collection_interval': '30'}
+    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    assert result.valid
+    assert config.query_metrics.collection_interval == 30
+
+
+def test_invalid_numbers(mock_check, minimal_instance):
+    instance = minimal_instance.copy()
+    instance['query_metrics'] = {'collection_interval': 'not_a_number'}
+    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    assert any("query_metrics.collection_interval must be greater than 0" in w for w in result.warnings)
+    assert config.query_metrics.collection_interval == DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
