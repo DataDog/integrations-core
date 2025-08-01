@@ -2,14 +2,12 @@ id: "barracuda_secure_edge"
 tests:
   - sample: "2025 03 31 11:46:17 +00:00 Info     box_control[5405]: Session
       localhost_hapair_daemon: Closed"
-    attributes:
-      service: "auth"
-      source: "barracuda_secure_edge"
     result:
     custom: {}
     message: "2025 03 31 11:46:17 +00:00 Info     box_control[5405]: Session localhost_hapair_daemon: Closed"
     tags:
      - "source:barracuda_secure_edge"
+     - "service:auth"
     timestamp: 1
   - sample: "2025 03 31 11:46:24 +00:00 Info     firewall: [DNS] Operation: Updating
       DNS Configuration based on /etc/resolv.conf. Cancelling pending DNS
