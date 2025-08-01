@@ -399,41 +399,39 @@ class PostgresMetadata(DBMAsyncJob):
                 if not self._should_collect_metadata(dbname, "database"):
                     continue
 
-                with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
-                    with conn.cursor(row_factory=dict_row) as cursor:
-                        for schema in database["schemas"]:
-                            if not self._should_collect_metadata(schema["name"], "schema"):
-                                continue
+                for schema in database["schemas"]:
+                    if not self._should_collect_metadata(schema["name"], "schema"):
+                        continue
 
-                            tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
-                            self._log.debug(
-                                "Tables found for schema '{schema}' in database '{database}': {tables}".format(
-                                    schema=database["schemas"],
-                                    database=dbname,
-                                    tables=[table["name"] for table in tables],
-                                )
-                            )
-                            table_chunks = list(get_list_chunks(tables, chunk_size))
+                    tables = self._query_tables_for_schema(schema["id"], dbname)
+                    self._log.debug(
+                        "Tables found for schema '{schema}' in database '{database}': {tables}".format(
+                            schema=database["schemas"],
+                            database=dbname,
+                            tables=[table["name"] for table in tables],
+                        )
+                    )
+                    table_chunks = list(get_list_chunks(tables, chunk_size))
 
-                            buffer_column_count = 0
+                    buffer_column_count = 0
+                    tables_buffer = []
+
+                    for tables in table_chunks:
+                        table_info = self._query_table_information(schema['name'], tables)
+
+                        tables_buffer = [*tables_buffer, *table_info]
+                        for t in table_info:
+                            buffer_column_count += len(t.get("columns", []))
+
+                        if buffer_column_count >= 100_000:
+                            self._flush_schema(base_event, database, schema, tables_buffer)
+                            total_tables += len(tables_buffer)
                             tables_buffer = []
+                            buffer_column_count = 0
 
-                            for tables in table_chunks:
-                                table_info = self._query_table_information(cursor, schema['name'], tables)
-
-                                tables_buffer = [*tables_buffer, *table_info]
-                                for t in table_info:
-                                    buffer_column_count += len(t.get("columns", []))
-
-                                if buffer_column_count >= 100_000:
-                                    self._flush_schema(base_event, database, schema, tables_buffer)
-                                    total_tables += len(tables_buffer)
-                                    tables_buffer = []
-                                    buffer_column_count = 0
-
-                            if len(tables_buffer) > 0:
-                                self._flush_schema(base_event, database, schema, tables_buffer)
-                                total_tables += len(tables_buffer)
+                    if len(tables_buffer) > 0:
+                        self._flush_schema(base_event, database, schema, tables_buffer)
+                        total_tables += len(tables_buffer)
         except Exception as e:
             self._log.error("Error collecting schema metadata: %s", e)
             status = "error"
@@ -525,19 +523,21 @@ class PostgresMetadata(DBMAsyncJob):
             encoding: str
             owner: str
         """
-        try:
-            cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
-        except psycopg.Error as e:
-            self._log.error(
-                "Error while executing query: %s. ",
-                e,
-            )
-            return []
+        with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                try:
+                    cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []
 
-        row = cursor.fetchone()
-        return row
+                row = cursor.fetchone()
+                return row
 
-    def _query_schema_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, str]:
+    def _query_schema_information(self, dbname: str) -> Dict[str, str]:
         """
         Collect user schemas. Returns
             id: str
@@ -555,8 +555,10 @@ class PostgresMetadata(DBMAsyncJob):
             schema_query_ = schema_query_.format("")
 
         try:
-            cursor.execute(schema_query_)
-            rows = cursor.fetchall()
+            with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    cursor.execute(schema_query_)
+                    rows = cursor.fetchall()
         except psycopg.Error as e:
             self._log.error(
                 "Error while executing query: %s. ",
@@ -571,7 +573,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._log.debug("Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows))
         return schemas
 
-    def _get_table_info(self, cursor, dbname, schema_id):
+    def _get_table_info(self, dbname, schema_id):
         """
         Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
         the max_tables limit.
@@ -580,46 +582,48 @@ class PostgresMetadata(DBMAsyncJob):
         """
         filter = self._get_tables_filter()
         try:
-            if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
-            else:
-                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+            with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+                        cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
+                    else:
+                        cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+
+                    rows = cursor.fetchall()
+                    table_info = [dict(row) for row in rows]
+
+                    limit = self._config.schemas_metadata_config.get("max_tables", 300)
+
+                    if len(table_info) <= limit:
+                        return table_info
+
+                    self._log.debug(
+                        "{table_count} tables found but max_tables is set to {max_tables}."
+                        "{missing_count} tables will be missing from this collection".format(
+                            table_count=len(table_info), max_tables=limit, missing_count=len(table_info) - limit
+                        )
+                    )
+
+                    if not self._config.relations:
+                        self._check.log.warning(
+                            "Number of tables exceeds limit of %d set by max_tables but "
+                            "relation metrics are not configured for %s."
+                            "Please configure relation metrics for all tables to sort by most active."
+                            "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                            "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
+                            "for details on how to enable relation metrics.",
+                            limit,
+                            dbname,
+                        )
+                        return table_info[:limit]
+
+                    return self._sort_and_limit_table_info(dbname, table_info, limit)
         except psycopg.Error as e:
             self._log.error(
                 "Error while executing query: %s. ",
                 e,
             )
             return []
-
-        rows = cursor.fetchall()
-        table_info = [dict(row) for row in rows]
-
-        limit = self._config.schemas_metadata_config.get("max_tables", 300)
-
-        if len(table_info) <= limit:
-            return table_info
-
-        self._log.debug(
-            "{table_count} tables found but max_tables is set to {max_tables}."
-            "{missing_count} tables will be missing from this collection".format(
-                table_count=len(table_info), max_tables=limit, missing_count=len(table_info) - limit
-            )
-        )
-
-        if not self._config.relations:
-            self._check.log.warning(
-                "Number of tables exceeds limit of %d set by max_tables but "
-                "relation metrics are not configured for %s."
-                "Please configure relation metrics for all tables to sort by most active."
-                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
-                "for details on how to enable relation metrics.",
-                limit,
-                dbname,
-            )
-            return table_info[:limit]
-
-        return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
     def _get_tables_filter(self):
         includes = self._config.schemas_metadata_config.get("include_tables", [])
@@ -641,7 +645,7 @@ class PostgresMetadata(DBMAsyncJob):
         return sql
 
     def _sort_and_limit_table_info(
-        self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
+        self, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
     ) -> List[Dict[str, Union[str, bool]]]:
         def sort_tables(info):
             cache = self._check.metrics_cache.table_activity_metrics
@@ -661,7 +665,11 @@ class PostgresMetadata(DBMAsyncJob):
             else:
                 # get activity
                 try:
-                    cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
+                    with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                        with conn.cursor(row_factory=dict_row) as cursor:
+                            cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
+                            row = cursor.fetchone()
+                            return row.get("total_activity", 0) if row is not None else 0
                 except psycopg.Error as e:
                     self._log.error(
                         "Error while executing query: %s. ",
@@ -669,16 +677,11 @@ class PostgresMetadata(DBMAsyncJob):
                     )
                     return []
 
-                row = cursor.fetchone()
-                return row.get("total_activity", 0) if row is not None else 0
-
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
 
-    def _query_tables_for_schema(
-        self, cursor: psycopg.Cursor, schema_id: str, dbname: str
-    ) -> List[Dict[str, Union[str, Dict]]]:
+    def _query_tables_for_schema(self, schema_id: str, dbname: str) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect list of tables for a schema. Returns a list of dictionaries
         with key/values:
@@ -691,7 +694,7 @@ class PostgresMetadata(DBMAsyncJob):
             "num_partitions": int (if has partitions)
 
         """
-        tables_info = self._get_table_info(cursor, dbname, schema_id)
+        tables_info = self._get_table_info(dbname, schema_id)
         table_payloads = []
         for table in tables_info:
             this_payload = {}
@@ -795,22 +798,20 @@ class PostgresMetadata(DBMAsyncJob):
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
-        with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                database_info = self._query_database_information(cursor, dbname)
-                metadata.update(
-                    {
-                        "description": database_info["description"],
-                        "name": database_info["name"],
-                        "id": str(database_info["id"]),
-                        "encoding": database_info["encoding"],
-                        "owner": database_info["owner"],
-                        "schemas": [],
-                    }
-                )
-                schema_info = self._query_schema_information(cursor, dbname)
-                for schema in schema_info:
-                    metadata["schemas"].append(schema)
+        database_info = self._query_database_information(dbname)
+        metadata.update(
+            {
+                "description": database_info["description"],
+                "name": database_info["name"],
+                "id": str(database_info["id"]),
+                "encoding": database_info["encoding"],
+                "owner": database_info["owner"],
+                "schemas": [],
+            }
+        )
+        schema_info = self._query_schema_information(dbname)
+        for schema in schema_info:
+            metadata["schemas"].append(schema)
 
         return metadata
 
