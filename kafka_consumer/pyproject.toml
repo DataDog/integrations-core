@@ -37,6 +37,8 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "confluent-kafka==2.8.0",
+    "fastavro==1.11.1",
+    "protobuf==6.31.1",
 ]
 
 [project.urls]
