@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # datadog_checks/active_directory/check.py
 
-from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBaseCheckWithLegacySupport
-from datadog_checks.base.constants import ServiceCheck
 import platform
 import time
+
+from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBaseCheckWithLegacySupport
 
 
 class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
@@ -35,8 +35,6 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         # Configuration options
         self.service_check_enabled = instance.get('service_check_enabled', True)
         self.force_all_metrics = instance.get('force_all_metrics', False)
-        self.emit_service_status = instance.get('emit_service_status', False)
-        self.service_check_timeout = instance.get('service_check_timeout', 5)
 
         # Caching configuration
         self._service_cache = {}
@@ -66,7 +64,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         # Use cached results if recent
         current_time = time.time()
         if current_time - self._last_service_check < self._cache_duration:
-            self.log.debug("Using cached service states (age: {:.1f}s)".format(current_time - self._last_service_check))
+            self.log.debug("Using cached service states (age: %.1fs)", current_time - self._last_service_check)
             return self._build_config_from_cache(METRICS_CONFIG)
 
         # Refresh cache
@@ -91,9 +89,9 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
             try:
                 is_running = self._is_service_running(service)
                 self._service_cache[service] = is_running
-                self.log.debug("Service {}: {}".format(service, 'running' if is_running else 'not running'))
+                self.log.debug("Service %s: %s", service, 'running' if is_running else 'not running')
             except Exception as e:
-                self.log.warning("Failed to check service {}: {}".format(service, e))
+                self.log.warning("Failed to check service %s: %s", service, e)
                 # Optimistically assume service is available on error
                 self._service_cache[service] = True
 
@@ -121,7 +119,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
             return is_running
 
         except ImportError as e:
-            self.log.error("pywin32 not available: {}".format(e))
+            self.log.error("pywin32 not available: %s", e)
             self.log.info("Install pywin32 to enable service detection")
             return True  # Assume available if we can't check
 
@@ -137,7 +135,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         for metric_name in self.REQUIRED_METRICS:
             if metric_name in metrics_config:
                 filtered_config['metrics'][metric_name] = metrics_config[metric_name]
-                self.log.debug("Including required metric: {}".format(metric_name))
+                self.log.debug("Including required metric: %s", metric_name)
 
         # Add metrics based on service availability
         metrics_added = set(self.REQUIRED_METRICS)
@@ -150,9 +148,9 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     if metric_name in metrics_config and metric_name not in metrics_added:
                         filtered_config['metrics'][metric_name] = metrics_config[metric_name]
                         metrics_added.add(metric_name)
-                        self.log.debug("Including {} (service {} is running)".format(metric_name, service))
+                        self.log.debug("Including %s (service %s is running)", metric_name, service)
             else:
-                self.log.info("Excluding metrics {} (service {} not running)".format(metric_names, service))
+                self.log.info("Excluding metrics %s (service %s not running)", metric_names, service)
 
         # Add any metrics not controlled by services
         # This ensures backward compatibility if new metrics are added
@@ -167,69 +165,11 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
 
                 if not controlled:
                     filtered_config['metrics'][metric_name] = metric_config
-                    self.log.debug("Including uncontrolled metric: {}".format(metric_name))
+                    self.log.debug("Including uncontrolled metric: %s", metric_name)
 
         return filtered_config
 
     def check(self, _):
-        """Perform the check and emit service status if configured."""
-        # Emit service checks if enabled
-        if self.emit_service_status and self.service_check_enabled:
-            self._emit_service_checks()
-
+        """Perform the check."""
         # Call parent check
         return super().check(_)
-
-    def _emit_service_checks(self):
-        """Emit service status as Datadog service checks."""
-        # Only emit on Windows
-        if not self._is_windows:
-            return
-
-        # Define service descriptions
-        service_descriptions = {
-            'Netlogon': 'AD Authentication Service',
-            'DHCPServer': 'DHCP Server',
-            'DFSR': 'DFS Replication',
-            'DNS': 'DNS Server',
-            'W32Time': 'Windows Time Service',
-            'ADWS': 'AD Web Services',
-            'Kdc': 'Kerberos Key Distribution Center',
-        }
-
-        # Check each service we care about
-        for service in self.SERVICE_METRIC_MAP.keys():
-            check_name = "{}.service.{}".format(self.__NAMESPACE__, service.lower())
-
-            try:
-                # Use cached value if available and fresh
-                current_time = time.time()
-                if (service in self._service_cache and
-                    current_time - self._last_service_check < self._cache_duration):
-                    is_running = self._service_cache[service]
-                else:
-                    is_running = self._is_service_running(service)
-
-                # Emit service check
-                if is_running:
-                    self.service_check(
-                        check_name,
-                        ServiceCheck.OK,
-                        message="{} is running".format(service_descriptions.get(service, service)),
-                        tags=[]
-                    )
-                else:
-                    self.service_check(
-                        check_name,
-                        ServiceCheck.WARNING,
-                        message="{} is not running".format(service_descriptions.get(service, service)),
-                        tags=[]
-                    )
-
-            except Exception as e:
-                self.service_check(
-                    check_name,
-                    ServiceCheck.UNKNOWN,
-                    message="Failed to check {}: {}".format(service, str(e)),
-                    tags=[]
-                )
