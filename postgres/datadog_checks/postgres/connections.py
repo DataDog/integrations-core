@@ -175,10 +175,10 @@ class MultiDatabaseConnectionPool(object):
         """
         with self._mu:
             now = datetime.datetime.now()
-            for dbname, conn in list(self._conns.items()):
+            for _, conn in list(self._conns.items()):
                 if conn.deadline < now:
                     self._stats.connection_pruned += 1
-                    self._terminate_connection_unsafe(dbname)
+                    # self._terminate_connection_unsafe(dbname)
 
     def close_all_connections(self):
         success = True
