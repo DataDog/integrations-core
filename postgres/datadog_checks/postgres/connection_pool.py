@@ -7,7 +7,7 @@ import time
 from collections import OrderedDict
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, Union
 
 from psycopg import Connection
 from psycopg_pool import ConnectionPool
@@ -32,12 +32,15 @@ class PostgresConnectionArgs:
     ssl_key: Optional[str] = None
     ssl_password: Optional[str] = None
 
-    def as_kwargs(self, dbname: str) -> Dict[str, str]:
+    def as_kwargs(self, dbname: str) -> Dict[str, Union[str, int]]:
         """
         Return a dictionary of connection arguments for psycopg.
 
         Args:
             dbname (str): The database name to connect to.
+
+        Returns:
+            Dict[str, Union[str, int]]: Connection arguments dictionary with string and integer values.
         """
         kwargs = {
             "application_name": self.application_name,
@@ -71,7 +74,7 @@ class ConnectionProxy(AbstractContextManager):
 
     def __init__(self, pool: ConnectionPool) -> None:
         self.pool = pool
-        self._ctx = None
+        self._ctx: Optional[Any] = None
         self._conn: Optional[Connection] = None
 
     def __enter__(self) -> Connection:
@@ -79,7 +82,7 @@ class ConnectionProxy(AbstractContextManager):
         self._conn = self._ctx.__enter__()
         return self._conn
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> Optional[bool]:
+    def __exit__(self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[Any]) -> Optional[bool]:
         return self._ctx.__exit__(exc_type, exc_val, exc_tb)
 
 
@@ -102,7 +105,7 @@ class LRUConnectionPoolManager:
         self,
         max_db: int,
         base_conn_args: PostgresConnectionArgs,
-        pool_config: Optional[Dict[str, object]] = None,
+        pool_config: Optional[Dict[str, Any]] = None,
         statement_timeout: Optional[int] = None,  # milliseconds
         sqlascii_encodings: Optional[list[str]] = None,
     ) -> None:
@@ -113,6 +116,8 @@ class LRUConnectionPoolManager:
             max_db (int): Maximum number of unique dbname pools to maintain.
             base_conn_args (PostgresConnectionArgs): Common connection parameters.
             pool_config (dict, optional): Additional ConnectionPool settings (min_size, max_size, etc).
+            statement_timeout (int, optional): Statement timeout in milliseconds.
+            sqlascii_encodings (list[str], optional): List of encodings to handle for SQLASCII text.
         """
         self.max_db = max_db
         self.base_conn_args = base_conn_args
@@ -132,11 +137,10 @@ class LRUConnectionPoolManager:
         conn.autocommit = True
 
         if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
-            loader = SQLASCIITextLoader(
-                encodings=self.sqlascii_encodings
-            )  # TODO: We should probably warn if encoding is ascii but utf-8 is set
+            text_loader = SQLASCIITextLoader
+            text_loader.encodings = self.sqlascii_encodings
             for typ in ["text", "varchar", "name", "regclass"]:
-                conn.adapters.register_loader(typ, loader)
+                conn.adapters.register_loader(typ, text_loader)
 
         conn.cursor_factory = CommenterCursor
 
@@ -168,6 +172,7 @@ class LRUConnectionPoolManager:
 
         Args:
             dbname (str): The database name to get a pool for.
+            persistent (bool): Whether this pool should be marked as persistent (protected from LRU eviction).
 
         Returns:
             ConnectionPool: The pool for the requested dbname.
@@ -210,6 +215,7 @@ class LRUConnectionPoolManager:
 
         Args:
             dbname (str): The database name to get a connection for.
+            persistent (bool): Whether the underlying pool should be marked as persistent.
 
         Returns:
             ConnectionProxy: A context manager yielding a psycopg.Connection.
@@ -227,12 +233,13 @@ class LRUConnectionPoolManager:
             - total: Total connections managed by the pool
             - waiters: Threads waiting for a connection
             - last_used: Monotonic timestamp of last access
+            - persistent: Whether the pool is marked as persistent
 
         Args:
             dbname (str): The database name to fetch stats for.
 
         Returns:
-            dict: Dictionary of pool stats and metadata, or None if the pool does not exist.
+            Optional[Dict[str, Any]]: Dictionary of pool stats and metadata, or None if the pool does not exist.
         """
         with self.lock:
             entry = self.pools.get(dbname)

@@ -4,6 +4,8 @@
 
 import time
 from typing import Dict
+import threading
+import queue
 
 import pytest
 from psycopg import Connection
@@ -333,6 +335,58 @@ def test_max_idle_closes_and_reopens_connection(pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
+def test_statement_timeout_configuration(pg_instance: Dict[str, str]):
+    """
+    Test that statement_timeout is properly configured on connections and that
+    timeout behavior works correctly.
+    """
+    conn_args = PostgresConnectionArgs(
+        application_name="test_statement_timeout",
+        user=pg_instance["username"],
+        password=pg_instance["password"],
+        host=pg_instance["host"],
+        port=int(pg_instance["port"]),
+    )
+
+    manager = LRUConnectionPoolManager(
+        max_db=1,
+        base_conn_args=conn_args,
+        statement_timeout=1000,  # 1 second
+    )
+
+    try:
+        dbname = pg_instance["dbname"]
+        with manager.get_connection(dbname) as conn:
+            assert isinstance(conn, Connection)
+
+            with conn.cursor() as cur:
+                # Verify timeout is set correctly
+                cur.execute("SHOW statement_timeout")
+                timeout = cur.fetchone()[0]
+                assert timeout == "1s"
+
+                # Test that a normal query works
+                cur.execute("SELECT 1")
+                result = cur.fetchone()
+                assert result == (1,)
+
+        # Test timeout behavior with a long query
+        with manager.get_connection(dbname) as conn:
+            with conn.cursor() as cur:
+                # This should timeout after 1 second
+                with pytest.raises(Exception) as exc_info:
+                    cur.execute("SELECT pg_sleep(2)")
+
+                # Verify it's a timeout-related exception
+                error_msg = str(exc_info.value).lower()
+                assert any(keyword in error_msg for keyword in ["timeout", "statement_timeout", "canceling"])
+
+    finally:
+        manager.close_all()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_connection_termination_and_recovery(pg_instance):
     """
     Simulates a server-side termination of a connection and verifies the pool
@@ -488,3 +542,127 @@ def test_eviction_when_all_pools_are_persistent(pg_instance):
 
     finally:
         manager.close_all()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_connection_proxy_exception_handling(pg_instance: Dict[str, str]):
+    """
+    Test that ConnectionProxy properly handles exceptions and releases connections.
+    """
+    conn_args = PostgresConnectionArgs(
+        application_name="test_proxy_exceptions",
+        user=pg_instance["username"],
+        password=pg_instance["password"],
+        host=pg_instance["host"],
+        port=int(pg_instance["port"]),
+    )
+
+    manager = LRUConnectionPoolManager(max_db=1, base_conn_args=conn_args)
+
+    try:
+        dbname = pg_instance["dbname"]
+
+        # Test normal usage first
+        with manager.get_connection(dbname) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+                result = cur.fetchone()
+                assert result == (1,)
+
+        # Test exception handling - this should raise an exception
+        with pytest.raises(Exception) as exc_info:
+            with manager.get_connection(dbname) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT * FROM nonexistent_table")
+
+        # Verify it's a database-related exception
+        error_msg = str(exc_info.value).lower()
+        assert any(keyword in error_msg for keyword in ["relation", "table", "nonexistent", "does not exist"])
+
+        # Verify connection is still available after exception
+        with manager.get_connection(dbname) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+                result = cur.fetchone()
+                assert result == (1,)
+
+        # Test that pool stats are still valid after exception
+        stats = manager.get_pool_stats(dbname)
+        assert stats is not None
+        assert stats["pool_available"] == 1
+
+    finally:
+        manager.close_all()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_concurrent_access_and_thread_safety(pg_instance: Dict[str, str]):
+    """
+    Test that the pool manager handles concurrent access safely from multiple threads.
+    """
+    conn_args = PostgresConnectionArgs(
+        application_name="test_concurrent",
+        user=pg_instance["username"],
+        password=pg_instance["password"],
+        host=pg_instance["host"],
+        port=int(pg_instance["port"]),
+    )
+
+    manager = LRUConnectionPoolManager(max_db=2, base_conn_args=conn_args)
+    results = queue.Queue()
+
+    def worker(dbname):
+        """Worker function that accesses a database and reports results."""
+        try:
+            with manager.get_connection(dbname) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT pg_sleep(0.2), 1")  # simulate work
+                    result = cur.fetchone()
+                    if result[-1] == 1:
+                        results.put(f"success_{dbname}")
+                    else:
+                        results.put(f"error_{dbname}: unexpected result {result}")
+        except Exception as e:
+            results.put(f"error_{dbname}: {e}")
+
+    try:
+        # Start multiple threads accessing different databases
+        threads = []
+        for i in range(10):
+            dbname = f"dogs_{i % 2}"  # Only 2 unique dbs, 10 threads, to test connection contention
+            thread = threading.Thread(target=worker, args=(dbname,))
+            threads.append(thread)
+            thread.start()
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+
+        # Verify all operations succeeded
+        success_count = 0
+        error_count = 0
+        while not results.empty():
+            result = results.get()
+            if result.startswith("success_"):
+                success_count += 1
+            else:
+                error_count += 1
+                print(f"Thread error: {result}")
+
+        assert success_count == 10, f"Expected all 10 operations to succeed, got {success_count} successes and {error_count} errors"
+
+        # Verify pool limits are respected
+        assert len(manager.pools) <= 5, f"Expected max 5 pools, got {len(manager.pools)}"
+
+        # Verify all pools are functional after concurrent access
+        for dbname in list(manager.pools.keys()):
+            stats = manager.get_pool_stats(dbname)
+            assert stats is not None, f"Pool stats should be available for {dbname}"
+            assert stats["pool_available"] == 1, f"Pool should have available connections for {dbname}"
+            assert stats["pool_size"] == 1, f"Pool should have size 1 for {dbname}"
+
+    finally:
+        manager.close_all()
+        assert len(manager.pools) == 0, "All pools should be closed"
