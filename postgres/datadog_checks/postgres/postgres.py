@@ -606,7 +606,6 @@ class PostgreSql(AgentCheck):
 
         results = None
         is_relations = scope.get('relation') and self._relations_manager.has_relations
-        print('query scope db', dbname)
         try:
             with (
                 self.db()
@@ -626,7 +625,6 @@ class PostgreSql(AgentCheck):
                             cursor.execute(query.replace(r'%', r'%%'))
 
                         results = cursor.fetchall()
-                        print('metrics results', results)
                         if not results:
                             return None
 
@@ -816,7 +814,6 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
-        print("collect stats")
         db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
