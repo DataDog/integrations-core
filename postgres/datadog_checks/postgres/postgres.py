@@ -606,6 +606,7 @@ class PostgreSql(AgentCheck):
 
         results = None
         is_relations = scope.get('relation') and self._relations_manager.has_relations
+        print('query scope db', dbname)
         try:
             with (
                 self.db()
@@ -625,6 +626,31 @@ class PostgreSql(AgentCheck):
                             cursor.execute(query.replace(r'%', r'%%'))
 
                         results = cursor.fetchall()
+                        print('metrics results', results)
+                        if not results:
+                            return None
+
+                        if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
+                            self.log.debug(
+                                "Query: %s returned more than %s results (%s). Truncating",
+                                query,
+                                MAX_CUSTOM_RESULTS,
+                                len(results),
+                            )
+                            results = results[:MAX_CUSTOM_RESULTS]
+
+                        if is_relations and len(results) > self._config.max_relations:
+                            self.log.debug(
+                                "Query: %s returned more than %s results (%s). "
+                                "Truncating. You can edit this limit by setting the `max_relations` config option",
+                                query,
+                                self._config.max_relations,
+                                len(results),
+                            )
+                            results = results[: self._config.max_relations]
+
+                        return results
+
         except psycopg.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
@@ -647,27 +673,6 @@ class PostgreSql(AgentCheck):
             )
 
             return None
-
-        if not results:
-            return None
-
-        if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
-            self.log.debug(
-                "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
-            )
-            results = results[:MAX_CUSTOM_RESULTS]
-
-        if is_relations and len(results) > self._config.max_relations:
-            self.log.debug(
-                "Query: %s returned more than %s results (%s). "
-                "Truncating. You can edit this limit by setting the `max_relations` config option",
-                query,
-                self._config.max_relations,
-                len(results),
-            )
-            results = results[: self._config.max_relations]
-
-        return results
 
     def _query_scope(self, scope, instance_tags, is_custom_metrics, dbname=None):
         if scope is None:
@@ -811,6 +816,7 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
+        print("collect stats")
         db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
@@ -851,59 +857,59 @@ class PostgreSql(AgentCheck):
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
 
-            results_len = self._query_scope(db_instance_metrics, instance_tags, False)
-            if results_len is not None:
-                self.gauge(
-                    "db.count",
-                    results_len,
-                    tags=self.tags_without_db,
-                    hostname=self.reported_hostname,
-                )
+        results_len = self._query_scope(db_instance_metrics, instance_tags, False)
+        if results_len is not None:
+            self.gauge(
+                "db.count",
+                results_len,
+                tags=self.tags_without_db,
+                hostname=self.reported_hostname,
+            )
 
-            self._query_scope(bgw_instance_metrics, instance_tags, False)
-            self._query_scope(archiver_instance_metrics, instance_tags, False)
+        self._query_scope(bgw_instance_metrics, instance_tags, False)
+        self._query_scope(archiver_instance_metrics, instance_tags, False)
 
-            if self._config.collect_checksum_metrics and self.version >= V12:
-                # SHOW queries need manual cursor execution so can't be bundled with the metrics
-                with self.db() as conn:
-                    with conn.cursor() as cursor:
-                        try:
-                            cursor.execute("SHOW data_checksums;")
-                        except psycopg.Error as e:
-                            self._log.error(
-                                "Error while executing query: %s. ",
-                                e,
-                            )
-                            return
-
-                        enabled = cursor.fetchone()[0]
-                        self.count(
-                            "checksums.enabled",
-                            1,
-                            tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
-                            hostname=self.reported_hostname,
+        if self._config.collect_checksum_metrics and self.version >= V12:
+            # SHOW queries need manual cursor execution so can't be bundled with the metrics
+            with self.db() as conn:
+                with conn.cursor() as cursor:
+                    try:
+                        cursor.execute("SHOW data_checksums;")
+                    except psycopg.Error as e:
+                        self._log.error(
+                            "Error while executing query: %s. ",
+                            e,
                         )
-            if self._config.collect_activity_metrics:
-                activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
-                self._query_scope(activity_metrics, instance_tags, False)
+                        return
 
-            if per_database_metric_scope:
-                # if autodiscovery is enabled, get per-database metrics from all databases found
-                if self.autodiscovery:
-                    self._collect_metric_autodiscovery(
-                        instance_tags,
-                        scopes=per_database_metric_scope,
-                        scope_type='_collect_stat_autodiscovery',
+                    enabled = cursor.fetchone()[0]
+                    self.count(
+                        "checksums.enabled",
+                        1,
+                        tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
+                        hostname=self.reported_hostname,
                     )
-                else:
-                    # otherwise, continue just with dbname
-                    metric_scope.extend(per_database_metric_scope)
+        if self._config.collect_activity_metrics:
+            activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
+            self._query_scope(activity_metrics, instance_tags, False)
 
-            for scope in list(metric_scope):
-                self._query_scope(scope, instance_tags, False)
+        if per_database_metric_scope:
+            # if autodiscovery is enabled, get per-database metrics from all databases found
+            if self.autodiscovery:
+                self._collect_metric_autodiscovery(
+                    instance_tags,
+                    scopes=per_database_metric_scope,
+                    scope_type='_collect_stat_autodiscovery',
+                )
+            else:
+                # otherwise, continue just with dbname
+                metric_scope.extend(per_database_metric_scope)
 
-            for scope in self._config.custom_metrics:
-                self._query_scope(scope, instance_tags, True)
+        for scope in list(metric_scope):
+            self._query_scope(scope, instance_tags, False)
+
+        for scope in self._config.custom_metrics:
+            self._query_scope(scope, instance_tags, True)
 
         if self.dynamic_queries:
             for dynamic_query in self.dynamic_queries:
