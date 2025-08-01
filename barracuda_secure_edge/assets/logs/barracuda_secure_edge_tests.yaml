@@ -1,25 +1,17 @@
-id: "barracuda_secure_edge"
+id: barracuda_secure_edge
 tests:
-  - sample: "2025 03 31 11:46:17 +00:00 Info     box_control[5405]: Session
-      localhost_hapair_daemon: Closed"
-    attributes:
-      source: "barracuda_secure_edge"
-      service: "auth"
+  - sample: "2025 07 17 19:12:15 +05:30 Info     : pam_unix(sudo:session):
+      pam_unix(sshd:auth): Login sacumen from 10.10.16.1: Denied: Unknown user
+      sacumen"
     result: null
-  - sample: "2025 03 31 11:46:24 +00:00 Info     firewall: [DNS] Operation: Updating
-      DNS Configuration based on /etc/resolv.conf. Cancelling pending DNS
-      requests, if any. Will resume work afterwards."
-    attributes:
-      source: "barracuda_secure_edge"
-      service: "firewall"
+  - sample: "2025 07 17 19:34:24 +00:00 Warning  firewall: [DNS] Operation: Failed
+      to find file /opt/phion/preserve/customapp.dnsapp. Stopping work on custom
+      apps and clearing respective caches"
     result: null
-  - sample: "2025 04 01 20:17:08 +00:00 Info     event: [1071065] Insert Event from
-      127.0.0.1:54624 - (D|2|ccactivate|1|License|4700|Query Activation State
-      for  Failed|CloudGen-WAN|1743538628|Querying licensing servers for the
+  - sample: "2025 04 01 20:15:08 +00:00 Info     event: [1071065] Insert Event from
+      127.0.0.1:18323 - (D|2|ccactivate|1|License|4700|Query Activation State
+      for  Failed|CloudGen-WAN|1743538508|Querying licensing servers for the
       license activation state failed)"
-    attributes:
-      source: "barracuda_secure_edge"
-      service: "system"
     result: null
 
 # The `result` field should be left blank to start. Once you submit your log asset files with

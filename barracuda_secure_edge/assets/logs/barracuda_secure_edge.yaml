@@ -528,5 +528,3 @@ pipeline:
 
 
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{data:message}
-              
-              
