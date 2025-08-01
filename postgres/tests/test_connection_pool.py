@@ -16,6 +16,26 @@ from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, Po
 from .utils import _get_superconn
 
 
+def _create_conn_args(pg_instance, application_name="test_connection_pool"):
+    """
+    Helper function to create PostgresConnectionArgs with common test configuration.
+
+    Args:
+        pg_instance: The PostgreSQL instance configuration
+        application_name: The application name for the connection
+
+    Returns:
+        PostgresConnectionArgs: Configured connection arguments
+    """
+    return PostgresConnectionArgs(
+        application_name=application_name,
+        user=pg_instance["username"],
+        password=pg_instance["password"],
+        host=pg_instance["host"],
+        port=int(pg_instance["port"]),
+    )
+
+
 def _make_base_args(**overrides):
     """Helper to create base connection arguments with defaults."""
     base = {
@@ -153,14 +173,7 @@ def test_basic_connection(pg_instance: Dict[str, str]):
     Test basic connection acquisition, query execution, and pool stats
     for a single dbname using LRUConnectionPoolManager.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_basic_connection",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
-
+    conn_args = _create_conn_args(pg_instance, "test_basic_connection")
     manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args, pool_config={"min_size": 1, "max_size": 2})
 
     try:
@@ -201,15 +214,8 @@ def test_lru_eviction_and_connection_rotation(pg_instance):
     Opens and closes multiple connections across dogs_n databases and asserts LRU behavior
     and correct enforcement of min_size=0, max_size=1 per pool.
     """
-    base_conn_args = PostgresConnectionArgs(
-        application_name="test_lru_eviction_and_connection_rotation",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
-
-    manager = LRUConnectionPoolManager(max_db=3, base_conn_args=base_conn_args)
+    conn_args = _create_conn_args(pg_instance, "test_lru_eviction_and_connection_rotation")
+    manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args)
 
     dbnames = [f"dogs_{i}" for i in range(5)]  # 5 dbs, max pool limit is 3
 
@@ -244,14 +250,7 @@ def test_lru_eviction_order(pg_instance):
     """
     Verifies that the least recently used dbname pool is evicted when the max_db limit is exceeded.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_lru_eviction_order",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
-
+    conn_args = _create_conn_args(pg_instance, "test_lru_eviction_order")
     manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args)
 
     try:
@@ -287,13 +286,7 @@ def test_max_idle_closes_and_reopens_connection(pg_instance):
     Tests that a connection is closed after max_idle seconds of idleness,
     and that the pool reopens a usable connection on next use.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_max_idle_closes_and_reopens_connection",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
+    conn_args = _create_conn_args(pg_instance, "test_max_idle_closes_and_reopens_connection")
 
     manager = LRUConnectionPoolManager(
         max_db=1,
@@ -340,13 +333,7 @@ def test_statement_timeout_configuration(pg_instance: Dict[str, str]):
     Test that statement_timeout is properly configured on connections and that
     timeout behavior works correctly.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_statement_timeout",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
+    conn_args = _create_conn_args(pg_instance, "test_statement_timeout")
 
     manager = LRUConnectionPoolManager(
         max_db=1,
@@ -392,13 +379,7 @@ def test_connection_termination_and_recovery(pg_instance):
     Simulates a server-side termination of a connection and verifies the pool
     replaces it and continues working.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_connection_termination_and_recovery",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
+    conn_args = _create_conn_args(pg_instance, "test_connection_termination_and_recovery")
 
     manager = LRUConnectionPoolManager(
         max_db=1,
@@ -456,13 +437,7 @@ def test_persistent_pool_eviction_behavior(pg_instance):
     """
     Ensures persistent pools are not evicted while non-persistent ones are available.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_persistent_pool_eviction_behavior",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
+    conn_args = _create_conn_args(pg_instance, "test_persistent_pool_eviction_behavior")
 
     manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args)
 
@@ -504,13 +479,7 @@ def test_eviction_when_all_pools_are_persistent(pg_instance):
     Ensures that if all existing pools are persistent, the least recently used one
     is still evicted to make room for a new pool.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_eviction_when_all_pools_are_persistent",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
+    conn_args = _create_conn_args(pg_instance, "test_eviction_when_all_pools_are_persistent")
 
     manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args)
 
@@ -550,13 +519,7 @@ def test_connection_proxy_exception_handling(pg_instance: Dict[str, str]):
     """
     Test that ConnectionProxy properly handles exceptions and releases connections.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_proxy_exceptions",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
+    conn_args = _create_conn_args(pg_instance, "test_proxy_exceptions")
 
     manager = LRUConnectionPoolManager(max_db=1, base_conn_args=conn_args)
 
@@ -602,13 +565,7 @@ def test_concurrent_access_and_thread_safety(pg_instance: Dict[str, str]):
     """
     Test that the pool manager handles concurrent access safely from multiple threads.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_concurrent",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
+    conn_args = _create_conn_args(pg_instance, "test_concurrent")
 
     manager = LRUConnectionPoolManager(max_db=2, base_conn_args=conn_args)
     results = queue.Queue()
@@ -677,15 +634,8 @@ def test_commenter_cursor_functionality(pg_instance: Dict[str, str]):
     Test that CommenterCursor properly prepends SQL comments and handles ignore_query_metric parameter
     when used with LRUConnectionPoolManager.
     """
-    conn_args = PostgresConnectionArgs(
-        application_name="test_commenter_cursor",
-        user=pg_instance["username"],
-        password=pg_instance["password"],
-        host=pg_instance["host"],
-        port=int(pg_instance["port"]),
-    )
-
-    manager = LRUConnectionPoolManager(max_db=1, base_conn_args=conn_args)
+    conn_args = _create_conn_args(pg_instance, "test_commenter_cursor")
+    manager = LRUConnectionPoolManager(max_db=1, base_conn_args=conn_args, pool_config={"min_size": 1, "max_size": 1})
 
     try:
         dbname = pg_instance["dbname"]
