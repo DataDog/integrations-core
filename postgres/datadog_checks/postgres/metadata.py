@@ -532,7 +532,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "Error while executing query: %s. ",
                 e,
             )
-            return []                
+            return []
 
         row = cursor.fetchone()
         return row
@@ -589,8 +589,8 @@ class PostgresMetadata(DBMAsyncJob):
                 "Error while executing query: %s. ",
                 e,
             )
-            return []                
-        
+            return []
+
         rows = cursor.fetchall()
         table_info = [dict(row) for row in rows]
 
@@ -667,7 +667,7 @@ class PostgresMetadata(DBMAsyncJob):
                         "Error while executing query: %s. ",
                         e,
                     )
-                    return []                
+                    return []
 
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row is not None else 0
@@ -791,7 +791,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "Error while executing query: %s. ",
                 e,
             )
-            return []                
+            return []
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
@@ -830,7 +830,9 @@ class PostgresMetadata(DBMAsyncJob):
                                 query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
                             else:
                                 self._log.warning(
-                                    "unable to collect settings for extension %s in schema %s", extension, row['schemaname']
+                                    "unable to collect settings for extension %s in schema %s",
+                                    extension,
+                                    row['schemaname'],
                                 )
                         else:
                             self._log.warning("unable to collect settings for unknown extension %s", extension)
@@ -861,4 +863,4 @@ class PostgresMetadata(DBMAsyncJob):
                         "Error while executing query: %s. ",
                         e,
                     )
-                    return []                
+                    return []

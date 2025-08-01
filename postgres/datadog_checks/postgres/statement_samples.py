@@ -757,10 +757,9 @@ class PostgresStatementSamples(DBMAsyncJob):
                         return None
                     return result[0][0]
             except psycopg.errors.Error as e:
-                self._log.error(
-                    "Failed to collect execution plan for dbname=%s: %s", dbname, repr(e)
-                )
+                self._log.error("Failed to collect execution plan for dbname=%s: %s", dbname, repr(e))
                 return None
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(

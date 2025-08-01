@@ -209,7 +209,7 @@ class ExplainParameterizedQueries:
                         "Error while executing query: %s. ",
                         e,
                     )
-                    return []                
+                    return []
                 return cursor.fetchall()
 
     def _is_parameterized_query(self, statement: str) -> bool:

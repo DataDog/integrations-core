@@ -242,7 +242,7 @@ class PostgreSql(AgentCheck):
                         "Error while executing query: %s. ",
                         e,
                     )
-                    return []                
+                    return []
 
                 rows = cursor.fetchall()
                 return rows
@@ -432,7 +432,7 @@ class PostgreSql(AgentCheck):
                         "Error while executing query: %s. ",
                         e,
                     )
-                    return ""                
+                    return ""
 
                 role = cursor.fetchone()[0]
                 # value fetched for role is of <type 'bool'>
@@ -1012,7 +1012,7 @@ class PostgreSql(AgentCheck):
                 for setting in rows:
                     name, val = setting
                     self.pg_settings[name] = val
-        except (psycopg.Error) as err:
+        except psycopg.Error as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",
