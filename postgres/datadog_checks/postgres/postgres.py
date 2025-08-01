@@ -235,7 +235,15 @@ class PostgreSql(AgentCheck):
     def execute_query_raw(self, query, db):
         with db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute(query)
+                try:
+                    cursor.execute(query)
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []                
+
                 rows = cursor.fetchall()
                 return rows
 
@@ -277,7 +285,7 @@ class PostgreSql(AgentCheck):
             with conn.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 cursor.fetchall()
-        except psycopg.OperationalError as e:
+        except psycopg.Error as e:
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
             raise DatabaseHealthCheckError(err_msg)
@@ -417,7 +425,15 @@ class PostgreSql(AgentCheck):
     def _get_replication_role(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SELECT pg_is_in_recovery();')
+                try:
+                    cursor.execute('SELECT pg_is_in_recovery();')
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""                
+
                 role = cursor.fetchone()[0]
                 # value fetched for role is of <type 'bool'>
                 return "standby" if role else "master"
@@ -468,14 +484,28 @@ class PostgreSql(AgentCheck):
     def load_system_identifier(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SELECT system_identifier FROM pg_control_system();')
-                self.system_identifier = cursor.fetchone()[0]
+                try:
+                    cursor.execute('SELECT system_identifier FROM pg_control_system();')
+                    self.system_identifier = cursor.fetchone()[0]
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""
 
     def load_cluster_name(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SHOW cluster_name;')
-                self.cluster_name = cursor.fetchone()[0]
+                try:
+                    cursor.execute('SHOW cluster_name;')
+                    self.cluster_name = cursor.fetchone()[0]
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""
 
     def load_version(self):
         self.raw_version = self._version_utils.get_raw_version(self.db())
@@ -490,9 +520,16 @@ class PostgreSql(AgentCheck):
     def _get_wal_level(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SHOW wal_level;')
-                wal_level = cursor.fetchone()[0]
-                return wal_level
+                try:
+                    cursor.execute('SHOW wal_level;')
+                    wal_level = cursor.fetchone()[0]
+                    return wal_level
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""
 
     @property
     def reported_hostname(self):
@@ -597,6 +634,13 @@ class PostgreSql(AgentCheck):
             self._clean_state()
         except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
+        except psycopg.Error as e:
+            log_func(
+                "Error while executing query: %s. ",
+                e,
+            )
+
+            return None
 
         if not results:
             return None
@@ -822,7 +866,15 @@ class PostgreSql(AgentCheck):
             if self._config.collect_checksum_metrics and self.version >= V12:
                 # SHOW queries need manual cursor execution so can't be bundled with the metrics
                 with conn.cursor() as cursor:
-                    cursor.execute("SHOW data_checksums;")
+                    try:
+                        cursor.execute("SHOW data_checksums;")
+                    except psycopg.Error as e:
+                        self._log.error(
+                            "Error while executing query: %s. ",
+                            e,
+                        )
+                        return
+
                     enabled = cursor.fetchone()[0]
                     self.count(
                         "checksums.enabled",
@@ -919,7 +971,15 @@ class PostgreSql(AgentCheck):
         if self._config.query_timeout:
             # Set the statement_timeout for the session
             with conn.cursor() as cursor:
-                cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
+                try:
+                    cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
+                except psycopg.Error as e:
+                    self.log.warning(
+                        "Failed to set statement_timeout to %d: %s",
+                        self._config.query_timeout,
+                        e,
+                    )
+                    return None
         if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
             text_loader = SQLASCIITextLoader
             text_loader.encodings = self._config.query_encodings
@@ -952,7 +1012,7 @@ class PostgreSql(AgentCheck):
                 for setting in rows:
                     name, val = setting
                     self.pg_settings[name] = val
-        except (psycopg.DatabaseError, psycopg.OperationalError) as err:
+        except (psycopg.Error) as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",

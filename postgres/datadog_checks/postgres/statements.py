@@ -206,7 +206,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params=params, binary=binary)
             return cursor.fetchall()
-        except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
+        except (psycopg.Error) as e:
             # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
             # but the next time the query is run, it will retrieve the correct columns.
             self._log.warning("Failed to run query [%s] %s", query, params)

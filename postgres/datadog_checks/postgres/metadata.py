@@ -323,7 +323,14 @@ class PostgresMetadata(DBMAsyncJob):
 
                 # Get loaded extensions
                 cursor.execute(PG_EXTENSION_INFO_QUERY)
-                rows = cursor.fetchall()
+                try:
+                    rows = cursor.fetchall()
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []
 
                 self._log.debug("Loaded %s rows from pg_extension", len(rows))
                 return [dict(row) for row in rows]
@@ -518,7 +525,15 @@ class PostgresMetadata(DBMAsyncJob):
             encoding: str
             owner: str
         """
-        cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
+        try:
+            cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
+        except psycopg.Error as e:
+            self._log.error(
+                "Error while executing query: %s. ",
+                e,
+            )
+            return []                
+
         row = cursor.fetchone()
         return row
 
@@ -539,8 +554,16 @@ class PostgresMetadata(DBMAsyncJob):
         else:
             schema_query_ = schema_query_.format("")
 
-        cursor.execute(schema_query_)
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(schema_query_)
+            rows = cursor.fetchall()
+        except psycopg.Error as e:
+            self._log.error(
+                "Error while executing query: %s. ",
+                e,
+            )
+            return []
+
         schemas = []
         for row in rows:
             schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
@@ -556,10 +579,18 @@ class PostgresMetadata(DBMAsyncJob):
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
         filter = self._get_tables_filter()
-        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-            cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
-        else:
-            cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+        try:
+            if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
+            else:
+                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+        except psycopg.Error as e:
+            self._log.error(
+                "Error while executing query: %s. ",
+                e,
+            )
+            return []                
+        
         rows = cursor.fetchall()
         table_info = [dict(row) for row in rows]
 
@@ -629,7 +660,15 @@ class PostgresMetadata(DBMAsyncJob):
                 return table_data.get("index_scans", 0) + table_data.get("seq_scans", 0)
             else:
                 # get activity
-                cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
+                try:
+                    cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []                
+
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row is not None else 0
 
@@ -707,44 +746,52 @@ class PostgresMetadata(DBMAsyncJob):
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
 
         # Get indexes
-        cursor.execute(PG_INDEXES_QUERY.format(table_ids=table_ids))
-        rows = cursor.fetchall()
-        for row in rows:
-            # Partition indexes in some versions of Postgres have appended digits for each partition
-            table_name = table_name_lookup.get(str(row.get("table_id")))
-            while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
-                table_name = table_name[0:-1]
-            if tables.get(table_name) is not None:
-                tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
+        try:
+            cursor.execute(PG_INDEXES_QUERY.format(table_ids=table_ids))
 
-        # Get partitions
-        if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-            cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
             rows = cursor.fetchall()
             for row in rows:
-                tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
+                # Partition indexes in some versions of Postgres have appended digits for each partition
+                table_name = table_name_lookup.get(str(row.get("table_id")))
+                while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
+                    table_name = table_name[0:-1]
+                if tables.get(table_name) is not None:
+                    tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
 
-            cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
+            # Get partitions
+            if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
+                cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
+                rows = cursor.fetchall()
+                for row in rows:
+                    tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
+
+                cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
+                rows = cursor.fetchall()
+                for row in rows:
+                    table_name = table_name_lookup.get(str(row.get("id")))
+                    tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
+
+            # Get foreign keys
+            cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
             rows = cursor.fetchall()
             for row in rows:
                 table_name = table_name_lookup.get(str(row.get("id")))
-                tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
+                tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
 
-        # Get foreign keys
-        cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
-        rows = cursor.fetchall()
-        for row in rows:
-            table_name = table_name_lookup.get(str(row.get("id")))
-            tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
+            # Get columns
+            cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
+            rows = cursor.fetchall()
+            for row in rows:
+                table_name = table_name_lookup.get(str(row.get("id")))
+                tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
 
-        # Get columns
-        cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
-        rows = cursor.fetchall()
-        for row in rows:
-            table_name = table_name_lookup.get(str(row.get("id")))
-            tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
-
-        return tables.values()
+            return tables.values()
+        except psycopg.Error as e:
+            self._log.error(
+                "Error while executing query: %s. ",
+                e,
+            )
+            return []                
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
@@ -771,40 +818,47 @@ class PostgresMetadata(DBMAsyncJob):
     def _collect_postgres_settings(self):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                # Get loaded extensions
-                cursor.execute(PG_EXTENSIONS_QUERY)
-                rows = cursor.fetchall()
-                query = PG_SETTINGS_QUERY
-                for row in rows:
-                    extension = row['extname']
-                    if extension in PG_EXTENSION_LOADER_QUERY:
-                        if row['schemaname'] in ['pg_catalog', 'public']:
-                            query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                try:
+                    # Get loaded extensions
+                    cursor.execute(PG_EXTENSIONS_QUERY)
+                    rows = cursor.fetchall()
+                    query = PG_SETTINGS_QUERY
+                    for row in rows:
+                        extension = row['extname']
+                        if extension in PG_EXTENSION_LOADER_QUERY:
+                            if row['schemaname'] in ['pg_catalog', 'public']:
+                                query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                            else:
+                                self._log.warning(
+                                    "unable to collect settings for extension %s in schema %s", extension, row['schemaname']
+                                )
                         else:
-                            self._log.warning(
-                                "unable to collect settings for extension %s in schema %s", extension, row['schemaname']
-                            )
-                    else:
-                        self._log.warning("unable to collect settings for unknown extension %s", extension)
+                            self._log.warning("unable to collect settings for unknown extension %s", extension)
 
-                if self.pg_settings_ignored_patterns:
-                    query = query + " WHERE name NOT LIKE ALL(%s)"
+                    if self.pg_settings_ignored_patterns:
+                        query = query + " WHERE name NOT LIKE ALL(%s)"
 
-                self._log.debug(
-                    "Running query [%s] and patterns are %s",
-                    query,
-                    self.pg_settings_ignored_patterns,
-                )
-                self._time_since_last_settings_query = time.time()
-                cursor.execute(query, (self.pg_settings_ignored_patterns,))
-                # pg3 returns a set of results for each statement in the multiple statement query
-                # We want to retrieve the last one that actually has the settings results
-                rows = []
-                has_more_results = True
-                while has_more_results:
-                    if cursor.pgresult.status == psycopg.pq.ExecStatus.TUPLES_OK:
-                        rows = cursor.fetchall()
-                    has_more_results = cursor.nextset()
-                self._log.debug("Loaded %s rows from pg_settings", rows)
-                self._log.debug("Loaded %s rows from pg_settings", len(rows))
-                return rows
+                    self._log.debug(
+                        "Running query [%s] and patterns are %s",
+                        query,
+                        self.pg_settings_ignored_patterns,
+                    )
+                    self._time_since_last_settings_query = time.time()
+                    cursor.execute(query, (self.pg_settings_ignored_patterns,))
+                    # pg3 returns a set of results for each statement in the multiple statement query
+                    # We want to retrieve the last one that actually has the settings results
+                    rows = []
+                    has_more_results = True
+                    while has_more_results:
+                        if cursor.pgresult.status == psycopg.pq.ExecStatus.TUPLES_OK:
+                            rows = cursor.fetchall()
+                        has_more_results = cursor.nextset()
+                    self._log.debug("Loaded %s rows from pg_settings", rows)
+                    self._log.debug("Loaded %s rows from pg_settings", len(rows))
+                    return rows
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []                
