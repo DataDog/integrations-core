@@ -27,13 +27,13 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 **Note**: To install Database Monitoring for MongoDB, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
 
-Most low-level metrics (uptime, storage size etc.) need to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
+Most low-level metrics (uptime, storage size etc.) need to be collected on every `mongod` node. Other higher-level metrics (collection/index statistics, etc.) should be collected only once. For these reasons, the way you configure the Agents depends on how your MongoDB cluster is deployed.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Standalone" xxx -->
 #### Standalone
 
-To configure this integration for a single node MongoDB deployment:
+To configure this integration for a single-node MongoDB deployment:
 
 ##### Prepare MongoDB
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
@@ -61,7 +61,7 @@ db.createUser({
 ```
 
 ##### Configure the agents
-You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
+You only need a single agent, preferably running on the same node, to collect all the available MongoDB metrics. See below for configuration options.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Replica Set" xxx -->
 #### Replica set

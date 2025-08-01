@@ -1,0 +1,32 @@
+{
+    "version": 2,
+    "created_at": "2025-07-15",
+    "last_updated_at": "2025-07-15",
+    "title": "High Fallback Failure Rate Detected (>15%)",
+    "description": "This monitor alerts when the percentage of failed fallback requests from the primary model to the fallback model exceeds 15% in the last 15 minutes.",
+    "definition": {
+        "id": 178027992,
+        "name": "High Fallback Failure Rate Detected (>15%)",
+        "type": "query alert",
+        "query": "sum(last_15m):sum:litellm.deployment.failed_fallbacks.count{*} by {host,requested_model,fallback_model}.as_count() + (sum:litellm.deployment.successful_fallbacks.count{*} by {host,requested_model,fallback_model}.as_count() + sum:litellm.deployment.failed_fallbacks.count{*} by {host,requested_model,fallback_model}.as_count()) > 15",
+        "message": "{{#is_alert}}\n\nThe percentage of failed fallback requests from the primary model to the fallback model has exceeded {{threshold}}% in the last 15 minutes. Details:\n\nhost:{{host.name}}\nrequested_model:{{requested_model.name}}\nfallback_model:{{fallback_model.name}}\n\n{{/is_alert}}\n\n{{#is_alert_recovery}}\n\nThe fallback failure rate has returned to normal levels (below {{threshold}}%).\n\n{{/is_alert_recovery}}",
+        "tags": [],
+        "options": {
+            "thresholds": {
+                "critical": 15
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:litellm"
+    ]
+}

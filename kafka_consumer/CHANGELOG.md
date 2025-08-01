@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.1 / 2025-07-25
+
+***Fixed***:
+
+* Lowercase Kafka cluster in data streams messages feature. ([#20842](https://github.com/DataDog/integrations-core/pull/20842))
+
 ## 6.6.0 / 2025-07-10
 
 ***Added***:

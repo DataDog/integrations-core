@@ -20,7 +20,7 @@ The `container` check requires some folders to be mounted to allow for automatic
 
 ### Configuration
 
-The `container` check does not expose any specific configuration settings. To customize common fields or to force the activation of the `container` check, follow these steps:
+The `container` check exposes specific configuration settings to emit extended memory metrics in addition to standard set. To customize common fields or to force the activation of the `container` check, follow these steps:
 
 1. Create the `container.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
 
@@ -38,6 +38,8 @@ Some metrics may not be available depending on your environment (Linux / Windows
 ### Metrics
 
 See [metadata.csv][3] for a list of metrics provided by this integration.
+
+If you need extended container memory metrics `extended_memory_metrics` has to be set to `true`. It will enable following metrics: active_anon, inactive_anon, active_file, inactive_file, unevictable, shmem, file_mapped, file_dirty, file_writeback, page_tables, refault_anon, refault_file
 
 ## Troubleshooting
 

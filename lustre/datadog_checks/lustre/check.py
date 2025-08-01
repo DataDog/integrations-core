@@ -4,6 +4,7 @@
 import re
 import subprocess
 from datetime import datetime, timezone
+from ipaddress import ip_address
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
@@ -36,7 +37,7 @@ def _get_stat_type(suffix: str, unit: str) -> str:
         return 'gauge'
 
 
-def _handle_ip_in_param(parts: List[str]) -> List[str]:
+def _handle_ip_in_param(parts: List[str]) -> Tuple[List[str], bool]:
     """
     Merge parameter parts corresponding to an IP address.
 
@@ -44,12 +45,16 @@ def _handle_ip_in_param(parts: List[str]) -> List[str]:
         ['some','172','0','0','12@tcp','param']
     =>  ['some','172.0.0.12@tcp', 'param']
     """
-    match_index = 0
-    for i, part in enumerate(parts):
-        if '@' in part:
-            match_index = i
-    new_part = ".".join(parts[match_index - 3 : match_index + 1])
-    return [*parts[: match_index - 3], new_part, *parts[match_index + 1 :]]
+    match_indexes = [i for i in range(len(parts)) if '@' in parts[i]]
+    if len(match_indexes) != 1 or match_indexes[0] < 3:
+        return [], False
+    index = match_indexes[0]
+    new_part = ".".join(parts[index - 3 : index + 1])
+    try:
+        ip_address(new_part.split('@')[0])
+    except ValueError:
+        return [], False
+    return [*parts[: index - 3], new_part, *parts[index + 1 :]], True
 
 
 class LustreCheck(AgentCheck):
@@ -160,6 +165,7 @@ class LustreCheck(AgentCheck):
                     filesystem = match.group(0)
                     filesystems.append(filesystem)
             self.filesystems = list(set(filesystems))  # Remove duplicates
+            assert self.filesystems, f'Nothing matched regex `{filesystem_regex}` in params {lines}'
             self.log.debug('Found filesystem(s): %s', self.filesystems)
         except Exception as e:
             self.log.error('Failed to find filesystems: %s', e)
@@ -194,6 +200,11 @@ class LustreCheck(AgentCheck):
         try:
             self.log.debug('Running command: %s', cmd)
             output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
+            if not output.returncode == 0 and output.stderr:
+                self.log.debug(
+                    'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
+                )
+                return ''
             if output.stdout is None:
                 self.log.debug(
                     'Command %s returned no output, check if dd-agent is running\
@@ -218,12 +229,12 @@ class LustreCheck(AgentCheck):
             device_name = jobstats_param.split('.')[1]  # For example: lustre-MDT0000
             if not any(device_name.startswith(fs) for fs in filesystems):
                 continue
-            jobstats_metrics = self._get_jobstats_metrics(jobstats_param)['job_stats']
+            jobstats_metrics = self._get_jobstats_metrics(jobstats_param).get('job_stats')
             if jobstats_metrics is None:
                 self.log.debug('No jobstats metrics found for %s', jobstats_param)
                 continue
             for job in jobstats_metrics:
-                job_id = job['job_id']
+                job_id = job.get('job_id', "unknown")
                 tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
                 for metric_name, metric_values in job.items():
                     if not isinstance(metric_values, dict):
@@ -265,15 +276,19 @@ class LustreCheck(AgentCheck):
         jobstats_output = self._run_command('lctl', 'get_param', '-ny', jobstats_param, sudo=True)
         try:
             return yaml.safe_load(jobstats_output) or {}
-        except KeyError:
-            self.log.debug('No jobstats metrics found for %s', jobstats_param)
+        except Exception as e:
+            self.log.debug('Could not get data for "%s", caught exception: %s', jobstats_param, e)
             return {}
 
     def submit_lnet_stats_metrics(self) -> None:
         '''
         Submit the lnet stats metrics.
         '''
-        lnet_metrics = self._get_lnet_metrics('stats')['statistics']
+        lnet_metrics = self._get_lnet_metrics('stats')
+        if 'statistics' not in lnet_metrics:
+            self.log.debug('Could not find `statistics` property in the output of lnet stats. Output: %s', lnet_metrics)
+            return
+        lnet_metrics = lnet_metrics['statistics']
         for metric in lnet_metrics:
             if metric.endswith('_count') or metric == 'errors':
                 metric_type = 'count'
@@ -285,7 +300,11 @@ class LustreCheck(AgentCheck):
         '''
         Submit the lnet local ni metrics.
         '''
-        lnet_local_stats = self._get_lnet_metrics('net')['net']
+        lnet_local_stats = self._get_lnet_metrics('net')
+        if 'net' not in lnet_local_stats:
+            self.log.debug('Could not find `net` property in the output of lnet stats. Output: %s', lnet_local_stats)
+            return
+        lnet_local_stats = lnet_local_stats['net']
         for net in lnet_local_stats:
             net_type = net.get('net type')
             for ni in net.get('local NI(s)', []):
@@ -302,7 +321,11 @@ class LustreCheck(AgentCheck):
         '''
         Submit the lnet peer ni metrics.
         '''
-        lnet_peer_stats = self._get_lnet_metrics('peer')['peer']
+        lnet_peer_stats = self._get_lnet_metrics('peer')
+        if 'peer' not in lnet_peer_stats:
+            self.log.debug('Could not find `peer` property in the output of lnet stats. Output: %s', lnet_peer_stats)
+            return
+        lnet_peer_stats = lnet_peer_stats['peer']
         for peer in lnet_peer_stats:
             nid = peer.get('primary nid')
             for ni in peer.get('peer ni', []):
@@ -347,8 +370,8 @@ class LustreCheck(AgentCheck):
         lnet_stats = self._run_command('lnetctl', stats_type, 'show', '-v', self.lnetctl_verbosity, sudo=True)
         try:
             return yaml.safe_load(lnet_stats) or {}
-        except (KeyError, ValueError):
-            self.log.debug('No lnet stats found')
+        except Exception as e:
+            self.log.debug('Could not get lnet %s, caught exception: %s', stats_type, e)
             return {}
 
     def submit_param_data(self, params: Set[LustreParam], filesystems: List[str]) -> None:
@@ -400,32 +423,36 @@ class LustreCheck(AgentCheck):
             else:
                 self.log.debug('Unexpected metric value for %s.%s: %s', name, suffix, metric_value)
 
-    def _extract_tags_from_param(self, param_regex: str, param_name: str, wildcards: Tuple[str]) -> List[str]:
+    def _extract_tags_from_param(self, param_regex: str, param_name: str, wildcards: Tuple[str, ...]) -> List[str]:
         '''
         Extract tags from the parameter name based on the regex and wildcard meanings.
         '''
+        if not wildcards:
+            return []
         tags = []
-        if wildcards:
-            regex_parts = param_regex.split('.')
-            param_parts = param_name.split('.')
-            wildcard_number = 0
-            if not len(regex_parts) == len(param_parts):
-                # Edge case: mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats
-                if any("@" in part for part in param_parts):
-                    # We need to reconstruct the address
-                    param_parts = _handle_ip_in_param(param_parts)
-                else:
-                    self.log.debug('Parameter name %s does not match regex %s', param_name, param_regex)
+        regex_parts = param_regex.split('.')
+        param_parts = param_name.split('.')
+        wildcard_number = 0
+        if not len(regex_parts) == len(param_parts):
+            # Edge case: mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats
+            if len(regex_parts) + 3 == len(param_parts):
+                # We need to reconstruct the address
+                param_parts, is_valid_ip = _handle_ip_in_param(param_parts)
+                if not is_valid_ip:
+                    self.log.debug("Skipping tags for parameter %s", param_name)
+                    return []
+            else:
+                self.log.debug('Parameter name %s does not match regex %s', param_name, param_regex)
+                return tags
+        for part_number, part in enumerate(regex_parts):
+            if part == '*':
+                if wildcard_number >= len(wildcards):
+                    self.log.debug(
+                        'Found %s wildcards, which exceeds available wildcard tags %s', wildcard_number, wildcards
+                    )
                     return tags
-            for part_number, part in enumerate(regex_parts):
-                if part == '*':
-                    if wildcard_number >= len(wildcards):
-                        self.log.debug(
-                            'Found %s wildcards, which exceeds available wildcard tags %s', wildcard_number, wildcards
-                        )
-                        return tags
-                    tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
-                    wildcard_number += 1
+                tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
+                wildcard_number += 1
         return tags
 
     def _parse_stats(self, raw_stats: str) -> Dict[str, Dict[str, Union[int, str]]]:

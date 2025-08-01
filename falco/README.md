@@ -97,6 +97,15 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
 <!-- xxz tab xxx -->
 <!-- xxx tab "Agent" xxx -->
 ##### Agent
+Update the settings in the configuration file (`falco.yaml`) as shown below:
+
+  ```yaml
+  json_output: true
+  file_output:
+    enabled: true
+    filename: <PATH TO LOGS>
+  ```
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -109,7 +118,7 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
    logs:
      - type: file
        path: <PATH TO LOGS>
-       service: myservice
+       service: <SERVICE NAME>
        source: falco
    ```
 

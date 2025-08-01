@@ -44,12 +44,12 @@ jobs:
     with:
       job-name: "${{ matrix.name }}"
       target: "${{ matrix.target }}"
+      target-env: "${{ matrix.target-env }}"
       platform: "${{ matrix.platform }}"
       runner: "${{ toJson(matrix.runner) }}"
       repo: "${{ inputs.repo }}"
 
       # Options
-      standard: true
       # We never test Python in integrations-core, but some partners may want to keep testing it
       # in marketplace and integrations-extras.
       test-py2: ${{ inputs.repo != 'core' && (!matrix.python-support || contains(matrix.python-support, '2')) }}

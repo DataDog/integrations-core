@@ -71,6 +71,10 @@ class TestKubeAPIServerMetrics:
         'flowcontrol_request_concurrency_limit',
         'flowcontrol_current_inqueue_requests',
         'flowcontrol_dispatched_requests_total',
+        'flowcontrol_current_executing_seats',
+        'flowcontrol_nominal_limit_seats',
+        'flowcontrol_request_wait_duration_seconds.sum',
+        'flowcontrol_request_wait_duration_seconds.count',
         'etcd_requests_total',
         'etcd_request_errors_total',
     ]

@@ -175,6 +175,21 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_downstream_rq_tx_reset': 'http.downstream_rq_tx_reset',
     'envoy_http_downstream_rq_ws_on_non_ws_route': 'http.downstream_rq_ws_on_non_ws_route',
     'envoy_http_downstream_rq_xx': 'http.downstream_rq_xx',
+    'envoy_http_ext_proc_streams_started': 'http.ext_proc.streams_started',
+    'envoy_http_ext_proc_stream_msgs_sent': 'http.ext_proc.stream_msgs_sent',
+    'envoy_http_ext_proc_stream_msgs_received': 'http.ext_proc.stream_msgs_received',
+    'envoy_http_ext_proc_spurious_msgs_received': 'http.ext_proc.spurious_msgs_received',
+    'envoy_http_ext_proc_streams_closed': 'http.ext_proc.streams_closed',
+    'envoy_http_ext_proc_streams_failed': 'http.ext_proc.streams_failed',
+    'envoy_http_ext_proc_failure_mode_allowed': 'http.ext_proc.failure_mode_allowed',
+    'envoy_http_ext_proc_message_timeouts': 'http.ext_proc.message_timeouts',
+    'envoy_http_ext_proc_rejected_header_mutations': 'http.ext_proc.rejected_header_mutations',
+    'envoy_http_ext_proc_override_message_timeout_received': 'http.ext_proc.override_message_timeout_received',
+    'envoy_http_ext_proc_override_message_timeout_ignored': 'http.ext_proc.override_message_timeout_ignored',
+    'envoy_http_ext_proc_clear_route_cache_ignored': 'http.ext_proc.clear_route_cache_ignored',
+    'envoy_http_ext_proc_clear_route_cache_disabled': 'http.ext_proc.clear_route_cache_disabled',
+    'envoy_http_ext_proc_clear_route_cache_upstream_ignored': 'http.ext_proc.clear_route_cache_upstream_ignored',
+    'envoy_http_ext_proc_send_immediate_resp_upstream_ignored': 'http.ext_proc.send_immediate_resp_upstream_ignored',
     'envoy_http_no_cluster': 'http.no_cluster',
     'envoy_http_no_route': 'http.no_route',
     'envoy_http_passthrough_internal_redirect_bad_location': 'http.passthrough_internal_redirect_bad_location',
@@ -2307,6 +2322,126 @@ METRICS = {
             (),
         ),
         'method': 'histogram',
+    },
+    'http.ext_proc.streams_started': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.stream_msgs_sent': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.stream_msgs_received': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.spurious_msgs_received': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.streams_closed': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.streams_failed': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.failure_mode_allowed': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.message_timeouts': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.rejected_header_mutations': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.override_message_timeout_received': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.override_message_timeout_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.clear_route_cache_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.clear_route_cache_disabled': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.clear_route_cache_upstream_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.ext_proc.send_immediate_resp_upstream_ignored': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'http.rs_too_large': {
         'tags': (

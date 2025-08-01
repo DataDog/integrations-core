@@ -139,6 +139,8 @@ def test_parse_get_version():
         assert v.version == '5.5.12'
         assert v.flavor == 'MySQL'
         assert v.build == 'log'
+        assert v.version_compatible(compat_version=(5, 4, 3))
+        assert not v.version_compatible(compat_version=(8, 0, 43))
 
 
 @pytest.mark.parametrize(

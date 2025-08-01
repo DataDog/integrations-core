@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 12.2.0 / 2025-07-31
+
+***Added***:
+
+* Run integration tests in parallel for single integrations ([#20816](https://github.com/DataDog/integrations-core/pull/20816))
+
 ## 12.1.0 / 2025-07-15
 
 ***Added***:

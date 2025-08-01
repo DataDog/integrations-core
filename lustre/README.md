@@ -126,10 +126,10 @@ For changelog collection on client nodes, ensure changelog users are registered:
 
 ```bash
 # Register a changelog user
-lctl changelog_register
+sudo lctl changelog_register
 
 # List registered changelog users  
-lctl changelog_users <filesystem>
+sudo lctl get_param mdd.*.changelog_users
 ```
 
 Need help? Contact [Datadog support][8].

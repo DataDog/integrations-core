@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+
 from .utils import _get_superconn
 
 
@@ -14,8 +16,8 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
     check = integration_check(pg_instance)
 
     with check.db() as conn:
-        conn.execute("SET client_encoding TO 'UTF8'")
-        with conn.cursor() as cursor:
+        # verify CommenterCursor and CommenterDictCursor prepend the query with /* service='datadog-agent' */
+        with conn.cursor(cursor_factory=CommenterCursor) as cursor:
             cursor.execute(
                 'SELECT generate_series(1, 10) AS number',
                 ignore_query_metric=ignore,
@@ -24,7 +26,7 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
             assert isinstance(result[0], int)
         __check_prepand_sql_comment(pg_instance, ignore)
 
-        with conn.cursor() as cursor:
+        with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
             cursor.execute(
                 'SELECT generate_series(1, 10) AS number',
                 ignore_query_metric=ignore,
@@ -40,7 +42,6 @@ def __check_prepand_sql_comment(pg_instance, ignore):
     # collect query_text from pg_stat_activity
     # assert /* service='datadog-agent' */ is present in the query
     super_conn = _get_superconn(pg_instance)
-    super_conn.execute("SET client_encoding TO 'UTF8'")
     with super_conn.cursor() as cursor:
         cursor.execute(
             (

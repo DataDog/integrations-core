@@ -60,6 +60,8 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str] = None
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
+    collect_tasks: Optional[bool] = None
+    collected_task_types: Optional[tuple[str, ...]] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None

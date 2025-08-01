@@ -24,8 +24,8 @@ IGNORED_LNET_GROUPS = {
 @dataclass(frozen=True)
 class LustreParam:
     regex: str
-    node_types: Tuple[str]
-    wildcards: Tuple[str] = ()
+    node_types: Tuple[str, ...]
+    wildcards: Tuple[str, ...] = ()
     prefix: str = ''
     fixture: str = ''
 
@@ -320,7 +320,7 @@ EXTRA_STATS = [
         fixture='mds_mgs_export_stats.txt',
     ),
     # OSS (Object Storage Server) params
-    LustreParam(regex='ost.OSS.oss.stats', node_types=('oss',), prefix='oss', fixture='oss_ost_stats.txt'),
+    LustreParam(regex='ost.OSS.ost.stats', node_types=('oss',), prefix='oss', fixture='oss_ost_stats.txt'),
     LustreParam(
         regex='osc.*.stats',
         node_types=('client',),

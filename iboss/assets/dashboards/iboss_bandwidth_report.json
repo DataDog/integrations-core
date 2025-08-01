@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Bandwidth Report",
+    "title": "iboss - Bandwidth Metrics Report",
     "description": "This dashboard provides a comprehensive analysis of network bandwidth consumption across domains, applications, countries, locations, protocols, and users.",
     "widgets": [
         {
@@ -41,6 +41,27 @@
                 "y": 0,
                 "width": 8,
                 "height": 3
+            }
+        },
+        {
+            "id": 2477081884623788,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using metrics. Please follow the Configuration steps [here](/integrations/iboss) to enable metrics collection. Ensure the `Collect bandwidth metrics` option is enabled to collect these metrics.\n- All bandwidth metrics are collected once per day, once the complete daily iboss report is available. Please ensure to set the dashboard time range to at least `Past 1 Day` to view the data.\n- Filters: \n  - `reporter_node` applies to all widgets\n  - `domain_name` applies to widgets in `Domains` group\n  - `country_name` applies to widgets in `Counties` group\n  - `source_location` applies to widgets in `Locations` group\n  - `protocol` applies to widgets in `Protocols` group\n  - `user_name` applies to widgets in `Users` group",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 4
             }
         },
         {
@@ -97,17 +118,17 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "sum:iboss.bandwidth.domains.total_bytes{*}.rollup(sum, 300)"
+                                "query": "sum:iboss.bandwidth.domains.total_bytes{$reporter_node}.rollup(sum, 300)"
                             },
                             {
                                 "data_source": "metrics",
                                 "name": "query2",
-                                "query": "sum:iboss.bandwidth.domains.total_upstream_bytes{*}.rollup(sum, 300)"
+                                "query": "sum:iboss.bandwidth.domains.total_upstream_bytes{$reporter_node}.rollup(sum, 300)"
                             },
                             {
                                 "data_source": "metrics",
                                 "name": "query3",
-                                "query": "sum:iboss.bandwidth.domains.total_downstream_bytes{*}.rollup(sum, 300)"
+                                "query": "sum:iboss.bandwidth.domains.total_downstream_bytes{$reporter_node}.rollup(sum, 300)"
                             }
                         ],
                         "response_format": "timeseries",
@@ -123,7 +144,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 7,
                 "width": 12,
                 "height": 4
             }
@@ -150,7 +171,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.domains.total_bytes{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_bytes{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -206,7 +227,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.domains.total_downstream_bytes{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_downstream_bytes{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -262,7 +283,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.domains.total_upstream_bytes{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_upstream_bytes{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -318,31 +339,31 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.domains.total_bytes{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_bytes{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.bandwidth.domains.total_upstream_bytes{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_upstream_bytes{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.bandwidth.domains.total_downstream_bytes{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_downstream_bytes{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.bandwidth.domains.total_packets{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_packets{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:iboss.bandwidth.domains.total_connections{*} by {domain_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.domains.total_connections{$domain,$reporter_node} by {domain_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -464,7 +485,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 7,
+                "y": 11,
                 "width": 12,
                 "height": 9
             }
@@ -491,7 +512,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.countries.total_bytes{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_bytes{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -547,7 +568,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.countries.total_downstream_bytes{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_downstream_bytes{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -603,7 +624,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.countries.total_upstream_bytes{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_upstream_bytes{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -659,31 +680,31 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.countries.total_bytes{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_bytes{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.bandwidth.countries.total_upstream_bytes{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_upstream_bytes{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.bandwidth.countries.total_downstream_bytes{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_downstream_bytes{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.bandwidth.countries.total_packets{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_packets{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:iboss.bandwidth.countries.total_connections{*} by {country_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.countries.total_connections{$country_name,$reporter_node} by {country_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -805,7 +826,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 20,
                 "width": 12,
                 "height": 9
             }
@@ -832,7 +853,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.location.total_bytes{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_bytes{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -888,7 +909,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.location.total_downstream_bytes{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_downstream_bytes{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -944,7 +965,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.location.total_upstream_bytes{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_upstream_bytes{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1000,31 +1021,31 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.location.total_bytes{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_bytes{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.bandwidth.location.total_upstream_bytes{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_upstream_bytes{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.bandwidth.location.total_downstream_bytes{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_downstream_bytes{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.bandwidth.location.total_packets{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_packets{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:iboss.bandwidth.location.total_connections{*} by {source_location}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.location.total_connections{$source_location,$reporter_node} by {source_location}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1146,7 +1167,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 25,
+                "y": 29,
                 "width": 12,
                 "height": 9
             }
@@ -1173,7 +1194,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.protocol.total_bytes{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_bytes{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1229,7 +1250,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.protocol.total_downstream_bytes{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_downstream_bytes{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1285,7 +1306,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.protocol.total_upstream_bytes{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_upstream_bytes{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1341,31 +1362,31 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.protocol.total_bytes{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_bytes{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.bandwidth.protocol.total_upstream_bytes{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_upstream_bytes{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.bandwidth.protocol.total_downstream_bytes{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_downstream_bytes{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.bandwidth.protocol.total_packets{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_packets{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:iboss.bandwidth.protocol.total_connections{*} by {protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_connections{$protocol,$reporter_node} by {protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1496,31 +1517,31 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.protocol.total_bytes{*} by {asset_name, asset_id, protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_bytes{$protocol,$reporter_node} by {asset_name,asset_id,protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.bandwidth.protocol.total_upstream_bytes{*} by {asset_name, asset_id, protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_upstream_bytes{$protocol,$reporter_node} by {asset_name,asset_id,protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.bandwidth.protocol.total_downstream_bytes{*} by {asset_name, asset_id, protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_downstream_bytes{$protocol,$reporter_node} by {asset_name,asset_id,protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.bandwidth.protocol.total_packets{*} by {asset_name, asset_id, protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_packets{$protocol,$reporter_node} by {asset_name,asset_id,protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:iboss.bandwidth.protocol.total_connections{*} by {asset_name, asset_id, protocol}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.protocol.total_connections{$protocol,$reporter_node} by {asset_name,asset_id,protocol}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1642,7 +1663,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 34,
+                "y": 38,
                 "width": 12,
                 "height": 13
             }
@@ -1669,7 +1690,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.users.total_bytes{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_bytes{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1725,7 +1746,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.users.total_downstream_bytes{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_downstream_bytes{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1781,7 +1802,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.users.total_upstream_bytes{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_upstream_bytes{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1837,31 +1858,31 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.bandwidth.users.total_bytes{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_bytes{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.bandwidth.users.total_upstream_bytes{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_upstream_bytes{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.bandwidth.users.total_downstream_bytes{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_downstream_bytes{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.bandwidth.users.total_packets{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_packets{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:iboss.bandwidth.users.total_connections{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.bandwidth.users.total_connections{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1983,13 +2004,50 @@
             },
             "layout": {
                 "x": 0,
-                "y": 47,
+                "y": 51,
                 "width": 12,
                 "height": 9
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "name": "reporter_node",
+            "prefix": "reporting_node_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "domain",
+            "prefix": "domain_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "country_name",
+            "prefix": "country_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "source_location",
+            "prefix": "source_location",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "protocol",
+            "prefix": "protocol",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user",
+            "prefix": "user_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
     "layout_type": "ordered",
     "notify_list": [],
     "reflow_type": "fixed"

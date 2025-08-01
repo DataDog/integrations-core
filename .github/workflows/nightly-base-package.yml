@@ -24,7 +24,6 @@ jobs:
       repo: core
 
       # Options
-      standard: true
       minimum-base-package: true
       test-py2: true
     secrets: inherit

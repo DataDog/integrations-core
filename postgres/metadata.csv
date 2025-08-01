@@ -73,6 +73,8 @@ postgresql.function.self_time,rate,,,,"Enabled with `collect_function_metrics`. 
 postgresql.function.total_time,rate,,,,"Enabled with `collect_function_metrics`. Total time spent in this function and all other functions called by it. This metric is tagged with db, schema, function.",0,postgres,postgres_function_total_time,,
 postgresql.heap_blocks_hit,gauge,,hit,second,"Enabled with `relations`. The number of buffer hits in this table. This metric is tagged with db, schema, table.",0,postgres,heap blks hit,,
 postgresql.heap_blocks_read,gauge,,block,second,"Enabled with `relations`. The number of disk blocks read from this table. This metric is tagged with db, schema, table.",0,postgres,heap blks read,,
+postgresql.index.index_blocks_hit,gauge,,hit,second,"Enabled with `relations`. The number of buffer hits for a specific index. This metric is tagged with db, schema, table, index.",0,postgres,index blks hit,,
+postgresql.index.index_blocks_read,gauge,,block,second,"Enabled with `relations`. The number of disk blocks for a specific index. This metric is tagged with db, schema, table, index.",0,postgres,index blks read,,
 postgresql.index_bloat,gauge,,percent,,"Enabled with `collect_bloat_metrics`. The estimated percentage of index bloat. This metric is tagged with db, schema, table, index.",0,postgres,ibloat,,
 postgresql.index_blocks_hit,gauge,,hit,second,"Enabled with `relations`. The number of buffer hits in all indexes on this table. This metric is tagged with db, schema, table.",0,postgres,idx blks hit,,
 postgresql.index_blocks_read,gauge,,block,second,"Enabled with `relations`. The number of disk blocks read from all indexes on this table. This metric is tagged with db, schema, table.",0,postgres,idx blks read,,

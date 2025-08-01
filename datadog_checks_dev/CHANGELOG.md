@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 35.1.3 / 2025-07-30
+
+***Fixed***:
+
+* Update required owner of logs files ([#20817](https://github.com/DataDog/integrations-core/pull/20817))
+* Fail config validation if templates are missing. ([#20832](https://github.com/DataDog/integrations-core/pull/20832))
+
 ## 35.1.2 / 2025-07-14
 
 ***Fixed***:

@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Zero Trust Report",
+    "title": "iboss - Zero Trust Metrics Report",
     "description": "This dashboard provides a comprehensive view of Zero Trust activity across users, assets, and resources.",
     "widgets": [
         {
@@ -44,6 +44,27 @@
             }
         },
         {
+            "id": 8456360545644742,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using metrics. Please follow the Configuration steps [here](/integrations/iboss) to enable metrics collection. Ensure the `Collect Zero Trust metrics` option is enabled to collect these metrics.\n- All zero trust metrics are collected once per day, once the complete daily iboss report is available. Please ensure to set the dashboard time range to at least `Past 1 Day` to view the data.",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 7137137324922314,
             "definition": {
                 "title": "Overview",
@@ -66,7 +87,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.zero_trust.transactions{*}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.transactions{$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -129,7 +150,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.zero_trust.transactions{*}.rollup(sum, 300)"
+                                            "query": "sum:iboss.zero_trust.transactions{$reporter_node}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -164,7 +185,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.zero_trust.traffic{*}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.traffic{$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -233,7 +254,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.zero_trust.traffic{*}.rollup(sum, 300)"
+                                            "query": "sum:iboss.zero_trust.traffic{$reporter_node}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -259,9 +280,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 12,
-                "height": 1
+                "height": 7
             }
         },
         {
@@ -301,7 +322,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.zero_trust.total_user_count{*}.rollup(avg, 300)"
+                                            "query": "avg:iboss.zero_trust.total_user_count{$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -335,19 +356,19 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.zero_trust.user.average_confidence_score{*} by {user_id}.rollup(avg, 300)",
+                                            "query": "avg:iboss.zero_trust.user.average_confidence_score{$reporter_node} by {user_id}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.zero_trust.user.transactions{*} by {user_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.user.transactions{$reporter_node} by {user_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.zero_trust.user.traffic{*} by {user_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.user.traffic{$reporter_node} by {user_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -421,7 +442,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 12,
                 "width": 12,
                 "height": 7
             }
@@ -463,7 +484,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.zero_trust.total_asset_count{*}.rollup(avg, 300)"
+                                            "query": "avg:iboss.zero_trust.total_asset_count{$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -497,19 +518,19 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.zero_trust.asset.average_confidence_score{*} by {asset_name,asset_type,asset_id}.rollup(avg, 300)",
+                                            "query": "avg:iboss.zero_trust.asset.average_confidence_score{$reporter_node} by {asset_name,asset_type,asset_id}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.zero_trust.asset.transactions{*} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.asset.transactions{$reporter_node} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.zero_trust.asset.traffic{*} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.asset.traffic{$reporter_node} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -583,7 +604,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 19,
                 "width": 12,
                 "height": 7
             }
@@ -625,7 +646,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.zero_trust.total_resource_count{*}.rollup(avg, 300)"
+                                            "query": "avg:iboss.zero_trust.total_resource_count{$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -659,19 +680,19 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.zero_trust.resource.average_confidence_score{*} by {resource_id,resource_name}.rollup(avg, 300)",
+                                            "query": "avg:iboss.zero_trust.resource.average_confidence_score{$reporter_node} by {resource_id,resource_name}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.zero_trust.resource.transactions{*} by {resource_id,resource_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource.transactions{$reporter_node} by {resource_id,resource_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.zero_trust.resource.traffic{*} by {resource_id,resource_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource.traffic{$reporter_node} by {resource_id,resource_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -745,7 +766,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 26,
                 "width": 12,
                 "height": 8
             }
@@ -772,13 +793,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.zero_trust.resource_location.transactions{*} by {resource_location_type}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource_location.transactions{$reporter_node} by {resource_location_type}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.zero_trust.resource_location.traffic{*} by {resource_location_type}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource_location.traffic{$reporter_node} by {resource_location_type}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -849,13 +870,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.zero_trust.policy_action.transactions{*} by {policy_action}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.policy_action.transactions{$reporter_node} by {policy_action}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.zero_trust.policy_action.traffic{*} by {policy_action}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.policy_action.traffic{$reporter_node} by {policy_action}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -917,7 +938,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 26,
+                "y": 34,
                 "width": 12,
                 "height": 5
             }
@@ -944,13 +965,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.zero_trust.resource_type.transactions{*} by {resource_type_name,resource_type_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource_type.transactions{$reporter_node} by {resource_type_name,resource_type_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.zero_trust.resource_type.traffic{*} by {resource_type_name,resource_type_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource_type.traffic{$reporter_node} by {resource_type_name,resource_type_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1021,13 +1042,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.zero_trust.resource_category.transactions{*} by {resource_category_name,resource_category_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource_category.transactions{$reporter_node} by {resource_category_name,resource_category_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.zero_trust.resource_category.traffic{*} by {resource_category_name,resource_category_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.zero_trust.resource_category.traffic{$reporter_node} by {resource_category_name,resource_category_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1089,13 +1110,20 @@
             },
             "layout": {
                 "x": 0,
-                "y": 31,
+                "y": 39,
                 "width": 12,
                 "height": 9
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "name": "reporter_node",
+            "prefix": "reporting_node_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
     "layout_type": "ordered",
     "notify_list": [],
     "reflow_type": "fixed"

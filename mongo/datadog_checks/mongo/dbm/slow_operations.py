@@ -5,7 +5,7 @@
 
 import binascii
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from bson import json_util
 from cachetools import TTLCache
@@ -158,7 +158,7 @@ class MongoSlowOperations(DBMAsyncJob):
         for profile in profiling_data:
             if 'command' not in profile:
                 continue
-            profile["ts"] = profile["ts"].timestamp()  # convert datetime to timestamp
+            profile["ts"] = profile["ts"].replace(tzinfo=timezone.utc).timestamp()  # convert datetime to timestamp
             yield self._obfuscate_slow_operation(profile, db_name)
 
     def _collect_slow_operations_from_logs(self, db_names, last_ts):

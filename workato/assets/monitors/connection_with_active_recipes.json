@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "created_at": "2025-06-09",
+  "last_updated_at": "2025-06-09",
+  "title": "Connection with active recipes is offline",
+  "description": "A connection with active recipes is offline either due to authorization failure or lost connectivity",
+  "definition": {
+	"id": 174104969,
+	"name": "Workato Connection with active recipe has {{#is_alert}}disconnected{{/is_alert}}{{#is_alert_recovery}}recovered{{/is_alert_recovery}} for connection {{name}}",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:workato.connections.failure{active_recipes:true} by {name} > 0",
+	"message": "{{#is_alert}}The Workato Connection {{name}} is disconnected and is referenced by active recipes {{/is_alert}}\n{{#is_alert_recovery}}The Workato Connection {{name}} has recovered {{/is_alert_recovery}}\n\n@email@example.com",
+	"tags": [
+		"source:workato"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 0
+		},
+		"notify_audit": false,
+		"threshold_windows": null,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"notify_by": [
+			"*"
+		],
+		"new_group_delay": 0
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:workato"
+  ]
+}
