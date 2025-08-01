@@ -1,65 +1,19 @@
 id: "barracuda_secure_edge"
 tests:
-  -
-    sample: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ; PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
-    result:
-      custom: {}
-      message: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ; PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
-      tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1
-  - sample: "2025 04 02 12:20:51 +00:00 Security Block:
-      FWD|UDP|p1|10.10.17.18|137|00:41:0e:93:aa:91|10.10.17.255|137|netbios-ns|\
-      |BLOCKALL|4002|||0|1|40|30|20|10||||||"
+  - sample: "2025 03 31 11:46:17 +00:00 Info     box_control[5405]: Session
+      localhost_hapair_daemon: Closed"
     result: null
-  - sample: "2025 03 31 13:15:47 +00:00 Notice   firewall: [Request] Rule:
-      /opt/phion/bin/acpffwdrule prefixwrite
-      /opt/phion/config/active/servers/CSC/services/NGFW/active.fwrule
-      /opt/phion/run/rule.prefix &"
+  - sample: "2025 03 31 11:46:24 +00:00 Info     firewall: [DNS] Operation: Updating
+      DNS Configuration based on /etc/resolv.conf. Cancelling pending DNS
+      requests, if any. Will resume work afterwards."
     result: null
-  - sample: "2025 04 02 08:19:55 +00:00 Notice   sshd: notice: Shell (/bin/bash)
-      opened for user root@10.10.16.1:57129 (uid=0)"
-    result: null
-  - sample: "2025 03 31 11:45:26 +00:00 Internal [0210108] writeSSHdconf(): starting
-      handling of ssh daemon configuration "
-    result: null
-  - sample: "2025 03 31 13:18:30 +00:00 Internal [0140200] 0 0 boxnet(p,ARGS): wrote
-      outer line control parametrisation for xDHCP links to
-      /var/phion/preserve/boxnet/DHCP/xDHCP.opconf"
-    result: null
-  - sample: "2025 03 31 11:46:29 +00:00 Info     L2TP server config file changed.
-      restart required "
-    result: null
-  - sample: "2025 03 31 11:46:35 +00:00 Info     sslvpn: SSL Cipher Spec unspecified
-      - strong ciphers only selected - using:
-      'ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+EXP:-SSLv2'"
-    result: null
-  - sample: 2025 03 31 11:46:17 +00:00 Info     Opened listen socket on
-      169.254.128.2:807
-    result: null
-  - sample: "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login succeeded:
-      localhost_CloudGen-WAN Valid password and valid challenge"
-    result: null
-  - sample: 2025 05 23 11:46:38 +00:00
-      Info     [localhost_wanhub@127.0.0.1_43774]  COMMIT(add)
-      servers/CSC/services/DHCPR (Generic Service directory for DHCPR)
-    result: null
-  - sample: 2025 05 12 11:46:36 +00:00 Notice   Starting main loop pid=9123
-    result: null
-  - sample: "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login succeeded:
-      localhost_CloudGen-WAN Valid password and valid challenge"
-    result: null
-  - sample: "2025 04 01 06:26:28 +00:00 Internal phibs: SAML: process binary for
-      SAML/ADFS authentication."
-    result: null
-  - sample: "2025 03 31 11:45:37 +00:00 Notice   openxdhcp[4500]: start worker
-      xdhcp1 for active link provider"
-    result: null
-  - sample: "2025 04 02 09:37:14 +00:00 Info     event: [1071065] Insert Event from
-      127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State
-      for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the
+  - sample: "2025 04 01 20:17:08 +00:00 Info     event: [1071065] Insert Event from
+      127.0.0.1:54624 - (D|2|ccactivate|1|License|4700|Query Activation State
+      for  Failed|CloudGen-WAN|1743538628|Querying licensing servers for the
       license activation state failed)"
     result: null
-  - sample: "2025 03 31 11:46:20 +00:00 Internal event: [1070045] Startup
-      CheckEventState (pid=6397): check every 30 sec"
-    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
