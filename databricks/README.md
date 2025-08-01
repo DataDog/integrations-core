@@ -38,11 +38,17 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 
 1. In your Databricks account, click on **User Management** in the left menu. Then, under the **Service principals** tab, click **Add service principal**.
 2. Under the **Credentials & secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret. Also take note of your account ID, which can be found by clicking on your profile in the upper-right corner.
-3. Click **Workspaces** in the left menu, then select the name of your workspace.
-4. Go to the **Permissions** tab and click **Add permissions**.
-5. Search for the service principal you created and assign it the **Admin** permission.
-6. In Datadog, open the Databricks integration tile.
-7. On the **Configure** tab, click **Add Databricks Workspace**.
+3. Your service principal will require read access to the schemas within your catalog.
+```sql
+GRANT USE CATALOG ON CATALOG <CATALOG> TO <service_principal>;
+GRANT USE SCHEMA ON CATALOG <CATALOG> TO <service_principal>;
+GRANT SELECT ON CATALOG <CATALOG> TO <service_principal>;
+```
+4. Click **Workspaces** in the left menu, then select the name of your workspace.
+5. Go to the **Permissions** tab and click **Add permissions**.
+6. Search for the service principal you created and assign it the **Admin** permission.
+7. In Datadog, open the Databricks integration tile.
+8. On the **Configure** tab, click **Add Databricks Workspace**.
 9. Enter a workspace name, your Databricks workspace URL, account ID, and the client ID and secret you generated.
 10. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
 <!-- xxz tab xxx -->
