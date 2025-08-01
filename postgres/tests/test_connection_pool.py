@@ -199,11 +199,12 @@ def test_lru_eviction_and_connection_rotation(pg_instance):
     assert len(manager.pools) == 3
 
     # Check that those pools respect pool_config limits
-    for dbname, (pool, last_used) in manager.pools.items():
+    for dbname, (pool, last_used, persistent) in manager.pools.items():
         stats = pool.get_stats()
         assert stats["pool_min"] == 0
         assert stats["pool_max"] == 1
         assert stats["pool_size"] <= 1
+        assert persistent is False
 
     manager.close_all()
     # After closing, pool dict should be empty
@@ -362,6 +363,99 @@ def test_connection_termination_and_recovery(pg_instance):
 
         stats = manager.get_pool_stats(dbname)
         assert stats["connections_num"] >= 2, "Expected connection to be reopened after termination"
+
+    finally:
+        manager.close_all()
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_persistent_pool_eviction_behavior(pg_instance):
+    """
+    Ensures persistent pools are not evicted while non-persistent ones are available.
+    """
+    conn_args = PostgresConnectionArgs(
+        application_name="test_persistent_pool_eviction_behavior",
+        user=pg_instance["username"],
+        password=pg_instance["password"],
+        host=pg_instance["host"],
+        port=int(pg_instance["port"]),
+    )
+
+    manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args)
+
+    try:
+        # Fill pool with 3 connections
+        dbs = ["dogs_0", "dogs_1", "dogs_2"]
+        with manager.get_connection(dbs[0]):  # non-persistent
+            pass
+        with manager.get_connection(dbs[1]):  # non-persistent
+            pass
+        with manager.get_connection(dbs[2], persistent=True):  # persistent
+            pass
+
+        # Trigger eviction by adding one more
+        with manager.get_connection("dogs_3"):
+            pass
+
+        pool_keys = list(manager.pools.keys())
+
+        # Assert persistent pool still exists
+        assert "dogs_2" in pool_keys
+
+        # One of the non-persistent dbs must be evicted
+        evicted = set(dbs[:2]) - set(pool_keys)
+        assert len(evicted) == 1, "One non-persistent db should have been evicted"
+
+        # Final pool should contain 3 entries
+        assert len(pool_keys) == 3
+
+    finally:
+        manager.close_all()
+        assert len(manager.pools) == 0
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_eviction_when_all_pools_are_persistent(pg_instance):
+    """
+    Ensures that if all existing pools are persistent, the least recently used one
+    is still evicted to make room for a new pool.
+    """
+    conn_args = PostgresConnectionArgs(
+        application_name="test_eviction_when_all_pools_are_persistent",
+        user=pg_instance["username"],
+        password=pg_instance["password"],
+        host=pg_instance["host"],
+        port=int(pg_instance["port"]),
+    )
+
+    manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args)
+
+    try:
+        # Open 3 persistent pools
+        dbs = ["dogs_0", "dogs_1", "dogs_2"]
+        for db in dbs:
+            with manager.get_connection(db, persistent=True):
+                pass
+
+        # Re-access dogs_1 to update its recency
+        with manager.get_connection("dogs_1"):
+            pass
+
+        # dogs_0 is now the least recently used persistent pool
+
+        # Open a new pool to trigger eviction
+        with manager.get_connection("dogs_3", persistent=True):
+            pass
+
+        current_pools = list(manager.pools.keys())
+
+        # Should have evicted dogs_0
+        assert "dogs_0" not in current_pools, "Expected least recently used persistent pool to be evicted"
+        assert "dogs_1" in current_pools
+        assert "dogs_2" in current_pools
+        assert "dogs_3" in current_pools
+        assert len(current_pools) == 3
 
     finally:
         manager.close_all()

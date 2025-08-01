@@ -121,7 +121,7 @@ class LRUConnectionPoolManager:
             "open": True,
         }
         self.lock = threading.Lock()
-        self.pools: OrderedDict[str, Tuple[ConnectionPool, float]] = OrderedDict()
+        self.pools: OrderedDict[str, Tuple[ConnectionPool, float, bool]] = OrderedDict()
 
     def _configure_connection(self, conn: Connection) -> None:
         conn.autocommit = True
@@ -151,7 +151,7 @@ class LRUConnectionPoolManager:
 
         return ConnectionPool(kwargs=kwargs, configure=self._configure_connection, **self.pool_config)
 
-    def get_pool(self, dbname: str) -> ConnectionPool:
+    def get_pool(self, dbname: str, persistent: bool = False) -> ConnectionPool:
         """
         Get or create a ConnectionPool for the given dbname.
 
@@ -168,19 +168,27 @@ class LRUConnectionPoolManager:
         with self.lock:
             now = time.monotonic()
             if dbname in self.pools:
-                pool, _ = self.pools.pop(dbname)
-                self.pools[dbname] = (pool, now)
+                pool, _, was_persistent = self.pools.pop(dbname)
+                self.pools[dbname] = (pool, now, was_persistent or persistent)
                 return pool
 
             if len(self.pools) >= self.max_db:
-                old_dbname, (old_pool, _) = self.pools.popitem(last=False)
-                old_pool.close()
+                # Try to evict a non-persistent pool first
+                for evict_dbname in list(self.pools.keys()):
+                    _, _, is_persistent = self.pools[evict_dbname]
+                    if not is_persistent:
+                        old_pool, _, _ = self.pools.pop(evict_dbname)
+                        old_pool.close()
+                        break
+                else:
+                    # All remaining are persistent, evict true LRU
+                    evict_dbname, (old_pool, _, _) = self.pools.popitem(last=False)
+                    old_pool.close()
 
             new_pool = self._create_pool(dbname)
-            self.pools[dbname] = (new_pool, now)
+            self.pools[dbname] = (new_pool, now, persistent)
             return new_pool
-
-    def get_connection(self, dbname: str) -> ConnectionProxy:
+    def get_connection(self, dbname: str, persistent: bool = False) -> ConnectionProxy:
         """
         Context-managed access to a single connection from the pool associated with the given dbname.
 
@@ -198,7 +206,7 @@ class LRUConnectionPoolManager:
         Returns:
             ConnectionProxy: A context manager yielding a psycopg.Connection.
         """
-        pool = self.get_pool(dbname)
+        pool = self.get_pool(dbname, persistent)
         return ConnectionProxy(pool)
 
     def get_pool_stats(self, dbname: str) -> Optional[Dict[str, Any]]:
@@ -222,20 +230,21 @@ class LRUConnectionPoolManager:
             entry = self.pools.get(dbname)
             if not entry:
                 return None
-            pool, last_used = entry
+            pool, last_used, persistent = entry
             stats = pool.get_stats()
             return {
                 **stats,
                 "last_used": last_used,
+                "persistent": persistent,
             }
 
     def close_all(self) -> None:
         """
-        Gracefully close all active pools and release all underlying connections.
+        Gracefully close all active pools including persistent ones and release all underlying connections.
 
         This clears the pool manager state and should be called during shutdown or cleanup.
         """
         with self.lock:
-            for pool, _ in self.pools.values():
+            for pool, _, _ in self.pools.values():
                 pool.close()
             self.pools.clear()
