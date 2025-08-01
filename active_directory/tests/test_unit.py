@@ -1,13 +1,15 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 from unittest import mock
+
+import pytest
 
 from datadog_checks.active_directory.check import ActiveDirectoryCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
 # --- Fixtures ---
+
 
 @pytest.fixture
 def core_performance_objects():
@@ -28,6 +30,7 @@ def core_performance_objects():
             },
         )
     }
+
 
 @pytest.fixture
 def optional_performance_objects():
@@ -63,9 +66,13 @@ def optional_performance_objects():
         ),
     }
 
+
 # --- Test Cases ---
 
-def test_core_ntds_metrics(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, core_performance_objects):
+
+def test_core_ntds_metrics(
+    aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, core_performance_objects
+):
     """
     Tests the collection of required NTDS metrics, which should always be collected
     regardless of service availability.
@@ -75,16 +82,24 @@ def test_core_ntds_metrics(aggregator, dd_default_hostname, dd_run_check, mock_p
     dd_run_check(check)
 
     global_tags = [f'server:{dd_default_hostname}']
-    
+
     aggregator.assert_service_check('active_directory.windows.perf.health', ServiceCheck.OK, tags=global_tags)
     aggregator.assert_metric('active_directory.ntds.ds.threads_in_use', 5, tags=global_tags)
     aggregator.assert_metric('active_directory.ntds.ldap.client_sessions', 10, tags=global_tags)
     aggregator.assert_metric('active_directory.ntds.ldap.bind_time', 50, tags=global_tags)
-    
+
     aggregator.assert_all_metrics_covered()
 
+
 @mock.patch('datadog_checks.active_directory.check.ActiveDirectoryCheckV2._is_service_running', return_value=True)
-def test_optional_metrics_when_services_are_running(mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, optional_performance_objects):
+def test_optional_metrics_when_services_are_running(
+    mock_is_service_running,
+    aggregator,
+    dd_default_hostname,
+    dd_run_check,
+    mock_performance_objects,
+    optional_performance_objects,
+):
     """
     Tests that all optional metrics are collected when their corresponding services are detected as running.
     """
@@ -109,8 +124,17 @@ def test_optional_metrics_when_services_are_running(mock_is_service_running, agg
     aggregator.assert_metric('active_directory.dfsr.staging_folder_size', 5242880, tags=domain_tags)
     aggregator.assert_metric('active_directory.dfsr.conflict_folder_size', 1048576, tags=public_tags)
 
+
 @mock.patch('datadog_checks.active_directory.check.ActiveDirectoryCheckV2._is_service_running')
-def test_service_aware_collection_skips_metrics(mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects, core_performance_objects, optional_performance_objects):
+def test_service_aware_collection_skips_metrics(
+    mock_is_service_running,
+    aggregator,
+    dd_default_hostname,
+    dd_run_check,
+    mock_performance_objects,
+    core_performance_objects,
+    optional_performance_objects,
+):
     """
     Tests that metric collection is dynamically skipped if a service is not running.
     """
@@ -120,6 +144,7 @@ def test_service_aware_collection_skips_metrics(mock_is_service_running, aggrega
     # Configure the mock to simulate that the DFSR service is NOT running
     def service_side_effect(service_name):
         return service_name != 'DFSR'  # Return True for all services except DFSR
+
     mock_is_service_running.side_effect = service_side_effect
 
     check = ActiveDirectoryCheckV2('active_directory', {}, [{'host': dd_default_hostname}])
@@ -127,33 +152,9 @@ def test_service_aware_collection_skips_metrics(mock_is_service_running, aggrega
 
     # NTDS metrics should ALWAYS be collected (it's a required metric set)
     aggregator.assert_metric('active_directory.ntds.ds.threads_in_use', 5, count=1)
-    
+
     # Netlogon metrics SHOULD be collected (service is mocked as running)
     aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', 2, count=1)
-    
+
     # DFSR metrics should NOT be collected (service is mocked as not running)
     aggregator.assert_metric('active_directory.dfsr.staging_folder_size', count=0)
-
-@mock.patch('datadog_checks.active_directory.check.ActiveDirectoryCheckV2._is_service_running')
-def test_emits_service_checks(mock_is_service_running, aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):
-    """
-    Tests that service checks are emitted correctly based on service status.
-    """
-    mock_performance_objects({})  # No metrics needed for this test
-
-    # Simulate Netlogon running and DFSR not running
-    def service_side_effect(service_name):
-        return service_name == 'Netlogon'
-    mock_is_service_running.side_effect = service_side_effect
-
-    instance_config = [{'host': dd_default_hostname, 'emit_service_status': True}]
-    check = ActiveDirectoryCheckV2('active_directory', {}, instance_config)
-    dd_run_check(check)
-
-    global_tags = [f'server:{dd_default_hostname}']
-
-    # Assert that the Netlogon service check is OK
-    aggregator.assert_service_check('active_directory.service.netlogon', ServiceCheck.OK, tags=global_tags)
-    
-    # Assert that the DFSR service check is WARNING (since it's not running)
-    aggregator.assert_service_check('active_directory.service.dfsr', ServiceCheck.WARNING, tags=global_tags)

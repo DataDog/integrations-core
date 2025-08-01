@@ -55,12 +55,6 @@ instances:
     #
     # force_all_metrics: false
     
-    ## @param emit_service_status - boolean - optional - default: false
-    ## Emit Datadog service checks for each Windows service.
-    ## Allows monitoring of AD service availability.
-    #
-    # emit_service_status: false
-    
     ## @param service_cache_duration - number - optional - default: 300
     ## How long to cache service state in seconds.
     #
