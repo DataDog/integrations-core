@@ -64,7 +64,7 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
                 env_vars.update(metadata.get(E2EMetadata.ENV_VARS, {}))
 
                 agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-                agent = get_agent_interface(agent_type)(app.platform, integration, env, metadata, env_data.config_file)
+                agent = get_agent_interface(agent_type)(app, integration, env, metadata, env_data.config_file)
 
                 try:
                     agent.stop()
