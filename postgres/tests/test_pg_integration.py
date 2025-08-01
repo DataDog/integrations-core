@@ -820,7 +820,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
             },
             None,
             None,
-            False,
+            None,
         ),
         (
             {
@@ -829,7 +829,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
             },
             None,
             None,
-            False,
+            None,
         ),
         (
             {
@@ -849,7 +849,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
             },
             None,
             None,
-            False,
+            None,
         ),
         (
             {
@@ -922,7 +922,7 @@ def test_database_instance_cloud_metadata_aws(
             None,
             None,
             None,
-            False,
+            None,
         ),
         (
             {

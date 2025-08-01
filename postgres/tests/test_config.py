@@ -140,6 +140,7 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     instance['deep_database_monitoring'] = True
     instance['statement_samples'] = {'enabled': True}
     config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    assert config.dbm is True
     assert any("deprecated" in w for w in result.warnings)
 
 

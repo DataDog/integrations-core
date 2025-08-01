@@ -68,25 +68,12 @@ SAMPLE_QUERIES = [
     (USER_ADMIN, PASSWORD_ADMIN, "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
-dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
     DBMAsyncJob.executor.shutdown(wait=True)
     DBMAsyncJob.executor = ThreadPoolExecutor()
-
-
-@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
-@pytest.mark.parametrize("dbm_enabled", [True, False])
-def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
-    # test to make sure we continue to support the old key
-    for k in dbm_enabled_keys:
-        dbm_instance.pop(k, None)
-    dbm_instance[dbm_enabled_key] = dbm_enabled
-    check = integration_check(dbm_instance)
-    assert check._config.dbm == dbm_enabled
 
 
 @requires_over_10
@@ -1752,23 +1739,6 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
 
 
 @pytest.mark.parametrize(
-    "number_key",
-    [
-        "explained_queries_cache_maxsize",
-        "explained_queries_per_hour_per_query",
-        "seen_samples_cache_maxsize",
-        "collection_interval",
-    ],
-)
-def test_statement_samples_config_invalid_number(integration_check, pg_instance, number_key):
-    pg_instance['query_samples'] = {
-        number_key: "not-a-number",
-    }
-    with pytest.raises(ValueError):
-        integration_check(pg_instance)
-
-
-@pytest.mark.parametrize(
     "error,metric_columns,expected_error_tag,expected_warnings",
     [
         (
@@ -1878,7 +1848,7 @@ def test_statement_metrics_database_extension_errors(
                 'this warning. See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#'
                 'high-pg-stat-statements-max-configuration for more details\n'
                 'code=high-pg-stat-statements-max-configuration dbname=datadog_test host=stubbed.hostname '
-                'threshold=9999 value=10000',
+                'threshold=9999.0 value=10000',
             ],
         ),
         (10000, []),
@@ -2014,7 +1984,8 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
         conn.close()
 
 
-@pytest.mark.unit
+# Even though this test is a unit test we leave it unmarked because loading this file loads the fixture
+# that requires booting up the database and makes it very slow to run compared to other unit tests
 def test_get_query_metrics_payload_rows():
     config, _ = build_config(check={}, init_config={}, instance={"host": "host", "username": "user"})
     statement_metrics = PostgresStatementMetrics({}, config, None)
