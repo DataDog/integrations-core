@@ -29,6 +29,7 @@ def resource_type_for_event_type(event_type):
 
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
+    HA_SUPPORTED = True
     __NAMESPACE__ = 'proxmox'
 
     def __init__(self, name, init_config, instances):
