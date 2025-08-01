@@ -81,6 +81,7 @@ from .queries import (
     SQL_REPLICATION_ROLE_AWS_AURORA,
     SQL_SERVER_ID_AWS_AURORA,
     SQL_SERVER_UUID,
+    SQL_TIDB_VERSION,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -121,6 +122,7 @@ class MySql(AgentCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._is_aurora = None
+        self._is_tidb = None
         self._performance_schema_enabled = None
         self._events_wait_current_enabled = None
         self._group_replication_active = None
@@ -288,6 +290,7 @@ class MySql(AgentCheck):
     def set_version(self, db):
         self.version = get_version(db)
         self.is_mariadb = self.version.flavor == "MariaDB"
+        self.is_tidb = self.version.flavor == "TiDB"
         self.tag_manager.set_tag("dbms_flavor", self.version.flavor.lower(), replace=True)
 
     def set_server_uuid(self, db):
@@ -314,6 +317,12 @@ class MySql(AgentCheck):
         self._is_group_replication_active(db)
 
     def _check_performance_schema_enabled(self, db):
+        # TiDB doesn't have performance_schema but uses information_schema.cluster_statements_summary instead
+        if self._get_is_tidb(db):
+            self._performance_schema_enabled = False
+            self.log.debug("TiDB detected, performance_schema check skipped")
+            return self._performance_schema_enabled
+
         with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
             results = dict(cursor.fetchall())
@@ -462,7 +471,8 @@ class MySql(AgentCheck):
 
         if self.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-        if self._index_metrics.include_index_metrics:
+        # TiDB doesn't have mysql.innodb_index_stats table
+        if self._index_metrics.include_index_metrics and not self._get_is_tidb(db):
             queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
         self._runtime_queries_cached.compile_queries()
@@ -582,7 +592,11 @@ class MySql(AgentCheck):
             # Innodb metrics are not available for Aurora reader instances
             if self._is_aurora and self._replication_role == "reader":
                 self.log.debug("Skipping innodb metrics collection for reader instance")
+            # TiDB does not support InnoDB storage engine
+            elif self._get_is_tidb(db):
+                self.log.info("Skipping innodb metrics collection for TiDB instance")
             else:
+                self.log.debug("Collecting InnoDB metrics (not Aurora reader, not TiDB)")
                 with tracked_query(self, operation="innodb_metrics"):
                     results.update(self.innodb_stats.get_stats_from_innodb_status(db))
                 self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
@@ -593,23 +607,29 @@ class MySql(AgentCheck):
                 results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
         # Compute key cache utilization metric
-        key_blocks_unused = collect_scalar('Key_blocks_unused', results)
-        key_cache_block_size = collect_scalar('key_cache_block_size', results)
-        key_buffer_size = collect_scalar('key_buffer_size', results)
-        results['Key_buffer_size'] = key_buffer_size
+        # TiDB doesn't have MyISAM key cache metrics
+        if not self._get_is_tidb(db):
+            key_blocks_unused = collect_scalar('Key_blocks_unused', results)
+            key_cache_block_size = collect_scalar('key_cache_block_size', results)
+            key_buffer_size = collect_scalar('key_buffer_size', results)
+            results['Key_buffer_size'] = key_buffer_size
 
-        try:
-            # can be null if the unit is missing in the user config (4 instead of 4G for eg.)
-            if key_buffer_size != 0:
-                key_cache_utilization = 1 - ((key_blocks_unused * key_cache_block_size) / key_buffer_size)
-                results['Key_cache_utilization'] = key_cache_utilization
+            try:
+                # can be null if the unit is missing in the user config (4 instead of 4G for eg.)
+                if key_buffer_size != 0 and key_cache_block_size is not None and key_blocks_unused is not None:
+                    key_cache_utilization = 1 - ((key_blocks_unused * key_cache_block_size) / key_buffer_size)
+                    results['Key_cache_utilization'] = key_cache_utilization
 
-            results['Key_buffer_bytes_used'] = collect_scalar('Key_blocks_used', results) * key_cache_block_size
-            results['Key_buffer_bytes_unflushed'] = (
-                collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
-            )
-        except TypeError as e:
-            self.log.error("Not all Key metrics are available, unable to compute: %s", e)
+                if key_cache_block_size is not None:
+                    key_blocks_used = collect_scalar('Key_blocks_used', results)
+                    key_blocks_not_flushed = collect_scalar('Key_blocks_not_flushed', results)
+
+                    if key_blocks_used is not None:
+                        results['Key_buffer_bytes_used'] = key_blocks_used * key_cache_block_size
+                    if key_blocks_not_flushed is not None:
+                        results['Key_buffer_bytes_unflushed'] = key_blocks_not_flushed * key_cache_block_size
+            except (TypeError, ZeroDivisionError) as e:
+                self.log.error("Not all Key metrics are available, unable to compute: %s", e)
 
         metrics.update(VARIABLES_VARS)
         metrics.update(INNODB_VARS)
@@ -681,7 +701,10 @@ class MySql(AgentCheck):
             metrics.update(TABLE_VARS)
 
         if self._config.replication_enabled:
-            if self.performance_schema_enabled and self._group_replication_active:
+            # TiDB does not support MySQL replication
+            if self._get_is_tidb(db):
+                self.log.debug("Skipping replication metrics collection for TiDB instance")
+            elif self.performance_schema_enabled and self._group_replication_active:
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
@@ -1126,6 +1149,39 @@ class MySql(AgentCheck):
 
         return self._is_aurora
 
+    def _get_is_tidb(self, db):
+        """
+        Tests if the instance is a TiDB database and caches the result.
+        """
+        if self._is_tidb is not None:
+            return self._is_tidb
+
+        if db is None:
+            self.log.debug("Cannot determine if server is TiDB: database connection is None")
+            return False
+
+        try:
+            with closing(db.cursor(CommenterCursor)) as cursor:
+                cursor.execute(SQL_TIDB_VERSION)
+                result = cursor.fetchone()
+                self.log.debug("TiDB detection - VERSION() result: %s", result)
+                if result and 'TiDB' in result[0]:
+                    self._is_tidb = True
+                    self.log.info("Detected TiDB instance")
+                else:
+                    self._is_tidb = False
+
+        except Exception:
+            self.warning(
+                "Unable to determine if server is TiDB. If this is a TiDB database, some "
+                "information may be unavailable: %s",
+                traceback.format_exc(),
+            )
+            # Don't cache the result on error - leave _is_tidb as None
+            return False
+
+        return self._is_tidb
+
     @classmethod
     def _get_stats_from_status(cls, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -1164,6 +1220,12 @@ class MySql(AgentCheck):
         # table. Later is chosen because that involves no string parsing.
         if self._is_innodb_engine_enabled_cached is not None:
             return self._is_innodb_engine_enabled_cached
+
+        # TiDB doesn't have InnoDB engine
+        if self._get_is_tidb(db):
+            self._is_innodb_engine_enabled_cached = False
+            return self._is_innodb_engine_enabled_cached
+
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)
@@ -1470,6 +1532,9 @@ class MySql(AgentCheck):
             return
         if self._group_replication_active:
             self.log.debug("Group replication cluster tags are not currently supported")
+            return
+        if self._get_is_tidb(db):
+            self.log.debug("TiDB cluster tags are not currently supported")
             return
 
         replica_status = self._get_replica_replication_status(db)
