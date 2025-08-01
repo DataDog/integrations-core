@@ -4,6 +4,7 @@
 import re
 import subprocess
 from datetime import datetime, timezone
+from ipaddress import ip_address
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
@@ -44,16 +45,16 @@ def _handle_ip_in_param(parts: List[str]) -> Tuple[List[str], bool]:
         ['some','172','0','0','12@tcp','param']
     =>  ['some','172.0.0.12@tcp', 'param']
     """
-    match_index = None
-    for i, part in enumerate(parts):
-        if '@' in part:
-            match_index = i
-    if match_index is None or match_index < 3:
+    match_indexes = [i for i in range(len(parts)) if '@' in parts[i]]
+    if len(match_indexes) != 1 or match_indexes[0] < 3:
         return [], False
-    new_part = ".".join(parts[match_index - 3 : match_index + 1])
-    if not re.match(r"\b\d*\.\d*\.\d*\.\d*@\b.", new_part):
+    index = match_indexes[0]
+    new_part = ".".join(parts[index - 3 : index + 1])
+    try:
+        ip_address(new_part.split('@')[0])
+    except ValueError:
         return [], False
-    return [*parts[: match_index - 3], new_part, *parts[match_index + 1 :]], True
+    return [*parts[: index - 3], new_part, *parts[index + 1 :]], True
 
 
 class LustreCheck(AgentCheck):
