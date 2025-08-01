@@ -5,110 +5,141 @@
 import time
 from typing import Dict
 
+import pytest
 from psycopg import Connection
 from psycopg.errors import AdminShutdown
 
-import pytest
-
 from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs
+
 from .utils import _get_superconn
 
+
+def _make_base_args(**overrides):
+    """Helper to create base connection arguments with defaults."""
+    base = {
+        "application_name": "test_app",
+        "user": "testuser",
+        "password": "testpass",
+        "host": "localhost",
+        "port": 5432,
+        "ssl_mode": "allow",
+    }
+    base.update(overrides)
+    return base
+
+
+def _make_expected_kwargs(**overrides):
+    """Helper to create expected kwargs with defaults."""
+    base = {
+        "application_name": "test_app",
+        "user": "testuser",
+        "password": "testpass",
+        "host": "localhost",
+        "port": 5432,
+        "sslmode": "allow",
+    }
+    base.update(overrides)
+
+    # Remove None values to match actual implementation behavior
+    return {k: v for k, v in base.items() if v is not None}
+
+
 @pytest.mark.parametrize(
-    "init_args, override_dbname, expected",
+    "init_args, dbname, expected",
     [
-        # Case 1: Full initialization, no override
+        # Basic functionality tests
+        (_make_base_args(), "testdb", _make_expected_kwargs(dbname="testdb")),
+        (_make_base_args(), "override_db", _make_expected_kwargs(dbname="override_db")),
+        (_make_base_args(), "overridedb", _make_expected_kwargs(dbname="overridedb")),
+        # Optional parameter exclusion tests
+        (_make_base_args(password=None), "testdb", _make_expected_kwargs(dbname="testdb", password=None)),
+        (_make_base_args(port=None), "testdb", _make_expected_kwargs(dbname="testdb", port=None)),
         (
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "alice",
-                "password": "secret",
-                "host": "localhost",
-                "port": 5432,
-                "dbname": "mydb"
-            },
-            None,
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "alice",
-                "password": "secret",
-                "host": "localhost",
-                "port": 5432,
-                "dbname": "mydb",
-                "sslmode": "allow"
-            }
+            _make_base_args(password=""),
+            "testdb",
+            _make_expected_kwargs(dbname="testdb", password=None),  # Empty string excluded
         ),
-        # Case 2: No dbname in init, dbname provided via override
+        # SSL configuration tests
         (
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "bob",
-                "password": "pw123",
-                "host": "127.0.0.1",
-                "port": 5433,
-                "dbname": None
-            },
-            "override_db",
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "bob",
-                "password": "pw123",
-                "host": "127.0.0.1",
-                "port": 5433,
-                "dbname": "override_db",
-                "sslmode": "allow"
-            }
+            _make_base_args(
+                ssl_mode="require",
+                ssl_cert="/path/to/client.crt",
+                ssl_key="/path/to/client.key",
+                ssl_root_cert="/path/to/ca.crt",
+                ssl_password="sslkeypass",
+            ),
+            "ssldb",
+            _make_expected_kwargs(
+                dbname="ssldb",
+                sslmode="require",
+                sslcert="/path/to/client.crt",
+                sslkey="/path/to/client.key",
+                sslrootcert="/path/to/ca.crt",
+                sslpassword="sslkeypass",
+            ),
         ),
-        # Case 3: dbname in init, overridden at call time
         (
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "carol",
-                "password": "pass",
-                "host": "db.internal",
-                "port": 5432,
-                "dbname": "initdb"
-            },
-            "overridedb",
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "carol",
-                "password": "pass",
-                "host": "db.internal",
-                "port": 5432,
-                "dbname": "overridedb",
-                "sslmode": "allow"
-            }
+            _make_base_args(ssl_mode="prefer", ssl_cert="/path/to/client.crt", ssl_key="/path/to/client.key"),
+            "override_ssl_db",
+            _make_expected_kwargs(
+                dbname="override_ssl_db", sslmode="prefer", sslcert="/path/to/client.crt", sslkey="/path/to/client.key"
+            ),
         ),
-        # Case 4: No dbname anywhere
         (
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "dave",
-                "password": "1234",
-                "host": "localhost",
-                "port": 5432,
-                "dbname": None,
-            },
-            None,
-            {
-                "application_name": "test_postgres_connection_args_as_kwargs",
-                "user": "dave",
-                "password": "1234",
-                "host": "localhost",
-                "port": 5432,
-                "dbname": None,
-                "sslmode": "allow"
-            }
+            _make_base_args(ssl_mode="verify-full"),
+            "testdb",
+            _make_expected_kwargs(dbname="testdb", sslmode="verify-full"),
         ),
-    ]
+        # SSL parameter exclusion tests
+        (
+            _make_base_args(ssl_mode="require", ssl_cert=None, ssl_key=None, ssl_root_cert=None, ssl_password=None),
+            "testdb",
+            _make_expected_kwargs(dbname="testdb", sslmode="require"),
+        ),
+        (
+            _make_base_args(
+                ssl_mode="require",
+                ssl_cert="/path/to/client.crt",
+                ssl_key=None,
+                ssl_root_cert="/path/to/ca.crt",
+                ssl_password=None,
+            ),
+            "testdb",
+            _make_expected_kwargs(
+                dbname="testdb", sslmode="require", sslcert="/path/to/client.crt", sslrootcert="/path/to/ca.crt"
+            ),
+        ),
+        # Edge cases
+        (
+            _make_base_args(password="", ssl_mode=""),
+            "testdb",
+            _make_expected_kwargs(
+                dbname="testdb",
+                password=None,  # Empty string excluded
+                sslmode="",
+            ),
+        ),
+        (
+            _make_base_args(),
+            "",  # Empty string dbname
+            _make_expected_kwargs(dbname=""),  # Empty string is valid
+        ),
+    ],
 )
-def test_postgres_connection_args_as_kwargs(init_args, override_dbname, expected):
+def test_postgres_connection_args_as_kwargs(init_args, dbname, expected):
     """
     Validates that PostgresConnectionArgs.as_kwargs() correctly outputs connection kwargs
-    under various combinations of dbname initialization and override.
+    under various combinations of initialization parameters and dbname.
+
+    Test cases cover:
+    - Basic connection parameters (user, password, host, port)
+    - SSL configuration (ssl_mode, ssl_cert, ssl_key, ssl_root_cert, ssl_password)
+    - Edge cases (None values, empty strings, missing optional parameters)
+    - dbname parameter handling
+    - Parameter exclusion when values are None
     """
     args = PostgresConnectionArgs(**init_args)
-    kwargs = args.as_kwargs(dbname=override_dbname)
+    kwargs = args.as_kwargs(dbname=dbname)
 
     assert kwargs == expected
 
@@ -128,11 +159,7 @@ def test_basic_connection(pg_instance: Dict[str, str]):
         port=int(pg_instance["port"]),
     )
 
-    manager = LRUConnectionPoolManager(
-        max_db=3,
-        base_conn_args=conn_args,
-        pool_config={"min_size": 1, "max_size": 2}
-    )
+    manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args, pool_config={"min_size": 1, "max_size": 2})
 
     try:
         dbname = pg_instance["dbname"]
@@ -164,6 +191,7 @@ def test_basic_connection(pg_instance: Dict[str, str]):
     finally:
         manager.close_all()
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_lru_eviction_and_connection_rotation(pg_instance):
@@ -179,10 +207,7 @@ def test_lru_eviction_and_connection_rotation(pg_instance):
         port=int(pg_instance["port"]),
     )
 
-    manager = LRUConnectionPoolManager(
-        max_db=3,
-        base_conn_args=base_conn_args
-    )
+    manager = LRUConnectionPoolManager(max_db=3, base_conn_args=base_conn_args)
 
     dbnames = [f"dogs_{i}" for i in range(5)]  # 5 dbs, max pool limit is 3
 
@@ -199,7 +224,7 @@ def test_lru_eviction_and_connection_rotation(pg_instance):
     assert len(manager.pools) == 3
 
     # Check that those pools respect pool_config limits
-    for dbname, (pool, last_used, persistent) in manager.pools.items():
+    for _dbname, (pool, _last_used, persistent) in manager.pools.items():
         stats = pool.get_stats()
         assert stats["pool_min"] == 0
         assert stats["pool_max"] == 1
@@ -209,6 +234,7 @@ def test_lru_eviction_and_connection_rotation(pg_instance):
     manager.close_all()
     # After closing, pool dict should be empty
     assert len(manager.pools) == 0
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
@@ -251,6 +277,7 @@ def test_lru_eviction_order(pg_instance):
     finally:
         manager.close_all()
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_max_idle_closes_and_reopens_connection(pg_instance):
@@ -271,7 +298,7 @@ def test_max_idle_closes_and_reopens_connection(pg_instance):
         base_conn_args=conn_args,
         pool_config={
             "max_idle": 0.5,  # second timeout
-        }
+        },
     )
 
     dbname = pg_instance["dbname"]
@@ -303,6 +330,7 @@ def test_max_idle_closes_and_reopens_connection(pg_instance):
     finally:
         manager.close_all()
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_connection_termination_and_recovery(pg_instance):
@@ -326,7 +354,7 @@ def test_connection_termination_and_recovery(pg_instance):
             "max_size": 1,
             "max_idle": 60,
             "open": True,
-        }
+        },
     )
 
     dbname = pg_instance["dbname"]
@@ -366,6 +394,7 @@ def test_connection_termination_and_recovery(pg_instance):
 
     finally:
         manager.close_all()
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")

@@ -20,31 +20,36 @@ class PostgresConnectionArgs:
     """
     Immutable PostgreSQL connection arguments.
     """
+
     application_name: str
     user: str
-    password: str
     host: str
-    port: int
+    port: Optional[int] = None
+    password: Optional[str] = None
     ssl_mode: Optional[str] = "allow"
     ssl_cert: Optional[str] = None
     ssl_root_cert: Optional[str] = None
     ssl_key: Optional[str] = None
     ssl_password: Optional[str] = None
-    dbname: Optional[str] = None  # Not used directly by the pool manager
 
-    def as_kwargs(self, dbname: Optional[str] = None) -> Dict[str, str]:
+    def as_kwargs(self, dbname: str) -> Dict[str, str]:
         """
-        Return a dictionary of connection arguments for psycopg, optionally overriding dbname.
+        Return a dictionary of connection arguments for psycopg.
+
+        Args:
+            dbname (str): The database name to connect to.
         """
         kwargs = {
             "application_name": self.application_name,
             "user": self.user,
-            "password": self.password,
             "host": self.host,
-            "port": self.port,
-            "dbname": dbname or self.dbname,
+            "dbname": dbname,
             "sslmode": self.ssl_mode,
         }
+        if self.password:
+            kwargs["password"] = self.password
+        if self.port:
+            kwargs["port"] = self.port
         if self.ssl_cert:
             kwargs["sslcert"] = self.ssl_cert
         if self.ssl_root_cert:
@@ -188,6 +193,7 @@ class LRUConnectionPoolManager:
             new_pool = self._create_pool(dbname)
             self.pools[dbname] = (new_pool, now, persistent)
             return new_pool
+
     def get_connection(self, dbname: str, persistent: bool = False) -> ConnectionProxy:
         """
         Context-managed access to a single connection from the pool associated with the given dbname.
