@@ -2,27 +2,24 @@ id: "barracuda_secure_edge"
 tests:
   - sample: "2025 03 31 11:46:17 +00:00 Info     box_control[5405]: Session
       localhost_hapair_daemon: Closed"
-    result:
-    custom: {}
-    message: "2025 03 31 11:46:17 +00:00 Info     box_control[5405]: Session localhost_hapair_daemon: Closed"
-    tags:
-     - "source:barracuda_secure_edge"
-     - "service:auth"
-    timestamp: 1
+    attributes:
+      source: "barracuda_secure_edge"
+      service: "auth"
+    result: null
   - sample: "2025 03 31 11:46:24 +00:00 Info     firewall: [DNS] Operation: Updating
       DNS Configuration based on /etc/resolv.conf. Cancelling pending DNS
       requests, if any. Will resume work afterwards."
     attributes:
-      service: "firewall"
       source: "barracuda_secure_edge"
+      service: "firewall"
     result: null
   - sample: "2025 04 01 20:17:08 +00:00 Info     event: [1071065] Insert Event from
       127.0.0.1:54624 - (D|2|ccactivate|1|License|4700|Query Activation State
       for  Failed|CloudGen-WAN|1743538628|Querying licensing servers for the
       license activation state failed)"
     attributes:
-      service: "system"
       source: "barracuda_secure_edge"
+      service: "system"
     result: null
 
 # The `result` field should be left blank to start. Once you submit your log asset files with
