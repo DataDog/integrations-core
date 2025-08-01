@@ -140,13 +140,13 @@ jobs:
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true'
       run: |-
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+        python .builders/build.py ${{ matrix.job.image }} --workflow-id ${{ github.run_id }} --python 3 ${{ env.OUT_DIR }}/py3
 
     - name: Pull image and build wheels
       if: steps.changed-files.outputs.builders_any_changed != 'true'
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
+        python .builders/build.py ${{ matrix.job.image }} --workflow-id ${{ github.run_id }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
 
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
@@ -232,10 +232,10 @@ jobs:
       run: |-
         # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --workflow-id ${{ github.run_id }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
         else
           mkdir ~/builder_root
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --workflow-id ${{ github.run_id }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
         fi
 
     - name: Upload artifacts
@@ -284,11 +284,8 @@ jobs:
         project_id: datadog-agent-int-build
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
-    - name: Upload wheels
-      run: python .builders/upload.py targets
-
-    - name: Lock files
-      run: python .builders/lock.py targets
+    - name: Upload and Lock Wheels
+      run: python .builders/upload_and_lock.py targets --workflow-id ${{ github.run_id }}
 
     - name: Clean up repository
       run: |-
