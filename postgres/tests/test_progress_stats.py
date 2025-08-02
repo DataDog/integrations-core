@@ -10,6 +10,7 @@ from datadog_checks.postgres.util import (
     CLUSTER_VACUUM_PROGRESS_METRICS,
     INDEX_PROGRESS_METRICS,
     VACUUM_PROGRESS_METRICS,
+    VACUUM_PROGRESS_METRICS_LT_17,
 )
 
 from .common import DB_NAME, _get_expected_tags, _iterate_metric_name
@@ -20,6 +21,8 @@ from .utils import (
     lock_table,
     requires_over_12,
     requires_over_13,
+    requires_over_17,
+    requires_under_17,
     run_query_thread,
     run_vacuum_thread,
 )
@@ -72,7 +75,7 @@ def test_analyze_progress(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(metric_name, count=1, tags=expected_tags)
 
 
-@requires_over_12
+@requires_over_17
 def test_vacuum_progress(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
 
@@ -99,6 +102,37 @@ def test_vacuum_progress(aggregator, integration_check, pg_instance):
         f'db:{DB_NAME}',
     ]
     for metric_name in _iterate_metric_name(VACUUM_PROGRESS_METRICS):
+        aggregator.assert_metric(metric_name, count=1, tags=expected_tags)
+
+
+@requires_over_12
+@requires_under_17
+def test_vacuum_progress_lt_17(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+
+    # Start vacuum
+    thread = run_vacuum_thread(pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING) test_part1')
+
+    # Wait for vacuum to be reported
+    _wait_for_value(
+        pg_instance,
+        lower_threshold=0,
+        query="SELECT count(*) from pg_stat_progress_vacuum",
+    )
+
+    # Collect metrics
+    check.check(pg_instance)
+
+    # Kill vacuum and cleanup thread
+    kill_vacuum(pg_instance)
+    thread.join()
+
+    expected_tags = _get_expected_tags(check, pg_instance) + [
+        'phase:scanning heap',
+        'table:test_part1',
+        f'db:{DB_NAME}',
+    ]
+    for metric_name in _iterate_metric_name(VACUUM_PROGRESS_METRICS_LT_17):
         aggregator.assert_metric(metric_name, count=1, tags=expected_tags)
 
 

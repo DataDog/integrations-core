@@ -12,7 +12,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
-from .common import assert_check_kafka, assert_check_kafka_has_consumer_group_state_tag, metrics
+from .common import assert_check_kafka, metrics
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -40,7 +40,6 @@ def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     """
     dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
-    assert_check_kafka_has_consumer_group_state_tag(aggregator, kafka_instance['consumer_groups'])
 
 
 def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):
@@ -469,40 +468,49 @@ def test_regex_consumer_groups(
     assert expected_warning in caplog.text
 
 
-@pytest.mark.parametrize(
-    'read_persistent_cache, kafka_instance_config, consumer_lag_seconds_count',
-    [
-        pytest.param(
-            "",
-            {
-                'consumer_groups': {},
-                'data_streams_enabled': 'true',
-                'monitor_unlisted_consumer_groups': True,
+@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
+def test_data_streams_live_messages(dd_run_check, check, kafka_instance, datadog_agent):
+    cluster_id = common.get_cluster_id()
+    kafka_instance['live_messages_configs'] = [
+        {
+            'kafka': {
+                'cluster': cluster_id,
+                'topic': 'marvel',
+                'partition': 0,
+                'start_offset': 0,
+                'n_messages': 2,
+                'value_format': 'json',
             },
-            0,
-            id='Read from cache failed',
-        ),
-    ],
-)
-def test_load_broker_timestamps_empty(
-    read_persistent_cache,
-    kafka_instance_config,
-    consumer_lag_seconds_count,
-    kafka_instance,
-    dd_run_check,
-    caplog,
-    aggregator,
-    check,
-):
-
-    kafka_instance.update(kafka_instance_config)
-    check = check(kafka_instance)
-    check.read_persistent_cache = mock.Mock(return_value=read_persistent_cache)
-    dd_run_check(check)
-
-    caplog.set_level(logging.WARN)
-    expected_warning = " Could not read broker timestamps from cache"
-
-    assert expected_warning in caplog.text
-    aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
-    assert check.read_persistent_cache.mock_calls == [mock.call("broker_timestamps_")]
+            'id': 'config_1_id',
+        }
+    ]
+    kafka_check = check(kafka_instance)
+    dd_run_check(kafka_check)
+    expected_logs = [
+        {
+            'timestamp': 400 * 1000,
+            'technology': 'kafka',
+            'cluster': str(cluster_id),
+            'config_id': 'config_1_id',
+            'topic': 'marvel',
+            'partition': '0',
+            'offset': '0',
+            'message_value': '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+            'ddtags': 'optional:tag1',
+        },
+        {
+            'timestamp': 400 * 1000,
+            'technology': 'kafka',
+            'cluster': str(cluster_id),
+            'config_id': 'config_1_id',
+            'topic': 'marvel',
+            'partition': '0',
+            'offset': '1',
+            'message_value': '{"name": "Bruce Banner", "age": 45,\
+ "transaction_amount": 456, "currency": "dollar"}',
+            'value_schema_id': '350',
+            'message_key': '{"name": "Bruce Banner"}',
+            'ddtags': 'optional:tag1',
+        },
+    ]
+    datadog_agent.assert_logs(kafka_check.check_id, expected_logs)

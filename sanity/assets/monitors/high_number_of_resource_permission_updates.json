@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-01-02",
+	"last_updated_at": "2025-01-02",
+	"title": "High number of resource permission updates",
+	"description": "This monitor alerts when there's an unusually high number of resource permission changes within a short time frame, potentially indicating unauthorized access attempts, misconfiguration, or suspicious activity that could compromise data security and access controls.",
+	"definition": {
+		"id": 161559074,
+		"name": "High number of resource permission updates",
+		"type": "log alert",
+		"query": "logs(\"source:sanity service:activity-logs @evt.name:project.permissionResource.update\").index(\"*\").rollup(\"count\").by(\"@projectId\").last(\"10m\") > 10",
+		"message": "{{#is_warning}}\nThe resource permission update count has exceeded the warning threshold for the project: **{{@projectId.name}}**.\nResource permission update count: **{{value}}**\nThreshold: {{warn_threshold}} \n{{/is_warning}}\n\n{{#is_alert}}\nThe resource permission update count has exceeded the alert threshold for the project: **{{@projectId.name}}**.\nResource permission update count: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"integration:sanity"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "show_no_data",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:sanity"
+	]
+}

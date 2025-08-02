@@ -64,7 +64,8 @@ class Disk(AgentCheck):
         self._timeout = instance.get('timeout', 5)
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
-        self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+        self._blkid_label_re = re.compile('LABEL="(.*?)"', re.I)
+        self._lowercase_device_tag = is_affirmative(instance.get('lowercase_device_tag', False))
 
         if self._use_lsblk and self._blkid_cache_file:
             raise ConfigurationError("Only one of 'use_lsblk' and 'blkid_cache_file' can be set at the same time.")
@@ -125,16 +126,16 @@ class Disk(AgentCheck):
                 disk_usage = timeout(self._timeout)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
-                    u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
-                    u'You might want to change the timeout length in the settings.',
+                    'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                    'You might want to change the timeout length in the settings.',
                     self._timeout,
                     part.mountpoint,
                 )
                 continue
             except Exception as e:
                 self.log.debug(
-                    u'Unable to get disk metrics for %s: %s. '
-                    u'You can exclude this mountpoint in the settings if it is invalid.',
+                    'Unable to get disk metrics for %s: %s. '
+                    'You can exclude this mountpoint in the settings if it is invalid.',
                     part.mountpoint,
                     e,
                 )
@@ -183,7 +184,7 @@ class Disk(AgentCheck):
         if Platform.is_win32():
             device_name = device_name.strip('\\').lower()
 
-        tags.append('device:{}'.format(device_name))
+        tags.append('device:{}'.format(device_name.lower() if self._lowercase_device_tag else device_name))
         tags.append('device_name:{}'.format(_base_device_name(part.device)))
         return tags
 
@@ -291,16 +292,16 @@ class Disk(AgentCheck):
             inodes = timeout(self._timeout)(os.statvfs)(mountpoint)
         except TimeoutException:
             self.log.warning(
-                u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
-                u'You might want to change the timeout length in the settings.',
+                'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                'You might want to change the timeout length in the settings.',
                 self._timeout,
                 mountpoint,
             )
             return metrics
         except Exception as e:
             self.log.debug(
-                u'Unable to get disk metrics for %s: %s. '
-                u'You can exclude this mountpoint in the settings if it is invalid.',
+                'Unable to get disk metrics for %s: %s. '
+                'You can exclude this mountpoint in the settings if it is invalid.',
                 mountpoint,
                 e,
             )
@@ -331,7 +332,7 @@ class Disk(AgentCheck):
                 device_specific_tags = self._get_device_specific_tags(disk_name)
                 metric_tags.extend(device_specific_tags)
 
-                metric_tags.append('device:{}'.format(disk_name))
+                metric_tags.append('device:{}'.format(disk_name.lower() if self._lowercase_device_tag else disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
                     metric_tags.extend(self.devices_label.get(disk_name))

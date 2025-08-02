@@ -91,6 +91,14 @@ mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
+To collect index metrics, grant the `datadog` user an additional privilege:
+
+```shell
+
+mysql> GRANT SELECT ON mysql.innodb_index_stats TO 'datadog'@'%';
+Query OK, 0 rows affected (0.00 sec)
+```
+
 ### Configuration
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
@@ -570,7 +578,7 @@ Additional helpful documentation, links, and articles:
 - [Monitoring MySQL performance metrics][31]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd-2.png
-[4]: https://app.datadoghq.com/account/settings/agent/latest
+[4]: /account/settings/agent/latest
 [5]: https://dev.mysql.com/doc/refman/8.0/en/creating-accounts.html
 [6]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1/
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

@@ -19,6 +19,7 @@ class KafkaConfig:
         self.log = log
         self._custom_tags = instance.get('tags', [])
         self._monitor_unlisted_consumer_groups = is_affirmative(instance.get('monitor_unlisted_consumer_groups', False))
+        self._collect_consumer_group_state = instance.get('collect_consumer_group_state', False)
         self._monitor_all_broker_highwatermarks = is_affirmative(
             instance.get('monitor_all_broker_highwatermarks', False)
         )
@@ -79,6 +80,9 @@ class KafkaConfig:
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
+        # Data Streams live messages
+        self.live_messages_configs = instance.get('live_messages_configs', [])
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')
@@ -123,6 +127,42 @@ class KafkaConfig:
             )
 
         self._validate_consumer_groups()
+        self._validate_live_messages_configs()
+
+    def _validate_live_messages_configs(self):
+        live_messages_configs = []
+        for config in self.live_messages_configs:
+            if 'id' not in config:
+                self.log.debug('Data Streams live messages configuration has no ID')
+                continue
+            kafka = config.get('kafka', None)
+            if not kafka:
+                self.log.debug('Data Streams live messages configuration has no kafka configuration')
+                continue
+            if not (
+                'cluster' in kafka
+                and 'topic' in kafka
+                and 'partition' in kafka
+                and 'start_offset' in kafka
+                and 'n_messages' in kafka
+            ):
+                self.log.debug('Data Streams live messages configuration missing required kafka parameters.', kafka)
+                continue
+            # Only json format is supported for Data Streams live messages
+            if kafka.get('value_format', '') == '':
+                kafka['value_format'] = 'json'
+            if kafka['value_format'] != 'json':
+                self.log.debug(
+                    'Only json format is supported for Data Streams live messages, got %s', kafka['value_format']
+                )
+            if kafka.get('key_format', '') == '':
+                kafka['key_format'] = 'json'
+            if kafka['key_format'] != 'json':
+                self.log.debug(
+                    'Only json format is supported for Data Streams live messages, got %s', kafka['key_format']
+                )
+            live_messages_configs.append(config)
+        self.live_messages_configs = live_messages_configs
 
     def _compile_regex(self, consumer_groups_regex, consumer_groups):
         # Turn the dict of regex dicts into a single string and compile

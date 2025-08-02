@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "Failed refund detected due to a rejection by the card scheme",
+	"description": "Failed refunds occur when card networks, such as Visa or Mastercard, reject refund requests, preventing funds from being returned to customers. This monitor tracks such failures to ensure prompt investigation and resolution, maintaining timely refunds and customer satisfaction.",
+	"definition": {
+		"id": 154211495,
+		"name": "Failed refund detected due to a rejection by the card scheme",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:transaction @evt.name:REFUND_FAILED\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}Failed refund due to a rejection by the card scheme refers to the failure of a refund transaction caused by an issue with the card scheme, which is the network that processes credit and debit card payments (such as Visa or Mastercard). This means the card network could not process the refund and further action is required\n\nPlease investigate the transaction details (pspReference: {{log.attributes.pspReference}}) and resolve the issue to ensure timely refunds and avoid potential customer dissatisfaction.{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:transaction"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}

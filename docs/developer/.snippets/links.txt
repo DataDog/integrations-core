@@ -72,7 +72,7 @@
 [github-apps-probot]: https://github.com/probot/stale
 [github-apps-probot-config]: https://github.com/DataDog/integrations-core/blob/master/.github/stale.yml
 [github-pages-docs]: https://help.github.com/en/github/working-with-github-pages/about-github-pages
-[github-personal-access-token]: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
+[github-personal-access-token]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token
 [github-rebase-and-merge]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#rebase-and-merge-your-pull-request-commits
 [github-saml-single-sign-on]: https://help.github.com/en/github/authenticating-to-github/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on
 [github-squash-and-merge]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#squash-and-merge-your-pull-request-commits

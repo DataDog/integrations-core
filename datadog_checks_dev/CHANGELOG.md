@@ -2,6 +2,68 @@
 
 <!-- towncrier release notes start -->
 
+## 35.1.3 / 2025-07-30
+
+***Fixed***:
+
+* Update required owner of logs files ([#20817](https://github.com/DataDog/integrations-core/pull/20817))
+* Fail config validation if templates are missing. ([#20832](https://github.com/DataDog/integrations-core/pull/20832))
+
+## 35.1.2 / 2025-07-14
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors ([#20435](https://github.com/DataDog/integrations-core/pull/20435))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* [MINPROC-2319] remove the integration exception mapper ([#20697](https://github.com/DataDog/integrations-core/pull/20697))
+* Update new integration readme template. ([#20749](https://github.com/DataDog/integrations-core/pull/20749))
+
+## 35.1.1 / 2025-06-04
+
+***Fixed***:
+
+* Stop relying on manifest.json to validate spec.yaml. Also stop checking the 'name' field in spec.yaml. ([#20398](https://github.com/DataDog/integrations-core/pull/20398))
+* Ignore missing readmes in extras and marketplace repos. This is to temporarily unblock contributors while we discuss how to handle readmes in Publishing Platform. ([#20438](https://github.com/DataDog/integrations-core/pull/20438))
+
+## 35.1.0 / 2025-05-27
+
+***Added***:
+
+* Update release tag to ensure that tags are fetched before getting the list of tags ([#20292](https://github.com/DataDog/integrations-core/pull/20292))
+
+## 35.0.1 / 2025-04-30
+
+***Fixed***:
+
+* Fix `ddev validate dep` command to support dependencies with Git urls ([#19743](https://github.com/DataDog/integrations-core/pull/19743))
+* Soft deprecation of service check submission:
+  - remove them from integration scaffolding templates
+  - add a warning to the method docstring ([#19831](https://github.com/DataDog/integrations-core/pull/19831))
+* Stop using the uptime library ([#19842](https://github.com/DataDog/integrations-core/pull/19842))
+* Bump Python version to 3.12 for new integration templates. ([#19970](https://github.com/DataDog/integrations-core/pull/19970))
+* Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)`, respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
+
+## 35.0.0 / 2025-02-26
+
+***Removed***:
+
+* Remove trello client. ([#19536](https://github.com/DataDog/integrations-core/pull/19536))
+
+***Security***:
+
+* Removed dependency on psycopg2 ([#19325](https://github.com/DataDog/integrations-core/pull/19325))
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+* Add tls_ciphers config to templates ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+***Fixed***:
+
+* Revert "Upgrade PGBouncer to psycopg3" due to instability in testing ([#19497](https://github.com/DataDog/integrations-core/pull/19497))
+* Pin beautifulsoup4 ([#19538](https://github.com/DataDog/integrations-core/pull/19538))
+
 ## 34.1.0 / 2024-11-13
 
 ***Added***:

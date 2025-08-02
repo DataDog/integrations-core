@@ -24,6 +24,7 @@ METRICS = {
     'apiserver_request_duration_seconds': 'request_duration_seconds',
     'apiserver_request_latencies': 'request_latencies',
     'apiserver_request_latency_seconds': 'request_latencies',
+    'process_cpu_seconds_total': 'process_cpu_total',
     'process_resident_memory_bytes': 'process_resident_memory_bytes',
     'process_virtual_memory_bytes': 'process_virtual_memory_bytes',
     'grpc_client_started_total': 'grpc_client_started_total',
@@ -36,8 +37,7 @@ METRICS = {
     'apiserver_admission_step_admission_latencies_seconds': 'admission_step_admission_latencies_seconds',
     'apiserver_admission_controller_admission_latencies_seconds': 'admission_controller_admission_duration_seconds',
     # fmt: off
-    'apiserver_admission_step_admission_latencies_seconds_summary':
-        'admission_step_admission_latencies_seconds_summary',
+    'apiserver_admission_step_admission_latencies_seconds_summary': 'admission_step_admission_latencies_seconds_summary',  # noqa
     # fmt: on
     # For Kubernetes >= 1.14
     # (https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.14.md#deprecated-metrics)
@@ -46,8 +46,7 @@ METRICS = {
     'apiserver_admission_step_admission_duration_seconds': 'admission_step_admission_latencies_seconds',
     'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
     # fmt: off
-    'apiserver_admission_step_admission_duration_seconds_summary':
-        'admission_step_admission_latencies_seconds_summary',
+    'apiserver_admission_step_admission_duration_seconds_summary': 'admission_step_admission_latencies_seconds_summary',
     # fmt: on
     # For Kubernetes >= 1.16
     # https://v1-16.docs.kubernetes.io/docs/setup/release/#added-metrics
@@ -72,6 +71,7 @@ METRICS = {
     'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
     'apiserver_flowcontrol_current_inqueue_requests': 'flowcontrol_current_inqueue_requests',
     'apiserver_flowcontrol_dispatched_requests_total': 'flowcontrol_dispatched_requests_total',
+    'apiserver_flowcontrol_request_wait_duration_seconds': 'flowcontrol_request_wait_duration_seconds',
     # For Kubernetes >= 1.26
     # https://github.com/kubernetes/kubernetes/pull/112690
     'kubernetes_feature_enabled': 'kubernetes_feature_enabled',
@@ -79,12 +79,13 @@ METRICS = {
     'apiserver_flowcontrol_request_concurrency_limit': 'flowcontrol_request_concurrency_limit',
     'apiserver_flowcontrol_current_executing_requests': 'flowcontrol_current_executing_requests',
     'apiserver_flowcontrol_rejected_requests_total': 'flowcontrol_rejected_requests_total',
+    'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_nominal_limit_seats',
     'apiserver_storage_db_total_size_in_bytes': 'etcd.db.total_size',
     # For Kubernetes >= 1.28
     'apiserver_storage_size_bytes': 'etcd.db.total_size',
-    'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_request_concurrency_limit',
     'etcd_requests_total': 'etcd_requests_total',
     'etcd_request_errors_total': 'etcd_request_errors_total',
+    'apiserver_flowcontrol_current_executing_seats': 'flowcontrol_current_executing_seats',
 }
 
 

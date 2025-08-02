@@ -1,0 +1,15 @@
+name: Keda
+files:
+- name: keda.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:8080/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing the Keda's Prometheus metrics. For more information refer to:
+          https://keda.sh/docs/2.16/integrations/prometheus/

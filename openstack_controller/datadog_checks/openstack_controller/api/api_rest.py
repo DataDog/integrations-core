@@ -19,13 +19,9 @@ class ApiRest(Api):
         self._region_id = self.config.endpoint_region_id
         self._catalog = None
         self._current_project_id = None
-        self._role_names = None
 
     def auth_url(self):
         return self.config.keystone_server_url
-
-    def has_admin_role(self):
-        return 'admin' in self._role_names
 
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
@@ -123,7 +119,6 @@ class ApiRest(Api):
             self._interface,
             self._region_id,
         )
-        self._role_names = [role.get('name') for role in response_json.get('token', {}).get('roles', [])]
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
 
     def _add_microversion_headers(self):
@@ -458,7 +453,6 @@ class ApiRest(Api):
         )
 
     def get_baremetal_conductors(self):
-
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
 
         url = '{}/v1/conductors'.format(ironic_endpoint)

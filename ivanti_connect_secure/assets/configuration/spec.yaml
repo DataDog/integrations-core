@@ -1,0 +1,10 @@
+name: Ivanti Connect Secure
+files:
+- name: ivanti_connect_secure.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp # or 'udp'
+      port: <PORT>
+      source: ivanti-connect-secure
+      service: ivanti-connect-secure

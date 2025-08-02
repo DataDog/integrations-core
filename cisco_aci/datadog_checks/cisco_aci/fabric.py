@@ -51,7 +51,7 @@ class Fabric:
             lldp_adj_eps = self.api.get_lldp_adj_eps()
             cdp_adj_eps = self.api.get_cdp_adj_eps()
             device_map = ndm.get_device_ip_mapping(devices)
-            links = ndm.create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, self.namespace)
+            links = ndm.create_topology_link_metadata(self.log, lldp_adj_eps, cdp_adj_eps, device_map, self.namespace)
 
             collect_timestamp = int(time.time())
             batches = ndm.batch_payloads(self.namespace, devices, interfaces, links, collect_timestamp)
@@ -268,5 +268,5 @@ class Fabric:
     def submit_interface_status_metric(self, status, tags, hostname):
         if status:
             new_tags = tags.copy()
-            new_tags.extend(["port.status:{}".format(status)])
+            new_tags.extend(["status:{}".format(status)])
             self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags, hostname=hostname)

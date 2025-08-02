@@ -1,1 +1,0 @@
-Fall back to ``system_health/event_file`` when querying deadlocks if `datadog` XE session wasn't created.

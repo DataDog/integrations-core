@@ -1,14 +1,22 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import annotations
+
 import functools
-import inspect
 import os
+from typing import TYPE_CHECKING
+
+import lazy_loader
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.common import to_native_string
 
-from ..config import is_affirmative
-from ..utils.common import to_native_string
+if TYPE_CHECKING:
+    import inspect as _module_inspect
+
+inspect: _module_inspect = lazy_loader.load('inspect')
 
 EXCLUDED_MODULES = ['threading']
 
@@ -114,9 +122,9 @@ def traced_class(cls):
         try:
             integration_tracing_exhaustive = is_affirmative(datadog_agent.get_config('integration_tracing_exhaustive'))
 
-            from ddtrace import patch_all, tracer
-
-            patch_all()
+            # https://ddtrace.readthedocs.io/en/stable/basic_usage.html#ddtrace-auto
+            import ddtrace.auto  # noqa: F401
+            from ddtrace import tracer
 
             def decorate(cls):
                 for attr in cls.__dict__:

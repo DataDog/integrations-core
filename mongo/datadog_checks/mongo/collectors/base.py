@@ -27,6 +27,9 @@ class MongoCollector(object):
         self.metrics_to_collect = self.check.metrics_to_collect
         self._collection_interval = None
         self._collector_key = (self.__class__.__name__,)
+        self._system_collections_skip_stats = {
+            "local": frozenset(["system.replset", "replset.election", "replset.minvalid"])
+        }
 
     def collect(self, api):
         """The main method exposed by the collector classes, needs to be implemented by every subclass.
@@ -36,6 +39,15 @@ class MongoCollector(object):
     def compatible_with(self, deployment):
         """Whether or not this specific collector is compatible with this specific deployment type."""
         raise NotImplementedError()
+
+    def should_skip_system_collection(self, coll_name):
+        """Whether or not the collection should be skipped because collStats or indexStats
+        is not authorized to run on certain system collections.
+        """
+        db_name = getattr(self, "db_name", None)
+        if not db_name or db_name not in self._system_collections_skip_stats:
+            return False
+        return coll_name in self._system_collections_skip_stats[db_name]
 
     def _normalize(self, metric_name, submit_method, prefix=None):
         """Replace case-sensitive metric name characters, normalize the metric name,
@@ -49,7 +61,7 @@ class MongoCollector(object):
             metric_name = re.compile(pattern).sub(repl, metric_name)
 
         # Normalize, and wrap
-        return u"{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
+        return "{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
             normalized_metric_name=self.check.normalize(metric_name.lower()),
             metric_prefix=metric_prefix,
             metric_suffix=metric_suffix,
@@ -94,7 +106,7 @@ class MongoCollector(object):
             # value is now status[x][y][z]
             if not isinstance(value, (int, float)):
                 raise TypeError(
-                    u"{0} value is a {1}, it should be an int, or a float instead.".format(metric_name, type(value))
+                    "{0} value is a {1}, it should be an int, or a float instead.".format(metric_name, type(value))
                 )
 
             # Submit the metric

@@ -16,7 +16,7 @@ OPTIONAL_HEADERS = {
 
 EXPERIMENTAL_HEADER = {"sample_tags"}
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS | EXPERIMENTAL_HEADER
-HEADERS_TO_CHECK = REQUIRED_HEADERS | OPTIONAL_HEADERS
+HEADERS_TO_CHECK = REQUIRED_HEADERS | {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name'}
 
 ORDERED_HEADERS = [
     "metric_name",
@@ -196,6 +196,7 @@ VALID_UNIT_NAMES = {
     'terawatt',
     'view',
     'microdollar',
+    'nanodollar',
     'euro',
     'pound',
     'penny',
@@ -392,6 +393,13 @@ VALID_UNIT_NAMES = {
     "yemeni rial",
     "zambian kwacha",
     "zimbabwe gold",
+    "bit_in_decimal_bytes_family",
+    "byte_in_decimal_bytes_family",
+    "bit_in_binary_bytes_family",
+    "byte_in_binary_bytes_family",
+    "collection",
+    "entity",
+    "vector",
 }
 
 ALLOWED_PREFIXES = ('system.', 'jvm.', 'http.', 'datadog.', 'sftp.', 'process.', 'runtime.', 'otelcol_')

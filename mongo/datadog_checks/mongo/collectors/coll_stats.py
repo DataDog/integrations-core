@@ -18,7 +18,7 @@ class CollStatsCollector(MongoCollector):
         super(CollStatsCollector, self).__init__(check, tags)
         self.coll_names = coll_names
         self.db_name = db_name
-        self.max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
+        self._max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
         self._collection_interval = check._config.metrics_collection_interval['collection']
         self._collector_key = (self.__class__.__name__, db_name)  # db_name is part of collector key
 
@@ -29,7 +29,7 @@ class CollStatsCollector(MongoCollector):
     def _get_collections(self, api):
         if self.coll_names:
             return self.coll_names
-        return api.list_authorized_collections(self.db_name, limit=self.max_collections_per_database)
+        return api.list_authorized_collections(self.db_name, limit=self._max_collections_per_database)
 
     def __calculate_oplatency_avg(self, latency_stats):
         """Calculate the average operation latency."""
@@ -45,6 +45,10 @@ class CollStatsCollector(MongoCollector):
     def collect(self, api):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
+            if self.should_skip_system_collection(coll_name):
+                self.log.debug("Skipping collStats for system collection %s.%s", self.db_name, coll_name)
+                continue
+
             # Grab the stats from the collection
             try:
                 collection_stats = self._get_collection_stats(api, coll_name)

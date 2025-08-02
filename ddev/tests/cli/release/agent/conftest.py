@@ -21,6 +21,7 @@ def repo_with_history(tmp_path_factory):
     repo.git.run('config', 'user.email', 'you@example.com')
     repo.git.run('config', 'user.name', 'Your Name')
     repo.git.run('config', 'commit.gpgsign', 'false')
+    repo.git.run('config', 'tag.gpgsign', 'false')
 
     # Initial version with a single integration
     write_agent_requirements(repo.path, ['datadog-foo==1.0.0'])

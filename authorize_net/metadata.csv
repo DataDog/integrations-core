@@ -1,0 +1,10 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+authorize_net.unsettled_transaction.amount_by_account_type,count,,,,Total amount of unsettled transactions by account type,0,authorize_net,Total amount by account type,,
+authorize_net.unsettled_transaction.amount_by_market_type,count,,,,Total amount of unsettled transactions by market type,0,authorize_net,Total amount by market type,,
+authorize_net.unsettled_transaction.amount_by_product,count,,,,Total amount of unsettled transactions by product,0,authorize_net,Total amount by product,,
+authorize_net.unsettled_transaction.amount_by_status,count,,,,Total amount of unsettled transactions by status,0,authorize_net,Total amount by status,,
+authorize_net.unsettled_transaction.count_by_account_type,count,,,,Total number of unsettled transactions by account type,0,authorize_net,Count by account type,,
+authorize_net.unsettled_transaction.count_by_market_type,count,,,,Total number of unsettled transactions by market type,0,authorize_net,Count by market type,,
+authorize_net.unsettled_transaction.count_by_product,count,,,,Total number of unsettled transactions by product,0,authorize_net,Count by product,,
+authorize_net.unsettled_transaction.count_by_status,count,,,,Total number of unsettled transactions by status,0,authorize_net,Count by status,,
+authorize_net.unsettled_transaction.total_unsettled_transactions,count,,,,Total number of unsettled transactions,0,authorize_net,Total unsettled transactions,,

@@ -2,7 +2,40 @@
 
 <!-- towncrier release notes start -->
 
-## 6.1.0 / 2024-10-31
+## 7.0.0 / 2025-07-10
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Modernize bs4 interface by replacing deprecated 'findAll' with 'find_all' ([#20415](https://github.com/DataDog/integrations-core/pull/20415))
+
+## 6.4.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 6.3.0 / 2025-03-19 / Agent 7.65.0
+
+***Added***:
+
+* Update dependencies ([#19687](https://github.com/DataDog/integrations-core/pull/19687))
+
+***Fixed***:
+
+* Gracefully handle unavailable apps and their aspects. Before we would throw an exception as soon as we encountered an error, which deprived us of a lot of available metrics. ([#19750](https://github.com/DataDog/integrations-core/pull/19750))
+
+## 6.2.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 6.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:
 

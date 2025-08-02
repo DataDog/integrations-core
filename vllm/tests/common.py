@@ -19,6 +19,11 @@ MOCKED_INSTANCE = {
     "tags": ['test:test'],
 }
 
+MOCKED_INSTANCE_RAY = {
+    "openmetrics_endpoint": f"http://{HOST}:{PORT}/metrics_prefix",
+    "tags": ['test:test'],
+}
+
 MOCKED_VERSION_ENDPOINT = f"http://{HOST}:{PORT}/version"
 
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')

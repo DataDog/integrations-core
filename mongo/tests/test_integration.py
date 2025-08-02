@@ -42,7 +42,7 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongo"
-    assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
+    assert sorted(mongodb_instance_event['tags']) == sorted(expected_tags)
 
     expected_instance_metadata = {
         "replset_name": replset_name,
@@ -112,7 +112,12 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos', 'hosting_type:self-hosted']
+    expected_tags = [
+        'server:mongodb://testUser2:*****@localhost:27017/test',
+        'sharding_cluster_role:mongos',
+        'hosting_type:self-hosted',
+        'clustername:my_cluster',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongos_check,
@@ -181,7 +186,6 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'top',
         'connection-pool',
         'dbstats-local',
-        'dbstats',
         'fsynclock',
         'hostinfo',
     ]
@@ -339,7 +343,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         'sharding_cluster_role:shardsvr',
         'hosting_type:self-hosted',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
@@ -401,7 +405,6 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         'top',
         'connection-pool',
         'dbstats-local',
-        'dbstats',
         'fsynclock',
         'hostinfo',
     ]
@@ -779,6 +782,7 @@ def test_integration_replicaset_secondary(
         'dbstats-local',
         'fsynclock',
         'hostinfo',
+        'indexes-stats',
     ]
     if collect_custom_queries:
         metrics_categories.append('custom-queries')
@@ -836,7 +840,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         'replset_me:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
+    metrics_categories = ['serverStatus', 'replset-arbiter']
 
     assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
@@ -909,7 +913,7 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = [f'server:{mongo_check._config.clean_server_name}', 'hosting_type:self-hosted']
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
@@ -1094,7 +1098,11 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         'hosting_type:self-hosted',
     ]
 
-    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = replica_tags + [
+        f'server:{mongo_check._config.clean_server_name}',
+        'clustername:my_cluster',
+        'replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
@@ -1189,5 +1197,79 @@ def test_integration_localhost_process_stats(instance_integration, aggregator, c
 
     metrics_categories = [
         'process-stats',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
+
+
+def test_integration_skip_system_database_stats(instance_integration_autodiscovery, aggregator, check, dd_run_check):
+    instance_integration_autodiscovery['system_database_stats'] = False
+    mongo_check = check(instance_integration_autodiscovery)
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
+    ]
+    metrics_categories = [
+        'dbstats-non-system',
+        'indexes-stats-non-system',
+        'collection-non-system',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+
+
+def test_integration_custom_metrics_collection_interval(
+    instance_integration_autodiscovery, aggregator, check, dd_run_check
+):
+    instance_integration_autodiscovery['metrics_collection_interval'] = {
+        'collection': 300,
+        'collections_indexes_stats': 300,
+        'db_stats': 300,
+    }
+
+    mongo_check = check(instance_integration_autodiscovery)
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
+    ]
+    metrics_categories = [
+        'dbstats-local',
+        'dbstats',
+        'indexes-stats-autodiscover',
+        'collection-autodiscover',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+
+    aggregator.reset()
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    # No new metrics should be collected as the interval is set to 300 seconds
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags, count=0)
+
+
+def test_integration_skip_free_storage_metrics(instance_integration, aggregator, check, dd_run_check):
+    instance_integration['free_storage_metrics'] = False
+    mongo_check = check(instance_integration)
+
+    with mock_pymongo("standalone"):
+        dd_run_check(mongo_check)
+
+    metrics_categories = [
+        'dbstats-non-free-storage',
     ]
     assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])

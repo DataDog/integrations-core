@@ -19,7 +19,7 @@ class AirflowCheck(AgentCheck):
 
         self._url = self.instance.get('url', '')
         self._tags = self.instance.get('tags', [])
-
+        self._collect_ongoing_duration = self.instance.get('collect_ongoing_duration', True)
         # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
         # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
         # potential configuration errors as part of the check run phase.
@@ -51,7 +51,7 @@ class AirflowCheck(AgentCheck):
         else:
             submit_metrics(resp, tags)
             # Only calculate task duration for stable API
-            if target_url is url_stable:
+            if target_url is url_stable and self._collect_ongoing_duration:
                 task_instances = self._get_all_task_instances(url_stable_task_instances, tags)
                 if task_instances:
                     self._calculate_task_ongoing_duration(task_instances, tags)
@@ -118,14 +118,14 @@ class AirflowCheck(AgentCheck):
             dag_task_tags = copy(tags)
             task_id = task.get('task_id')
             dag_id = task.get('dag_id')
-            execution_date = task.get('execution_date')
+            start_date = task.get('start_date')
 
             # Add tags for each task
             dag_task_tags.append('dag_id:{}'.format(dag_id))
             dag_task_tags.append('task_id:{}'.format(task_id))
 
             # Calculate ongoing duration
-            ongoing_duration = get_timestamp() - datetime.fromisoformat((execution_date)).timestamp()
+            ongoing_duration = get_timestamp() - datetime.fromisoformat((start_date)).timestamp()
             self.gauge('airflow.dag.task.ongoing_duration', ongoing_duration, tags=dag_task_tags)
 
     def _parse_config(self):

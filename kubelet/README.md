@@ -52,6 +52,10 @@ The check can still collect:
 
 ## Data Collected
 
+### Metrics
+
+See [metadata.csv][9] for a list of metrics provided by this integration.
+
 ### Service Checks
 
 See [service_checks.json][5] for a list of service checks provided by this integration.
@@ -67,7 +71,7 @@ For network metrics reported at the pod level, containers cannot be excluded bas
 Need help? Contact [Datadog support][6].
 
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files
@@ -75,3 +79,4 @@ Need help? Contact [Datadog support][6].
 [6]: https://docs.datadoghq.com/help/
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubelet/datadog_checks/kubelet/data/conf.yaml.default
 [8]: https://docs.datadoghq.com/agent/guide/autodiscovery-management/?tab=containerizedagent
+[9]: https://github.com/DataDog/integrations-core/blob/master/kubelet/metadata.csv

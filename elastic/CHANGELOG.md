@@ -2,6 +2,30 @@
 
 <!-- towncrier release notes start -->
 
+## 9.0.0 / 2025-07-10
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+## 8.2.0 / 2025-04-22 / Agent 7.66.0
+
+***Added***:
+
+* Adds sanitization to the URL tag when user and password options are supplied to the user configured endpoint. ([#20121](https://github.com/DataDog/integrations-core/pull/20121))
+
+## 8.1.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 8.0.1 / 2024-12-11 / Agent 7.61.0
+
+***Fixed***:
+
+* Regression fix: Handle missing index fields in payload. ([#19249](https://github.com/DataDog/integrations-core/pull/19249))
+
 ## 8.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

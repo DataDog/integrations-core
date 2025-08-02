@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2025-05-15 / Agent 7.67.0
+
+***Changed***:
+
+* Bump datadog-checks-base to 37.10.1 and python to 3.12 ([#20271](https://github.com/DataDog/integrations-core/pull/20271))
+
+## 3.0.1 / 2025-04-09 / Agent 7.66.0
+
+***Fixed***:
+
+* Properly support custom tags. ([#20022](https://github.com/DataDog/integrations-core/pull/20022))
+
 ## 3.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

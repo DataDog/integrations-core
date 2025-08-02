@@ -125,6 +125,18 @@ class OperationSampleOperationStatsCursor(TypedDict, total=False):
     operation_using_cursor_id: Optional[str]
 
 
+class OperationSampleOperationStatsTransaction(TypedDict, total=False):
+    txn_number: int
+    txn_retry_counter: int
+    time_open_micros: int
+    time_active_micros: int
+    time_inactive_micros: int
+
+
+class OperationSampleOperationStatsLsid(TypedDict, total=False):
+    id: str
+
+
 class OperationSampleOperationStats(TypedDict, total=False):
     active: bool
     desc: Optional[str]
@@ -134,7 +146,6 @@ class OperationSampleOperationStats(TypedDict, total=False):
     query_framework: Optional[str]
     current_op_time: str
     microsecs_running: Optional[int]
-    transaction_time_open_micros: Optional[int]
     prepare_read_conflicts: Optional[int]
     write_conflicts: Optional[int]
     num_yields: Optional[int]
@@ -145,6 +156,8 @@ class OperationSampleOperationStats(TypedDict, total=False):
     flow_control_stats: Optional[OperationSampleOperationStatsFlowControlStats]
     waiting_for_latch: Optional[OperationSampleOperationStatsWaitingForLatch]
     cursor = Optional[OperationSampleOperationStatsCursor]
+    transaction = Optional[OperationSampleOperationStatsTransaction]
+    lsid = Optional[OperationSampleOperationStatsLsid]
 
 
 class OperationSampleActivityBase(TypedDict, total=False):

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+from dateutil import tz
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -229,10 +230,12 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
     config = IBMMQConfig(instance_ssl_dummy, {})
 
     error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME)
-    with mock.patch(
-        'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
-    ) as get_normal_connection, mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection:
-
+    with (
+        mock.patch(
+            'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
+        ) as get_normal_connection,
+        mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection,
+    ):
         with pytest.raises(pymqi.MQMIError):
             get_queue_manager_connection(config, logger)
 
@@ -242,22 +245,22 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
     # normal connection failed with with error other those listed in get_queue_manager_connection
     for error_reason in [pymqi.CMQC.MQRC_HOST_NOT_AVAILABLE, pymqi.CMQC.MQRC_SSL_CONFIG_ERROR]:
         error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, error_reason)
-        with mock.patch(
-            'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
-        ) as get_normal_connection, mock.patch(
-            'datadog_checks.ibm_mq.connection.get_ssl_connection'
-        ) as get_ssl_connection:
-
+        with (
+            mock.patch(
+                'datadog_checks.ibm_mq.connection.get_normal_connection', side_effect=error
+            ) as get_normal_connection,
+            mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection,
+        ):
             get_queue_manager_connection(config, logger)
 
             get_normal_connection.assert_called_with(config, logger)
             get_ssl_connection.assert_called_with(config, logger)
 
     # no issue with normal connection
-    with mock.patch('datadog_checks.ibm_mq.connection.get_normal_connection') as get_normal_connection, mock.patch(
-        'datadog_checks.ibm_mq.connection.get_ssl_connection'
-    ) as get_ssl_connection:
-
+    with (
+        mock.patch('datadog_checks.ibm_mq.connection.get_normal_connection') as get_normal_connection,
+        mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection,
+    ):
         get_queue_manager_connection(config, logger)
 
         get_normal_connection.assert_called_with(config, logger)
@@ -270,3 +273,55 @@ def test_queue_manager_process_direct_ssl(instance):
     instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
     config = IBMMQConfig(instance, {})
     assert config.try_basic_auth is False
+
+
+@pytest.mark.parametrize(
+    'timezone_config, expected_timezone, expected_stats_tz, expected_error, use_qm_tz_for_metrics',
+    [
+        pytest.param('UTC', 'UTC', tz.UTC, None, False, id='default-utc-string'),
+        pytest.param('UTC', 'UTC', tz.UTC, None, True, id='default-utc-object'),
+        pytest.param(
+            'America/New_York',
+            'America/New_York',
+            tz.UTC,
+            None,
+            False,
+            id='valid-timezone-string',
+        ),
+        pytest.param(
+            'America/New_York', 'America/New_York', tz.gettz('America/New_York'), None, True, id='valid-timezone-object'
+        ),
+        pytest.param('Europe/London', 'Europe/London', tz.UTC, None, False, id='another-valid-timezone-string'),
+        pytest.param(
+            'Europe/London', 'Europe/London', tz.gettz('Europe/London'), None, True, id='another-valid-timezone-object'
+        ),
+        pytest.param('Invalid/Timezone', 'UTC', tz.UTC, 'Invalid timezone', False, id='invalid-timezone-string'),
+        pytest.param('Invalid/Timezone', 'UTC', tz.UTC, 'Invalid timezone', True, id='invalid-timezone-object'),
+    ],
+)
+def test_timezone_configuration(
+    instance, timezone_config, expected_timezone, expected_stats_tz, expected_error, use_qm_tz_for_metrics
+):
+    from datadog_checks.ibm_mq.config import IBMMQConfig
+
+    instance['queue_manager_timezone'] = timezone_config
+    instance['use_qm_tz_for_metrics'] = use_qm_tz_for_metrics
+    config = IBMMQConfig(instance, {})
+
+    # Test string representation (used for PCF metrics)
+    assert config.qm_timezone == expected_timezone
+
+    # Test timezone object (used for statistics messages)
+    assert config.qm_stats_tz == expected_stats_tz
+
+    # Test that both representations are consistent
+    if expected_error:
+        # When there's an error, both should default to UTC
+        assert config.qm_timezone == 'UTC'
+        assert config.qm_stats_tz == tz.UTC
+    else:
+        # For valid timezones, string should match the input timezone
+        assert config.qm_timezone == timezone_config
+
+    # Test the new option
+    assert config.use_qm_tz_for_metrics == use_qm_tz_for_metrics

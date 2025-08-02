@@ -45,10 +45,21 @@ instances:
     #
     # collect_sshare_stats: true
 
+    ## @param collect_scontrol_stats - boolean - optional - default: false
+    ## Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
+    ## node to collect the list of running jobs along with their PIDs.
+    #
+    # collect_scontrol_stats: false
+
     ## @param collect_gpu_stats - boolean - optional - default: false
     ## Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
     #
     # collect_gpu_stats: false
+
+    ## @param collect_seff_stats - boolean - optional - default: false
+    ## Whether or not to collect seff statistics.
+    #
+    # collect_seff_stats: false
 
     ## @param sinfo_collection_level - integer - optional - default: 1
     ## The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
@@ -82,6 +93,11 @@ instances:
     ## Full path to the squeue binary.
     #
     # squeue_path: /usr/bin/squeue
+
+    ## @param scontrol_path - string - optional - default: /usr/bin/scontrol
+    ## Full path to the scontrol binary.
+    #
+    # scontrol_path: /usr/bin/scontrol
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

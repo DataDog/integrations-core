@@ -1,0 +1,131 @@
+{
+    "Task": {
+      "Id": "ServerTasks-1844",
+      "SpaceId": "Spaces-1",
+      "Name": "Deploy",
+      "Description": "Deploy test-api release 0.1.5 to Development",
+      "Arguments": {
+        "DeploymentId": "Deployments-16"
+      },
+      "State": "Success",
+      "Completed": "Monday, 23 September 2024 2:57:22 PM +00:00",
+      "QueueTime": "2024-09-23T14:57:18.798+00:00",
+      "QueueTimeExpiry": null,
+      "StartTime": "2024-09-23T14:57:19.411+00:00",
+      "LastUpdatedTime": "2024-09-23T14:57:22.603+00:00",
+      "CompletedTime": "2024-09-23T14:57:22.603+00:00",
+      "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+      "Duration": "3 seconds",
+      "ErrorMessage": "",
+      "HasBeenPickedUpByProcessor": true,
+      "IsCompleted": true,
+      "FinishedSuccessfully": true,
+      "HasPendingInterruptions": false,
+      "CanRerun": false,
+      "HasWarningsOrErrors": false,
+      "UnmetPreconditions": null,
+      "ProjectId": "Projects-1",
+      "Links": {
+        "Self": "/api/tasks/ServerTasks-1844",
+        "Web": "/app#/Spaces-1/tasks/ServerTasks-1844",
+        "Raw": "/api/tasks/ServerTasks-1844/raw",
+        "Rerun": "/api/tasks/rerun/ServerTasks-1844",
+        "Cancel": "/api/tasks/ServerTasks-1844/cancel",
+        "State": "/api/tasks/ServerTasks-1844/state",
+        "BlockedBy": "/api/tasks/ServerTasks-1844/blockedby",
+        "QueuedBehind": "/api/tasks/ServerTasks-1844/queued-behind{?skip,take}",
+        "Details": "/api/tasks/ServerTasks-1844/details{?verbose,tail,ranges}",
+        "StatusMessages": "/api/tasks/ServerTasks-1844/status/messages",
+        "Prioritize": "/api/tasks/ServerTasks-1844/prioritize",
+        "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-1844",
+        "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-1844"
+      }
+    },
+    "ActivityLogs": [
+      {
+        "Id": "ServerTasks-1844_9JHSA77SGD",
+        "Name": "Deploy test-api release 0.1.5 to Development",
+        "Started": "2024-09-23T14:57:19.448+00:00",
+        "Ended": "2024-09-23T14:57:22.532+00:00",
+        "Status": "Success",
+        "ShowAtSummaryLevel": true,
+        "Children": [
+          {
+            "Id": "ServerTasks-1844_9JHSA77SGD/9bbbc7623baac23498923",
+            "Name": "Step 1: echo",
+            "Started": "2024-09-23T14:57:20.181+00:00",
+            "Ended": "2024-09-23T14:57:21.005+00:00",
+            "Status": "Success",
+            "ShowAtSummaryLevel": true,
+            "Children": [
+              {
+                "Id": "ServerTasks-1844_9JHSA77SGD/9bbbc7623baac23498923/817324bb1232abc95729712aa",
+                "Name": "Octopus Server",
+                "Started": "2024-09-23T14:57:20.181+00:00",
+                "Ended": "2024-09-23T14:57:21.004+00:00",
+                "Status": "Success",
+                "ShowAtSummaryLevel": true,
+                "Children": [],
+                "LogElements": [
+                  {
+                    "OccurredAt": "2024-09-23T14:57:20.967+00:00",
+                    "Category": "Info",
+                    "MessageText": "Testing",
+                    "Number": 44
+                  }
+                ]
+              }
+            ],
+            "LogElements": []
+          },
+          {
+            "Id": "ServerTasks-1844_9JHSA77SGD/17994a8f71c4461ea8153d43675f3c8f",
+            "Name": "Step 2: Run a Script",
+            "Started": "2024-09-23T14:57:21.224+00:00",
+            "Ended": "2024-09-23T14:57:22.068+00:00",
+            "Status": "Success",
+            "ShowAtSummaryLevel": true,
+            "Children": [
+              {
+                "Id": "ServerTasks-1844_9JHSA77SGD/17994a8f71c4461ea8153d43675f3c8f/0977b10aabs213d1234",
+                "Name": "Octopus Server",
+                "Started": "2024-09-23T14:57:21.224+00:00",
+                "Ended": "2024-09-23T14:57:22.067+00:00",
+                "Status": "Success",
+                "ShowAtSummaryLevel": true,
+                "Children": [],
+                "LogElements": [
+                  {
+                    "OccurredAt": "2024-09-23T14:57:22.029+00:00",
+                    "Category": "Info",
+                    "MessageText": "test",
+                    "Number": 44
+                  }
+                ]
+              }
+            ],
+            "LogElements": []
+          }
+        ],
+        "LogElements": [
+          {
+            "OccurredAt": "2024-09-23T14:57:22.532+00:00",
+            "Category": "Info",
+            "MessageText": "The deployment completed successfully.",
+            "Number": 3
+          }
+        ]
+      }
+    ],
+    "PhysicalLogSize": 23360,
+    "Progress": {
+      "ProgressPercentage": 0,
+      "EstimatedTimeRemaining": null
+    },
+    "Links": {
+      "Self": "/api/tasks/ServerTasks-1844/details",
+      "Task": "/api/tasks/ServerTasks-1844",
+      "Web": "/app#/Spaces-1/tasks/ServerTasks-1844",
+      "Raw": "/api/tasks/ServerTasks-1844/raw"
+    }
+}

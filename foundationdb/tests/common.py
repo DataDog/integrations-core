@@ -50,9 +50,9 @@ E2E_TLS_CONFIG = {'init_config': {}, 'instances': [E2E_TLS_INSTANCE]}
 
 E2E_METADATA = {
     'start_commands': [
-        'curl -o foundationdb-clients_6.3.23-1_amd64.deb '
-        '-L https://github.com/apple/foundationdb/releases/download/6.3.23/foundationdb-clients_6.3.23-1_amd64.deb',
-        'dpkg -i foundationdb-clients_6.3.23-1_amd64.deb',
+        'curl -o foundationdb-clients_6.3.25-1_amd64.deb '
+        '-L https://github.com/apple/foundationdb/releases/download/6.3.25/foundationdb-clients_6.3.25-1_amd64.deb',
+        'dpkg -i foundationdb-clients_6.3.25-1_amd64.deb',
     ],
     'docker_volumes': [
         '{}:/fdb/fdb.cluster'.format(CLUSTER_FILE),
@@ -63,6 +63,13 @@ E2E_METADATA = {
 }
 
 METRICS = [
+    "foundationdb.clients.connected",
+    "foundationdb.cluster_generation",
+    "foundationdb.coordinators",
+    "foundationdb.excluded_machines",
+    "foundationdb.excluded_processes",
+    "foundationdb.fault_tolerance.max_zone_failures_without_losing_availability",
+    "foundationdb.fault_tolerance.max_zone_failures_without_losing_data",
     "foundationdb.latency_probe.batch_priority_transaction_start_seconds",
     "foundationdb.latency_probe.commit_seconds",
     "foundationdb.latency_probe.immediate_priority_transaction_start_seconds",
@@ -71,6 +78,12 @@ METRICS = [
     "foundationdb.machines",
     "foundationdb.processes",
     "foundationdb.degraded_processes",
+    "foundationdb.workload.bytes.read.counter",
+    "foundationdb.workload.bytes.read.hz",
+    "foundationdb.workload.bytes.written.counter",
+    "foundationdb.workload.bytes.written.hz",
+    "foundationdb.workload.keys.read.counter",
+    "foundationdb.workload.keys.read.hz",
     "foundationdb.workload.transactions.committed.counter",
     "foundationdb.workload.transactions.committed.hz",
     "foundationdb.workload.transactions.conflicted.counter",
@@ -97,6 +110,7 @@ METRICS = [
     "foundationdb.workload.operations.reads.hz",
     "foundationdb.workload.operations.writes.counter",
     "foundationdb.workload.operations.writes.hz",
+    "foundationdb.data.average_partition_size_bytes",
     "foundationdb.data.system_kv_size_bytes",
     "foundationdb.data.total_disk_used_bytes",
     "foundationdb.data.total_kv_size_bytes",
@@ -104,6 +118,7 @@ METRICS = [
     "foundationdb.data.moving_data.in_flight_bytes",
     "foundationdb.data.moving_data.in_queue_bytes",
     "foundationdb.data.moving_data.total_written_bytes",
+    "foundationdb.data.partitions_count",
     "foundationdb.datacenter_lag.seconds",
     "foundationdb.instances",
     "foundationdb.process.role.input_bytes.hz",
@@ -126,6 +141,8 @@ METRICS = [
     "foundationdb.process.role.mutations.counter",
     "foundationdb.process.role.stored_bytes",
     "foundationdb.process.role.query_queue_max",
+    "foundationdb.process.role.queue_disk_available_bytes",
+    "foundationdb.process.role.queue_disk_total_bytes",
     "foundationdb.process.role.local_rate",
     "foundationdb.process.role.kvstore_available_bytes",
     "foundationdb.process.role.kvstore_free_bytes",
@@ -135,6 +152,7 @@ METRICS = [
     "foundationdb.process.role.kvstore_total_size",
     "foundationdb.process.role.kvstore_used_bytes",
     "foundationdb.process.cpu.usage_cores",
+    "foundationdb.process.disk.busy",
     "foundationdb.process.disk.free_bytes",
     "foundationdb.process.disk.reads.hz",
     "foundationdb.process.disk.total_bytes",
@@ -171,6 +189,7 @@ METRICS = [
     "foundationdb.process.role.read_latency_statistics.p90",
     "foundationdb.process.role.read_latency_statistics.p99",
     "foundationdb.process.role.queue_length",
+    "foundationdb.processes_per_role",
     "foundationdb.processes_per_role.cluster_controller",
     "foundationdb.processes_per_role.coordinator",
     "foundationdb.processes_per_role.data_distributor",
@@ -180,4 +199,9 @@ METRICS = [
     "foundationdb.processes_per_role.ratekeeper",
     "foundationdb.processes_per_role.resolver",
     "foundationdb.processes_per_role.storage",
+    "foundationdb.qos.batch_transactions_per_second_limit",
+    "foundationdb.qos.released_transactions_per_second",
+    "foundationdb.qos.transactions_per_second_limit",
+    "foundationdb.qos.worst_queue_bytes_log_server",
+    "foundationdb.qos.worst_queue_bytes_storage_server",
 ]

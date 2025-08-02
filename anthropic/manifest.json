@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor Anthropic usage and health at the application level",
+    "description": "Monitor, optimize, and evaluate your LLM applications using Anthropic",
     "title": "Anthropic",
     "media": [],
     "classifier_tags": [

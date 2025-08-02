@@ -1,0 +1,576 @@
+{
+    "title": "Bitdefender - User Control Event Details",
+    "description": "The Bitdefender User Control Event Details dashboard provides insights about endpoint user activity that has been blocked according to your applied policy.",
+    "widgets": [
+      {
+        "id": 7040578069690868,
+        "definition": {
+          "type": "image",
+          "url": "https://fieldtrust.be/wp-content/uploads/2023/09/Bitdefender_Masterbrand_Logo_Positive-1-1024x236.png",
+          "sizing": "contain",
+          "margin": "md",
+          "has_background": true,
+          "has_border": true,
+          "vertical_align": "center",
+          "horizontal_align": "center"
+        },
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 6106324979267452,
+        "definition": {
+          "type": "note",
+          "content": "**Dashboard Overview**\n\nThe Bitdefender User Control Event Details dashboard provides insights about endpoint user activity that has been blocked according to your applied policy.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+          "background_color": "white",
+          "font_size": "14",
+          "text_align": "left",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 6,
+          "y": 0,
+          "width": 6,
+          "height": 4
+        }
+      },
+      {
+        "id": 8381815651878924,
+        "definition": {
+          "title": "User Control Events Overview",
+          "background_color": "vivid_purple",
+          "show_title": true,
+          "type": "group",
+          "layout_type": "ordered",
+          "widgets": [
+            {
+              "id": 7647676261691942,
+              "definition": {
+                "title": "Total User Control Logs Count",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                  {
+                    "response_format": "scalar",
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "value": 0,
+                        "palette": "black_on_light_green"
+                      }
+                    ]
+                  }
+                ],
+                "autoscale": true,
+                "precision": 2
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 4
+              }
+            },
+            {
+              "id": 5401124096925314,
+              "definition": {
+                "title": "User Control Logs Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "alias": "COUNT",
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "timeseries",
+                    "style": {
+                      "palette": "dog_classic",
+                      "order_by": "values",
+                      "line_type": "solid",
+                      "line_width": "normal"
+                    },
+                    "display_type": "line"
+                  }
+                ]
+              },
+              "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 4
+              }
+            },
+            {
+              "id": 7850676414570406,
+              "definition": {
+                "title": "Events by User Control Event Type",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.uc_type",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "sort": {
+                      "count": 500,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    },
+                    "style": {
+                      "palette": "datadog16"
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "table"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 5
+              }
+            },
+            {
+              "id": 3423228084877634,
+              "definition": {
+                "title": "Events by Block Type",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.block_type",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "sort": {
+                      "count": 500,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    },
+                    "style": {
+                      "palette": "datadog16"
+                    }
+                  }
+                ],
+                "type": "sunburst",
+                "legend": {
+                  "type": "table"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 5
+              }
+            },
+            {
+              "id": 563247584849604,
+              "definition": {
+                "title": "Top 10 Categories",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.categories",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  },
+                  "palette": "dog_classic"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 6,
+                "height": 4
+              }
+            },
+            {
+              "id": 8336505781298466,
+              "definition": {
+                "title": "Top 10 URLs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.url",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 10,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  },
+                  "palette": "dog_classic"
+                }
+              },
+              "layout": {
+                "x": 6,
+                "y": 14,
+                "width": 6,
+                "height": 4
+              }
+            },
+            {
+              "id": 2828062372756458,
+              "definition": {
+                "title": "Top 10 Application Path",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "queries": [
+                      {
+                        "data_source": "logs",
+                        "name": "query1",
+                        "indexes": [
+                          "*"
+                        ],
+                        "compute": {
+                          "aggregation": "count"
+                        },
+                        "group_by": [
+                          {
+                            "facet": "@params.events.application_path",
+                            "limit": 10,
+                            "sort": {
+                              "order": "desc",
+                              "aggregation": "count"
+                            }
+                          }
+                        ],
+                        "search": {
+                          "query": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type"
+                        },
+                        "storage": "hot"
+                      }
+                    ],
+                    "response_format": "scalar",
+                    "formulas": [
+                      {
+                        "formula": "query1"
+                      }
+                    ],
+                    "sort": {
+                      "count": 500,
+                      "order_by": [
+                        {
+                          "type": "formula",
+                          "index": 0,
+                          "order": "desc"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "style": {
+                  "display": {
+                    "type": "stacked",
+                    "legend": "automatic"
+                  },
+                  "palette": "datadog16"
+                }
+              },
+              "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 4
+              }
+            },
+            {
+              "id": 2176735841497242,
+              "definition": {
+                "title": "User Control Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                  {
+                    "response_format": "event_list",
+                    "query": {
+                      "data_source": "logs_stream",
+                      "query_string": "source:bitdefender @params.events.module:uc $Computer_IP $Category $Block_Type",
+                      "indexes": [],
+                      "storage": "hot"
+                    },
+                    "columns": [
+                      {
+                        "field": "status_line",
+                        "width": "auto"
+                      },
+                      {
+                        "field": "timestamp",
+                        "width": "auto"
+                      },
+                      {
+                        "field": "content",
+                        "width": "compact"
+                      }
+                    ]
+                  }
+                ],
+                "type": "list_stream"
+              },
+              "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 12,
+                "height": 5
+              }
+            }
+          ]
+        },
+        "layout": {
+          "x": 0,
+          "y": 4,
+          "width": 12,
+          "height": 28,
+          "is_column_break": true
+        }
+      }
+    ],
+    "template_variables": [
+      {
+        "name": "Computer_IP",
+        "prefix": "@params.events.computer_ip",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Category",
+        "prefix": "@params.events.categories",
+        "available_values": [],
+        "default": "*"
+      },
+      {
+        "name": "Block_Type",
+        "prefix": "@params.events.block_type",
+        "available_values": [],
+        "default": "*"
+      }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+  }

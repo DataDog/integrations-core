@@ -775,7 +775,7 @@ teleport_cache_events{cache_component="auth"} 21
 teleport_cache_events{cache_component="node"} 11
 teleport_cache_events{cache_component="proxy"} 20
 # HELP teleport_cache_stale_events Number of stale events received by a Teleport service cache. A high percentage of stale events can indicate a degraded backend.
-# TYPE teleport_cache_stale_events  counter
+# TYPE teleport_cache_stale_events counter
 teleport_cache_stale_events {cache_component="auth"} 1
 teleport_cache_stale_events {cache_component="node"} 2
 teleport_cache_stale_events {cache_component="proxy"} 3
@@ -1089,6 +1089,10 @@ auth_generate_seconds_bucket{le="1"} 25
 auth_generate_seconds_bucket{le="+Inf"} 30
 auth_generate_seconds_sum 33.0
 auth_generate_seconds_count 30
+
+# HELP teleport_roles_total Number of roles that exist in the cluster
+# TYPE teleport_roles_total gauge
+teleport_roles_total 70
 
 # TYPE teleport_audit_emit_events counter
 teleport_audit_emit_events_total 0

@@ -46,9 +46,14 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
+        "cilium-operator",
+        "cilium-operator-alibabacloud",
+        "cilium-operator-azure",
+        "cilium-operator-aws",
         "cilium-operator-generic",
         "cilium-agent",
-        "cilium-health-responder"
+        "cilium-health-responder",
+        "clustermesh-apiserver"
       ],
       "source_type_id": 10077,
       "auto_install": true

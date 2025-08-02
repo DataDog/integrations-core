@@ -18,7 +18,8 @@ FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixture
 CAPACITY_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'capacity')
 FABRIC_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'fabric')
 TENANT_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'tenant')
-ALL_FIXTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR]
+FAULTS_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'faults')
+ALL_FIXTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR, FAULTS_FIXTURES_DIR]
 
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
@@ -33,6 +34,8 @@ CONFIG_WITH_TAGS = {
     'tenant': ['DataDog'],
     "tags": ["project:cisco_aci"],
     "send_ndm_metadata": True,
+    "send_faultinst_faults": True,
+    "send_faultdelegate_faults": True,
 }
 
 # list of fixture names
@@ -183,6 +186,14 @@ FIXTURE_LIST = [
     # 9ec9c2e1bcd513274516713bc3f68724 - Api.get_eth_list_and_stats
     '_api_node_class_topology_pod_1_node_101_l1PhysIf_json_rsp_subtree_children_rsp_subtree_include_stats_rsp_subtree_class_ethpmPhysIf_eqptEgrTotal5min_eqptIngrTotal5min_eqptEgrDropPkts5min_eqptEgrBytes5min_eqptIngrBytes5min',
     # 9bd6720132f1eef5ae8ec7d6438d9c6b - Api.get_eth_list_and_stats
+    '_api_node_class_faultInst_json',
+    # 431f5593e6349e09f0097d3f23dea75c - Api.get_faultinst_faults
+    '_api_node_class_faultDelegate_json',
+    # 5d56882ce9d312af184fedfe77bc08df - Api.get_faultdelegate_faults
+    '_api_node_class_faultInst_json_query_target_filter_and_gt_faultInst_lastTransition__1741816605_365___',
+    # 5058ab43747e6423c036a89104ec05dc - Api.get_faultinst_faults
+    '_api_node_class_faultDelegate_json_query_target_filter_and_gt_faultDelegate_lastTransition__1741791186_041___',
+    # 8bf03ccb4d494c0f8d05f7e8d9115dfd - Api.get_faultdelegate_faults
 ]
 
 # The map will contain the md5 hash to the fixture
@@ -243,3 +254,7 @@ class FakeTenantSessionWrapper(FakeSessionWrapper):
 
 class FakeFabricSessionWrapper(FakeSessionWrapper):
     fixture_dirs = [FABRIC_FIXTURES_DIR]
+
+
+class FakeFaultsSessionWrapper(FakeSessionWrapper):
+    fixture_dirs = [FAULTS_FIXTURES_DIR]

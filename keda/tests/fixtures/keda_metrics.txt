@@ -1,0 +1,1162 @@
+# HELP certwatcher_read_certificate_errors_total Total number of certificate read errors
+# TYPE certwatcher_read_certificate_errors_total counter
+certwatcher_read_certificate_errors_total 0
+# HELP controller_runtime_webhook_panics_total Total number of webhook panics
+# TYPE controller_runtime_webhook_panics_total counter
+controller_runtime_webhook_panics_total 0
+# HELP controller_runtime_webhook_requests_in_flight Current number of admission requests being served.
+# TYPE controller_runtime_webhook_requests_in_flight gauge
+controller_runtime_webhook_requests_in_flight{webhook="/validate-eventing-keda-sh-v1alpha1-cloudeventsource"} 0
+controller_runtime_webhook_requests_in_flight{webhook="/validate-eventing-keda-sh-v1alpha1-clustercloudeventsource"} 0
+controller_runtime_webhook_requests_in_flight{webhook="/validate-keda-sh-v1alpha1-clustertriggerauthentication"} 0
+controller_runtime_webhook_requests_in_flight{webhook="/validate-keda-sh-v1alpha1-scaledjob"} 0
+controller_runtime_webhook_requests_in_flight{webhook="/validate-keda-sh-v1alpha1-scaledobject"} 0
+controller_runtime_webhook_requests_in_flight{webhook="/validate-keda-sh-v1alpha1-triggerauthentication"} 0
+# HELP controller_runtime_webhook_requests_total Total number of admission requests by HTTP status code.
+# TYPE controller_runtime_webhook_requests_total counter
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-eventing-keda-sh-v1alpha1-cloudeventsource"} 0
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-eventing-keda-sh-v1alpha1-clustercloudeventsource"} 0
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-keda-sh-v1alpha1-clustertriggerauthentication"} 0
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-keda-sh-v1alpha1-scaledjob"} 0
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-keda-sh-v1alpha1-scaledobject"} 0
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-keda-sh-v1alpha1-triggerauthentication"} 0
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-eventing-keda-sh-v1alpha1-cloudeventsource"} 0
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-eventing-keda-sh-v1alpha1-clustercloudeventsource"} 0
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-keda-sh-v1alpha1-clustertriggerauthentication"} 0
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-keda-sh-v1alpha1-scaledjob"} 0
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-keda-sh-v1alpha1-scaledobject"} 0
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-keda-sh-v1alpha1-triggerauthentication"} 0
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 8.042e-06
+go_gc_duration_seconds{quantile="0.25"} 8.042e-06
+go_gc_duration_seconds{quantile="0.5"} 0.000170208
+go_gc_duration_seconds{quantile="0.75"} 0.000170208
+go_gc_duration_seconds{quantile="1"} 0.000170208
+go_gc_duration_seconds_sum 0.00017825
+go_gc_duration_seconds_count 2
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 3.223464e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 22526
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 2.736128e+06
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 12431
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.7326008802889886e+09
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 34957
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 75040
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 81600
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 557056
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 3.7474304e+07
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP aggregator_discovery_aggregation_count_total [ALPHA] Counter of number of times discovery was aggregated
+# TYPE aggregator_discovery_aggregation_count_total counter
+aggregator_discovery_aggregation_count_total 1
+# HELP apiserver_audit_event_total [ALPHA] Counter of audit events generated and sent to the audit backend.
+# TYPE apiserver_audit_event_total counter
+apiserver_audit_event_total 0
+# HELP apiserver_audit_requests_rejected_total [ALPHA] Counter of apiserver requests rejected due to an error in audit logging backend.
+# TYPE apiserver_audit_requests_rejected_total counter
+apiserver_audit_requests_rejected_total 0
+# HELP apiserver_client_certificate_expiration_seconds [ALPHA] Distribution of the remaining lifetime on the certificate used to authenticate a request.
+# TYPE apiserver_client_certificate_expiration_seconds histogram
+apiserver_client_certificate_expiration_seconds_bucket{le="0"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="1800"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="3600"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="7200"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="21600"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="43200"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="86400"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="172800"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="345600"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="604800"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="2.592e+06"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="7.776e+06"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="1.5552e+07"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="3.1104e+07"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="+Inf"} 0
+apiserver_client_certificate_expiration_seconds_sum 0
+apiserver_client_certificate_expiration_seconds_count 0
+# HELP apiserver_current_inflight_requests [STABLE] Maximal number of currently used inflight request limit of this apiserver per request kind in last second.
+# TYPE apiserver_current_inflight_requests gauge
+apiserver_current_inflight_requests{request_kind="mutating"} 0
+apiserver_current_inflight_requests{request_kind="readOnly"} 0
+# HELP apiserver_delegated_authz_request_duration_seconds [ALPHA] Request latency in seconds. Broken down by status code.
+# TYPE apiserver_delegated_authz_request_duration_seconds histogram
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="0.25"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="0.5"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="0.7"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="1"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="1.5"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="3"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="5"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="10"} 12
+apiserver_delegated_authz_request_duration_seconds_bucket{code="201",le="+Inf"} 12
+apiserver_delegated_authz_request_duration_seconds_sum{code="201"} 0.045623252
+apiserver_delegated_authz_request_duration_seconds_count{code="201"} 12
+# HELP apiserver_delegated_authz_request_total [ALPHA] Number of HTTP requests partitioned by status code.
+# TYPE apiserver_delegated_authz_request_total counter
+apiserver_delegated_authz_request_total{code="201"} 12
+# HELP apiserver_envelope_encryption_dek_cache_fill_percent [ALPHA] Percent of the cache slots currently occupied by cached DEKs.
+# TYPE apiserver_envelope_encryption_dek_cache_fill_percent gauge
+apiserver_envelope_encryption_dek_cache_fill_percent 0
+# HELP apiserver_flowcontrol_read_vs_write_current_requests EXPERIMENTAL: [ALPHA] Observations, at the end of every nanosecond, of the number of requests (as a fraction of the relevant limit) waiting or in regular stage of execution
+# TYPE apiserver_flowcontrol_read_vs_write_current_requests histogram
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0"} 3.43803666325e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.001"} 3.43803666325e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.01"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.1"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.2"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.3"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.4"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.5"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.6"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.7"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.8"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.9"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.95"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="0.99"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="1"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_bucket{phase="executing",request_kind="readOnly",le="+Inf"} 3.43861560783e+11
+apiserver_flowcontrol_read_vs_write_current_requests_sum{phase="executing",request_kind="readOnly"} 195506.455
+apiserver_flowcontrol_read_vs_write_current_requests_count{phase="executing",request_kind="readOnly"} 3.43861560783e+11
+# HELP apiserver_flowcontrol_seat_fair_frac [ALPHA] Fair fraction of server's concurrency to allocate to each priority level that can use it
+# TYPE apiserver_flowcontrol_seat_fair_frac gauge
+apiserver_flowcontrol_seat_fair_frac 0
+# HELP apiserver_request_duration_seconds [STABLE] Response latency distribution in seconds for each verb, dry run value, group, version, resource, subresource, scope and component.
+# TYPE apiserver_request_duration_seconds histogram
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.005"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.025"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.05"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.1"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.2"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.4"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.6"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.8"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1.25"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1.5"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="2"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="3"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="4"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="5"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="6"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="8"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="10"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="15"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="20"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="30"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="45"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="60"} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="+Inf"} 34
+apiserver_request_duration_seconds_sum{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 0.010738917999999998
+apiserver_request_duration_seconds_count{component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 34
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.005"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.025"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.05"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.1"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.2"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.4"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.6"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.8"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1.25"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1.5"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="2"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="3"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="4"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="5"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="6"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="8"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="10"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="15"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="20"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="30"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="45"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="60"} 115
+apiserver_request_duration_seconds_bucket{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="+Inf"} 115
+apiserver_request_duration_seconds_sum{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 0.034279792
+apiserver_request_duration_seconds_count{component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 115
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.005"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.025"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.05"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.1"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.2"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.4"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.6"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.8"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1.25"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1.5"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="2"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="3"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="4"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="5"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="6"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="8"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="10"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="15"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="20"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="30"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="45"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="60"} 7
+apiserver_request_duration_seconds_bucket{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="+Inf"} 7
+apiserver_request_duration_seconds_sum{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 0.004998374999999999
+apiserver_request_duration_seconds_count{component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 7
+# HELP apiserver_request_filter_duration_seconds [ALPHA] Request filter latency distribution in seconds, for each filter type
+# TYPE apiserver_request_filter_duration_seconds histogram
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.0001"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.0003"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.001"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.003"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.01"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.03"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="0.3"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="5"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="10"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="15"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="30"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="audit",le="+Inf"} 239
+apiserver_request_filter_duration_seconds_sum{filter="audit"} 0.0001087550000000001
+apiserver_request_filter_duration_seconds_count{filter="audit"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.0001"} 183
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.0003"} 232
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.001"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.003"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.01"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.03"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="0.3"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="5"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="10"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="15"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="30"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authentication",le="+Inf"} 239
+apiserver_request_filter_duration_seconds_sum{filter="authentication"} 0.017057584000000008
+apiserver_request_filter_duration_seconds_count{filter="authentication"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.0001"} 227
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.0003"} 227
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.001"} 227
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.003"} 232
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.01"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.03"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="0.3"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="5"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="10"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="15"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="30"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="authorization",le="+Inf"} 239
+apiserver_request_filter_duration_seconds_sum{filter="authorization"} 0.04983261600000001
+apiserver_request_filter_duration_seconds_count{filter="authorization"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.0001"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.0003"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.001"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.003"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.01"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.03"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="0.3"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="1"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="5"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="10"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="15"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="30"} 239
+apiserver_request_filter_duration_seconds_bucket{filter="impersonation",le="+Inf"} 239
+apiserver_request_filter_duration_seconds_sum{filter="impersonation"} 0.002865845
+apiserver_request_filter_duration_seconds_count{filter="impersonation"} 239
+# HELP apiserver_request_sli_duration_seconds [ALPHA] Response latency distribution (not counting webhook duration and priority & fairness queue wait times) in seconds for each verb, group, version, resource, subresource, scope and component.
+# TYPE apiserver_request_sli_duration_seconds histogram
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.05"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.1"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.2"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.4"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.6"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.8"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1.25"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1.5"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="2"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="3"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="4"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="5"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="6"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="8"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="10"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="15"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="20"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="30"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="45"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="60"} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="+Inf"} 34
+apiserver_request_sli_duration_seconds_sum{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 0.010738917999999998
+apiserver_request_sli_duration_seconds_count{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 34
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.05"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.1"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.2"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.4"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.6"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.8"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1.25"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1.5"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="2"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="3"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="4"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="5"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="6"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="8"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="10"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="15"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="20"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="30"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="45"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="60"} 115
+apiserver_request_sli_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="+Inf"} 115
+apiserver_request_sli_duration_seconds_sum{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 0.034279792
+apiserver_request_sli_duration_seconds_count{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 115
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.05"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.1"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.2"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.4"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.6"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.8"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1.25"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1.5"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="2"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="3"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="4"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="5"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="6"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="8"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="10"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="15"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="20"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="30"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="45"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="60"} 7
+apiserver_request_sli_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="+Inf"} 7
+apiserver_request_sli_duration_seconds_sum{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 0.004998374999999999
+apiserver_request_sli_duration_seconds_count{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 7
+# HELP apiserver_request_slo_duration_seconds [ALPHA] Response latency distribution (not counting webhook duration and priority & fairness queue wait times) in seconds for each verb, group, version, resource, subresource, scope and component.
+# TYPE apiserver_request_slo_duration_seconds histogram
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.05"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.1"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.2"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.4"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.6"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="0.8"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1.25"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1.5"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="2"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="3"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="4"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="5"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="6"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="8"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="10"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="15"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="20"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="30"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="45"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="60"} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="+Inf"} 34
+apiserver_request_slo_duration_seconds_sum{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 0.010738917999999998
+apiserver_request_slo_duration_seconds_count{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 34
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.05"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.1"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.2"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.4"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.6"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="0.8"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1.25"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1.5"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="2"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="3"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="4"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="5"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="6"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="8"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="10"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="15"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="20"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="30"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="45"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="60"} 115
+apiserver_request_slo_duration_seconds_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="+Inf"} 115
+apiserver_request_slo_duration_seconds_sum{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 0.034279792
+apiserver_request_slo_duration_seconds_count{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 115
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.05"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.1"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.2"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.4"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.6"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="0.8"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1.25"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1.5"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="2"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="3"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="4"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="5"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="6"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="8"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="10"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="15"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="20"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="30"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="45"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="60"} 7
+apiserver_request_slo_duration_seconds_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="+Inf"} 7
+apiserver_request_slo_duration_seconds_sum{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 0.004998374999999999
+apiserver_request_slo_duration_seconds_count{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 7
+# HELP apiserver_request_total [STABLE] Counter of apiserver requests broken out for each verb, dry run value, group, version, resource, scope, component, and HTTP response code.
+# TYPE apiserver_request_total counter
+apiserver_request_total{code="200",component="",dry_run="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 34
+apiserver_request_total{code="200",component="",dry_run="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 115
+apiserver_request_total{code="304",component="apiserver",dry_run="",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 7
+# HELP apiserver_response_sizes [STABLE] Response size distribution in bytes for each group, version, verb, resource, subresource, scope and component.
+# TYPE apiserver_response_sizes histogram
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1000"} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="10000"} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="100000"} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1e+06"} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1e+07"} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1e+08"} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="1e+09"} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version="",le="+Inf"} 34
+apiserver_response_sizes_sum{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 68
+apiserver_response_sizes_count{component="",group="",resource="",scope="",subresource="/healthz",verb="GET",version=""} 34
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1000"} 115
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="10000"} 115
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="100000"} 115
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1e+06"} 115
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1e+07"} 115
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1e+08"} 115
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="1e+09"} 115
+apiserver_response_sizes_bucket{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version="",le="+Inf"} 115
+apiserver_response_sizes_sum{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 230
+apiserver_response_sizes_count{component="",group="",resource="",scope="",subresource="/readyz",verb="GET",version=""} 115
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1000"} 7
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="10000"} 7
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="100000"} 7
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1e+06"} 7
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1e+07"} 7
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1e+08"} 7
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="1e+09"} 7
+apiserver_response_sizes_bucket{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version="",le="+Inf"} 7
+apiserver_response_sizes_sum{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 0
+apiserver_response_sizes_count{component="apiserver",group="",resource="",scope="",subresource="apis",verb="GET",version=""} 7
+# HELP apiserver_storage_data_key_generation_duration_seconds [ALPHA] Latencies in seconds of data encryption key(DEK) generation operations.
+# TYPE apiserver_storage_data_key_generation_duration_seconds histogram
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="5e-06"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="1e-05"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="2e-05"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="4e-05"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="8e-05"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.00016"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.00032"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.00064"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.00128"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.00256"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.00512"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.01024"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.02048"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="0.04096"} 0
+apiserver_storage_data_key_generation_duration_seconds_bucket{le="+Inf"} 0
+apiserver_storage_data_key_generation_duration_seconds_sum 0
+apiserver_storage_data_key_generation_duration_seconds_count 0
+# HELP apiserver_storage_data_key_generation_failures_total [ALPHA] Total number of failed data encryption key(DEK) generation operations.
+# TYPE apiserver_storage_data_key_generation_failures_total counter
+apiserver_storage_data_key_generation_failures_total 0
+# HELP apiserver_storage_envelope_transformation_cache_misses_total [ALPHA] Total number of cache misses while accessing key decryption key(KEK).
+# TYPE apiserver_storage_envelope_transformation_cache_misses_total counter
+apiserver_storage_envelope_transformation_cache_misses_total 0
+# HELP apiserver_tls_handshake_errors_total [ALPHA] Number of requests dropped with 'TLS handshake error from' error
+# TYPE apiserver_tls_handshake_errors_total counter
+apiserver_tls_handshake_errors_total 2
+# HELP apiserver_webhooks_x509_insecure_sha1_total [ALPHA] Counts the number of requests to servers with insecure SHA1 signatures in their serving certificate OR the number of connection failures due to the insecure SHA1 signatures (either/or, based on the runtime environment)
+# TYPE apiserver_webhooks_x509_insecure_sha1_total counter
+apiserver_webhooks_x509_insecure_sha1_total 0
+# HELP apiserver_webhooks_x509_missing_san_total [ALPHA] Counts the number of requests to servers missing SAN extension in their serving certificate OR the number of connection failures due to the lack of x509 certificate SAN extension missing (either/or, based on the runtime environment)
+# TYPE apiserver_webhooks_x509_missing_san_total counter
+apiserver_webhooks_x509_missing_san_total 0
+# HELP authenticated_user_requests [ALPHA] Counter of authenticated requests broken out by username.
+# TYPE authenticated_user_requests counter
+authenticated_user_requests{username="other"} 239
+# HELP authentication_attempts [ALPHA] Counter of authenticated attempts.
+# TYPE authentication_attempts counter
+authentication_attempts{result="success"} 239
+# HELP authentication_duration_seconds [ALPHA] Authentication duration in seconds broken out by result.
+# TYPE authentication_duration_seconds histogram
+authentication_duration_seconds_bucket{result="success",le="0.001"} 239
+authentication_duration_seconds_bucket{result="success",le="0.002"} 239
+authentication_duration_seconds_bucket{result="success",le="0.004"} 239
+authentication_duration_seconds_bucket{result="success",le="0.008"} 239
+authentication_duration_seconds_bucket{result="success",le="0.016"} 239
+authentication_duration_seconds_bucket{result="success",le="0.032"} 239
+authentication_duration_seconds_bucket{result="success",le="0.064"} 239
+authentication_duration_seconds_bucket{result="success",le="0.128"} 239
+authentication_duration_seconds_bucket{result="success",le="0.256"} 239
+authentication_duration_seconds_bucket{result="success",le="0.512"} 239
+authentication_duration_seconds_bucket{result="success",le="1.024"} 239
+authentication_duration_seconds_bucket{result="success",le="2.048"} 239
+authentication_duration_seconds_bucket{result="success",le="4.096"} 239
+authentication_duration_seconds_bucket{result="success",le="8.192"} 239
+authentication_duration_seconds_bucket{result="success",le="16.384"} 239
+authentication_duration_seconds_bucket{result="success",le="+Inf"} 239
+authentication_duration_seconds_sum{result="success"} 0.013010210000000003
+authentication_duration_seconds_count{result="success"} 239
+# HELP authorization_attempts_total [ALPHA] Counter of authorization attempts broken down by result. It can be either 'allowed', 'denied', 'no-opinion' or 'error'.
+# TYPE authorization_attempts_total counter
+authorization_attempts_total{result="allowed"} 239
+# HELP authorization_duration_seconds [ALPHA] Authorization duration in seconds broken out by result.
+# TYPE authorization_duration_seconds histogram
+authorization_duration_seconds_bucket{result="allowed",le="0.001"} 227
+authorization_duration_seconds_bucket{result="allowed",le="0.002"} 228
+authorization_duration_seconds_bucket{result="allowed",le="0.004"} 235
+authorization_duration_seconds_bucket{result="allowed",le="0.008"} 239
+authorization_duration_seconds_bucket{result="allowed",le="0.016"} 239
+authorization_duration_seconds_bucket{result="allowed",le="0.032"} 239
+authorization_duration_seconds_bucket{result="allowed",le="0.064"} 239
+authorization_duration_seconds_bucket{result="allowed",le="0.128"} 239
+authorization_duration_seconds_bucket{result="allowed",le="0.256"} 239
+authorization_duration_seconds_bucket{result="allowed",le="0.512"} 239
+authorization_duration_seconds_bucket{result="allowed",le="1.024"} 239
+authorization_duration_seconds_bucket{result="allowed",le="2.048"} 239
+authorization_duration_seconds_bucket{result="allowed",le="4.096"} 239
+authorization_duration_seconds_bucket{result="allowed",le="8.192"} 239
+authorization_duration_seconds_bucket{result="allowed",le="16.384"} 239
+authorization_duration_seconds_bucket{result="allowed",le="+Inf"} 239
+authorization_duration_seconds_sum{result="allowed"} 0.048879254000000004
+authorization_duration_seconds_count{result="allowed"} 239
+# HELP cardinality_enforcement_unexpected_categorizations_total [ALPHA] The count of unexpected categorizations during cardinality enforcement.
+# TYPE cardinality_enforcement_unexpected_categorizations_total counter
+cardinality_enforcement_unexpected_categorizations_total 0
+# HELP disabled_metrics_total [BETA] The count of disabled metrics.
+# TYPE disabled_metrics_total counter
+disabled_metrics_total 0
+# HELP field_validation_request_duration_seconds [ALPHA] Response latency distribution in seconds for each field validation value
+# TYPE field_validation_request_duration_seconds histogram
+field_validation_request_duration_seconds_bucket{field_validation="",le="0.05"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="0.1"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="0.2"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="0.4"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="0.6"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="0.8"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="1"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="1.25"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="1.5"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="2"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="3"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="4"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="5"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="6"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="8"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="10"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="15"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="20"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="30"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="45"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="60"} 0
+field_validation_request_duration_seconds_bucket{field_validation="",le="+Inf"} 0
+field_validation_request_duration_seconds_sum{field_validation=""} 0
+field_validation_request_duration_seconds_count{field_validation=""} 0
+# HELP hidden_metrics_total [BETA] The count of hidden metrics.
+# TYPE hidden_metrics_total counter
+hidden_metrics_total 0
+# HELP registered_metrics_total [BETA] The count of registered metrics broken by stability level and deprecation version.
+# TYPE registered_metrics_total counter
+registered_metrics_total{deprecated_version="",stability_level="ALPHA"} 120
+registered_metrics_total{deprecated_version="",stability_level="BETA"} 13
+registered_metrics_total{deprecated_version="",stability_level="STABLE"} 12
+registered_metrics_total{deprecated_version="1.27.0",stability_level="ALPHA"} 1
+registered_metrics_total{deprecated_version="1.28.0",stability_level="ALPHA"} 1
+registered_metrics_total{deprecated_version="1.30.0",stability_level="ALPHA"} 3
+registered_metrics_total{deprecated_version="1.31.0",stability_level="ALPHA"} 1
+# HELP workqueue_adds_total [ALPHA] Total number of adds handled by workqueue
+# TYPE workqueue_adds_total counter
+workqueue_adds_total{name="DynamicCABundle-client-ca-bundle"} 1
+workqueue_adds_total{name="DynamicCABundle-serving-cert"} 1
+workqueue_adds_total{name="DynamicConfigMapCABundle-client-ca"} 7
+workqueue_adds_total{name="DynamicServingCertificateController"} 7
+workqueue_adds_total{name="RequestHeaderAuthRequestController"} 1
+# HELP workqueue_depth [ALPHA] Current depth of workqueue
+# TYPE workqueue_depth gauge
+workqueue_depth{name="DynamicCABundle-client-ca-bundle"} 0
+workqueue_depth{name="DynamicCABundle-serving-cert"} 0
+workqueue_depth{name="DynamicConfigMapCABundle-client-ca"} 0
+workqueue_depth{name="DynamicServingCertificateController"} 0
+workqueue_depth{name="RequestHeaderAuthRequestController"} 0
+# HELP certwatcher_read_certificate_total Total number of certificate reads
+# TYPE certwatcher_read_certificate_total counter
+certwatcher_read_certificate_total 0
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 88
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 4.5449336e+07
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 3.909936e+06
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.9595264e+07
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 1.900544e+06
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 1200
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 326400
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 2.7305824e+07
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.212416e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 3.1806728e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 8
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.73260052073e+09
+# HELP rest_client_requests_total Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET"} 7
+rest_client_requests_total{code="201",host="10.96.0.1:443",method="POST"} 12
+# HELP controller_runtime_active_workers Number of currently used workers per controller
+# TYPE controller_runtime_active_workers gauge
+controller_runtime_active_workers{controller="cert-rotator"} 0
+controller_runtime_active_workers{controller="cloudeventsource"} 0
+controller_runtime_active_workers{controller="clustercloudeventsource"} 0
+controller_runtime_active_workers{controller="clustertriggerauthentication"} 0
+controller_runtime_active_workers{controller="scaledjob"} 0
+controller_runtime_active_workers{controller="scaledobject"} 0
+controller_runtime_active_workers{controller="triggerauthentication"} 0
+# HELP controller_runtime_max_concurrent_reconciles Maximum number of concurrent reconciles per controller
+# TYPE controller_runtime_max_concurrent_reconciles gauge
+controller_runtime_max_concurrent_reconciles{controller="cert-rotator"} 1
+controller_runtime_max_concurrent_reconciles{controller="cloudeventsource"} 1
+controller_runtime_max_concurrent_reconciles{controller="clustercloudeventsource"} 1
+controller_runtime_max_concurrent_reconciles{controller="clustertriggerauthentication"} 1
+controller_runtime_max_concurrent_reconciles{controller="scaledjob"} 1
+controller_runtime_max_concurrent_reconciles{controller="scaledobject"} 5
+controller_runtime_max_concurrent_reconciles{controller="triggerauthentication"} 1
+# HELP controller_runtime_reconcile_errors_total Total number of reconciliation errors per controller
+# TYPE controller_runtime_reconcile_errors_total counter
+controller_runtime_reconcile_errors_total{controller="cert-rotator"} 0
+controller_runtime_reconcile_errors_total{controller="cloudeventsource"} 0
+controller_runtime_reconcile_errors_total{controller="clustercloudeventsource"} 0
+controller_runtime_reconcile_errors_total{controller="clustertriggerauthentication"} 0
+controller_runtime_reconcile_errors_total{controller="scaledjob"} 0
+controller_runtime_reconcile_errors_total{controller="scaledobject"} 0
+controller_runtime_reconcile_errors_total{controller="triggerauthentication"} 0
+# HELP controller_runtime_reconcile_panics_total Total number of reconciliation panics per controller
+# TYPE controller_runtime_reconcile_panics_total counter
+controller_runtime_reconcile_panics_total{controller="cert-rotator"} 0
+controller_runtime_reconcile_panics_total{controller="cloudeventsource"} 0
+controller_runtime_reconcile_panics_total{controller="clustercloudeventsource"} 0
+controller_runtime_reconcile_panics_total{controller="clustertriggerauthentication"} 0
+controller_runtime_reconcile_panics_total{controller="scaledjob"} 0
+controller_runtime_reconcile_panics_total{controller="scaledobject"} 0
+controller_runtime_reconcile_panics_total{controller="triggerauthentication"} 0
+# HELP controller_runtime_reconcile_time_seconds Length of time per reconciliation per controller
+# TYPE controller_runtime_reconcile_time_seconds histogram
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.005"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.01"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.025"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.05"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.1"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.15"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.2"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.25"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.3"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.35"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.4"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.45"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.6"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.7"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.8"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="0.9"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="1"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="1.25"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="1.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="1.75"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="2"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="2.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="3"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="3.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="4"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="4.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="6"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="7"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="8"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="9"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="10"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="15"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="20"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="25"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="30"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="40"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="50"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="60"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="cert-rotator",le="+Inf"} 2
+controller_runtime_reconcile_time_seconds_sum{controller="cert-rotator"} 0.014531625
+controller_runtime_reconcile_time_seconds_count{controller="cert-rotator"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.005"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.01"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.025"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.05"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.1"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.15"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.2"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.25"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.3"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.35"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.4"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.45"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.5"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.6"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.7"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.8"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="0.9"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="1"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="1.25"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="1.5"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="1.75"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="2"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="2.5"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="3"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="3.5"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="4"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="4.5"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="5"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="6"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="7"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="8"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="9"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="10"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="15"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="20"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="25"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="30"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="40"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="50"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="60"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="scaledjob",le="+Inf"} 1
+controller_runtime_reconcile_time_seconds_sum{controller="scaledjob"} 0.123412833
+controller_runtime_reconcile_time_seconds_count{controller="scaledjob"} 1
+# HELP controller_runtime_reconcile_total Total number of reconciliations per controller
+# TYPE controller_runtime_reconcile_total counter
+controller_runtime_reconcile_total{controller="cert-rotator",result="error"} 0
+controller_runtime_reconcile_total{controller="cert-rotator",result="requeue"} 0
+controller_runtime_reconcile_total{controller="cert-rotator",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="cert-rotator",result="success"} 2
+controller_runtime_reconcile_total{controller="cloudeventsource",result="error"} 0
+controller_runtime_reconcile_total{controller="cloudeventsource",result="requeue"} 0
+controller_runtime_reconcile_total{controller="cloudeventsource",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="cloudeventsource",result="success"} 0
+controller_runtime_reconcile_total{controller="clustercloudeventsource",result="error"} 0
+controller_runtime_reconcile_total{controller="clustercloudeventsource",result="requeue"} 0
+controller_runtime_reconcile_total{controller="clustercloudeventsource",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="clustercloudeventsource",result="success"} 0
+controller_runtime_reconcile_total{controller="clustertriggerauthentication",result="error"} 0
+controller_runtime_reconcile_total{controller="clustertriggerauthentication",result="requeue"} 0
+controller_runtime_reconcile_total{controller="clustertriggerauthentication",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="clustertriggerauthentication",result="success"} 0
+controller_runtime_reconcile_total{controller="scaledjob",result="error"} 0
+controller_runtime_reconcile_total{controller="scaledjob",result="requeue"} 0
+controller_runtime_reconcile_total{controller="scaledjob",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="scaledjob",result="success"} 1
+controller_runtime_reconcile_total{controller="scaledobject",result="error"} 0
+controller_runtime_reconcile_total{controller="scaledobject",result="requeue"} 0
+controller_runtime_reconcile_total{controller="scaledobject",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="scaledobject",result="success"} 0
+controller_runtime_reconcile_total{controller="triggerauthentication",result="error"} 0
+controller_runtime_reconcile_total{controller="triggerauthentication",result="requeue"} 0
+controller_runtime_reconcile_total{controller="triggerauthentication",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="triggerauthentication",result="success"} 0
+# HELP controller_runtime_terminal_reconcile_errors_total Total number of terminal reconciliation errors per controller
+# TYPE controller_runtime_terminal_reconcile_errors_total counter
+controller_runtime_terminal_reconcile_errors_total{controller="cert-rotator"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="cloudeventsource"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="clustercloudeventsource"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="clustertriggerauthentication"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="scaledjob"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="scaledobject"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="triggerauthentication"} 0
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.23.3"} 1
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.475087e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.4489752e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 3.2342016e+07
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 408000
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 885817
+# HELP keda_build_info Info metric, with static information about KEDA build like: version, git commit and Golang runtime info.
+# TYPE keda_build_info gauge
+keda_build_info{git_commit="5c52d032931b8ecf855d0c298f8d5e48937aecd7",goarch="arm64",goos="linux",goversion="go1.23.3",version="2.16.0"} 1
+# HELP keda_internal_scale_loop_latency DEPRECATED - will be removed in 2.16: use 'keda_internal_scale_loop_latency_seconds' instead.
+# TYPE keda_internal_scale_loop_latency gauge
+keda_internal_scale_loop_latency{namespace="default",resource="csv-processor",type="scaledjob"} 0
+# HELP keda_internal_scale_loop_latency_seconds Total deviation (in seconds) between the expected execution time and the actual execution time for the scaling loop.
+# TYPE keda_internal_scale_loop_latency_seconds gauge
+keda_internal_scale_loop_latency_seconds{namespace="default",resource="csv-processor",type="scaledjob"} 0.000345505
+# HELP keda_resource_registered_total Total number of KEDA custom resources per namespace for each custom resource type (CRD) registered.
+# TYPE keda_resource_registered_total gauge
+keda_resource_registered_total{namespace="default",type="scaled_job"} 1
+# HELP keda_resource_totals DEPRECATED - will be removed in 2.16: use 'keda_resource_registered_total' instead.
+# TYPE keda_resource_totals gauge
+keda_resource_totals{namespace="default",type="scaled_job"} 1
+# HELP keda_scaled_job_errors_total Number of scaled job errors
+# TYPE keda_scaled_job_errors_total counter
+keda_scaled_job_errors_total{namespace="default",scaledJob="csv-processor"} 0
+# HELP keda_scaler_active Indicates whether a scaler is active (1), or not (0).
+# TYPE keda_scaler_active gauge
+keda_scaler_active{metric="s0-redis-csvs-to-process",namespace="default",scaledObject="csv-processor",scaler="redisScaler",triggerIndex="0",type="scaledjob"} 0
+# HELP keda_scaler_detail_errors_total The total number of errors encountered for each scaler.
+# TYPE keda_scaler_detail_errors_total counter
+keda_scaler_detail_errors_total{metric="s0-redis-csvs-to-process",namespace="default",scaledObject="csv-processor",scaler="redisScaler",triggerIndex="0",type="scaledjob"} 0
+# HELP keda_scaler_errors DEPRECATED - will be removed in 2.16: use 'keda_scaler_detail_errors_total' instead.
+# TYPE keda_scaler_errors counter
+keda_scaler_errors{metric="s0-redis-csvs-to-process",namespace="default",scaledObject="csv-processor",scaler="redisScaler",triggerIndex="0",type="scaledjob"} 0
+# HELP keda_scaler_metrics_latency DEPRECATED - will be removed in 2.16: use 'keda_scaler_metrics_latency_seconds' instead.
+# TYPE keda_scaler_metrics_latency gauge
+keda_scaler_metrics_latency{metric="s0-redis-csvs-to-process",namespace="default",scaledObject="csv-processor",scaler="redisScaler",triggerIndex="0",type="scaledjob"} 1
+# HELP keda_scaler_metrics_latency_seconds The latency of retrieving current metric from each scaler, in seconds.
+# TYPE keda_scaler_metrics_latency_seconds gauge
+keda_scaler_metrics_latency_seconds{metric="s0-redis-csvs-to-process",namespace="default",scaledObject="csv-processor",scaler="redisScaler",triggerIndex="0",type="scaledjob"} 0.001407625
+# HELP keda_scaler_metrics_value The current value for each scaler's metric that would be used by the HPA in computing the target average.
+# TYPE keda_scaler_metrics_value gauge
+keda_scaler_metrics_value{metric="s0-redis-csvs-to-process",namespace="default",scaledObject="csv-processor",scaler="redisScaler",triggerIndex="0",type="scaledjob"} 0
+# HELP keda_trigger_registered_total Total number of triggers per trigger type registered.
+# TYPE keda_trigger_registered_total gauge
+keda_trigger_registered_total{type="redis"} 1
+# HELP keda_trigger_totals DEPRECATED - will be removed in 2.16: use 'keda_trigger_registered_total' instead.
+# TYPE keda_trigger_totals gauge
+keda_trigger_totals{type="redis"} 1
+# HELP leader_election_master_status Gauge of if the reporting system is master of the relevant lease, 0 indicates backup, 1 indicates master. 'name' is the string used to identify the lease. Please make sure to group by name.
+# TYPE leader_election_master_status gauge
+leader_election_master_status{name="operator.keda.sh"} 1
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.24
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 11
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.377685504e+09
+# HELP workqueue_adds_total Total number of adds handled by workqueue
+# TYPE workqueue_adds_total counter
+workqueue_adds_total{controller="cert-rotator",name="cert-rotator"} 2
+workqueue_adds_total{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_adds_total{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_adds_total{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_adds_total{controller="scaledjob",name="scaledjob"} 1
+workqueue_adds_total{controller="scaledobject",name="scaledobject"} 0
+workqueue_adds_total{controller="triggerauthentication",name="triggerauthentication"} 0
+# HELP workqueue_depth Current depth of workqueue
+# TYPE workqueue_depth gauge
+workqueue_depth{controller="cert-rotator",name="cert-rotator"} 0
+workqueue_depth{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_depth{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_depth{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_depth{controller="scaledjob",name="scaledjob"} 0
+workqueue_depth{controller="scaledobject",name="scaledobject"} 0
+workqueue_depth{controller="triggerauthentication",name="triggerauthentication"} 0
+# HELP workqueue_longest_running_processor_seconds How many seconds has the longest running processor for workqueue been running.
+# TYPE workqueue_longest_running_processor_seconds gauge
+workqueue_longest_running_processor_seconds{controller="cert-rotator",name="cert-rotator"} 0
+workqueue_longest_running_processor_seconds{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_longest_running_processor_seconds{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_longest_running_processor_seconds{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_longest_running_processor_seconds{controller="scaledjob",name="scaledjob"} 0
+workqueue_longest_running_processor_seconds{controller="scaledobject",name="scaledobject"} 0
+workqueue_longest_running_processor_seconds{controller="triggerauthentication",name="triggerauthentication"} 0
+# HELP workqueue_queue_duration_seconds How long in seconds an item stays in workqueue before being requested
+# TYPE workqueue_queue_duration_seconds histogram
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="9.999999999999999e-05"} 1
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="0.001"} 1
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="0.01"} 2
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="0.1"} 2
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1"} 2
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="10"} 2
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="100"} 2
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1000"} 2
+workqueue_queue_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="+Inf"} 2
+workqueue_queue_duration_seconds_sum{controller="cert-rotator",name="cert-rotator"} 0.007450832
+workqueue_queue_duration_seconds_count{controller="cert-rotator",name="cert-rotator"} 2
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="10"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="100"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1000"} 0
+workqueue_queue_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_queue_duration_seconds_count{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="10"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="100"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1000"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_queue_duration_seconds_count{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="10"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="100"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1000"} 0
+workqueue_queue_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_queue_duration_seconds_count{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="9.999999999999999e-06"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="9.999999999999999e-05"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="0.001"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="0.01"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="0.1"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="10"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="100"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1000"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="+Inf"} 1
+workqueue_queue_duration_seconds_sum{controller="scaledjob",name="scaledjob"} 9.333e-06
+workqueue_queue_duration_seconds_count{controller="scaledjob",name="scaledjob"} 1
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="10"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="100"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1000"} 0
+workqueue_queue_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{controller="scaledobject",name="scaledobject"} 0
+workqueue_queue_duration_seconds_count{controller="scaledobject",name="scaledobject"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="10"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="100"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1000"} 0
+workqueue_queue_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{controller="triggerauthentication",name="triggerauthentication"} 0
+workqueue_queue_duration_seconds_count{controller="triggerauthentication",name="triggerauthentication"} 0
+# HELP workqueue_retries_total Total number of retries handled by workqueue
+# TYPE workqueue_retries_total counter
+workqueue_retries_total{controller="cert-rotator",name="cert-rotator"} 0
+workqueue_retries_total{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_retries_total{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_retries_total{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_retries_total{controller="scaledjob",name="scaledjob"} 0
+workqueue_retries_total{controller="scaledobject",name="scaledobject"} 0
+workqueue_retries_total{controller="triggerauthentication",name="triggerauthentication"} 0
+# HELP workqueue_unfinished_work_seconds How many seconds of work has been done that is in progress and hasn't been observed by work_duration. Large values indicate stuck threads. One can deduce the number of stuck threads by observing the rate at which this increases.
+# TYPE workqueue_unfinished_work_seconds gauge
+workqueue_unfinished_work_seconds{controller="cert-rotator",name="cert-rotator"} 0
+workqueue_unfinished_work_seconds{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_unfinished_work_seconds{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_unfinished_work_seconds{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_unfinished_work_seconds{controller="scaledjob",name="scaledjob"} 0
+workqueue_unfinished_work_seconds{controller="scaledobject",name="scaledobject"} 0
+workqueue_unfinished_work_seconds{controller="triggerauthentication",name="triggerauthentication"} 0
+# HELP workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE workqueue_work_duration_seconds histogram
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="0.01"} 2
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="0.1"} 2
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1"} 2
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="10"} 2
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="100"} 2
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="1000"} 2
+workqueue_work_duration_seconds_bucket{controller="cert-rotator",name="cert-rotator",le="+Inf"} 2
+workqueue_work_duration_seconds_sum{controller="cert-rotator",name="cert-rotator"} 0.014563709000000001
+workqueue_work_duration_seconds_count{controller="cert-rotator",name="cert-rotator"} 2
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="10"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="100"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="1000"} 0
+workqueue_work_duration_seconds_bucket{controller="cloudeventsource",name="cloudeventsource",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_work_duration_seconds_count{controller="cloudeventsource",name="cloudeventsource"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="10"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="100"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="1000"} 0
+workqueue_work_duration_seconds_bucket{controller="clustercloudeventsource",name="clustercloudeventsource",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_work_duration_seconds_count{controller="clustercloudeventsource",name="clustercloudeventsource"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="10"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="100"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="1000"} 0
+workqueue_work_duration_seconds_bucket{controller="clustertriggerauthentication",name="clustertriggerauthentication",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_work_duration_seconds_count{controller="clustertriggerauthentication",name="clustertriggerauthentication"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1"} 1
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="10"} 1
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="100"} 1
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="1000"} 1
+workqueue_work_duration_seconds_bucket{controller="scaledjob",name="scaledjob",le="+Inf"} 1
+workqueue_work_duration_seconds_sum{controller="scaledjob",name="scaledjob"} 0.123438292
+workqueue_work_duration_seconds_count{controller="scaledjob",name="scaledjob"} 1
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="10"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="100"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="1000"} 0
+workqueue_work_duration_seconds_bucket{controller="scaledobject",name="scaledobject",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{controller="scaledobject",name="scaledobject"} 0
+workqueue_work_duration_seconds_count{controller="scaledobject",name="scaledobject"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="10"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="100"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="1000"} 0
+workqueue_work_duration_seconds_bucket{controller="triggerauthentication",name="triggerauthentication",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{controller="triggerauthentication",name="triggerauthentication"} 0
+workqueue_work_duration_seconds_count{controller="triggerauthentication",name="triggerauthentication"} 0

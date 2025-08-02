@@ -6,10 +6,16 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka import TopicPartition
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
-from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
+from datadog_checks.kafka_consumer.kafka_consumer import (
+    DATA_STREAMS_MESSAGES_CACHE_KEY,
+    _get_interpolated_timestamp,
+    deserialize_message,
+    resolve_start_offsets,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -20,15 +26,15 @@ def fake_consumer_offsets_for_times(partitions):
     return [(t, p, 80) for t, p in partitions]
 
 
-def seed_mock_client():
+def seed_mock_client(cluster_id="cluster_id"):
     """Set some common defaults for the mock client to kafka."""
     client = mock.create_autospec(KafkaClient)
     client.list_consumer_groups.return_value = ["consumer_group1"]
     client.get_partitions_for_topic.return_value = ['partition1']
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
-    client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
+    client.describe_consumer_group.return_value = 'STABLE'
     client.consumer_get_cluster_id_and_list_topics.return_value = (
-        "cluster_id",
+        cluster_id,
         # topics
         [
             # Used in unit tets
@@ -205,7 +211,6 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
-            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_metric(
@@ -217,7 +222,6 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
-            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_event(
@@ -225,6 +229,39 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
         "topic: topic1, partition: partition1 has negative consumer lag. "
         "This should never happen and will result in the consumer skipping new messages "
         "until the lag turns positive.",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
+    )
+
+
+def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
+    mock_client = seed_mock_client()
+    kafka_instance["collect_consumer_group_state"] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric(
+        "kafka.consumer_offset",
+        count=1,
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+            'consumer_group_state:STABLE',
+        ],
+    )
+    aggregator.assert_metric(
+        "kafka.consumer_lag",
         count=1,
         tags=[
             'consumer_group:consumer_group1',
@@ -380,3 +417,235 @@ def test_get_interpolated_timestamp():
     assert _get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
     assert _get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
     assert _get_interpolated_timestamp({10: 200}, 15) is None
+
+
+@pytest.mark.parametrize(
+    'persistent_cache_contents, instance_overrides, consumer_lag_seconds_count',
+    [
+        pytest.param(
+            "",
+            {
+                'consumer_groups': {},
+                'data_streams_enabled': 'true',
+                'monitor_unlisted_consumer_groups': True,
+            },
+            0,
+            id='Read from cache failed',
+        ),
+    ],
+)
+def test_load_broker_timestamps_empty(
+    persistent_cache_contents,
+    instance_overrides,
+    consumer_lag_seconds_count,
+    kafka_instance,
+    dd_run_check,
+    caplog,
+    aggregator,
+    check,
+):
+    kafka_instance.update(instance_overrides)
+    mock_client = seed_mock_client()
+    check = check(kafka_instance)
+    check.client = mock_client
+    check.read_persistent_cache = mock.Mock(return_value=persistent_cache_contents)
+    dd_run_check(check)
+
+    caplog.set_level(logging.WARN)
+    expected_warning = " Could not read broker timestamps from cache"
+
+    assert expected_warning in caplog.text
+    aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
+    assert check.read_persistent_cache.mock_calls == [mock.call("broker_timestamps_")]
+
+
+def test_client_init(kafka_instance, check, dd_run_check):
+    """
+    We only open a connection to a consumer once per consumer group.
+
+    Doing so more often degrades performance, as described in this issue:
+    https://github.com/DataDog/integrations-core/issues/19564
+    """
+    mock_client = seed_mock_client()
+    check = check(kafka_instance)
+    check.client = mock_client
+    dd_run_check(check)
+
+    assert check.client.open_consumer.mock_calls == [mock.call("consumer_group1")]
+
+
+def test_resolve_start_offsets():
+    highwater_offsets = {
+        ("topic1", 0): 100,
+        ("topic1", 1): 200,
+        ("topic2", 0): 150,
+    }
+    assert resolve_start_offsets(highwater_offsets, "topic1", 0, 80, 10) == [TopicPartition("topic1", 0, 80)]
+    assert resolve_start_offsets(highwater_offsets, "topic2", 0, -1, 10) == [TopicPartition("topic2", 0, 141)]
+    assert sorted(resolve_start_offsets(highwater_offsets, "topic1", -1, -1, 10)) == [
+        TopicPartition("topic1", 0, 81),
+        TopicPartition("topic1", 1, 191),
+    ]
+
+
+class MockedMessage:
+    def __init__(self, value, key=None, offset=0):
+        self.v = value
+        self.k = key
+        self.o = offset
+
+    def value(self):
+        return self.v
+
+    def key(self):
+        return self.k
+
+    def partition(self):
+        return 0
+
+    def offset(self):
+        return self.o
+
+
+def test_deserialize_message():
+    message = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}'
+    # schema ID is 350, which is 0x015E in hex.
+    # A magic byte (0x00) is added and the schema ID (4-byte big-endian integer).
+    message_with_schema = (
+        b'\x00\x00\x00\x01\x5e{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}'
+    )
+    key = b'{"name": "Peter Parker"}'
+    assert deserialize_message(MockedMessage(message, key)) == (
+        '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+    assert deserialize_message(MockedMessage(message_with_schema)) == (
+        '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+        350,
+        '',
+        None,
+    )
+    invalid_json = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"'
+    assert deserialize_message(MockedMessage(invalid_json, key)) == (None, None, None, None)
+
+    invalid_utf8 = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"\xff'
+    assert deserialize_message(MockedMessage(invalid_utf8, key)) == (None, None, None, None)
+
+
+def mocked_time():
+    return 400
+
+
+@mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
+@pytest.mark.parametrize(
+    'persistent_cache_read_content, expected_persistent_cache_writes, expected_logs',
+    [
+        pytest.param(
+            "config_1_id,config_id_2",
+            [],
+            [],
+            id='Does not retrieve messages a second time',
+        ),
+        pytest.param(
+            "",
+            ["config_1_id"],
+            [
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'marvel',
+                    'partition': '0',
+                    'offset': '12',
+                    'message_value': '{"name": "Peter Parker", "age": 18, \
+"transaction_amount": 123, "currency": "dollar"}',
+                    'message_key': '{"name": "Peter Parker"}',
+                },
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'marvel',
+                    'partition': '0',
+                    'offset': '13',
+                    'message_value': '{"name": "Bruce Banner", "age": 45, \
+"transaction_amount": 456, "currency": "dollar"}',
+                },
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'marvel',
+                    'message': 'No more messages to retrieve',
+                    'live_messages_error': 'No more messages to retrieve',
+                },
+            ],
+            id='Retrieves messages from Kafka',
+        ),
+    ],
+)
+def test_data_streams_messages(
+    persistent_cache_read_content,
+    expected_persistent_cache_writes,
+    expected_logs,
+    kafka_instance,
+    dd_run_check,
+    check,
+):
+    (
+        kafka_instance.update(
+            {
+                'consumer_groups': {},
+                'monitor_unlisted_consumer_groups': True,
+                'live_messages_configs': [
+                    {
+                        'kafka': {
+                            'cluster': 'cluster_id',
+                            'topic': 'marvel',
+                            'partition': 0,
+                            'start_offset': 0,
+                            'n_messages': 3,
+                            'value_format': 'json',
+                        },
+                        'id': 'config_1_id',
+                    }
+                ],
+            }
+        ),
+    )
+    mock_client = seed_mock_client(cluster_id="Cluster_id")
+    mock_client.get_next_message.side_effect = [
+        MockedMessage(
+            b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+            b'{"name": "Peter Parker"}',
+            12,
+        ),
+        MockedMessage(
+            b'{"name": "Bruce Banner", "age": 45, "transaction_amount": 456, "currency": "dollar"}',
+            b'',
+            13,
+        ),
+        None,
+    ]
+    check = check(kafka_instance)
+    check.client = mock_client
+
+    def mocked_read_persistent_cache(key):
+        if key == DATA_STREAMS_MESSAGES_CACHE_KEY:
+            return persistent_cache_read_content
+        return ""
+
+    check.read_persistent_cache = mock.Mock(side_effect=mocked_read_persistent_cache)
+    check.write_persistent_cache = mock.Mock()
+    check.send_log = mock.Mock()
+
+    dd_run_check(check)
+
+    for content in expected_persistent_cache_writes:
+        assert mock.call(DATA_STREAMS_MESSAGES_CACHE_KEY, content) in check.write_persistent_cache.mock_calls
+    assert [mock.call(log) for log in expected_logs] == check.send_log.mock_calls

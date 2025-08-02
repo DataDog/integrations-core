@@ -148,6 +148,7 @@ files:
                   resources do not have realtime metrics
           Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
                   historical metrics
+          Note3: If no filters are set for a resource type, all resources of that resource type are collected.
 
         value:
           example:
@@ -305,8 +306,8 @@ files:
         description: |
           The events that should be collected by the vSphere integration.
 
-          The "event" specifies the event type you want to include, and the "excluded_messages" is a list of
-          messages of that event type you do not want to collect. For example, if the key
+          The "event" specifies the event type you want to include, and optionally, the "excluded_messages" is
+          a list of messages of that event type you do not want to collect. For example, if the key
           is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
           then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
           and 'Green to Gray' will be included.

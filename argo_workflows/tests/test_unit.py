@@ -62,14 +62,57 @@ COUNTS = {
 # Sorting eases debugging of missing metrics.
 EXPECTED_METRICS = sorted(GAUGES | COUNTS)
 
+V3_6_METRICS = {
+    ('cronworkflows.concurrencypolicy_triggered.count', agg.MONOTONIC_COUNT),
+    ('cronworkflows.triggered.count', agg.MONOTONIC_COUNT),
+    ('deprecated.feature', agg.GAUGE),
+    ('current_workflows', agg.GAUGE),
+    ('is_leader', agg.GAUGE),
+    ('log_messages.count', agg.MONOTONIC_COUNT),
+    ('pod.pending.count', agg.MONOTONIC_COUNT),
+    ('pods', agg.GAUGE),
+    ('pods_total.count', agg.MONOTONIC_COUNT),
+    ('queue_depth', agg.GAUGE),
+    ('queue.longest_running', agg.GAUGE),
+    ('queue.retries.count', agg.MONOTONIC_COUNT),
+    ('queue.unfinished_work', agg.GAUGE),
+    ('total.count', agg.MONOTONIC_COUNT),
+    ('version', agg.GAUGE),
+    ('workflowtemplate.runtime', agg.GAUGE),
+    ('workflowtemplate.triggered.count', agg.MONOTONIC_COUNT),
+}
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path='tests/fixtures/metrics.txt')
+
+@pytest.mark.parametrize(
+    "fixture_file, description",
+    [
+        ('tests/fixtures/metrics.txt', 'Test with old metric names'),
+        ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
+    ],
+)
+def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_response, fixture_file, description):
+    mock_http_response(file_path=fixture_file)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
 
     for m_name, m_type in EXPECTED_METRICS:
         aggregator.assert_metric(f'argo_workflows.{m_name}', metric_type=m_type)
+
+    if fixture_file == 'tests/fixtures/metricsv3-6+.txt':
+        for m_name, m_type in V3_6_METRICS:
+            aggregator.assert_metric(f'argo_workflows.{m_name}', metric_type=m_type)
+
+        histograms = (
+            'k8s_request.duration',
+            'queue.duration',
+            'operation_duration_seconds',
+            'queue_latency',
+        )
+
+        for m_name in histograms:
+            aggregator.assert_metric(f'argo_workflows.{m_name}.sum', metric_type=agg.MONOTONIC_COUNT)
+            aggregator.assert_metric(f'argo_workflows.{m_name}.count', metric_type=agg.MONOTONIC_COUNT)
+            aggregator.assert_metric(f'argo_workflows.{m_name}.bucket', metric_type=agg.MONOTONIC_COUNT)
 
     histograms = (
         'operation_duration_seconds',

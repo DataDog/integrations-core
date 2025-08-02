@@ -19,7 +19,6 @@ from .version_utils import get_version_from_http, get_version_from_socket
 
 
 class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
-
     SHOWTABLE_RE = re.compile(
         r"# table: (?P<name>[^ ,]+), type: (?P<type>[^ ,]+), size:(?P<size>[0-9]+), used:(?P<used>[0-9]+)$"
     )
@@ -38,7 +37,6 @@ class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
 
 
 class HAProxyCheckLegacy(AgentCheck):
-
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 
@@ -453,7 +451,7 @@ class HAProxyCheckLegacy(AgentCheck):
         return formatted_status
 
     def _process_backend_hosts_metric(self, active_tag=None):
-        agg_statuses = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
+        agg_statuses = defaultdict(lambda: dict.fromkeys(Services.COLLATED_STATUSES, 0))
         active_tag = [] if active_tag is None else active_tag
 
         for host_status, count in self.hosts_statuses.items():
@@ -493,7 +491,7 @@ class HAProxyCheckLegacy(AgentCheck):
         self,
         active_tag=None,
     ):
-        agg_statuses_counter = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
+        agg_statuses_counter = defaultdict(lambda: dict.fromkeys(Services.COLLATED_STATUSES, 0))
         active_tag = [] if active_tag is None else active_tag
         # Initialize `statuses_counter`: every value is a defaultdict initialized with the correct
         # keys, which depends on the `collate_status_tags_per_host` option

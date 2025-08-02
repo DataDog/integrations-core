@@ -4,6 +4,3 @@
 python = ["3.12"]
 
 [envs.default]
-dependencies = [
-  "freezegun==0.3.15",
-]

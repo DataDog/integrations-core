@@ -85,7 +85,6 @@ class SessionWrapper:
 
 
 class Api:
-
     wrapper_factory = SessionWrapper
 
     def __init__(
@@ -334,6 +333,20 @@ class Api:
             query = "rsp-subtree-include=count"
         base_path = "/api/class/"
         path = "{}{}.json?{}".format(base_path, capacity_metric, query)
+        response = self.make_request(path)
+        return self._parse_response(response)
+
+    def get_faultinst_faults(self, afterTimestamp):
+        path = "/api/node/class/faultInst.json"
+        if afterTimestamp is not None:
+            path += "?query-target-filter=and(gt(faultInst.lastTransition,\"{}\"))".format(afterTimestamp)
+        response = self.make_request(path)
+        return self._parse_response(response)
+
+    def get_faultdelegate_faults(self, afterTimestamp):
+        path = "/api/node/class/faultDelegate.json"
+        if afterTimestamp is not None:
+            path += "?query-target-filter=and(gt(faultDelegate.lastTransition,\"{}\"))".format(afterTimestamp)
         response = self.make_request(path)
         return self._parse_response(response)
 

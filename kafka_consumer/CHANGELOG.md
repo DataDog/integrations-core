@@ -2,7 +2,56 @@
 
 <!-- towncrier release notes start -->
 
-## 6.1.0 / 2024-11-25
+## 6.6.1 / 2025-07-25
+
+***Fixed***:
+
+* Lowercase Kafka cluster in data streams messages feature. ([#20842](https://github.com/DataDog/integrations-core/pull/20842))
+
+## 6.6.0 / 2025-07-10
+
+***Added***:
+
+* kafka_consumer check can retrieve messages from Kafka and log them. ([#20512](https://github.com/DataDog/integrations-core/pull/20512))
+
+## 6.5.2 / 2025-05-15 / Agent 7.67.0
+
+***Fixed***:
+
+* Create new kafka consumer client only if needed when fetching highwater offsets. ([#20163](https://github.com/DataDog/integrations-core/pull/20163))
+
+## 6.5.1 / 2025-03-06 / Agent 7.65.0
+
+***Fixed***:
+
+* Collect consumer state tag as string name instead of int value. ([#19744](https://github.com/DataDog/integrations-core/pull/19744))
+
+## 6.5.0 / 2025-02-13 / Agent 7.63.0
+
+***Added***:
+
+* Bump OpenSSL in confluent-kafka to 3.4.1 on Windows. ([#19608](https://github.com/DataDog/integrations-core/pull/19608))
+
+## 6.4.0 / 2025-02-12
+
+***Added***:
+
+* Bump the OpenSSL version in confluent-kakfa to 3.3.3 on Linux and MacOS. ([#19591](https://github.com/DataDog/integrations-core/pull/19591))
+
+## 6.3.0 / 2025-01-25
+
+***Added***:
+
+* Bump version of `confluent-kafka` to 2.8.0 ([#19370](https://github.com/DataDog/integrations-core/pull/19370))
+* Disable collecting consumer group state by default ([#19411](https://github.com/DataDog/integrations-core/pull/19411))
+
+## 6.2.0 / 2025-01-16
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 6.1.0 / 2024-11-25 / Agent 7.60.0
 
 ***Security***:
 

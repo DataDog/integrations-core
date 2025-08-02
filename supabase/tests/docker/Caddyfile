@@ -1,0 +1,15 @@
+:8000 {
+    handle_path /metrics {
+        root * /usr/share/caddy
+        rewrite * /privileged_metrics
+        file_server
+    }
+}
+
+:9000 {
+    handle_path /metrics {
+        root * /usr/share/caddy
+        rewrite * /storage_api_metrics
+        file_server
+    }
+}

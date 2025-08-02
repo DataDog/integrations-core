@@ -324,7 +324,7 @@
           {
             "id": 5935466024454224,
             "definition": {
-              "title": "Kyverno Monitor Summary",
+              "title": "Slurm Monitor Summary",
               "type": "manage_status",
               "display_format": "countsAndList",
               "color_preference": "text",

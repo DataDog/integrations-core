@@ -29,7 +29,9 @@ def test_node_check_legacy(aggregator, instance_legacy, mock_client):
     aggregator.assert_service_check(c.SERVICE_CHECK_CONNECT, c.OK, tags=global_tags)
 
     for node_info in client.list_nodes()['NodeInfoList']:
-        broker_info = node_info['BrokerNodeInfo']
+        broker_info = node_info.get('BrokerNodeInfo')
+        if broker_info is None:
+            continue
         broker_tags = ['broker_id:{}'.format(broker_info['BrokerId'])]
         broker_tags.extend(global_tags)
 
@@ -99,7 +101,10 @@ def test_node_check(aggregator, dd_run_check, instance, mock_client):
     aggregator.assert_service_check('aws.msk.{}'.format(c.SERVICE_CHECK_CONNECT), c.OK, tags=global_tags)
 
     for node_info in client.list_nodes()['NodeInfoList']:
-        broker_info = node_info['BrokerNodeInfo']
+        broker_info = node_info.get('BrokerNodeInfo')
+        if broker_info is None:
+            continue
+
         broker_tags = ['broker_id:{}'.format(broker_info['BrokerId'])]
         broker_tags.extend(global_tags)
 
@@ -222,7 +227,9 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
     aggregator.assert_service_check(c.SERVICE_CHECK_CONNECT, c.OK, tags=global_tags)
 
     for node_info in client.list_nodes()['NodeInfoList']:
-        broker_info = node_info['BrokerNodeInfo']
+        broker_info = node_info.get('BrokerNodeInfo')
+        if broker_info is None:
+            continue
         broker_tags = ['broker_id:{}'.format(broker_info['BrokerId'])]
         broker_tags.extend(global_tags)
 

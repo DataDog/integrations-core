@@ -32,12 +32,11 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "rethinkdb==2.4.10post1",
+    "rethinkdb==2.4.10.post1",
 ]
 
 [project.urls]
@@ -55,7 +54,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/rethinkdb",
+    "/datadog_checks",
 ]
 dev-mode-dirs = [
     ".",

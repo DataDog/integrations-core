@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import string
 from enum import Enum
 from typing import Any, List, Tuple  # noqa: F401
@@ -74,14 +75,21 @@ class DBExplainError(Enum):
     # search path may be different when the client executed a query from where we executed it.
     undefined_table = 'undefined_table'
 
+    # we cannot create a prepared statement because this function is undefined with the given parameters
+    # this is likely because of an obfuscated parameter
+    undefined_function = 'undefined_function'
+
     # the statement was explained with the prepared statement workaround
     explained_with_prepared_statement = 'explained_with_prepared_statement'
 
-    # the statement was tried to be explained with the prepared statement workaround but failedd
+    # the statement was tried to be explained with the prepared statement workaround but failed
     failed_to_explain_with_prepared_statement = 'failed_to_explain_with_prepared_statement'
 
     # the statement was tried to be explained with the prepared statement workaround but no plan was returned
     no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
+
+    # PostgreSQL cannot determine the data type of a parameter in the query
+    indeterminate_datatype = 'indeterminate_datatype'
 
 
 class DatabaseHealthCheckError(Exception):
@@ -121,6 +129,40 @@ def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+SET_TRIM_PATTERN = re.compile(
+    r"""
+    ^
+    (?:
+        \s*
+        # match one leading comment
+        (?:
+            /\*
+            .*
+            \*/
+            \s*
+        )?
+
+        # match leading SET commands
+        SET\b
+        (?:
+            [^';] | # keywords, integer literals, etc.
+            '[^']*' # single-quoted strings
+        )+
+        ;
+    )+
+    """,
+    flags=(re.I | re.X),
+)
+
+
+# Expects one or more SQL statements in a string. If the string
+# begins with any SET statements, they are removed and the rest
+# of the string is returned. Otherwise, the string is returned
+# as it was received.
+def trim_leading_set_stmts(sql):
+    return SET_TRIM_PATTERN.sub('', sql, 1).lstrip()
 
 
 fmt = PartialFormatter()
@@ -207,6 +249,34 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
     ],
 }
 
+QUERY_PG_STAT_RECOVERY_PREFETCH = {
+    'name': 'pg_stat_recovery_prefetch',
+    'query': """
+        SELECT
+            prefetch,
+            hit,
+            skip_init,
+            skip_new,
+            skip_fpw,
+            skip_rep,
+            wal_distance,
+            block_distance,
+            io_depth
+        FROM pg_stat_recovery_prefetch
+    """.strip(),
+    'columns': [
+        {'name': 'recovery_prefetch.prefetch', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.hit', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_init', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_new', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_fpw', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_rep', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.wal_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.block_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.io_depth', 'type': 'gauge'},
+    ],
+}
+
 QUERY_PG_UPTIME = {
     'name': 'pg_uptime',
     'query': "SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))",
@@ -215,20 +285,77 @@ QUERY_PG_UPTIME = {
     ],
 }
 
-QUERY_PG_CONTROL_CHECKPOINT = {
+QUERY_PG_CONTROL_CHECKPOINT_LT_10 = {
     'name': 'pg_control_checkpoint',
     'query': """
         SELECT timeline_id,
-               EXTRACT (EPOCH FROM now() - checkpoint_time)
+          EXTRACT (EPOCH FROM now() - checkpoint_time),
+          pg_xlog_location_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_xlog_receive_location()
+              ELSE pg_current_xlog_location() END, checkpoint_location),
+          pg_xlog_location_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_xlog_receive_location()
+              ELSE pg_current_xlog_location() END, redo_location)
         FROM pg_control_checkpoint();
 """,
     'columns': [
         {'name': 'control.timeline_id', 'type': 'gauge'},
         {'name': 'control.checkpoint_delay', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay_bytes', 'type': 'gauge'},
+        {'name': 'control.redo_delay_bytes', 'type': 'gauge'},
     ],
 }
 
-COMMON_BGW_METRICS = {
+QUERY_PG_CONTROL_CHECKPOINT = {
+    'name': 'pg_control_checkpoint',
+    'query': """
+        SELECT timeline_id,
+          EXTRACT (EPOCH FROM now() - checkpoint_time),
+          pg_wal_lsn_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn()
+              ELSE pg_current_wal_lsn() END, checkpoint_lsn),
+          pg_wal_lsn_diff(
+          CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn()
+              ELSE pg_current_wal_lsn() END, redo_lsn)
+        FROM pg_control_checkpoint();
+""",
+    'columns': [
+        {'name': 'control.timeline_id', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay_bytes', 'type': 'gauge'},
+        {'name': 'control.redo_delay_bytes', 'type': 'gauge'},
+    ],
+}
+
+QUERY_PG_BGWRITER_CHECKPOINTER = {
+    'name': 'bgw_metrics',
+    'query': """
+        SELECT
+            cp.num_timed,
+            cp.num_requested,
+            cp.buffers_written,
+            bg.buffers_clean,
+            bg.maxwritten_clean,
+            bg.buffers_alloc,
+            cp.write_time,
+            cp.sync_time
+        FROM pg_stat_bgwriter bg, pg_stat_checkpointer cp
+    """.strip(),
+    'metrics': {
+        'checkpoints_timed': ('bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
+        'checkpoints_req': ('bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
+        'buffers_checkpoint': ('bgwriter.buffers_checkpoint', AgentCheck.monotonic_count),
+        'buffers_clean': ('bgwriter.buffers_clean', AgentCheck.monotonic_count),
+        'maxwritten_clean': ('bgwriter.maxwritten_clean', AgentCheck.monotonic_count),
+        'buffers_alloc': ('bgwriter.buffers_alloc', AgentCheck.monotonic_count),
+        'checkpoint_write_time': ('bgwriter.write_time', AgentCheck.monotonic_count),
+        'checkpoint_sync_time': ('bgwriter.sync_time', AgentCheck.monotonic_count),
+    },
+    'descriptors': [],
+    'relation': False,
+}
+
+COMMON_BGW_METRICS_LT_17 = {
     'checkpoints_timed': ('bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
     'buffers_checkpoint': ('bgwriter.buffers_checkpoint', AgentCheck.monotonic_count),
@@ -238,9 +365,9 @@ COMMON_BGW_METRICS = {
     'buffers_alloc': ('bgwriter.buffers_alloc', AgentCheck.monotonic_count),
 }
 
-NEWER_91_BGW_METRICS = {'buffers_backend_fsync': ('bgwriter.buffers_backend_fsync', AgentCheck.monotonic_count)}
+NEWER_91_BGW_METRICS_LT_17 = {'buffers_backend_fsync': ('bgwriter.buffers_backend_fsync', AgentCheck.monotonic_count)}
 
-NEWER_92_BGW_METRICS = {
+NEWER_92_BGW_METRICS_LT_17 = {
     'checkpoint_write_time': ('bgwriter.write_time', AgentCheck.monotonic_count),
     'checkpoint_sync_time': ('bgwriter.sync_time', AgentCheck.monotonic_count),
 }
@@ -317,37 +444,36 @@ SELECT {metrics_columns}
 }
 
 # Requires postgres 10+
-REPLICATION_STATS_METRICS = {
-    'descriptors': [
-        ('application_name', 'wal_app_name'),
-        ('state', 'wal_state'),
-        ('sync_state', 'wal_sync_state'),
-        ('client_addr', 'wal_client_addr'),
-    ],
-    'metrics': {
-        'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
-            'replication.wal_write_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, EXTRACT(epoch from flush_lag)) AS flush_lag': (
-            'replication.wal_flush_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, EXTRACT(epoch from replay_lag)) AS replay_lag': (
-            'replication.wal_replay_lag',
-            AgentCheck.gauge,
-        ),
-        'GREATEST (0, age(backend_xmin)) as backend_xmin_age': (
-            'replication.backend_xmin_age',
-            AgentCheck.gauge,
-        ),
-    },
-    'relation': False,
-    'query': """
-SELECT application_name, state, sync_state, client_addr, {metrics_columns}
-FROM pg_stat_replication
-""",
+QUERY_PG_REPLICATION_STATS_METRICS = {
     'name': 'replication_stats_metrics',
+    'query': """
+SELECT
+    pg_stat_replication.application_name,
+    pg_stat_replication.state,
+    pg_stat_replication.sync_state,
+    pg_stat_replication.client_addr,
+    pg_stat_replication_slot.slot_name,
+    pg_stat_replication_slot.slot_type,
+    GREATEST (0, age(pg_stat_replication.backend_xmin)) as backend_xmin_age,
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.write_lag)) as write_lag,
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.flush_lag)) as flush_lag,
+    GREATEST (0, EXTRACT(epoch from pg_stat_replication.replay_lag)) AS replay_lag
+FROM pg_stat_replication as pg_stat_replication
+LEFT JOIN pg_replication_slots as pg_stat_replication_slot
+ON pg_stat_replication.pid = pg_stat_replication_slot.active_pid;
+""".strip(),
+    'columns': [
+        {'name': 'wal_app_name', 'type': 'tag'},
+        {'name': 'wal_state', 'type': 'tag'},
+        {'name': 'wal_sync_state', 'type': 'tag'},
+        {'name': 'wal_client_addr', 'type': 'tag'},
+        {'name': 'slot_name', 'type': 'tag_not_null'},
+        {'name': 'slot_type', 'type': 'tag_not_null'},
+        {'name': 'replication.backend_xmin_age', 'type': 'gauge'},
+        {'name': 'replication.wal_write_lag', 'type': 'gauge'},
+        {'name': 'replication.wal_flush_lag', 'type': 'gauge'},
+        {'name': 'replication.wal_replay_lag', 'type': 'gauge'},
+    ],
 }
 
 
@@ -431,6 +557,23 @@ JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
 """.strip(),
 }
 
+QUERY_PG_WAIT_EVENT_METRICS = {
+    'name': 'wait_event_stats',
+    'columns': [
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'user', 'type': 'tag_not_null'},
+        {'name': 'wait_event', 'type': 'tag'},
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'activity.wait_event', 'type': 'gauge'},
+    ],
+    'query': """
+SELECT application_name, datname, usename, COALESCE(wait_event, 'NoWaitEvent'), backend_type, COUNT(*)
+FROM pg_stat_activity
+GROUP BY application_name, datname, usename, backend_type, wait_event
+""".strip(),
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {
@@ -502,8 +645,30 @@ select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_curren
     ],
 }
 
-# Requires PG10+
 VACUUM_PROGRESS_METRICS = {
+    'name': 'vacuum_progress_metrics',
+    'query': """
+SELECT v.datname, c.relname, v.phase,
+       v.heap_blks_total, v.heap_blks_scanned, v.heap_blks_vacuumed,
+       v.index_vacuum_count, v.max_dead_tuple_bytes, v.num_dead_item_ids
+  FROM pg_stat_progress_vacuum as v
+  JOIN pg_class c on c.oid = v.relid
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'phase', 'type': 'tag'},
+        {'name': 'vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'vacuum.heap_blks_vacuumed', 'type': 'gauge'},
+        {'name': 'vacuum.index_vacuum_count', 'type': 'gauge'},
+        {'name': 'vacuum.max_dead_tuples', 'type': 'gauge'},
+        {'name': 'vacuum.num_dead_tuples', 'type': 'gauge'},
+    ],
+}
+
+# Requires PG10+
+VACUUM_PROGRESS_METRICS_LT_17 = {
     'name': 'vacuum_progress_metrics',
     'query': """
 SELECT v.datname, c.relname, v.phase,

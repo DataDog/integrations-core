@@ -20,6 +20,10 @@ def instance_auto_discover_queues():
     return False
 
 
+def instance_collect_connection_metrics():
+    return False
+
+
 def instance_collect_reset_queue_metrics():
     return True
 
@@ -78,3 +82,7 @@ def instance_timeout():
 
 def instance_try_basic_auth():
     return True
+
+
+def instance_use_qm_tz_for_metrics():
+    return False

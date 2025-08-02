@@ -7,7 +7,7 @@ import copy
 import re
 import socket
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import requests
@@ -32,6 +32,7 @@ class HTTPCheck(AgentCheck):
     SOURCE_TYPE_NAME = "system"
     SC_STATUS = "http.can_connect"
     SC_SSL_CERT = "http.ssl_cert"
+    HA_SUPPORTED = True
 
     DEFAULT_HTTP_CONFIG_REMAPPER = {
         "client_cert": {"name": "tls_cert"},
@@ -351,13 +352,13 @@ class HTTPCheck(AgentCheck):
 
         try:
             cert = x509.load_der_x509_certificate(binary_cert)
-            exp_date = cert.not_valid_after
+            exp_date = cert.not_valid_after_utc
         except Exception as e:
             msg = repr(e)
             self.log.debug('Unable to parse the certificate to get expiration: %s', e)
             return AgentCheck.UNKNOWN, None, None, msg
 
-        time_left = exp_date - datetime.utcnow()
+        time_left = exp_date - datetime.now(timezone.utc)
         days_left = time_left.days
         seconds_left = time_left.total_seconds()
 

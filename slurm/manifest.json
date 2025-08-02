@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a1e88183-da10-4651-bac8-843bdb640af7",
   "app_id": "slurm",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

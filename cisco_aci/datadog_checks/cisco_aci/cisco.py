@@ -10,6 +10,7 @@ from datadog_checks.cisco_aci.aci_metrics import make_tenant_metrics
 from datadog_checks.cisco_aci.api import Api
 from datadog_checks.cisco_aci.capacity import Capacity
 from datadog_checks.cisco_aci.fabric import Fabric
+from datadog_checks.cisco_aci.faults import Faults
 from datadog_checks.cisco_aci.tags import CiscoTags
 from datadog_checks.cisco_aci.tenant import Tenant
 
@@ -19,8 +20,8 @@ SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
 
 
 class CiscoACICheck(AgentCheck):
-
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'pwd': {'name': 'password'}}
+    HA_SUPPORTED = True
 
     def __init__(self, name, init_config, instances):
         super(CiscoACICheck, self).__init__(name, init_config, instances)
@@ -131,6 +132,20 @@ class CiscoACICheck(AgentCheck):
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
                 message="aci capacity operations failed, returning a status of {}".format(e),
+                tags=service_check_tags,
+            )
+            api.close()
+            raise
+
+        try:
+            faults = Faults(self, api, self.instance, self.instance.get('namespace', 'default'))
+            faults.collect()
+        except Exception as e:
+            self.log.error('faults collection failed: %s', e)
+            self.service_check(
+                SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="aci faults operations failed, returning a status of {}".format(e),
                 tags=service_check_tags,
             )
             api.close()

@@ -6,6 +6,7 @@ import pytest
 from datadog_checks.base import AgentCheck
 
 from .common import (
+    ALL_BACKENDS_METRICS,
     BACKENDS_METRICS,
     COMMANDS_COUNTERS_METRICS,
     CONNECTION_POOL_METRICS,
@@ -69,8 +70,9 @@ def test_server_down(aggregator, instance_basic, dd_run_check):
         (['memory_metrics'], MEMORY_METRICS, []),
         (['backends_metrics'], BACKENDS_METRICS, ['hostgroup', 'status']),
         (['query_rules_metrics'], QUERY_RULES_TAGS_METRICS, ['rule_id']),
+        (['all_backends_metrics'], ALL_BACKENDS_METRICS, ['hostgroup', 'status']),
     ),
-    ids=('global', 'command_counters', 'connection_pool', 'users', 'memory', 'backends', 'query_rules'),
+    ids=('global', 'command_counters', 'connection_pool', 'users', 'memory', 'backends', 'query_rules', 'all_backends'),
 )
 def test_additional_metric(
     aggregator, instance_basic, dd_run_check, additional_metrics, expected_metrics, tag_prefixes
