@@ -156,38 +156,35 @@ instances:
     ##
     ## 3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
     ##              of data:
-    ##                a. value_path - This is the JSON path from the `data_path` to the metric. This path may include
-    ##                                string keys as well as list indices. For example, if querying for size of parent
-    ##                                circuit breaker, the `value_path` is `estimated_size_in_bytes`.
-    ##                b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
-    ##                          tag and applied to every metric collected by this particular query.
-    ##
-    ##                c. type (optional) - An optional parameter to designates the type of data sent. Possible values
-    ##                                     for `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with
-    ##                                     `gauge` being the default.
+    ##       1. value_path - This is the JSON path from the `data_path` to the metric. This path may include string
+    ##                       keys as well as list indices. For example, if querying for size of parent circuit
+    ##                       breaker, the `value_path` is `estimated_size_in_bytes`.
+    ##       2. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a tag and
+    ##                 applied to every metric collected by this particular query.
+    ##       3. type (optional) - An optional parameter to designates the type of data sent. Possible values for
+    ##                            `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with `gauge` being
+    ##                            the default.
     ##
     ## 4. payload (optional) - An optional payload can be included when querying the endpoint. This turns the GET
     ##                         request into a POST request, so a read-only user should be used when writing
     ##                         custom queries with a payload. Use YAML formatting when including a payload.
-    ##
-    ## Example:
-    ## - endpoint: /_search
-    ##   data_path: aggregations.genres.buckets
-    ##   payload:
-    ##     aggs:
-    ##       genres:
-    ##         terms:
-    ##           field: "id"
-    ##   columns:
-    ##   - value_path: key
-    ##     name: id
-    ##     type: tag
-    ##   - value_path: doc_count
-    ##     name: elasticsearch.doc_count
-    ##   tags:
-    ##   - custom_tag:1
     #
-    # custom_queries: []
+    # custom_queries:
+    #   - endpoint: /_search
+    #     data_path: aggregations.genres.buckets
+    #     payload:
+    #       aggs:
+    #         genres:
+    #           terms:
+    #             field: id
+    #     columns:
+    #     - value_path: key
+    #       name: id
+    #       type: tag
+    #     - value_path: doc_count
+    #       name: elasticsearch.doc_count
+    #     tags:
+    #     - custom_tag:1
 
     ## @param submit_events - boolean - optional - default: true
     ## By default we submit events to Datadog if the cluster starts unhealthy or anytime its health changes.
@@ -269,7 +266,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -292,7 +289,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
