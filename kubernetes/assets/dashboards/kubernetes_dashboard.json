@@ -424,7 +424,7 @@
                                             "data_source": "events",
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:kubernetes $node"
+                                                "query": "source:kubernetes $node $cluster"
                                             },
                                             "indexes": [
                                                 "*"
@@ -466,7 +466,7 @@
                             "requests": [
                                 {
                                     "query": {
-                                        "query_string": "source:kubernetes $node",
+                                        "query_string": "source:kubernetes $node $cluster",
                                         "data_source": "event_stream",
                                         "event_size": "s"
                                     },
