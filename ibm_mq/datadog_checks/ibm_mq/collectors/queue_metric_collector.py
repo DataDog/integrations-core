@@ -75,13 +75,23 @@ class QueueMetricCollector(object):
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
+
+        _discover = (
+            self._discover_queues_via_names if self.config.auto_discover_queues_via_names else self._discover_queues
+        )
+
+        if self.config.auto_discover_queues_via_names:
+            self.log.debug("Using _discover_queues_via_names to discover queues")
+        else:
+            self.log.debug("Using _discover_queues to discover queues")
+
         discovered_queues = set()
         if self.config.auto_discover_queues and not self.config.queue_patterns or self.config.queue_regex:
-            discovered_queues.update(self._discover_queues(queue_manager, '*'))
+            discovered_queues.update(_discover(queue_manager, '*'))
 
         if self.config.queue_patterns:
             for pattern in self.config.queue_patterns:
-                discovered_queues.update(self._discover_queues(queue_manager, pattern))
+                discovered_queues.update(_discover(queue_manager, pattern))
 
         if self.config.queue_regex:
             keep_queues = set()
@@ -98,6 +108,50 @@ class QueueMetricCollector(object):
         return discovered_queues
 
     def _discover_queues(self, queue_manager, mq_pattern_filter):
+        # type: (pymqi.QueueManager, str) -> List[str]
+        queues = []
+
+        for queue_type in SUPPORTED_QUEUE_TYPES:
+            args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
+            pcf = None
+            try:
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
+                response = pcf.MQCMD_INQUIRE_Q(args)
+            except pymqi.MQMIError as e:
+                # Don't warn if no messages, see:
+                # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                    self.log.debug("No queue info available")
+                elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_UNKNOWN_OBJECT_NAME:
+                    self.log.debug("No matching queue of type %d for pattern %s", queue_type, mq_pattern_filter)
+                else:
+                    self.warning("Error discovering queue: %s", e)
+            else:
+                for queue_info in response:
+                    queue = queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)
+                    if queue:
+                        queue_name = to_string(queue).strip()
+                        self.log.debug("Discovered queue: %s", queue_name)
+                        queues.append(queue_name)
+                    else:
+                        self.log.debug('Discovered queue with empty name, skipping.')
+                        continue
+                self.log.debug("%s queues discovered", str(len(queues)))
+            finally:
+                # Close internal reply queue to prevent filling up a dead-letter queue.
+                # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
+                # https://dsuch.github.io/pymqi/examples.html#how-to-specify-dynamic-reply-to-queues
+                if pcf is not None:
+                    pcf.disconnect()
+
+        if not queues:
+            self.warning("No matching queue of type MQQT_LOCAL or MQQT_REMOTE for pattern %s", mq_pattern_filter)
+
+        return queues
+
+    def _discover_queues_via_names(self, queue_manager, mq_pattern_filter):
         # type: (pymqi.QueueManager, str) -> List[str]
         queues = []
 
@@ -130,9 +184,9 @@ class QueueMetricCollector(object):
                         # Don't warn if no messages, see:
                         # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
                         if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
-                            self.log.debug("No queue info available for pattern %s", mq_pattern_filter)
+                            self.log.debug("No queue info available for queue %s", queue_name)
                         elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_UNKNOWN_OBJECT_NAME:
-                            self.log.debug("No matching queue of type %d for pattern %s", queue_type, mq_pattern_filter)
+                            self.log.debug("No matching queue of type %d for queue %s", queue_type, queue_name)
                         else:
                             self.log.debug("Error inquiring queue %s: %s", queue_name, e)
                             self._submit_discovery_error_metric(e, [f"queue:{queue_name}"])
