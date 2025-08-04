@@ -31,7 +31,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "anthropic_usage_and_costs.",
+        "prefix": "anthropic.",
         "check": [],
         "metadata_path": "metadata.csv"
       },
