@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "paramiko==3.5.1",
+    "paramiko==4.0.0",
 ]
 
 [project.urls]
