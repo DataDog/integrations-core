@@ -336,11 +336,17 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_metadata(self):
+        if not self._collect_pg_settings_enabled:
+            return
+        
         # Only query for settings if configured to do so &&
         # don't report more often than the configured collection interval
         elapsed_s = time.time() - self._time_since_last_settings_query
-        if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
+        if elapsed_s >= self.pg_settings_collection_interval:
             self._pg_settings_cached = self._collect_postgres_settings()
+        if not self._pg_settings_cached:
+            self._log.debug("Skipping settings collection because no settings were found")
+            return
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
