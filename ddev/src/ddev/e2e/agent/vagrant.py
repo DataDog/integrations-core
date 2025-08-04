@@ -69,9 +69,6 @@ class VagrantAgent(AgentInterface):
         self.env_data = EnvDataStorage(app.data_dir).get(integration.name, env)
         self._initialize_vagrant(write=False)
 
-    def get_id(self) -> str:
-        return self._vm_name
-
     # =============================
     # Public Methods: Lifecycle (start, stop, restart, enter shell)
     # =============================
