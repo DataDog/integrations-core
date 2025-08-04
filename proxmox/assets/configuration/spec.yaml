@@ -62,9 +62,17 @@ files:
       value:
           example:
             - resource: vm
+              property: hostname
               patterns:
-                - <VM_REGEX_1>
-                - <VM_REGEX_2>
+                - .*
+            - resource: node
+              type: exclude
+              patterns:
+                - .+
+            - resource: container
+              type: include
+              patterns:
+                - thiscontainer
           type: array
           items:
             type: object

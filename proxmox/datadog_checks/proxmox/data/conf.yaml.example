@@ -141,9 +141,17 @@ instances:
     #
     # resource_filters:
     #   - resource: vm
+    #     property: hostname
     #     patterns:
-    #     - <VM_REGEX_1>
-    #     - <VM_REGEX_2>
+    #     - .*
+    #   - resource: node
+    #     type: exclude
+    #     patterns:
+    #     - .+
+    #   - resource: container
+    #     type: include
+    #     patterns:
+    #     - thiscontainer
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
