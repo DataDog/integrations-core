@@ -206,7 +206,6 @@ class VagrantAgent(AgentInterface):
         template = self._get_vagrantfile_template()
 
         return template.render(
-            dd_api_key=os.environ.get("DD_API_KEY", ""),
             exported_env_vars_str=exported_env_vars_str,
             vagrant_box=vagrant_box,
             synced_folders_str=synced_folders_str,
