@@ -1,6 +1,12 @@
 # CHANGELOG - GPU
 
 
+## 0.3.0
+
+***Added***:
+
+* Added process-level GPU metrics with PID tags: `gpu.process.sm_active`, `gpu.process.dram_active`, `gpu.process.encoder_utilization`, and `gpu.process.decoder_utilization`.
+
 ## 0.2.0
 
 ***Removed***:
