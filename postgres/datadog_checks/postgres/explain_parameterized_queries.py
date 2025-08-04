@@ -190,12 +190,26 @@ class ExplainParameterizedQueries:
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
             with conn.cursor() as cursor:
                 logger.debug('Executing query=[%s]', query)
-                cursor.execute(query, ignore_query_metric=True)
+                try:
+                    cursor.execute(query, ignore_query_metric=True)
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []
 
     def _execute_query_and_fetch_rows(self, dbname, query):
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
             with conn.cursor() as cursor:
-                cursor.execute(query, ignore_query_metric=True)
+                try:
+                    cursor.execute(query, ignore_query_metric=True)
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []
                 return cursor.fetchall()
 
     def _is_parameterized_query(self, statement: str) -> bool:

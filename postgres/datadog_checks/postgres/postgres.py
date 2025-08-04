@@ -235,7 +235,15 @@ class PostgreSql(AgentCheck):
     def execute_query_raw(self, query, db):
         with db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute(query)
+                try:
+                    cursor.execute(query)
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return []
+
                 rows = cursor.fetchall()
                 return rows
 
@@ -277,7 +285,7 @@ class PostgreSql(AgentCheck):
             with conn.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 cursor.fetchall()
-        except psycopg.OperationalError as e:
+        except psycopg.Error as e:
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
             raise DatabaseHealthCheckError(err_msg)
@@ -417,7 +425,15 @@ class PostgreSql(AgentCheck):
     def _get_replication_role(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SELECT pg_is_in_recovery();')
+                try:
+                    cursor.execute('SELECT pg_is_in_recovery();')
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""
+
                 role = cursor.fetchone()[0]
                 # value fetched for role is of <type 'bool'>
                 return "standby" if role else "master"
@@ -468,14 +484,28 @@ class PostgreSql(AgentCheck):
     def load_system_identifier(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SELECT system_identifier FROM pg_control_system();')
-                self.system_identifier = cursor.fetchone()[0]
+                try:
+                    cursor.execute('SELECT system_identifier FROM pg_control_system();')
+                    self.system_identifier = cursor.fetchone()[0]
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""
 
     def load_cluster_name(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SHOW cluster_name;')
-                self.cluster_name = cursor.fetchone()[0]
+                try:
+                    cursor.execute('SHOW cluster_name;')
+                    self.cluster_name = cursor.fetchone()[0]
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""
 
     def load_version(self):
         self.raw_version = self._version_utils.get_raw_version(self.db())
@@ -490,9 +520,16 @@ class PostgreSql(AgentCheck):
     def _get_wal_level(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SHOW wal_level;')
-                wal_level = cursor.fetchone()[0]
-                return wal_level
+                try:
+                    cursor.execute('SHOW wal_level;')
+                    wal_level = cursor.fetchone()[0]
+                    return wal_level
+                except psycopg.Error as e:
+                    self._log.error(
+                        "Error while executing query: %s. ",
+                        e,
+                    )
+                    return ""
 
     @property
     def reported_hostname(self):
@@ -559,7 +596,7 @@ class PostgreSql(AgentCheck):
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
 
-    def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
+    def _run_query_scope(self, scope, is_custom_metrics, cols, descriptors, dbname=None):
         if scope is None:
             return None
         if scope == REPLICATION_METRICS or not self.version >= V9:
@@ -570,18 +607,48 @@ class PostgreSql(AgentCheck):
         results = None
         is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
-            query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
-            with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
-                # if this is a relation-specific query, we need to list all relations last
-                if is_relations:
-                    schema_field = get_schema_field(descriptors)
-                    formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                    cursor.execute(formatted_query)
-                else:
-                    self.log.debug("Running query: %s", str(query))
-                    cursor.execute(query.replace(r'%', r'%%'))
+            with (
+                self.db()
+                if dbname is None
+                else self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn
+            ):
+                with conn.cursor() as cursor:
+                    query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
+                    with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
+                        # if this is a relation-specific query, we need to list all relations last
+                        if is_relations:
+                            schema_field = get_schema_field(descriptors)
+                            formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                            cursor.execute(formatted_query)
+                        else:
+                            self.log.debug("Running query: %s", str(query))
+                            cursor.execute(query.replace(r'%', r'%%'))
 
-                results = cursor.fetchall()
+                        results = cursor.fetchall()
+                        if not results:
+                            return None
+
+                        if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
+                            self.log.debug(
+                                "Query: %s returned more than %s results (%s). Truncating",
+                                query,
+                                MAX_CUSTOM_RESULTS,
+                                len(results),
+                            )
+                            results = results[:MAX_CUSTOM_RESULTS]
+
+                        if is_relations and len(results) > self._config.max_relations:
+                            self.log.debug(
+                                "Query: %s returned more than %s results (%s). "
+                                "Truncating. You can edit this limit by setting the `max_relations` config option",
+                                query,
+                                self._config.max_relations,
+                                len(results),
+                            )
+                            results = results[: self._config.max_relations]
+
+                        return results
+
         except psycopg.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
@@ -597,29 +664,15 @@ class PostgreSql(AgentCheck):
             self._clean_state()
         except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
+        except psycopg.Error as e:
+            log_func(
+                "Error while executing query: %s. ",
+                e,
+            )
 
-        if not results:
             return None
 
-        if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
-            self.log.debug(
-                "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
-            )
-            results = results[:MAX_CUSTOM_RESULTS]
-
-        if is_relations and len(results) > self._config.max_relations:
-            self.log.debug(
-                "Query: %s returned more than %s results (%s). "
-                "Truncating. You can edit this limit by setting the `max_relations` config option",
-                query,
-                self._config.max_relations,
-                len(results),
-            )
-            results = results[: self._config.max_relations]
-
-        return results
-
-    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, dbname=None):
+    def _query_scope(self, scope, instance_tags, is_custom_metrics, dbname=None):
         if scope is None:
             return None
         # build query
@@ -629,7 +682,7 @@ class PostgreSql(AgentCheck):
         # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
-        results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors)
+        results = self._run_query_scope(scope, is_custom_metrics, cols, descriptors, dbname=dbname)
         if not results:
             return None
 
@@ -714,10 +767,8 @@ class PostgreSql(AgentCheck):
         databases = self.autodiscovery.get_items()
         for db in databases:
             try:
-                with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                    with conn.cursor() as cursor:
-                        for scope in scopes:
-                            self._query_scope(cursor, scope, instance_tags, False, db)
+                for scope in scopes:
+                    self._query_scope(scope, instance_tags, False, dbname=db)
             except Exception as e:
                 self.log.error("Error collecting metrics for database %s %s", db, str(e))
         elapsed_ms = (time() - start_time) * 1000
@@ -803,26 +854,31 @@ class PostgreSql(AgentCheck):
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
 
-        with self.db() as conn:
-            with conn.cursor() as cursor:
-                results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
-                if results_len is not None:
-                    self.gauge(
-                        "db.count",
-                        results_len,
-                        tags=self.tags_without_db,
-                        hostname=self.reported_hostname,
-                    )
+        results_len = self._query_scope(db_instance_metrics, instance_tags, False)
+        if results_len is not None:
+            self.gauge(
+                "db.count",
+                results_len,
+                tags=self.tags_without_db,
+                hostname=self.reported_hostname,
+            )
 
-            with conn.cursor() as cursor:
-                self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
-            with conn.cursor() as cursor:
-                self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
+        self._query_scope(bgw_instance_metrics, instance_tags, False)
+        self._query_scope(archiver_instance_metrics, instance_tags, False)
 
-            if self._config.collect_checksum_metrics and self.version >= V12:
-                # SHOW queries need manual cursor execution so can't be bundled with the metrics
+        if self._config.collect_checksum_metrics and self.version >= V12:
+            # SHOW queries need manual cursor execution so can't be bundled with the metrics
+            with self.db() as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute("SHOW data_checksums;")
+                    try:
+                        cursor.execute("SHOW data_checksums;")
+                    except psycopg.Error as e:
+                        self._log.error(
+                            "Error while executing query: %s. ",
+                            e,
+                        )
+                        return
+
                     enabled = cursor.fetchone()[0]
                     self.count(
                         "checksums.enabled",
@@ -830,30 +886,27 @@ class PostgreSql(AgentCheck):
                         tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
                         hostname=self.reported_hostname,
                     )
-            if self._config.collect_activity_metrics:
-                activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
-                with conn.cursor() as cursor:
-                    self._query_scope(cursor, activity_metrics, instance_tags, False)
+        if self._config.collect_activity_metrics:
+            activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
+            self._query_scope(activity_metrics, instance_tags, False)
 
-            if per_database_metric_scope:
-                # if autodiscovery is enabled, get per-database metrics from all databases found
-                if self.autodiscovery:
-                    self._collect_metric_autodiscovery(
-                        instance_tags,
-                        scopes=per_database_metric_scope,
-                        scope_type='_collect_stat_autodiscovery',
-                    )
-                else:
-                    # otherwise, continue just with dbname
-                    metric_scope.extend(per_database_metric_scope)
+        if per_database_metric_scope:
+            # if autodiscovery is enabled, get per-database metrics from all databases found
+            if self.autodiscovery:
+                self._collect_metric_autodiscovery(
+                    instance_tags,
+                    scopes=per_database_metric_scope,
+                    scope_type='_collect_stat_autodiscovery',
+                )
+            else:
+                # otherwise, continue just with dbname
+                metric_scope.extend(per_database_metric_scope)
 
-            for scope in list(metric_scope):
-                with conn.cursor() as cursor:
-                    self._query_scope(cursor, scope, instance_tags, False)
+        for scope in list(metric_scope):
+            self._query_scope(scope, instance_tags, False)
 
-            for scope in self._config.custom_metrics:
-                with conn.cursor() as cursor:
-                    self._query_scope(cursor, scope, instance_tags, True)
+        for scope in self._config.custom_metrics:
+            self._query_scope(scope, instance_tags, True)
 
         if self.dynamic_queries:
             for dynamic_query in self.dynamic_queries:
@@ -919,7 +972,15 @@ class PostgreSql(AgentCheck):
         if self._config.query_timeout:
             # Set the statement_timeout for the session
             with conn.cursor() as cursor:
-                cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
+                try:
+                    cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
+                except psycopg.Error as e:
+                    self.log.warning(
+                        "Failed to set statement_timeout to %d: %s",
+                        self._config.query_timeout,
+                        e,
+                    )
+                    return None
         if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
             text_loader = SQLASCIITextLoader
             text_loader.encodings = self._config.query_encodings
@@ -952,7 +1013,7 @@ class PostgreSql(AgentCheck):
                 for setting in rows:
                     name, val = setting
                     self.pg_settings[name] = val
-        except (psycopg.DatabaseError, psycopg.OperationalError) as err:
+        except psycopg.Error as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",

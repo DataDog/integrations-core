@@ -91,6 +91,8 @@ class DBExplainError(Enum):
     # PostgreSQL cannot determine the data type of a parameter in the query
     indeterminate_datatype = 'indeterminate_datatype'
 
+    unknown_error = 'unknown_error'
+
 
 class DatabaseHealthCheckError(Exception):
     pass
