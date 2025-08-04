@@ -2,7 +2,7 @@
 
 ## Overview
 
-This integration provides Datadog users with comprehensive visibility into their Anthropic API usage and associated costs. By ingesting data from Anthropic’s Admin Usage & Cost APIs, the integration enables organizations to:
+This integration provides Datadog users with comprehensive visibility into their Anthropic API usage and associated costs. By ingesting data from Anthropic's Admin usage and cost APIs, the integration enables organizations to:
 
 - **Monitor LLM token consumption** (input, output, cache usage) in near real-time
 - **Track costs by model, workspace, and service tier**, supporting accurate attribution and budgeting
@@ -20,7 +20,7 @@ To get started with the Anthropic Admin API integration in Datadog, follow the s
 You will need an **Admin API key** from Anthropic. This key allows access to usage and cost reports across your organization.
 
 1. Visit the [Anthropic Admin API documentation](https://docs.anthropic.com/en/docs/admin-api-overview).
-2. Navigate to your organization’s settings or reach out to your Anthropic account admin.
+2. Navigate to your organization's settings or reach out to your Anthropic account admin.
 3. Create a new Admin API key with appropriate permissions for accessing:
    - `GET /v1/organizations/usage_report/messages`
    - `GET /v1/organizations/cost_report`
@@ -28,15 +28,12 @@ You will need an **Admin API key** from Anthropic. This key allows access to usa
 
 ### 2. Configure the Datadog Integration
 
-1. In Datadog, go to **Integrations → Anthropic**.
+1. In Datadog, go to **Integrations -> Anthropic**.
 2. In the configuration panel, provide the **Admin API Key** by pasting the key you generated from Anthropic.
 3. Click **Save Configuration**.
 
 Once saved, Datadog will begin polling Anthropic usage and cost endpoints using this key and populate metrics in your environment.
 
-### Validation
-
-!!! Add steps to validate integration is functioning as expected !!!
 
 ## Data Collected
 
