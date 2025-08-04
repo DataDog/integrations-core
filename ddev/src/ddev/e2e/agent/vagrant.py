@@ -59,9 +59,6 @@ def disable_integration_before_install(config_file: Path):
 class VagrantAgent(AgentInterface):
     VM_HOST_IP = "172.30.1.5"
 
-    # =============================
-    # Constructor and Dunder Methods
-    # =============================
     def __init__(
         self, app: Application, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
     ) -> None:
@@ -70,9 +67,6 @@ class VagrantAgent(AgentInterface):
         self.env_data = EnvDataStorage(app.data_dir).get(integration.name, env)
         self._initialize_vagrant(write=False)
 
-    # =============================
-    # Public Methods: Lifecycle (start, stop, restart, enter shell)
-    # =============================
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         # Generate the Vagrantfile content
         self._initialize_vagrant(
@@ -94,7 +88,6 @@ class VagrantAgent(AgentInterface):
         # Halt the VM
         self.app.display_info(f"Halting VM `{self._vm_name}`")
         self._run_command(f"vagrant halt {self._vm_name}", "halt_command", host=True)
-
         self.app.display_info(f"VM `{self._vm_name}` halted")
 
         # Destroy the VM
@@ -112,9 +105,6 @@ class VagrantAgent(AgentInterface):
         self.app.display_debug(f"Interactive shell command: `{' '.join(host_cmd)}`")
         self.platform.modules.subprocess.run(host_cmd, check=True)
 
-    # =============================
-    # Public Methods: Agent Control
-    # =============================
     def restart(self) -> None:
         self.app.display_info(f"Restarting Datadog Agent service in VM `{self._vm_name}`")
         if self._is_windows_vm:
@@ -142,9 +132,6 @@ class VagrantAgent(AgentInterface):
         if stderr:
             self.app.display_error(stderr)
 
-    # =============================
-    # Private Helpers: Vagrant Setup & Initialization
-    # =============================
     def _initialize_vagrant(self, write: bool = False, **kwargs):
         self._vagrant_dir = self.env_data.storage_dir / "vagrant" / self._vm_name
         self._vagrant_dir.mkdir(parents=True, exist_ok=True)
@@ -191,7 +178,6 @@ class VagrantAgent(AgentInterface):
         for volume in synced_folders:
             # Handle Windows paths that contain drive letters (e.g., C:\path)
             # Look for pattern like ":C:\" or ":D:\" etc.
-
             windows_path_match = re.search(r':([A-Za-z]:\\.*)', volume)
             if windows_path_match:
                 # Split at the position before the drive letter
@@ -245,7 +231,6 @@ class VagrantAgent(AgentInterface):
         local_packages: dict[Path, str],
         start_commands: list[str],
         post_install_commands: list[str],
-        host_operation_env_vars,
     ):
         self.app.display_info(
             f"Starting up Vagrant VM `{self._vm_name}`",
@@ -407,7 +392,6 @@ class VagrantAgent(AgentInterface):
                 local_packages,
                 start_commands,
                 post_install_commands,
-                host_operation_env_vars,
             )
 
         # Handle agent restart after initialization if any custom operations were performed
@@ -459,9 +443,6 @@ EOF'"""
             return {k: self._substitute_template_variables(v) for k, v in value.items()}
         return value
 
-    # =============================
-    # Cached Properties
-    # =============================
     @cached_property
     def _isatty(self) -> bool:
         isatty: Callable[[], bool] | None = getattr(sys.stdout, "isatty", None)
