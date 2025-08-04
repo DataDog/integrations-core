@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Real-Time CASB Analytics",
+    "title": "iboss - Real-Time CASB Log Analytics",
     "description": "This dashboard provides a comprehensive overview of CASB activities using logs.",
     "widgets": [
         {
@@ -44,6 +44,27 @@
             }
         },
         {
+            "id": 4543884781025507,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 7500833456952142,
             "definition": {
                 "title": "Traffic Volume",
@@ -58,7 +79,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                    "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                 },
                                 "indexes": [
                                     "*"
@@ -100,7 +121,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 3,
                 "height": 3
             }
@@ -140,7 +161,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                    "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                 },
                                 "indexes": [
                                     "*"
@@ -166,7 +187,7 @@
             },
             "layout": {
                 "x": 3,
-                "y": 3,
+                "y": 5,
                 "width": 9,
                 "height": 3
             }
@@ -199,7 +220,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -266,7 +287,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -311,7 +332,7 @@
                                             "name": "query3",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -338,7 +359,7 @@
                                             "name": "query4",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -364,7 +385,7 @@
                                             "name": "query5",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG @action:Blocked $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG @action:Blocked $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -390,7 +411,7 @@
                                             "name": "query6",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG @malware:1 $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG @malware:1 $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -495,7 +516,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
+                "y": 8,
                 "width": 12,
                 "height": 8,
                 "is_column_break": true
@@ -529,7 +550,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -595,7 +616,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -640,7 +661,7 @@
                                             "name": "query3",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -667,7 +688,7 @@
                                             "name": "query4",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -693,7 +714,7 @@
                                             "name": "query5",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG @action:Blocked $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG @action:Blocked $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -748,12 +769,6 @@
                                         },
                                         {
                                             "cell_display_mode": "number",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "byte_in_decimal_bytes_family"
-                                                }
-                                            },
                                             "alias": "Hit Count",
                                             "conditional_formats": [
                                                 {
@@ -766,12 +781,6 @@
                                         },
                                         {
                                             "cell_display_mode": "number",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "byte_in_decimal_bytes_family"
-                                                }
-                                            },
                                             "alias": "Block Count",
                                             "conditional_formats": [
                                                 {
@@ -798,7 +807,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 16,
                 "width": 12,
                 "height": 8
             }
@@ -847,7 +856,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG -@categoryName:\"-\" $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG -@categoryName:\"-\" $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -903,7 +912,7 @@
                                             "name": "query3",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -930,7 +939,7 @@
                                             "name": "query4",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -956,7 +965,7 @@
                                             "name": "query5",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG @action:Blocked $user $application"
+                                                "query": "source:iboss @evt.name:WEB_LOG @action:Blocked $user $application $asset_id $computer_name $category_name $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1049,7 +1058,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 22,
+                "y": 24,
                 "width": 12,
                 "height": 8
             }
@@ -1065,6 +1074,30 @@
         {
             "name": "application",
             "prefix": "@applicationName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "asset_id",
+            "prefix": "@assetId",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "computer_name",
+            "prefix": "@computerName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "location",
+            "prefix": "@location",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "category_name",
+            "prefix": "@categoryName",
             "available_values": [],
             "default": "*"
         }
