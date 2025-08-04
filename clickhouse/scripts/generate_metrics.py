@@ -19,6 +19,11 @@ QUERIES_DIR = os.path.join(HERE, '..', 'datadog_checks', 'clickhouse', 'queries'
 class MetricsGenerator(abc.ABC):
     INTEGRATION_PREFIX = 'clickhouse'
 
+    def __init__(self, version: str = None):
+        super().__init__()
+        self.metrics = {}
+        self.version = version or 'master'
+
     @staticmethod
     def read_file(file, encoding='utf-8'):
         with open(file, 'r', encoding=encoding) as f:
@@ -52,47 +57,133 @@ class MetricsGenerator(abc.ABC):
         return NotImplemented
 
 
-class SystemMetricsGenerator(MetricsGenerator):
-    METRIC_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)"\)\s*\\?')
-    METRIC_PREFIX = 'ClickHouseMetrics'
-    MODULE_NAME = 'system_metrics.py'
+class SystemProfileEvents(MetricsGenerator):
+    METRIC_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)",\s*(?P<type>[\w:]+)\)\s*\\?')
+    METRIC_PREFIX = 'ClickHouseProfileEvents'
+    MODULE_NAME = 'system_events.py'
+    CLASS_NAME = 'SystemEvents'
 
-    source_url = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/Common/CurrentMetrics.cpp'
+    source_url = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/Common/ProfileEvents.cpp'
 
-    def __init__(self, version: str = None):
-        super().__init__()
-        self.metrics = {}
-        self.version = version or 'master'
+    # each value represents the following tuple (<metric-type>, <scale>)
+    VALUE_TYPES = {
+        'ValueType::Number': ('monotonic_gauge', None),
+        'ValueType::Bytes': ('monotonic_gauge', None),
+        'ValueType::Milliseconds': ('temporal_percent', 'millisecond'),
+        'ValueType::Microseconds': ('temporal_percent', 'microsecond'),
+        'ValueType::Nanoseconds': ('temporal_percent', 'nanosecond'),
+    }
 
     def fetch_metrics(self):
+        if self.metrics:
+            return self.metrics
+
         text = requests.get(self.source_url.format(branch=self.version), timeout=10).text
-        metrics = dict(match.groups() for match in self.METRIC_PATTERN.finditer(text))
-
-        return {metric: description for metric, description in metrics.items() if description}
-
-    def prefetch(self):
-        if not self.metrics:
-            self.metrics = self.fetch_metrics()
+        metrics = list(match.groups() for match in self.METRIC_PATTERN.finditer(text))
+        self.metrics = {metric: (description, value_type) for metric, description, value_type in metrics}
 
         return self.metrics
 
+    @staticmethod
+    def metric_name(metric):
+        return f'{SystemProfileEvents.METRIC_PREFIX}_{metric}'
+
     def make_template_config(self):
-        data = self.prefetch()
+        data = self.fetch_metrics()
+
+        items = []
+        for metric_name, data in data.items():
+            metric_type, scale = self.get_metric_type(metric_name)
+            if scale is None:
+                item = self.get_metric_item(metric_name, metric_type)
+            else:
+                item = self.get_metric_item_with_scale(metric_name, metric_type, scale)
+            items.append(self.indent(item, 16))
+
         config = {
-            'metrics_items': ',\n'.join(self.indent(self.get_metric_header(metric), 16) for metric in data.keys()),
-            'metrics_class': 'SystemMetrics',
+            'metrics_items': ',\n'.join(items),
+            'metrics_class': self.CLASS_NAME,
         }
 
         return config
 
-    @staticmethod
-    def get_metric_header(metric):
+    def get_metric_item(self, metric, metric_type):
+        return """
+                '{metric}': {{
+                    'name': '{metric_name}',
+                    'type': '{type}',
+                }}
+        """.format(metric=metric, metric_name=self.metric_name(metric), type=metric_type).strip()
+
+    def get_metric_item_with_scale(self, metric, metric_type, scale):
+        return """
+                '{metric}': {{
+                    'name': '{metric_name}',
+                    'type': '{type}',
+                    'scale': '{scale}',
+                }}
+        """.format(metric=metric, metric_name=self.metric_name(metric), type=metric_type, scale=scale).strip()
+
+    def get_metric_type(self, metric):
+        value_type = self.metrics[metric][1]
+        if not value_type in self.VALUE_TYPES:
+            print(f'unknown value type {value_type}, skipping')
+            return
+
+        return self.VALUE_TYPES[value_type]
+
+    def generate_queries(self):
+        config = self.make_template_config()
+        self.format_template(self.MODULE_NAME, config)
+
+    def generate_tests(self):
+        data = self.fetch_metrics()
+
+        metrics = []
+        for metric in data.keys():
+            _, scale = self.get_metric_type(metric)
+            if scale is None:
+                metrics.append(self.integration_metric_name(self.metric_name(f'{metric}.count')))
+                metrics.append(self.integration_metric_name(self.metric_name(f'{metric}.total')))
+            else:
+                metrics.append(self.integration_metric_name(self.metric_name(metric)))
+        pprint.pprint(metrics, indent=4)
+
+
+class SystemMetricsGenerator(MetricsGenerator):
+    METRIC_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)"\)\s*\\?')
+    METRIC_PREFIX = 'ClickHouseMetrics'
+    MODULE_NAME = 'system_metrics.py'
+    CLASS_NAME = 'SystemMetrics'
+
+    source_url = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/Common/CurrentMetrics.cpp'
+
+    def fetch_metrics(self):
+        if self.metrics:
+            return self.metrics
+
+        text = requests.get(self.source_url.format(branch=self.version), timeout=10).text
+        metrics = dict(match.groups() for match in self.METRIC_PATTERN.finditer(text))
+        self.metrics = {metric: description for metric, description in metrics.items() if description}
+
+        return self.metrics
+
+    def make_template_config(self):
+        data = self.fetch_metrics()
+        config = {
+            'metrics_items': ',\n'.join(self.indent(self.get_metric_item(metric), 16) for metric in data.keys()),
+            'metrics_class': self.CLASS_NAME,
+        }
+
+        return config
+
+    def get_metric_item(self, metric):
         return """
                 '{metric}': {{
                     'name': '{metric_name}',
                     'type': 'gauge',
                 }}
-        """.format(metric=metric, metric_name=SystemMetricsGenerator.metric_name(metric)).strip()
+        """.format(metric=metric, metric_name=self.metric_name(metric)).strip()
 
     @staticmethod
     def metric_name(metric):
@@ -103,7 +194,7 @@ class SystemMetricsGenerator(MetricsGenerator):
         self.format_template(self.MODULE_NAME, config)
 
     def generate_tests(self):
-        data = self.prefetch()
+        data = self.fetch_metrics()
         metrics = []
         for metric in data.keys():
             metrics.append(self.integration_metric_name(self.metric_name(metric)))
@@ -112,6 +203,7 @@ class SystemMetricsGenerator(MetricsGenerator):
 
 TEMPLATE_GENERATORS = {
     'system_metrics': SystemMetricsGenerator,
+    'system_events': SystemProfileEvents,
 }
 
 
@@ -126,7 +218,7 @@ def main():
     parser.add_argument(
         '--query',
         type=str,
-        choices=['system_metrics'],
+        choices=['system_metrics', 'system_events'],
         required=True,
         help=(
             'Generate according module in the following path `datadog_checks/clickhouse/queries/<query>.py`.'
