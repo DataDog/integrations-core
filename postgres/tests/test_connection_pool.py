@@ -146,6 +146,22 @@ def _make_expected_kwargs(**overrides):
             "",  # Empty string dbname
             _make_expected_kwargs(dbname=""),  # Empty string is valid
         ),
+        # Socket connection tests (no host or password)
+        (
+            _make_base_args(host=None, password=None),
+            "testdb",
+            _make_expected_kwargs(dbname="testdb", host=None, password=None),
+        ),
+        (
+            _make_base_args(host=None, password=None, port=None),
+            "testdb",
+            _make_expected_kwargs(dbname="testdb", host=None, password=None, port=None),
+        ),
+        (
+            _make_base_args(host="", password=""),
+            "testdb",
+            _make_expected_kwargs(dbname="testdb", host=None, password=None),  # Empty strings excluded
+        ),
     ],
 )
 def test_postgres_connection_args_as_kwargs(init_args, dbname, expected):

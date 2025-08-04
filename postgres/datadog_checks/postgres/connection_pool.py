@@ -23,7 +23,7 @@ class PostgresConnectionArgs:
 
     application_name: str
     user: str
-    host: str
+    host: Optional[str] = None
     port: Optional[int] = None
     password: Optional[str] = None
     ssl_mode: Optional[str] = "allow"
@@ -45,10 +45,11 @@ class PostgresConnectionArgs:
         kwargs = {
             "application_name": self.application_name,
             "user": self.user,
-            "host": self.host,
             "dbname": dbname,
             "sslmode": self.ssl_mode,
         }
+        if self.host:
+            kwargs["host"] = self.host
         if self.password:
             kwargs["password"] = self.password
         if self.port:
