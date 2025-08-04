@@ -745,7 +745,7 @@ def should_propagate_agent_tags(instance, init_config) -> bool:
     return instance_propagate_agent_tags()
 
 
-def sanitize(config: Union[InstanceConfig ,dict]) -> dict:
+def sanitize(config: Union[InstanceConfig, dict]) -> dict:
     if isinstance(config, InstanceConfig):
         # If config is an InstanceConfig object, convert it to a dict
         config = config.model_dump(exclude=['custom_metrics', 'custom_queries'])
