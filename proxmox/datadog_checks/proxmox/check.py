@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck
@@ -9,6 +11,9 @@ from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.proxmox.config_models import ConfigMixin
 
 from .constants import (
+    ADDITIONAL_FILTER_PROPERTIES,
+    ALLOWED_FILTER_PROPERTIES,
+    ALLOWED_FILTER_TYPES,
     EVENT_TYPE_TO_TITLE,
     NODE_RESOURCE,
     OK_STATUS,
@@ -18,6 +23,7 @@ from .constants import (
     RESOURCE_TYPE_MAP,
     VM_RESOURCE,
 )
+from .resource_filters import create_resource_filter, is_resource_collected_by_filters
 
 
 def resource_type_for_event_type(event_type):
@@ -35,12 +41,96 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         super(ProxmoxCheck, self).__init__(name, init_config, instances)
         self.all_resources = {}
         self.last_event_collect_time = get_current_datetime()
+        self.resource_filters = self._parse_resource_filters(self.instance.get('resource_filters', []))
         self.check_initializations.append(self._parse_config)
 
     def _parse_config(self):
         self.base_tags = [f"proxmox_server:{self.config.proxmox_server}"]
         if self.config.tags:
             self.base_tags.extend(self.config.tags)
+
+    def _parse_resource_filters(self, all_resource_filters):
+        # Keep a list of resource filters ids (tuple of resource, property and type) that are already registered.
+        # This is to prevent users to define the same filter twice with different patterns.
+        resource_filters_ids = []
+        formatted_resource_filters = []
+        allowed_resource_types = set(RESOURCE_TYPE_MAP.values())
+
+        for resource_filter in all_resource_filters:
+            self.log.debug("processing filter %s", resource_filter)
+            # Optional fields:
+            if 'type' not in resource_filter:
+                resource_filter['type'] = 'include'
+            if 'property' not in resource_filter:
+                resource_filter['property'] = 'resource_name'
+
+            missing_fields = False
+            # Check required fields
+            for field in ['resource', 'property', 'type', 'patterns']:
+                if field not in resource_filter:
+                    self.log.warning(
+                        "Ignoring filter %r because it doesn't contain a %s field.", resource_filter, field
+                    )
+                    missing_fields = True
+                    continue
+
+            if missing_fields:
+                continue
+
+            # Check `resource` validity
+            if resource_filter['resource'] not in allowed_resource_types:
+                self.log.warning(
+                    "Ignoring filter %r because resource %s is not a supported resource",
+                    resource_filter,
+                    resource_filter['resource'],
+                )
+                continue
+
+            # Check `property` validity
+            allowed_prop_names = []
+            allowed_prop_names.extend(ALLOWED_FILTER_PROPERTIES)
+            if resource_filter['resource'] in {NODE_RESOURCE, VM_RESOURCE}:
+                allowed_prop_names.extend(ADDITIONAL_FILTER_PROPERTIES)
+
+            if resource_filter['property'] not in allowed_prop_names:
+                self.log.warning(
+                    "Ignoring filter %r because property '%s' is not valid for resource type %s. Should be one of %r.",
+                    resource_filter,
+                    resource_filter['property'],
+                    resource_filter['resource'],
+                    allowed_prop_names,
+                )
+                continue
+
+            # Check `type` validity
+            if resource_filter['type'] not in ALLOWED_FILTER_TYPES:
+                self.log.warning(
+                    "Ignoring filter %r because type '%s' is not valid. Should be one of %r.",
+                    resource_filter,
+                    resource_filter['type'],
+                    ALLOWED_FILTER_TYPES,
+                )
+            patterns = [re.compile(r) for r in resource_filter['patterns']]
+            filter_instance = create_resource_filter(
+                resource_filter['resource'],
+                resource_filter['property'],
+                patterns,
+                is_include=(resource_filter['type'] == 'include'),
+            )
+            if filter_instance.unique_key() in resource_filters_ids:
+                self.log.warning(
+                    "Ignoring filter %r because you already have a `%s` filter for resource type %s and property %s.",
+                    resource_filter,
+                    resource_filter['type'],
+                    resource_filter['resource'],
+                    resource_filter['property'],
+                )
+                continue
+
+            formatted_resource_filters.append(filter_instance)
+            resource_filters_ids.append(filter_instance.unique_key())
+
+        return formatted_resource_filters
 
     def _submit_resource_metrics(self, resource, tags, hostname):
         for metric_name, metric_name_remapped in RESOURCE_METRIC_NAME.items():
@@ -162,6 +252,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             resource_type_remapped = RESOURCE_TYPE_MAP.get(resource_type, resource_type)
             resource_id = resource.get('id')
             resource_name = resource.get('name')
+
             if resource_name is None:
                 # some resource types don't have a name attribute
                 resource_name = resource.get(resource.get('type', ''))
@@ -184,12 +275,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             if pool and resource_type_remapped != 'pool':
                 resource_tags.add(f'proxmox_pool:{pool}')
 
-            self.gauge(
-                f'{resource_type_remapped}.count',
-                1,
-                tags=self.base_tags + list(resource_tags),
-            )
-
             status = resource.get("status")
             status = 1 if status in OK_STATUS else 0
 
@@ -204,18 +289,30 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             elif resource_type_remapped == NODE_RESOURCE:
                 hostname = node
 
+            resource_val = {
+                'resource_type': resource_type_remapped,
+                'resource_name': resource_name,
+                'hostname': hostname,
+            }
+
+            if not is_resource_collected_by_filters(resource_id, resource_val, self.resource_filters):
+                self.log.debug("skipping resource %s: %s as it is not collected by filters")
+                continue
+
             tags = []
             if hostname is None:
                 tags = self.base_tags + list(resource_tags)
             else:
                 external_tags.append((hostname, {self.__NAMESPACE__: self.base_tags + list(resource_tags)}))
 
-            all_resources[resource_id] = {
-                'resource_type': resource_type_remapped,
-                'resource_name': resource_name,
-                'tags': tags,
-                'hostname': hostname,
-            }
+            resource_val['tags'] = tags
+            all_resources[resource_id] = resource_val
+
+            self.gauge(
+                f'{resource_type_remapped}.count',
+                1,
+                tags=self.base_tags + list(resource_tags),
+            )
 
             if resource_type_remapped != "pool":
                 # pools don't have a status attribute

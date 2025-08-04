@@ -129,6 +129,21 @@ instances:
     #
     # empty_default_hostname: true
 
+    ## @param resource_filters - list of mappings - optional
+    ## Each filter in the list is composed of three parameters.
+    ## 'resource' is one of vm/node/container/storage/pool/sdn on which to apply the filter
+    ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
+    ## 'type' is either include list (default) or exclude list. If a resource is both included and excluded it will be
+    ##        considered excluded.
+    ## 'property' is the kind of property on which to apply the filter and must be one of those values:
+    ##    - resource_name (default) to filter on the resource name (defined by Proxmox)
+    #
+    # resource_filters:
+    #   - resource: vm
+    #     patterns:
+    #     - <VM_REGEX_1>
+    #     - <VM_REGEX_2>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
