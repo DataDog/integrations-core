@@ -163,7 +163,14 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         user = task.get('user')
         event_title = EVENT_TYPE_TO_TITLE.get(task_type, task_type)
         resource_type = resource_type_for_event_type(task_type)
+
         resource_id = f'{resource_type}/{id}'
+        resource = self.all_resources.get(resource_id, {})
+
+        if task.get('id') and not is_resource_collected_by_filters(resource, self.resource_filters):
+            self.log.debug("skipping event for resource %s: %s as it is not collected by filters")
+            return None
+
         self.log.debug(
             "Creating event for task type: %s ID: %s, resource id %s on node %s",
             task_type,
@@ -171,9 +178,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             resource_id,
             node_name,
         )
-
-        resource = self.all_resources.get(resource_id, {})
-
         tags = list(resource.get('tags', []))
         tags.append(f'proxmox_event_type:{task_type}')
         tags.append(f'proxmox_user:{user}')
@@ -295,7 +299,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 'hostname': hostname,
             }
 
-            if not is_resource_collected_by_filters(resource_id, resource_val, self.resource_filters):
+            if not is_resource_collected_by_filters(resource_val, self.resource_filters):
                 self.log.debug("skipping resource %s: %s as it is not collected by filters")
                 continue
 
@@ -351,8 +355,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                     continue
 
                 event = self._create_dd_event_for_task(task, node_name)
-                self.log.debug("Submitting event %s", event)
-                self.event(event)
+                if event is not None:
+                    self.log.debug("Submitting event %s", event)
+                    self.event(event)
 
     def check(self, _):
         try:

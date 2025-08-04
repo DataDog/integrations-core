@@ -17,6 +17,7 @@ from .common import (
     ALL_EVENTS,
     ALL_METRICS,
     CONTAINER_PERF_METRICS,
+    NO_CONTAINER_EVENTS,
     NODE_PERF_METRICS,
     NODE_RESOURCE_METRICS,
     PERF_METRICS,
@@ -959,3 +960,76 @@ def test_resource_filters_errors(dd_run_check, resource_filters, expected_messag
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
     assert expected_message in caplog.text
+
+
+@pytest.mark.parametrize(
+    ('resource_filters, expected_events'),
+    [
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'container',
+                    'property': 'resource_name',
+                    'patterns': [
+                        '.*',
+                    ],
+                }
+            ],
+            NO_CONTAINER_EVENTS,
+            id='no container events',
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'container',
+                    'property': 'resource_name',
+                    'patterns': [
+                        '.*',
+                    ],
+                },
+                {
+                    'type': 'exclude',
+                    'resource': 'vm',
+                    'property': 'resource_name',
+                    'patterns': [
+                        'test',
+                    ],
+                },
+            ],
+            ALL_EVENTS,
+            id='all events, some filters',
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'node',
+                    'property': 'resource_name',
+                    'patterns': [
+                        'hello',
+                    ],
+                }
+            ],
+            [],
+            id='node filtered, no events',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.proxmox.check.get_current_datetime")
+def test_resource_filters_events(
+    get_current_datetime, aggregator, dd_run_check, resource_filters, expected_events, instance
+):
+    instance = copy.deepcopy(instance)
+    instance['collect_tasks'] = True
+    instance['resource_filters'] = resource_filters
+    get_current_datetime.return_value = datetime.fromtimestamp(1752552000, timezone.utc)
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    for event in expected_events:
+        aggregator.assert_event(**event)
+
+    assert len(aggregator.events) == len(expected_events)

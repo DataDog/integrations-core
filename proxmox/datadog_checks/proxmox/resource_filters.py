@@ -37,7 +37,9 @@ class ResourceFilter:
         return match_any_regex(prop, self.patterns)
 
 
-def is_resource_collected_by_filters(resource_id, resource, resource_filters):
+def is_resource_collected_by_filters(resource, resource_filters):
+    if not resource:
+        return False
     resource_type = resource.get("resource_type")
 
     # Limit filters to those for the resource_type of the mor
