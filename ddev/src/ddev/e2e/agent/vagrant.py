@@ -77,7 +77,6 @@ class VagrantAgent(AgentInterface):
         # Prepare all necessary environment variables and configurations
         agent_install_env_vars = self._prepare_agent_install_env_vars(agent_build)
         synced_folders = self._prepare_synced_folders(local_packages)
-        host_operation_env_vars = self._prepare_host_env_vars(env_vars)
         exported_env_vars = self._prepare_exported_env_vars(env_vars)
 
         # Generate the Vagrantfile content
@@ -89,6 +88,7 @@ class VagrantAgent(AgentInterface):
         )
 
         # Initialize the VM, run custom commands, and handle restart if necessary
+        host_operation_env_vars = self._prepare_host_env_vars(env_vars)
         self._initialize_vm_with_commands(agent_build, local_packages, host_operation_env_vars)
 
     def stop(self) -> None:
