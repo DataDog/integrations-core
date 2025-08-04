@@ -4,6 +4,7 @@
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 from __future__ import annotations
 
+import copy
 from enum import Enum
 from typing import TYPE_CHECKING, Optional, Tuple, TypedDict
 
@@ -744,15 +745,18 @@ def should_propagate_agent_tags(instance, init_config) -> bool:
     return instance_propagate_agent_tags()
 
 
-def sanitize(config: InstanceConfig) -> dict:
-    sanitized = config.model_dump(exclude=['custom_metrics', 'custom_queries'])
+def sanitize(config: Union[InstanceConfig ,dict]) -> dict:
+    if isinstance(config, InstanceConfig):
+        # If config is an InstanceConfig object, convert it to a dict
+        config = config.model_dump(exclude=['custom_metrics', 'custom_queries'])
+    sanitized = copy.deepcopy(config)
     sanitized['password'] = '***' if sanitized.get('password') else None
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
 
     return sanitized
 
 
-def safefloat(value: Union[str, float, int, None]) -> float:
+def safefloat(value: any) -> float:
     if value is None:
         return 0.0
     try:

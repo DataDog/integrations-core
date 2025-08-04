@@ -143,6 +143,7 @@ class PostgreSql(AgentCheck):
             errors=[str(error) for error in validation_result.errors],
             warnings=validation_result.warnings,
             config=sanitize(self._config),
+            instance=sanitize(self.instance),
             features=validation_result.features,
         )
 
