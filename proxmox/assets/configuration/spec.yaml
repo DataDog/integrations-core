@@ -53,12 +53,12 @@ files:
       description: |
           Each filter in the list is composed of three parameters.
           'resource' is one of vm/node/container/storage/pool/sdn on which to apply the filter
-          'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
-          'type' is either include list (default) or exclude list. If a resource is both included and excluded it will be
+          'patterns' is a list of matching regex, if any of those matches, the resource is monitored.
+          'type' is either the include list (default) or exclude list. If a resource is both included and excluded, it is
                  considered excluded.
-          'property' is the kind of property on which to apply the filter and must be one of those values:
+          'property' is the kind of property on which to apply the filter and must be one of these values:
              - resource_name (default) to filter on the resource name (defined by Proxmox)
-             - hostname (available only for VMs and Nodes) to filter on the hostname
+             - hostname (available only for VMs and nodes) to filter on the hostname
       value:
           example:
             - resource: vm
