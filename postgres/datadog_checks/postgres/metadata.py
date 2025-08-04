@@ -224,7 +224,7 @@ class PostgresMetadata(DBMAsyncJob):
         2. collection of pg_settings
     """
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
             "ignored_settings_patterns", DEFAULT_SETTINGS_IGNORED_PATTERNS
         )
@@ -258,7 +258,6 @@ class PostgresMetadata(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="database-metadata",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config

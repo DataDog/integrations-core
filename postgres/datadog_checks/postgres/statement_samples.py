@@ -140,7 +140,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         collection_interval = float(
             config.statement_samples_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -167,7 +167,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config

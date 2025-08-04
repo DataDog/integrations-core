@@ -156,7 +156,7 @@ DEFAULT_COLLECTION_INTERVAL = 10
 class PostgresStatementMetrics(DBMAsyncJob):
     """Collects telemetry for SQL statements"""
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         collection_interval = float(
             config.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -171,7 +171,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             dbms="postgres",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._metrics_collection_interval = collection_interval
