@@ -69,7 +69,7 @@ class Health:
                     'timestamp': time.time() * 1000,
                     'version': 1,
                     'check_id': self.check.check_id,
-                    'category': self.check.__class__.__name__,
+                    'category': self.check.__NAMESPACE__ or self.check.__class__.__name__.lower(),
                     'name': name,
                     'status': status,
                     'tags': tags or [],
