@@ -4,7 +4,9 @@
 
 import copy
 import logging
+from datetime import datetime, timezone
 
+import mock
 import pytest
 
 from datadog_checks.dev.http import MockResponse
@@ -12,12 +14,14 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
 
 from .common import (
+    ALL_EVENTS,
     ALL_METRICS,
     CONTAINER_PERF_METRICS,
     NODE_PERF_METRICS,
     NODE_RESOURCE_METRICS,
     PERF_METRICS,
     RESOURCE_METRICS,
+    START_UPDATE_EVENTS,
     STORAGE_PERF_METRICS,
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
@@ -474,3 +478,63 @@ def test_perf_metrics_error(dd_run_check, caplog, instance):
     caplog.set_level(logging.DEBUG)
     dd_run_check(check)
     assert "Invalid metric entry found; metric name: disk.used, resource id: storage/ip-122-82-3-112" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_ha_metrics(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.ha.quorum', hostname='ip-122-82-3-112', tags=['node_status:OK'])
+    aggregator.assert_metric('proxmox.ha.quorate', hostname='ip-122-82-3-112', tags=['node_status:OK'])
+
+
+@pytest.mark.parametrize(
+    ('collect_tasks, task_types, expected_events'),
+    [
+        pytest.param(
+            False,
+            [],
+            [],
+            id='collect_tasks disabled and task_types empty',
+        ),
+        pytest.param(
+            False,
+            ['startall'],
+            [],
+            id='collect_tasks disabled and task_types contains one event',
+        ),
+        pytest.param(
+            True,
+            None,
+            ALL_EVENTS,
+            id='collect_tasks enabled and task_types not set',
+        ),
+        pytest.param(
+            True,
+            [],
+            [],
+            id='collect_tasks enabled and task_types empty',
+        ),
+        pytest.param(
+            True,
+            ['vzstart', 'aptupdate'],
+            START_UPDATE_EVENTS,
+            id='collect_tasks enabled and task_types contains two events',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.proxmox.check.get_current_datetime")
+def test_events(get_current_datetime, dd_run_check, aggregator, instance, collect_tasks, task_types, expected_events):
+    instance = copy.deepcopy(instance)
+    instance['collect_tasks'] = collect_tasks
+    if task_types is not None:
+        instance['collected_task_types'] = task_types
+    get_current_datetime.return_value = datetime.fromtimestamp(1752552000, timezone.utc)
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    for event in expected_events:
+        aggregator.assert_event(**event)
+
+    assert len(aggregator.events) == len(expected_events)
