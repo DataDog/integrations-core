@@ -37,6 +37,7 @@ def setup_kuma():
     )
 
 
+# FIXME Dummy change to tigger test
 def wait_for_kuma_readiness(api_url, api_port, max_wait=600):
     """Wait for Kuma control plane to be ready by querying the /config endpoint."""
     config_url = f'http://{api_url}:{api_port}/config'
