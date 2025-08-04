@@ -180,7 +180,7 @@ class VagrantAgent(AgentInterface):
         exported_env_vars = kwargs.get("exported_env_vars", {})
 
         agent_install_env_vars_str = (
-            " ".join([f'{key}="{value}"' for key, value in agent_install_env_vars.items()])
+            " ".join(f'{key}="{value}"' for key, value in agent_install_env_vars.items())
             if agent_install_env_vars
             else ""
         )
@@ -323,26 +323,27 @@ class VagrantAgent(AgentInterface):
 
     def _prepare_agent_install_env_vars(self, agent_build: str) -> dict[str, str]:
         """Prepare environment variables for agent installation based on the build."""
-        agent_install_env_vars = {}
+        if not agent_build:
+            return {}
 
-        if agent_build:
-            # format: <pipeline_id>-<major_version>-<arch>"
-            # example: "12345-7-x86_64"
-            parts = agent_build.split("-")
-            if len(parts) != 3 or not all(parts):
-                self.app.abort(
-                    text=f"Invalid `agent_build` format: '{agent_build}'. "
-                    f"Expected format: '<pipeline_id>-<major_version>-<arch>'"
-                )
-            pipeline_id, major_version, arch = agent_build.split("-")
-            agent_install_env_vars["TESTING_APT_URL"] = "s3.amazonaws.com/apttesting.datad0g.com"
-            agent_install_env_vars["TESTING_APT_REPO_VERSION"] = (
-                f"pipeline-{pipeline_id}-a{major_version}-{arch} {major_version}"
+        agent_install_env_vars = {}
+        # format: <pipeline_id>-<major_version>-<arch>"
+        # example: "12345-7-x86_64"
+        parts = agent_build.split("-")
+        if len(parts) != 3 or not all(parts):
+            self.app.abort(
+                text=f"Invalid `agent_build` format: '{agent_build}'. "
+                f"Expected format: '<pipeline_id>-<major_version>-<arch>'"
             )
-            agent_install_env_vars["TESTING_YUM_URL"] = "s3.amazonaws.com/yumtesting.datad0g.com"
-            agent_install_env_vars["TESTING_YUM_VERSION_PATH"] = (
-                f"testing/pipeline-{pipeline_id}-a{major_version}/{major_version}"
-            )
+        pipeline_id, major_version, arch = agent_build.split("-")
+        agent_install_env_vars["TESTING_APT_URL"] = "s3.amazonaws.com/apttesting.datad0g.com"
+        agent_install_env_vars["TESTING_APT_REPO_VERSION"] = (
+            f"pipeline-{pipeline_id}-a{major_version}-{arch} {major_version}"
+        )
+        agent_install_env_vars["TESTING_YUM_URL"] = "s3.amazonaws.com/yumtesting.datad0g.com"
+        agent_install_env_vars["TESTING_YUM_VERSION_PATH"] = (
+            f"testing/pipeline-{pipeline_id}-a{major_version}/{major_version}"
+        )
 
         return agent_install_env_vars
 
