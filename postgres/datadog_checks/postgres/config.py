@@ -752,11 +752,11 @@ def sanitize(config: InstanceConfig) -> dict:
     return sanitized
 
 
-def safefloat(value: Union[str, float, None]) -> float:
+def safefloat(value: Union[str, float, int, None]) -> float:
     if value is None:
         return 0.0
-    if isinstance(value, float):
-        return value
-    if isinstance(value, str) and value.isnumeric():
-        return float(value)
-    return 0.0
+    try:
+        f = float(value)
+        return f
+    except Exception:
+        return 0.0
