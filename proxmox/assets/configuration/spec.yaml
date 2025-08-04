@@ -58,6 +58,7 @@ files:
                  considered excluded.
           'property' is the kind of property on which to apply the filter and must be one of those values:
              - resource_name (default) to filter on the resource name (defined by Proxmox)
+             - hostname (available only for VMs and Nodes) to filter on the hostname
       value:
           example:
             - resource: vm
