@@ -98,16 +98,14 @@ class VagrantAgent(AgentInterface):
             self._run_commands(stop_guest_commands, "stop")
 
         # Halt the VM
-        halt_cmd_host = f"vagrant halt {self._vm_name}"
         self.app.display_info(f"Halting VM `{self._vm_name}`")
-        self._run_command(halt_cmd_host, "halt_command", host=True)
+        self._run_command(f"vagrant halt {self._vm_name}", "halt_command", host=True)
 
         self.app.display_info(f"VM `{self._vm_name}` halted")
 
         # Destroy the VM
-        destroy_cmd_host = f"vagrant destroy {self._vm_name} --force"
         self.app.display_info(f"Destroying VM `{self._vm_name}`")
-        self._run_command(destroy_cmd_host, "destroy_command", host=True)
+        self._run_command(f"vagrant destroy {self._vm_name} --force", "destroy_command", host=True)
         self.app.display_info(f"VM `{self._vm_name}` destroyed.")
 
         # delete the vagrant dir
