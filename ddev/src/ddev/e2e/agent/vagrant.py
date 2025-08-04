@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import shutil
 import sys
@@ -199,7 +200,6 @@ class VagrantAgent(AgentInterface):
         for volume in synced_folders:
             # Handle Windows paths that contain drive letters (e.g., C:\path)
             # Look for pattern like ":C:\" or ":D:\" etc.
-            import re
 
             windows_path_match = re.search(r':([A-Za-z]:\\.*)', volume)
             if windows_path_match:
