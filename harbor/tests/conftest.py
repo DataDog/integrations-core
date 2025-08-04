@@ -48,7 +48,7 @@ def dd_environment(e2e_instance):
     expected_log = "http server Running on" if HARBOR_VERSION < [1, 10, 0] else "API server is serving at"
     conditions = [
         CheckDockerLogs(compose_file, expected_log, wait=3),
-        WaitFor(create_simple_user, wait=5),
+        WaitFor(create_simple_user, wait=5, attempts=12),
     ]
     with docker_run(compose_file, conditions=conditions, attempts=5):
         yield e2e_instance
