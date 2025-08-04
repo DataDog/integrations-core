@@ -57,7 +57,7 @@ pipeline:
       sourceType: attribute
       target: syslog.timestamp
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map hostname to syslog.hostname
@@ -67,7 +67,7 @@ pipeline:
       sourceType: attribute
       target: syslog.hostname
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map 'component' to 'service'
@@ -77,7 +77,7 @@ pipeline:
       sourceType: attribute
       target: service
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Remapping status from level attribute
@@ -87,7 +87,7 @@ pipeline:
       sourceType: attribute
       target: status
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: status-remapper
       name: Remapper level to status
