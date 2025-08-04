@@ -110,6 +110,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         return event
 
     def _collect_ha_metrics(self):
+        self.log.debug("Collecting HA metrics")
         ha_response = self.http.get(f"{self.config.proxmox_server}/cluster/ha/status/current")
         ha_response_json = ha_response.json()
         ha_statuses = ha_response_json.get('data', [])
@@ -126,6 +127,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 self.gauge('ha.quorate', quorate, hostname=node, tags=tags)
 
     def _collect_performance_metrics(self):
+        self.log.debug("Collecting performance metrics")
         metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
         metrics_response_json = metrics_response.json()
         metrics = metrics_response_json.get('data', {}).get('data', [])
@@ -149,6 +151,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
 
     def _collect_resource_metrics(self):
+        self.log.debug("Collecting resource metrics.")
         resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
         resources_response_json = resources_response.json()
         resources = resources_response_json.get("data", [])
@@ -165,6 +168,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             if resource_name is None:
                 # some resource types don't have a name attribute
                 resource_name = resource.get(resource.get('type', ''))
+
+            self.log.debug("Processing resource: %s type: %s", resource_name, resource_type_remapped)
 
             resource_tags = {
                 f'proxmox_type:{resource_type_remapped}',
@@ -197,6 +202,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
             if (resource_type_remapped == VM_RESOURCE or resource_type_remapped == NODE_RESOURCE) and status == 0:
                 # don't collect information about powered off VMs and nodes
+                self.log.debug("Skipping resource %s as it is powered off.", resource_name)
                 continue
             elif resource_type_remapped == VM_RESOURCE and status == 1:
                 vm_id = resource.get('vmid')
@@ -208,14 +214,17 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             if hostname is None:
                 tags = self.base_tags + list(resource_tags)
             else:
+                self.log.debug("Adding external tags for resource %s", resource_name)
                 external_tags.append((hostname, {self.__NAMESPACE__: self.base_tags + list(resource_tags)}))
 
-            all_resources[resource_id] = {
+            resource_val = {
                 'resource_type': resource_type_remapped,
                 'resource_name': resource_name,
                 'tags': tags,
                 'hostname': hostname,
             }
+            self.log.debug("Created resource: %s", resource_val)
+            all_resources[resource_id] = resource_val
 
             if resource_type_remapped != "pool":
                 # pools don't have a status attribute
@@ -231,6 +240,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         self.set_external_tags(external_tags)
 
     def _collect_tasks(self):
+        self.log.debug("Collecting tasks")
         for resource in self.all_resources.values():
             if resource.get('resource_type') != 'node':
                 continue
