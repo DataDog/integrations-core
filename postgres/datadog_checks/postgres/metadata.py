@@ -297,10 +297,15 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
+        if not self._collect_extensions_enabled:
+            return
         # Only query if configured, according to interval
         elapsed_s = time.time() - self._time_since_last_extension_query
-        if elapsed_s >= self.pg_extensions_collection_interval and self._collect_extensions_enabled:
+        if elapsed_s >= self.pg_extensions_collection_interval:
             self._extensions_cached = self._collect_postgres_extensions()
+        if not self._extensions_cached:
+            self._log.debug("Skipping extension collection because no extensions were found")
+            return
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
