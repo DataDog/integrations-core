@@ -5,7 +5,7 @@
         {
             "id": 8481596997566296,
             "definition": {
-                "title": "",
+                "title": "Barracuda CloudGen Firewall",
                 "banner_img": "/api/v2/images/72076454-0aca-4881-a73b-ff421931b5dd",
                 "show_title": true,
                 "type": "group",
