@@ -114,7 +114,7 @@ class VagrantAgent(AgentInterface):
 
     def enter_shell(self) -> None:
         self.app.display_info(f"Entering interactive shell for VM `{self._vm_name}`")
-        host_cmd = self._format_command([], interactive=True)
+        host_cmd = ["vagrant", "ssh", self._vm_name]
         self.app.display_debug(f"Interactive shell command: `{' '.join(host_cmd)}`")
         self.platform.modules.subprocess.run(host_cmd, check=True)
 
@@ -127,8 +127,7 @@ class VagrantAgent(AgentInterface):
             agent_service_name = self.metadata.get("vagrant_windows_agent_service_name", "DatadogAgent")
             guest_cmds = [f"sc stop {agent_service_name}", f"sc start {agent_service_name}"]
         else:
-            restart_cmd_str = "sudo service datadog-agent restart"
-            guest_cmds = [restart_cmd_str]
+            guest_cmds = ["sudo service datadog-agent restart"]
 
         self._run_commands(guest_cmds, "restart_agent_service")
         self.app.display_info("Datadog Agent service restart sequence completed.")
@@ -306,11 +305,8 @@ class VagrantAgent(AgentInterface):
             # Linux/Unix: Use sudo to run as dd-agent user
             return f'sudo -u dd-agent {self._python_path} -m pip install --disable-pip-version-check -e {package_path}'
 
-    def _format_command(self, guest_command_parts: list[str], interactive: bool = False) -> list[str]:
+    def _format_command(self, guest_command_parts: list[str]) -> list[str]:
         # Returns the host-side command to execute something in the guest.
-        if interactive:
-            return ["vagrant", "ssh", self._vm_name]
-
         # Prepare the command string to be executed inside the VM via ssh -c "..."
         inner_cmd_list = []
         inner_cmd_list.extend(guest_command_parts)
