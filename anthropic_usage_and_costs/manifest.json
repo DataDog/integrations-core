@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Enable teams to monitor Anthropic token consumption, track spend, and attribute usage across workspaces, users, and models directly within Datadog.",
     "title": "Anthropic Usage and Costs",
     "media": [],
     "classifier_tags": [
