@@ -22,6 +22,7 @@ class AgentEnvVars:
     URL = 'DD_DD_URL'
 
 
+# Note: we cannot use pathlib to create the paths as the host running ddev might have a different OS than the VM's OS
 # Agent file paths (Linux)
 LINUX_AGENT_BIN_PATH = "/opt/datadog-agent/bin/agent/agent"
 LINUX_AGENT_PYTHON_PREFIX = "/opt/datadog-agent/embedded/bin/python"
