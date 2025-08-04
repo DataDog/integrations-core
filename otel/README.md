@@ -1,4 +1,5 @@
 ## OpenTelemetry Collector
+
 ## Overview
 
 <div class="alert alert-danger">
@@ -18,6 +19,7 @@ Host metrics are shown in the OpenTelemetry Host Metrics default dashboard, but 
 Follow the [OpenTelemetry Collector documentation][1] to install the `opentelemetry-collector-contrib` distribution, or any other distribution that includes the Datadog Exporter.
 
 The Datadog Agent is **not** needed to export telemetry data to Datadog in this setup. See [OTLP Ingest in Datadog Agent][7] if you want to use the Datadog Agent instead.
+
 ### Configuration
 
 To export telemetry data to Datadog from the OpenTelemetry Collector, add the Datadog exporter to your metrics and traces pipelines.
@@ -25,7 +27,7 @@ The only required setting is [your API key][2].
 
 A minimal configuration file to retrieve system metrics is as follows.
 
-``` yaml
+```yaml
 receivers:
   hostmetrics:
     scrapers:
@@ -41,17 +43,24 @@ receivers:
 processors:
   batch:
     timeout: 10s
+  cumulativetodelta:
+    include:
+      metrics:
+        - system.network.io
+  deltatorate:
+    metrics:
+      - system.network.io
 
 exporters:
   datadog:
     api:
       key: "<Your API key goes here>"
-      
+
 service:
   pipelines:
     metrics:
       receivers: [hostmetrics]
-      processors: [batch]
+      processors: [batch, cumulativetodelta, deltatorate]
       exporters: [datadog]
 ```
 
@@ -67,7 +76,7 @@ CPU and disk metrics are not available on macOS.
 Check the OpenTelemetry Collector logs to see the Datadog exporter being enabled and started correctly.
 For example, with the configuration above you should find logging messages similar to the following.
 
-``` 
+```
 Exporter is enabled.	{"component_kind": "exporter", "exporter": "datadog"}
 Exporter is starting...	{"component_kind": "exporter", "component_type": "datadog", "component_name": "datadog"}
 Exporter started.	{"component_kind": "exporter", "component_type": "datadog", "component_name": "datadog"}
@@ -93,7 +102,6 @@ The OpenTelemetry Collector does not include any events.
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
-
 
 [1]: https://opentelemetry.io/docs/collector/getting-started/
 [2]: /organization-settings/api-keys
