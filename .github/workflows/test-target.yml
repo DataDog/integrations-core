@@ -413,15 +413,14 @@ jobs:
         name: "test-results-${{ inputs.target }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
-    - name: Upload coverage data
+    - name: Upload coverage data as artifact
       if: >
-        inputs.standard &&
         !github.event.repository.private &&
         always() &&
         inputs.pytest-args != '-m flaky'
-      # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
-      uses: codecov/codecov-action@15559ed290fa727036809b67ab0f646ffa6c5158
+      # Flaky tests will have low coverage, don't include in artifacts to avoid pipeline issues
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        use_oidc: true
-        files: "${{ inputs.target }}/coverage.xml"
-        flags: "${{ inputs.target }}"
+        name: "coverage-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
+        path: "${{ inputs.target }}/coverage.xml"
+        if-no-files-found: ignore
