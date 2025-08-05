@@ -594,7 +594,7 @@
             "id": 3570061571959430,
             "definition": {
               "type": "note",
-              "content": "The Kafka Broker metrics here inform you of data loss/delay through unclean leader elections and network throughputs, as well as request fails through request purgatories and timeouts metrics",
+              "content": "The Kafka Broker metrics here inform you of data loss/delay through unclean leader elections, network throughputs, and request fails through request purgatories and timeouts metrics.\n\nTo access these metrics you need to have the [Kafka Broker](https://docs.datadoghq.com/integrations/kafka/?tab=host) integration enabled.",
               "background_color": "gray",
               "font_size": "14",
               "text_align": "left",
@@ -861,7 +861,7 @@
             "id": 4804179441675328,
             "definition": {
               "type": "note",
-              "content": "Kafka Producers send messages to brokers for storage and distribution by topic. These metrics inform you of the volume and rate of data sent, and the success rate of message delivery.",
+              "content": "Kafka Producers send messages to brokers for storage and distribution by topic. These metrics inform you of the volume and rate of data sent, and the success rate of message delivery.\n\nTo access these metrics you need to have the [Kafka Broker](https://docs.datadoghq.com/integrations/kafka/?tab=host) integration enabled.",
               "background_color": "gray",
               "font_size": "14",
               "text_align": "left",
@@ -1098,7 +1098,7 @@
             "id": 2581435872418256,
             "definition": {
               "type": "note",
-              "content": "Kafka Consumer metrics provide insights into lag between message production and consumption, success rates and latency of message delivery, and the volume of data consumed.",
+              "content": "Kafka Consumer metrics provide insights into lag between message production and consumption, success rates and latency of message delivery, and the volume of data consumed.\n\nTo access these metrics you need to have the [Kafka Broker](https://docs.datadoghq.com/integrations/kafka/?tab=host) and [Kafka Consumer](https://docs.datadoghq.com/integrations/kafka-consumer/?tab=host) integrations enabled.",
               "background_color": "gray",
               "font_size": "14",
               "text_align": "left",
