@@ -18,9 +18,13 @@
       "Category::OS & System",
       "Category::Cloud",
       "Category::Network",
+      "Category::Event Management",
+      "Category::Metrics",
+      "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Events"
     ]
   },
   "assets": {
@@ -36,7 +40,10 @@
       },
       "metrics": {
         "prefix": "proxmox.",
-        "check": "proxmox.api.up",
+        "check": [
+          "proxmox.api.up",
+          "proxmox.cpu"
+        ],
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
@@ -56,6 +63,15 @@
     },
     "dashboards": {
       "Proxmox Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "CPU Usage is High on Proxmox VM": "assets/monitors/vm_cpu_usage.json",
+      "CPU Usage is High on Proxmox Node": "assets/monitors/node_cpu_usage.json",
+      "Memory Usage is High on Proxmox VM": "assets/monitors/vm_memory_usage.json",
+      "Memory Usage is High on Proxmox Node": "assets/monitors/node_memory_usage.json"
+    },
+    "saved_views": {
+      "proxmox_api_logs": "assets/saved_views/proxmox_api_logs.json"
     }
   },
   "author": {

@@ -31,7 +31,7 @@ def reload_command(app: Application, *, intg_name: str, environment: str):
 
     metadata = env_data.read_metadata()
     agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-    agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
+    agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
 
     try:
         agent.restart()

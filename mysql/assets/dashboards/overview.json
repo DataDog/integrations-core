@@ -536,8 +536,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:system.net.bytes_rcvd{$scope}",
-                  "semantic_mode": "combined"
+                  "query": "sum:system.net.bytes_rcvd{$scope}"
                 }
               ],
               "formulas": [
@@ -557,8 +556,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:system.net.bytes_sent{$scope}",
-                  "semantic_mode": "combined"
+                  "query": "sum:system.net.bytes_sent{$scope}"
                 }
               ],
               "formulas": [

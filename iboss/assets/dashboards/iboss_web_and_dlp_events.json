@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Web and DLP Events",
+    "title": "iboss - Web and DLP Logs",
     "description": "This dashboard provides insights into iboss web activity and DLP events, helping track user access and data protection actions.",
     "widgets": [
         {
@@ -44,6 +44,27 @@
             }
         },
         {
+            "id": 8147860885320242,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 8263350195248973,
             "definition": {
                 "title": "Web Traffic Insights",
@@ -67,7 +88,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -135,7 +156,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -190,7 +211,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -264,7 +285,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -280,7 +301,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -326,7 +347,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -380,7 +401,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@directionName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@directionName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -450,7 +471,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@computerName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@computerName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -519,7 +540,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@http.url_details.scheme:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@http.url_details.scheme:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -588,7 +609,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@directionName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@directionName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -658,7 +679,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -727,7 +748,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@directionName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@directionName:\"-\" $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -797,7 +818,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss @evt.name:WEB_LOG -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -955,7 +976,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1090,7 +1111,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@categoryName:(\"\" OR \"-\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@categoryName:(\"\" OR \"-\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1167,7 +1188,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@applicationName:(\"\" OR \"-\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG -@applicationName:(\"\" OR \"-\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1246,7 +1267,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1316,7 +1337,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG @logSubType:PHISHING -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG @logSubType:PHISHING -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1419,7 +1440,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG (@logSubType:MALWARE_SOURCE @malware:1) -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG (@logSubType:MALWARE_SOURCE @malware:1) -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1523,7 +1544,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1593,7 +1614,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG (@logSubType:MALWARE_CONTENT @malware:1) -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG (@logSubType:MALWARE_CONTENT @malware:1) -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1697,7 +1718,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss @evt.name:WEB_LOG @malware:1 $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss @evt.name:WEB_LOG @malware:1 $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1774,7 +1795,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG @malware:1 $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG @malware:1 $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1848,7 +1869,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host",
+                                        "query_string": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1908,14 +1929,35 @@
                             "width": 12,
                             "height": 4
                         }
+                    },
+                    {
+                        "id": 4527190463574390,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Note**\n- This dashboard is populated using logs data.\n- If you have not configured syslog option, please follow the **Installation**, and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                            "background_color": "yellow",
+                            "font_size": "16",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 43,
+                            "width": 12,
+                            "height": 2
+                        }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 12,
-                "height": 44
+                "height": 46
             }
         },
         {
@@ -1946,7 +1988,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2012,7 +2054,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2067,7 +2109,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2137,7 +2179,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2242,7 +2284,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2311,7 +2353,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP -@computerName:(\"-\" OR \"\") $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2417,7 +2459,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP @action:Blocked $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP @action:Blocked $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2487,7 +2529,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2582,7 +2624,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2649,7 +2691,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host",
+                                        "query_string": "source:iboss service:iboss @evt.name:DLP $device_name $action $direction $protocol $source_ip $destination_ip $url_host $host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2718,13 +2760,19 @@
             },
             "layout": {
                 "x": 0,
-                "y": 47,
+                "y": 51,
                 "width": 12,
                 "height": 20
             }
         }
     ],
     "template_variables": [
+        {
+            "name": "host",
+            "prefix": "@hostname",
+            "available_values": [],
+            "default": "*"
+        },
         {
             "name": "device_name",
             "prefix": "@computerName",
