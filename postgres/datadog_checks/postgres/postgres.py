@@ -5,7 +5,7 @@ import contextlib
 import copy
 import functools
 import os
-import time
+from time import time
 from string import Template
 
 import psycopg
@@ -304,12 +304,12 @@ class PostgreSql(AgentCheck):
             self.log.error(err_msg)
             raise DatabaseHealthCheckError(err_msg)
 
-    def _validate_connection(self, conn):
+    def _validate_connection(self):
         """
         Validate the connection to the database and the support for all enabled features.
         """
 
-        if time.time() - self._last_validation_timestamp < self._validation_interval:
+        if time() - self._last_validation_timestamp < self._validation_interval:
             return
 
         errors: list[str | Exception] = []
@@ -333,7 +333,7 @@ class PostgreSql(AgentCheck):
                             (self._config.username,),
                         )
                         if not cursor.fetchone():
-                            errors.append(
+                            warnings.append(
                                 DatabaseHealthCheckError(
                                     "The pg_monitor role is not present in the database. "
                                     "Please create it to ensure proper monitoring."
@@ -353,7 +353,7 @@ class PostgreSql(AgentCheck):
             warnings=warnings,
         )
 
-        self._last_validation_timestamp = time.time()
+        self._last_validation_timestamp = time()
         if len(errors) > 0:
             raise errors[0]
 
