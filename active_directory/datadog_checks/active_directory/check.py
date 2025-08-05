@@ -14,6 +14,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
 
     # Service to Performance Object mapping
     SERVICE_METRIC_MAP = {
+        'NTDS': ['NTDS'],  # Core AD service - always collect these metrics
         'Netlogon': ['Netlogon', 'Security System-Wide Statistics'],
         'DHCPServer': ['DHCP Server'],
         'DFSR': ['DFS Replicated Folders'],
@@ -128,6 +129,8 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
             raise Exception("Service check failed for {}: {}".format(service_name, str(e)))
 
     def _build_config_from_cache(self, metrics_config):
+        import json
+
         """Build configuration using cached service states."""
         filtered_config = {'metrics': {}}
 
@@ -148,9 +151,9 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     if metric_name in metrics_config and metric_name not in metrics_added:
                         filtered_config['metrics'][metric_name] = metrics_config[metric_name]
                         metrics_added.add(metric_name)
-                        self.log.debug("Including %s (service %s is running)", metric_name, service)
+                        self.log.error("Including %s (service %s is running)", metric_name, service)
             else:
-                self.log.info("Excluding metrics %s (service %s not running)", metric_names, service)
+                self.log.error("Excluding metrics %s (service %s not running)", metric_names, service)
 
         # Add any metrics not controlled by services
         # This ensures backward compatibility if new metrics are added
@@ -167,9 +170,27 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     filtered_config['metrics'][metric_name] = metric_config
                     self.log.debug("Including uncontrolled metric: %s", metric_name)
 
+        self.log.error(json.dumps(filtered_config, indent=4))
         return filtered_config
 
     def check(self, _):
-        """Perform the check."""
-        # Call parent check
+        """
+        Perform the check.
+
+        The perf-counter layer keeps its compiled counter list between runs,
+        so we have to *pro-actively* refresh the service cache and invalidate
+        that compiled list whenever the cache is considered expired.
+        """
+        if self.service_check_enabled and not self.force_all_metrics:
+            now = time.time()
+            if now - self._last_service_check >= self._cache_duration:
+                self.log.debug("Service cache expired after %.1fs - refreshing", now - self._last_service_check)
+                self._refresh_service_cache()
+                self._last_service_check = now
+
+                # Make sure PerfCountersBaseCheckWithLegacySupport recompiles
+                # its counter set using the *new* service cache.
+                if hasattr(self, "_config"):
+                    self._config = None
+
         return super().check(_)

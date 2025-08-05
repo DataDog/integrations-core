@@ -111,6 +111,9 @@ class PerfCountersBaseCheck(AgentCheck):
                     self._connection, object_name, object_config, use_localized_counters, self._static_tags
                 )
                 perf_objects.append(perf_object)
+                import pprint
+
+                pprint.pprint(perf_object)
 
         self.perf_objects.clear()
         self.perf_objects.extend(perf_objects)

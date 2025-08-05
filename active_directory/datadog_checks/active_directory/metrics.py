@@ -91,7 +91,6 @@ METRICS_CONFIG = {
     },
     'DFS Replicated Folders': {
         'name': 'dfsr',
-        'tag_name': 'replication_group',  # Instance names are replication group names
         'counters': [
             {
                 'Size of Files Deleted': {'name': 'deleted_files_size', 'unit': 'byte'},
