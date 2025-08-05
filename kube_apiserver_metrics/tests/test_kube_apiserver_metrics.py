@@ -33,7 +33,9 @@ instanceSecure = {
 
 @pytest.fixture()
 def mock_read_bearer_token():
-    with mock.patch('datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX"):
+    with mock.patch(
+        'datadog_checks.base.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX"
+    ):
         yield
 
 
