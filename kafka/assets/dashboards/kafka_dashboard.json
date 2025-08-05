@@ -3,64 +3,133 @@
   "description": "## Kafka Overview Dashboard\n\nThis dashboard provides an overview of your Kafka environment. It displays metrics from Kafka, Zookeeper, and Kafka Consumer Integrations with Datadog, giving you a complete view of the health and observability measures of your Kafka Cluster. Enabling the Kafka integration alone populates most of the dashboard widgets. To have the all groups populated with data, enable all three integrations.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://www.datadoghq.com/product/data-streams-monitoring/).\n\nFor more information, read:\n* [Kafka integration documentation](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Monitoring Kafka blog post](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper integration documentation](https://docs.datadoghq.com/integrations/zk/?tab=host)",
   "widgets": [
     {
+      "id": 5924016577024848,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/logos/kafka_small.svg",
+        "url_dark_theme": "/static/images/logos/kafka_reversed_small.svg",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7914240170882312,
+      "definition": {
+        "type": "note",
+        "content": "**Useful Links**\n\n* [Data Streams Monitoring](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)\n* [Kafka Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper Integration Doc](https://docs.datadoghq.com/integrations/zk/?tab=host)\n",
+        "background_color": "white",
+        "font_size": "16",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2594907126478070,
+      "definition": {
+        "type": "note",
+        "content": "**Kafka Integration Overview Dashboard**\n\nThis dashboard provides a 360-view of the health and observability measures of your Kafka Cluster. It displays metrics from Kafka, Zookeeper and Kafka Consumer Integrations with Datadog. To have the all groups populated with data, you will have to enable all 3 integrations. However, enabling the Kafka integration alone will populate most of the dashboard widgets.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
       "id": 236806910885332,
       "definition": {
-        "title": "",
-        "banner_img": "",
-        "show_title": false,
+        "title": "Data Streams Monitoring",
+        "background_color": "purple",
+        "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 5924016577024848,
-            "definition": {
-              "type": "image",
-              "url": "/static/images/logos/kafka_small.svg",
-              "url_dark_theme": "/static/images/logos/kafka_reversed_small.svg",
-              "sizing": "contain",
-              "margin": "md",
-              "has_background": false,
-              "has_border": false,
-              "vertical_align": "center",
-              "horizontal_align": "center"
-            },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
-          },
-          {
-            "id": 2594907126478070,
+            "id": 8756831542082047,
             "definition": {
               "type": "note",
-              "content": "**Kafka Integration Overview Dashboard**\n\nThis dashboard provides an overview of your Kafka environment. It displays metrics from Kafka, Zookeeper and Kafka Consumer Integrations with Datadog, giving you a 360-view of the health and observability measures of your Kafka Cluster. To have the all groups populated with data, you will have to enable all 3 integrations. However, enabling the Kafka integration alone will populate most of the dashboard widgets.\n\nIf you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).",
-              "background_color": "white",
+              "content": "To visualize the your streaming data pipelines and easily investigate Kafka issues and identify bottlenecks, check out [Data Streams Monitoring](/data-streams) or [learn more](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).\n\nDive Deeper into Kafka Lag with [this DSM Dashboard](/dashboard/lists?q=Data%20Streams%20Monitoring%3A%20Kafka&p=1)",
+              "background_color": "blue",
               "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "top",
-              "show_tick": false,
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
               "tick_pos": "50%",
-              "tick_edge": "left",
+              "tick_edge": "bottom",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 3, "width": 3, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
           },
           {
-            "id": 7914240170882312,
+            "id": 5768286309127768,
             "definition": {
-              "type": "note",
-              "content": "**Useful Links**\n\n* [Kafka Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [ZooKeeper Integration Doc](https://docs.datadoghq.com/integrations/zk/?tab=host)\n* [Data Streams Monitoring](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)",
-              "background_color": "white",
-              "font_size": "16",
-              "text_align": "left",
-              "vertical_align": "top",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
+              "title": "Kafka Topology for $topic, $env",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "topology_map",
+              "requests": [
+                {
+                  "request_type": "topology",
+                  "query": {
+                    "filters": [
+                      "$env"
+                    ],
+                    "service": "",
+                    "data_source": "data_streams",
+                    "query_string": "traffic_type:kafka queue:$topic.value"
+                  }
+                }
+              ]
             },
-            "layout": { "x": 3, "y": 3, "width": 3, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 7
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 6, "height": 8 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 9
+      }
     },
     {
       "id": 1458255527068538,
@@ -85,7 +154,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
           },
           {
             "id": 5429446961227528,
@@ -113,7 +187,11 @@
                       "value": 10
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "aggregator": "avg",
@@ -127,9 +205,16 @@
               ],
               "autoscale": true,
               "precision": 2,
-              "timeseries_background": { "type": "bars" }
+              "timeseries_background": {
+                "type": "bars"
+              }
             },
-            "layout": { "x": 0, "y": 1, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 7126099834297418,
@@ -149,7 +234,12 @@
               "show_priority": false,
               "show_last_triggered": false
             },
-            "layout": { "x": 2, "y": 1, "width": 4, "height": 6 }
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 4,
+              "height": 7
+            }
           },
           {
             "id": 5329136028287784,
@@ -177,7 +267,11 @@
                       "value": 0
                     }
                   ],
-                  "formulas": [{ "formula": "query1 - query2" }],
+                  "formulas": [
+                    {
+                      "formula": "query1 - query2"
+                    }
+                  ],
                   "queries": [
                     {
                       "aggregator": "avg",
@@ -199,10 +293,17 @@
               "precision": 2,
               "timeseries_background": {
                 "type": "area",
-                "yaxis": { "include_zero": false }
+                "yaxis": {
+                  "include_zero": false
+                }
               }
             },
-            "layout": { "x": 0, "y": 2, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 595300252374894,
@@ -225,7 +326,11 @@
                       "value": 0
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "aggregator": "avg",
@@ -239,9 +344,54 @@
               ],
               "autoscale": true,
               "precision": 0,
-              "timeseries_background": { "type": "bars" }
+              "timeseries_background": {
+                "type": "bars"
+              }
             },
-            "layout": { "x": 0, "y": 3, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 4902777306033361,
+            "definition": {
+              "title": "Max Kafka Lag",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:kafka.estimated_consumer_lag{$env,$topic ,$consumer_group}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 6283188824779080,
@@ -264,7 +414,11 @@
                       "value": 300
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "aggregator": "avg",
@@ -279,9 +433,16 @@
               "autoscale": false,
               "custom_unit": "ms",
               "precision": 2,
-              "timeseries_background": { "type": "area" }
+              "timeseries_background": {
+                "type": "area"
+              }
             },
-            "layout": { "x": 0, "y": 4, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 7120815629099702,
@@ -304,7 +465,11 @@
                       "value": 300
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "aggregator": "avg",
@@ -319,9 +484,16 @@
               "autoscale": false,
               "custom_unit": "ms",
               "precision": 2,
-              "timeseries_background": { "type": "area" }
+              "timeseries_background": {
+                "type": "area"
+              }
             },
-            "layout": { "x": 0, "y": 5, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 2,
+              "height": 1
+            }
           },
           {
             "id": 6153358611007182,
@@ -344,7 +516,11 @@
                       "value": 1000
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "aggregator": "avg",
@@ -359,13 +535,111 @@
               "autoscale": false,
               "custom_unit": "ms",
               "precision": 2,
-              "timeseries_background": { "type": "area" }
+              "timeseries_background": {
+                "type": "area"
+              }
             },
-            "layout": { "x": 0, "y": 6, "width": 2, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 2,
+              "height": 1
+            }
           }
         ]
       },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 8 }
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 9
+      }
+    },
+    {
+      "id": 5494449967761917,
+      "definition": {
+        "title": "Topic Health",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "count:data_streams.latency{type:kafka AND direction:out AND (pathway_type:edge OR pathway_type:partial_edge) AND $topic AND $env} by {topic,env}.as_rate()",
+                "aggregator": "avg"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "count:data_streams.latency{type:kafka AND direction:in AND (pathway_type:edge OR pathway_type:partial_edge) AND $topic AND $env} by {topic,env}.as_rate()",
+                "aggregator": "avg"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query3",
+                "query": "max:data_streams.kafka.lag_seconds{$topic,$env} by {topic,env}",
+                "aggregator": "last"
+              }
+            ],
+            "response_format": "scalar",
+            "sort": {
+              "count": 500,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            },
+            "formulas": [
+              {
+                "cell_display_mode": "number",
+                "alias": "Messages In",
+                "number_format": {
+                  "unit": {
+                    "type": "custom_unit_label",
+                    "label": "msg/s"
+                  }
+                },
+                "formula": "query1"
+              },
+              {
+                "cell_display_mode": "number",
+                "alias": "Messages Out",
+                "number_format": {
+                  "unit": {
+                    "type": "custom_unit_label",
+                    "label": "msg/s"
+                  }
+                },
+                "formula": "query2"
+              },
+              {
+                "cell_display_mode": "number",
+                "alias": "Max Kafka Lag",
+                "formula": "query3"
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto",
+        "custom_links": [
+          {
+            "label": "View in Data Streams Monitoring",
+            "link": "/data-streams/map?query=queue:{{topic.value}}&env={{env.value}}&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=true"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 4
+      }
     },
     {
       "id": 4734964335590552,
@@ -390,7 +664,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 1
+            }
           },
           {
             "id": 75077178454600,
@@ -400,13 +679,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "alias": "Clean", "formula": "query2" },
-                    { "alias": "Unclean", "formula": "query1" }
+                    {
+                      "alias": "Clean",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Unclean",
+                      "formula": "query1"
+                    }
                   ],
                   "queries": [
                     {
@@ -430,7 +721,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 813550024104470,
@@ -440,13 +736,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "alias": "Bytes In", "formula": "query1" },
-                    { "alias": "Bytes Out", "formula": "query2" }
+                    {
+                      "alias": "Bytes In",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Bytes Out",
+                      "formula": "query2"
+                    }
                   ],
                   "queries": [
                     {
@@ -470,7 +778,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 3, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 2542338265763338,
@@ -480,13 +793,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "alias": "Producer", "formula": "query1" },
-                    { "alias": "Fetch", "formula": "query2" }
+                    {
+                      "alias": "Producer",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Fetch",
+                      "formula": "query2"
+                    }
                   ],
                   "queries": [
                     {
@@ -510,7 +835,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 5, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 715154928904470,
@@ -520,13 +850,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "alias": "Produce", "formula": "query1" },
-                    { "alias": "Fetch", "formula": "query2" }
+                    {
+                      "alias": "Produce",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Fetch",
+                      "formula": "query2"
+                    }
                   ],
                   "queries": [
                     {
@@ -550,11 +892,21 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 7, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 4, "height": 10 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 10
+      }
     },
     {
       "id": 214934188085478,
@@ -579,7 +931,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 1
+            }
           },
           {
             "id": 1710406769010256,
@@ -589,11 +946,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -611,7 +978,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 2772867130889104,
@@ -621,13 +993,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "alias": "Request", "formula": "abs(query1)" },
-                    { "alias": "Response", "formula": "abs(query2)" }
+                    {
+                      "alias": "Request",
+                      "formula": "abs(query1)"
+                    },
+                    {
+                      "alias": "Response",
+                      "formula": "abs(query2)"
+                    }
                   ],
                   "queries": [
                     {
@@ -651,7 +1035,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 3, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 4449092387768158,
@@ -661,11 +1050,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -683,7 +1082,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 5, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 672205362131494,
@@ -693,11 +1097,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -715,11 +1129,21 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 7, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 4, "y": 0, "width": 4, "height": 10 }
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 4,
+        "height": 10
+      }
     },
     {
       "id": 7612648335779806,
@@ -744,7 +1168,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 1
+            }
           },
           {
             "id": 7608752991496422,
@@ -754,18 +1183,28 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "style": { "palette": "green" },
+                      "style": {
+                        "palette": "green"
+                      },
                       "alias": "Lag",
                       "formula": "query1"
                     },
                     {
-                      "style": { "palette": "purple" },
+                      "style": {
+                        "palette": "purple"
+                      },
                       "alias": "Offset",
                       "formula": "query2"
                     }
@@ -792,7 +1231,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 8458681128381916,
@@ -802,11 +1246,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -824,7 +1278,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 3, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 2830450524878806,
@@ -834,11 +1293,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "abs(query1)" }],
+                  "formulas": [
+                    {
+                      "formula": "abs(query1)"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -856,7 +1325,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 5, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 3805366576951434,
@@ -866,11 +1340,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -888,11 +1372,21 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 7, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 8, "y": 0, "width": 4, "height": 10 }
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 10
+      }
     },
     {
       "id": 6246186854446866,
@@ -907,7 +1401,7 @@
             "id": 8236156193990667,
             "definition": {
               "type": "note",
-              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. [Learn more](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)\n\nAssign the **topic** variable to view insights about a specific topic",
+              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. \nOpen in [Data Streams Monitoring](/data-streams) or [Learn More](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).\n\nAssign the **topic** variable to view insights about a specific topic",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
@@ -917,28 +1411,12 @@
               "tick_edge": "bottom",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
-          },
-          {
-            "id": 3148501078668227,
-            "definition": {
-              "title": "Kafka Topology for $topic, $env",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "topology_map",
-              "requests": [
-                {
-                  "request_type": "topology",
-                  "query": {
-                    "filters": ["$env"],
-                    "service": "",
-                    "data_source": "data_streams",
-                    "query_string": "traffic_type:kafka queue:$topic.value"
-                  }
-                }
-              ]
-            },
-            "layout": { "x": 0, "y": 1, "width": 6, "height": 6 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
           },
           {
             "id": 2184446562382655,
@@ -948,7 +1426,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -957,10 +1441,14 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:data_streams.latency{type:kafka AND (pathway_type:edge) AND direction:in AND $topic} by {env,topic}"
+                      "query": "max:data_streams.kafka.lag_seconds{$topic ,$env} by {env,topic}"
                     }
                   ],
-                  "formulas": [{ "formula": "top(query1, 10, 'max', 'desc')" }],
+                  "formulas": [
+                    {
+                      "formula": "top(query1, 10, 'max', 'desc')"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "order_by": "values",
@@ -977,7 +1465,12 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 1, "width": 6, "height": 6 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 2
+            }
           },
           {
             "id": 1870414104649433,
@@ -987,7 +1480,13 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1027,7 +1526,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 7, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 944656656985134,
@@ -1037,7 +1541,13 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1077,7 +1587,12 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 7, "width": 6, "height": 2 }
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 6058441691900230,
@@ -1087,12 +1602,20 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "formula": "top(query1, 10, 'mean', 'desc')" }
+                    {
+                      "formula": "top(query1, 10, 'mean', 'desc')"
+                    }
                   ],
                   "queries": [
                     {
@@ -1124,7 +1647,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 9, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 3284852106159467,
@@ -1164,11 +1692,21 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 9, "width": 6, "height": 2 }
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 18, "width": 12, "height": 12 }
+      "layout": {
+        "x": 0,
+        "y": 25,
+        "width": 12,
+        "height": 8
+      }
     },
     {
       "id": 6693725981895002,
@@ -1193,7 +1731,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
           },
           {
             "id": 1082500062594226,
@@ -1203,13 +1746,23 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "formula": "query1" },
-                    { "formula": "query2" }
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    }
                   ],
                   "queries": [
                     {
@@ -1233,7 +1786,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 2464018598303636,
@@ -1245,7 +1803,11 @@
               "type": "heatmap",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -1254,11 +1816,18 @@
                     }
                   ],
                   "response_format": "timeseries",
-                  "style": { "palette": "dog_classic" }
+                  "style": {
+                    "palette": "dog_classic"
+                  }
                 }
               ]
             },
-            "layout": { "x": 4, "y": 1, "width": 4, "height": 2 }
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 1672495146907534,
@@ -1268,11 +1837,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -1290,7 +1869,12 @@
                 }
               ]
             },
-            "layout": { "x": 8, "y": 1, "width": 4, "height": 2 }
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 1648173259960202,
@@ -1300,11 +1884,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -1322,7 +1916,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 3, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 622016484301358,
@@ -1334,7 +1933,11 @@
               "type": "heatmap",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -1343,11 +1946,18 @@
                     }
                   ],
                   "response_format": "timeseries",
-                  "style": { "palette": "dog_classic" }
+                  "style": {
+                    "palette": "dog_classic"
+                  }
                 }
               ]
             },
-            "layout": { "x": 4, "y": 3, "width": 4, "height": 2 }
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 1229030254709744,
@@ -1357,11 +1967,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -1379,13 +1999,18 @@
                 }
               ]
             },
-            "layout": { "x": 8, "y": 3, "width": 4, "height": 2 }
+            "layout": {
+              "x": 8,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 30,
+        "y": 33,
         "width": 12,
         "height": 6,
         "is_column_break": true
@@ -1414,7 +2039,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
           },
           {
             "id": 5260033322648958,
@@ -1424,13 +2054,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "alias": "Major GC", "formula": "query1" },
-                    { "alias": "Minor GC", "formula": "query2" }
+                    {
+                      "alias": "Major GC",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Minor GC",
+                      "formula": "query2"
+                    }
                   ],
                   "queries": [
                     {
@@ -1454,7 +2096,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 3147053810778090,
@@ -1464,13 +2111,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    { "alias": "Major GC", "formula": "query1" },
-                    { "alias": "Minor GC", "formula": "query2" }
+                    {
+                      "alias": "Major GC",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Minor GC",
+                      "formula": "query2"
+                    }
                   ],
                   "queries": [
                     {
@@ -1494,11 +2153,21 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 1, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 36, "width": 12, "height": 5 }
+      "layout": {
+        "x": 0,
+        "y": 39,
+        "width": 12,
+        "height": 5
+      }
     },
     {
       "id": 8466685701903458,
@@ -1523,7 +2192,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
           },
           {
             "id": 4450446556187890,
@@ -1533,26 +2207,45 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "a" }],
+                  "formulas": [
+                    {
+                      "formula": "a"
+                    }
+                  ],
                   "queries": [
                     {
-                      "compute": { "aggregation": "count" },
+                      "compute": {
+                        "aggregation": "count"
+                      },
                       "data_source": "logs",
                       "group_by": [
                         {
                           "facet": "status",
                           "limit": 50,
                           "should_exclude_missing": true,
-                          "sort": { "aggregation": "count", "order": "desc" }
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
                         }
                       ],
-                      "indexes": ["*"],
+                      "indexes": [
+                        "*"
+                      ],
                       "name": "a",
-                      "search": { "query": "source:kafka" },
+                      "search": {
+                        "query": "source:kafka"
+                      },
                       "storage": "flex_tier"
                     }
                   ],
@@ -1566,7 +2259,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 1, "width": 8, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 8,
+              "height": 4
+            }
           },
           {
             "id": 2559718770477840,
@@ -1574,15 +2272,32 @@
               "title": "Error Logs",
               "title_size": "16",
               "title_align": "left",
-              "time": { "live_span": "1mo" },
+              "time": {
+                "live_span": "1mo"
+              },
               "requests": [
                 {
                   "columns": [
-                    { "field": "status_line", "width": "auto" },
-                    { "field": "timestamp", "width": "auto" },
-                    { "field": "host", "width": "auto" },
-                    { "field": "service", "width": "auto" },
-                    { "field": "content", "width": "compact" }
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
                   ],
                   "query": {
                     "data_source": "logs_stream",
@@ -1595,15 +2310,30 @@
               ],
               "type": "list_stream"
             },
-            "layout": { "x": 8, "y": 1, "width": 4, "height": 4 }
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 41, "width": 12, "height": 6 }
+      "layout": {
+        "x": 0,
+        "y": 44,
+        "width": 12,
+        "height": 6
+      }
     }
   ],
   "template_variables": [
-    { "name": "env", "prefix": "env", "available_values": [], "default": "*" },
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "default": "*"
+    },
     {
       "name": "consumer_group",
       "prefix": "consumer_group",
