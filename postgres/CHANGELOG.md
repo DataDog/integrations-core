@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 22.16.0 / 2025-07-29
+
+***Added***:
+
+* Reverts upgrade to psycopg3 ([#20885](https://github.com/DataDog/integrations-core/pull/20885))
+* Reverts the fix to the `e.pgerror` ([#20883](https://github.com/DataDog/integrations-core/pull/20883))
+
+## 22.15.1 / 2025-07-25
+
+***Fixed***:
+
+* Fixes the reference to the now non-existent `e.pgerror` ([#20848](https://github.com/DataDog/integrations-core/pull/20848))
+
 ## 22.15.0 / 2025-07-10
 
 ***Added***:
