@@ -228,3 +228,51 @@ def test_discover_queues_uses_correct_method_based_on_config(
     getattr(collector, expected_method).assert_called()
     getattr(collector, not_expected_method).assert_not_called()
     assert expected_queue in result
+
+
+def test_discover_queues_resilience_with_broken_queue(instance, aggregator, get_check):
+    instance['auto_discover_queues'] = True
+    instance['queues'] = []
+    check = get_check(instance)
+    collector = check.queue_metric_collector
+
+    queue_manager = Mock()
+    good_queues = ['GOOD.QUEUE.1', 'GOOD.QUEUE.2']
+    broken_queue = 'BROKEN.QUEUE.1'
+    all_queues = good_queues + [broken_queue]
+
+    collector.config.auto_discover_queues_via_names = False
+
+    with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute') as PCFExecute:
+        pcf_mock = PCFExecute.return_value
+        pcf_mock.MQCMD_INQUIRE_Q.side_effect = pymqi.MQMIError(2, 2035)  # Common MQRC_NOT_AUTHORIZED
+
+        result_direct = collector.discover_queues(queue_manager)
+        assert result_direct == set()
+
+    collector.config.auto_discover_queues_via_names = True
+
+    with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute') as PCFExecute:
+        pcf_mock = PCFExecute.return_value
+
+        pcf_mock.MQCMD_INQUIRE_Q_NAMES.return_value = [
+            {pymqi.CMQCFC.MQCACF_Q_NAMES: [queue.encode() for queue in all_queues]}
+        ]
+
+        def mock_inquire_q(args):
+            queue_name = args[pymqi.CMQC.MQCA_Q_NAME].decode()
+            if queue_name == broken_queue:
+                raise pymqi.MQMIError(2, 2035)  # Common MQRC_NOT_AUTHORIZED
+            else:
+                return [{pymqi.CMQC.MQCA_Q_NAME: queue_name.encode()}]
+
+        pcf_mock.MQCMD_INQUIRE_Q.side_effect = mock_inquire_q
+
+        result_via_names = collector.discover_queues(queue_manager)
+        assert result_via_names == set(good_queues)
+        assert broken_queue not in result_via_names
+        aggregator.assert_metric(
+            'ibm_mq.queue.discovery.error',
+            1,
+            tags=['queue:BROKEN.QUEUE.1', 'ibm_error_code:2035', 'ibm_error:MQRC_NOT_AUTHORIZED'],
+        )
