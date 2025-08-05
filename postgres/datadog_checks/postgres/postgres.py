@@ -5,8 +5,8 @@ import contextlib
 import copy
 import functools
 import os
+import time
 from string import Template
-from time import time
 
 import psycopg
 from cachetools import TTLCache
@@ -25,7 +25,7 @@ from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
-from datadog_checks.postgres.health import HealthEvent, PostgresHealth
+from datadog_checks.postgres.health import HealthEvent, PostgresHealth, PostgresHealthEvent
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -166,11 +166,12 @@ class PostgreSql(AgentCheck):
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
+        self._last_validation_timestamp = 0
+        self._validation_interval = 60 * 5
         self.check_initializations.append(
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
-        self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
         self.check_initializations.append(self.load_system_identifier)
@@ -302,6 +303,59 @@ class PostgreSql(AgentCheck):
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
             raise DatabaseHealthCheckError(err_msg)
+
+    def _validate_connection(self, conn):
+        """
+        Validate the connection to the database and the support for all enabled features.
+        """
+
+        if time.time() - self._last_validation_timestamp < self._validation_interval:
+            return
+
+        errors: list[str | Exception] = []
+        warnings: list[str] = []
+
+        try:
+            with self.db() as conn:
+                self._connection_health_check(conn)
+
+                try:
+                    # Check pg_monitor role
+                    with conn.cursor() as cursor:
+                        cursor.execute(
+                            """
+                            SELECT 1
+                            FROM pg_roles r
+                            JOIN pg_auth_members m ON r.oid = m.roleid
+                            JOIN pg_roles u ON u.oid = m.member
+                            WHERE r.rolname = 'pg_monitor' AND u.rolname = %s
+                            """,
+                            (self._config.username,),
+                        )
+                        if not cursor.fetchone():
+                            errors.append(
+                                DatabaseHealthCheckError(
+                                    "The pg_monitor role is not present in the database. "
+                                    "Please create it to ensure proper monitoring."
+                                )
+                            )
+                # Catch unexpected errors during role check
+                except Exception as e:
+                    errors.append(e)
+
+        except Exception as e:
+            errors.append(e)
+
+        self.health.submit_health_event(
+            name=PostgresHealthEvent.VALIDATION,
+            status=HealthStatus.ERROR if errors else HealthStatus.WARNING if warnings else HealthStatus.OK,
+            errors=errors,
+            warnings=warnings,
+        )
+
+        self._last_validation_timestamp = time.time()
+        if len(errors) > 0:
+            raise errors[0]
 
     @property
     def dynamic_queries(self):
@@ -953,15 +1007,6 @@ class PostgreSql(AgentCheck):
             conn.adapters.register_loader("regclass", text_loader)
         return conn
 
-    def _connect(self):
-        """
-        Get and memoize connections to instances.
-        The connection created here will be persistent. It will not be automatically
-        evicted from the connection pool.
-        """
-        with self.db() as conn:
-            self._connection_health_check(conn)
-
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
@@ -1053,8 +1098,9 @@ class PostgreSql(AgentCheck):
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
         try:
-            # Check version
-            self._connect()
+            # Health check
+            self._validate_connection()
+
             # We don't want to cache versions between runs to capture minor updates for metadata
             self.load_version()
 
