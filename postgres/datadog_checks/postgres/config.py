@@ -507,21 +507,21 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     if safefloat(args['query_metrics']['collection_interval']) <= 0:
         args['query_metrics']['collection_interval'] = DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
         validation_result.add_warning(
-            "query_metrics.collection_interval must be greater than 0, defaulting to"
+            "query_metrics.collection_interval must be greater than 0, defaulting to "
             f"{DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL} seconds."
         )
 
     if safefloat(args['query_samples']['collection_interval']) <= 0:
         args['query_samples']['collection_interval'] = DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL
         validation_result.add_warning(
-            "query_samples.collection_interval must be greater than 0, defaulting to"
+            "query_samples.collection_interval must be greater than 0, defaulting to "
             f"{DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL} seconds."
         )
 
     if safefloat(args['query_activity']['collection_interval']) <= 0:
         args['query_activity']['collection_interval'] = DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL
         validation_result.add_warning(
-            "query_activity.collection_interval must be greater than 0, defaulting to"
+            "query_activity.collection_interval must be greater than 0, defaulting to "
             f"{DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL} seconds."
         )
 
@@ -626,7 +626,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
 
     if config.empty_default_hostname:
         validation_result.add_warning(
-            'The `empty_default_hostname` option has no effect in the Postgres check.'
+            'The `empty_default_hostname` option has no effect in the Postgres check. '
             'Use the `exclude_hostname` option instead.'
         )
 
