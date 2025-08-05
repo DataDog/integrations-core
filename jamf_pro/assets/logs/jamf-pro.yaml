@@ -99,8 +99,8 @@ pipeline:
         `ComputerPushCapabilityChanged` Events
       enabled: true
       filter:
-        query: "@evt.name:(ComputerAdded OR ComputerInventoryCompleted OR
-          ComputerPushCapabilityChanged)"
+        query: service:(ComputerAdded OR ComputerInventoryCompleted OR
+          ComputerPushCapabilityChanged)
       processors:
         - type: attribute-remapper
           name: Map `event` to `event.computer`
@@ -116,7 +116,7 @@ pipeline:
       name: Attribute Remapping for `SCEPChallenge` Events
       enabled: true
       filter:
-        query: "@evt.name:SCEPChallenge"
+        query: service:SCEPChallenge
       processors:
         - type: attribute-remapper
           name: Map `event.targetUser.uid` to `usr.id`
@@ -152,7 +152,7 @@ pipeline:
       name: Attribute Remapping for `RestAPIOperations` Events
       enabled: true
       filter:
-        query: "@evt.name:RestAPIOperations"
+        query: service:RestAPIOperation
       processors:
         - type: attribute-remapper
           name: Map `event.restAPIOperationType` to `http.method`
@@ -164,13 +164,23 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.authorizedUsername` to `usr.name`
+          enabled: true
+          sources:
+            - event.authorizedUsername
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Parse Computer Events
       enabled: true
       filter:
-        query: "@evt.name:(ComputerAdded OR ComputerCheckIn OR
-          ComputerInventoryCompleted OR ComputerPatchPolicyCompleted OR
-          ComputerPolicyFinished OR ComputerPushCapabilityChanged)"
+        query: service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted
+          OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR
+          ComputerPushCapabilityChanged)
       processors:
         - type: attribute-remapper
           name: Map `event.computer.username` to `usr.name`
@@ -213,9 +223,9 @@ pipeline:
       name: Parse Mobile Events
       enabled: true
       filter:
-        query: "@evt.name:(MobileDeviceCheckIn OR MobileDeviceCommandCompleted OR
+        query: service:(MobileDeviceCheckIn OR MobileDeviceCommandCompleted OR
           MobileDeviceEnrolled OR MobileDeviceInventoryCompleted OR
-          MobileDevicePushSent OR MobileDeviceUnenrolled)"
+          MobileDevicePushSent OR MobileDeviceUnEnrolled)
       processors:
         - type: attribute-remapper
           name: Map `event.username` to `usr.name`

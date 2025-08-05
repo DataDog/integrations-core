@@ -248,7 +248,6 @@ tests:
   result:
     custom:
       event:
-        authorizedUsername: "jane.doe"
         objectID: 10001
         objectName: "Security Updates"
         objectTypeName: "Patch Policy"
@@ -256,6 +255,8 @@ tests:
         restAPIOperationType: "UPDATE"
       evt:
         name: "RestAPIOperation"
+      usr:
+        name: "jane.doe"
       webhook:
         eventTimestamp: 1752237458000
         id: 7010

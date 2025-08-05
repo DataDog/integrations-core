@@ -4,7 +4,7 @@
 
 [Jamf Pro][1] is an Apple device management tool that helps organizations deploy, configure, and secure Macs, iPhones, and iPads. It enables automated setup, app management, and compliance for Apple devices at scale.
 
-Integrate Jamf Pro with Datadog to gain insights into [Events][2] using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate Jamf Pro with Datadog to gain insights into [Events][2] using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
@@ -26,7 +26,7 @@ Configure the Datadog endpoint to forward Jamf Pro detections as logs to Datadog
 10. Choose **JSON** in Content Type.
 11. Choose the event that will trigger the webhook in the Webhook Event dropdown.
 12. Click **Save**.
-13. Ensure the steps 3-11 are repeated for each of 22 event types, to ensure complete data collection coverage.
+13. Ensure that steps 3-11 are repeated for each of the 22 event types, to ensure complete data collection coverage.
 
 ## Data Collected
 
