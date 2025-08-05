@@ -54,7 +54,7 @@ def start(
     ignore_state: bool,
 ):
     """
-    Start an environment.
+    Start an environment and test codecov.
     """
     import json
     import os
