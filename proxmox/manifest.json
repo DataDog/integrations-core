@@ -18,11 +18,13 @@
       "Category::OS & System",
       "Category::Cloud",
       "Category::Network",
+      "Category::Event Management",
       "Category::Metrics",
       "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Events"
     ]
   },
   "assets": {
@@ -67,6 +69,9 @@
       "CPU Usage is High on Proxmox Node": "assets/monitors/node_cpu_usage.json",
       "Memory Usage is High on Proxmox VM": "assets/monitors/vm_memory_usage.json",
       "Memory Usage is High on Proxmox Node": "assets/monitors/node_memory_usage.json"
+    },
+    "saved_views": {
+      "proxmox_api_logs": "assets/saved_views/proxmox_api_logs.json"
     }
   },
   "author": {

@@ -28,22 +28,24 @@
 
     1. If the item is a string, then it represents the exposed metric name, and
        the sent metric name is identical. For example:
-
+         ```
          metrics:
          - <METRIC_1>
          - <METRIC_2>
+         ```
     2. If the item is a mapping, then the keys represent the exposed metric names.
 
-         a. If a value is a string, then it represents the sent metric name. For example:
-
+         1. If a value is a string, then it represents the sent metric name. For example:
+              ```
               metrics:
               - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
               - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-         b. If a value is a mapping, then it must have a `name` and, optionally, a `type` key.
+              ```
+         2. If a value is a mapping, then it must have a `name` and, optionally, a `type` key.
             The `name` represents the sent metric name, and the `type` represents how
             the metric should be handled, overriding any type information the endpoint
             may provide. For example:
-
+              ```
               metrics:
               - <EXPOSED_METRIC_1>:
                   name: <SENT_METRIC_1>
@@ -51,7 +53,7 @@
               - <EXPOSED_METRIC_2>:
                   name: <SENT_METRIC_2>
                   type: <METRIC_TYPE_2>
-
+              ```
             The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
 
     Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
@@ -61,12 +63,19 @@
     https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
 
     Regular expressions may be used to match the exposed metric names, for example:
-
+      ```
       metrics:
       - ^network_(ingress|egress)_.+
       - .+:
           type: gauge
+      ````
   value:
+    example:
+      - <METRIC_1>
+      - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+      - <EXPOSED_METRIC_3>:
+          name: <SENT_METRIC_3>
+          type: <METRIC_TYPE_3>
     type: array
     items:
       anyOf:
@@ -92,22 +101,24 @@
 
     1. If the item is a string, then it represents the exposed metric name, and
        the sent metric name will be identical. For example:
-
+         ```
          extra_metrics:
          - <METRIC_1>
          - <METRIC_2>
+         ```
     2. If the item is a mapping, then the keys represent the exposed metric names.
 
-         a. If a value is a string, then it represents the sent metric name. For example:
-
+         1. If a value is a string, then it represents the sent metric name. For example:
+              ```
               extra_metrics:
               - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
               - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-         b. If a value is a mapping, then it must have a `name` and/or `type` key.
+              ```
+         2. If a value is a mapping, then it must have a `name` and/or `type` key.
             The `name` represents the sent metric name, and the `type` represents how
             the metric should be handled, overriding any type information the endpoint
             may provide. For example:
-
+              ```
               extra_metrics:
               - <EXPOSED_METRIC_1>:
                   name: <SENT_METRIC_1>
@@ -115,7 +126,7 @@
               - <EXPOSED_METRIC_2>:
                   name: <SENT_METRIC_2>
                   type: <METRIC_TYPE_2>
-
+              ```
             The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
 
     Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
@@ -125,12 +136,19 @@
     https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
 
     Regular expressions may be used to match the exposed metric names, for example:
-
+      ```
       extra_metrics:
       - ^network_(ingress|egress)_.+
       - .+:
           type: gauge
+      ```
   value:
+    example:
+      - <METRIC_1>
+      - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+      - <EXPOSED_METRIC_3>:
+          name: <SENT_METRIC_3>
+          type: <METRIC_TYPE_3>
     type: array
     items:
       anyOf:
@@ -286,9 +304,9 @@
     exposed metrics from which to share labels, and the values are mappings that configure the
     sharing behavior. Each mapping must have at least one of the following keys:
 
-      labels - This is a list of labels to share. All labels are shared if this is not set.
-      match - This is a list of labels to match on other metrics as a condition for sharing.
-      values - This is a list of allowed values as a condition for sharing.
+      - labels - This is a list of labels to share. All labels are shared if this is not set.
+      - match - This is a list of labels to match on other metrics as a condition for sharing.
+      - values - This is a list of allowed values as a condition for sharing.
 
     To unconditionally share all labels of a metric, set it to `true`.
 
@@ -296,19 +314,18 @@
     to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
     label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
     to all other metrics if their value is equal to `23` or `42`.
-
-      share_labels:
-        metric_a: true
-        metric_b:
-          labels:
-          - node
-          match:
-          - pod
-        metric_c:
-          values:
-          - 23
-          - 42
   value:
+    example:
+      metric_a: true
+      metric_b:
+        labels:
+        - node
+        match:
+        - pod
+      metric_c:
+        values:
+        - 23
+        - 42
     type: object
     additionalProperties:
       anyOf:
