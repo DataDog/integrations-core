@@ -1052,7 +1052,7 @@ def test_statement_reported_hostname(
 
     check = integration_check(dbm_instance)
 
-    run_one_check(check, cancel=False) # We want to run this twice so don't cancel
+    run_one_check(check, cancel=False)
     run_one_check(check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")

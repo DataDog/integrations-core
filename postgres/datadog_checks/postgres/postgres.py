@@ -964,7 +964,6 @@ class PostgreSql(AgentCheck):
         self.db_pool._configure_connection(conn)
         return conn
 
-
     def _connect(self):
         """
         Get and memoize connections to instances.
