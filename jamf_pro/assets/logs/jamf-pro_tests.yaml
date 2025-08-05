@@ -252,9 +252,10 @@ tests:
         objectName: "Security Updates"
         objectTypeName: "Patch Policy"
         operationSuccessful: true
-        restAPIOperationType: "UPDATE"
       evt:
         name: "RestAPIOperation"
+      http:
+        method: "UPDATE"
       usr:
         name: "jane.doe"
       webhook:
