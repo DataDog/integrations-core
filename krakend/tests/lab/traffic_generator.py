@@ -16,13 +16,15 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
+ConfigDict = dict[str, Any]
+
 shutdown_event = asyncio.Event()
 
 # Global configuration that can be updated dynamically
-current_config: dict[str, Any] = {}
+current_config: ConfigDict = {}
 
 
-def validate_config(config: dict) -> tuple[bool, str]:
+def validate_config(config: ConfigDict) -> tuple[bool, str]:
     """
     Validate the configuration to ensure probabilities sum to 1.
 
@@ -55,7 +57,7 @@ def validate_config(config: dict) -> tuple[bool, str]:
     return True, ""
 
 
-def load_config(config_path: Path) -> tuple[dict, str]:
+def load_config(config_path: Path) -> tuple[ConfigDict, str]:
     """
     Load and validate configuration from YAML file.
 
