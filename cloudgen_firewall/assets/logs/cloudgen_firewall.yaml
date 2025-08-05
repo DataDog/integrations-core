@@ -195,10 +195,10 @@ pipeline:
           enabled: true
           source: message
           samples:
-            - "2025-03-19T09:31:22+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal
-              firewall: [Main] Sync: Authentication audit is set to 'auto', auto
-              detection "
+            - '2025-03-19T09:31:22+05:30 sacumentestlocal
+              sacumentestlocal/box_Firewall_audit":  Info sacumentestlocal
+              firewall: [Main] Sync: Authentication audit is set to ''auto'', auto
+              detection '
             - '2025-03-19T09:31:22+05:30 sacumentestlocal
               sacumentestlocal/box_Firewall_audit":  Info sacumentestlocal
               Block: <cumulative>|10.10.17.255|137'
@@ -258,7 +258,8 @@ pipeline:
               Connection terminated (while 'ecachepb')"
           grok:
             supportRules: ""
-            matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
+            matchRules:
+              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{data:hostname}
               %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+%{greedyData:Action}
         - type: grok-parser
@@ -277,7 +278,8 @@ pipeline:
               firewall: [Main] Sync: BOX sacumentestlocal IP 10.10.16.167"
           grok:
             supportRules: ""
-            matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
+            matchRules:
+              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{data:hostname}
               %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:log_type}:\s+\[%{word:status}\]\s+%{word:action}:\s+%{data:message}
     - type: pipeline
