@@ -411,3 +411,15 @@ jobs:
       with:
         name: "test-results-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
+
+    - name: Upload coverage data as artifact
+      if: >
+        !github.event.repository.private &&
+        always() &&
+        inputs.pytest-args != '-m flaky'
+      # Flaky tests will have low coverage, don't include in artifacts to avoid pipeline issues
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: "coverage-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
+        path: "${{ inputs.target }}/coverage.xml"
+        if-no-files-found: ignore
