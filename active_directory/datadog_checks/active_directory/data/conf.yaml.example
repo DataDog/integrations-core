@@ -40,25 +40,6 @@ instances:
     ## the health of the `server`.
     #
     # enable_health_service_check: true
-    
-    ## @param service_check_enabled - boolean - optional - default: true
-    ## By default, the integration checks Windows services before collecting their metrics.
-    ## This ensures metrics are only collected for services that are actually running.
-    ## Set to false to collect all metrics regardless of service state.
-    #
-    # service_check_enabled: true
-    
-    ## @param force_all_metrics - boolean - optional - default: false
-    ## Force collection of all metrics regardless of service state.
-    ## This overrides the intelligent service checking behavior.
-    ## Use this if you want to attempt metric collection even when services appear to be stopped.
-    #
-    # force_all_metrics: false
-    
-    ## @param service_cache_duration - number - optional - default: 300
-    ## How long to cache service state in seconds.
-    #
-    # service_cache_duration: 300
 
     ## @param server_tag - string - optional
     ## The name used for tagging `server`. The value defined here replaces the `server:` tag key.
@@ -104,11 +85,6 @@ instances:
     ##                           locale-specific versions rather than by their English name. This overrides
     ##                           any defined value in `init_config`.
     ##
-    ## For performance objects with instances (like DFS Replicated Folders), use include/exclude
-    ## to filter specific instances. Instance names vary by object:
-    ## - DFS Replicated Folders: Replication group names
-    ## - DHCP Server: Usually "_Total" or specific scope names
-    ##
     ## The key for each counter object represents the name of the desired counter.
     ## Counters can be defined in the following ways:
     ##
@@ -150,73 +126,6 @@ instances:
     #     name: ds
     #     counters:
     #     - DS % Writes from LDAP: writes_from_ldap
-    #
-    #   ## Netlogon metrics configuration
-    #   ## Monitors authentication performance and DC secure channel health
-    #   Netlogon:
-    #     name: netlogon
-    #     counters:
-    #     - Semaphore Waiters: semaphore_waiters
-    #     - Semaphore Holders: semaphore_holders
-    #     - Semaphore Acquires:
-    #         name: semaphore_acquires
-    #         type: count
-    #     - Semaphore Timeouts:
-    #         name: semaphore_timeouts
-    #         type: count
-    #     - Average Semaphore Hold Time: semaphore_hold_time
-    #
-    #   ## Security System-Wide Statistics
-    #   ## Tracks authentication protocol usage (NTLM vs Kerberos)
-    #   Security System-Wide Statistics:
-    #     name: security
-    #     counters:
-    #     - NTLM Authentications:
-    #         name: ntlm_authentications
-    #         type: rate
-    #     - Kerberos Authentications:
-    #         name: kerberos_authentications
-    #         type: rate
-    #
-    #   ## DHCP Server metrics
-    #   ## Monitors DHCP failover and binding updates
-    #   DHCP Server:
-    #     name: dhcp
-    #     counters:
-    #     - Binding Updates Dropped:
-    #         name: binding_updates_dropped
-    #         type: count
-    #     - Failover: Update pending messages: failover.update_pending_messages
-    #     - Failover: Messages received/sec:
-    #         name: failover.messages_received
-    #         type: rate
-    #     - Failover: Messages sent/sec:
-    #         name: failover.messages_sent
-    #         type: rate
-    #
-    #   ## DFS Replication metrics
-    #   ## Monitors DFS replication health and conflicts
-    #   ## Note: Instance names are DFS replication group names (e.g., "Domain System Volume", "Public Share")
-    #   DFS Replicated Folders:
-    #     name: dfsr
-    #     tag_name: replication_group
-    #     # Filter specific replication groups
-    #     # include:
-    #     #   - "Public Share"
-    #     #   - "Department*"
-    #     counters:
-    #     - Size of Files Deleted:
-    #         name: deleted_files_size
-    #         unit: byte
-    #     - Staging Space In Use:
-    #         name: staging_folder_size
-    #         unit: byte
-    #     - File Installs Retried:
-    #         name: file_installs_retried
-    #         type: count
-    #     - Conflict Folder Size:
-    #         name: conflict_files_size
-    #         unit: byte
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
