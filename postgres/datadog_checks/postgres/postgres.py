@@ -22,7 +22,6 @@ from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_res
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs
-from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
@@ -958,82 +957,13 @@ class PostgreSql(AgentCheck):
             )
 
     def _new_connection(self, dbname):
-        if self._config.host == 'localhost' and self._config.password == '':
-            # Use ident method
-            connection_string = "user=%s dbname=%s application_name=%s" % (
-                self._config.user,
-                dbname,
-                self._config.application_name,
-            )
-            conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=CommenterCursor)
-        else:
-            password = self._config.password
-            if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
-                # if we are running on AWS, check if IAM auth is enabled
-                aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
-                if aws_managed_authentication['enabled']:
-                    # if IAM auth is enabled, region must be set. Validation is done in the config
-                    region = self.cloud_metadata['aws']['region']
-                    password = aws.generate_rds_iam_token(
-                        host=self._config.host,
-                        username=self._config.user,
-                        port=self._config.port,
-                        region=region,
-                        role_arn=aws_managed_authentication.get('role_arn'),
-                    )
-            elif 'azure' in self.cloud_metadata:
-                azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
-                if azure_managed_authentication['enabled']:
-                    client_id = azure_managed_authentication['client_id']
-                    identity_scope = azure_managed_authentication.get('identity_scope', None)
-                    password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
-
-            self.log.debug(
-                "Try to connect to %s with %s",
-                self._config.host,
-                "password" if password == self._config.password else "token",
-            )
-
-            args = {
-                'host': self._config.host,
-                'user': self._config.user,
-                'password': password,
-                'dbname': dbname,
-                'sslmode': self._config.ssl_mode,
-                'application_name': self._config.application_name,
-            }
-            if self._config.port:
-                args['port'] = self._config.port
-            if self._config.ssl_cert:
-                args['sslcert'] = self._config.ssl_cert
-            if self._config.ssl_root_cert:
-                args['sslrootcert'] = self._config.ssl_root_cert
-            if self._config.ssl_key:
-                args['sslkey'] = self._config.ssl_key
-            if self._config.ssl_password:
-                args['sslpassword'] = self._config.ssl_password
-            conn = psycopg.connect(**args, autocommit=True, cursor_factory=CommenterCursor)
-        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        if self._config.query_timeout:
-            # Set the statement_timeout for the session
-            with conn.cursor() as cursor:
-                try:
-                    cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
-                except psycopg.Error as e:
-                    self.log.warning(
-                        "Failed to set statement_timeout to %d: %s",
-                        self._config.query_timeout,
-                        e,
-                    )
-                    return None
-        if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
-            text_loader = SQLASCIITextLoader
-            text_loader.encodings = self._config.query_encodings
-            conn.adapters.register_loader("text", text_loader)
-            conn.adapters.register_loader("varchar", text_loader)
-            conn.adapters.register_loader("name", text_loader)
-            conn.adapters.register_loader("regclass", text_loader)
+        # TODO: Keeping this main connection outside of the pool for now to keep existing behavior.
+        # We should move this to the pool in the future.
+        conn_args = self.build_connection_args()
+        conn = psycopg.connect(**conn_args.as_kwargs(dbname=dbname))
+        self.db_pool._configure_connection(conn)
         return conn
+
 
     def _connect(self):
         """
