@@ -400,6 +400,10 @@ VALID_UNIT_NAMES = {
     "collection",
     "entity",
     "vector",
+    "unix second",
+    "unix millisecond",
+    "unix microsecond",
+    "unix nanosecond",
 }
 
 ALLOWED_PREFIXES = ('system.', 'jvm.', 'http.', 'datadog.', 'sftp.', 'process.', 'runtime.', 'otelcol_')
