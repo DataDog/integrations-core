@@ -2,10 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import psycopg
+import psycopg2
+import psycopg2.extras
 import pymysql
-from psycopg import ClientCursor
-from psycopg.rows import dict_row
 
 from datadog_checks.base.errors import ConfigurationError
 
@@ -45,23 +44,19 @@ class DatabaseClient:
                 )
             else:
                 # PostgreSQL connection settings
-                self.connection = psycopg.connect(
+                self.connection = psycopg2.connect(
                     host=self.db_host,
                     port=self.db_port,
                     user=self.db_username,
                     password=self.db_password,
                     dbname=self.db_name,
-                    cursor_factory=ClientCursor,
+                    cursor_factory=psycopg2.extras.DictCursor,
                     connect_timeout=DB_CONNECTION_TIMEOUT_IN_SECONDS,
-                    autocommit=True,
                 )
             message = f"Successfully authenticated with the {self.db_type} database."
             self.log.info(LOG_TEMPLATE.format(host=self.db_host, message=message))
-            if self.db_type == MYSQL:
-                self.cursor = self.connection.cursor()
-            else:
-                self.cursor = self.connection.cursor(row_factory=dict_row)
-        except (pymysql.Error, psycopg.Error) as db_err:
+            self.cursor = self.connection.cursor()
+        except (pymysql.Error, psycopg2.Error) as db_err:
             err_message = (
                 f"Authentication failed for provided credentials. Please check the provided credentials."
                 f" | Error={db_err}."
@@ -75,7 +70,7 @@ class DatabaseClient:
             self.connection.close()
             message = "Connection closed successfully."
             self.log.info(LOG_TEMPLATE.format(host=self.db_host, message=message))
-        except (pymysql.Error, psycopg.Error) as db_err:
+        except (pymysql.Error, psycopg2.Error) as db_err:
             err_message = f"Error occurred while closing the connection. | Error={db_err}."
             self.log.error(LOG_TEMPLATE.format(host=self.db_host, message=err_message))
 
@@ -103,6 +98,6 @@ class DatabaseClient:
         try:
             self.cursor.execute(query)
             return self.cursor.fetchall()
-        except (pymysql.Error, psycopg.Error) as db_err:
+        except (pymysql.Error, psycopg2.Error) as db_err:
             err_message = f"Error occurred while executing query: {query}. | Error={db_err}."
             self.log.error(LOG_TEMPLATE.format(host=self.db_host, message=err_message))
