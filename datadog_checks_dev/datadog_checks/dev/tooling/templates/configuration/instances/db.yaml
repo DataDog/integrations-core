@@ -78,6 +78,17 @@
           type: array
           items:
             type: object
+            properties:
+              - name: name
+                type: string
+              - name: type
+                type: string
+                enum:
+                  - gauge
+                  - monotonic_count
+                  - tag
+                  - tag_list
+                  - tag_not_null
         - name: tags
           type: array
           items:

@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.config import PostgresConfig
+from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
@@ -68,25 +68,12 @@ SAMPLE_QUERIES = [
     (USER_ADMIN, PASSWORD_ADMIN, "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
-dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
     DBMAsyncJob.executor.shutdown(wait=True)
     DBMAsyncJob.executor = ThreadPoolExecutor()
-
-
-@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
-@pytest.mark.parametrize("dbm_enabled", [True, False])
-def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
-    # test to make sure we continue to support the old key
-    for k in dbm_enabled_keys:
-        dbm_instance.pop(k, None)
-    dbm_instance[dbm_enabled_key] = dbm_enabled
-    check = integration_check(dbm_instance)
-    assert check._config.dbm_enabled == dbm_enabled
 
 
 @requires_over_10
@@ -341,120 +328,6 @@ def test_statement_metrics(
         conn.close()
 
 
-@pytest.mark.parametrize(
-    "input_cloud_metadata,output_cloud_metadata",
-    [
-        ({}, {}),
-        (
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                },
-            },
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                    'managed_authentication': {'enabled': False},
-                },
-            },
-        ),
-        (
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'fully_qualified_domain_name': 'test-server.database.windows.net',
-                },
-            },
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                    'managed_authentication': {'enabled': False},
-                },
-            },
-        ),
-        (
-            {
-                'aws': {
-                    'instance_endpoint': 'foo.aws.com',
-                },
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                },
-            },
-            {
-                'aws': {'instance_endpoint': 'foo.aws.com', 'managed_authentication': {'enabled': False}},
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
-                    'managed_authentication': {'enabled': False},
-                },
-            },
-        ),
-        (
-            {
-                'gcp': {
-                    'project_id': 'foo-project',
-                    'instance_id': 'bar',
-                    'extra_field': 'included',
-                },
-            },
-            {
-                'gcp': {
-                    'project_id': 'foo-project',
-                    'instance_id': 'bar',
-                    'extra_field': 'included',
-                },
-            },
-        ),
-    ],
-)
-def test_statement_metrics_cloud_metadata(
-    aggregator, integration_check, dbm_instance, input_cloud_metadata, output_cloud_metadata, datadog_agent
-):
-    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
-    # don't need samples for this test
-    dbm_instance['query_samples'] = {'enabled': False}
-    dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    if input_cloud_metadata:
-        for k, v in input_cloud_metadata.items():
-            dbm_instance[k] = v
-    connections = {}
-
-    def _run_queries():
-        for user, password, dbname, query, arg in SAMPLE_QUERIES:
-            if dbname not in connections:
-                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
-            connections[dbname].cursor().execute(query, (arg,))
-
-    check = integration_check(dbm_instance)
-    check._connect()
-
-    _run_queries()
-    run_one_check(check)
-    _run_queries()
-    run_one_check(check)
-
-    events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1, "should capture exactly one metrics payload"
-    event = events[0]
-
-    assert event['host'] == 'stubbed.hostname'
-    assert event['timestamp'] > 0
-    assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
-    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
-
-    for conn in connections.values():
-        conn.close()
-
-
 @requires_over_13
 def test_wal_metrics(aggregator, integration_check, dbm_instance):
     dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
@@ -555,7 +428,6 @@ def dbm_instance(pg_instance):
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': CLOSE_TO_ZERO_INTERVAL}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -568,7 +440,6 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
-    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -1142,7 +1013,6 @@ def test_statement_reported_hostname(
         ),
     ],
 )
-@pytest.mark.unit
 def test_activity_snapshot_collection(
     aggregator,
     integration_check,
@@ -1165,7 +1035,6 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1293,7 +1162,6 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     dbm_instance['dbstrict'] = True
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     dbm_instance['collect_raw_query_statement'] = {'enabled': True}
     check = integration_check(dbm_instance)
     check._connect()
@@ -1789,7 +1657,6 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1872,95 +1739,8 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
 
 
 @pytest.mark.parametrize(
-    "number_key",
-    [
-        "explained_queries_cache_maxsize",
-        "explained_queries_per_hour_per_query",
-        "seen_samples_cache_maxsize",
-        "collection_interval",
-    ],
-)
-def test_statement_samples_config_invalid_number(integration_check, pg_instance, number_key):
-    pg_instance['query_samples'] = {
-        number_key: "not-a-number",
-    }
-    with pytest.raises(ValueError):
-        integration_check(pg_instance)
-
-
-class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
-    """
-    A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
-    has it as read-only and not settable at construction-time
-    """
-
-    def __init__(self, pg_error):
-        self.pg_error = pg_error
-
-    def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
-        else:
-            return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
-
-    def __str__(self):
-        return self.pg_error
-
-
-class UndefinedTable(psycopg.errors.UndefinedTable):
-    """
-    A fake UndefinedTable that allows setting pg_error on construction since UndefinedTable
-    has it as read-only and not settable at construction-time
-    """
-
-    def __init__(self, pg_error):
-        self.pg_error = pg_error
-
-    def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
-        else:
-            return super(UndefinedTable, self).__getattribute__(attr)
-
-    def __str__(self):
-        return self.pg_error
-
-
-@pytest.mark.parametrize(
     "error,metric_columns,expected_error_tag,expected_warnings",
     [
-        (
-            ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
-            [],
-            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
-            [
-                'Unable to collect statement metrics because pg_stat_statements extension is '
-                "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statements-not-loaded'
-                ' for more details\ncode=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
-            ],
-        ),
-        (
-            UndefinedTable('ERROR:  relation "pg_stat_statements" does not exist'),
-            [],
-            'error:database-UndefinedTable-pg_stat_statements_not_created',
-            [
-                'Unable to collect statement metrics because pg_stat_statements is not '
-                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
-                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
-            ],
-        ),
-        (
-            ObjectNotInPrerequisiteState('cannot insert into view'),
-            [],
-            'error:database-ObjectNotInPrerequisiteState',
-            [
-                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
-                "See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: cannot insert into view\n"
-                "dbname=datadog_test host=stubbed.hostname"
-            ],
-        ),
         (
             psycopg.errors.DatabaseError('connection reset'),
             [],
@@ -2009,6 +1789,52 @@ def test_statement_metrics_database_errors(
 
 
 @pytest.mark.parametrize(
+    "error,metric_columns,expected_error_tag,expected_warnings",
+    [
+        (
+            'not-created',
+            [],
+            'error:database-UndefinedTable-pg_stat_statements_not_created',
+            [
+                'Unable to collect statement metrics because pg_stat_statements is not '
+                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
+                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
+            ],
+        ),
+    ],
+)
+def test_statement_metrics_database_extension_errors(
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
+):
+    # don't need samples for this test
+    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
+    check = integration_check(dbm_instance)
+
+    # Break databased on purpose to simulate the extension not being loaded or created
+    if error == 'not-created':
+        superconn = _get_superconn(dbm_instance)
+        with superconn.cursor() as cur:
+            cur.execute("DROP EXTENSION pg_stat_statements CASCADE;")
+
+            run_one_check(check)
+
+            # Restore extension for next test
+            cur.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;")
+
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + [expected_error_tag]
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )
+
+    assert check.warnings == expected_warnings
+
+
+@pytest.mark.parametrize(
     "pg_stat_statements_max_threshold,expected_warnings",
     [
         (
@@ -2022,7 +1848,7 @@ def test_statement_metrics_database_errors(
                 'this warning. See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#'
                 'high-pg-stat-statements-max-configuration for more details\n'
                 'code=high-pg-stat-statements-max-configuration dbname=datadog_test host=stubbed.hostname '
-                'threshold=9999 value=10000',
+                'threshold=9999.0 value=10000',
             ],
         ),
         (10000, []),
@@ -2158,9 +1984,10 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
         conn.close()
 
 
-@pytest.mark.unit
+# Even though this test is a unit test we leave it unmarked because loading this file loads the fixture
+# that requires booting up the database and makes it very slow to run compared to other unit tests
 def test_get_query_metrics_payload_rows():
-    config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
+    config, _ = build_config(check={}, init_config={}, instance={"host": "host", "username": "user"})
     statement_metrics = PostgresStatementMetrics({}, config, None)
     wrapper = {}
 

@@ -258,7 +258,7 @@ class QueryManager(QueryExecutor):
             self.queries.append(query)
 
         if len(self.queries) == 0:
-            self.logger.warning('QueryManager initialized with no query')
+            self.logger.debug('QueryManager initialized with no query')
 
     def execute(self, extra_tags=None):
         # This needs to stay here b/c when we construct a QueryManager in a check's __init__
