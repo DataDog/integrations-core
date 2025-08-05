@@ -554,7 +554,7 @@ class PostgresMetadata(DBMAsyncJob):
             schema_query_ = schema_query_.format("")
 
         try:
-            with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+            with self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     cursor.execute(schema_query_)
                     rows = cursor.fetchall()
@@ -583,7 +583,7 @@ class PostgresMetadata(DBMAsyncJob):
         """
         filter = self._get_tables_filter()
         try:
-            with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+            with self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
                         cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
@@ -666,7 +666,7 @@ class PostgresMetadata(DBMAsyncJob):
             else:
                 # get activity
                 try:
-                    with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                    with self.db_pool.get_connection(dbname) as conn:
                         with conn.cursor(row_factory=dict_row) as cursor:
                             cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                             row = cursor.fetchone()
@@ -751,7 +751,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         # Get indexes
         try:
-            with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+            with self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     query = PG_INDEXES_QUERY.format(table_ids=table_ids)
                     cursor.execute(query)

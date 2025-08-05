@@ -612,7 +612,7 @@ def test_successful_explain(
     check._connect()
 
     # run check so all internal state is correctly initialized
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -699,7 +699,7 @@ def test_failed_explain_handling(
         pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -989,11 +989,11 @@ def test_statement_metadata(
         cursor.execute(
             query,
         )
-        run_one_check(check)
+        run_one_check(check, cancel=False)
         cursor.execute(
             query,
         )
-        run_one_check(check)
+        run_one_check(check, cancel=False)
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -1052,7 +1052,7 @@ def test_statement_reported_hostname(
 
     check = integration_check(dbm_instance)
 
-    run_one_check(check)
+    run_one_check(check, cancel=False) # We want to run this twice so don't cancel
     run_one_check(check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -1496,7 +1496,7 @@ def test_statement_run_explain_errors(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain(
         "datadog_test", query, query, "7231596c8b5536d1"
     )
@@ -1844,7 +1844,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
+    assert check.db_pool.pools.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
@@ -2137,7 +2137,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 @pytest.mark.unit
 def test_get_query_metrics_payload_rows():
     config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
-    statement_metrics = PostgresStatementMetrics({}, config, None)
+    statement_metrics = PostgresStatementMetrics({}, config)
     wrapper = {}
 
     TestCase = namedtuple('TestCase', 'rows max_size expected')

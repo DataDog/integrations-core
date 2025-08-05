@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
+from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs
 from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
@@ -136,7 +136,12 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
+        self.db_pool = LRUConnectionPoolManager(
+            max_db=self._config.max_connections,
+            base_conn_args=self.build_connection_args(),
+            statement_timeout=self._config.query_timeout,
+            sqlascii_encodings=self._config.query_encodings,
+        )
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
@@ -607,11 +612,7 @@ class PostgreSql(AgentCheck):
         results = None
         is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
-            with (
-                self.db()
-                if dbname is None
-                else self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn
-            ):
+            with self.db() if dbname is None else self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor() as cursor:
                     query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
                     with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
@@ -800,9 +801,7 @@ class PostgreSql(AgentCheck):
 
         databases = self.autodiscovery.get_items()
         for dbname in databases:
-            db = functools.partial(
-                self.db_pool.get_connection, dbname=dbname, ttl_ms=self._config.idle_connection_timeout
-            )
+            db = functools.partial(self.db_pool.get_connection, dbname=dbname)
             self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
     def _emit_running_metric(self):
@@ -912,10 +911,56 @@ class PostgreSql(AgentCheck):
             for dynamic_query in self.dynamic_queries:
                 dynamic_query.execute()
 
+    def build_connection_args(self) -> PostgresConnectionArgs:
+        if self._config.host == 'localhost' and self._config.password == '':
+            return PostgresConnectionArgs(
+                application_name=self._config.application_name,
+                user=self._config.user,
+            )
+        else:
+            password = self._config.password
+            if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
+                # if we are running on AWS, check if IAM auth is enabled
+                aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+                if aws_managed_authentication['enabled']:
+                    # if IAM auth is enabled, region must be set. Validation is done in the config
+                    region = self.cloud_metadata['aws']['region']
+                    password = aws.generate_rds_iam_token(
+                        host=self._config.host,
+                        username=self._config.user,
+                        port=self._config.port,
+                        region=region,
+                        role_arn=aws_managed_authentication.get('role_arn'),
+                    )
+            elif 'azure' in self.cloud_metadata:
+                azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
+                if azure_managed_authentication['enabled']:
+                    client_id = azure_managed_authentication['client_id']
+                    identity_scope = azure_managed_authentication.get('identity_scope', None)
+                    password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
+
+            self.log.debug(
+                "Try to connect to %s with %s",
+                self._config.host,
+                "password" if password == self._config.password else "token",
+            )
+            return PostgresConnectionArgs(
+                application_name=self._config.application_name,
+                user=self._config.user,
+                host=self._config.host,
+                port=self._config.port,
+                password=password,
+                ssl_mode=self._config.ssl_mode,
+                ssl_cert=self._config.ssl_cert,
+                ssl_root_cert=self._config.ssl_root_cert,
+                ssl_key=self._config.ssl_key,
+                ssl_password=self._config.ssl_password,
+            )
+
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
-            connection_string = "dbname=%s user=%s application_name=%s" % (
+            connection_string = "user=%s dbname=%s application_name=%s" % (
                 self._config.user,
                 dbname,
                 self._config.application_name,
@@ -1032,15 +1077,13 @@ class PostgreSql(AgentCheck):
         # reload settings for the main DB only once every time the connection is reestablished
         conn = self.db_pool.get_connection(
             self._config.dbname,
-            self._config.idle_connection_timeout,
-            startup_fn=self._load_pg_settings,
             persistent=True,
         )
 
         return conn
 
     def _close_db_pool(self):
-        self.db_pool.close_all_connections()
+        self.db_pool.close_all()
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
