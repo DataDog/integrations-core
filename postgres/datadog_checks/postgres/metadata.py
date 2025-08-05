@@ -336,7 +336,6 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
-        if self._pg_settings_cached:
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
