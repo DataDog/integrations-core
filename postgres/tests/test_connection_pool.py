@@ -724,3 +724,49 @@ def _verify_sql_comment_prepended(pg_instance, query_pattern, ignore_query_metri
             )
     finally:
         super_conn.close()
+
+
+def test_closed_state_and_pool_creation_prevention():
+    """
+    Test that the pool manager correctly tracks closed state and prevents new pool creation after closing.
+
+    This test verifies:
+    1. The is_closed() method returns the correct state
+    2. New pools cannot be created after close_all() is called
+    3. New connections cannot be created after close_all() is called
+    """
+    # Create a pool manager with mock connection args (no real DB needed for this test)
+    conn_args = PostgresConnectionArgs(
+        application_name="test_closed_state",
+        user="testuser",
+        password="testpass",
+        host="localhost",
+        port=5432,
+    )
+
+    manager = LRUConnectionPoolManager(max_db=2, base_conn_args=conn_args)
+
+    # Initially should not be closed
+    assert not manager.is_closed()
+
+    # Close the manager
+    manager.close_all()
+
+    # Should now be closed
+    assert manager.is_closed()
+
+    # Attempting to get a new pool should raise RuntimeError
+    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection pool"):
+        manager.get_pool("testdb")
+
+    # Attempting to get a connection should also raise RuntimeError
+    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection pool"):
+        manager.get_connection("testdb")
+
+    # Calling close_all() again should not cause issues (idempotent)
+    manager.close_all()
+    assert manager.is_closed()
+
+    # Still should not be able to create new pools
+    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection pool"):
+        manager.get_pool("testdb")

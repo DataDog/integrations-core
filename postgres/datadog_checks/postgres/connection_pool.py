@@ -135,6 +135,7 @@ class LRUConnectionPoolManager:
         }
         self.lock = threading.Lock()
         self.pools: OrderedDict[str, Tuple[ConnectionPool, float, bool]] = OrderedDict()
+        self._closed = False
 
     def _configure_connection(self, conn: Connection) -> None:
         conn.autocommit = True
@@ -179,8 +180,13 @@ class LRUConnectionPoolManager:
 
         Returns:
             ConnectionPool: The pool for the requested dbname.
+
+        Raises:
+            RuntimeError: If the pool manager has been closed.
         """
         with self.lock:
+            if self._closed:
+                raise RuntimeError("Pool manager is closed and cannot get connection pool")
             now = time.monotonic()
             if dbname in self.pools:
                 pool, _, was_persistent = self.pools.pop(dbname)
@@ -222,6 +228,9 @@ class LRUConnectionPoolManager:
 
         Returns:
             ConnectionProxy: A context manager yielding a psycopg.Connection.
+
+        Raises:
+            RuntimeError: If the pool manager has been closed.
         """
         pool = self.get_pool(dbname, persistent)
         return ConnectionProxy(pool)
@@ -260,9 +269,20 @@ class LRUConnectionPoolManager:
         """
         Gracefully close all active pools including persistent ones and release all underlying connections.
 
-        This clears the pool manager state and should be called during shutdown or cleanup.
+        This clears the pool manager state and prevents new pools from being created.
+        Should be called during shutdown or cleanup.
         """
         with self.lock:
             for pool, _, _ in self.pools.values():
                 pool.close()
             self.pools.clear()
+            self._closed = True
+
+    def is_closed(self) -> bool:
+        """
+        Check if the pool manager has been closed.
+
+        Returns:
+            bool: True if the pool manager is closed, False otherwise.
+        """
+        return self._closed
