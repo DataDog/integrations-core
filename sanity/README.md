@@ -33,7 +33,7 @@ Integrate Sanity with Datadog to gain insights into content and project-related 
 
 1. Select an existing API key or create a new one by clicking one of the buttons below: <!-- UI Component to be added by Datadog team -->
 
-### To set up the webhook, please follow the instructions provided in the manual Webhook Configuration. Alternatively, you can use the Share Webhook Configurations option to quickly apply a pre-configured setup.
+**Note**: To set up the webhook, please follow the instructions provided in the Manual Webhook Configuration. Alternatively, you can use the Share Webhook Configurations option to apply a pre-configured setup.
 
 ### Manual Webhook Configuration
 
@@ -63,15 +63,15 @@ Integrate Sanity with Datadog to gain insights into content and project-related 
 
 ### Share Webhook Configuration
 
-**Note:** These are alternative steps for **Manual Webhook Configuration**. Please follow only one set of instructions.
+**Note**: These are alternative steps for **Manual Webhook Configuration**. Follow only one set of instructions.
 1. Log in to your [Sanity account][2] as an Administrator.
-2. To configure the webhook automatically, please follow this [link][6].
+2. To configure the webhook automatically, please follow the [Sanity webhook configuration][6].
 3. Update the existing URL with the Datadog webhook URL.
 4. Click **Apply webhook**.
 5. In the configuration dialog, set the following parameters:
-    - **Organization:** Select the organization from the dropdown list.
-    - **Project:**: Select the relevant project from the dropdown list.
-    - **Dataset:** Select `* (all datasets)`.
+    - **Organization**: Select the organization from the dropdown list.
+    - **Project**: Select the relevant project from the dropdown list.
+    - **Dataset**: Select `* (all datasets)`.
 6. Click **Create webhook**.
 
 **Note**: These steps enable collection of document changes along with task and comment activity logs.
