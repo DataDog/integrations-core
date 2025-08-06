@@ -44,9 +44,9 @@ def make_collector(instance=None, logger=None):
     if instance is None:
         instance = {'queues': []}
     config = IBMMQConfig(instance, {})
-    if logger is None:
-        logger = Mock()
-    return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), logger)
+    # if logger is None:
+    #     logger = Mock()
+    return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock())
 
 
 @pytest.mark.parametrize(
@@ -75,10 +75,10 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
     instance['auto_discover_queues'] = True
     instance['queues'] = []
 
-    logger = logging.getLogger('test_ibm_mq')
-    logger.setLevel(logging.DEBUG)
+    # logger = logging.getLogger('test_ibm_mq')
+    # logger.setLevel(logging.DEBUG)
 
-    collector = make_collector(instance, logger)
+    collector = make_collector(instance)
     collector.warning = Mock(side_effect=lambda msg, *args: logger.warning(msg, *args))
     queue_manager = Mock()
     pcf_mock = Mock()
