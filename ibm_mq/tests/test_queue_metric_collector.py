@@ -40,7 +40,7 @@ def test_regex_precedes_autodiscovery(instance):
     assert discovered_queues == {'pattern_queue', 'DEV.QUEUE.1'}
 
 
-def make_collector(instance=None, logger=None):
+def make_collector(instance=None):
     if instance is None:
         instance = {'queues': []}
     config = IBMMQConfig(instance, {})
@@ -72,9 +72,6 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
     instance['auto_discover_queues'] = True
     instance['queues'] = []
-
-    # logger = logging.getLogger('test_ibm_mq')
-    # logger.setLevel(logging.DEBUG)
 
     collector = make_collector(instance)
     collector.warning = Mock()
@@ -176,11 +173,8 @@ def test_discover_queues_warns_when_no_queues_found(
     instance['auto_discover_queues'] = True
     instance['queues'] = []
 
-    logger = logging.getLogger('test_ibm_mq_no_queues')
-    logger.setLevel(logging.DEBUG)
-
-    collector = make_collector(instance, logger)
-    collector.warning = Mock(side_effect=lambda msg, *args: logger.warning(msg, *args))
+    collector = make_collector(instance)
+    collector.warning = Mock()
 
     queue_manager = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute') as PCFExecute:
@@ -210,10 +204,7 @@ def test_discover_queues_uses_correct_method_based_on_config(
     instance['auto_discover_queues'] = True
     instance['queues'] = []
 
-    logger = logging.getLogger('test_ibm_mq_method_selection')
-    logger.setLevel(logging.DEBUG)
-
-    collector = make_collector(instance, logger)
+    collector = make_collector(instance)
     queue_manager = Mock()
 
     collector._discover_queues = Mock(return_value=['queue1'])
