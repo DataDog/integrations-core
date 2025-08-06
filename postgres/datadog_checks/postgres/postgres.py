@@ -185,7 +185,7 @@ class PostgreSql(AgentCheck):
         """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
         self.tags.append("database_instance:{}".format(self.database_identifier))
-        self.tags.append("ddagenthostname:{}".format(datadog_agent.get_hostname()))
+        self.tags.append("ddagenthostname:{}".format(self._agent_hostname))
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
