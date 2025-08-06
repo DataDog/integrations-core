@@ -1,4 +1,4 @@
-# Agent Check: Anthropic Usage and Costs
+# Anthropic Usage and Costs
 
 ## Overview
 
@@ -19,7 +19,7 @@ To get started with the Anthropic Admin API integration in Datadog, follow the s
 
 You will need an **Admin API key** from Anthropic. This key allows access to usage and cost reports across your organization.
 
-1. Visit the [Anthropic Admin API documentation](https://docs.anthropic.com/en/docs/admin-api-overview).
+1. Visit the [Anthropic Admin API documentation][5].
 2. Navigate to your organization's settings or reach out to your Anthropic account admin.
 3. Create a new Admin API key with appropriate permissions for accessing:
    - `GET /v1/organizations/usage_report/messages`
@@ -39,7 +39,9 @@ Once saved, Datadog will begin polling Anthropic usage and cost endpoints using 
 
 ### Metrics
 
-Anthropic Usage and Costs does not include any metrics.
+Anthropic Usage and Costs collects metrics.
+
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -53,7 +55,9 @@ Anthropic Usage and Costs does not include any events.
 
 Need help? Contact [Datadog support][3].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://www.anthropic.com/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
+[4]: https://github.com/DataDog/integrations-core/blob/master/anthropic_usage_and_costs/metadata.csv
+[5]: https://docs.anthropic.com/en/docs/admin-api-overview
 
