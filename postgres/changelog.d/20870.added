@@ -1,1 +1,1 @@
-[DBMON-5545] Update tags with agent host name. Added agent_hostname to the core tags to be able to inject it to all surfaces of the UI
+Update tags with agent host name. Added agent_hostname to the core tags to be able to inject it to all surfaces of the UI
