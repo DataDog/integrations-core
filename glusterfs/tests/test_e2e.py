@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.glusterfs import GlusterfsCheck
 
-from .common import EXPECTED_METRICS, GLUSTER_VERSION
+from .common import EXPECTED_METRICS
 
 skip_on_ci = pytest.mark.skipif(running_on_ci(), reason="This test requires Vagrant and is not supported on CI")
 
