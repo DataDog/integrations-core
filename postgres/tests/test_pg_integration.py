@@ -772,6 +772,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'replication_role:master',
         'database_hostname:{}'.format(expected_database_hostname),
         'database_instance:{}'.format(expected_database_instance),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
     ]
     check = PostgreSql('test_instance', {}, [pg_instance])
     run_one_check(check)
