@@ -273,10 +273,10 @@ class LRUConnectionPoolManager:
         Should be called during shutdown or cleanup.
         """
         with self.lock:
+            self._closed = True
             for pool, _, _ in self.pools.values():
                 pool.close()
             self.pools.clear()
-            self._closed = True
 
     def is_closed(self) -> bool:
         """
