@@ -5,8 +5,8 @@ import contextlib
 import copy
 import functools
 import os
-from time import time
 from string import Template
+from time import time
 
 import psycopg
 from cachetools import TTLCache
@@ -39,7 +39,7 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
-from .config import build_config, sanitize
+from .config import Feature, FeatureKey, FeatureNames, build_config, sanitize
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -171,6 +171,9 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
+        # Send metadata before validating connection to even if connection fails
+        # the UI can display the broken instance for debugging
+        self.check_initializations.append(self._send_database_instance_metadata)
         # Validation needs to run first because other initialization will crash
         # if the connection is not valid
         self.check_initializations.append(self._validate_connection)
@@ -318,6 +321,7 @@ class PostgreSql(AgentCheck):
         connection_status = HealthStatus.OK
         errors: list[str | Exception] = []
         warnings: list[str] = []
+        features: list[Feature] = []
 
         try:
             try:
@@ -328,10 +332,10 @@ class PostgreSql(AgentCheck):
                 # Abort any further validation if the connection is not healthy
                 raise e
 
-            try:
-                with self.db() as conn:
-                    # Check pg_monitor role
-                    with conn.cursor() as cursor:
+            with self.db() as conn:
+                # Check pg_monitor role
+                with conn.cursor() as cursor:
+                    try:
                         cursor.execute(
                             """
                             SELECT 1
@@ -349,9 +353,37 @@ class PostgreSql(AgentCheck):
                                     "Please create it to ensure proper monitoring."
                                 )
                             )
-            # Catch unexpected errors during role check
-            except Exception as e:
-                errors.append(e)
+                    # Catch unexpected errors during role check
+                    except psycopg.Error as e:
+                        errors.append(e)
+                    
+                    if self._config.query_samples.enabled or self._config.query_metrics.enabled:
+                        enabled = True
+                        description = None
+                        try:
+                            conn.cursor().execute("SELECT 1 FROM pg_stat_statements LIMIT 1")
+                        except psycopg.Error as e:
+                            enabled = False
+                            description = str("The pg_stat_statements extension is not enabled.")
+                            warnings.append(
+                                DatabaseHealthCheckError(
+                                    "The pg_stat_statements extension is not enabled. "
+                                    "Please enable it to collect query samples."
+                                )
+                            )
+                        features.append({
+                            "key": FeatureKey.QUERY_METRICS,
+                            "name": FeatureNames[FeatureKey.QUERY_METRICS],
+                            "enabled": enabled,
+                            "description": description,
+                        })
+                        features.append({
+                            "key": FeatureKey.QUERY_SAMPLES,
+                            "name": FeatureNames[FeatureKey.QUERY_SAMPLES],
+                            "enabled": enabled,
+                            "description": description,
+                        })
+
 
         except Exception as e:
             errors.append(e)
@@ -360,7 +392,7 @@ class PostgreSql(AgentCheck):
             name=PostgresHealthEvent.VALIDATION,
             status=HealthStatus.ERROR if errors else HealthStatus.WARNING if warnings else HealthStatus.OK,
             errors=[str(e) for e in errors],
-            warnings=warnings,
+            warnings=[str(w) for w in warnings],
             connection_status=connection_status,
         )
 
