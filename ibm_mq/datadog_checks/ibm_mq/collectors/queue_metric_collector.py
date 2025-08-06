@@ -187,15 +187,12 @@ class QueueMetricCollector(object):
                         else:
                             self.log.debug("Error inquiring queue %s: %s", queue_name, e)
                             self._submit_discovery_error_metric(e, [f"queue:{queue_name}"])
-                            continue
                 self.log.debug("%s queues discovered", str(len(queues)))
             except pymqi.MQMIError as e:
                 self.log.debug("Error inquiring queue names for pattern %s: %s", mq_pattern_filter, e)
                 self._submit_discovery_error_metric(e, [f"queue_pattern:{mq_pattern_filter}"])
-                continue
             except Exception as e:
                 self.log.debug("Error retrieving queue info for %s: %s", mq_pattern_filter, e)
-                continue
             finally:
                 # Close internal reply queue to prevent filling up a dead-letter queue.
                 # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
