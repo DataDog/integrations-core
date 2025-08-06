@@ -16,3 +16,6 @@ dependencies = ["click", "requests", "rich", "httpx", "pyyaml"]
 start = "python -m tests.lab.traffic_generator start {args}"
 generate = "python -m tests.lab.traffic_generator generate {args}"
 stop = "python -m tests.lab.traffic_generator stop {args}"
+
+[envs.lab.env-vars]
+KRAKEND_IS_LAB = "true"
