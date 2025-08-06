@@ -135,16 +135,8 @@ INSTANCE_COLLECT_ALL = {
 }
 
 INSTANCE_COLLECT_ALL_VIA_NAMES = {
-    'channel': CHANNEL,
-    'queue_manager': QUEUE_MANAGER,
-    'host': HOST,
-    'port': PORT,
-    'username': USERNAME,
-    'password': PASSWORD,
-    'auto_discover_queues': True,
+    **INSTANCE_COLLECT_ALL,
     'auto_discover_queues_via_names': True,
-    'collect_statistics_metrics': True,
-    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_QUEUE_REGEX_TAG = {
