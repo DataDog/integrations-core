@@ -9,6 +9,7 @@ def database_instance_resource_tags(hostname):
         f'dd.internal.resource:database_instance:{hostname}',
         f'database_hostname:{hostname}',
         f'database_instance:{hostname}',
+        f'ddagenthostname:{"stubbed.hostname"}',
     )
 
 
