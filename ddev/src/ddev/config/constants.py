@@ -18,6 +18,7 @@ class ConfigEnvVars:
 
 
 class VerbosityLevels:
+    # test
     ERROR = -2
     WARNING = -1
     INFO = 0
