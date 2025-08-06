@@ -40,13 +40,6 @@ def test_regex_precedes_autodiscovery(instance):
     assert discovered_queues == {'pattern_queue', 'DEV.QUEUE.1'}
 
 
-def make_collector(instance=None):
-    if instance is None:
-        instance = {'queues': []}
-    config = IBMMQConfig(instance, {})
-    return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
-
-
 @pytest.mark.parametrize(
     "auto_discover_queues_via_names, error_code",
     [
@@ -66,14 +59,15 @@ def make_collector(instance=None):
         "true_unknown_error",
     ],
 )
-def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_names, error_code, caplog):
+def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_names, error_code, caplog, get_check):
     # Test direct discovery method (_discover_queues) with known MQ errors
     # Should not raise, should log debug, should not call _submit_discovery_error_metric
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
     instance['auto_discover_queues'] = True
     instance['queues'] = []
 
-    collector = make_collector(instance)
+    check = get_check(instance)
+    collector = check.queue_metric_collector
     collector.warning = Mock()
     queue_manager = Mock()
     pcf_mock = Mock()
@@ -144,11 +138,12 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
     ],
     ids=["direct_method", "via_names_method"],
 )
-def test_discover_queues_disconnects_on_exception(instance, auto_discover_queues_via_names, side_effect_attr):
+def test_discover_queues_disconnects_on_exception(instance, auto_discover_queues_via_names, side_effect_attr, get_check):
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
     instance['auto_discover_queues'] = True
 
-    collector = make_collector(instance)
+    check = get_check(instance)
+    collector = check.queue_metric_collector
     queue_manager = Mock()
     pcf_mock = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
@@ -167,13 +162,14 @@ def test_discover_queues_disconnects_on_exception(instance, auto_discover_queues
     ids=["direct_method", "via_names_method"],
 )
 def test_discover_queues_warns_when_no_queues_found(
-    instance, auto_discover_queues_via_names, patch_method, return_value, caplog
+    instance, auto_discover_queues_via_names, patch_method, return_value, caplog, get_check
 ):
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
     instance['auto_discover_queues'] = True
     instance['queues'] = []
 
-    collector = make_collector(instance)
+    check = get_check(instance)
+    collector = check.queue_metric_collector
     collector.warning = Mock()
 
     queue_manager = Mock()
@@ -198,13 +194,14 @@ def test_discover_queues_warns_when_no_queues_found(
     ids=["direct_method", "via_names_method"],
 )
 def test_discover_queues_uses_correct_method_based_on_config(
-    instance, auto_discover_queues_via_names, expected_method, not_expected_method, expected_queue
+    instance, auto_discover_queues_via_names, expected_method, not_expected_method, expected_queue, get_check
 ):
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
     instance['auto_discover_queues'] = True
     instance['queues'] = []
 
-    collector = make_collector(instance)
+    check = get_check(instance)
+    collector = check.queue_metric_collector
     queue_manager = Mock()
 
     collector._discover_queues = Mock(return_value=['queue1'])
