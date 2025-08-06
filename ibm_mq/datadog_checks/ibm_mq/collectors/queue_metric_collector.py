@@ -80,11 +80,6 @@ class QueueMetricCollector(object):
             self._discover_queues_via_names if self.config.auto_discover_queues_via_names else self._discover_queues
         )
 
-        if self.config.auto_discover_queues_via_names:
-            self.log.debug("Using _discover_queues_via_names to discover queues")
-        else:
-            self.log.debug("Using _discover_queues to discover queues")
-
         discovered_queues = set()
         if self.config.auto_discover_queues and not self.config.queue_patterns or self.config.queue_regex:
             discovered_queues.update(_discover(queue_manager, '*'))
@@ -109,6 +104,7 @@ class QueueMetricCollector(object):
 
     def _discover_queues(self, queue_manager, mq_pattern_filter):
         # type: (pymqi.QueueManager, str) -> List[str]
+        self.log.debug("Using _discover_queues to discover queues")
         queues = []
 
         for queue_type in SUPPORTED_QUEUE_TYPES:
@@ -153,6 +149,7 @@ class QueueMetricCollector(object):
 
     def _discover_queues_via_names(self, queue_manager, mq_pattern_filter):
         # type: (pymqi.QueueManager, str) -> List[str]
+        self.log.debug("Using _discover_queues_via_names to discover queues")
         queues = []
 
         for queue_type in SUPPORTED_QUEUE_TYPES:
