@@ -153,10 +153,7 @@ def test_discover_queues_disconnects_on_exception(instance, auto_discover_queues
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
     instance['auto_discover_queues'] = True
 
-    logger = logging.getLogger('test_ibm_mq_disconnect')
-    logger.setLevel(logging.DEBUG)
-
-    collector = make_collector(instance, logger)
+    collector = make_collector(instance)
     queue_manager = Mock()
     pcf_mock = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
