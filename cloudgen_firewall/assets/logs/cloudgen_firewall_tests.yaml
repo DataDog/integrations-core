@@ -11,6 +11,6 @@ tests:
   - sample: "2025-03-20T14:01:19+05:30 sacumentestlocal
       sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
       [1071065] Insert Event from 127.0.0.1:28764 -
-      (D|2|log|2|Login|2420|abhishek|sacumentestlocal|1742479279|Login abhishek
+      (D|2|log|2|Login|2420|testuser|sacumentestlocal|1742479279|Login testuser
       from 10.10.16.1 : Allowed.)"
     result: null
