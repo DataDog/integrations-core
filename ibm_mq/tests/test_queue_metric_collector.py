@@ -79,7 +79,7 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
     # logger.setLevel(logging.DEBUG)
 
     collector = make_collector(instance)
-    collector.warning = Mock(side_effect=lambda msg, *args: logger.warning(msg, *args))
+    collector.warning = Mock()
     queue_manager = Mock()
     pcf_mock = Mock()
     error = pymqi.MQMIError(2, error_code)
