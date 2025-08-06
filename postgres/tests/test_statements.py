@@ -419,8 +419,6 @@ def test_statement_metrics_cloud_metadata(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
@@ -436,7 +434,7 @@ def test_statement_metrics_cloud_metadata(
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -461,8 +459,6 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     connections = {}
 
@@ -496,8 +492,6 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -956,11 +950,7 @@ def test_statement_metadata(
 ):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
-    dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
-    # This prevents DBMAsync from skipping job executions, as a job should not be executed
-    # more frequently than its collection period.
-    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -1043,11 +1033,6 @@ def test_statement_reported_hostname(
     reported_hostname,
     expected_hostname,
 ):
-    dbm_instance['query_samples']['run_sync'] = True
-    dbm_instance['query_metrics']['run_sync'] = True
-    # This prevents DBMAsync from skipping job executions, as a job should not be executed
-    # more frequently than its collection period.
-    dbm_instance['query_samples']['collection_interval'] = 0.0000001
     dbm_instance['reported_hostname'] = reported_hostname
 
     check = integration_check(dbm_instance)
@@ -1142,7 +1127,6 @@ def test_statement_reported_hostname(
         ),
     ],
 )
-@pytest.mark.unit
 def test_activity_snapshot_collection(
     aggregator,
     integration_check,
@@ -2101,8 +2085,6 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     connections = {}
 
@@ -2187,7 +2169,6 @@ def test_metrics_encoding(
     integration_check,
     dbm_instance,
 ):
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if POSTGRES_LOCALE == 'C':
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     dbm_instance['query_samples'] = {'enabled': False}
