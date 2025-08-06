@@ -472,7 +472,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -2098,7 +2098,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
