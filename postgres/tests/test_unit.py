@@ -124,7 +124,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
 
     check = integration_check(pg_instance)
     try:
-        check.db_pool.get_connection(pg_instance['dbname'], 100)
+        check.db_pool.get_connection(pg_instance['dbname'])
     except psycopg.ProgrammingError as e:
         fail(str(e))
     except psycopg.OperationalError:

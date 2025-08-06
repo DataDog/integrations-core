@@ -419,8 +419,6 @@ def test_statement_metrics_cloud_metadata(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
@@ -436,7 +434,7 @@ def test_statement_metrics_cloud_metadata(
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -461,8 +459,6 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     connections = {}
 
@@ -476,7 +472,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -496,8 +492,6 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -612,7 +606,7 @@ def test_successful_explain(
     check._connect()
 
     # run check so all internal state is correctly initialized
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -699,7 +693,7 @@ def test_failed_explain_handling(
         pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -956,11 +950,7 @@ def test_statement_metadata(
 ):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
-    dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
-    # This prevents DBMAsync from skipping job executions, as a job should not be executed
-    # more frequently than its collection period.
-    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -989,11 +979,11 @@ def test_statement_metadata(
         cursor.execute(
             query,
         )
-        run_one_check(check)
+        run_one_check(check, cancel=False)
         cursor.execute(
             query,
         )
-        run_one_check(check)
+        run_one_check(check, cancel=False)
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -1043,16 +1033,11 @@ def test_statement_reported_hostname(
     reported_hostname,
     expected_hostname,
 ):
-    dbm_instance['query_samples']['run_sync'] = True
-    dbm_instance['query_metrics']['run_sync'] = True
-    # This prevents DBMAsync from skipping job executions, as a job should not be executed
-    # more frequently than its collection period.
-    dbm_instance['query_samples']['collection_interval'] = 0.0000001
     dbm_instance['reported_hostname'] = reported_hostname
 
     check = integration_check(dbm_instance)
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     run_one_check(check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -1142,7 +1127,6 @@ def test_statement_reported_hostname(
         ),
     ],
 )
-@pytest.mark.unit
 def test_activity_snapshot_collection(
     aggregator,
     integration_check,
@@ -1496,7 +1480,7 @@ def test_statement_run_explain_errors(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain(
         "datadog_test", query, query, "7231596c8b5536d1"
     )
@@ -1552,7 +1536,7 @@ def test_statement_run_explain_parameterized_queries(
     if check.version < V12:
         return
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain(
         "datadog_test", query, query, "7231596c8b5536d1"
     )
@@ -1844,7 +1828,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
+    assert check.db_pool.pools.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
@@ -2101,8 +2085,6 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     connections = {}
 
@@ -2116,7 +2098,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -2137,7 +2119,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 @pytest.mark.unit
 def test_get_query_metrics_payload_rows():
     config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
-    statement_metrics = PostgresStatementMetrics({}, config, None)
+    statement_metrics = PostgresStatementMetrics({}, config)
     wrapper = {}
 
     TestCase = namedtuple('TestCase', 'rows max_size expected')
@@ -2187,7 +2169,6 @@ def test_metrics_encoding(
     integration_check,
     dbm_instance,
 ):
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if POSTGRES_LOCALE == 'C':
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     dbm_instance['query_samples'] = {'enabled': False}

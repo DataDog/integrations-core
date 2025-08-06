@@ -21,8 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
-from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
+from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
@@ -136,11 +135,16 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
+        self.db_pool = LRUConnectionPoolManager(
+            max_db=self._config.max_connections,
+            base_conn_args=self.build_connection_args(),
+            statement_timeout=self._config.query_timeout,
+            sqlascii_encodings=self._config.query_encodings,
+        )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
-        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
-        self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config)
+        self.statement_samples = PostgresStatementSamples(self, self._config)
+        self.metadata_samples = PostgresMetadata(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
@@ -607,11 +611,7 @@ class PostgreSql(AgentCheck):
         results = None
         is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
-            with (
-                self.db()
-                if dbname is None
-                else self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn
-            ):
+            with self.db() if dbname is None else self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor() as cursor:
                     query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
                     with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
@@ -800,9 +800,7 @@ class PostgreSql(AgentCheck):
 
         databases = self.autodiscovery.get_items()
         for dbname in databases:
-            db = functools.partial(
-                self.db_pool.get_connection, dbname=dbname, ttl_ms=self._config.idle_connection_timeout
-            )
+            db = functools.partial(self.db_pool.get_connection, dbname=dbname)
             self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
     def _emit_running_metric(self):
@@ -912,15 +910,12 @@ class PostgreSql(AgentCheck):
             for dynamic_query in self.dynamic_queries:
                 dynamic_query.execute()
 
-    def _new_connection(self, dbname):
+    def build_connection_args(self) -> PostgresConnectionArgs:
         if self._config.host == 'localhost' and self._config.password == '':
-            # Use ident method
-            connection_string = "dbname=%s user=%s application_name=%s" % (
-                self._config.user,
-                dbname,
-                self._config.application_name,
+            return PostgresConnectionArgs(
+                application_name=self._config.application_name,
+                user=self._config.user,
             )
-            conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=CommenterCursor)
         else:
             password = self._config.password
             if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
@@ -948,46 +943,25 @@ class PostgreSql(AgentCheck):
                 self._config.host,
                 "password" if password == self._config.password else "token",
             )
+            return PostgresConnectionArgs(
+                application_name=self._config.application_name,
+                user=self._config.user,
+                host=self._config.host,
+                port=self._config.port,
+                password=password,
+                ssl_mode=self._config.ssl_mode,
+                ssl_cert=self._config.ssl_cert,
+                ssl_root_cert=self._config.ssl_root_cert,
+                ssl_key=self._config.ssl_key,
+                ssl_password=self._config.ssl_password,
+            )
 
-            args = {
-                'host': self._config.host,
-                'user': self._config.user,
-                'password': password,
-                'dbname': dbname,
-                'sslmode': self._config.ssl_mode,
-                'application_name': self._config.application_name,
-            }
-            if self._config.port:
-                args['port'] = self._config.port
-            if self._config.ssl_cert:
-                args['sslcert'] = self._config.ssl_cert
-            if self._config.ssl_root_cert:
-                args['sslrootcert'] = self._config.ssl_root_cert
-            if self._config.ssl_key:
-                args['sslkey'] = self._config.ssl_key
-            if self._config.ssl_password:
-                args['sslpassword'] = self._config.ssl_password
-            conn = psycopg.connect(**args, autocommit=True, cursor_factory=CommenterCursor)
-        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        if self._config.query_timeout:
-            # Set the statement_timeout for the session
-            with conn.cursor() as cursor:
-                try:
-                    cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
-                except psycopg.Error as e:
-                    self.log.warning(
-                        "Failed to set statement_timeout to %d: %s",
-                        self._config.query_timeout,
-                        e,
-                    )
-                    return None
-        if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
-            text_loader = SQLASCIITextLoader
-            text_loader.encodings = self._config.query_encodings
-            conn.adapters.register_loader("text", text_loader)
-            conn.adapters.register_loader("varchar", text_loader)
-            conn.adapters.register_loader("name", text_loader)
-            conn.adapters.register_loader("regclass", text_loader)
+    def _new_connection(self, dbname):
+        # TODO: Keeping this main connection outside of the pool for now to keep existing behavior.
+        # We should move this to the pool in the future.
+        conn_args = self.build_connection_args()
+        conn = psycopg.connect(**conn_args.as_kwargs(dbname=dbname))
+        self.db_pool._configure_connection(conn)
         return conn
 
     def _connect(self):
@@ -1032,15 +1006,13 @@ class PostgreSql(AgentCheck):
         # reload settings for the main DB only once every time the connection is reestablished
         conn = self.db_pool.get_connection(
             self._config.dbname,
-            self._config.idle_connection_timeout,
-            startup_fn=self._load_pg_settings,
             persistent=True,
         )
 
         return conn
 
     def _close_db_pool(self):
-        self.db_pool.close_all_connections()
+        self.db_pool.close_all()
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None

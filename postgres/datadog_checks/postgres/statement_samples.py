@@ -140,7 +140,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         collection_interval = float(
             config.statement_samples_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -167,7 +167,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config
@@ -662,7 +661,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self.db_pool.get_connection(dbname, self._conn_ttl_ms)
+            self.db_pool.get_connection(dbname)
         except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -726,7 +725,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+        with self.db_pool.get_connection(dbname) as conn:
             try:
                 # When sending potentially non-ascii data, e.g. UTF8, we need to force
                 # the client encoding to UTF-8 to match Python string encoding
