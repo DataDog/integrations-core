@@ -68,7 +68,6 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
 
     check = get_check(instance)
     collector = check.queue_metric_collector
-    collector.warning = Mock()
     queue_manager = Mock()
     pcf_mock = Mock()
     error = pymqi.MQMIError(2, error_code)
@@ -172,12 +171,11 @@ def test_discover_queues_warns_when_no_queues_found(
 
     check = get_check(instance)
     collector = check.queue_metric_collector
-    collector.warning = Mock()
 
     queue_manager = Mock()
     with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute') as PCFExecute:
         getattr(PCFExecute.return_value, patch_method).return_value = return_value
-        with caplog.at_level(logging.DEBUG):
+        with caplog.at_level(logging.WARNING):
             result = collector.discover_queues(queue_manager)
         assert any(
             "No matching queue of type MQQT_LOCAL or MQQT_REMOTE for pattern" in record.message
