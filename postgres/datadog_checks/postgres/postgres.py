@@ -171,6 +171,9 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
+        # Validation needs to run first because other initialization will crash
+        # if the connection is not valid
+        self.check_initializations.append(self._validate_connection)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
@@ -312,14 +315,21 @@ class PostgreSql(AgentCheck):
         if time() - self._last_validation_timestamp < self._validation_interval:
             return
 
+        connection_status = HealthStatus.OK
         errors: list[str | Exception] = []
         warnings: list[str] = []
 
         try:
-            with self.db() as conn:
-                self._connection_health_check(conn)
+            try:
+                with self.db() as conn:
+                    self._connection_health_check(conn)
+            except Exception as e:
+                connection_status = HealthStatus.ERROR
+                # Abort any further validation if the connection is not healthy
+                raise e
 
-                try:
+            try:
+                with self.db() as conn:
                     # Check pg_monitor role
                     with conn.cursor() as cursor:
                         cursor.execute(
@@ -339,9 +349,9 @@ class PostgreSql(AgentCheck):
                                     "Please create it to ensure proper monitoring."
                                 )
                             )
-                # Catch unexpected errors during role check
-                except Exception as e:
-                    errors.append(e)
+            # Catch unexpected errors during role check
+            except Exception as e:
+                errors.append(e)
 
         except Exception as e:
             errors.append(e)
@@ -349,8 +359,9 @@ class PostgreSql(AgentCheck):
         self.health.submit_health_event(
             name=PostgresHealthEvent.VALIDATION,
             status=HealthStatus.ERROR if errors else HealthStatus.WARNING if warnings else HealthStatus.OK,
-            errors=errors,
+            errors=[str(e) for e in errors],
             warnings=warnings,
+            connection_status=connection_status,
         )
 
         self._last_validation_timestamp = time()
