@@ -27,6 +27,8 @@ jobs:
       test-py2: true
     secrets: inherit
   test-windows:
+    needs:
+      - test
     uses: ./.github/workflows/test-all-windows.yml
 
     permissions:
@@ -43,6 +45,7 @@ jobs:
   save-event:
     needs:
     - test
+    - test-windows
     if: success() || failure()
 
     uses: ./.github/workflows/save-event.yml
