@@ -40,7 +40,7 @@
             "prefix": "team_alias"
         }
     ],
-    "title": "LiteLLM Overview",
+    "title": "LiteLLM Overview - draft",
     "widgets": [
         {
             "definition": {
@@ -53,7 +53,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "[LiteLLM](https://www.litellm.ai/) is a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.\n\nThis dashboard provides a comprehensive, real-time view of all LLM API activity flowing through the LiteLLM proxy layer. It is designed to help teams monitor performance, track key usage metrics, detect anomalies, and manage costs across multiple large language model providers.\n\nUse Datadog's LLM Observability to evaluate, troubleshoot, and iterate on your LLM agents or applications using LiteLLM. LLM Observability SDK can\u00a0__[automatically trace](https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python)__\u00a0your LLM operations __[get started today](https://docs.datadoghq.com/llm_observability/quickstart/?tab=python)__",
+                            "content": "[LiteLLM](https://www.litellm.ai/) is a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.\n\nThis dashboard provides a comprehensive, real-time view of all LLM API activity flowing through the LiteLLM proxy layer. It is designed to help teams monitor performance, track key usage metrics, detect anomalies, and manage costs across multiple large language model providers.\n\nIn addition to the native integration, use Datadog's LLM Observability to evaluate, troubleshoot, and iterate on your LLM agents or applications using LiteLLM. LLM Observability SDK can\u00a0__[automatically trace](https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python)__\u00a0your LLM operations __[get started today](https://docs.datadoghq.com/llm_observability/quickstart/?tab=python)__",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -2503,7 +2503,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 0
+                "y": 51
             }
         },
         {
@@ -2787,7 +2787,7 @@
                 "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 11
+                "y": 62
             }
         },
         {
@@ -2883,7 +2883,7 @@
                 "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 22
+                "y": 73
             }
         },
         {
@@ -3138,7 +3138,7 @@
                 "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 28
+                "y": 79
             }
         }
     ]
