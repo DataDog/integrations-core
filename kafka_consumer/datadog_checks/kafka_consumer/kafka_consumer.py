@@ -104,9 +104,9 @@ class KafkaCheck(AgentCheck):
             broker_timestamps,
             cluster_id,
         )
+        self.data_streams_live_message(highwater_offsets or {}, cluster_id)
         if self.config._close_admin_client:
             self.client.close_admin_client()
-        self.data_streams_live_message(highwater_offsets or {}, cluster_id)
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -414,7 +414,9 @@ class KafkaCheck(AgentCheck):
         self.event(event_dict)
 
     def data_streams_live_message(self, highwater_offsets, cluster_id):
+        monitored_topics = None
         for cfg in self.config.live_messages_configs:
+            monitored_topics = monitored_topics or {topic.lower() for (topic, _) in highwater_offsets.keys()}
             kafka = cfg['kafka']
             topic = kafka["topic"]
             partition = kafka["partition"]
@@ -430,6 +432,9 @@ class KafkaCheck(AgentCheck):
                 continue
             if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
                 continue
+            if topic.lower() not in monitored_topics:
+                self.log.debug('Skipping live messages for topic %s because it is not monitored by this check', topic)
+                continue
             start_offsets = resolve_start_offsets(highwater_offsets, topic, partition, start_offset, n_messages)
 
             if not start_offsets:
@@ -443,6 +448,7 @@ class KafkaCheck(AgentCheck):
                         'topic': str(topic),
                         'live_messages_error': 'Unable to list partitions to read from',
                         'message': "Unable to list partitions to read from",
+                        'feature': 'data_streams_messages',
                     }
                 )
                 continue
@@ -471,48 +477,54 @@ class KafkaCheck(AgentCheck):
                 )
                 continue
 
-            self.client.start_collecting_messages(start_offsets)
-            for _ in range(n_messages):
-                message = self.client.get_next_message()
-                if message is None:
-                    self.log.debug('Live messages: no message to retrieve')
-                    self.send_log(
-                        {
-                            'timestamp': int(time()),
-                            'config_id': config_id,
-                            'technology': 'kafka',
-                            'cluster': str(cluster),
-                            'topic': str(topic),
-                            'live_messages_error': 'No more messages to retrieve',
-                            'message': "No more messages to retrieve",
-                        }
+            consumer_group = f"datadog_messages_{config_id}"
+            self.client.start_collecting_messages(start_offsets, consumer_group)
+            try:
+                for _ in range(n_messages):
+                    message = self.client.get_next_message()
+                    if message is None:
+                        self.log.debug('Live messages: no message to retrieve')
+                        self.send_log(
+                            {
+                                'timestamp': int(time()),
+                                'config_id': config_id,
+                                'technology': 'kafka',
+                                'cluster': str(cluster),
+                                'topic': str(topic),
+                                'live_messages_error': 'No more messages to retrieve',
+                                'message': "No more messages to retrieve",
+                                'feature': 'data_streams_messages',
+                            }
+                        )
+                        break
+                    data = {
+                        'timestamp': int(time()),
+                        'technology': 'kafka',
+                        'cluster': str(cluster),
+                        'config_id': config_id,
+                        'topic': str(topic),
+                        'partition': str(message.partition()),
+                        'offset': str(message.offset()),
+                        'feature': 'data_streams_messages',
+                    }
+                    decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(
+                        message, value_format, value_schema, key_format, key_schema
                     )
-                    break
-                data = {
-                    'timestamp': int(time()),
-                    'technology': 'kafka',
-                    'cluster': str(cluster),
-                    'config_id': config_id,
-                    'topic': str(topic),
-                    'partition': str(message.partition()),
-                    'offset': str(message.offset()),
-                }
-                decoded_value, value_schema_id, decoded_key, key_schema_id = deserialize_message(
-                    message, value_format, value_schema, key_format, key_schema
-                )
-                if decoded_value:
-                    data['message_value'] = decoded_value
-                else:
-                    data['message'] = "Message format not supported"
-                    data['live_messages_error'] = 'Message format not supported'
-                if value_schema_id:
-                    data['value_schema_id'] = str(value_schema_id)
-                if decoded_key:
-                    data['message_key'] = decoded_key
-                if key_schema_id:
-                    data['key_schema_id'] = str(key_schema_id)
-                self.send_log(data)
-            self.client.close_consumer()
+                    if decoded_value:
+                        data['message_value'] = decoded_value
+                    else:
+                        data['message'] = "Message format not supported"
+                        data['live_messages_error'] = 'Message format not supported'
+                    if value_schema_id:
+                        data['value_schema_id'] = str(value_schema_id)
+                    if decoded_key:
+                        data['message_key'] = decoded_key
+                    if key_schema_id:
+                        data['key_schema_id'] = str(key_schema_id)
+                    self.send_log(data)
+            finally:
+                self.client.close_consumer()
+                self.client.delete_consumer_group(consumer_group)
             self._mark_messages_retrieved(config_id)
 
 
