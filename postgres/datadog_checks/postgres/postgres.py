@@ -394,6 +394,7 @@ class PostgreSql(AgentCheck):
             errors=[str(e) for e in errors],
             warnings=[str(w) for w in warnings],
             connection_status=connection_status,
+            features=features,
         )
 
         self._last_validation_timestamp = time()
