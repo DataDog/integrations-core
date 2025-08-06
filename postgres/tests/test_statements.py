@@ -1536,7 +1536,7 @@ def test_statement_run_explain_parameterized_queries(
     if check.version < V12:
         return
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain(
         "datadog_test", query, query, "7231596c8b5536d1"
     )
