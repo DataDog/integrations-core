@@ -44,9 +44,7 @@ def make_collector(instance=None, logger=None):
     if instance is None:
         instance = {'queues': []}
     config = IBMMQConfig(instance, {})
-    # if logger is None:
-    #     logger = Mock()
-    return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock())
+    return QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
 
 
 @pytest.mark.parametrize(
