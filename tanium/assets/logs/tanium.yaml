@@ -4,6 +4,11 @@ backend_only: false
 facets:
   - groups:
       - Web Access
+    name: URL Host
+    path: http.url_details.host
+    source: log
+  - groups:
+      - Web Access
     name: Client IP
     path: network.client.ip
     source: log

@@ -41,7 +41,7 @@ This integration collects logs from the sources listed above and transmits them 
 5. Click on **Yes** and copy the **token** for later use.
 6. This integration supports both **cloud-based** and **self-hosted** Tanium instances:
    - **Cloud-based**: The Host format is **\<customer\>.cloud.tanium.com**. Replace **\<customer\>** with your organization's specific subdomain.
-   - **Self-hosted**: The Host is domain of your self-hosted tanium instance. The instance must be publicly accessible through HTTPS. Example: `tk-example.titankube.com`, `123.123.123.123:8443`.
+   - **Self-hosted**: The Host is the domain of your self-hosted Tanium instance. The instance must be publicly accessible through HTTPS. Example: `tk-example.titankube.com`, `123.123.123.123:8443`.
 
 ### Rotate API Token in Tanium
 
