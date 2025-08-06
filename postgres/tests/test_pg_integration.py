@@ -772,6 +772,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'replication_role:master',
         'database_hostname:{}'.format(expected_database_hostname),
         'database_instance:{}'.format(expected_database_instance),
+        'ddagenthostname:{}'.format(expected_database_hostname),
     ]
     check = PostgreSql('test_instance', {}, [pg_instance])
     run_one_check(check)
@@ -786,6 +787,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     assert event['host'] == expected_host
     assert event['database_instance'] == expected_database_instance
     assert event['database_hostname'] == expected_database_hostname
+    assert event['ddagenthostname'] == expected_database_hostname
     assert event['dbms'] == "postgres"
 
     assert sorted(event['tags']) == sorted(expected_tags)

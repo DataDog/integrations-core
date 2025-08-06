@@ -134,7 +134,7 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
     expected_metric_tags = tags.METRIC_TAGS + (
         f'database_hostname:{dd_default_hostname}',
         f'database_instance:{dd_default_hostname}',
-        f'ddagenthostname:{"stubbed.hostname"}',
+        f'ddagenthostname:{dd_default_hostname}',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
     if MYSQL_FLAVOR in ('mysql', 'percona'):
