@@ -7,17 +7,24 @@ from urllib.parse import urlparse
 import click
 from packaging.requirements import Requirement
 
-from ....utils import get_next
-from ...constants import get_agent_requirements, get_root
-from ...dependencies import (
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    annotate_errors,
+    echo_failure,
+    echo_success,
+)
+from datadog_checks.dev.tooling.constants import get_agent_requirements, get_root
+from datadog_checks.dev.tooling.dependencies import (
     get_dependency_set,
     read_agent_dependencies,
     read_check_base_dependencies,
     read_check_dependencies,
 )
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_project_file, has_project_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure, echo_success
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_project_file, has_project_file
+from datadog_checks.dev.utils import get_next
 
 
 def get_marker_string(dependency_definition):

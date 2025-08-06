@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 8.3.0 / 2025-07-10
+
+***Added***:
+
+* Add ibm_mq.channel.conn_status and ibm_mq.channel.connections_active metrics with channel and connection metric tests ([#20519](https://github.com/DataDog/integrations-core/pull/20519))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
 ## 8.2.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:

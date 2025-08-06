@@ -1,0 +1,30 @@
+job_stats:
+- job_id:          vim.0
+  snapshot_time:   1749555518.685497069 secs.nsecs
+  start_time:      1749555508.597767178 secs.nsecs
+  elapsed_time:    10.087729891 secs.nsecs
+  open:            { samples:           4, unit: usecs, min:       80, max:      182, sum:              535, sumsq:              79601 }
+  close:           { samples:           3, unit: usecs, min:       38, max:       51, sum:              130, sumsq:               5726 }
+  mknod:           { samples:           4, unit: usecs, min:       61, max:      153, sum:              435, sumsq:              53663 }
+  link:            { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  unlink:          { samples:           2, unit: usecs, min:       50, max:       67, sum:              117, sumsq:               6989 }
+  mkdir:           { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  rmdir:           { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  rename:          { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  getattr:         { samples:           7, unit: usecs, min:        4, max:        6, sum:               32, sumsq:                152 }
+  setattr:         { samples:           1, unit: usecs, min:       43, max:       43, sum:               43, sumsq:               1849 }
+  getxattr:        { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  setxattr:        { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  statfs:          { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  sync:            { samples:           1, unit: usecs, min:     1848, max:     1848, sum:             1848, sumsq:            3415104 }
+  samedir_rename:  { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  parallel_rename_file: { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  parallel_rename_dir: { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  crossdir_rename: { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  read:            { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  write:           { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  read_bytes:      { samples:           0, unit: bytes, min:        0, max:        0, sum:                0, sumsq:                  0, hist: {  } }
+  write_bytes:     { samples:           0, unit: bytes, min:        0, max:        0, sum:                0, sumsq:                  0, hist: {  } }
+  punch:           { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  migrate:         { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }
+  fallocate:       { samples:           0, unit: usecs, min:        0, max:        0, sum:                0, sumsq:                  0 }

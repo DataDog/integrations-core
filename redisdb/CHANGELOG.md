@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2025-06-12 / Agent 7.68.0
+
+***Changed***:
+
+* Bump `redis` dependency to `6.0.0` and stop supporting `charset`, `connection_pool`, and `errors` configuration options. ([#20265](https://github.com/DataDog/integrations-core/pull/20265))
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
 ## 7.3.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:

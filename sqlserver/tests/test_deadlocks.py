@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -156,9 +156,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, x
     dbm_instance['dbm_enabled'] = True
     deadlock_payloads = _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator)
     try:
-        assert (
-            len(deadlock_payloads) == 1
-        ), f"Should have collected one deadlock payload, but collected: {len(deadlock_payloads)}"
+        assert len(deadlock_payloads) == 1, (
+            f"Should have collected one deadlock payload, but collected: {len(deadlock_payloads)}"
+        )
     except AssertionError as e:
         raise e
     deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
@@ -176,9 +176,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, x
             if process.find('inputbuf').text == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;":
                 found += 1
     try:
-        assert (
-            found == 1
-        ), "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
+        assert found == 1, (
+            "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
+        )
     except AssertionError as e:
         logging.error("deadlock payload: %s", str(deadlocks))
         raise e
@@ -192,9 +192,9 @@ def test_no_empty_deadlocks_payloads(dd_run_check, init_config, dbm_instance, ag
         '_query_deadlocks',
         return_value=[],
     ):
-        assert not _run_check_and_get_deadlock_payloads(
-            dd_run_check, check, aggregator
-        ), "shouldn't have sent an empty payload"
+        assert not _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator), (
+            "shouldn't have sent an empty payload"
+        )
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -364,3 +364,15 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         result_string = result_string.replace('\t', '').replace('\n', '')
         result_string = re.sub(r'\s{2,}', ' ', result_string)
         assert expected_xml_string == result_string
+
+
+@pytest.mark.unit
+def test_collect_deadlocks_config(dbm_instance):
+    dbm_instance['collect_deadlocks'] = {"enabled": True, 'collection_interval': 0.2}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.deadlocks_config == {"enabled": True, 'collection_interval': 0.2}
+
+    dbm_instance.pop('collect_deadlocks')
+    dbm_instance['deadlocks_collection'] = {"enabled": True, 'collection_interval': 0.3}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.deadlocks_config == {"enabled": True, 'collection_interval': 0.3}

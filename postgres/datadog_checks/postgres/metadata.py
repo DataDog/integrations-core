@@ -13,7 +13,7 @@ from datadog_checks.postgres.cursor import CommenterDictCursor
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
@@ -35,7 +35,7 @@ DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 # spective catalog tables.
 PG_EXTENSION_INFO_QUERY = """
 SELECT
-e.oid AS id,
+e.oid::text AS id,
 e.extname AS name,
 r.rolname AS owner,
 ns.nspname AS schema_name,
@@ -301,20 +301,20 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_extension_query
         if elapsed_s >= self.pg_extensions_collection_interval and self._collect_extensions_enabled:
             self._extensions_cached = self._collect_postgres_extensions()
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_extension",
-            "collection_interval": self.collection_interval,
-            "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._check.cloud_metadata,
-            "metadata": self._extensions_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_extension",
+                "collection_interval": self.pg_extensions_collection_interval,
+                "dbms_version": payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._check.cloud_metadata,
+                "metadata": self._extensions_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):
@@ -336,20 +336,20 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_settings",
-            "collection_interval": self.collection_interval,
-            "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._check.cloud_metadata,
-            "metadata": self._pg_settings_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_settings",
+                "collection_interval": self.pg_settings_collection_interval,
+                "dbms_version": payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._check.cloud_metadata,
+                "metadata": self._pg_settings_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
         if not self._collect_schemas_enabled:
             self._log.debug("Skipping schema collection because it is disabled")
@@ -401,8 +401,7 @@ class PostgresMetadata(DBMAsyncJob):
 
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             self._log.debug(
-                                "Tables found for schema '{schema}' in database '{database}':"
-                                "{tables}".format(
+                                "Tables found for schema '{schema}' in database '{database}': {tables}".format(
                                     schema=database["schemas"],
                                     database=dbname,
                                     tables=[table["name"] for table in tables],
@@ -459,8 +458,9 @@ class PostgresMetadata(DBMAsyncJob):
             regex = re.compile(re_str)
             if regex.search(name):
                 self._log.debug(
-                    "Excluding {metadata_type} {name} from metadata collection "
-                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                    "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
+                        metadata_type=metadata_type, name=name, re_str=re_str
+                    )
                 )
                 return False
 
@@ -473,8 +473,9 @@ class PostgresMetadata(DBMAsyncJob):
             regex = re.compile(re_str)
             if regex.search(name):
                 self._log.debug(
-                    "Including {metadata_type} {name} in metadata collection "
-                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                    "Including {metadata_type} {name} in metadata collection because of {re_str}".format(
+                        metadata_type=metadata_type, name=name, re_str=re_str
+                    )
                 )
                 return True
         return False

@@ -12,7 +12,7 @@ Supported vendors: NVIDIA.
 ## Requirements
 
 - NVIDIA driver version: 450.51 and above
-- Datadog agent version: 7.65 and above
+- Datadog agent version: latest
 - Supported OS: Linux only
 - Linux kernel version: 5.8 and above
 
@@ -192,21 +192,86 @@ spec:
   features:
     gpu:
       enabled: true
-  # for operator versions 1.14.x and 1.15.x  add this section
+  # For operator versions below 1.18, add this section
   override:
     nodeAgent:
+     volumes:
+        # Add this volume for operator version below 1.18, unless other system-probe features
+        # such as npm, cws, usm or oom_kill are enabled.
+        - name: debugfs
+          hostPath:
+            path: /sys/kernel/debug
       containers:
         agent:
           env:
             # add this env var, if using operator version 1.14.x
             - name: DD_ENABLE_NVML_DETECTION
-              value: "true" 
+              value: "true"
             # add this env var, if using operator versions 1.14.x or 1.15.x
             - name: DD_COLLECT_GPU_TAGS
-              value: "true" 
+              value: "true"
+        system-probe:
+          volumeMounts:
+            # Add this volume for operator version below 1.18, unless other system-probe features
+            # such as Cloud Network Monitoring, Cloud Workload Security or Universal Service Monitoring
+            # are enabled.
+            - name: debugfs
+              mountPath: /sys/kernel/debug
 ```
 
-For **mixed environments**, use the [DatadogAgentProfiles feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. In this case, it is not necessary to modify the DatadogAgent manifest. Instead, create a profile that enables the configuration on GPU nodes only:
+For **mixed environments**, use the [DatadogAgentProfiles (DAP) feature](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md) of the operator, which allows different configurations to be deployed for different nodes. Note that this feature is disabled by default, so it needs to be enabled. For more information, see [Enabling DatadogAgentProfiles](https://github.com/DataDog/datadog-operator/blob/main/docs/datadog_agent_profiles.md#enabling-datadogagentprofiles).
+
+Modifying the DatadogAgent manifest is necessary to enable certain features that are not supported by the DAP yet:
+- In the existing configuration, enable the `system-probe` container in the datadog-agent pods. Because the DAP feature does not yet support conditionally enabling containers, a feature that uses `system-probe` needs to be enabled for all Agent pods.
+  - You can check this by looking at the list of containers when running `kubectl describe pod <datadog-agent-pod-name> -n <namespace>`.
+  - Datadog recommends enabling the `oomKill` integration, as it is lightweight and does not require any additional configuration or cost.
+- Configure the Agent so that the NVIDIA container runtime exposes GPUs to the Agent.
+  - You can do this using environment variables or volume mounts, depending on whether the `accept-nvidia-visible-devices-as-volume-mounts` parameter is set to `true` or `false` in the NVIDIA container runtime configuration.
+  - Datadog recommends configuring the Agent both ways, as it reduces the chance of misconfiguration. There are no side effects to having both.
+- Expose the PodResources socket to the Agent to integrate with the Kubernetes Device Plugin.
+  - This needs to be done globally, as the DAP does not yet support conditional volume mounts.
+
+In summary, the changes that need to be applied to the DatadogAgent manifest are the following:
+
+```yaml
+spec:
+  features:
+    oomKill:
+      # Only enable this feature if there is nothing else that requires the system-probe container in all Agent pods
+      # Examples of system-probe features are npm, cws, usm
+      enabled: true
+
+override:
+    nodeAgent:
+      volumes:
+        - name: nvidia-devices
+          hostPath:
+            path: /dev/null
+        - name: pod-resources
+          hostPath:
+            path: /var/lib/kubelet/pod-resources
+      containers:
+        agent:
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+          volumeMounts:
+            - name: nvidia-devices
+              mountPath: /dev/nvidia-visible-devices
+            - name: pod-resources
+              mountPath: /var/lib/kubelet/pod-resources
+        system-probe:
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+          volumeMounts:
+            - name: nvidia-devices
+              mountPath: /dev/nvidia-visible-devices
+            - name: pod-resources
+              mountPath: /var/lib/kubelet/pod-resources
+```
+
+Once the DatadogAgent configuration is changed, create a profile that enables the GPU feature configuration on GPU nodes only:
 
 ```yaml
 apiVersion: datadoghq.com/v1alpha1
@@ -229,12 +294,10 @@ spec:
             env:
               - name: DD_GPU_MONITORING_ENABLED
                 value: "true"
-          # add this env var, if using operator version 1.14.x      
           agent:
             env:
               - name: DD_ENABLE_NVML_DETECTION
-                value: "true" 
-              # add this env var, if using operator versions 1.14.x or 1.15.x
+                value: "true"
               - name: DD_COLLECT_GPU_TAGS
                 value: "true"
 ```

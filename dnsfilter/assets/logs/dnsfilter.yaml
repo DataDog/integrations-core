@@ -1,0 +1,189 @@
+id: dnsfilter
+metric_id: dnsfilter
+backend_only: false
+facets:
+  - groups:
+      - DNS
+    name: Response Code
+    path: dns.flags.rcode
+    source: log
+  - groups:
+      - DNS
+    name: Question Name
+    path: dns.question.name
+    source: log
+  - groups:
+      - DNS
+    name: Question Type
+    path: dns.question.type
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+pipeline:
+  type: pipeline
+  name: DNSFilter
+  enabled: true
+  filter:
+    query: source:dnsfilter
+  processors:
+    - type: grok-parser
+      name: Convert to epoch time
+      enabled: true
+      source: time
+      samples:
+        - 2025-05-02 07:05:46.529
+      grok:
+        supportRules: ""
+        matchRules: rule %{date("yyyy-M-d H:m:s.SSS"):timestamp}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: attribute-remapper
+      name: Map `local_user_id` to `usr.id`
+      enabled: true
+      sources:
+        - local_user_id
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `local_user_name` to `usr.name`
+      enabled: true
+      sources:
+        - local_user_name
+      sourceType: attribute
+      target: usr.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `request_address` to `network.client.ip`
+      enabled: true
+      sources:
+        - request_address
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: geo-ip-parser
+      name: Extracting geolocation information from the Client IP
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: attribute-remapper
+      name: Map `domain` to `dns.question.name`
+      enabled: true
+      sources:
+        - domain
+      sourceType: attribute
+      target: dns.question.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `result` to `evt.outcome`
+      enabled: true
+      sources:
+        - result
+      sourceType: attribute
+      target: evt.outcome
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `question_type` to `dns.question.type`
+      enabled: true
+      sources:
+        - question_type
+      sourceType: attribute
+      target: dns.question.type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: category-processor
+      name: Define `status` based on `threat` and `evt.outcome`
+      enabled: true
+      categories:
+        - name: info
+          filter:
+            query: (@threat:true @evt.outcome:blocked) OR (@threat:false
+              @evt.outcome:allowed) OR (@threat:false @evt.outcome:blocked)
+        - name: warning
+          filter:
+            query: "@threat:true @evt.outcome:allowed"
+      target: status
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: attribute-remapper
+      name: Map `code` to `dns.flags.rcode`
+      enabled: true
+      sources:
+        - code
+      sourceType: attribute
+      target: dns.flags.rcode
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false

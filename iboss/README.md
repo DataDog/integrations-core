@@ -22,11 +22,61 @@ This integration collects the following metrics:
 - **Threat**: Provides visibility into detected and prevented threats across users, assets, IPs, and geolocations, enabling threat trend analysis and risk monitoring.
 - **Zero Trust**: Provides visibility into users, devices, resources, and traffic, enabling continuous monitoring, trust evaluation, and policy enforcement within the Zero Trust framework.
 
+**Note:** All metrics except for `Gateway Performance` are collected once per day, only after the complete daily iboss report is available.
+
 Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to alert you to any potential issues.
+
+### Dashboards
+
+#### Logs
+
+Here is the list of dashboards populated using logs:
+
+- iboss - Logs Overview
+- iboss - Web & DLP Logs
+- iboss - Audit Logs
+- iboss - Real-Time Digital Experience Log Analytics
+- iboss - Real-Time Web Log Analytics
+- iboss - Real-Time Bandwidth Log Analytics
+- iboss - Real-Time Zero Trust Log Analytics
+- iboss - Real-Time Threat Log Analytics
+- iboss - Real-Time CASB Log Analytics
+
+#### Metrics
+
+Here is the list of dashboards populated using metrics:
+
+- iboss - Gateway Performance Metrics
+- iboss - Digital Experience Metrics Report
+- iboss - Web Analytics Metrics Report
+- iboss - Bandwidth Metrics Report
+- iboss - Zero Trust Metrics Report
+- iboss - Threat Metrics Report
+- iboss - CASB Metrics Report
+
+
+### Monitors
+
+#### Logs
+
+Here is the list of monitors for logs:
+
+- Excessive bandwidth usage detected
+- High average application peer time detected
+- High rate of unprevented threats detected
+
+#### Metrics
+
+Here is the list of monitors for metrics:
+
+- Anomalous increase in gateway requests per second detected
+- High gateway load detected
+- High proxy error rate detected
+- High proxy response time detected
 
 ## Setup
 
-**Note**: The following steps are required only for collecting metrics. For log collection, see the [Log collection](#log-collection) section below.
+**Note**: The following steps are required only for collecting metrics. For log collection, see the `Log collection` section below.
 
 ### Generate API credentials in iboss
 
@@ -62,13 +112,13 @@ To collect metrics, you can either use an existing user with **Full Administrato
    | --------------------------------- | ------------------------------------------------------------------------------------ |
    | Email Address                     | The email address of your iboss account.                                             |
    | Password                          | The password of your iboss account.                                                  |
-   | Get gateway performance metrics   | Enable to collect gateway performance metrics from iboss. The default value is `true`. |
-   | Get bandwidth metrics             | Enable to collect bandwidth metrics from iboss. The default value is `true`.           |
-   | Get Digital Experience metrics    | Enable to collect Digital Experience metrics from iboss. The default value is `true`.  |
-   | Get web metrics                   | Enable to collect web metrics from iboss. The default value is `true`.                 |
-   | Get CASB metrics                  | Enable to collect CASB metrics from iboss. The default value is `true`.                |
-   | Get threat metrics                | Enable to collect threat metrics from iboss. The default value is `true`.              |
-   | Get zero trust metrics            | Enable to collect zero trust metrics from iboss. The default value is `true`.          |
+   | Collect gateway performance metrics   | Enable to collect gateway performance metrics from iboss. The default value is `true`. |
+   | Collect bandwidth metrics             | Enable to collect bandwidth metrics from iboss. The default value is `true`.           |
+   | Collect Digital Experience metrics    | Enable to collect digital experience metrics from iboss. The default value is `true`.  |
+   | Collect web metrics                   | Enable to collect web metrics from iboss. The default value is `true`.                 |
+   | Collect CASB metrics                  | Enable to collect CASB metrics from iboss. The default value is `true`.                |
+   | Collect threat metrics                | Enable to collect threat metrics from iboss. The default value is `true`.              |
+   | Collect Zero Trust metrics            | Enable to collect zero trust metrics from iboss. The default value is `true`.          |
 
 2. Click **Save**.
 
@@ -120,7 +170,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 3. Click the **Add Integration** button to add the Syslog integration.
 4. Configure the settings as follows:
    - **Forward From**: Select **Reporter** from the dropdown.
-   - **Select Reporting Database**: Select the Primary Reporting Database.
+   - **Select Reporting Database**: Select the Reporting Database.
    - **Service Name**: Choose a descriptive name for the integration.
    - **Enable Service**: Set this to Enabled.
    - **Log Type**: Select **URL** from the dropdown.
@@ -132,9 +182,13 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
    - **Log Format**: Select **JSON** from the dropdown.
    - **Transfer Interval**: Select **Continuous** from the dropdown.
    - **Field Delimiter**: Select **SPACE** from the dropdown.
-   - **Send DLP/Web/DNS/Malware/Audit Logs**: Set to Enable based on your preference for sending logs.
+   - **Send DLP/Web/DNS/Malware/Audit/ConnectionError Logs**: Set to Enable based on your preference for sending logs.
    - **Fields to Forward**: Add all fields except **DLP Base64 Encoded Meta Data**, **Base64 Encoded Meta Data**, and **Chat GPT Message**.
      <br>After entering the required details, click **Add Service**.
+
+**Note:** 
+- If you have multiple reporter nodes, make sure to repeat steps 3 and 4 for each reporter node.
+- The `Send Connection Error Logs` toggle in iboss should only be visible if `Send Web Logs` toggle is disabled.
 
 ### Validation
 

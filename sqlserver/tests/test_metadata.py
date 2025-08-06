@@ -377,7 +377,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
-
         assert db_name in databases_to_find
         # id's are env dependant
         normalize_ids(actual_payload)
@@ -404,3 +403,15 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
             ):
                 found = True
     assert found
+
+
+@pytest.mark.unit
+def test_collect_schemas_config(dbm_instance):
+    dbm_instance['collect_schemas'] = {"enabled": True, "max_execution_time": 0}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}
+
+    dbm_instance.pop('collect_schemas')
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    assert check._config.schema_config == {"enabled": True, "max_execution_time": 0}

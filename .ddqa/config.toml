@@ -97,5 +97,12 @@ jira_statuses = [
   "In Progress",
   "Done",
 ]
-github_team = "windows-agent"
-github_labels = ["team/windows-agent"]
+github_team = "windows-products"
+github_labels = ["team/windows-products"]
+
+[teams."Agent Build"]
+jira_project = "ABLD"
+jira_issue_type = "Task"
+jira_statuses = ["To Do", "In Progress", "Done"]
+github_team = "agent-build"
+github_labels = ["team/agent-build"]

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import sys
+from collections.abc import Callable
 from functools import lru_cache
 from importlib import import_module
 
@@ -86,29 +87,64 @@ class Platform:
 
         return self.modules.subprocess.run(self.format_for_subprocess(command, shell=shell), shell=shell, **kwargs)
 
-    def check_command(self, command: str | list[str], shell=False, **kwargs):
+    def check_command(
+        self, command: str | list[str], shell=False, on_error: Callable[[int], None] | None = None, **kwargs
+    ):
         """
         Equivalent to `run_command`, but non-zero exit codes will gracefully end program execution.
+
+        If `on_error` is provided, it will be called with the exit code.
         """
         process = self.run_command(command, shell=shell, **kwargs)
         if process.returncode:
+            if on_error is not None:
+                on_error(process.returncode)
             self.exit_with_code(process.returncode)
 
         return process
 
-    def check_command_output(self, command: str | list[str], shell=False, **kwargs) -> str:
+    def check_command_output(
+        self,
+        command: str | list[str],
+        shell=False,
+        on_error: Callable[[int, str], None] | None = None,
+        print_output: bool = False,
+        **kwargs,
+    ) -> str:
         """
         Equivalent to the output from the process returned by `capture_process`,
         but non-zero exit codes will gracefully end program execution.
+
+        If `on_error` is provided, it will be called with the exit code and the stdout of the command.
+
+        The `print_output` parameter is used to control whether the output of the command is printed to the console
+        in real-time.
+
+        The output will always be printed to the console if the command fails, even if `print_output` is False.
         """
+        if print_output:
+            kwargs["bufsize"] = 1
+            kwargs["encoding"] = "utf-8"
+
         with self.capture_process(command, shell=shell, **kwargs) as process:
-            stdout, _ = process.communicate()
+            if print_output:
+                stdout = ""
+                for line in iter(process.stdout.readline, ""):
+                    stdout += line
+                    self.__display_func(line, end='')
+            else:
+                stdout, _ = process.communicate()
 
         if process.returncode:
-            self.__display_func(stdout.decode('utf-8'))
+            if not print_output:
+                # Print output if it has not been printed yet
+                self.__display_func(stdout)
+
+            if on_error is not None:
+                on_error(process.returncode, stdout)
             self.exit_with_code(process.returncode)
 
-        return stdout.decode('utf-8')
+        return stdout
 
     def capture_process(self, command: str | list[str], shell=False, **kwargs):
         """

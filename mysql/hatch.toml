@@ -36,6 +36,14 @@ version = [
   "11.4",  # EOL 29 May 2029 (LTS version)
 ]
 
+[[envs.default.matrix]]
+python = ["3.12"]
+flavor = ["percona"]
+version = [
+  "8.0.42",
+  "8.4",
+]
+
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.36"] },

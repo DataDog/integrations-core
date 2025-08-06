@@ -337,29 +337,29 @@ def test_agent_signature(case_name, check, expected_attributes):
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()
-        metric_name = u'Klüft inför på fédéral'
+        metric_name = 'Klüft inför på fédéral'
         normalized_metric_name = 'Kluft_infor_pa_federal'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_fix_case(self):
         check = AgentCheck()
-        metric_name = u'Klüft inför på fédéral'
+        metric_name = 'Klüft inför på fédéral'
         normalized_metric_name = 'kluft_infor_pa_federal'
 
         assert check.normalize(metric_name, fix_case=True) == normalized_metric_name
 
     def test_prefix(self):
         check = AgentCheck()
-        metric_name = u'metric'
-        prefix = u'somePrefix'
+        metric_name = 'metric'
+        prefix = 'somePrefix'
         normalized_metric_name = 'somePrefix.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
 
     def test_prefix_bytes(self):
         check = AgentCheck()
-        metric_name = u'metric'
+        metric_name = 'metric'
         prefix = b'some'
         normalized_metric_name = 'some.metric'
 
@@ -368,7 +368,7 @@ class TestMetricNormalization:
     def test_prefix_unicode_metric_bytes(self):
         check = AgentCheck()
         metric_name = b'metric'
-        prefix = u'some'
+        prefix = 'some'
         normalized_metric_name = 'some.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
@@ -376,35 +376,35 @@ class TestMetricNormalization:
     def test_prefix_fix_case(self):
         check = AgentCheck()
         metric_name = b'metric'
-        prefix = u'somePrefix'
+        prefix = 'somePrefix'
         normalized_metric_name = 'some_prefix.metric'
 
         assert check.normalize(metric_name, fix_case=True, prefix=prefix) == normalized_metric_name
 
     def test_underscores_redundant(self):
         check = AgentCheck()
-        metric_name = u'a_few__redundant___underscores'
+        metric_name = 'a_few__redundant___underscores'
         normalized_metric_name = 'a_few_redundant_underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_underscores_at_ends(self):
         check = AgentCheck()
-        metric_name = u'_some_underscores_'
+        metric_name = '_some_underscores_'
         normalized_metric_name = 'some_underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_underscores_and_dots(self):
         check = AgentCheck()
-        metric_name = u'some_.dots._and_._underscores'
+        metric_name = 'some_.dots._and_._underscores'
         normalized_metric_name = 'some.dots.and.underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_invalid_chars_and_underscore(self):
         check = AgentCheck()
-        metric_name = u'metric.hello++aaa$$_bbb'
+        metric_name = 'metric.hello++aaa$$_bbb'
         normalized_metric_name = 'metric.hello_aaa_bbb'
 
         assert check.normalize(metric_name) == normalized_metric_name
@@ -414,7 +414,7 @@ class TestMetricNormalization:
     'case, tag, expected_tag',
     [
         ('nothing to normalize', 'abc:123', 'abc:123'),
-        ('unicode', u'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
+        ('unicode', 'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
         ('invalid chars', 'foo,+*-/()[]{}-  \t\nbar:123', 'foo_bar:123'),
         ('leading and trailing underscores', '__abc:123__', 'abc:123'),
         ('redundant underscore', 'foo_____bar', 'foo_bar'),
@@ -467,7 +467,7 @@ class TestEvents:
         check.event(event)
         aggregator.assert_event('test event test event', tags=["foo", "bar"])
 
-    @pytest.mark.parametrize('msg_text', [u'test-π', 'test-π', b'test-\xcf\x80'])
+    @pytest.mark.parametrize('msg_text', ['test-π', 'test-π', b'test-\xcf\x80'])
     def test_encoding(self, aggregator, msg_text):
         check = AgentCheck()
         event = {
@@ -475,7 +475,7 @@ class TestEvents:
             'msg_title': 'new test event',
             'aggregation_key': 'test.event',
             'msg_text': msg_text,
-            'tags': ['∆', u'Ω-bar'],
+            'tags': ['∆', 'Ω-bar'],
             'timestamp': 1,
         }
         check.event(event)
@@ -671,7 +671,7 @@ class TestTags:
 
     def test_unicode_string(self):
         check = AgentCheck()
-        tag = u'unicode:string'
+        tag = 'unicode:string'
         tags = [tag]
 
         normalized_tags = check._normalize_tags_type(tags, None)
@@ -683,7 +683,7 @@ class TestTags:
     def test_unicode_device_name(self):
         check = AgentCheck()
         tags = []
-        device_name = u'unicode_string'
+        device_name = 'unicode_string'
 
         normalized_tags = check._normalize_tags_type(tags, device_name)
         normalized_device_tag = normalized_tags[0]
@@ -718,10 +718,10 @@ class TestTags:
 
     def test_external_hostname(self, datadog_agent):
         check = AgentCheck()
-        external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
+        external_host_tags = [('hostnam\xe9', {'src_name': ['key1:val1']})]
         check.set_external_tags(external_host_tags)
 
-        datadog_agent.assert_external_tags(u'hostnam\xe9', {'src_name': ['key1:val1']})
+        datadog_agent.assert_external_tags('hostnam\xe9', {'src_name': ['key1:val1']})
         datadog_agent.assert_external_tags_count(1)
 
     @pytest.mark.parametrize(
@@ -1312,14 +1312,11 @@ def test_env_var_logic_preset():
 @pytest.mark.parametrize(
     "should_profile_value, expected_calls",
     [
-        (True, 1),
-        (False, 0),
+        pytest.param(True, 1, id="enabled"),
+        pytest.param(False, 0, id="disabled"),
     ],
 )
-def test_profile_memory(should_profile_value, expected_calls):
-    """
-    Test that profile_memory is called when should_profile_memory is True
-    """
+def test_profile_memory_when_enabled(should_profile_value, expected_calls):
     check = AgentCheck('test', {}, [{}])
     check.should_profile_memory = mock.MagicMock(return_value=should_profile_value)
     check.profile_memory = mock.MagicMock()
