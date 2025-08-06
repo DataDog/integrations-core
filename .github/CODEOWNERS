@@ -123,15 +123,15 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /docs/developer/tutorials/snmp/                                    @DataDog/ndm-core @DataDog/agent-integrations
 
 # System checks
-/disk/                                    @DataDog/agent-integrations @DataDog/windows-agent
-/disk/*.md                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/disk/manifest.json                       @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/network/                                 @DataDog/agent-integrations @DataDog/windows-agent
-/network/*.md                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/network/manifest.json                    @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/process/                                 @DataDog/agent-integrations @DataDog/windows-agent
-/process/*.md                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
-/process/manifest.json                    @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/disk/                                    @DataDog/agent-integrations @DataDog/windows-products
+/disk/*.md                                @DataDog/agent-integrations @DataDog/windows-products @DataDog/documentation
+/disk/manifest.json                       @DataDog/agent-integrations @DataDog/windows-products @DataDog/documentation
+/network/                                 @DataDog/agent-integrations @DataDog/windows-products
+/network/*.md                             @DataDog/agent-integrations @DataDog/windows-products @DataDog/documentation
+/network/manifest.json                    @DataDog/agent-integrations @DataDog/windows-products @DataDog/documentation
+/process/                                 @DataDog/agent-integrations @DataDog/windows-products
+/process/*.md                             @DataDog/agent-integrations @DataDog/windows-products @DataDog/documentation
+/process/manifest.json                    @DataDog/agent-integrations @DataDog/windows-products @DataDog/documentation
 
 # OpenTelemetry
 /otel/                                    @DataDog/opentelemetry @DataDog/agent-integrations
@@ -168,47 +168,47 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /crewai/            @DataDog/ml-observability @DataDog/documentation
 
 # Windows agent
-datadog_checks_base/datadog_checks/base/checks/win/                  @DataDog/windows-agent @DataDog/agent-integrations
-datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/windows-agent @DataDog/agent-integrations
-/active_directory/                                                   @DataDog/windows-agent @DataDog/agent-integrations
-/active_directory/*.md                                               @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/active_directory/manifest.json                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/aspdotnet/                                                          @DataDog/windows-agent @DataDog/agent-integrations
-/aspdotnet/*.md                                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/aspdotnet/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/dotnetclr/                                                          @DataDog/windows-agent @DataDog/agent-integrations
-/dotnetclr/*.md                                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/dotnetclr/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/exchange_server/                                                    @DataDog/windows-agent @DataDog/agent-integrations
-/exchange_server/*.md                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/exchange_server/manifest.json                                       @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/hyperv/                                                             @DataDog/windows-agent @DataDog/agent-integrations
-/hyperv/*.md                                                         @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/hyperv/manifest.json                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/iis/                                                                @DataDog/windows-agent @DataDog/agent-integrations
-/iis/*.md                                                            @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/iis/manifest.json                                                   @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/pdh_check/                                                          @DataDog/windows-agent @DataDog/agent-integrations
-/pdh_check/*.md                                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/pdh_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/win32_event_log/                                                    @DataDog/windows-agent @DataDog/agent-integrations
-/win32_event_log/*.md                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/win32_event_log/manifest.json                                       @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_certificate/                                                @DataDog/windows-agent @DataDog/agent-integrations
-/windows_certificate/*.md                                            @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_certificate/manifest.json                                   @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_performance_counters/                                       @DataDog/windows-agent @DataDog/agent-integrations
-/windows_performance_counters/*.md                                   @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_performance_counters/manifest.json                          @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_registry/                                                   @DataDog/windows-agent @DataDog/agent-integrations
-/windows_registry/*.md                                               @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_registry/manifest.json                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_service/                                                    @DataDog/windows-agent @DataDog/agent-integrations
-/windows_service/*.md                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/windows_service/manifest.json                                       @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/wmi_check/                                                          @DataDog/windows-agent @DataDog/agent-integrations
-/wmi_check/*.md                                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
-/wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+datadog_checks_base/datadog_checks/base/checks/win/                  @DataDog/windows-products @DataDog/agent-integrations
+datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/windows-products @DataDog/agent-integrations
+/active_directory/                                                   @DataDog/windows-products @DataDog/agent-integrations
+/active_directory/*.md                                               @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/active_directory/manifest.json                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/aspdotnet/                                                          @DataDog/windows-products @DataDog/agent-integrations
+/aspdotnet/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/aspdotnet/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/dotnetclr/                                                          @DataDog/windows-products @DataDog/agent-integrations
+/dotnetclr/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/dotnetclr/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/exchange_server/                                                    @DataDog/windows-products @DataDog/agent-integrations
+/exchange_server/*.md                                                @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/exchange_server/manifest.json                                       @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/hyperv/                                                             @DataDog/windows-products @DataDog/agent-integrations
+/hyperv/*.md                                                         @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/hyperv/manifest.json                                                @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/iis/                                                                @DataDog/windows-products @DataDog/agent-integrations
+/iis/*.md                                                            @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/iis/manifest.json                                                   @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/pdh_check/                                                          @DataDog/windows-products @DataDog/agent-integrations
+/pdh_check/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/pdh_check/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/win32_event_log/                                                    @DataDog/windows-products @DataDog/agent-integrations
+/win32_event_log/*.md                                                @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/win32_event_log/manifest.json                                       @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_certificate/                                                @DataDog/windows-products @DataDog/agent-integrations
+/windows_certificate/*.md                                            @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_certificate/manifest.json                                   @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_performance_counters/                                       @DataDog/windows-products @DataDog/agent-integrations
+/windows_performance_counters/*.md                                   @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_performance_counters/manifest.json                          @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/                                                   @DataDog/windows-products @DataDog/agent-integrations
+/windows_registry/*.md                                               @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/manifest.json                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_service/                                                    @DataDog/windows-products @DataDog/agent-integrations
+/windows_service/*.md                                                @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/windows_service/manifest.json                                       @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/wmi_check/                                                          @DataDog/windows-products @DataDog/agent-integrations
+/wmi_check/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/wmi_check/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 
 # SaaS Integrations
 /adyen/                                                              @DataDog/saas-integrations
@@ -300,6 +300,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /incident_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
 /incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
 /incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviews @DataDog/logs-core
+
+/keeper/                                                             @DataDog/saas-integrations
+/keeper/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/keeper/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/keeper/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation

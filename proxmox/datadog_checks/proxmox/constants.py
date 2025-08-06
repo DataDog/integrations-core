@@ -46,3 +46,24 @@ RESOURCE_METRIC_NAME = {
 }
 
 RESOURCE_COUNT_METRICS = ['uptime']
+
+EVENT_TYPE_TO_TITLE = {
+    'vzstart': 'Container Started',
+    'vzshutdown': 'Container Shutdown',
+    'vzsuspend': 'Container Suspened',
+    'qmstart': 'VM Started',
+    'qhstop': 'VM Stopped',
+    'qmshutdown': 'VM Shutdown',
+    'qmreboot': 'VM Rebooted',
+    'qmigrate': 'VM Migrated',
+    'qmsuspend': 'VM Hibernated',
+    'startall': 'Bulk start VMs and Containers',
+    'stopall': 'Bulk stop VMs and Containers',
+    'suspendall': 'Bulk suspend VMs and Containers',
+    'aptupdate': 'Update package database',
+    'vncproxy': 'Console started',
+}
+
+ALLOWED_FILTER_PROPERTIES = ['resource_name']
+ADDITIONAL_FILTER_PROPERTIES = ['hostname']
+ALLOWED_FILTER_TYPES = ['include', 'exclude']

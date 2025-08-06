@@ -71,8 +71,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.14.0" \
-SHA256="5eba3ec2d898919a4b34cc89ace0068d9d09420b8643f265aebac59f8d126203" \
+VERSION="8.15.0" \
+SHA256="d85cfc79dc505ff800cb1d321a320183035011fa08cb301356425d86be8fc53c" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \

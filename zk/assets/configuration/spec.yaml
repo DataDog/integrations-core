@@ -36,6 +36,9 @@ files:
 
               Available options are: `leader`, `follower`, `standalone` or an array of one or more of these.
             value:
+              example:
+                - leader
+                - follower
               anyOf:
                 - type: string
                 - type: array
