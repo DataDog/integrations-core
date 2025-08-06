@@ -12,16 +12,45 @@ This integration collects logs from the sources listed above and transmits them 
 
 ## Setup
 
+### Retrieve Datadog CIDR Range
+
+1. Use an API platform such as Postman, or curl to make a GET request to the [Datadog API endpoint][5].
+2. Once you receive the response, locate the **webhooks** section in the JSON. It will look something like this:
+   ```json
+      "webhooks": {
+         "prefixes_ipv4": [
+            "0.0.0.0/32",
+            ...
+         ],
+         "prefixes_ipv6": []
+         }
+   ```
+3. From the **prefixes_ipv4** list under the Webhooks section, copy each CIDR entry.
+
 ### Generate API Credentials in Tanium
 
-1. Login into Tanium.
+1. Sign in to Tanium Console as a user who has the following permissions:
+   - `Special`: Token Use
+   - `Execute`: Threat Response API
+   - `Read`: Audit, Threat Response Alerts, and Threat Response Audit
 2. From the main menu, navigate to **Administration** > **Permissions** > **API Tokens**.
 3. Click **New API Token** and configure the token settings:
-    - **Expiration**: Enter the expiration interval in days.
-    - **Trusted IP addresses**: Enter the external IP addresses as `::/0,0.0.0.0/0` to enable any system to use the token.
+   - **Expiration**: Enter the expiration interval as `365` days. Ensure you rotate the token before it expires. Refer to the "Rotate API Token in Tanium" section for instructions.
+   - **Trusted IP addresses**: Enter each CIDR entry retrieved in the "Retrieve Datadog CIDR Range" section, separated by commas or new lines.
 4. Click on **Create**.
 5. Click on **Yes** and copy the **token** for later use.
-6. The Tanium host format is **\<customer\>.cloud.tanium.com**. Replace **\<customer\>** with your organization's specific subdomain.
+6. This integration supports both **cloud-based** and **self-hosted** Tanium instances:
+   - **Cloud-based**: The Host format is **\<customer\>.cloud.tanium.com**. Replace **\<customer\>** with your organization's specific subdomain.
+   - **Self-hosted**: The Host is domain of your self-hosted tanium instance. The instance must be publicly accessible through HTTPS. Example: `tk-example.titankube.com`, `123.123.123.123:8443`.
+
+### Rotate API Token in Tanium
+
+1. Sign in to Tanium Console as a user who has the following permission:
+   - `Special`: Token Rotate
+2. From the main menu, navigate to **Administration** > **Permissions** > **API Tokens**.
+3. Select the token and click **Rotate Token**.
+4. Enter the old **Token** value and click **Rotate**.
+5. Click on **Yes** and copy the new **token** for later use.
 
 ### Connect your Tanium Account to Datadog
 
@@ -55,3 +84,4 @@ For any further assistance, contact [Datadog support][2].
 [2]: https://docs.datadoghq.com/help/
 [3]: https://docs.datadoghq.com/logs/explorer/
 [4]: https://www.datadoghq.com/product/cloud-siem/
+[5]: https://docs.datadoghq.com/api/latest/ip-ranges/

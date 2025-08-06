@@ -221,6 +221,7 @@ tests:
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
+     - "api_host:example.com"
     timestamp: 1735193752000
  -
   sample: |-

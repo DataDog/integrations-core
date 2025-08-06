@@ -6,7 +6,7 @@
             "id": 2975728723421586,
             "definition": {
                 "type": "image",
-                "url": "https://www.tanium.com/wp-content/themes/main/lib/images/header-logo.svg",
+                "url": "https://webcontent.tanium.com/wp-content/uploads/Logo_Tanium_Primary-Red_RGB.png",
                 "sizing": "contain",
                 "margin": "md",
                 "has_background": false,
@@ -1071,6 +1071,10 @@
                                         },
                                         {
                                             "field": "Endpoint.impactScore",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "alert_link",
                                             "width": "auto"
                                         },
                                         {
