@@ -88,7 +88,7 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
 
     _test_operation_time_metrics(aggregator, operation_time_metrics, mysql_check.debug_stats_kwargs()['tags'])
 
-    aggregator.assert_all_metricdatabase_instances_covered()
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=[variables.OPERATION_TIME_METRIC_NAME]
     )
