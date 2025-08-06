@@ -1,4 +1,4 @@
-name: PR All
+name: PR All- Windows
 
 on:
   pull_request:
@@ -13,8 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    uses: ./.github/workflows/test-all.yml
+  test-windows:
+    needs:
+      - test
+    uses: ./.github/workflows/test-all-windows.yml
 
     permissions:
        # needed for compute-matrix in test-target.yml
@@ -29,14 +31,14 @@ jobs:
 
   save-event:
     needs:
-    - test
+    - test-windows
     if: success() || failure()
 
     uses: ./.github/workflows/save-event.yml
 
   upload-coverage:
     needs:
-    - test
+    - test-windows
     if: >
       !github.event.repository.private &&
       (success() || failure())
@@ -65,7 +67,7 @@ jobs:
 
   submit-traces:
     needs:
-    - test
+    - test-windows
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml
