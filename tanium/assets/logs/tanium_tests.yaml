@@ -73,15 +73,15 @@ tests:
         "status" : "HIGH_FIDELITY"
       }
     }
+  service: "threat-response-alerts"
   tags:
    - "api_host:example.com"
-  service: "threat-response-alerts"
   result:
     custom:
       Endpoint:
         id: 2
       ackedAt: "2024-12-26T06:26:52.692Z"
-      alert_link: "https:/example.com/ui/threatresponse/alerts?guid=00000000-0000-0000-0000-000000000001"
+      alert_link: "https://example.com/ui/threatresponse/alerts?guid=00000000-0000-0000-0000-000000000001"
       alertedAt: "2024-12-26T06:15:52.000Z"
       computerName: "AssetTag-EID"
       createdAt: "2024-12-26T06:20:09.636Z"
