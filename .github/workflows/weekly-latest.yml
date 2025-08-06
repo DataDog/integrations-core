@@ -19,10 +19,24 @@ jobs:
        id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
+  test-windows:
+    uses: ./.github/workflows/test-all-windows.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+    permissions:
+       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       id-token: write
+       # needed for compute-matrix in test-target.yml
+       contents: read
 
   submit-traces:
     needs:
     - test
+    - test-windows
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml

@@ -28,9 +28,27 @@ jobs:
       test-py2: true
     secrets: inherit
 
+  test-windows:
+    uses: ./.github/workflows/test-all-windows.yml
+
+    permissions:
+       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       id-token: write
+       # needed for compute-matrix in test-target.yml
+       contents: read
+
+    with:
+      repo: core
+
+      # Options
+      minimum-base-package: true
+      test-py2: true
+    secrets: inherit
+
   submit-traces:
     needs:
     - test
+    - test-windows
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml

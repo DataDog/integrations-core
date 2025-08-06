@@ -26,6 +26,19 @@ jobs:
       # Options
       test-py2: true
     secrets: inherit
+  test-windows:
+    uses: ./.github/workflows/test-all-windows.yml
+
+    permissions:
+       # needed for compute-matrix in test-target.yml
+       contents: read
+
+    with:
+      repo: core
+
+      # Options
+      test-py2: true
+    secrets: inherit
 
   save-event:
     needs:
@@ -37,6 +50,7 @@ jobs:
   upload-coverage:
     needs:
     - test
+    - test-windows
     if: >
       !github.event.repository.private &&
       (success() || failure())
