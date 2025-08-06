@@ -458,7 +458,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(expected_hostname),
-        'ddagenthostname:{}'.format(dd_default_hostname),
+        'ddagenthostname:{}'.format(expected_hostname),
     )
     aggregator.assert_service_check(
         'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
