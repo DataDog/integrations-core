@@ -1,4 +1,9 @@
 id: cloudgen_firewall
 tests:
   - sample: "2025 07 17 19:12:51 +00:00 Info     LOGIN ATTEMPT: boxconfig[24111]: Login localhost_CloudGen-WAN from 127.0.0.1 : Allowed."
-    result: null
+    result:
+      custom:
+      message: "2025 07 17 19:12:51 +00:00 Info     LOGIN ATTEMPT: boxconfig[24111]: Login localhost_CloudGen-WAN from 127.0.0.1 : Allowed."
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1
