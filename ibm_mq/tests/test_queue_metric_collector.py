@@ -138,7 +138,9 @@ def test_discover_queues_and_handle_errors(instance, auto_discover_queues_via_na
     ],
     ids=["direct_method", "via_names_method"],
 )
-def test_discover_queues_disconnects_on_exception(instance, auto_discover_queues_via_names, side_effect_attr, get_check):
+def test_discover_queues_disconnects_on_exception(
+    instance, auto_discover_queues_via_names, side_effect_attr, get_check
+):
     instance['auto_discover_queues_via_names'] = auto_discover_queues_via_names
     instance['auto_discover_queues'] = True
 
