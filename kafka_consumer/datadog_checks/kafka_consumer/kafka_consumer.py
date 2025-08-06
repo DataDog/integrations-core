@@ -414,8 +414,6 @@ class KafkaCheck(AgentCheck):
         self.event(event_dict)
 
     def data_streams_live_message(self, highwater_offsets, cluster_id):
-        print("hello")
-        print(highwater_offsets)
         monitored_topics = None
         for cfg in self.config.live_messages_configs:
             monitored_topics = monitored_topics or {topic for (topic, _) in highwater_offsets.keys()}
@@ -435,7 +433,6 @@ class KafkaCheck(AgentCheck):
             if not cluster or not cluster_id or cluster.lower() != cluster_id.lower():
                 continue
             if topic not in monitored_topics:
-                print("not in topics")
                 self.log.debug('Skipping live messages for topic %s because it is not monitored by this check', topic)
                 continue
             start_offsets = resolve_start_offsets(highwater_offsets, topic, partition, start_offset, n_messages)
