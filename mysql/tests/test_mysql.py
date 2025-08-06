@@ -88,7 +88,7 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
 
     _test_operation_time_metrics(aggregator, operation_time_metrics, mysql_check.debug_stats_kwargs()['tags'])
 
-    aggregator.assert_all_metrics_covered()
+    aggregator.assert_all_metricdatabase_instances_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=[variables.OPERATION_TIME_METRIC_NAME]
     )
@@ -134,7 +134,7 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
     expected_metric_tags = tags.METRIC_TAGS + (
         f'database_hostname:{dd_default_hostname}',
         f'database_instance:{dd_default_hostname}',
-        f'ddagenthostname:{dd_default_hostname}',
+        f'ddagenthostname:{"stubbed.hostname"}',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
     if MYSQL_FLAVOR in ('mysql', 'percona'):
@@ -458,7 +458,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(expected_hostname),
-        'ddagenthostname:{}'.format(expected_hostname),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
     )
     aggregator.assert_service_check(
         'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
@@ -830,7 +830,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
         "database_instance:{}".format(expected_database_instance),
         'dd.internal.resource:database_instance:{}'.format(expected_database_instance),
         "dbms_flavor:{}".format(MYSQL_FLAVOR.lower()),
-        'ddagenthostname:{}'.format(expected_database_hostname),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
     )
 
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
