@@ -5,7 +5,6 @@
 import threading
 import time
 from collections import OrderedDict
-from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple, Union
 
@@ -63,30 +62,6 @@ class PostgresConnectionArgs:
         if self.ssl_password:
             kwargs["sslpassword"] = self.ssl_password
         return kwargs
-
-
-class ConnectionProxy(AbstractContextManager):
-    """
-    A context manager that wraps psycopg_pool.ConnectionPool.connection(),
-    ensuring that the connection is properly acquired and released.
-
-    Used to provide a safe interface for the get_connection() method in the pool manager.
-    """
-
-    def __init__(self, pool: ConnectionPool) -> None:
-        self.pool = pool
-        self._ctx: Optional[Any] = None
-        self._conn: Optional[Connection] = None
-
-    def __enter__(self) -> Connection:
-        self._ctx = self.pool.connection()
-        self._conn = self._ctx.__enter__()
-        return self._conn
-
-    def __exit__(
-        self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[Any]
-    ) -> Optional[bool]:
-        return self._ctx.__exit__(exc_type, exc_val, exc_tb)
 
 
 class LRUConnectionPoolManager:
@@ -166,56 +141,12 @@ class LRUConnectionPoolManager:
 
         return ConnectionPool(kwargs=kwargs, configure=self._configure_connection, **self.pool_config)
 
-    def get_pool(self, dbname: str, persistent: bool = False) -> ConnectionPool:
-        """
-        Get or create a ConnectionPool for the given dbname.
-
-        If a pool already exists for the dbname, it is reused and marked as recently used.
-        If it does not exist and the pool limit has been reached, the least recently used
-        pool is evicted to make space.
-
-        Args:
-            dbname (str): The database name to get a pool for.
-            persistent (bool): Whether this pool should be marked as persistent (protected from LRU eviction).
-
-        Returns:
-            ConnectionPool: The pool for the requested dbname.
-
-        Raises:
-            RuntimeError: If the pool manager has been closed.
-        """
-        with self.lock:
-            if self._closed:
-                raise RuntimeError("Pool manager is closed and cannot get connection pool")
-            now = time.monotonic()
-            if dbname in self.pools:
-                pool, _, was_persistent = self.pools.pop(dbname)
-                self.pools[dbname] = (pool, now, was_persistent or persistent)
-                return pool
-
-            if len(self.pools) >= self.max_db:
-                # Try to evict a non-persistent pool first
-                for evict_dbname in list(self.pools.keys()):
-                    _, _, is_persistent = self.pools[evict_dbname]
-                    if not is_persistent:
-                        old_pool, _, _ = self.pools.pop(evict_dbname)
-                        old_pool.close()
-                        break
-                else:
-                    # All remaining are persistent, evict true LRU
-                    evict_dbname, (old_pool, _, _) = self.pools.popitem(last=False)
-                    old_pool.close()
-
-            new_pool = self._create_pool(dbname)
-            self.pools[dbname] = (new_pool, now, persistent)
-            return new_pool
-
-    def get_connection(self, dbname: str, persistent: bool = False) -> ConnectionProxy:
+    def get_connection(self, dbname: str, persistent: bool = False):
         """
         Context-managed access to a single connection from the pool associated with the given dbname.
 
-        Ensures that the connection is returned to its pool after use. Internally wraps
-        `pool.connection()` to safely manage resource cleanup.
+        Ensures that the connection is returned to its pool after use. Returns the context manager
+        from psycopg_pool.ConnectionPool.connection().
 
         Usage:
             with manager.get_connection("mydb") as conn:
@@ -227,13 +158,41 @@ class LRUConnectionPoolManager:
             persistent (bool): Whether the underlying pool should be marked as persistent.
 
         Returns:
-            ConnectionProxy: A context manager yielding a psycopg.Connection.
+            Context manager yielding a psycopg.Connection.
 
         Raises:
             RuntimeError: If the pool manager has been closed.
         """
-        pool = self.get_pool(dbname, persistent)
-        return ConnectionProxy(pool)
+        with self.lock:
+            if self._closed:
+                raise RuntimeError("Pool manager is closed and cannot get connection")
+
+            now = time.monotonic()
+
+            # Get or create pool
+            if dbname in self.pools:
+                pool, _, was_persistent = self.pools.pop(dbname)
+                self.pools[dbname] = (pool, now, was_persistent or persistent)
+            else:
+                # Create new pool, potentially evicting old ones
+                if len(self.pools) >= self.max_db:
+                    # Try to evict a non-persistent pool first
+                    for evict_dbname in list(self.pools.keys()):
+                        _, _, is_persistent = self.pools[evict_dbname]
+                        if not is_persistent:
+                            old_pool, _, _ = self.pools.pop(evict_dbname)
+                            old_pool.close()
+                            break
+                    else:
+                        # All remaining are persistent, evict true LRU
+                        evict_dbname, (old_pool, _, _) = self.pools.popitem(last=False)
+                        old_pool.close()
+
+                pool = self._create_pool(dbname)
+                self.pools[dbname] = (pool, now, persistent)
+
+            # Return the pool's context manager directly
+            return pool.connection()
 
     def get_pool_stats(self, dbname: str) -> Optional[Dict[str, Any]]:
         """
