@@ -198,10 +198,10 @@ datadog-sonatype-nexus==2.0.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.0.0
 datadog-spark==7.0.1
 datadog-sqlserver==22.8.0
-datadog-squid==5.0.0
+datadog-squid==5.0.1
 datadog-ssh-check==4.2.1
 datadog-statsd==3.0.0
-datadog-strimzi==4.0.0
+datadog-strimzi==4.0.1
 datadog-supabase==2.0.0
 datadog-supervisord==4.0.0
 datadog-suricata==2.0.0
