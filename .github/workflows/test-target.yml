@@ -297,7 +297,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
+          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0} -k "not fips"', inputs.pytest-args) || '-- all -k "not fips"' }}
         fi
 
     - name: Run E2E tests
