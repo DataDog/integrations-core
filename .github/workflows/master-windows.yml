@@ -1,4 +1,6 @@
-name: Master
+name: Master Windows
+# This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
+# We will remove this once we have a better solution
 
 on:
   push:
@@ -13,7 +15,7 @@ jobs:
     needs:
     - cache
 
-    uses: ./.github/workflows/test-all.yml
+    uses: ./.github/workflows/test-all-windows.yml
     with:
       repo: core
 
@@ -32,6 +34,7 @@ jobs:
        contents: read
 
   publish-test-results:
+
     needs:
     - test
 
