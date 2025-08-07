@@ -4,6 +4,7 @@
 # datadog_checks/active_directory/check.py
 
 import platform
+import threading
 import time
 
 from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBaseCheckWithLegacySupport
@@ -37,9 +38,29 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         self.service_check_enabled = instance.get('service_check_enabled', True)
         self.force_all_metrics = instance.get('force_all_metrics', False)
 
+        # Thread safety
+        self._lock = threading.Lock()
+
         # Caching configuration
         self._service_cache = {}
-        self._cache_duration = instance.get('service_cache_duration', 300)  # 5 minutes
+        self._config_cache = None  # Cache the built configuration
+        
+        # Validate and set cache duration
+        cache_duration = instance.get('service_cache_duration', 300)
+        try:
+            cache_duration = float(cache_duration)
+            # Enforce reasonable bounds: 60 seconds to 1 hour
+            if cache_duration < 60:
+                self.log.warning("service_cache_duration too low (%s), using minimum of 60 seconds", cache_duration)
+                cache_duration = 60
+            elif cache_duration > 3600:
+                self.log.warning("service_cache_duration too high (%s), using maximum of 3600 seconds", cache_duration)
+                cache_duration = 3600
+        except (TypeError, ValueError):
+            self.log.warning("Invalid service_cache_duration value, using default of 300 seconds")
+            cache_duration = 300
+        
+        self._cache_duration = cache_duration
         self._last_service_check = 0
 
         # Platform detection
@@ -63,17 +84,32 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
             return {'metrics': METRICS_CONFIG}
 
         # Use cached results if recent
-        current_time = time.time()
-        if current_time - self._last_service_check < self._cache_duration:
-            self.log.debug("Using cached service states (age: %.1fs)", current_time - self._last_service_check)
-            return self._build_config_from_cache(METRICS_CONFIG)
+        with self._lock:
+            current_time = time.time()
+            if current_time - self._last_service_check < self._cache_duration:
+                self.log.debug("Using cached service states (age: %.1fs)", current_time - self._last_service_check)
+                # Return cached config if available
+                if self._config_cache is not None:
+                    return self._config_cache
+                # Otherwise build and cache it
+                self._config_cache = self._build_config_from_cache(METRICS_CONFIG)
+                return self._config_cache
 
         # Refresh cache
-        self.log.debug("Refreshing service state cache")
-        self._refresh_service_cache()
-        self._last_service_check = current_time
-
-        return self._build_config_from_cache(METRICS_CONFIG)
+        with self._lock:
+            # Double-check after acquiring lock (another thread might have refreshed)
+            current_time = time.time()
+            if current_time - self._last_service_check < self._cache_duration:
+                if self._config_cache is not None:
+                    return self._config_cache
+            
+            self.log.debug("Refreshing service state cache")
+            self._refresh_service_cache()
+            self._last_service_check = current_time
+            
+            # Build and cache the new config
+            self._config_cache = self._build_config_from_cache(METRICS_CONFIG)
+            return self._config_cache
 
     def _refresh_service_cache(self):
         """Refresh service availability cache."""
@@ -81,9 +117,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         self._service_cache.clear()
 
         # Get all services we need to check
-        services_to_check = set()
-        for service in self.SERVICE_METRIC_MAP.keys():
-            services_to_check.add(service)
+        services_to_check = set(self.SERVICE_METRIC_MAP.keys())
 
         # Check each service
         for service in services_to_check:
@@ -94,7 +128,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
             except Exception as e:
                 self.log.warning("Failed to check service %s: %s", service, e)
                 # Optimistically assume service is available on error
-                self._service_cache[service] = True
+                self._service_cache[service] = False
 
     def _is_service_running(self, service_name):
         """Check if a Windows service is running."""
@@ -129,8 +163,6 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
             raise Exception("Service check failed for {}: {}".format(service_name, str(e)))
 
     def _build_config_from_cache(self, metrics_config):
-        import json
-
         """Build configuration using cached service states."""
         filtered_config = {'metrics': {}}
 
@@ -151,9 +183,9 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     if metric_name in metrics_config and metric_name not in metrics_added:
                         filtered_config['metrics'][metric_name] = metrics_config[metric_name]
                         metrics_added.add(metric_name)
-                        self.log.error("Including %s (service %s is running)", metric_name, service)
+                        self.log.debug("Including %s (service %s is running)", metric_name, service)
             else:
-                self.log.error("Excluding metrics %s (service %s not running)", metric_names, service)
+                self.log.debug("Excluding metrics %s (service %s not running)", metric_names, service)
 
         # Add any metrics not controlled by services
         # This ensures backward compatibility if new metrics are added
@@ -170,7 +202,6 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     filtered_config['metrics'][metric_name] = metric_config
                     self.log.debug("Including uncontrolled metric: %s", metric_name)
 
-        self.log.error(json.dumps(filtered_config, indent=4))
         return filtered_config
 
     def check(self, _):
@@ -182,15 +213,19 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         that compiled list whenever the cache is considered expired.
         """
         if self.service_check_enabled and not self.force_all_metrics:
-            now = time.time()
-            if now - self._last_service_check >= self._cache_duration:
-                self.log.debug("Service cache expired after %.1fs - refreshing", now - self._last_service_check)
-                self._refresh_service_cache()
-                self._last_service_check = now
+            with self._lock:
+                now = time.time()
+                if now - self._last_service_check >= self._cache_duration:
+                    self.log.debug("Service cache expired after %.1fs - refreshing", now - self._last_service_check)
+                    self._refresh_service_cache()
+                    self._last_service_check = now
+                    
+                    # Clear cached config
+                    self._config_cache = None
 
-                # Make sure PerfCountersBaseCheckWithLegacySupport recompiles
-                # its counter set using the *new* service cache.
-                if hasattr(self, "_config"):
-                    self._config = None
+                    # Make sure PerfCountersBaseCheckWithLegacySupport recompiles
+                    # its counter set using the *new* service cache.
+                    if hasattr(self, "_config"):
+                        self._config = None
 
         return super().check(_)

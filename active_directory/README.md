@@ -39,7 +39,7 @@ The integration collects metrics from the following Windows Performance Objects:
 - **Security System-Wide Statistics**: Authentication protocol usage metrics (NTLM vs Kerberos)
 - **DHCP Server**: DHCP failover and binding update metrics (when DHCP Server role is installed)
 - **DFS Replicated Folders**: DFS replication health, conflicts, and staging metrics (when DFSR role is installed)
-  - Note: Metrics are tagged with `replication_group` containing the DFS replication group name
+  - Note: Metrics are tagged with `instance` containing the DFS replication group name
 
 #### Netlogon Metrics
 
