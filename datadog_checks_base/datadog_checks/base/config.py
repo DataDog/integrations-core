@@ -9,6 +9,7 @@ def is_affirmative(value):
     """
     # try string cast
     if isinstance(value, str):
+        print("test")
         return value.lower() in {'yes', 'true', '1', 'y', 'on'}
 
     # use object's implementation of `__bool__`, it's faster than cast.
