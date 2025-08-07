@@ -51,9 +51,12 @@ class TagsSet:
         """Add a tag with explicit key and value.
 
         For standalone value tags, use add_standalone_tag() instead.
+
+        Raises:
+            ValueError: If key is empty
         """
         if not key:
-            return
+            raise ValueError("Tag key cannot be empty. Use add_standalone_tag() for standalone values.")
 
         if key not in self._data:
             self._data[key] = set()
@@ -69,14 +72,21 @@ class TagsSet:
         self._data[''].add(value)
 
     def add_unique_tag(self, key: str, value: str) -> None:
-        """Add a tag under given key, ensuring the key has only this value."""
+        """Add a tag under given key, ensuring the key has only this value.
+
+        Raises:
+            ValueError: If key is empty
+        """
         if not key:
-            return None
+            raise ValueError("Tag key cannot be empty. Use add_standalone_tag() for standalone values.")
         self._data[key] = {value}
 
     def get_tag(self, key: str) -> set[str]:
         """Return all values for the given key. Returns an empty set if key doesn't exist."""
         return self._data.get(key, set())
+
+    def get_standalone_tags(self) -> set[str]:
+        return self.get_tag('')
 
     def _get_tag_tuples(self, sort: bool = True) -> list[tuple[str, str]]:
         """Return all tags as a list of (key, value) tuples, sorted if requested."""

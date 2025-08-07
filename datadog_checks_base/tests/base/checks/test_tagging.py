@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import pytest
+
 from datadog_checks.base.utils.tagging import TagsSet
 
 
@@ -135,11 +137,17 @@ class TestTagsSet:
         tags.add_tag('app', 'web')
         assert list(tags) == [('app', 'web'), ('env', 'prod')]
 
-    def test_empty_key_value(self):
-        """Test empty string key and value."""
+    def test_empty_key_raises_error(self):
+        """Test that empty key raises ValueError."""
         tags = TagsSet()
-        tags.add_tag('', '')
-        assert tags.get_tags() == []
+        with pytest.raises(ValueError, match="Tag key cannot be empty"):
+            tags.add_tag('', 'value')
+
+    def test_empty_key_add_unique_raises_error(self):
+        """Test that empty key in add_unique_tag raises ValueError."""
+        tags = TagsSet()
+        with pytest.raises(ValueError, match="Tag key cannot be empty"):
+            tags.add_unique_tag('', 'value')
 
     def test_special_chars_colon(self):
         """Test key/value with colons."""
@@ -162,3 +170,16 @@ class TestTagsSet:
         tags.add_standalone_tag('production')
         tags.add_standalone_tag('critical')
         assert sorted(tags.get_tags()) == ['critical', 'production']
+
+    def test_standalone_tags_use_empty_key(self):
+        """Test that standalone tags are stored with empty key."""
+        tags = TagsSet()
+        tags.add_standalone_tag('production')
+        tags.add_standalone_tag('staging')
+        # Verify they're stored under empty key
+        assert tags.get_standalone_tags() == {'production', 'staging'}
+
+        tags.add_tag('env', 'prod')
+        tags.add_tag('env', 'staging')
+        # Verify they appear as standalone in output
+        assert sorted(tags.get_tags()) == ['env:prod', 'env:staging', 'production', 'staging']
