@@ -242,7 +242,7 @@ class PostgreSql(AgentCheck):
                 try:
                     cursor.execute(query)
                 except psycopg.Error as e:
-                    self._log.error(
+                    self.log.error(
                         "Error while executing query: %s. ",
                         e,
                     )
@@ -432,7 +432,7 @@ class PostgreSql(AgentCheck):
                 try:
                     cursor.execute('SELECT pg_is_in_recovery();')
                 except psycopg.Error as e:
-                    self._log.error(
+                    self.log.error(
                         "Error while executing query: %s. ",
                         e,
                     )
@@ -492,7 +492,7 @@ class PostgreSql(AgentCheck):
                     cursor.execute('SELECT system_identifier FROM pg_control_system();')
                     self.system_identifier = cursor.fetchone()[0]
                 except psycopg.Error as e:
-                    self._log.error(
+                    self.log.error(
                         "Error while executing query: %s. ",
                         e,
                     )
@@ -505,7 +505,7 @@ class PostgreSql(AgentCheck):
                     cursor.execute('SHOW cluster_name;')
                     self.cluster_name = cursor.fetchone()[0]
                 except psycopg.Error as e:
-                    self._log.error(
+                    self.log.error(
                         "Error while executing query: %s. ",
                         e,
                     )
@@ -529,7 +529,7 @@ class PostgreSql(AgentCheck):
                     wal_level = cursor.fetchone()[0]
                     return wal_level
                 except psycopg.Error as e:
-                    self._log.error(
+                    self.log.error(
                         "Error while executing query: %s. ",
                         e,
                     )
@@ -871,7 +871,7 @@ class PostgreSql(AgentCheck):
                     try:
                         cursor.execute("SHOW data_checksums;")
                     except psycopg.Error as e:
-                        self._log.error(
+                        self.log.error(
                             "Error while executing query: %s. ",
                             e,
                         )
