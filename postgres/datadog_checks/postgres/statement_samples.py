@@ -480,7 +480,11 @@ class PostgresStatementSamples(DBMAsyncJob):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
-        self._collect_statement_samples()
+        try:
+            self._collect_statement_samples()
+        except Exception:
+            self._log.exception('Unable to collect statement samples due to an error')
+
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
