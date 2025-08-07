@@ -8,7 +8,7 @@ datadog-aerospike==5.0.1; sys_platform == 'linux2'
 datadog-airflow==7.0.1
 datadog-amazon-msk==7.0.1
 datadog-ambari==6.1.1; sys_platform != 'win32'
-datadog-apache==7.0.0
+datadog-apache==7.0.1
 datadog-appgate-sdp==2.0.0; sys_platform != 'win32'
 datadog-arangodb==4.0.0
 datadog-argo-rollouts==3.0.0
