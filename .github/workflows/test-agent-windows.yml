@@ -36,7 +36,7 @@ on:
 
 jobs:
   test:
-    uses: ./.github/workflows/test-all.yml
+    uses: ./.github/workflows/test-all-windows.yml
     with:
       repo: core
 

@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    uses: ./.github/workflows/test-all.yml
+    uses: ./.github/workflows/test-all-windows.yml
     with:
       repo: core
 
@@ -19,6 +19,7 @@ jobs:
        id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
+
   submit-traces:
     needs:
     - test

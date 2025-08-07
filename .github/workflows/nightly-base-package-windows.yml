@@ -1,4 +1,6 @@
-name: Nightly minimum base package test
+name: Nightly minimum base package test -  Windows
+# This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
+# We will remove this once we have a better solution
 
 on:
   # Triggering minimum base package tests can be useful outside of the schedule, for instance for PRs
@@ -12,7 +14,7 @@ on:
 
 jobs:
   test:
-    uses: ./.github/workflows/test-all.yml
+    uses: ./.github/workflows/test-all-windows.yml
 
     permissions:
        # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github

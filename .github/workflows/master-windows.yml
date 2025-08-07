@@ -1,40 +1,54 @@
-name: PR All Windows
+name: Master Windows
 # This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
 # We will remove this once we have a better solution
 
 on:
-  pull_request:
-    paths:
-    - datadog_checks_base/datadog_checks/**
-    - datadog_checks_dev/datadog_checks/dev/*.py
-    - ddev/src/**
-    - "!agent_requirements.in"
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
-  cancel-in-progress: true
+  push:
+    branches:
+    - master
 
 jobs:
+  cache:
+    uses: ./.github/workflows/cache-shared-deps.yml
+
   test:
+    needs:
+    - cache
+
     uses: ./.github/workflows/test-all-windows.yml
+    with:
+      repo: core
+
+      # Options
+      # Because -m starts with a dash,
+      # click (the library used to build the CLI) will
+      # interpret it as an option, not as an argument.
+      # To avoid this, using -- syntax,
+      # which tells the command that everything following it
+      # should be treated as positional arguments, not options
+      pytest-args: '-m "not flaky"'
+    secrets: inherit
 
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
 
-    with:
-      repo: core
+  publish-test-results:
 
-      # Options
-      test-py2: true
-    secrets: inherit
-
-  save-event:
     needs:
     - test
-    if: success() || failure()
 
-    uses: ./.github/workflows/save-event.yml
+    if: success() || failure()
+    concurrency:
+      group: test-results
+
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
+
+    uses: ./.github/workflows/test-results-master.yml
+    secrets: inherit
 
   upload-coverage:
     needs:
