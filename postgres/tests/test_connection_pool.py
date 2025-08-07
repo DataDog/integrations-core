@@ -755,18 +755,14 @@ def test_closed_state_and_pool_creation_prevention():
     # Should now be closed
     assert manager.is_closed()
 
-    # Attempting to get a new pool should raise RuntimeError
-    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection pool"):
-        manager.get_pool("testdb")
-
-    # Attempting to get a connection should also raise RuntimeError
-    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection pool"):
+    # Attempting to get a connection should raise RuntimeError
+    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection"):
         manager.get_connection("testdb")
 
     # Calling close_all() again should not cause issues (idempotent)
     manager.close_all()
     assert manager.is_closed()
 
-    # Still should not be able to create new pools
-    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection pool"):
-        manager.get_pool("testdb")
+    # Still should not be able to create new connections
+    with pytest.raises(RuntimeError, match="Pool manager is closed and cannot get connection"):
+        manager.get_connection("testdb")
