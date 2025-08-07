@@ -6,226 +6,151 @@ from datadog_checks.base.utils.tagging import TagsSet
 
 
 class TestTagsSet:
-    """Test the TagsSet data structure."""
+    """Test the TagsSet data structure with minimal, focused tests."""
 
-    def test_init(self):
-        """Test TagsSet initialization."""
-        tags_set = TagsSet()
-        assert tags_set.get_tags() == []
+    def test_init_empty(self):
+        """Test empty initialization."""
+        tags = TagsSet()
+        assert tags.get_tags() == []
 
-    def test_add_tag(self):
-        """Test adding tags."""
-        tags_set = TagsSet()
+    def test_add_single_tag(self):
+        """Test adding a single tag."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        assert tags.get_tags() == ['env:prod']
 
-        # Add single tag
-        tags_set.add_tag('env', 'production')
-        assert tags_set.get_tags() == [('env', 'production')]
+    def test_add_multiple_values_same_key(self):
+        """Test adding multiple values to same key."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('env', 'dev')
+        assert tags.get_tags() == ['env:dev', 'env:prod']
 
-        # Add another value to same key
-        tags_set.add_tag('env', 'staging')
-        expected = [('env', 'production'), ('env', 'staging')]
-        assert sorted(tags_set.get_tags()) == sorted(expected)
+    def test_add_different_keys(self):
+        """Test adding tags with different keys."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('app', 'web')
+        assert tags.get_tags() == ['app:web', 'env:prod']
 
-        # Add tag with different key
-        tags_set.add_tag('service', 'web')
-        expected = [('env', 'production'), ('env', 'staging'), ('service', 'web')]
-        assert sorted(tags_set.get_tags()) == sorted(expected)
+    def test_add_unique_tag_replaces(self):
+        """Test add_unique_tag replaces existing values."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('env', 'dev')
+        tags.add_unique_tag('env', 'test')
+        assert tags.get_tags() == ['env:test']
 
-    def test_add_unique_tag(self):
-        """Test adding unique tags."""
-        tags_set = TagsSet()
+    def test_add_unique_tag_new_key(self):
+        """Test add_unique_tag with new key."""
+        tags = TagsSet()
+        tags.add_unique_tag('env', 'prod')
+        assert tags.get_tags() == ['env:prod']
 
-        # Add initial tag
-        tags_set.add_tag('env', 'production')
-        tags_set.add_tag('env', 'staging')
-        assert len([t for t in tags_set.get_tags() if t[0] == 'env']) == 2
+    def test_get_tag_empty(self):
+        """Test get_tag on empty set."""
+        tags = TagsSet()
+        assert tags.get_tag('env') == set()
 
-        # Add unique tag - should replace all existing values for that key
-        tags_set.add_unique_tag('env', 'development')
-        assert tags_set.get_tags() == [('env', 'development')]
+    def test_get_tag_single_value(self):
+        """Test get_tag with single value."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        assert tags.get_tag('env') == {'prod'}
 
-        # Add unique tag for new key
-        tags_set.add_unique_tag('region', 'us-east-1')
-        expected = [('env', 'development'), ('region', 'us-east-1')]
-        assert sorted(tags_set.get_tags()) == sorted(expected)
+    def test_get_tag_multiple_values(self):
+        """Test get_tag with multiple values."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('env', 'dev')
+        assert tags.get_tag('env') == {'prod', 'dev'}
 
-    def test_get_tag(self):
-        """Test getting values for a specific key."""
-        tags_set = TagsSet()
+    def test_get_tag_nonexistent_key(self):
+        """Test get_tag with non-existent key."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        assert tags.get_tag('app') == set()
 
-        # Test getting from empty set
-        assert tags_set.get_tag('env') == set()
+    def test_get_tags_unsorted(self):
+        """Test get_tags with sort=False."""
+        tags = TagsSet()
+        tags.add_tag('b', '1')
+        tags.add_tag('a', '2')
+        result = tags.get_tags(sort=False)
+        assert set(result) == {'a:2', 'b:1'}
 
-        # Add some tags
-        tags_set.add_tag('env', 'production')
-        tags_set.add_tag('env', 'staging')
-        tags_set.add_tag('env', 'development')
-        tags_set.add_tag('service', 'web')
-        tags_set.add_tag('service', 'api')
-
-        # Test getting existing keys
-        assert tags_set.get_tag('env') == {'production', 'staging', 'development'}
-        assert tags_set.get_tag('service') == {'web', 'api'}
-
-        # Test getting non-existent key
-        assert tags_set.get_tag('region') == set()
-
-        # Test after unique tag (replaces all values)
-        tags_set.add_unique_tag('env', 'testing')
-        assert tags_set.get_tag('env') == {'testing'}
-
-        # Test after removing specific value
-        tags_set.add_tag('env', 'qa')
-        tags_set.remove_tag('env', 'testing')
-        assert tags_set.get_tag('env') == {'qa'}
-
-        # Test after removing all values for a key
-        tags_set.remove_tag('env')
-        assert tags_set.get_tag('env') == set()
-
-    def test_iterator(self):
-        """Test iteration over tags."""
-        tags_set = TagsSet()
-
-        # Add tags
-        tags_set.add_tag('env', 'production')
-        tags_set.add_tag('service', 'web')
-        tags_set.add_tag('region', 'us-east-1')
-
-        # Test iteration
-        tags_list = list(tags_set)
-        expected = [('env', 'production'), ('region', 'us-east-1'), ('service', 'web')]
-        assert tags_list == expected
-
-        # Test that iteration returns sorted results
-        tags_via_iter = list(tags_set)
-        tags_via_method = tags_set.get_tags(sort=True)
-        assert tags_via_iter == tags_via_method
-
-    def test_tags_sorted(self):
-        """Test that get_tags() returns sorted results."""
-        tags_set = TagsSet()
-
-        # Add tags in non-sorted order
-        tags_set.add_tag('zoo', 'animals')
-        tags_set.add_tag('apple', 'fruit')
-        tags_set.add_tag('banana', 'fruit')
-        tags_set.add_tag('apple', 'company')
-
-        # Should be sorted by key first, then value
-        expected = [('apple', 'company'), ('apple', 'fruit'), ('banana', 'fruit'), ('zoo', 'animals')]
-        assert tags_set.get_tags() == expected
-        assert tags_set.get_tags(sort=True) == expected
-
-        # Test unsorted - should still contain all tags but order not guaranteed
-        unsorted_tags = tags_set.get_tags(sort=False)
-        assert len(unsorted_tags) == len(expected)
-        assert set(unsorted_tags) == set(expected)
+    def test_get_tags_sorted(self):
+        """Test get_tags with sort=True."""
+        tags = TagsSet()
+        tags.add_tag('b', '1')
+        tags.add_tag('a', '2')
+        assert tags.get_tags(sort=True) == ['a:2', 'b:1']
 
     def test_remove_tag_all_values(self):
-        """Test removing all tags under a key."""
-        tags_set = TagsSet()
-
-        # Add multiple tags
-        tags_set.add_tag('env', 'production')
-        tags_set.add_tag('env', 'staging')
-        tags_set.add_tag('env', 'development')
-        tags_set.add_tag('service', 'web')
-
-        # Remove all env tags
-        tags_set.remove_tag('env')
-        assert tags_set.get_tags() == [('service', 'web')]
-
-        # Remove non-existent key (should not raise error)
-        tags_set.remove_tag('non_existent')
-        assert tags_set.get_tags() == [('service', 'web')]
+        """Test removing all values for a key."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('env', 'dev')
+        tags.remove_tag('env')
+        assert tags.get_tags() == []
 
     def test_remove_tag_specific_value(self):
-        """Test removing specific key:value tags."""
-        tags_set = TagsSet()
+        """Test removing specific value."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('env', 'dev')
+        tags.remove_tag('env', 'dev')
+        assert tags.get_tags() == ['env:prod']
 
-        # Add multiple tags
-        tags_set.add_tag('env', 'production')
-        tags_set.add_tag('env', 'staging')
-        tags_set.add_tag('env', 'development')
-        tags_set.add_tag('service', 'web')
+    def test_remove_tag_nonexistent_key(self):
+        """Test removing non-existent key doesn't error."""
+        tags = TagsSet()
+        tags.remove_tag('env')  # Should not raise
+        assert tags.get_tags() == []
 
-        # Remove specific env tag
-        tags_set.remove_tag('env', 'staging')
-        expected = [('env', 'development'), ('env', 'production'), ('service', 'web')]
-        assert sorted(tags_set.get_tags()) == sorted(expected)
+    def test_remove_tag_nonexistent_value(self):
+        """Test removing non-existent value doesn't error."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.remove_tag('env', 'dev')  # Should not raise
+        assert tags.get_tags() == ['env:prod']
 
-        # Remove non-existent value (should not raise error)
-        tags_set.remove_tag('env', 'non_existent')
-        assert sorted(tags_set.get_tags()) == sorted(expected)
+    def test_clear_with_tags(self):
+        """Test clear removes all tags."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('app', 'web')
+        tags.clear()
+        assert tags.get_tags() == []
 
-        # Remove last value for a key - key should be removed
-        tags_set.remove_tag('service', 'web')
-        expected = [('env', 'development'), ('env', 'production')]
-        assert sorted(tags_set.get_tags()) == sorted(expected)
+    def test_iterator_empty(self):
+        """Test iteration on empty set."""
+        tags = TagsSet()
+        assert list(tags) == []
 
-    def test_clear(self):
-        """Test clearing all tags."""
-        tags_set = TagsSet()
+    def test_iterator_multiple_tags(self):
+        """Test iteration yields tuples."""
+        tags = TagsSet()
+        tags.add_tag('env', 'prod')
+        tags.add_tag('app', 'web')
+        assert list(tags) == [('app', 'web'), ('env', 'prod')]
 
-        # Add tags
-        tags_set.add_tag('env', 'production')
-        tags_set.add_tag('service', 'web')
-        tags_set.add_tag('region', 'us-east-1')
+    def test_empty_key_value(self):
+        """Test empty string key and value."""
+        tags = TagsSet()
+        tags.add_tag('', '')
+        assert tags.get_tags() == []
 
-        assert len(tags_set.get_tags()) > 0
+    def test_special_chars_colon(self):
+        """Test key/value with colons."""
+        tags = TagsSet()
+        tags.add_tag('url', 'http://example.com')
+        assert tags.get_tags() == ['url:http://example.com']
 
-        # Clear all tags
-        tags_set.clear()
-        assert tags_set.get_tags() == []
-
-    def test_edge_cases(self):
-        """Test edge cases."""
-        tags_set = TagsSet()
-
-        # Test empty string key and value
-        tags_set.add_tag('', '')
-        assert tags_set.get_tags() == [('', '')]
-
-        # Test with special characters
-        tags_set.clear()
-        tags_set.add_tag('key:with:colons', 'value:with:colons')
-        tags_set.add_tag('key/with/slashes', 'value/with/slashes')
-        tags_set.add_tag('key=with=equals', 'value=with=equals')
-
-        assert len(tags_set.get_tags()) == 3
-
-        # Test removing with special characters
-        tags_set.remove_tag('key:with:colons', 'value:with:colons')
-        assert len(tags_set.get_tags()) == 2
-
-    def test_multiple_operations(self):
-        """Test a sequence of operations."""
-        tags_set = TagsSet()
-
-        # Build up tags
-        tags_set.add_tag('env', 'prod')
-        tags_set.add_tag('env', 'dev')
-        tags_set.add_tag('service', 'api')
-        tags_set.add_unique_tag('version', '1.0.0')
-
-        # Verify state
-        assert len(tags_set.get_tags()) == 4
-
-        # Remove specific tag
-        tags_set.remove_tag('env', 'dev')
-        assert len(tags_set.get_tags()) == 3
-
-        # Update version
-        tags_set.add_unique_tag('version', '2.0.0')
-        expected = [('env', 'prod'), ('service', 'api'), ('version', '2.0.0')]
-        assert sorted(tags_set.get_tags()) == sorted(expected)
-
-        # Remove all env tags
-        tags_set.remove_tag('env')
-        expected = [('service', 'api'), ('version', '2.0.0')]
-        assert sorted(tags_set.get_tags()) == sorted(expected)
-
-        # Clear everything
-        tags_set.clear()
-        assert tags_set.get_tags() == []
+    def test_sorting_by_key_then_value(self):
+        """Test sorting is by key first, then value."""
+        tags = TagsSet()
+        tags.add_tag('a', '2')
+        tags.add_tag('a', '1')
+        tags.add_tag('b', '1')
+        assert tags.get_tags() == ['a:1', 'a:2', 'b:1']

@@ -33,7 +33,7 @@ class TagsSet:
       - add_tag(key, value): add one or more tags under the same key
       - add_unique_tag(key, value): add a tag ensuring the key is unique (replaces any existing tags with that key)
       - get_tag(key): return a set of all values for the given key
-      - get_tags(sort=True): return a sorted list of (key, value) tuples
+      - get_tags(sort=True): return a list of formatted strings 'key:value'
       - iteration: iterate over tags yielding (key, value) tuples
       - remove_tag(key, value=None): remove all tags under a given key, or a specific key:value tag if value is provided
       - clear(): remove all tags
@@ -44,6 +44,9 @@ class TagsSet:
 
     def add_tag(self, key: str, value: str) -> None:
         """Add a tag under given key."""
+        if not key:
+            return
+
         if key not in self._data:
             self._data[key] = set()
         self._data[key].add(value)
@@ -56,13 +59,17 @@ class TagsSet:
         """Return all values for the given key. Returns an empty set if key doesn't exist."""
         return self._data.get(key, set())
 
-    def get_tags(self, sort: bool = True) -> list[tuple[str, str]]:
+    def _get_tag_tuples(self, sort: bool = True) -> list[tuple[str, str]]:
         """Return all tags as a list of (key, value) tuples, sorted if requested."""
         tags_list: list[tuple[str, str]] = []
         for key, values in self._data.items():
             for val in values:
                 tags_list.append((key, val))
         return sorted(tags_list) if sort else tags_list
+
+    def get_tags(self, sort: bool = True) -> list[str]:
+        """Return all tags as a list of 'key:value' formatted strings, sorted if requested."""
+        return [f"{key}:{value}" for key, value in self._get_tag_tuples(sort=sort)]
 
     def remove_tag(self, key: str, value: str | None = None) -> None:
         """Remove tag(s) under the given key.
@@ -80,7 +87,7 @@ class TagsSet:
 
     def __iter__(self) -> Iterator[tuple[str, str]]:
         """Allow iteration over tags: for tag in ts or list(ts)."""
-        return iter(self.get_tags())
+        return iter(self._get_tag_tuples())
 
     def clear(self) -> None:
         """Remove all tags."""
