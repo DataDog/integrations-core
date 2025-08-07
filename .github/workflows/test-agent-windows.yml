@@ -1,4 +1,4 @@
-name: Test Agent release
+name: Test Agent release Windows
 
 on:
   workflow_dispatch:
