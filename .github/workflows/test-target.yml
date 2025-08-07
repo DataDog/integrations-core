@@ -268,6 +268,12 @@ jobs:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         # Check for specific environment first if it does exist then run the test for that environment else run all environments
+        echo "=== DEBUG: Full ddev env show output ==="
+        ddev env show ${{ inputs.target }}
+        ddev env show mongo
+        echo "=== END NEXT ==="
+        ddev env show ${{ inputs.target }} | grep '${{ inputs.target-env }}'
+        echo "=== END DEBUG ==="
         if [ -n '${{ inputs.target-env }}' ]; then
           if ddev env show ${{ inputs.target }} | grep -q '${{ inputs.target-env }}'; then
             echo "Environment ${{ inputs.target-env }} exists for ${{ inputs.target }}, running E2E tests..."
