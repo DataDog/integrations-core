@@ -26,6 +26,8 @@ def test_env_vars_repo(ddev, helpers, data_dir, write_result_file, mocker):
     with mock.patch('ddev.utils.structures.EnvVars', side_effect=MockEnvVars):
         result = ddev('env', 'test', 'postgres', 'py3.12')
         assert result.exit_code == 0, result.output
+        # Ensure test was not skipped
+        assert "does not have E2E tests to run" not in result.output
 
 
 @pytest.mark.parametrize(
