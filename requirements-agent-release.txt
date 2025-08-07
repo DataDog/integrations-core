@@ -153,7 +153,7 @@ datadog-nginx-ingress-controller==5.0.1
 datadog-nginx==9.0.1
 datadog-nvidia-nim==2.0.1
 datadog-nvidia-triton==3.0.1
-datadog-octopus-deploy==2.0.0
+datadog-octopus-deploy==2.0.1
 datadog-openldap==3.0.0
 datadog-openmetrics==7.0.0
 datadog-openstack-controller==9.0.0
