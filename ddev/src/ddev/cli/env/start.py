@@ -62,7 +62,7 @@ def start(
     ignore_state: bool,
 ):
     """
-    Start an environment.
+    Start an environment and test build windows.
     """
     import json
     import os
