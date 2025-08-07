@@ -121,7 +121,7 @@ datadog-kubeflow==2.0.1
 datadog-kubelet==10.0.1
 datadog-kubernetes-cluster-autoscaler==3.0.1
 datadog-kubernetes-state==10.1.1
-datadog-kubevirt-api==2.0.0
+datadog-kubevirt-api==2.0.1
 datadog-kubevirt-controller==2.0.0
 datadog-kubevirt-handler==2.0.0
 datadog-kuma==2.0.0
