@@ -28,7 +28,7 @@
         "type": "note",
         "content": "**Useful Links**\n\n* [Data Streams Monitoring](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)\n* [Kafka Broker Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Consumer Integration Doc](https://docs.datadoghq.com/integrations/kafka-consumer/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [Data Streams Kafka Lag Dashboard](/dashboard/lists?q=Data%20Streams%20Monitoring%3A%20Kafka&p=1)\n* [ZooKeeper Integration Doc](https://docs.datadoghq.com/integrations/zk/?tab=host)\n",
         "background_color": "white",
-        "font_size": "16",
+        "font_size": "14",
         "text_align": "left",
         "vertical_align": "top",
         "show_tick": false,
@@ -56,7 +56,7 @@
             "id": 8756831542082047,
             "definition": {
               "type": "note",
-              "content": "To visualize the your streaming data pipelines and easily investigate Kafka issues and identify bottlenecks, check out [Data Streams Monitoring](/data-streams) or [learn more](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).",
+              "content": "Visualize streaming pipelines, debug Kafka issues, and spot bottlenecks with [Data Streams Monitoring](/data-streams)",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "center",
@@ -199,7 +199,7 @@
     {
       "id": 1458255527068538,
       "definition": {
-        "title": "Cluster Health",
+        "title": "Clusters Health",
         "background_color": "purple",
         "show_title": true,
         "type": "group",
