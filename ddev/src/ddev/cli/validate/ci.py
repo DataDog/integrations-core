@@ -183,15 +183,6 @@ def ci(app: Application, sync: bool):
     target_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     windows_target_path = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
 
-    with open('/Users/juanpedro.araque/dd/integrations-core/ddev/expected_jobs_workflow.yml', 'w') as f:
-        f.write(expected_jobs_workflow)
-    with open('/Users/juanpedro.araque/dd/integrations-core/ddev/expected_windows_jobs_workflow.yml', 'w') as f:
-        f.write(expected_windows_jobs_workflow)
-    with open('/Users/juanpedro.araque/dd/integrations-core/ddev/original_jobs_workflow.yml', 'w') as f:
-        f.write(original_jobs_workflow)
-    with open('/Users/juanpedro.araque/dd/integrations-core/ddev/original_windows_jobs_workflow.yml', 'w') as f:
-        f.write(original_windows_jobs_workflow)
-
     # Check if either workflow needs updating
     workflows_need_sync = (
         original_jobs_workflow != expected_jobs_workflow
