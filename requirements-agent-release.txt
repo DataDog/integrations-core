@@ -193,7 +193,7 @@ datadog-slurm==2.0.2; sys_platform == 'linux2'
 datadog-snmp==10.1.1
 datadog-snowflake==7.6.1
 datadog-solr==2.1.0
-datadog-sonarqube==5.3.0
+datadog-sonarqube==5.3.1
 datadog-sonatype-nexus==2.0.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.0.0
 datadog-spark==7.0.0
