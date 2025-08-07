@@ -29,7 +29,7 @@ datadog-celery==2.0.1
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==6.0.1
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.16.0
+datadog-checks-base==37.17.0
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==8.0.0
 datadog-cilium==6.0.1
@@ -47,7 +47,7 @@ datadog-coredns==6.0.1; sys_platform == 'linux2'
 datadog-couch==9.0.1
 datadog-couchbase==6.0.1
 datadog-crio==5.0.1
-datadog-datadog-cluster-agent==6.0.0
+datadog-datadog-cluster-agent==6.0.1
 datadog-dcgm==4.0.0
 datadog-delinea-privilege-manager==1.0.0
 datadog-delinea-secret-server==1.0.0
