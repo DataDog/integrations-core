@@ -154,3 +154,11 @@ class TestTagsSet:
         tags.add_tag('a', '1')
         tags.add_tag('b', '1')
         assert tags.get_tags() == ['a:1', 'a:2', 'b:1']
+
+    # Tests for both tag formats (key:value and standalone value)
+    def test_add_standalone_tag(self):
+        """Test adding standalone value tags."""
+        tags = TagsSet()
+        tags.add_standalone_tag('production')
+        tags.add_standalone_tag('critical')
+        assert sorted(tags.get_tags()) == ['critical', 'production']

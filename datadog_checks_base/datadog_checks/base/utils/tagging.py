@@ -27,15 +27,20 @@ GENERIC_TAGS: set[str] = {
 
 class TagsSet:
     """
-    A data structure to manage a collection of tags (key:value pairs).
+    A data structure to manage a collection of tags supporting both formats:
+      - key:value pairs
+      - standalone values (stored with empty string key)
 
     Supports:
-      - add_tag(key, value): add one or more tags under the same key
-      - add_unique_tag(key, value): add a tag ensuring the key is unique (replaces any existing tags with that key)
+      - add(tag_string): add a tag in 'key:value' or 'value' format
+      - add_tag(key, value): add a key-value pair tag
+      - add_standalone_tag(value): add a standalone value tag
+      - add_unique_tag(key, value): add a tag ensuring the key has only this value
       - get_tag(key): return a set of all values for the given key
-      - get_tags(sort=True): return a list of formatted strings 'key:value'
+      - get_tags(sort=True): return a list of formatted tag strings
       - iteration: iterate over tags yielding (key, value) tuples
-      - remove_tag(key, value=None): remove all tags under a given key, or a specific key:value tag if value is provided
+      - remove(tag_string): remove a tag in 'key:value' or 'value' format
+      - remove_tag(key, value=None): remove all tags under a given key, or a specific key:value tag
       - clear(): remove all tags
     """
 
@@ -43,7 +48,10 @@ class TagsSet:
         self._data: dict[str, set[str]] = {}
 
     def add_tag(self, key: str, value: str) -> None:
-        """Add a tag under given key."""
+        """Add a tag with explicit key and value.
+
+        For standalone value tags, use add_standalone_tag() instead.
+        """
         if not key:
             return
 
@@ -51,8 +59,19 @@ class TagsSet:
             self._data[key] = set()
         self._data[key].add(value)
 
+    def add_standalone_tag(self, value: str) -> None:
+        """Add a standalone value tag (no key).
+
+        Standalone tags are stored internally with an empty key.
+        """
+        if '' not in self._data:
+            self._data[''] = set()
+        self._data[''].add(value)
+
     def add_unique_tag(self, key: str, value: str) -> None:
         """Add a tag under given key, ensuring the key has only this value."""
+        if not key:
+            return None
         self._data[key] = {value}
 
     def get_tag(self, key: str) -> set[str]:
@@ -68,8 +87,19 @@ class TagsSet:
         return sorted(tags_list) if sort else tags_list
 
     def get_tags(self, sort: bool = True) -> list[str]:
-        """Return all tags as a list of 'key:value' formatted strings, sorted if requested."""
-        return [f"{key}:{value}" for key, value in self._get_tag_tuples(sort=sort)]
+        """Return all tags as a list of formatted strings, sorted if requested.
+
+        Returns tags in their original format:
+        - 'key:value' for key-value pairs
+        - 'value' for standalone values
+        """
+        tags = []
+        for key, value in self._get_tag_tuples(sort=False):
+            if key:
+                tags.append(f"{key}:{value}")
+            else:
+                tags.append(value)
+        return sorted(tags) if sort else tags
 
     def remove_tag(self, key: str, value: str | None = None) -> None:
         """Remove tag(s) under the given key.
@@ -85,10 +115,10 @@ class TagsSet:
                 if not self._data[key]:
                     del self._data[key]
 
-    def __iter__(self) -> Iterator[tuple[str, str]]:
-        """Allow iteration over tags: for tag in ts or list(ts)."""
-        return iter(self._get_tag_tuples())
-
     def clear(self) -> None:
         """Remove all tags."""
         self._data.clear()
+
+    def __iter__(self) -> Iterator[tuple[str, str]]:
+        """Allow iteration over tags: for tag in ts or list(ts)."""
+        return iter(self._get_tag_tuples())
