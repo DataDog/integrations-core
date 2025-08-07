@@ -269,7 +269,7 @@ jobs:
       run: |
         # Check for specific environment first if it does exist then run the test for that environment else run all environments
         if [ -n '${{ inputs.target-env }}' ]; then
-          if ddev env list ${{ inputs.target }} | grep -q '${{ inputs.target-env }}'; then
+          if ddev env show ${{ inputs.target }} | grep -q '${{ inputs.target-env }}'; then
             echo "Environment ${{ inputs.target-env }} exists for ${{ inputs.target }}, running E2E tests..."
             target_env='${{ inputs.target-env }}'
           else
