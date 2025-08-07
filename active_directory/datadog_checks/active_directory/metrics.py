@@ -82,10 +82,12 @@ METRICS_CONFIG = {
         'name': 'dhcp',
         'counters': [
             {
-                'Binding Updates Dropped': {'name': 'binding_updates_dropped', 'type': 'count'},
-                'Failover: Update pending messages': 'failover.update_pending_messages',
-                'Failover: Messages received/sec': {'name': 'failover.messages_received', 'type': 'rate'},
-                'Failover: Messages sent/sec': {'name': 'failover.messages_sent', 'type': 'rate'},
+                'Failover: BndUpd Dropped.': {'name': 'failover.binding_updates_dropped', 'type': 'count'},
+                'Failover: BndUpd pending in outbound queue.': 'failover.binding_updates_pending',
+                'Failover: BndUpd received/sec': {'name': 'failover.binding_updates_received', 'type': 'rate'},
+                'Failover: BndAck received/sec': {'name': 'failover.binding_acks_received', 'type': 'rate'},
+                'Failover: BndUpd sent/sec': {'name': 'failover.binding_updates_sent', 'type': 'rate'},
+                'Failover: BndAck sent/sec': {'name': 'failover.binding_acks_sent', 'type': 'rate'},
             }
         ],
     },
@@ -93,10 +95,12 @@ METRICS_CONFIG = {
         'name': 'dfsr',
         'counters': [
             {
-                'Size of Files Deleted': {'name': 'deleted_files_size', 'unit': 'byte'},
-                'Staging Space In Use': {'name': 'staging_folder_size', 'unit': 'byte'},
+                'Deleted Space In Use': {'name': 'deleted_space_in_use', 'unit': 'byte'},
+                'Deleted Bytes Generated': {'name': 'deleted_bytes_generated', 'unit': 'byte'},
+                'Staging Space In Use': {'name': 'staging_space_in_use', 'unit': 'byte'},
                 'File Installs Retried': {'name': 'file_installs_retried', 'type': 'count'},
-                'Conflict Folder Size': {'name': 'conflict_files_size', 'unit': 'byte'},
+                'Conflict Space In Use': {'name': 'conflict_space_in_use', 'unit': 'byte'},
+                'Conflict Bytes Generated': {'name': 'conflict_bytes_generated', 'unit': 'byte'},
             }
         ],
     },
