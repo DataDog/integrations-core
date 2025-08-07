@@ -12,7 +12,7 @@
 ***Fixed***:
 
 * Fixed a bug where the AWS configuration was overwritten for the Postgres integration ([#20774](https://github.com/DataDog/integrations-core/pull/20774))
-* Improve descriptions and examples ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
 * Avoid sending empty Postgres extensions and settings payloads ([#20939](https://github.com/DataDog/integrations-core/pull/20939))
 
 ## 22.16.0 / 2025-07-29

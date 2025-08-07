@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* Improve descriptions and examples ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
 
 ## 6.2.0 / 2025-01-25 / Agent 7.63.0
 

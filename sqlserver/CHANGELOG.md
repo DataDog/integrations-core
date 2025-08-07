@@ -12,7 +12,7 @@
 
 * Add deprecated `collect_schemas`, `collect_xe` and `collect_deadlocks` option to `config.yaml.example`. These config options are deprecated at Agent 7.70.0 and will be removed in a future release. ([#20781](https://github.com/DataDog/integrations-core/pull/20781))
 * Lift `pyodbc` dependency exclusion for macOS on AArch64/ARM64 ([#20812](https://github.com/DataDog/integrations-core/pull/20812))
-* Improve descriptions and examples ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
 
 ## 22.7.1 / 2025-07-10
 
