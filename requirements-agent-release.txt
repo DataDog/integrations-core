@@ -109,7 +109,7 @@ datadog-karpenter==3.0.1
 datadog-kaspersky==1.0.0
 datadog-keda==2.0.1
 datadog-keycloak==1.0.0
-datadog-kong==6.0.0
+datadog-kong==6.0.1
 datadog-krakend==1.0.0
 datadog-kube-apiserver-metrics==7.0.0
 datadog-kube-controller-manager==8.0.0
