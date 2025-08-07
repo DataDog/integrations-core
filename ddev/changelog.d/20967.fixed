@@ -1,1 +1,1 @@
-Avoid  to start if a package without E2E tests is selected
+Skip E2E test execution for packages that don’t define them.

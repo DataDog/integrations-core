@@ -116,7 +116,6 @@ def test_command(
             and (python_filter is None or data.get('python') == python_filter)
         ]
 
-        print(env_names)
     elif environment == 'active':
         env_names = active_envs
     else:
