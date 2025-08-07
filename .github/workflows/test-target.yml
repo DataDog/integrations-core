@@ -267,16 +267,29 @@ jobs:
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
+        # Check for specific environment first if it does exist then run the test for that environment else run all environments
+        if [ -n '${{ inputs.target-env }}' ]; then
+          if ddev env list ${{ inputs.target }} | grep -q '${{ inputs.target-env }}'; then
+            echo "Environment ${{ inputs.target-env }} exists for ${{ inputs.target }}, running E2E tests..."
+            target_env='${{ inputs.target-env }}'
+          else
+            echo "Environment ${{ inputs.target-env }} does not exist for ${{ inputs.target }}, skipping E2E tests."
+            exit 0
+          fi
+        else
+          echo "No specific environment requested, running all environments for ${{ inputs.target }}..."
+          target_env='all'
+        fi
+          # '-- all' is passed for e2e tests if pytest args are provided
+          # This is done to avoid ddev from interpreting the arguments as environments
+          #   instead of pytest-args, because by default if no environment is provided
+          #   after -- it will run all environments. So when pytests args are provided
+          #   ddev will interpret '-m' as an environment to run the e2e test on and fails
+          # This is not required when no pytest args are provided and it will run all environments
+          #   by default
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} -- ${{ inputs.pytest-args }} -k "not fips"
+          ddev env test --base --new-env --junit ${{ inputs.target }} $target_env -- ${{ inputs.pytest-args }} -k "not fips"
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
             # Flaky test count can be zero, this is done to avoid pipeline failure
@@ -287,7 +300,7 @@ jobs:
           fi
         elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
           set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} -- ${{ inputs.pytest-args }} -k "not fips"
+          ddev env test --base --new-env --junit ${{ inputs.target }} $target_env -- ${{ inputs.pytest-args }} -k "not fips"
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
             # Flaky test count can be zero, this is done to avoid pipeline failure
@@ -297,7 +310,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
+          ddev env test --base --new-env --junit ${{ inputs.target }} $target_env ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
         fi
 
     - name: Run E2E tests
