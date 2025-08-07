@@ -1,4 +1,6 @@
-name: Test all windows
+name: Test all Windows
+# This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
+# We will remove this once we have a better solution
 
 on:
   workflow_call:
