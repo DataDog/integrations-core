@@ -269,13 +269,7 @@ jobs:
       run: |
         # Check for specific environment first if it does exist then run the test for that environment else run all environments
         echo "=== DEBUG: Full ddev env show output ==="
-        echo "=== DEBUG: Environment info ==="
-        echo "PWD: $(pwd)"
-        echo "Python version: $(python --version)"
-        echo "Docker version: $(docker --version)"
         echo "DDEV version: $(ddev --version)"
-        echo "Environment variables:"
-        env | grep -E "(DDEV|PYTHON|DOCKER)" || echo "No relevant env vars found"
         echo ${{ inputs.target }}
         echo "=== END DEBUG ==="
         ddev env show mongo
