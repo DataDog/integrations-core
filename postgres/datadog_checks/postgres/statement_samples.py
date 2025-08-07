@@ -485,7 +485,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         except Exception:
             self._log.exception('Unable to collect statement samples due to an error')
 
-
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
         start_time = time.time()
