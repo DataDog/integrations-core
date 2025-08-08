@@ -981,7 +981,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   <!-- xxz tab xxx -->
   <!-- xxz tabs xxx -->
 
-2. You can configure the injected Agents to automatically collect logs for the other containers in the pod by enabling `DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL`. Alternatively, the log integration can be setup through the standard Kubernetes [Autodiscovery annotations][30].
+2. You can configure the Agent sidecar to automatically collect logs for all of the containers in its pod by enabling `DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL`. Alternatively, the log integration can be setup per container with the standard Kubernetes [Autodiscovery annotations][30].
 
   <!-- xxx tabs xxx -->
   <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
