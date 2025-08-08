@@ -1,6 +1,9 @@
 id: kuma
 metric_id: kuma
 backend_only: false
+installation_sources:
+  - kuma
+  - kong_mesh
 facets:
   - groups:
       - Web Access
