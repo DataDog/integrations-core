@@ -82,7 +82,7 @@ def show(app: Application, *, intg_name: str | None, environment: str | None, fo
 
         metadata = env_data.read_metadata()
         agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-        agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
+        agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
 
         app.display_pair('Agent type', agent_type)
         app.display_pair('Agent ID', agent.get_id())

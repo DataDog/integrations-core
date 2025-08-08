@@ -8,6 +8,7 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka.admin import AdminClient
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -32,6 +33,27 @@ def mocked_read_persistent_cache(cache_key):
 
 def mocked_time():
     return 400
+
+
+def get_all_consumer_groups(kafka_instance):
+    """Get all consumer groups from Kafka cluster."""
+    config = {
+        "bootstrap.servers": kafka_instance['kafka_connect_str'],
+        "socket.timeout.ms": 1000,
+        "topic.metadata.refresh.interval.ms": 2000,
+    }
+    config.update(common.get_authentication_configuration(kafka_instance))
+    admin_client = AdminClient(config)
+
+    final_groups = set()
+    try:
+        groups_result = admin_client.list_consumer_groups().result()
+        for valid_group in groups_result.valid:
+            final_groups.add(valid_group.group_id)
+    except Exception as e:
+        print(f"Error getting final consumer groups: {e}")
+
+    return final_groups
 
 
 def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
@@ -486,6 +508,11 @@ def test_data_streams_live_messages(dd_run_check, check, kafka_instance, datadog
     ]
     kafka_check = check(kafka_instance)
     dd_run_check(kafka_check)
+
+    # Verify that live messages is not leaving behind any new consumer groups
+    final_groups = get_all_consumer_groups(kafka_instance)
+    assert final_groups == {'my_consumer'}
+
     expected_logs = [
         {
             'timestamp': 400 * 1000,
@@ -495,6 +522,7 @@ def test_data_streams_live_messages(dd_run_check, check, kafka_instance, datadog
             'topic': 'marvel',
             'partition': '0',
             'offset': '0',
+            'feature': 'data_streams_messages',
             'message_value': '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
             'ddtags': 'optional:tag1',
         },
@@ -506,6 +534,7 @@ def test_data_streams_live_messages(dd_run_check, check, kafka_instance, datadog
             'topic': 'marvel',
             'partition': '0',
             'offset': '1',
+            'feature': 'data_streams_messages',
             'message_value': '{"name": "Bruce Banner", "age": 45,\
  "transaction_amount": 456, "currency": "dollar"}',
             'value_schema_id': '350',

@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 35.1.4 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in configuration templates ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Fix codeowners validation to use proper team ([#20974](https://github.com/DataDog/integrations-core/pull/20974))
+
 ## 35.1.3 / 2025-07-30
 
 ***Fixed***:
