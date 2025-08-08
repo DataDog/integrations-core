@@ -27,7 +27,7 @@ from .version_utils import V9_4, V10, V14
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 QUERYID_TO_CALLS_QUERY = """
 SELECT queryid, calls
@@ -318,7 +318,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             else:
                 if len(current) == 1:
                     self._log.warning(
-                        "A single query is too large to send to Datadog. This query will be dropped. " "size=%d",
+                        "A single query is too large to send to Datadog. This query will be dropped. size=%d",
                         size,
                     )
                     continue

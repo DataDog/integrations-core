@@ -35,7 +35,7 @@ def test_e2e_profile_fireeye(dd_agent_check):
         'device_id:default:' + ip_address,
     ] + [
         'fe_hardware_model:but but their driving acted forward forward their zombies',
-        'fe_serial_number:zombies driving quaintly Jaded their zombies driving but ' 'Jaded',
+        'fe_serial_number:zombies driving quaintly Jaded their zombies driving but Jaded',
     ]
 
     # --- TEST EXTENDED METRICS ---

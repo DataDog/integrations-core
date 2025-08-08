@@ -42,7 +42,7 @@ platforms = ["linux", "windows"]
 
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2019"] }
+runners = { windows = ["windows-2022"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
@@ -133,6 +133,9 @@ exclude = [
     'http_check',
     'kubelet',
     'kubevirt',
+    'kubevirt_api',
+    'kubevirt_handler',
+    'kubevirt_controller',
     'kubernetes_state',
     'network',
     'ntp',

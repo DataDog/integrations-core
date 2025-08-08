@@ -1,0 +1,35 @@
+{
+  "booleans": [
+    "spec.paused",
+    "status.abort",
+    "status.controllerPause"
+  ],
+  "numbers": [
+    "spec.replicas",
+    "spec.revisionHistoryLimit",
+    "spec.progressDeadlineSeconds",
+    "spec.minReadySeconds",
+    "status.replicas",
+    "status.updatedReplicas",
+    "status.readyReplicas",
+    "status.availableReplicas",
+    "status.currentStepIndex",
+    "status.collisionCount",
+    "status.HPAReplicas"
+  ],
+  "strings": [
+    "apiVersion",
+    "kind",
+    "spec.workloadRef.apiVersion",
+    "spec.workloadRef.kind",
+    "spec.workloadRef.name",
+    "spec.workloadRef.scaleDown",
+    "spec.restartAt",
+    "status.phase",
+    "status.message",
+    "status.stableRS",
+    "status.selector",
+    "status.observedGeneration",
+    "status.workloadObservedGeneration"
+  ]
+}

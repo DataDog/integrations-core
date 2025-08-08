@@ -4,8 +4,8 @@
 import json
 from datetime import datetime, timedelta, timezone
 
-from ...utils.date import parse_rfc3339
-from .. import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.date import parse_rfc3339
 
 try:
     from datadog_agent import get_config

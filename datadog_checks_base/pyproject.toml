@@ -65,7 +65,7 @@ http = [
     "requests-oauthlib==2.0.0",
 ]
 json = [
-    "orjson==3.10.18",
+    "orjson==3.11.1",
 ]
 kube = [
     "kubernetes==33.1.0",
@@ -91,3 +91,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.ruff]
+extend = "../pyproject.toml"

@@ -83,7 +83,7 @@ from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionU
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -203,9 +203,8 @@ class PostgreSql(AgentCheck):
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
-            self.cloud_metadata["aws"] = {
-                "instance_endpoint": self.resolved_hostname,
-            }
+            self.cloud_metadata["aws"] = self.cloud_metadata.get("aws", {})
+            self.cloud_metadata["aws"]["instance_endpoint"] = self.resolved_hostname
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             # some `deployment_type`s map to multiple `resource_type`s
@@ -645,8 +644,7 @@ class PostgreSql(AgentCheck):
             expected_number_of_columns = len(descriptors) + len(cols)
             if len(row) != expected_number_of_columns:
                 raise RuntimeError(
-                    'Row does not contain enough values: '
-                    'expected {} ({} descriptors + {} columns), got {}'.format(
+                    'Row does not contain enough values: expected {} ({} descriptors + {} columns), got {}'.format(
                         expected_number_of_columns, len(descriptors), len(cols), len(row)
                     )
                 )
@@ -1067,7 +1065,7 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
+            message = 'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
                 self._config.host, self._config.port, self._config.dbname, str(e)
             )
             self.service_check(

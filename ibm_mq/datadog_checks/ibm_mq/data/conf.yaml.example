@@ -150,6 +150,12 @@ instances:
     #
     # auto_discover_queues: false
 
+    ## @param auto_discover_queues_via_names - boolean - optional - default: false
+    ## Autodiscover queues via names. Discovers all queue names, then collects metrics per queue. More resilient to
+    ## individual queue failures (e.g., permissions, broken queues), but uses more resources than bulk collection.
+    #
+    # auto_discover_queues_via_names: false
+
     ## @param collect_statistics_metrics - boolean - optional - default: false
     ## Collect metrics from Statistics Messages. Statistics collected are:
     ##   - channel statistics (MQCMD_STATISTICS_CHANNEL)
@@ -166,6 +172,16 @@ instances:
     ## https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
     #
     # collect_reset_queue_metrics: true
+
+    ## @param collect_connection_metrics - boolean - optional - default: false
+    ## Collect connection-related metrics. Metrics collected are:
+    ##   - connection status metrics (ibm_mq.channel.conn_status)
+    ##
+    ## Note: Enabling this option increases tag cardinality, as the ibm_mq.channel.conn_status
+    ## metric creates a new `connection` tag for each unique connection. This can lead to high
+    ## cardinality if you have many active connections.
+    #
+    # collect_connection_metrics: false
 
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.

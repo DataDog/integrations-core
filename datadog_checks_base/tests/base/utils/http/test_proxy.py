@@ -198,23 +198,24 @@ def test_no_proxy_uris_coverage():
         ),
     ],
 )
-@mock.patch('datadog_checks.base.utils.http.requests')
-def test_proxy_passes_right_params_to_requests(requests, proxy, expected_proxy, url):
+def test_proxy_passes_right_params_to_requests(proxy, expected_proxy, url):
     instance = {'proxy': proxy}
     init_config = {}
 
     http = RequestsWrapper(instance, init_config)
-    http.get(url)
 
-    call_args = {
-        'auth': None,
-        'cert': None,
-        'headers': OrderedDict(
-            [('User-Agent', 'Datadog Agent/0.0.0'), ('Accept', '*/*'), ('Accept-Encoding', 'gzip, deflate')]
-        ),
-        'proxies': expected_proxy,
-        'timeout': (10.0, 10.0),
-        'verify': True,
-        'allow_redirects': True,
-    }
-    requests.get.assert_called_with(url, **call_args)
+    with mock.patch('requests.Session.get') as mock_get:
+        http.get(url)
+
+        call_args = {
+            'auth': None,
+            'cert': None,
+            'headers': OrderedDict(
+                [('User-Agent', 'Datadog Agent/0.0.0'), ('Accept', '*/*'), ('Accept-Encoding', 'gzip, deflate')]
+            ),
+            'proxies': expected_proxy,
+            'timeout': (10.0, 10.0),
+            'verify': True,
+            'allow_redirects': True,
+        }
+        mock_get.assert_called_with(url, **call_args)

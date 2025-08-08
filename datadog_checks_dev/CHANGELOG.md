@@ -2,6 +2,30 @@
 
 <!-- towncrier release notes start -->
 
+## 35.1.4 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in configuration templates ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Fix codeowners validation to use proper team ([#20974](https://github.com/DataDog/integrations-core/pull/20974))
+
+## 35.1.3 / 2025-07-30
+
+***Fixed***:
+
+* Update required owner of logs files ([#20817](https://github.com/DataDog/integrations-core/pull/20817))
+* Fail config validation if templates are missing. ([#20832](https://github.com/DataDog/integrations-core/pull/20832))
+
+## 35.1.2 / 2025-07-14
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors ([#20435](https://github.com/DataDog/integrations-core/pull/20435))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* [MINPROC-2319] remove the integration exception mapper ([#20697](https://github.com/DataDog/integrations-core/pull/20697))
+* Update new integration readme template. ([#20749](https://github.com/DataDog/integrations-core/pull/20749))
+
 ## 35.1.1 / 2025-06-04
 
 ***Fixed***:

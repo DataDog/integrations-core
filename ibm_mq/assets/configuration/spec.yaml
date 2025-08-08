@@ -168,6 +168,13 @@ files:
         value:
           example: false
           type: boolean
+      - name: auto_discover_queues_via_names
+        description: |
+          Autodiscover queues via names. Discovers all queue names, then collects metrics per queue. More resilient to
+          individual queue failures (e.g., permissions, broken queues), but uses more resources than bulk collection.
+        value:
+          example: false
+          type: boolean
       - name: collect_statistics_metrics
         description: |
           Collect metrics from Statistics Messages. Statistics collected are:
@@ -186,6 +193,17 @@ files:
           https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
         value:
           example: true
+          type: boolean
+      - name: collect_connection_metrics
+        description: |
+          Collect connection-related metrics. Metrics collected are:
+            - connection status metrics (ibm_mq.channel.conn_status)
+
+          Note: Enabling this option increases tag cardinality, as the ibm_mq.channel.conn_status
+          metric creates a new `connection` tag for each unique connection. This can lead to high
+          cardinality if you have many active connections.
+        value:
+          example: false
           type: boolean
       - name: mqcd_version
         description: |
