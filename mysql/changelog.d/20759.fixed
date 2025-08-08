@@ -1,1 +1,0 @@
-Fixed an issue where reading cardinality from `BTREE` indexes on `MEMORY` tables could raise an error. These indexes may not report cardinality due to a known MySQL bug ([#58520](https://bugs.mysql.com/bug.php?id=58520)). The value will now default to 0.
