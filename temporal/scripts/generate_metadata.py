@@ -191,7 +191,12 @@ def check_existing_metric(name: str, previous_metadata: dict, added_dd_metrics: 
     Returns:
         metadata list with any existing metrics added
     """
-    pattern = re.compile(rf"^temporal\.server\.{re.escape(name)}(?:\.[a-z]+)*$")
+    # Match metric names like:
+    #   temporal.server.<metric_name>
+    #   temporal.server.<metric_name>.count
+    #   temporal.server.<metric_name>.sum
+    #   temporal.server.<metric_name>.bucket
+    pattern = re.compile(rf"^temporal\.server\.{re.escape(name)}(?:\.(?:count|sum|bucket))?$")
     result = []
     for dd_metric in previous_metadata:
         if pattern.match(dd_metric) and dd_metric not in added_dd_metrics:
