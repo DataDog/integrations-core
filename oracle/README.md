@@ -369,6 +369,7 @@ To connect to Oracle through TCPS (TCP with SSL), uncomment the `protocol` confi
 
 ### Custom query
 
+Custom Query is used to get specific fields from the database to be used a custom metrics.
 Providing custom queries is also supported. Each query must have two parameters:
 
 | Parameter       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -377,6 +378,7 @@ Providing custom queries is also supported. Each query must have two parameters:
 | `columns`       | This is a list representing each column, ordered sequentially from left to right. There are two required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix used to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
 
 Optionally use the `tags` parameter to apply a list of tags to each metric collected.
+The **number of columns** Output from the Custom Query should be **equal to to number of metrics variables** in the conf.yaml file shown below.
 
 The following:
 
