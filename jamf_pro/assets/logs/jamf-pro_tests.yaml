@@ -1,0 +1,388 @@
+id: "jamf-pro"
+tests:
+ -
+  sample: |-
+    {
+      "webhook" : {
+        "name" : "Computer Added Webhook",
+        "id" : 6010,
+        "webhookEvent" : "ComputerAdded",
+        "eventTimestamp" : 1752237458000
+      },
+      "event" : {
+        "osBuild" : "22F82",
+        "serialNumber" : "C02X1234JHD5",
+        "managementId" : "com.jamf.management.12345678-1234-5678-1234-567812345678",
+        "ipAddress" : "192.168.1.100",
+        "deviceName" : "John-Doe-MBP",
+        "building" : "Headquarters - Floor 3",
+        "jssID" : 12345,
+        "reportedIpAddress" : "203.0.113.45",
+        "room" : "3A-101",
+        "userDirectoryID" : "A1B2C3D4",
+        "realName" : "John Doe",
+        "emailAddress" : "john.doe@example.com",
+        "macAddress" : "00:1a:2b:3c:4d:5f",
+        "osVersion" : "13.4.1",
+        "alternateMacAddress" : "00:1a:2b:3c:4d:5e",
+        "phone" : "+1 (555) 123-4567",
+        "model" : "MacBook Pro (16-inch, 2023)",
+        "position" : "Senior Software Engineer",
+        "department" : "Engineering",
+        "udid" : "123e4567-e89b-12d3-a456-426614174000",
+        "username" : "jdoe"
+      }
+    }
+  result:
+    custom:
+      event:
+        computer:
+          alternateMacAddress: "00:1a:2b:3c:4d:5e"
+          building: "Headquarters - Floor 3"
+          department: "Engineering"
+          deviceName: "John-Doe-MBP"
+          jssID: 12345
+          macAddress: "00:1a:2b:3c:4d:5f"
+          managementId: "com.jamf.management.12345678-1234-5678-1234-567812345678"
+          model: "MacBook Pro (16-inch, 2023)"
+          osBuild: "22F82"
+          osVersion: "13.4.1"
+          phone: "+1 (555) 123-4567"
+          position: "Senior Software Engineer"
+          realName: "John Doe"
+          reportedIpAddress: "203.0.113.45"
+          room: "3A-101"
+          serialNumber: "C02X1234JHD5"
+          udid: "123e4567-e89b-12d3-a456-426614174000"
+          userDirectoryID: "A1B2C3D4"
+      evt:
+        name: "ComputerAdded"
+      network:
+        client:
+          geoip: {}
+          ip: "192.168.1.100"
+      usr:
+        email: "john.doe@example.com"
+        name: "jdoe"
+      webhook:
+        eventTimestamp: 1752237458000
+        id: 6010
+        name: "Computer Added Webhook"
+    message: |-
+      {
+        "webhook" : {
+          "name" : "Computer Added Webhook",
+          "id" : 6010,
+          "webhookEvent" : "ComputerAdded",
+          "eventTimestamp" : 1752237458000
+        },
+        "event" : {
+          "osBuild" : "22F82",
+          "serialNumber" : "C02X1234JHD5",
+          "managementId" : "com.jamf.management.12345678-1234-5678-1234-567812345678",
+          "ipAddress" : "192.168.1.100",
+          "deviceName" : "John-Doe-MBP",
+          "building" : "Headquarters - Floor 3",
+          "jssID" : 12345,
+          "reportedIpAddress" : "203.0.113.45",
+          "room" : "3A-101",
+          "userDirectoryID" : "A1B2C3D4",
+          "realName" : "John Doe",
+          "emailAddress" : "john.doe@example.com",
+          "macAddress" : "00:1a:2b:3c:4d:5f",
+          "osVersion" : "13.4.1",
+          "alternateMacAddress" : "00:1a:2b:3c:4d:5e",
+          "phone" : "+1 (555) 123-4567",
+          "model" : "MacBook Pro (16-inch, 2023)",
+          "position" : "Senior Software Engineer",
+          "department" : "Engineering",
+          "udid" : "123e4567-e89b-12d3-a456-426614174000",
+          "username" : "jdoe"
+        }
+      }
+    service: "ComputerAdded"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1752237458000
+ -
+  sample: |-
+    {
+      "webhook" : {
+        "name" : "SCEP Challenge Webhook",
+        "id" : 8010,
+        "webhookEvent" : "SCEPChallenge",
+        "eventTimestamp" : 1752237458000
+      },
+      "event" : {
+        "scepServerUrl" : "https://scep.example.com/mbp-certs",
+        "targetDevice" : {
+          "modelDisplay" : "16-inch MacBook Pro (2021)",
+          "product" : "MacBookPro18,3",
+          "osBuild" : "22G80",
+          "serialNumber" : "C07X1234JHD6",
+          "osVersion" : "13.6",
+          "bluetoothMacAddress" : "99:AA:BB:CC:DD:EE",
+          "model" : "MacBookPro18,3",
+          "udid" : "J0123456-7ABC-DEF8-9012-3456ABCDEF78",
+          "deviceName" : "Patricia's MacBook Pro",
+          "version" : "13.6",
+          "wifiMacAddress" : "99:AA:BB:CC:DD:EF"
+        },
+        "payloadTypes" : [ "com.apple.security.scep" ],
+        "payloadIdentifier" : "com.example.mbp.scep",
+        "targetUser" : {
+          "uid" : "1010",
+          "phone" : "+15554329876",
+          "departmentID" : 1000,
+          "dn" : "uid=pmartinez,ou=users,dc=example,dc=com",
+          "position" : "Manager",
+          "uuid" : "d0e1f2a3-b4c5-6789",
+          "email" : "patricia.martinez@example.com",
+          "room" : "1010",
+          "username" : "pmartinez",
+          "buildingID" : 1,
+          "realname" : "Patricia Martinez"
+        }
+      }
+    }
+  result:
+    custom:
+      event:
+        payloadIdentifier: "com.example.mbp.scep"
+        payloadTypes:
+         - "com.apple.security.scep"
+        scepServerUrl: "https://scep.example.com/mbp-certs"
+        targetDevice:
+          bluetoothMacAddress: "99:AA:BB:CC:DD:EE"
+          deviceName: "Patricia's MacBook Pro"
+          model: "MacBookPro18,3"
+          modelDisplay: "16-inch MacBook Pro (2021)"
+          osBuild: "22G80"
+          osVersion: "13.6"
+          product: "MacBookPro18,3"
+          serialNumber: "C07X1234JHD6"
+          udid: "J0123456-7ABC-DEF8-9012-3456ABCDEF78"
+          version: "13.6"
+          wifiMacAddress: "99:AA:BB:CC:DD:EF"
+        targetUser:
+          buildingID: 1
+          departmentID: 1000
+          dn: "uid=pmartinez,ou=users,dc=example,dc=com"
+          phone: "+15554329876"
+          position: "Manager"
+          realname: "Patricia Martinez"
+          room: "1010"
+          uuid: "d0e1f2a3-b4c5-6789"
+      evt:
+        name: "SCEPChallenge"
+      usr:
+        email: "patricia.martinez@example.com"
+        id: "1010"
+        name: "pmartinez"
+      webhook:
+        eventTimestamp: 1752237458000
+        id: 8010
+        name: "SCEP Challenge Webhook"
+    message: |-
+      {
+        "webhook" : {
+          "name" : "SCEP Challenge Webhook",
+          "id" : 8010,
+          "webhookEvent" : "SCEPChallenge",
+          "eventTimestamp" : 1752237458000
+        },
+        "event" : {
+          "scepServerUrl" : "https://scep.example.com/mbp-certs",
+          "targetDevice" : {
+            "modelDisplay" : "16-inch MacBook Pro (2021)",
+            "product" : "MacBookPro18,3",
+            "osBuild" : "22G80",
+            "serialNumber" : "C07X1234JHD6",
+            "osVersion" : "13.6",
+            "bluetoothMacAddress" : "99:AA:BB:CC:DD:EE",
+            "model" : "MacBookPro18,3",
+            "udid" : "J0123456-7ABC-DEF8-9012-3456ABCDEF78",
+            "deviceName" : "Patricia's MacBook Pro",
+            "version" : "13.6",
+            "wifiMacAddress" : "99:AA:BB:CC:DD:EF"
+          },
+          "payloadTypes" : [ "com.apple.security.scep" ],
+          "payloadIdentifier" : "com.example.mbp.scep",
+          "targetUser" : {
+            "uid" : "1010",
+            "phone" : "+15554329876",
+            "departmentID" : 1000,
+            "dn" : "uid=pmartinez,ou=users,dc=example,dc=com",
+            "position" : "Manager",
+            "uuid" : "d0e1f2a3-b4c5-6789",
+            "email" : "patricia.martinez@example.com",
+            "room" : "1010",
+            "username" : "pmartinez",
+            "buildingID" : 1,
+            "realname" : "Patricia Martinez"
+          }
+        }
+      }
+    service: "SCEPChallenge"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1752237458000
+ -
+  sample: |-
+    {
+      "webhook" : {
+        "name" : "Rest API Operation Webhook",
+        "id" : 7010,
+        "webhookEvent" : "RestAPIOperation",
+        "eventTimestamp" : 1752237458000
+      },
+      "event" : {
+        "operationSuccessful" : true,
+        "restAPIOperationType" : "UPDATE",
+        "objectTypeName" : "Patch Policy",
+        "objectName" : "Security Updates",
+        "authorizedUsername" : "jane.doe",
+        "objectID" : 10001
+      }
+    }
+  result:
+    custom:
+      event:
+        objectID: 10001
+        objectName: "Security Updates"
+        objectTypeName: "Patch Policy"
+        operationSuccessful: true
+      evt:
+        name: "RestAPIOperation"
+      http:
+        method: "UPDATE"
+      usr:
+        name: "jane.doe"
+      webhook:
+        eventTimestamp: 1752237458000
+        id: 7010
+        name: "Rest API Operation Webhook"
+    message: |-
+      {
+        "webhook" : {
+          "name" : "Rest API Operation Webhook",
+          "id" : 7010,
+          "webhookEvent" : "RestAPIOperation",
+          "eventTimestamp" : 1752237458000
+        },
+        "event" : {
+          "operationSuccessful" : true,
+          "restAPIOperationType" : "UPDATE",
+          "objectTypeName" : "Patch Policy",
+          "objectName" : "Security Updates",
+          "authorizedUsername" : "jane.doe",
+          "objectID" : 10001
+        }
+      }
+    service: "RestAPIOperation"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1752237458000
+ -
+  sample: |-
+    {
+      "webhook" : {
+        "name" : "Mobile Device Check In Webhook",
+        "id" : 9010,
+        "webhookEvent" : "MobileDeviceCheckIn",
+        "eventTimestamp" : 1752237458000
+      },
+      "event" : {
+        "modelDisplay" : "iPhone 13 Pro Max",
+        "mdmCommandUUID" : "d2a5f8a2-3e2b-4b4a-8a1d-8e1e2a3b4c5d",
+        "product" : "iPhone 13 Pro Max",
+        "osBuild" : "20F71",
+        "serialNumber" : "C39F12345678",
+        "managementId" : "549c8e89-d215-4a2e-806b-f054eb9c8430",
+        "ipAddress" : "192.168.1.100",
+        "mdmCommand" : "MobileDeviceCheckIn",
+        "deviceName" : "iPhone 13 Pro Max",
+        "version" : "16.5",
+        "jssID" : 11,
+        "room" : "Conference Room A",
+        "userDirectoryID" : "1001",
+        "wifiMacAddress" : "W4:F6:2C:5A:2A:91",
+        "osVersion" : "16.5",
+        "icciID" : "12345678901234567890",
+        "bluetoothMacAddress" : "F8:B1:DD:76:77:43",
+        "imei" : "358123456789012",
+        "model" : "iPhone14,3",
+        "udid" : "82b53ce7dklsjflksjhnfkljhdlasjhlkas",
+        "username" : "johndoe"
+      }
+    }
+  result:
+    custom:
+      event:
+        bluetoothMacAddress: "F8:B1:DD:76:77:43"
+        deviceName: "iPhone 13 Pro Max"
+        icciID: "12345678901234567890"
+        imei: "358123456789012"
+        jssID: 11
+        managementId: "549c8e89-d215-4a2e-806b-f054eb9c8430"
+        mdmCommand: "MobileDeviceCheckIn"
+        mdmCommandUUID: "d2a5f8a2-3e2b-4b4a-8a1d-8e1e2a3b4c5d"
+        model: "iPhone14,3"
+        modelDisplay: "iPhone 13 Pro Max"
+        osBuild: "20F71"
+        osVersion: "16.5"
+        product: "iPhone 13 Pro Max"
+        room: "Conference Room A"
+        serialNumber: "C39F12345678"
+        udid: "82b53ce7dklsjflksjhnfkljhdlasjhlkas"
+        userDirectoryID: "1001"
+        version: "16.5"
+        wifiMacAddress: "W4:F6:2C:5A:2A:91"
+      evt:
+        name: "MobileDeviceCheckIn"
+      network:
+        client:
+          geoip: {}
+          ip: "192.168.1.100"
+      usr:
+        name: "johndoe"
+      webhook:
+        eventTimestamp: 1752237458000
+        id: 9010
+        name: "Mobile Device Check In Webhook"
+    message: |-
+      {
+        "webhook" : {
+          "name" : "Mobile Device Check In Webhook",
+          "id" : 9010,
+          "webhookEvent" : "MobileDeviceCheckIn",
+          "eventTimestamp" : 1752237458000
+        },
+        "event" : {
+          "modelDisplay" : "iPhone 13 Pro Max",
+          "mdmCommandUUID" : "d2a5f8a2-3e2b-4b4a-8a1d-8e1e2a3b4c5d",
+          "product" : "iPhone 13 Pro Max",
+          "osBuild" : "20F71",
+          "serialNumber" : "C39F12345678",
+          "managementId" : "549c8e89-d215-4a2e-806b-f054eb9c8430",
+          "ipAddress" : "192.168.1.100",
+          "mdmCommand" : "MobileDeviceCheckIn",
+          "deviceName" : "iPhone 13 Pro Max",
+          "version" : "16.5",
+          "jssID" : 11,
+          "room" : "Conference Room A",
+          "userDirectoryID" : "1001",
+          "wifiMacAddress" : "W4:F6:2C:5A:2A:91",
+          "osVersion" : "16.5",
+          "icciID" : "12345678901234567890",
+          "bluetoothMacAddress" : "F8:B1:DD:76:77:43",
+          "imei" : "358123456789012",
+          "model" : "iPhone14,3",
+          "udid" : "82b53ce7dklsjflksjhnfkljhdlasjhlkas",
+          "username" : "johndoe"
+        }
+      }
+    service: "MobileDeviceCheckIn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1752237458000
