@@ -55,6 +55,8 @@ integration/ambari:
 - ambari/**/*
 integration/anthropic:
 - anthropic/**/*
+integration/anthropic_usage_and_costs:
+- anthropic_usage_and_costs/**/*
 integration/anyscale:
 - anyscale/**/*
 integration/apache:
