@@ -29,7 +29,8 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # The version of pyodbc is dynamically linked against a version of the odbc which doesn't come included in the wheel
     # That causes the omnibus' health check to flag it. Forcing the build so that we do include it in the wheel.
     always_build+=("pyodbc")
-
+    # Build psycopg to have control over openssl version
+    always_build+=("psycopg-c")
     # We need to build cryptography for FIPS support
     always_build+=("cryptography")
 else
