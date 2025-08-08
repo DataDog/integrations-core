@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: watchguard-firebox
 metric_id: watchguard-firebox
 backend_only: false

@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: pan.firewall
 metric_id: pan-firewall
 backend_only: false
