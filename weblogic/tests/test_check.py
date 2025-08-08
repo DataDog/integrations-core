@@ -19,5 +19,6 @@ def test(dd_agent_check):
     for metric in METRICS + JVM_E2E_METRICS_NEW:
         aggregator.assert_metric(metric)
 
+    
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)
