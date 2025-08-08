@@ -904,7 +904,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
         agentSidecarInjection:
           enabled: true
           provider: fargate
-    overrides:
+    override:
       clusterAgent:
         env:
           - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
@@ -917,7 +917,6 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`, so newly injected Agent containers will have kubelet logging enabled.
 
   ```yaml
-
   clusterAgent:
     admissionController:
       agentSidecarInjection:
