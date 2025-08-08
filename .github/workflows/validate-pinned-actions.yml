@@ -22,10 +22,10 @@ jobs:
         id: pin-actions
         # Relies on the following actions that need to be allowed in the repo:
         # aquaproj/aqua-installer@e2d0136abcf70b7a2f6f505720640750557c4b33
-        # suzuki-shunsuke/commit-action@04e7ae80e6b3c584ba8a4d98ab64474963d854eb
+        # suzuki-shunsuke/commit-action@9faad521ea6a1e768439ffbe6b25b6cb3fc1b181
         # suzuki-shunsuke/github-token-action@350d7506222e3a0016491abe85b5c4dd475b67d1
         # tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        uses: suzuki-shunsuke/pinact-action@d735505f3decf76fca3fdbb4c952e5b3eba0ffdd # v0.1.2
+        uses: suzuki-shunsuke/pinact-action@49cbd6acd0dbab6a6be2585d1dbdaa43b4410133 # v1.0.0
         with:
           skip_push: true
 
