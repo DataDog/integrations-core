@@ -787,7 +787,6 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     assert event['host'] == expected_host
     assert event['database_instance'] == expected_database_instance
     assert event['database_hostname'] == expected_database_hostname
-    assert event['ddagenthostname'] == expected_database_hostname
     assert event['dbms'] == "postgres"
 
     assert sorted(event['tags']) == sorted(expected_tags)

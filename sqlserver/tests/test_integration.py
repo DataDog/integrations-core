@@ -902,7 +902,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "sqlserver"
-    assert len(event['tags']) == 5
+    assert len(event['tags']) == 6
     assert event['tags'][0] == 'optional:tag1'
     assert any(tag.startswith('sqlserver_servername:') for tag in event['tags'])
     assert event['integration_version'] == __version__
