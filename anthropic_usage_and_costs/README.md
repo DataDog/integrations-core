@@ -9,7 +9,7 @@ This integration provides Datadog users with comprehensive visibility into their
 - **Understand usage trends** across teams, API keys, or user identities to optimize model usage
 - **Set up alerting and dashboards** that highlight anomalies in usage or unexpected cost spikes
 
-This is especially valuable for teams using Anthropic at scale who want to manage spend, understand product adoption, and ensure efficient use of AI resources - all within the familiar Datadog observability platform.
+This integration is especially valuable for teams using Anthropic at scale who want to manage spend, understand product adoption, and ensure efficient use of AI resources—all within the familiar Datadog observability platform.
 
 ## Setup
 
@@ -24,22 +24,18 @@ You will need an **Admin API key** from Anthropic. This key allows access to usa
 3. Create a new Admin API key with appropriate permissions for accessing:
    - `GET /v1/organizations/usage_report/messages`
    - `GET /v1/organizations/cost_report`
-4. **Copy the API key** to a secure location.
+4. Copy the API key to a secure location.
 
 ### 2. Configure the Datadog Integration
 
-1. In Datadog, go to **Integrations -> Anthropic**.
+1. In Datadog, go to [**Integrations > Anthropic**](https://app.datadoghq.com/integrations?integrationId=anthropic).
 2. In the configuration panel, provide the **Admin API Key** by pasting the key you generated from Anthropic.
 3. Click **Save Configuration**.
 
 Once saved, Datadog will begin polling Anthropic usage and cost endpoints using this key and populate metrics in your environment.
-
-
 ## Data Collected
 
 ### Metrics
-
-Anthropic Usage and Costs collects metrics.
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
