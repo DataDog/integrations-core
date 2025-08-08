@@ -62,6 +62,7 @@ files:
 
     - name: acl_token
       description: ACL token to use for authentication.
+      secret: true
       value:
         type: string
 
