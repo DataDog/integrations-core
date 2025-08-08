@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.4.0 / 2025-08-07
+
+***Added***:
+
+* Revert upgrade to psycopg3 ([#20884](https://github.com/DataDog/integrations-core/pull/20884))
+
 ## 8.3.0 / 2025-07-29
 
 ***Added***:

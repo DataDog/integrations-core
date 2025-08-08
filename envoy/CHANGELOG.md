@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.0 / 2025-08-07
+
+***Added***:
+
+* Added ext_proc metrics to the Envoy integration ([#20778](https://github.com/DataDog/integrations-core/pull/20778))
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
 ## 6.0.0 / 2025-07-10
 
 ***Changed***:
