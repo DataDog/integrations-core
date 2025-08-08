@@ -92,7 +92,7 @@ defaults:
 
 jobs:
   run:
-    name: "${{ inputs.job-name }}"
+    name: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
     runs-on: ${{ fromJson(inputs.runner) }}
 
     env:
