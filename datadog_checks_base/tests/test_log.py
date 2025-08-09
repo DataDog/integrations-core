@@ -9,8 +9,7 @@ import warnings
 import mock
 import pytest
 
-from datadog_checks import log
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, log
 from datadog_checks.base.log import DEFAULT_FALLBACK_LOGGER, CheckLogFormatter, get_check_logger, init_logging
 
 
