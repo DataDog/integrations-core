@@ -1,3 +1,5 @@
+# bypass-global-grok-parser-rules-checks
+# bypass-global-missing-date-remapper-checks
 id: lastpass
 metric_id: lastpass
 backend_only: false

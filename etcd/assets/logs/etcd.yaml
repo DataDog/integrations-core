@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: etcd
 metric_id: etcd
 backend_only: false

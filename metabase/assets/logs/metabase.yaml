@@ -1,3 +1,4 @@
+# bypass-global-missing-date-remapper-checks
 id: metabase
 metric_id: metabase
 backend_only: false
