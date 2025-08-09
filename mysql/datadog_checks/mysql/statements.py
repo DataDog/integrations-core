@@ -47,6 +47,21 @@ METRICS_COLUMNS = {
     'sum_no_good_index_used',
 }
 
+# TiDB statements_summary column mappings to MySQL performance_schema
+# Note: This mapping is kept for reference but the normalization function
+# handles the mapping directly due to version compatibility issues
+TIDB_TO_MYSQL_COLUMN_MAPPINGS = {
+    # TiDB column -> MySQL column
+    'SCHEMA_NAME': 'schema_name',
+    'DIGEST': 'digest',
+    'DIGEST_TEXT': 'digest_text',
+    'EXEC_COUNT': 'count_star',
+    'SUM_LATENCY': 'sum_timer_wait',  # TiDB uses nanoseconds like MySQL
+    'SUM_ERRORS': 'sum_errors',
+    'SUM_AFFECT_ROWS': 'sum_rows_affected',
+    'LAST_SEEN': 'last_seen',
+}
+
 
 def _row_key(row):
     """
@@ -54,6 +69,156 @@ def _row_key(row):
     :return: a tuple uniquely identifying this row
     """
     return row['schema_name'], row['query_signature']
+
+
+def _get_tidb_statement_summary_query(only_query_recent_statements=False, last_seen=None):
+    """
+    Builds the TiDB equivalent query for statement summary collection.
+
+    Uses information_schema.cluster_statements_summary which provides cluster-wide
+    statistics across all TiDB nodes.
+
+    Args:
+        only_query_recent_statements: If True, only query statements seen recently
+        last_seen: Timestamp for filtering recent statements
+
+    Returns:
+        tuple: (query_string, query_args)
+    """
+    if only_query_recent_statements:
+        condition = "WHERE `LAST_SEEN` >= %s"
+        args = [last_seen]
+    else:
+        # TiDB doesn't need to exclude EXPLAIN statements as they're not stored
+        condition = """
+            ORDER BY `EXEC_COUNT` DESC
+            LIMIT 10000
+        """
+        args = None
+
+    # Use only columns that exist in the TiDB cluster_statements_summary table
+    query = f"""\
+        SELECT
+            `INSTANCE`,
+            `SCHEMA_NAME`,
+            `DIGEST`,
+            `DIGEST_TEXT`,
+            `EXEC_COUNT`,
+            `SUM_LATENCY`,
+            `SUM_ERRORS`,
+            `AVG_AFFECTED_ROWS`,
+            `LAST_SEEN`,
+            `AVG_LATENCY`,
+            `MAX_LATENCY`,
+            `AVG_MEM`,
+            `MAX_MEM`,
+            `AVG_RESULT_ROWS`,
+            `MAX_RESULT_ROWS`
+        FROM information_schema.cluster_statements_summary
+        {condition}
+    """
+
+    return query, args
+
+
+def _normalize_tidb_statement_row(row):
+    """
+    Normalizes a TiDB cluster_statements_summary row to match MySQL performance_schema format.
+
+    Args:
+        row: A row from information_schema.cluster_statements_summary
+
+    Returns:
+        dict: Normalized row matching MySQL format
+    """
+    normalized = {}
+
+    # Map available TiDB columns to MySQL columns
+    normalized['schema_name'] = row.get('SCHEMA_NAME', '')
+    normalized['digest'] = row.get('DIGEST', '')
+    normalized['digest_text'] = row.get('DIGEST_TEXT', '')
+    normalized['count_star'] = row.get('EXEC_COUNT', 0)
+    normalized['sum_timer_wait'] = row.get('SUM_LATENCY', 0)
+    normalized['sum_errors'] = row.get('SUM_ERRORS', 0)
+    # TiDB has AVG_AFFECTED_ROWS, need to multiply by EXEC_COUNT to get sum
+    exec_count = row.get('EXEC_COUNT', 0)
+    avg_affected = row.get('AVG_AFFECTED_ROWS', 0)
+    normalized['sum_rows_affected'] = int(avg_affected * exec_count) if exec_count > 0 else 0
+    normalized['last_seen'] = row.get('LAST_SEEN', '')
+
+    # Use AVG_RESULT_ROWS * EXEC_COUNT as an approximation for sum_rows_sent
+    avg_result_rows = row.get('AVG_RESULT_ROWS', 0)
+    normalized['sum_rows_sent'] = int(avg_result_rows * exec_count) if exec_count > 0 else 0
+
+    # Set default values for MySQL columns that TiDB doesn't have
+    normalized['sum_lock_time'] = 0  # TiDB doesn't track lock time separately
+    normalized['sum_rows_examined'] = 0  # Not available in TiDB stats
+    normalized['sum_select_scan'] = 0
+    normalized['sum_select_full_join'] = 0
+    normalized['sum_no_index_used'] = 0
+    normalized['sum_no_good_index_used'] = 0
+
+    # Add TiDB-specific metrics as internal fields (prefixed with _)
+    normalized['_tidb_instance'] = row.get('INSTANCE', '')
+    normalized['_tidb_avg_latency'] = row.get('AVG_LATENCY', 0)
+    normalized['_tidb_max_latency'] = row.get('MAX_LATENCY', 0)
+    normalized['_tidb_avg_mem'] = row.get('AVG_MEM', 0)
+    normalized['_tidb_max_mem'] = row.get('MAX_MEM', 0)
+
+    return normalized
+
+
+def _is_tidb_statements_summary_available(cursor):
+    """
+    Check if TiDB cluster_statements_summary table is available and accessible.
+
+    Args:
+        cursor: Database cursor
+
+    Returns:
+        bool: True if available, False otherwise
+    """
+    try:
+        cursor.execute("""
+            SELECT 1
+            FROM information_schema.tables
+            WHERE table_schema = 'information_schema'
+            AND table_name = 'cluster_statements_summary'
+            LIMIT 1
+        """)
+        return cursor.fetchone() is not None
+    except Exception:
+        return False
+
+
+def _collect_tidb_statement_metrics_rows(cursor, only_query_recent_statements=False, last_seen=None):
+    """
+    Collects statement metrics from TiDB and normalizes them to MySQL format.
+
+    Args:
+        cursor: Database cursor
+        only_query_recent_statements: If True, only query recent statements
+        last_seen: Timestamp for filtering recent statements
+
+    Returns:
+        list: Normalized rows matching MySQL performance_schema format
+    """
+    query, args = _get_tidb_statement_summary_query(only_query_recent_statements, last_seen)
+
+    if args:
+        cursor.execute(query, args)
+    else:
+        cursor.execute(query)
+
+    rows = cursor.fetchall() or []
+
+    # Normalize rows to match MySQL format
+    normalized_rows = []
+    for row in rows:
+        normalized_row = _normalize_tidb_statement_row(row)
+        normalized_rows.append(normalized_row)
+
+    return normalized_rows
 
 
 class MySQLStatementMetrics(DBMAsyncJob):
@@ -89,10 +254,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
         # This is used to limit the queries to fetch from the performance schema to only the new ones
         self._last_seen = '1970-01-01'
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
-        self._full_statement_text_cache = TTLCache(
-            maxsize=self._config.full_statement_text_cache_max_size,
-            ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
-        )  # type: TTLCache
+        # For TiDB, we'll check this lazily on first use to avoid connecting during init
+        self._is_tidb_checked = False
+        self._samples_per_hour = None
+        self._full_statement_text_cache = None
 
         # statement_rows: cache of all rows for each digest, keyed by (schema_name, query_signature)
         # This is used to cache the metrics for queries that have the same query_signature but different digests
@@ -107,6 +272,32 @@ class MySQLStatementMetrics(DBMAsyncJob):
         if not self._db:
             self._db = connect_with_session_variables(**self._connection_args)
         return self._db
+
+    def _ensure_fqt_cache_initialized(self):
+        """
+        Lazily initialize the full statement text cache with appropriate rate limit
+        """
+        if self._full_statement_text_cache is not None:
+            return
+
+        # Check if this is TiDB and set appropriate rate limit
+        if not self._is_tidb_checked:
+            self._is_tidb_checked = True
+            db = self._get_db_connection()
+            if self._check._get_is_tidb(db):
+                self._samples_per_hour = max(6, self._config.full_statement_text_samples_per_hour_per_query)
+                self.log.info(
+                    "TiDB: Using enhanced FQT rate limit of %d samples per hour (every %d minutes)",
+                    self._samples_per_hour,
+                    60 // self._samples_per_hour,
+                )
+            else:
+                self._samples_per_hour = self._config.full_statement_text_samples_per_hour_per_query
+
+        self._full_statement_text_cache = TTLCache(
+            maxsize=self._config.full_statement_text_cache_max_size,
+            ttl=60 * 60 / self._samples_per_hour,
+        )
 
     def _close_db_conn(self):
         if self._db:
@@ -129,24 +320,30 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def collect_per_statement_metrics(self):
-        # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
-        # just returns no rows without errors if the performance schema is disabled
-        if self._check.performance_schema_enabled is None:
-            self.log.debug('Waiting for performance schema availability to be determined by the check, skipping run.')
-            return
-        if self._check.performance_schema_enabled is False:
-            self._check.record_warning(
-                DatabaseConfigurationError.performance_schema_not_enabled,
-                warning_with_tags(
-                    'Unable to collect statement metrics because the performance schema is disabled. '
-                    'See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
-                    'troubleshooting#%s for more details',
-                    DatabaseConfigurationError.performance_schema_not_enabled.value,
-                    code=DatabaseConfigurationError.performance_schema_not_enabled.value,
-                    host=self._check.reported_hostname,
-                ),
-            )
-            return
+        # For TiDB, we don't need performance_schema as it uses information_schema.cluster_statements_summary
+        if self._check._get_is_tidb(self._db):
+            self.log.debug('TiDB detected, using cluster_statements_summary for statement metrics')
+        else:
+            # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
+            # just returns no rows without errors if the performance schema is disabled
+            if self._check.performance_schema_enabled is None:
+                self.log.debug(
+                    'Waiting for performance schema availability to be determined by the check, skipping run.'
+                )
+                return
+            if self._check.performance_schema_enabled is False:
+                self._check.record_warning(
+                    DatabaseConfigurationError.performance_schema_not_enabled,
+                    warning_with_tags(
+                        'Unable to collect statement metrics because the performance schema is disabled. '
+                        'See https://docs.datadoghq.com/database_monitoring/setup_mysql/'
+                        'troubleshooting#%s for more details',
+                        DatabaseConfigurationError.performance_schema_not_enabled.value,
+                        code=DatabaseConfigurationError.performance_schema_not_enabled.value,
+                        host=self._check.reported_hostname,
+                    ),
+                )
+                return
 
         # Omit internal tags for dbm payloads since those are only relevant to metrics processed directly
         # by the agent
@@ -155,9 +352,21 @@ class MySQLStatementMetrics(DBMAsyncJob):
         rows = self._collect_per_statement_metrics(tags)
         if not rows:
             # No rows to process, can skip the rest of the payload generation and avoid an empty payload
+            if self._check._get_is_tidb(self._db):
+                self.log.debug("TiDB: No rows returned from _collect_per_statement_metrics")
             return
+
+        # Debug logging for TiDB FQT events
+        fqt_event_count = 0
+        if self._check._get_is_tidb(self._db):
+            self.log.debug("TiDB: Generating FQT events for %d rows", len(rows))
+
         for event in self._rows_to_fqt_events(rows, tags):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+            fqt_event_count += 1
+
+        if self._check._get_is_tidb(self._db):
+            self.log.debug("TiDB: Generated %d FQT events (rate-limited from %d rows)", fqt_event_count, len(rows))
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -195,12 +404,45 @@ class MySQLStatementMetrics(DBMAsyncJob):
         monotonic_rows = self._filter_query_rows(monotonic_rows)
         monotonic_rows = self._normalize_queries(monotonic_rows)
         monotonic_rows = self._add_associated_rows(monotonic_rows)
+
+        # Debug logging for TiDB
+        if self._check._get_is_tidb(self._db):
+            self.log.debug("TiDB: monotonic_rows count before compute_derivative_rows: %d", len(monotonic_rows))
+            if monotonic_rows:
+                self.log.debug("TiDB: sample row: %s", monotonic_rows[0])
+
         rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
+
+        # Debug logging for TiDB
+        if self._check._get_is_tidb(self._db):
+            self.log.debug("TiDB: rows count after compute_derivative_rows: %d", len(rows))
+            if rows:
+                self.log.debug("TiDB: sample derivative row: %s", rows[0])
+
+            # For TiDB, if no derivative rows are returned (e.g., first run),
+            # use the monotonic rows directly to ensure FQT events are generated
+            if not rows and monotonic_rows:
+                self.log.debug("TiDB: Using monotonic rows for FQT events on first run")
+                # Return monotonic rows with zeroed metric values to generate FQT events
+                rows = []
+                for row in monotonic_rows:
+                    # Create a copy with all metric columns set to 0
+                    fqt_row = dict(row)
+                    for metric in METRICS_COLUMNS:
+                        if metric in fqt_row:
+                            fqt_row[metric] = 0
+                    rows.append(fqt_row)
+
         return rows
 
     def _get_statement_count(self, tags):
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            cursor.execute("SELECT count(*) AS count from performance_schema.events_statements_summary_by_digest")
+            # Check if this is TiDB
+            if self._check._get_is_tidb(self._db):
+                # TiDB uses cluster_statements_summary instead
+                cursor.execute("SELECT count(*) AS count from information_schema.cluster_statements_summary")
+            else:
+                cursor.execute("SELECT count(*) AS count from performance_schema.events_statements_summary_by_digest")
 
             rows = cursor.fetchall() or []  # type: ignore
             if rows:
@@ -220,39 +462,51 @@ class MySQLStatementMetrics(DBMAsyncJob):
         several fields must be further processed from the delta values.
         """
         only_query_recent_statements = self._config.statement_metrics_config.get('only_query_recent_statements', False)
-        condition = (
-            "WHERE `last_seen` >= %s"
-            if only_query_recent_statements
-            else """WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
-            ORDER BY `count_star` DESC
-            LIMIT 10000"""
-        )
-
-        sql_statement_summary = """\
-            SELECT `schema_name`,
-                   `digest`,
-                   `digest_text`,
-                   `count_star`,
-                   `sum_timer_wait`,
-                   `sum_lock_time`,
-                   `sum_errors`,
-                   `sum_rows_affected`,
-                   `sum_rows_sent`,
-                   `sum_rows_examined`,
-                   `sum_select_scan`,
-                   `sum_select_full_join`,
-                   `sum_no_index_used`,
-                   `sum_no_good_index_used`,
-                   `last_seen`
-            FROM performance_schema.events_statements_summary_by_digest
-            {}
-            """.format(condition)
-
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            args = [self._last_seen] if only_query_recent_statements else None
-            cursor.execute(sql_statement_summary, args)
+            # Check if this is TiDB
+            if self._check._get_is_tidb(self._db):
+                # Use TiDB-specific implementation
+                if _is_tidb_statements_summary_available(cursor):
+                    rows = _collect_tidb_statement_metrics_rows(
+                        cursor, only_query_recent_statements=only_query_recent_statements, last_seen=self._last_seen
+                    )
+                else:
+                    self.log.warning("TiDB statements_summary table not available")
+                    return []
+            else:
+                # Use standard MySQL implementation
+                condition = (
+                    "WHERE `last_seen` >= %s"
+                    if only_query_recent_statements
+                    else """WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
+                    ORDER BY `count_star` DESC
+                    LIMIT 10000"""
+                )
 
-            rows = cursor.fetchall() or []  # type: ignore
+                sql_statement_summary = """\
+                    SELECT `schema_name`,
+                           `digest`,
+                           `digest_text`,
+                           `count_star`,
+                           `sum_timer_wait`,
+                           `sum_lock_time`,
+                           `sum_errors`,
+                           `sum_rows_affected`,
+                           `sum_rows_sent`,
+                           `sum_rows_examined`,
+                           `sum_select_scan`,
+                           `sum_select_full_join`,
+                           `sum_no_index_used`,
+                           `sum_no_good_index_used`,
+                           `last_seen`
+                    FROM performance_schema.events_statements_summary_by_digest
+                    {}
+                    """.format(condition)
+
+                args = [self._last_seen] if only_query_recent_statements else None
+                cursor.execute(sql_statement_summary, args)
+
+                rows = cursor.fetchall() or []  # type: ignore
 
         if rows:
             self._last_seen = max(row['last_seen'] for row in rows)
@@ -307,6 +561,9 @@ class MySQLStatementMetrics(DBMAsyncJob):
         return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]
 
     def _rows_to_fqt_events(self, rows, tags):
+        # Ensure FQT cache is initialized before use
+        self._ensure_fqt_cache_initialized()
+
         for row in rows:
             query_cache_key = _row_key(row)
             if query_cache_key in self._full_statement_text_cache:

@@ -919,3 +919,74 @@ def test_propagate_agent_tags(
                 status=MySql.OK,
                 tags=expected_tags,
             )
+
+
+# TiDB-specific tests
+@pytest.mark.unit
+def test_tidb_metrics_skipped():
+    """Test that TiDB properly skips incompatible metrics"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[
+            {
+                'server': 'localhost',
+                'user': 'datadog',
+                'options': {
+                    'replication': True,
+                    'extra_innodb_metrics': True,
+                },
+            }
+        ],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+    mysql_check._is_tidb = True
+    mysql_check.version = mock.MagicMock(flavor='TiDB')
+
+    # Mock database connection
+    mock_db = mock.MagicMock()
+    mock_cursor = mock.MagicMock()
+    mock_db.cursor.return_value = mock_cursor
+    mock_cursor.fetchall.return_value = []
+    mock_cursor.fetchone.return_value = None
+
+    # Mock the gauge method to track what metrics are reported
+    reported_metrics = []
+    mysql_check.gauge = mock.MagicMock(side_effect=lambda metric, *args, **kwargs: reported_metrics.append(metric))
+
+    # Call _collect_metrics which should skip InnoDB and replication metrics
+    mysql_check._collect_metrics(mock_db, [])
+
+    # Verify InnoDB metrics are not collected
+    innodb_metrics = [m for m in reported_metrics if 'innodb' in m.lower()]
+    assert len(innodb_metrics) == 0, f"InnoDB metrics should not be collected for TiDB: {innodb_metrics}"
+
+    # Verify key cache metrics are not collected
+    key_cache_metrics = [m for m in reported_metrics if 'key_cache' in m.lower() or 'key_buffer' in m.lower()]
+    assert len(key_cache_metrics) == 0, f"Key cache metrics should not be collected for TiDB: {key_cache_metrics}"
+
+
+@pytest.mark.unit
+def test_tidb_performance_schema_check():
+    """Test that performance_schema check returns False for TiDB"""
+    mysql_check = MySql(
+        common.CHECK_NAME,
+        {},
+        instances=[{'server': 'localhost', 'user': 'datadog'}],
+    )
+
+    # Mock TiDB detection
+    mysql_check._get_is_tidb = mock.MagicMock(return_value=True)
+
+    # Mock database connection
+    mock_db = mock.MagicMock()
+
+    # Call _check_performance_schema_enabled
+    result = mysql_check._check_performance_schema_enabled(mock_db)
+
+    # Should return False for TiDB without querying
+    assert result is False
+    # Should not have executed any queries
+    mock_db.cursor.assert_not_called()
