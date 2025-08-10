@@ -9,7 +9,7 @@ This integration provides Datadog users with comprehensive visibility into their
 - **Understand usage trends** across teams, API keys, or user identities to optimize model usage
 - **Set up alerting and dashboards** that highlight anomalies in usage or unexpected cost spikes
 
-This integration is especially valuable for teams using Anthropic at scale who want to manage spend, understand product adoption, and ensure efficient use of AI resources—all within the familiar Datadog observability platform.
+This integration is especially valuable for teams using Anthropic at scale who want to manage spend, understand product adoption, and ensure efficient use of AI resources-all within the familiar Datadog observability platform.
 
 ## Setup
 
