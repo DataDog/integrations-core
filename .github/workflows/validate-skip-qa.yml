@@ -37,7 +37,7 @@ jobs:
             This PR does not modify any files that are going to be shipped with the agent.
 
             To reduce the QA time during agent release, if the changes in this PR does not require QA,
-            consider adding the ![](https://img.shields.io/badge/-qa%2Fskip--qa-green?style=flat&color=e2dd48) label to this PR.
+            consider adding the `qa/skip-qa` label to this PR.
 
       - name: Post comment with list of modified files
         if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
@@ -48,7 +48,7 @@ jobs:
             ⚠️ **Missing qa/skip-qa label**
 
             The following files, which will be shipped with the agent, were modified in this PR and
-            the ![](https://img.shields.io/badge/-qa%2Fskip--qa-green?style=flat&color=e2dd48) has been added.
+            the `qa/skip-qa` label has been added.
 
             You can ignore this if you are sure the changes in this PR does not require QA. Otherwise, consider removing the label.
 
