@@ -10,6 +10,13 @@ from datadog_checks.dev import docker_run
 
 from .common import COMPOSE, INSTANCE
 
+E2E_METADATA = {
+    'start_commands': [
+        'apt update',
+        'apt install -y --no-install-recommends build-essential python3-dev libpq-dev',
+    ],
+}
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
@@ -23,7 +30,7 @@ def dd_environment():
         sleep=30,
     ):
         instance = INSTANCE.copy()
-        yield instance
+        yield instance, E2E_METADATA
 
 
 @pytest.fixture
