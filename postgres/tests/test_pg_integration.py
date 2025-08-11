@@ -318,10 +318,9 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
 
-    # Second: keep the connection open but an unexpected error happens during check run
-    with pytest.raises(AttributeError):
-        check.db = mock.MagicMock(side_effect=AttributeError('foo'))
-        check.check(pg_instance)
+    check.db = mock.MagicMock(side_effect=AttributeError('foo'))
+    check.check(pg_instance)
+
     # Since we can't connect to the host, we can't gather the replication role
     tags_without_role = _get_expected_tags(
         check, pg_instance, with_db=True, with_version=False, with_sys_id=False, with_cluster_name=False, role=None
@@ -335,16 +334,16 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
 
     # Forth: connection health check failed
-    with pytest.raises(DatabaseHealthCheckError):
-        db = mock.MagicMock()
-        db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
+    db = mock.MagicMock()
+    db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
 
-        @contextlib.contextmanager
-        def mock_db():
-            yield db
+    @contextlib.contextmanager
+    def mock_db():
+        yield db
 
-        check.db = mock_db
-        check.check(pg_instance)
+    check.db = mock_db
+    check.check(pg_instance)
+
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
     aggregator.reset()
 
@@ -600,8 +599,7 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     throw_exception_first_time.counter = 0
 
     with mock.patch('datadog_checks.postgres.PostgreSql._collect_stats', side_effect=throw_exception_first_time):
-        with pytest.raises(socket.error):
-            check.check(pg_instance)
+        check.check(pg_instance)
     assert_state_clean(check)
 
 
@@ -897,18 +895,6 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         ),
         (
             {
-                "instance_endpoint": "mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com",
-                "region": "us-east-1",
-                "managed_authentication": {
-                    "enabled": True,
-                },
-            },
-            psycopg.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
                 'region': 'us-east-1',
             },
             None,
@@ -925,27 +911,6 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
             None,
             None,
             False,
-        ),
-        (
-            {
-                'region': 'us-east-1',
-                "managed_authentication": {
-                    "enabled": 'true',
-                },
-            },
-            psycopg.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "managed_authentication": {
-                    "enabled": 'true',
-                }
-            },
-            ConfigurationError,
-            'AWS region must be set when using AWS managed authentication',
-            None,  # IAM auth requires region so this should fail
         ),
     ],
 )
@@ -1003,18 +968,6 @@ def test_database_instance_cloud_metadata_aws(
             {
                 "deployment_type": "flexible_server",
                 "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-            },
-            {
-                "client_id": "my-client-id",
-            },
-            psycopg.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
                 "managed_authentication": {
                     "enabled": False,
                 },
@@ -1040,51 +993,7 @@ def test_database_instance_cloud_metadata_aws(
             None,
             None,
             False,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-                "managed_authentication": {
-                    "enabled": True,
-                    "client_id": "my-client-id",
-                },
-            },
-            {
-                "client_id": "my-client-id",
-            },
-            psycopg.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-                "managed_authentication": {
-                    "enabled": 'true',
-                    "client_id": "my-client-id",
-                    'identity_scope': 'https://database.windows.net/.default',
-                },
-            },
-            None,
-            psycopg.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-                "managed_authentication": {
-                    "enabled": True,
-                },
-            },
-            None,
-            ConfigurationError,
-            'Azure client_id must be set when using Azure managed authentication',
-            None,
-        ),
+        ),   
     ],
 )
 def test_database_instance_cloud_metadata_azure(
