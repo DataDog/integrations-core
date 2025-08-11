@@ -8,6 +8,7 @@ import threading
 import time
 
 from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBaseCheckWithLegacySupport
+from datadog_checks.base.utils.windows import get_windows_service_states
 
 
 class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
@@ -66,8 +67,6 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         # Platform detection
         self._is_windows = platform.system() == 'Windows'
 
-        # Track if we've logged platform warnings
-        self._platform_warning_logged = False
 
     def get_default_config(self):
         """Build metrics configuration based on service availability."""
@@ -119,48 +118,52 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         # Get all services we need to check
         services_to_check = set(self.SERVICE_METRIC_MAP.keys())
 
-        # Check each service
-        for service in services_to_check:
-            try:
-                is_running = self._is_service_running(service)
-                self._service_cache[service] = is_running
-                self.log.debug("Service %s: %s", service, 'running' if is_running else 'not running')
-            except Exception as e:
-                self.log.warning("Failed to check service %s: %s", service, e)
-                # Optimistically assume service is available on error
+        try:
+            # Get service states using shared utility
+            service_states = get_windows_service_states(services_to_check, self.log)
+
+            # Process each service
+            for service, state in service_states.items():
+                if state is None:
+                    # Service not found on system
+                    self._service_cache[service] = False
+                    self.log.debug("Service %s not found on system", service)
+                elif state == 4:  # SERVICE_RUNNING
+                    self._service_cache[service] = True
+                    self.log.debug("Service %s is running", service)
+                else:
+                    self._service_cache[service] = False
+                    self.log.debug("Service %s is not running (state: %d)", service, state)
+
+        except ImportError:
+            # pywin32 not available on Windows - this is a real problem
+            self.log.error("Cannot check services: pywin32 not installed")
+            # Set all to False - we can't verify they're running
+            for service in services_to_check:
+                self._service_cache[service] = False
+
+        except Exception as e:
+            # Enumeration failed - could be permissions or other issue
+            self.log.error("Failed to enumerate services: %s", e)
+            # Set all to False - we can't verify they're running
+            for service in services_to_check:
                 self._service_cache[service] = False
 
     def _is_service_running(self, service_name):
         """Check if a Windows service is running."""
-        # On non-Windows platforms, always return True
-        if not self._is_windows:
-            if not self._platform_warning_logged:
-                self.log.info("Running on non-Windows platform, assuming all services are available")
-                self._platform_warning_logged = True
-            return True
-
         try:
-            # Import Windows-specific modules
-            import win32service  # type: ignore
-            import win32serviceutil  # type: ignore
+            states = get_windows_service_states({service_name}, self.log)
+            state = states.get(service_name)
 
-            # Query service status with timeout
-            status = win32serviceutil.QueryServiceStatus(service_name)
+            if state is None:
+                self.log.debug("Service %s not found", service_name)
+                return False
 
-            # status[1] is the current state
-            # SERVICE_RUNNING = 4
-            is_running = status[1] == win32service.SERVICE_RUNNING
-
-            return is_running
-
-        except ImportError as e:
-            self.log.error("pywin32 not available: %s", e)
-            self.log.info("Install pywin32 to enable service detection")
-            return True  # Assume available if we can't check
+            return state == 4  # SERVICE_RUNNING
 
         except Exception as e:
-            # Re-raise as this is an actual error
-            raise Exception("Service check failed for {}: {}".format(service_name, str(e)))
+            self.log.error("Failed to check service %s: %s", service_name, e)
+            return False  # Conservative - assume not running if can't check
 
     def _build_config_from_cache(self, metrics_config):
         """Build configuration using cached service states."""
