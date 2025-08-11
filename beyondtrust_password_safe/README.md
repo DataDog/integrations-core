@@ -137,7 +137,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-beyondtrust_passwo
 
    | Parameters                        | Description                                                                          |
    | --------------------------------- | ------------------------------------------------------------------------------------ |
-   | API Base Endpoint                 | API Base Endpoint used to make requests to the Password Safe public API (Example: https://beyondtrustcloud.com/BeyondTrust/api/public/v3).    |
+   | API Base Endpoint                 | API Base Endpoint used to make requests to the Password Safe public API (Example: `https://beyondtrustcloud.com/BeyondTrust/api/public/v3`).    |
    | Client ID                         | Client ID of the application user present in BeyondTrust Password Safe.              |
    | Client Secret                     | Client Secret of the application user present in BeyondTrust Password Safe.          |
 
