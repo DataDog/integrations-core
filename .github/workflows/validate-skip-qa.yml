@@ -26,10 +26,10 @@ jobs:
             **/changelog.d/**
             **/pyproject.toml
             **/hatch.toml
-            files_ignore: |
-                ddev/**
-                datadog_checks_dev/**
-                datadog_checks_tests_helper/**
+          files_ignore: |
+            ddev/**
+            datadog_checks_dev/**
+            datadog_checks_tests_helper/**
 
       - name: Post message - Add skip qa label
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
