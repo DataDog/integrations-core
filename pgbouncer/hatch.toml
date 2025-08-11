@@ -1,11 +1,5 @@
 [env.collectors.datadog-checks]
 
-# [envs.default]
-# post-install-commands = [
-#   "sudo apt update",
-#   "sudo apt install -y --no-install-recommends build-essential python3-dev libpq-dev",
-# ]
-
 [[envs.default.matrix]]
 python = ["3.12"]
 version = ["1.7", "1.8", "1.12", "1.23"]
