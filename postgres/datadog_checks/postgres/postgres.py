@@ -372,35 +372,36 @@ class PostgreSql(AgentCheck):
                                 )
                             )
                         
-                        for dbname in self.autodiscovery.get_items():
-                            with self.db(dbname) as conn:
-                                # Check for datadog schema and pg_stat_statements extension
-                                with conn.cursor() as cursor:
-                                    cursor.execute("SELECT 1 FROM pg_namespace WHERE nspname = 'datadog'")
+                        if self.autodiscovery:
+                            for dbname in self.autodiscovery.get_items():
+                                with self.db(dbname) as conn:
+                                    # Check for datadog schema and pg_stat_statements extension
+                                    with conn.cursor() as cursor:
+                                        cursor.execute("SELECT 1 FROM pg_namespace WHERE nspname = 'datadog'")
+                                        if not cursor.fetchone():
+                                            warnings.append(
+                                                DatabaseHealthCheckError(
+                                                    "The datadog schema is not present in the {dbname} database. "
+                                                    "Please create it to ensure proper monitoring."
+                                                )
+                                            )
+                                        cursor.execute("SELECT 1 FROM pg_stat_statements LIMIT 1")
+                                        if not cursor.fetchone():
+                                            warnings.append(
+                                                DatabaseHealthCheckError(
+                                                    "The pg_stat_statements extension is not enabled in the {dbname} database. "
+                                                    "Please enable it to collect query samples."
+                                                )
+                                            )
+                                    # Check for datadog.explain_statement function
+                                    cursor.execute("SELECT 1 FROM pg_proc WHERE proname = 'datadog.explain_statement'")
                                     if not cursor.fetchone():
                                         warnings.append(
                                             DatabaseHealthCheckError(
-                                                "The datadog schema is not present in the {dbname} database. "
+                                                "The datadog.explain_statement function is not present in the {dbname} database. "
                                                 "Please create it to ensure proper monitoring."
                                             )
                                         )
-                                    cursor.execute("SELECT 1 FROM pg_stat_statements LIMIT 1")
-                                    if not cursor.fetchone():
-                                        warnings.append(
-                                            DatabaseHealthCheckError(
-                                                "The pg_stat_statements extension is not enabled in the {dbname} database. "
-                                                "Please enable it to collect query samples."
-                                            )
-                                        )
-                                # Check for datadog.explain_statement function
-                                cursor.execute("SELECT 1 FROM pg_proc WHERE proname = 'datadog.explain_statement'")
-                                if not cursor.fetchone():
-                                    warnings.append(
-                                        DatabaseHealthCheckError(
-                                            "The datadog.explain_statement function is not present in the {dbname} database. "
-                                            "Please create it to ensure proper monitoring."
-                                        )
-                                    )
 
                         features.append({
                             "key": FeatureKey.QUERY_METRICS,
