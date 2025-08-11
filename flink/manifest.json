@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "39d70c50-017c-407a-9117-2055d8e03427",
   "app_id": "flink",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

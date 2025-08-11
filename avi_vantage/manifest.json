@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a3f11e6a-fdb7-421d-ad5c-dbfa987b8df8",
   "app_id": "avi-vantage",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

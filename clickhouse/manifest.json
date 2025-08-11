@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "668f43c1-bdd8-4686-bb92-d40f0c48fda9",
   "app_id": "clickhouse",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

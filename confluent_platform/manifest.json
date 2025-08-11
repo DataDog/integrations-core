@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "14e9ea66-bd7c-4c84-b642-a0290166deb4",
   "app_id": "confluent-platform",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
