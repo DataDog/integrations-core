@@ -3,7 +3,7 @@
     "created_at": "2025-08-08",
     "last_updated_at": "2025-08-08",
     "title": "ECS Fargate ephemeral storage utilization exceeds threshold",
-    "description": "Ephemeral storage utilization represents the percentage of temporary storage space consumed by an ECS Fargate task relative to its allocated limit. This monitor tracks when storage utilization exceeds the configured threshold to prevent storage exhaustion that could lead to task failures and data loss.",
+    "description": "Ephemeral storage utilization represents the percentage of temporary storage space consumed by an ECS Fargate task relative to its allocated limit. This monitor tracks when storage utilization exceeds the threshold to prevent storage exhaustion that could lead to task failures and data loss.",
     "definition": {
         "name": "[ECS Fargate] Ephemeral storage utilization is high for task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}})",
         "type": "query alert",
