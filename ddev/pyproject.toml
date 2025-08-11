@@ -47,6 +47,7 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
 
