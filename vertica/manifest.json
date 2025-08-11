@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c5946789-de76-4ec6-9485-db83dd66fd28",
   "app_id": "vertica",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

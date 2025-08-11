@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "450e17a2-3ca0-4dc5-800c-99c5db736073",
   "app_id": "vault",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
