@@ -79,6 +79,13 @@
     },
     "dashboards": {
       "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"
+    },
+    "monitors": {
+      "ECS Fargate CPU Usage": "assets/monitors/ecs_fargate_cpu_usage.json",
+      "ECS Fargate Memory Usage": "assets/monitors/ecs_fargate_mem_usage.json",
+      "ECS Fargate Ephemeral Storage Utilization": "assets/monitors/ecs_fargate_ephemeral_storage.json",
+      "ECS Fargate Network Received Error Rate": "assets/monitors/ecs_fargate_net_rcvd.json",
+      "ECS Fargate Network Sent Error Rate": "assets/monitors/ecs_fargate_net_sent.json"
     }
   }
 }
