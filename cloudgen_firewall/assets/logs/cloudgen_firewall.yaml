@@ -1,4 +1,4 @@
-id: "cloudgen_firewall"
+id: cloudgen_firewall
 metric_id: cloudgen-firewall
 backend_only: false
 installation_sources:
