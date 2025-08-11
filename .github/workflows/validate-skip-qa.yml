@@ -54,5 +54,7 @@ jobs:
 
             <details>
             <summary>List of modified files that will be shipped with the agent</summary>
-            ...
+            ```
+            ${{ steps.changed_files.outputs.all_changed_files }}
+            ```
             </details>
