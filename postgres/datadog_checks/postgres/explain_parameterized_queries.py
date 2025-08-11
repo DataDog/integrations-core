@@ -193,7 +193,7 @@ class ExplainParameterizedQueries:
                 try:
                     cursor.execute(query, ignore_query_metric=True)
                 except psycopg.Error as e:
-                    self._log.error(
+                    logger.error(
                         "Error while executing query: %s. ",
                         e,
                     )
@@ -205,7 +205,7 @@ class ExplainParameterizedQueries:
                 try:
                     cursor.execute(query, ignore_query_metric=True)
                 except psycopg.Error as e:
-                    self._log.error(
+                    logger.error(
                         "Error while executing query: %s. ",
                         e,
                     )
