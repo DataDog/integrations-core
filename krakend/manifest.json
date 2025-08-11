@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "db598784-537a-4e3f-921a-7965f80ed7a8",
   "app_id": "krakend",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

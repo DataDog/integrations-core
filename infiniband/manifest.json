@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d0c1b332-dc56-46c8-ab6a-048052f91e41",
   "app_id": "infiniband",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
