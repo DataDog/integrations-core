@@ -181,8 +181,6 @@ class AgentCheck(object):
         init_config = kwargs.get('init_config', {})
         agentConfig = kwargs.get('agentConfig', {})
         instances = kwargs.get('instances', [])
-        source = kwargs.get('source', '')
-        provider = kwargs.get('provider', '')
 
         if len(args) > 0:
             name = args[0]
@@ -225,8 +223,7 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        self.log.debug("source: {source}, provider: {provider}")
-        import pdb; pdb.set_trace()
+        self.log.debug("source: {kwargs.get('source', '')}")
 
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
         if not isinstance(metric_patterns, dict):
