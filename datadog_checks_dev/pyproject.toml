@@ -46,7 +46,6 @@ dynamic = [
     "version",
 ]
 
-
 [project.optional-dependencies]
 cli = [
     "aiohttp",
