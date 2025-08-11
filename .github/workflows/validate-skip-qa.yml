@@ -1,0 +1,62 @@
+name: 'Validate skip QA label'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  validate-skip-qa:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Get files changed
+        id: changed_files
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        with:
+          files: |
+            **/datadog_checks/**
+            **/changelog.d/**
+            **/pyproject.toml
+            **/hatch.toml
+
+      - name: Post message - add skip qa label
+        if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ⚠️ **Posibly missing qa/skip-qa label**
+            This PR does not modify any files that are going to be shipped with the agent.
+
+            To reduce the QA time during agent release, if the changes in this PR does not require QA,
+            consider adding the ![](https://img.shields.io/badge/-qa%2Fskip--qa-green?style=flat&color=e2dd48) label to this PR.
+
+      - name: Post comment with list of modified files
+        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ⚠️ **Missing qa/skip-qa label**
+
+            The following files, which will be shipped with the agent, were modified in this PR and
+            the ![](https://img.shields.io/badge/-qa%2Fskip--qa-green?style=flat&color=e2dd48) has been added.
+
+            You can ignore this if you are sure the changes in this PR does not require QA. Otherwise, consider removing the label.
+
+            <details>
+            <summary>List of modified files that will be shipped with the agent</summary>
+
+            ```
+            ${{ steps.changed_files.outputs.all_changed_files }}
+            ```
+
+            </details>
