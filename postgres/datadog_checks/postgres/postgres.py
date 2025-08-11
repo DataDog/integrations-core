@@ -1118,7 +1118,6 @@ class PostgreSql(AgentCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
-            
         else:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
