@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c161337b-578b-4c24-bc14-adf35e0ee0ed",
   "app_id": "ivanti-nzta",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

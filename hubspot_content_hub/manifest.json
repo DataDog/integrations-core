@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c5da80c1-8219-4aa0-bbd9-07c05b94edeb",
   "app_id": "hubspot-content-hub",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

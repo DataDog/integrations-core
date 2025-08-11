@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7cb71cbd-4dae-4544-895f-f960a49512bc",
   "app_id": "beyondtrust-password-safe",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9636c2eb-34f6-4aa4-a236-c39e47b21c79",
   "app_id": "cisco-secure-endpoint",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

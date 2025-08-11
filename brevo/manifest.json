@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "df939a65-33b7-4bc8-848f-bfe65c022332",
   "app_id": "brevo",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
