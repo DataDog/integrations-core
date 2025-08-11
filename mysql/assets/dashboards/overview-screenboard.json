@@ -1031,12 +1031,14 @@
                     {
                       "query": "avg:system.cpu.idle{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.system{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.iowait{$scope}",
@@ -1047,17 +1049,20 @@
                     {
                       "query": "avg:system.cpu.user{$scope}",
                       "data_source": "metrics",
-                      "name": "query4"
+                      "name": "query4",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.stolen{$scope}",
                       "data_source": "metrics",
-                      "name": "query5"
+                      "name": "query5",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.guest{$scope}",
                       "data_source": "metrics",
-                      "name": "query6"
+                      "name": "query6",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {

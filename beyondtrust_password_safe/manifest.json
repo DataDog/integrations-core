@@ -10,7 +10,28 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into BeyondTrust Password Safe logs",
     "title": "BeyondTrust Password Safe",
-    "media": [],
+    "media": [
+      {
+        "caption": "BeyondTrust Password Safe - Overview",
+        "image_url": "images/beyondtrust_password_safe_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust Password Safe - Password and Session Insights",
+        "image_url": "images/beyondtrust_password_safe_password_and_session_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust Password Safe - Management and Secret Safe Insights",
+        "image_url": "images/beyondtrust_password_safe_management_and_secret_safe_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BeyondTrust Password Safe - Audit Insights",
+        "image_url": "images/beyondtrust_password_safe_audit_insights.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
@@ -28,7 +49,19 @@
       "source_type_name": "BeyondTrust Password Safe",
       "events": {
         "creates_events": false
+      },
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
       }
+    },
+    "dashboards": {
+      "BeyondTrust Password Safe - Overview": "assets/dashboards/beyondtrust_password_safe_overview.json",
+      "BeyondTrust Password Safe - Password and Session Insights": "assets/dashboards/beyondtrust_password_safe_password_and_session_insights.json",
+      "BeyondTrust Password Safe - Management and Secret Safe Insights": "assets/dashboards/beyondtrust_password_safe_management_and_secret_safe_insights.json",
+      "BeyondTrust Password Safe - Audit Insights": "assets/dashboards/beyondtrust_password_safe_audit_insights.json"
+    },
+    "logs": {
+      "source": "beyondtrust-password-safe"
     }
   },
   "author": {

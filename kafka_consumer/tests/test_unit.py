@@ -1,18 +1,25 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
+import json
 import logging
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
 from confluent_kafka import TopicPartition
+from google.protobuf import descriptor_pb2
+from google.protobuf.message import DecodeError
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import (
     DATA_STREAMS_MESSAGES_CACHE_KEY,
     _get_interpolated_timestamp,
+    build_avro_schema,
+    build_protobuf_schema,
+    build_schema,
     deserialize_message,
     resolve_start_offsets,
 )
@@ -515,23 +522,149 @@ def test_deserialize_message():
         b'\x00\x00\x00\x01\x5e{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}'
     )
     key = b'{"name": "Peter Parker"}'
-    assert deserialize_message(MockedMessage(message, key)) == (
+    assert deserialize_message(MockedMessage(message, key), 'json', '', 'json', '') == (
         '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
         None,
         '{"name": "Peter Parker"}',
         None,
     )
-    assert deserialize_message(MockedMessage(message_with_schema)) == (
+    assert deserialize_message(MockedMessage(message_with_schema), 'json', '', 'json', '') == (
         '{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
         350,
         '',
         None,
     )
     invalid_json = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"'
-    assert deserialize_message(MockedMessage(invalid_json, key)) == (None, None, None, None)
+    assert deserialize_message(MockedMessage(invalid_json, key), 'json', '', 'json', '') == (None, None, None, None)
 
     invalid_utf8 = b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"\xff'
-    assert deserialize_message(MockedMessage(invalid_utf8, key)) == (None, None, None, None)
+    assert deserialize_message(MockedMessage(invalid_utf8, key), 'json', '', 'json', '') == (None, None, None, None)
+
+    # Test Avro deserialization
+    avro_schema = (
+        '{"type": "record", "name": "Book", "namespace": "com.book", '
+        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+        '{"name": "author", "type": "string"}]}'
+    )
+    avro_message = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
+    parsed_avro_schema = build_schema('avro', avro_schema)
+    assert deserialize_message(MockedMessage(avro_message, key), 'avro', parsed_avro_schema, 'json', '') == (
+        '{"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
+    # Test Protobuf deserialization
+    protobuf_schema = (
+        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
+        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
+    )
+    protobuf_message = (
+        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
+        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
+    )
+    parsed_protobuf_schema = build_schema('protobuf', protobuf_schema)
+    assert deserialize_message(
+        MockedMessage(protobuf_message, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (
+        '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  "author": "Alan Donovan"\n}',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
+    # Test invalid Avro messages
+    # Empty message (returns empty string, not None)
+    assert deserialize_message(MockedMessage(b'', key), 'avro', parsed_avro_schema, 'json', '') == (
+        '',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
+    # Corrupted message (truncated)
+    corrupted_avro = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language'  # Missing author field
+    assert deserialize_message(MockedMessage(corrupted_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Wrong data type (string instead of long for isbn)
+    wrong_type_avro = b'\x02\x12\x1bThe Go Programming Language\x18Alan Donovan'  # Wrong encoding for isbn
+    assert deserialize_message(MockedMessage(wrong_type_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Random bytes
+    random_avro = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(MockedMessage(random_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Completely invalid Avro message (random bytes)
+    invalid_avro = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(MockedMessage(invalid_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Avro message with wrong data types (string where long expected)
+    wrong_type_avro = b'\x02\x12\x1bThe Go Programming Language\x18Alan Donovan'  # Wrong encoding for isbn
+    assert deserialize_message(MockedMessage(wrong_type_avro, key), 'avro', parsed_avro_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Test invalid Protobuf messages
+    # Empty message (returns empty string, not None)
+    assert deserialize_message(MockedMessage(b'', key), 'protobuf', parsed_protobuf_schema, 'json', '') == (
+        '',
+        None,
+        '{"name": "Peter Parker"}',
+        None,
+    )
+
+    # Random bytes
+    random_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(MockedMessage(random_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', '') == (
+        None,
+        None,
+        None,
+        None,
+    )
+
+    # Completely invalid Protobuf message (random bytes)
+    invalid_protobuf = b'\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8\xf7\xf6\xf5\xf4\xf3\xf2\xf1\xf0'
+    assert deserialize_message(
+        MockedMessage(invalid_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (None, None, None, None)
+
+    # Protobuf message with wrong field number (field 99 instead of 1)
+    wrong_field_protobuf = (
+        b'\x99\x01\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1bThe Go Programming Language\x1a\x0cAlan Donovan'
+    )
+    assert deserialize_message(
+        MockedMessage(wrong_field_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (None, None, None, None)
+
+    # Protobuf message with truncated varint
+    truncated_varint_protobuf = b'\x08\xff\xff\xff\xff\xff\xff\xff\xff\xff'  # Incomplete varint
+    assert deserialize_message(
+        MockedMessage(truncated_varint_protobuf, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    ) == (None, None, None, None)
 
 
 def mocked_time():
@@ -540,15 +673,46 @@ def mocked_time():
 
 @mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', mocked_time)
 @pytest.mark.parametrize(
-    'persistent_cache_read_content, expected_persistent_cache_writes, expected_logs',
+    'messages, value_format, value_schema, persistent_cache_read_content, '
+    'expected_persistent_cache_writes, expected_logs',
     [
         pytest.param(
+            [
+                MockedMessage(
+                    b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+                    b'{"name": "Peter Parker"}',
+                    12,
+                ),
+                MockedMessage(
+                    b'{"name": "Bruce Banner", "age": 45, "transaction_amount": 456, "currency": "dollar"}',
+                    b'',
+                    13,
+                ),
+                None,
+            ],
+            'json',
+            '',
             "config_1_id,config_id_2",
             [],
             [],
             id='Does not retrieve messages a second time',
         ),
         pytest.param(
+            [
+                MockedMessage(
+                    b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
+                    b'{"name": "Peter Parker"}',
+                    12,
+                ),
+                MockedMessage(
+                    b'{"name": "Bruce Banner", "age": 45, "transaction_amount": 456, "currency": "dollar"}',
+                    b'',
+                    13,
+                ),
+                None,
+            ],
+            'json',
+            '',
             "",
             ["config_1_id"],
             [
@@ -557,9 +721,10 @@ def mocked_time():
                     'technology': 'kafka',
                     'cluster': 'cluster_id',
                     'config_id': 'config_1_id',
-                    'topic': 'marvel',
+                    'topic': 'topic1',
                     'partition': '0',
                     'offset': '12',
+                    'feature': 'data_streams_messages',
                     'message_value': '{"name": "Peter Parker", "age": 18, \
 "transaction_amount": 123, "currency": "dollar"}',
                     'message_key': '{"name": "Peter Parker"}',
@@ -569,9 +734,10 @@ def mocked_time():
                     'technology': 'kafka',
                     'cluster': 'cluster_id',
                     'config_id': 'config_1_id',
-                    'topic': 'marvel',
+                    'topic': 'topic1',
                     'partition': '0',
                     'offset': '13',
+                    'feature': 'data_streams_messages',
                     'message_value': '{"name": "Bruce Banner", "age": 45, \
 "transaction_amount": 456, "currency": "dollar"}',
                 },
@@ -580,16 +746,115 @@ def mocked_time():
                     'technology': 'kafka',
                     'cluster': 'cluster_id',
                     'config_id': 'config_1_id',
-                    'topic': 'marvel',
+                    'topic': 'topic1',
                     'message': 'No more messages to retrieve',
                     'live_messages_error': 'No more messages to retrieve',
+                    'feature': 'data_streams_messages',
                 },
             ],
             id='Retrieves messages from Kafka',
         ),
+        # This is the serialized Protobuf representing:
+        # syntax = "proto3";
+        # package com.book;
+        # message Book {
+        #     int64 isbn = 1;
+        #     string title = 2;
+        #     string author = 3;
+        # }
+        pytest.param(
+            [
+                MockedMessage(
+                    b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e',
+                    b'{"name": "Peter Parker"}',
+                    12,
+                ),
+                None,
+            ],
+            'protobuf',
+            'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2JuEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z',
+            "",
+            ["config_1_id"],
+            [
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'topic1',
+                    'partition': '0',
+                    'offset': '12',
+                    'feature': 'data_streams_messages',
+                    'message_value': (
+                        '{\n  "isbn": "9780134190440",\n  "title": "The Go Programming Language",\n  '
+                        '"author": "Alan Donovan"\n}'
+                    ),
+                    'message_key': '{"name": "Peter Parker"}',
+                },
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'topic1',
+                    'message': 'No more messages to retrieve',
+                    'live_messages_error': 'No more messages to retrieve',
+                    'feature': 'data_streams_messages',
+                },
+            ],
+            id='Retrieves Protobuf messages from Kafka',
+        ),
+        pytest.param(
+            [
+                MockedMessage(
+                    b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan',
+                    b'{"name": "Peter Parker"}',
+                    12,
+                ),
+                None,
+            ],
+            'avro',
+            (
+                '{"type": "record", "name": "Book", "namespace": "com.book", '
+                '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+                '{"name": "author", "type": "string"}]}'
+            ),
+            "",
+            ["config_1_id"],
+            [
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'topic1',
+                    'partition': '0',
+                    'offset': '12',
+                    'feature': 'data_streams_messages',
+                    'message_value': (
+                        '{"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}'
+                    ),
+                    'message_key': '{"name": "Peter Parker"}',
+                },
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'topic1',
+                    'message': 'No more messages to retrieve',
+                    'live_messages_error': 'No more messages to retrieve',
+                    'feature': 'data_streams_messages',
+                },
+            ],
+            id='Retrieves Avro messages from Kafka',
+        ),
     ],
 )
 def test_data_streams_messages(
+    messages,
+    value_format,
+    value_schema,
     persistent_cache_read_content,
     expected_persistent_cache_writes,
     expected_logs,
@@ -606,11 +871,14 @@ def test_data_streams_messages(
                     {
                         'kafka': {
                             'cluster': 'cluster_id',
-                            'topic': 'marvel',
+                            'topic': 'topic1',
                             'partition': 0,
                             'start_offset': 0,
                             'n_messages': 3,
-                            'value_format': 'json',
+                            'value_format': value_format,
+                            'value_schema': value_schema,
+                            'key_format': 'json',
+                            'key_schema': '',
                         },
                         'id': 'config_1_id',
                     }
@@ -619,19 +887,7 @@ def test_data_streams_messages(
         ),
     )
     mock_client = seed_mock_client(cluster_id="Cluster_id")
-    mock_client.get_next_message.side_effect = [
-        MockedMessage(
-            b'{"name": "Peter Parker", "age": 18, "transaction_amount": 123, "currency": "dollar"}',
-            b'{"name": "Peter Parker"}',
-            12,
-        ),
-        MockedMessage(
-            b'{"name": "Bruce Banner", "age": 45, "transaction_amount": 456, "currency": "dollar"}',
-            b'',
-            13,
-        ),
-        None,
-    ]
+    mock_client.get_next_message.side_effect = messages
     check = check(kafka_instance)
     check.client = mock_client
 
@@ -649,3 +905,83 @@ def test_data_streams_messages(
     for content in expected_persistent_cache_writes:
         assert mock.call(DATA_STREAMS_MESSAGES_CACHE_KEY, content) in check.write_persistent_cache.mock_calls
     assert [mock.call(log) for log in expected_logs] == check.send_log.mock_calls
+
+
+def test_build_schema():
+    """Test build_schema function with various valid and invalid schemas."""
+
+    # Test JSON format (should return None)
+    assert build_schema('json', '') is None
+    assert build_schema('json', '{"some": "json"}') is None
+    assert build_schema('json', None) is None
+
+    # Test valid Avro schema
+    valid_avro_schema = (
+        '{"type": "record", "name": "Book", "namespace": "com.book", '
+        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+        '{"name": "author", "type": "string"}]}'
+    )
+    avro_result = build_schema('avro', valid_avro_schema)
+    assert avro_result is not None
+    assert avro_result['type'] == 'record'
+    assert avro_result['name'] == 'Book'
+    assert avro_result['namespace'] == 'com.book'
+
+    # Test valid Protobuf schema
+    valid_protobuf_schema = (
+        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
+        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
+    )
+    protobuf_result = build_schema('protobuf', valid_protobuf_schema)
+    assert protobuf_result is not None
+    # The result should be a protobuf message class instance
+    assert hasattr(protobuf_result, 'isbn')
+    assert hasattr(protobuf_result, 'title')
+    assert hasattr(protobuf_result, 'author')
+
+    # Test unknown format
+    assert build_schema('unknown_format', 'some_schema') is None
+
+
+def test_build_schema_error_cases():
+    """Test build_schema with various error cases and edge cases."""
+
+    # Test Avro error cases
+    # Invalid JSON syntax
+    with pytest.raises(json.JSONDecodeError):
+        build_schema('avro', '{"invalid": json}')
+
+    # Valid JSON but incomplete schema (fastavro is permissive)
+    result = build_schema('avro', '{"type": "record"}')  # Missing name and fields
+    assert result is not None
+
+    # Test Protobuf error cases
+    # Invalid base64 encoding
+    with pytest.raises(base64.binascii.Error):
+        build_schema('protobuf', 'invalid-base64!')
+
+    # Valid base64 but invalid protobuf schema
+    # This is a valid base64 string that doesn't represent a valid FileDescriptorSet
+    with pytest.raises(DecodeError):  # Will be a protobuf DecodeError
+        build_schema('protobuf', 'SGVsbG8gV29ybGQ=')  # "Hello World" in base64
+
+    # Valid base64 but empty schema (should cause IndexError)
+    # Create a minimal but empty FileDescriptorSet
+    empty_descriptor = descriptor_pb2.FileDescriptorSet()
+    empty_descriptor_bytes = empty_descriptor.SerializeToString()
+    empty_descriptor_b64 = base64.b64encode(empty_descriptor_bytes).decode('utf-8')
+
+    with pytest.raises(IndexError):  # Should fail when trying to access file[0]
+        build_schema('protobuf', empty_descriptor_b64)
+
+
+def test_build_schema_none_handling():
+    """Test that build_schema functions properly handle None values."""
+
+    # Test Avro schema with None - should raise TypeError
+    with pytest.raises(TypeError):
+        build_avro_schema(None)
+
+    # Test Protobuf schema with None - should raise TypeError or base64.binascii.Error
+    with pytest.raises((TypeError, base64.binascii.Error)):
+        build_protobuf_schema(None)

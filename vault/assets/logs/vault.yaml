@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: vault
 metric_id: vault
 backend_only: false

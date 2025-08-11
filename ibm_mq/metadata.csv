@@ -38,6 +38,7 @@ ibm_mq.queue.depth_low_limit,gauge,,item,,"This attribute specifies low limit fo
 ibm_mq.queue.depth_max,gauge,,message,,"Maximum queue depth (parameter identifier: `MQIA_MAX_Q_DEPTH`). The maximum number of messages allowed on the queue. Note that other factors may cause the queue to be treated as full; for example, it will appear to be full if there is no storage available for a message.",0,ibm_mq,queue max depth,
 ibm_mq.queue.depth_max_event,gauge,,event,,Controls whether Queue Full events are generated (parameter identifier: `MQIA_Q_DEPTH_MAX_EVENT`).,0,ibm_mq,messages,
 ibm_mq.queue.depth_percent,gauge,,percent,,The percent of the queue that is currently utilized.,0,ibm_mq,queue usage percentage,
+ibm_mq.queue.discovery.error,gauge,,error,,Submits a metrics along tagged with error code and error tags when there is an error discovering queues,0,ibm_mq,discovery error,
 ibm_mq.queue.harden_get_backout,gauge,,request,,Whether to harden backout count. Specifies whether the count of backed out messages should be saved (hardened) across restarts of the message queue manager (parameter identifier: `MQIA_HARDEN_GET_BACKOUT`).,0,ibm_mq,times messages retrieved,
 ibm_mq.queue.high_q_depth,gauge,,message,,This attribute specifies the maximum number of messages on a queue (parameter identifier: `MQIA_HIGH_Q_DEPTH`).,0,ibm_mq,high q depth,
 ibm_mq.queue.inhibit_get,gauge,,occurrence,,Whether get operations are allowed (parameter identifier: `MQIA_INHIBIT_GET`).,0,ibm_mq,gets inhibited,
