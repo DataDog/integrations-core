@@ -3,6 +3,8 @@ name: 'Validate skip QA label'
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches:
+      - main
 
 jobs:
   validate-skip-qa:
@@ -14,8 +16,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
 
       - name: Get files changed
         id: changed_files
@@ -26,6 +26,10 @@ jobs:
             **/changelog.d/**
             **/pyproject.toml
             **/hatch.toml
+            files_ignore: |
+                ddev/**
+                datadog_checks_dev/**
+                datadog_checks_tests_helper/**
 
       - name: Post message - Add skip qa label
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
@@ -54,7 +58,9 @@ jobs:
 
             <details>
             <summary>List of modified files that will be shipped with the agent</summary>
+
             ```
             ${{ steps.changed_files.outputs.all_changed_files }}
             ```
+
             </details>
