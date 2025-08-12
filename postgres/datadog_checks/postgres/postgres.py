@@ -349,8 +349,8 @@ class PostgreSql(AgentCheck):
                         if not cursor.fetchone():
                             warnings.append(
                                 DatabaseHealthCheckError(
-                                    "The pg_monitor role is not present in the database. "
-                                    "Please create it to ensure proper monitoring."
+                                    f"The {self._config.username} user has not been granted the pg_monitor role. "
+                                    "Please grant it to ensure proper monitoring."
                                 )
                             )
                     # Catch unexpected errors during role check
@@ -364,10 +364,10 @@ class PostgreSql(AgentCheck):
                             conn.cursor().execute("SELECT 1 FROM pg_stat_statements LIMIT 1")
                         except psycopg.Error as e:
                             enabled = False
-                            description = str("The pg_stat_statements extension is not enabled in the {dbname} database.")
+                            description = str(f"The pg_stat_statements extension is not enabled in the {self._config.dbname} database.")
                             warnings.append(
                                 DatabaseHealthCheckError(
-                                    "The pg_stat_statements extension is not enabled in the {dbname} database. "
+                                    f"The pg_stat_statements extension is not enabled in the {self._config.dbname} database. "
                                     "Please enable it to collect query samples."
                                 )
                             )
