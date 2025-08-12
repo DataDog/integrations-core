@@ -25,7 +25,7 @@ from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, SQLASCIITextLoader
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
-from datadog_checks.postgres.health import HealthEvent, PostgresHealth, PostgresHealthEvent
+from datadog_checks.postgres.health import HealthEvent, PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -37,9 +37,10 @@ from datadog_checks.postgres.relationsmanager import (
 )
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.validate import PostgresValidator
 
 from .__about__ import __version__
-from .config import Feature, FeatureKey, FeatureNames, build_config, sanitize
+from .config import build_config, sanitize
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -106,6 +107,7 @@ class PostgreSql(AgentCheck):
     def __init__(self, name, init_config, instances, **kwargs):
         super(PostgreSql, self).__init__(name, init_config, instances, **kwargs)
         self.health = PostgresHealth(self)
+        self.validator = PostgresValidator(self)
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -314,128 +316,7 @@ class PostgreSql(AgentCheck):
         """
         Validate the connection to the database and the support for all enabled features.
         """
-
-        if time() - self._last_validation_timestamp < self._validation_interval:
-            return
-
-        connection_status = HealthStatus.OK
-        errors: list[str | Exception] = []
-        warnings: list[str] = []
-        features: list[Feature] = []
-
-        try:
-            try:
-                with self.db() as conn:
-                    self._connection_health_check(conn)
-            except Exception as e:
-                connection_status = HealthStatus.ERROR
-                # Abort any further validation if the connection is not healthy
-                raise e
-
-            with self.db() as conn:
-                # Check pg_monitor role
-                with conn.cursor() as cursor:
-                    try:
-                        cursor.execute(
-                            """
-                            SELECT 1
-                            FROM pg_roles r
-                            JOIN pg_auth_members m ON r.oid = m.roleid
-                            JOIN pg_roles u ON u.oid = m.member
-                            WHERE r.rolname = 'pg_monitor' AND u.rolname = %s
-                            """,
-                            (self._config.username,),
-                        )
-                        if not cursor.fetchone():
-                            warnings.append(
-                                DatabaseHealthCheckError(
-                                    f"The {self._config.username} user has not been granted the pg_monitor role. "
-                                    "Please grant it to ensure proper monitoring."
-                                )
-                            )
-                    # Catch unexpected errors during role check
-                    except psycopg.Error as e:
-                        errors.append(e)
-                    
-                    if self._config.query_samples.enabled or self._config.query_metrics.enabled:
-                        enabled = True
-                        description = None
-                        try:
-                            conn.cursor().execute("SELECT 1 FROM pg_stat_statements LIMIT 1")
-                        except psycopg.Error as e:
-                            enabled = False
-                            description = str(f"The pg_stat_statements extension is not enabled in the {self._config.dbname} database.")
-                            warnings.append(
-                                DatabaseHealthCheckError(
-                                    f"The pg_stat_statements extension is not enabled in the {self._config.dbname} database. "
-                                    "Please enable it to collect query samples."
-                                )
-                            )
-                        
-                        if self.autodiscovery:
-                            for dbname in self.autodiscovery.get_items():
-                                with self.db_pool.get_connection(dbname, 60_000) as conn:
-                                    # Check for datadog schema and pg_stat_statements extension
-                                    with conn.cursor() as cursor:
-                                        cursor.execute("SELECT 1 FROM pg_namespace WHERE nspname = 'datadog'")
-                                        if not cursor.fetchone():
-                                            warnings.append(
-                                                DatabaseHealthCheckError(
-                                                    f"The datadog schema is not present in the {dbname} database. "
-                                                    "Please create it to ensure proper monitoring."
-                                                )
-                                            )
-                                        try:
-                                            cursor.execute("SELECT 1 FROM pg_stat_statements LIMIT 1")
-                                            if not cursor.fetchone():
-                                                raise psycopg.Error(f"The pg_stat_statements extension is not enabled in the {dbname} database. ")
-                                        except psycopg.Error:
-                                            warnings.append(
-                                                DatabaseHealthCheckError(
-                                                    f"The pg_stat_statements extension is not enabled in the {dbname} database. "
-                                                    "Please enable it to collect query samples."
-                                                )
-                                            )
-                                        # Check for datadog.explain_statement function
-                                        cursor.execute("SELECT 1 FROM pg_proc WHERE proname = 'datadog.explain_statement'")
-                                        if not cursor.fetchone():
-                                            warnings.append(
-                                                DatabaseHealthCheckError(
-                                                   f"The datadog.explain_statement function is not present in the {dbname} database. "
-                                                    "Please create it to ensure proper monitoring."
-                                                )
-                                            )
-
-                        features.append({
-                            "key": FeatureKey.QUERY_METRICS,
-                            "name": FeatureNames[FeatureKey.QUERY_METRICS],
-                            "enabled": enabled,
-                            "description": description,
-                        })
-                        features.append({
-                            "key": FeatureKey.QUERY_SAMPLES,
-                            "name": FeatureNames[FeatureKey.QUERY_SAMPLES],
-                            "enabled": enabled,
-                            "description": description,
-                        })
-
-
-        except Exception as e:
-            errors.append(e)
-
-        self.log.info(f"Submitting health event: {PostgresHealthEvent.VALIDATION}, {HealthStatus.ERROR if errors else HealthStatus.WARNING if warnings else HealthStatus.OK}, {errors}, {warnings}, {connection_status}, {features}")
-        self.health.submit_health_event(
-            name=PostgresHealthEvent.VALIDATION,
-            status=HealthStatus.ERROR if errors else HealthStatus.WARNING if warnings else HealthStatus.OK,
-            errors=[str(e) for e in errors],
-            warnings=[str(w) for w in warnings],
-            connection_status=connection_status,
-            features=features,
-        )
-
-        self._last_validation_timestamp = time()
-        if len(errors) > 0:
-            raise errors[0]
+        self.validator.validate_connection()
 
     @property
     def dynamic_queries(self):
@@ -1239,7 +1120,7 @@ class PostgreSql(AgentCheck):
                 self.health.submit_health_event(
                     name=HealthEvent.UNKNOWN_ERROR,
                     status=HealthStatus.ERROR,
-                    description="Unknown error, please check the agent logs for more details.",                    
+                    description="Unknown error, please check the agent logs for more details.",
                 )
             raise e
         else:
