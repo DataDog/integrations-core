@@ -55,6 +55,8 @@ integration/ambari:
 - ambari/**/*
 integration/anthropic:
 - anthropic/**/*
+integration/anthropic_usage_and_costs:
+- anthropic_usage_and_costs/**/*
 integration/anyscale:
 - anyscale/**/*
 integration/apache:
@@ -85,6 +87,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/beyondtrust_identity_security_insights:
+- beyondtrust_identity_security_insights/**/*
 integration/beyondtrust_password_safe:
 - beyondtrust_password_safe/**/*
 integration/bitdefender:
