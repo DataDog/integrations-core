@@ -96,7 +96,7 @@ jobs:
 
       - name: Find comment - Remove skip qa label
         if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.0.0
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
         id: find_comment_remove_label
         with:
           issue-number: ${{ github.event.pull_request.number }}
