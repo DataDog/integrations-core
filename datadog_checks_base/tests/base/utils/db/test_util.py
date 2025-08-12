@@ -242,7 +242,14 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
 
 class JobForTesting(DBMAsyncJob):
     def __init__(
-        self, check, run_sync=False, enabled=True, rate_limit=10, min_collection_interval=15, job_execution_time=0
+        self,
+        check,
+        run_sync=False,
+        enabled=True,
+        rate_limit=10,
+        min_collection_interval=15,
+        job_execution_time=0,
+        max_sleep_chunk_s=5,
     ):
         super(JobForTesting, self).__init__(
             check,
@@ -253,6 +260,7 @@ class JobForTesting(DBMAsyncJob):
             config_host="test-host",
             dbms="test-dbms",
             rate_limit=rate_limit,
+            max_sleep_chunk_s=max_sleep_chunk_s,
             job_name="test-job",
             shutdown_callback=self.test_shutdown,
         )
@@ -305,6 +313,21 @@ def test_dbm_async_job_cancel(aggregator):
     expected_tags = tags + ['job:test-job']
     aggregator.assert_metric("dd.test-dbms.async_job.cancel", tags=expected_tags)
     aggregator.assert_metric("dbm.async_job_test.shutdown")
+
+
+def test_dbm_async_job_cancel_returns_early_on_long_sleep():
+    # Configure a very low rate so the sleep interval would be ~60s without cancellation
+    # Use a small chunk so the cancel check happens rapidly
+    job = JobForTesting(AgentCheck(), rate_limit=1 / 60.0, max_sleep_chunk_s=0.1)
+    job.run_job_loop([])
+    # Allow the thread to start and enter the sleep window
+    time.sleep(0.2)
+    start = time.time()
+    job.cancel()
+    # Should finish well before the full ~60s rate-limiter interval due to cancel-aware chunked sleep
+    job._job_loop_future.result(timeout=10)
+    elapsed = time.time() - start
+    assert elapsed < 10, "Job did not cancel before the full sleep interval"
 
 
 def test_dbm_async_job_run_sync(aggregator):
