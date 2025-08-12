@@ -50,7 +50,7 @@ class PostgresValidator:
         self, database_status: dict[str, dict[str, list | dict]], db_name: str, feature: Feature
     ) -> None:
         """Add a feature status to a specific database."""
-        database_status[db_name]["features"][str(feature["key"])] = feature
+        database_status[db_name]["features"][feature["key"].value] = feature
 
     def _row_exists(self, dbname: str, query: str, params: tuple = None) -> bool:
         """Check if a row exists in the database."""
@@ -169,16 +169,6 @@ class PostgresValidator:
                     self._add_database_feature(databases, dbname, query_metrics_feature)
                     self._add_database_feature(databases, dbname, query_samples_feature)
 
-        self.check.log.info(
-            "Submitting health event: %s, %s, %s, %s, %s, %s",
-            PostgresHealthEvent.VALIDATION,
-            HealthStatus.ERROR if errors else HealthStatus.WARNING if warnings else HealthStatus.OK,
-            errors,
-            warnings,
-            connection_status,
-            features,
-            databases,
-        )
         self.check.health.submit_health_event(
             name=PostgresHealthEvent.VALIDATION,
             status=HealthStatus.ERROR if errors else HealthStatus.WARNING if warnings else HealthStatus.OK,

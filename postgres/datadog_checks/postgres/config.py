@@ -256,7 +256,7 @@ class Feature(TypedDict):
     A feature in the Postgres configuration that can be enabled or disabled.
     """
 
-    key: str
+    key: FeatureKey
     name: str
     enabled: bool
     description: str | None
