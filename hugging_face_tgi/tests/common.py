@@ -15,7 +15,7 @@ def get_fixture_path(filename):
 
 
 MOCKED_INSTANCE = {
-    "openmetrics_endpoint": f"https://{HOST}:{PORT}/metrics",
+    "openmetrics_endpoint": f"http://{HOST}:{PORT}/metrics",
     'tags': ['test:tag'],
 }
 
