@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: harbor
 metric_id: harbor
 backend_only: false

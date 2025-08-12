@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: rethinkdb
 metric_id: rethinkdb
 backend_only: false

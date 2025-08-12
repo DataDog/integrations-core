@@ -32,7 +32,6 @@ jobs:
        contents: read
 
   publish-test-results:
-
     needs:
     - test
 

@@ -19,7 +19,6 @@ jobs:
        id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
-
   submit-traces:
     needs:
     - test
