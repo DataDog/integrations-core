@@ -32,7 +32,7 @@ class PostgresValidator:
     @staticmethod
     def _init_database_status(db_name: str) -> dict[str, list | dict]:
         """Initialize status structure for a database."""
-        return {"errors": [], "warnings": [], "features": [], "connection_status": HealthStatus.OK}
+        return {"errors": [], "warnings": [], "features": {}, "connection_status": HealthStatus.OK}
 
     def _add_database_warning(
         self, database_status: dict[str, dict[str, list | dict]], db_name: str, warning: str | Exception
@@ -47,10 +47,10 @@ class PostgresValidator:
         database_status[db_name]["errors"].append(str(error))
 
     def _add_database_feature(
-        self, database_status: dict[str, dict[str, list | dict]], db_name: str, feature: dict
+        self, database_status: dict[str, dict[str, list | dict]], db_name: str, feature: Feature
     ) -> None:
         """Add a feature status to a specific database."""
-        database_status[db_name]["features"].append(feature)
+        database_status[db_name]["features"][str(feature["key"])] = feature
 
     def _row_exists(self, dbname: str, query: str, params: tuple = None) -> bool:
         """Check if a row exists in the database."""
@@ -177,6 +177,7 @@ class PostgresValidator:
             warnings,
             connection_status,
             features,
+            databases,
         )
         self.check.health.submit_health_event(
             name=PostgresHealthEvent.VALIDATION,
