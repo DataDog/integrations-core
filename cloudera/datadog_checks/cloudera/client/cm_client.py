@@ -21,6 +21,9 @@ EVENT_TYPES = {
 class CmClient(Client):
     def __init__(self, log, **kwargs):
         self._log = log
+        import logging
+
+        logging.getLogger('cm_client').setLevel(logging.DEBUG)
         self._log.debug("creating CmClient object with parameters: %s", kwargs)
         cm_client.configuration.username = kwargs.get('workload_username')
         cm_client.configuration.password = kwargs.get('workload_password')
@@ -90,6 +93,12 @@ class CmClient(Client):
         ]
 
     def read_events(self, query) -> list:
+        all_events = cm_client.EventsResourceApi(self._client).read_events(query=query).items
+        self._log.debug("All events %s", len(all_events))
+
+        all_events_no_filter = cm_client.EventsResourceApi(self._client).read_events().items
+        num_events = len(all_events_no_filter) if all_events_no_filter is not None else 0
+        self._log.debug("All events without a filter %s", num_events)
         return [
             {
                 "timestamp": parser.isoparse(event.time_occurred).replace(tzinfo=timezone.utc).timestamp(),
@@ -99,5 +108,5 @@ class CmClient(Client):
                 "msg_title": event.content,
                 "msg_text": event.content,
             }
-            for event in cm_client.EventsResourceApi(self._client).read_events(query=query).items
+            for event in all_events
         ]
