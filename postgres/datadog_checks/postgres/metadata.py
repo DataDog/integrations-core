@@ -319,6 +319,8 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._time_since_last_extension_query = time.time()
@@ -525,6 +527,8 @@ class PostgresMetadata(DBMAsyncJob):
             encoding: str
             owner: str
         """
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 try:
@@ -556,6 +560,8 @@ class PostgresMetadata(DBMAsyncJob):
         else:
             schema_query_ = schema_query_.format("")
 
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         try:
             with self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
@@ -586,6 +592,8 @@ class PostgresMetadata(DBMAsyncJob):
         """
         filter = self._get_tables_filter()
         try:
+            if self._cancel_event.is_set():
+                raise Exception("Job loop cancelled. Aborting query.")
             with self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
@@ -669,6 +677,8 @@ class PostgresMetadata(DBMAsyncJob):
             else:
                 # get activity
                 try:
+                    if self._cancel_event.is_set():
+                        raise Exception("Job loop cancelled. Aborting query.")
                     with self.db_pool.get_connection(dbname) as conn:
                         with conn.cursor(row_factory=dict_row) as cursor:
                             cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
@@ -754,6 +764,8 @@ class PostgresMetadata(DBMAsyncJob):
 
         # Get indexes
         try:
+            if self._cancel_event.is_set():
+                raise Exception("Job loop cancelled. Aborting query.")
             with self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     query = PG_INDEXES_QUERY.format(table_ids=table_ids)
@@ -826,6 +838,8 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 try:

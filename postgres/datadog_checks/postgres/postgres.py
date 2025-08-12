@@ -411,9 +411,22 @@ class PostgreSql(AgentCheck):
         Cancels and sends cancel signal to all threads.
         """
         if self._config.dbm_enabled:
+            self.log.info("Cancelling DBM jobs")
+            now = time()
             self.statement_samples.cancel()
             self.statement_metrics.cancel()
             self.metadata_samples.cancel()
+            self.log.info("DBM jobs cancelled in %s seconds", time() - now)
+            if self.statement_metrics._job_loop_future:
+                self.statement_metrics._job_loop_future.result()
+                self.log.info("statement_metrics job loop finished in %s seconds", time() - now)
+            if self.statement_samples._job_loop_future:
+                self.statement_samples._job_loop_future.result()
+                self.log.info("statement_samples job loop finished in %s seconds", time() - now)
+            if self.metadata_samples._job_loop_future:
+                self.metadata_samples._job_loop_future.result()
+                self.log.info("metadata_samples job loop finished in %s seconds", time() - now)
+            self.log.warning("DBM jobs cancelled in %s seconds", time() - now)
         self._close_db_pool()
         if self._db:
             self._db.close()

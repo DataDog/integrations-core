@@ -241,6 +241,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
@@ -281,6 +283,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
 
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
@@ -308,6 +312,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 try:
@@ -728,6 +734,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self.db_pool.get_connection(dbname) as conn:
             try:
                 # When sending potentially non-ascii data, e.g. UTF8, we need to force
