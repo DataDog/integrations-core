@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize]
     branches:
       - master
+
 env:
   COMMENT_BODY_ADD_LABEL: |
     ⚠️ **Recommendation: Add `qa/skip-qa` Label**
