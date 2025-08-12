@@ -4,8 +4,8 @@
 
 import pytest
 
-from datadog_checks.hugging_face_tgi import HuggingFaceTgiCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.hugging_face_tgi import HuggingFaceTgiCheck
 
 from .common import RENAMED_LABELS, TEST_METRICS, get_fixture_path
 

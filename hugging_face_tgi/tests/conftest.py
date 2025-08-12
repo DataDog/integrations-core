@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import pytest
 import logging
+
+import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
@@ -23,6 +24,7 @@ def dd_environment():
         yield {
             'instances': [common.MOCKED_INSTANCE],
         }
+
 
 @pytest.fixture
 def instance():
