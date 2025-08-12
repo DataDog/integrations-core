@@ -60,7 +60,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(SlurmCheck, self).__init__(name, init_config, instances)
-
+        print("hello")
         # What should be collected
         self.collect_sinfo_stats = is_affirmative(self.instance.get('collect_sinfo_stats', True))
         self.collect_squeue_stats = is_affirmative(self.instance.get('collect_squeue_stats', True))
