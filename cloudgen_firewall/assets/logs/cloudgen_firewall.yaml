@@ -105,7 +105,7 @@ pipeline:
       name: Box Firewall
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:firewall
+        query: source:barracuda_cloudgen_logs
       processors:
         - type: grok-parser
           name: Box Firewall Activity
