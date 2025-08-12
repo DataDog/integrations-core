@@ -1,6 +1,8 @@
 id: "cloudgen_firewall"
 metric_id: cloudgen-firewall
 backend_only: false
+installation_sources:
+  - barracuda_cloudgen_logs
 facets:
   - description: "Shows the component of the Barracuda CloudGen Firewall log."
     facetType: list
@@ -47,7 +49,7 @@ pipeline:
   name: Barracuda CloudGen Firewall
   enabled: true
   filter:
-    query: source:cloudgen_firewall
+    query: source:barracuda_cloudgen_logs
   processors:
     - type: attribute-remapper
       name: " Map `timestamp` to `syslog.timestamp`"
