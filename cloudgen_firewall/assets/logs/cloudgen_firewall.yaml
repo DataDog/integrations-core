@@ -252,7 +252,7 @@ pipeline:
       name: Box Events
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:event
+        query: source:barracuda_cloudgen_logs
       processors:
         - type: grok-parser
           name: Box Event Events
@@ -471,7 +471,7 @@ pipeline:
       name: Box Authentication
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:auth
+        query: source:barracuda_cloudgen_logs
       processors:
         - type: grok-parser
           name: Box Auth Access
