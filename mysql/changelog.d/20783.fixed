@@ -1,1 +1,0 @@
-Add deprecated `collect_schemas` option to `config.yaml.example`. This config option is deprecated at Agent 7.69.0 and will be removed in a future release.

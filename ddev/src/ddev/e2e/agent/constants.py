@@ -20,3 +20,16 @@ class AgentEnvVars:
     SITE = 'DD_SITE'
     TELEMETRY_ENABLED = 'DD_TELEMETRY_ENABLED'
     URL = 'DD_DD_URL'
+
+
+# Note: we cannot use pathlib to create the paths as the host running ddev might have a different OS than the VM's OS
+# Agent file paths (Linux)
+LINUX_AGENT_BIN_PATH = "/opt/datadog-agent/bin/agent/agent"
+LINUX_AGENT_PYTHON_PREFIX = "/opt/datadog-agent/embedded/bin/python"
+LINUX_AGENT_CONF_DIR = "/etc/datadog-agent/conf.d"
+LINUX_SUDOERS_FILE_PATH = "/etc/sudoers.d/dd-agent"
+
+# Agent file paths (Windows)
+WINDOWS_AGENT_BIN_PATH = "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe"
+WINDOWS_AGENT_PYTHON_PREFIX = "C:\\Program Files\\Datadog\\Datadog Agent\\embedded"
+WINDOWS_AGENT_CONF_DIR = "C:\\ProgramData\\Datadog\\conf.d"
