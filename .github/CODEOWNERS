@@ -597,6 +597,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /bitwarden/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /bitwarden/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/beyondtrust_identity_security_insights/                             @DataDog/saas-integrations
+/beyondtrust_identity_security_insights/*.md                         @DataDog/saas-integrations @DataDog/documentation
+/beyondtrust_identity_security_insights/manifest.json                @DataDog/saas-integrations @DataDog/documentation
+/beyondtrust_identity_security_insights/assets/logs/                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /klaviyo/                                                            @DataDog/saas-integrations
 /klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
