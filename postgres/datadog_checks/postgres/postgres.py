@@ -1220,9 +1220,7 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            message = 'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
-                self._config.host, self._config.port, self._config.dbname, str(e)
-            )
+            message = str(e)
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -1231,6 +1229,14 @@ class PostgreSql(AgentCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+            if not isinstance(e, DatabaseHealthCheckError):
+                # Submit a health event for unknown errors
+                # We don't send the error because it may contain sensitive information
+                self.health.submit_health_event(
+                    name=HealthEvent.UNKNOWN_ERROR,
+                    status=HealthStatus.ERROR,
+                    description="Unknown error, please check the agent logs for more details.",                    
+                )
             raise e
         else:
             self.service_check(
