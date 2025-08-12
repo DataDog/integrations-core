@@ -129,45 +129,45 @@ class PostgresValidator:
                         ),
                     )
 
-                    # Check for datadog schema and pg_stat_statements extension
-                    if not self._row_exists(dbname, "SELECT 1 FROM pg_namespace WHERE nspname = 'datadog'"):
+                # Check for datadog schema and pg_stat_statements extension
+                if not self._row_exists(dbname, "SELECT 1 FROM pg_namespace WHERE nspname = 'datadog'"):
+                    self._add_database_warning(
+                        databases,
+                        dbname,
+                        DatabaseHealthCheckError(
+                            f"The datadog schema is not present in the {dbname} database. "
+                            "Please create it to ensure proper monitoring."
+                        ),
+                    )
+                    # Check for datadog.explain_statement function
+                    if not self._row_exists(
+                        dbname, "SELECT 1 FROM pg_proc WHERE proname = 'datadog.explain_statement'"
+                    ):
                         self._add_database_warning(
                             databases,
                             dbname,
                             DatabaseHealthCheckError(
-                                f"The datadog schema is not present in the {dbname} database. "
+                                f"The datadog.explain_statement function is not present in the {dbname} database. "
                                 "Please create it to ensure proper monitoring."
                             ),
                         )
-                        # Check for datadog.explain_statement function
-                        if not self._row_exists(
-                            dbname, "SELECT 1 FROM pg_proc WHERE proname = 'datadog.explain_statement'"
-                        ):
-                            self._add_database_warning(
-                                databases,
-                                dbname,
-                                DatabaseHealthCheckError(
-                                    f"The datadog.explain_statement function is not present in the {dbname} database. "
-                                    "Please create it to ensure proper monitoring."
-                                ),
-                            )
 
-                    query_metrics_feature = {
-                        "key": FeatureKey.QUERY_METRICS,
-                        "name": FeatureNames[FeatureKey.QUERY_METRICS],
-                        "enabled": enabled,
-                        "description": description,
-                    }
-                    query_samples_feature = {
-                        "key": FeatureKey.QUERY_SAMPLES,
-                        "name": FeatureNames[FeatureKey.QUERY_SAMPLES],
-                        "enabled": enabled,
-                        "description": description,
-                    }
+                query_metrics_feature = {
+                    "key": FeatureKey.QUERY_METRICS,
+                    "name": FeatureNames[FeatureKey.QUERY_METRICS],
+                    "enabled": enabled,
+                    "description": description,
+                }
+                query_samples_feature = {
+                    "key": FeatureKey.QUERY_SAMPLES,
+                    "name": FeatureNames[FeatureKey.QUERY_SAMPLES],
+                    "enabled": enabled,
+                    "description": description,
+                }
 
-                    # Add features to primary database
-                    self._add_database_feature(databases, dbname, query_metrics_feature)
-                    self._add_database_feature(databases, dbname, query_samples_feature)
+                # Add features to primary database
+                self._add_database_feature(databases, dbname, query_metrics_feature)
+                self._add_database_feature(databases, dbname, query_samples_feature)
 
         self.check.health.submit_health_event(
             name=PostgresHealthEvent.VALIDATION,
