@@ -64,6 +64,7 @@ class Health:
             Tags to associate with the health event.
         :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
+        print(f"Submitting health event: {name}, {status}")
         self.check.database_monitoring_health(
             json.dumps(
                 {
