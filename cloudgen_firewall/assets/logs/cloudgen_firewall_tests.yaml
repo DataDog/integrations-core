@@ -1,10 +1,97 @@
 id: cloudgen_firewall
 tests:
  -
-  sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
-    sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall:
-    [Request] Configuration: Reload AppDB"
+  sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
+    sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal Block:
+    FWD|UDP|eth0|10.1.1.9|38721|a0:d0:5b:29:32:2e|10.1.7.255|15600|||BOX-LAN-\
+    2-LAN|4017|||0|1|0|0|0|0||||||"
   service: "firewall"
+  result: null
+ -
+  sample: "2025-04-09T23:25:00+05:30 sacumentestlocal
+    sacumentestlocal/box_Firewall_IPSDownload:  Info sacumentestlocal Starting
+    main loop pid=4623"
+  service: "firewall"
+  result: null
+ -
+  sample: "2025-03-19T09:31:22+05:30 sacumentestlocal
+    sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal firewall:
+    [Main] Sync: Authentication audit is set to 'auto', auto detection "
+  service: "firewall"
+  result: null
+ -
+  sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+    sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin
+    Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+  service: "firewall"
+  result: null
+ -
+  sample: "2025-04-24T07:25:00+05:30 sacumentestlocal
+    sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal
+    firewall: [Admin Session testuser@10.1.1.167] AdminAction: Connection
+    terminated (while 'ecachepb')"
+  service: "firewall"
+  result: null
+ -
+  sample: "2025-04-09T23:25:00+05:30 sacumentestlocal
+    sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal firewall:
+    [Off] Sync: BOX IP is 10.1.1.167 Box RSA Pub"
+  service: "firewall"
+  result: null
+ - 
+  sample: "2025-04-09T13:06:41+05:30 sacumentestlocal
+    sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
+    [1071065] Insert Event from 127.0.0.1:10024 -
+    (D|2|ccactivate|1|License|4700|Query Activation State for 3343643
+    Failed|sacumentestlocal|1744204001|Querying licensing servers for the
+    license activation state failed)"
+  service: "event"
+  result: null
+ -
+  sample: "2025-03-20T14:01:16+05:30 sacumentestlocal
+    sacumentestlocal/box_Event_operative:  Error     sacumentestlocal event:
+    [1070256] (11) IOStreamSock: Receive() error:068000DF:asn1 encoding
+    routines::too large"
+  service: "event"
+  result: null
+ -
+  sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
+    sacumentestlocal/box_SSH_config:  Internal sacumentestlocal [0210108]
+    writeSSHdconf(): starting handling of ssh daemon configuration"
+  service: "ssh"
+  result: null
+ -
+  sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
+    sacumentestlocal/box_SSH_sshd:  Notice sacumentestlocal sshd: notice:
+    Starting session: shell on pts/0 for abhishek from 10.10.16.1 port 61649
+    id 0"
+  service: "ssh"
+  result: null
+ -
+  sample: "2025-03-19T09:27:26+05:30 sacumentestlocal
+    sacumentestlocal/box_Config_daemon_download:  Info     sacumentestlocal
+    Download of geo returned: Success: software up to date, version  Geo
+    Location Definitions : 85 (allow box distribution)"
+  service: "config"
+  result: null
+ -
+  sample: "2025-03-17T10:54:54+05:30 sacumentestlocal
+    sacumentestlocal/box_Config_admin:  Info     sacumentestlocal  challenge
+    sent for localhost_sacumentestlocal"
+  service: "config"
+  result: null
+ -  
+  sample: "2025-04-09T23:25:00+05:30 sacumentestlocal
+    sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal Starting
+    main loop pid=5429."
+  service: "config"
+  result: null
+ -
+  sample: "2025-04-04T11:49:18+05:30 sacumentestlocal
+    sacumentestlocal/box_Config_changes:  Info     sacumentestlocal
+    [abhishek@10.10.16.1_1694]  Deleting session
+    GCSID_abhishek_10.10.16.1_1694_19208"
+  service: "config"
   result: null
  -
   sample: "2025-03-17T08:24:45+05:30 sacumentestlocal
@@ -13,6 +100,15 @@ tests:
   service: "auth"
   result: null
  -
-  sample: "2025-03-14T11:04:10+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Drop Event from 127.0.0.1:56866 - (D|3|boxfw|2|Firewall|2500|10.10.16.167:80|sacumentestlocal)"
-  service: "event"
+  sample: "2025-07-17T13:18:00+05:30 sacumentestlocal
+    sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal
+    MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte
+    (auto-calculated)"
+  service: "control"
+  result: null
+ -
+  sample: "2025-03-17T18:51:54+03:10 sacumentestlocal
+    sacumentestlocal/box_System_mgmaccess:  Info   sacumentestlocal Connected
+    new handler #1296 of type 'Virus Scanner'"
+  service: "system"
   result: null
