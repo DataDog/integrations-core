@@ -23,11 +23,11 @@ To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
 The Agent's Kafka check is included in the [Datadog Agent][4] package, no additional installation is needed on your Kafka nodes.
 
+Add [Data Streams Monitoring][24] to your producers and consumers to visualize the application topology, root cause issues across services, and measure end to end latency, throughput and lag.
+
 The check collects metrics from JMX with [JMXFetch][5]. A JVM is needed on each kafka node so the Agent can run JMXFetch. The same JVM that Kafka uses can be used for this.
 
 **Note**: The Kafka check cannot be used with Managed Streaming for Apache Kafka (Amazon MSK). Use the [Amazon MSK integration][6] instead.
-
-Add [Data Streams Monitoring][24] to your producers and consumers to visualize the application topology, root cause issues across services, and measure end to end latency, throughput and lag.
 
 ### Configuration
 
