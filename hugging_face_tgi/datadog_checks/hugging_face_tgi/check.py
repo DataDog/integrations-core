@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.hugging_face_tgi.metrics import METRIC_MAP, RENAME_LABELS_MAP
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.hugging_face_tgi.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class HuggingFaceTgiCheck(OpenMetricsBaseCheckV2):
