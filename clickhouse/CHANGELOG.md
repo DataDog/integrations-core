@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.3.1 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
 ## 5.3.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:
