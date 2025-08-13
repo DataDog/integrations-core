@@ -1,7 +1,9 @@
 # CHANGELOG - BeyondTrust Password Safe
 
-## 1.0.0 / 2025-06-25
+<!-- towncrier release notes start -->
+
+## 1.0.0 / 2025-08-07
 
 ***Added***:
 
-* Initial Release
+* Initial Release ([#20630](https://github.com/DataDog/integrations-core/pull/20630))

@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 8.4.0 / 2025-08-07
+
+***Added***:
+
+* Make queue discovery logic more resilient and add new metric to track broken queues ([#20549](https://github.com/DataDog/integrations-core/pull/20549))
+
+***Fixed***:
+
+* Lift `pymqi` dependency exclusion for macOS on AArch64/ARM64 ([#20815](https://github.com/DataDog/integrations-core/pull/20815))
+
 ## 8.3.0 / 2025-07-10
 
 ***Added***:

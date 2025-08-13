@@ -218,45 +218,40 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
                 platform_ids = ['linux']
 
         hatch_toml = root / target / 'hatch.toml'
-        if not hatch_toml.is_file():
-            continue
+        target_envs: dict[str, list[str]] = {}
+        if hatch_toml.is_file():
+            hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
+            env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
+            # convert the env matrix to a list of targets for each combination of values
+            if env_matrix:
+                for env in env_matrix:
+                    if not isinstance(env, dict):
+                        continue
 
-        hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
-        env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
-        target_envs: dict[str, list[str]] = {platform_id: [] for platform_id in platform_ids}
-        # convert the env matrix to a list of targets for each combination of values
-        if env_matrix:
-            for env in env_matrix:
-                if not isinstance(env, dict):
-                    continue
+                    # Create a list of all combinations of values
+                    keys = env.keys()
+                    values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
+                    if not values:
+                        continue
 
-                # Create a list of all combinations of values
-                keys = env.keys()
-                values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
-                if not values:
-                    continue
+                    # Generate all combinations of values
+                    from itertools import product
 
-                # Generate all combinations of values
-                from itertools import product
+                    # This maps the lists of target envs into all their permutations
+                    # For example, if the env matrix is:
+                    # { 'foo': ['bar', 'baz'], 'python': ['3.8', '3.9'] }
+                    # The permutations would be:
+                    # - bar-py3.8
+                    # - bar-py3.9
+                    # - baz-py3.8
+                    # - baz-py3.9
+                    # If 'os' is one of the keys, we use it to put the combinations into the right platform
+                    # so that we can get the correct runner for the target-env
 
-                # This maps the lists of target envs into all their permutations
-                # For example, if the env matrix is:
-                # { 'foo': ['bar', 'baz'], 'python': ['3.8', '3.9'] }
-                # The permutations would be:
-                # - bar-py3.8
-                # - bar-py3.9
-                # - baz-py3.8
-                # - baz-py3.9
-                # If 'os' is one of the keys, we use it to put the combinations into the right platform
-                # so that we can get the correct runner for the target-env
-
-                os_index = list(keys).index('os') if 'os' in keys else -1
-                for combination in product(*values):
-                    os = combination[os_index] if os_index != -1 else platform_ids[0]
-                    target_envs[os].append('-'.join(combination))
-
-        else:
-            target_envs = {}
+                    os_index = list(keys).index('os') if 'os' in keys else -1
+                    for combination in product(*values):
+                        os = combination[os_index] if os_index != -1 else platform_ids[0]
+                        target_envs.setdefault(os, []).append('-'.join(combination))
 
         runners = matrix_overrides.get('runners', {})
         for platform_id in platform_ids:

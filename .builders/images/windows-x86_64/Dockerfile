@@ -13,7 +13,8 @@ SHELL ["cmd", "/S", "/C"]
 
 # https://learn.microsoft.com/en-us/visualstudio/install/build-tools-container#create-and-build-the-dockerfile
 # https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools
-RUN curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe `
+# Bootstrapper version pinned to 17.12.36227.10 (taken from learn.microsoft.com/en-us/visualstudio/releases/2022/release-history#fixed-version-bootstrappers)
+RUN curl -SL --output vs_buildtools.exe https://download.visualstudio.microsoft.com/download/pr/87b94407-0aa3-45fc-b53f-d224027a42b3/00e8cad9ef34839c57f9be8bc4f93c517804777bdef770e8dbdc8ba0e06bc348/vs_BuildTools.exe `
  && (start /w vs_buildtools.exe --quiet --wait --norestart --nocache `
      --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" `
      --add Microsoft.VisualStudio.Component.VC.140 `

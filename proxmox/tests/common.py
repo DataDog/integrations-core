@@ -418,3 +418,47 @@ START_UPDATE_EVENTS = [
         ],
     },
 ]
+
+
+NO_CONTAINER_EVENTS = [
+    {
+        'timestamp': 1752721614,
+        'event_type': 'proxmox',
+        'host': 'ip-122-82-3-112',
+        'msg_text': 'Update package database on node ip-122-82-3-112',
+        'msg_title': 'Update package database',
+        'alert_type': 'success',
+        'source_type_name': 'proxmox',
+        'tags': ['proxmox_event_type:aptupdate', 'proxmox_user:root@pam'],
+    },
+    {
+        'timestamp': 1752678425,
+        'event_type': 'proxmox',
+        'host': 'ip-122-82-3-112',
+        'msg_text': 'Bulk start VMs and Containers on node ip-122-82-3-112',
+        'msg_title': 'Bulk start VMs and Containers',
+        'alert_type': 'success',
+        'source_type_name': 'proxmox',
+        'tags': ['proxmox_event_type:startall', 'proxmox_user:root@pam'],
+    },
+    {
+        'timestamp': 1752628379,
+        'event_type': 'proxmox',
+        'host': 'ip-122-82-3-112',
+        'msg_text': 'Update package database on node ip-122-82-3-112',
+        'msg_title': 'Update package database',
+        'alert_type': 'success',
+        'source_type_name': 'proxmox',
+        'tags': ['proxmox_event_type:aptupdate', 'proxmox_user:root@pam'],
+    },
+    {
+        'timestamp': 1752854281,
+        'event_type': 'proxmox',
+        'host': 'debian',
+        'msg_text': 'Vm VM 100: VM Shutdown on node ip-122-82-3-112',
+        'msg_title': 'VM Shutdown',
+        'alert_type': 'success',
+        'source_type_name': 'proxmox',
+        'tags': ['proxmox_event_type:qmshutdown', 'proxmox_user:root@pam'],
+    },
+]

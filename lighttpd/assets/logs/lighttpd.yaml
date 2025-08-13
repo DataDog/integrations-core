@@ -1,3 +1,4 @@
+# bypass-global-missing-date-remapper-checks
 id: lighttpd
 metric_id: lighttpd
 backend_only: false

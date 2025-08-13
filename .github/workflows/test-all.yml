@@ -78,26 +78,6 @@ jobs:
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
     if: ${{ inputs.skip-ddev-tests == false }}
-  j6712d43:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: ddev on Windows
-      target: ddev
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-    if: ${{ inputs.skip-ddev-tests == false }}
   jb232c8c:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -143,25 +123,6 @@ jobs:
       target: datadog_checks_downloader
       platform: linux
       runner: '["ubuntu-22.04"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  jd66e148:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Active Directory
-      target: active_directory
-      platform: windows
-      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
@@ -390,25 +351,6 @@ jobs:
       target: argocd
       platform: linux
       runner: '["ubuntu-22.04"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j8c9f9aa:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: ASP.NET
-      target: aspdotnet
-      platform: windows
-      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
@@ -991,25 +933,6 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jc6b16d4:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: .NET CLR
-      target: dotnetclr
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
   j274814f:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1150,25 +1073,6 @@ jobs:
       target: etcd
       platform: linux
       runner: '["ubuntu-22.04"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j284dfb9:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Exchange Server
-      target: exchange_server
-      platform: windows
-      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
@@ -1682,25 +1586,6 @@ jobs:
       target: ignite
       platform: linux
       runner: '["ubuntu-22.04"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j9267198:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: IIS
-      target: iis
-      platform: windows
-      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
@@ -2761,25 +2646,6 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j4dff42c:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: PDH
-      target: pdh_check
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
   j4a8166b:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3360,25 +3226,6 @@ jobs:
       target: spark
       platform: linux
       runner: '["ubuntu-22.04"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j31a95c8:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: SQL Server on Windows
-      target: sqlserver
-      platform: windows
-      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
@@ -4002,82 +3849,6 @@ jobs:
       target: weblogic
       platform: linux
       runner: '["ubuntu-22.04"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j70c9219:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Windows Event Log
-      target: win32_event_log
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  jc1fb93c:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Windows performance counters
-      target: windows_performance_counters
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j9798a89:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Windows Service
-      target: windows_service
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j25cdd56:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: WMI
-      target: wmi_check
-      platform: windows
-      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}

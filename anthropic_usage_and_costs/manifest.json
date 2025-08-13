@@ -1,0 +1,53 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "96f960de-2b87-41ec-8d9a-88fe75e93dc9",
+  "app_id": "anthropic-usage-and-costs",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Enable Anthropic customers to monitor token consumption, track spend, and attribute usage directly within Datadog.",
+    "title": "Anthropic Usage and Costs",
+    "media": [],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Metrics",
+      "Category::Cost Management",
+      "Submitted Data Type::Metrics",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 54188605,
+      "source_type_name": "Anthropic Usage and Costs",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "anthropic.",
+        "check": [
+          "anthropic.input_tokens",
+          "anthropic.output_tokens"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}
