@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a0f0e600-1f10-4505-8fc3-64442e78b1a3",
   "app_id": "genesys",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
