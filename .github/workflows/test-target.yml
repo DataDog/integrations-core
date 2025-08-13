@@ -281,7 +281,7 @@ jobs:
         else
           ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.target-env || 'all' }} ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- -k "not fips"' }}
           exit_code=$?
-        fi        
+        fi
 
         if [ "$exit_code" -eq 5 ]; then
           echo "No tests were collected."
