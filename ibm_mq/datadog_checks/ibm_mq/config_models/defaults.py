@@ -20,6 +20,10 @@ def instance_auto_discover_queues():
     return False
 
 
+def instance_auto_discover_queues_via_names():
+    return False
+
+
 def instance_collect_connection_metrics():
     return False
 

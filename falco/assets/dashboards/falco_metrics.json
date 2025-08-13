@@ -133,7 +133,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:falco.rules.matches{$host, $endpoint}.as_count()"
+                                            "query": "sum:falco.rules.matches.count{$host, $endpoint}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -246,7 +246,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:falco.rules.matches{$endpoint}.as_count()"
+                                            "query": "sum:falco.rules.matches.count{$endpoint}.as_count()"
                                         }
                                     ],
                                     "formulas": [

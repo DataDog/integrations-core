@@ -72,7 +72,7 @@ RUN mkdir -p /opt/mqm \
 
 # krb5 for dependencies that require kerberos support
 RUN \
- DOWNLOAD_URL="https://kerberos.org/dist/krb5/1.20/krb5-{{version}}.tar.gz" \
+ DOWNLOAD_URL="https://web.mit.edu/kerberos/dist/krb5/1.20/krb5-1.20.1.tar.gz" \
  VERSION="1.20.1" \
  SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851" \
  RELATIVE_PATH="krb5-{{version}}/src" \
@@ -158,8 +158,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.14.0" \
- SHA256="5eba3ec2d898919a4b34cc89ace0068d9d09420b8643f265aebac59f8d126203" \
+ VERSION="8.15.0" \
+ SHA256="d85cfc79dc505ff800cb1d321a320183035011fa08cb301356425d86be8fc53c" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \
