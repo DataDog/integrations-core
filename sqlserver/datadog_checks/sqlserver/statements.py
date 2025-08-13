@@ -6,9 +6,9 @@ import binascii
 import copy
 import math
 import time
+from xml.etree.ElementTree import fromstring, tostring
 
 from cachetools import TTLCache
-from xml.etree.ElementTree import fromstring, tostring
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string

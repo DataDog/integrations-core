@@ -6,9 +6,9 @@ import logging
 import os
 import sys
 from unittest.mock import Mock, patch
+from xml.ElementTree import fromstring
 
 import pytest
-from xml.ElementTree import fromstring
 
 from datadog_checks.base.utils.db.utils import TagManager
 from datadog_checks.sqlserver import SQLServer

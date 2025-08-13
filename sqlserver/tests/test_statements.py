@@ -13,10 +13,10 @@ from collections import namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 from unittest.mock import ANY
+from xml.etree.ElementTree import fromstring, tostring
 
 import mock
 import pytest
-from xml.etree.ElementTree import fromstring
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -873,7 +873,7 @@ def _strip_whitespace(raw_plan):
             e.text = e.text.strip()
         if e.tail:
             e.tail = e.tail.strip()
-    return to_native_string(ET.tostring(tree))
+    return to_native_string(tostring(tree))
 
 
 def _load_test_xml_plan(filename):

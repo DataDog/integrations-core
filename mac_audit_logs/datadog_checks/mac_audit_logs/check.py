@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import List, Tuple
 from xml.etree.ElementTree import ParseError, fromstring
 
-
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.errors import (
     ConfigurationError,

@@ -8,9 +8,9 @@ import logging
 from abc import abstractmethod
 from io import BytesIO
 from time import time
+from xml.etree.ElementTree import iterparse
 
 from dateutil import parser
-from xml.etree.ElementTree import iterparse
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
