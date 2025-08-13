@@ -202,6 +202,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
 
     def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         try:
             with self._check._get_main_db() as conn:
                 with conn.cursor(row_factory=row_factory) as cursor:
