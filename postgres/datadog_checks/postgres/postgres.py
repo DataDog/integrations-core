@@ -77,7 +77,6 @@ from .util import (
     get_schema_field,
     payload_pg_version,
     warning_with_tags,
-
 )
 from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionUtils
 
