@@ -241,7 +241,7 @@ def sa_conn(instance_docker):
 
 @pytest.fixture
 def instance_e2e(instance_docker):
-    instance_docker['driver'] = get_local_driver()
+    instance_docker['driver'] = '{ODBC Driver 18 for SQL Server}'
     instance_docker['dbm'] = True
     return instance_docker
 
