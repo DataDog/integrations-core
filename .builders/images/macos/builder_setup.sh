@@ -40,34 +40,6 @@ SHA256="9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23" \
 RELATIVE_PATH="zlib-{{version}}" \
   install-from-source
 
-# libxml & libxslt for lxml
-DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
-VERSION="2.12.6" \
-SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
-RELATIVE_PATH="libxml2-{{version}}" \
-  install-from-source \
-    --without-iconv \
-    --without-python \
-    --without-icu \
-    --without-debug \
-    --without-mem-debug \
-    --without-run-debug \
-    --without-legacy \
-    --without-catalog \
-    --without-docbook \
-    --disable-static
-
-DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
-VERSION="1.1.39" \
-SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
-RELATIVE_PATH="libxslt-{{version}}" \
-  install-from-source \
-    --with-libxml-prefix="${DD_PREFIX_PATH}" \
-    --without-python \
-    --without-crypto \
-    --without-profiler \
-    --without-debugger \
-    --disable-static
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \

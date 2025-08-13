@@ -10,7 +10,7 @@ from io import BytesIO
 from time import time
 
 from dateutil import parser
-from lxml import etree
+from xml.etree.ElementTree import iterparse
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
@@ -272,7 +272,7 @@ class XESessionBase(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _process_events(self, xml_data):
         """
-        Parse and process ring buffer XML data in a single pass using lxml.etree.iterparse.
+        Parse and process ring buffer XML data in a single pass using iterparse.
         Filters events by timestamp and processes them directly.
 
         Returns:
@@ -290,7 +290,7 @@ class XESessionBase(DBMAsyncJob):
                 xml_stream = BytesIO(xml_data.encode('utf-16'))
 
             # Only parse 'end' events for <event> tags
-            context = etree.iterparse(xml_stream, events=('end',), tag='event')
+            context = iterparse(xml_stream, events=('end',), tag='event')
 
             for _, elem in context:
                 try:

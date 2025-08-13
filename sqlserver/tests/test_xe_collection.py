@@ -8,7 +8,7 @@ import sys
 from unittest.mock import Mock, patch
 
 import pytest
-from lxml import etree
+from xml.ElementTree import fromstring
 
 from datadog_checks.base.utils.db.utils import TagManager
 from datadog_checks.sqlserver import SQLServer
@@ -405,17 +405,17 @@ class TestXESessionHelpers:
         """Test extraction of values from XML elements"""
         # Test extracting value from element with value element
         xml = '<data name="test"><value>test_value</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_value(element) == 'test_value'
 
         # Test extracting value from element with text
         xml = '<data name="test">test_value</data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_value(element) == 'test_value'
 
         # Test empty element
         xml = '<data name="test"></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_value(element) is None
         assert extract_value(element, 'default') == 'default'
 
@@ -427,18 +427,18 @@ class TestXESessionHelpers:
         """Test extraction of integer values"""
         # Test valid integer
         xml = '<data name="test"><value>123</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_int_value(element) == 123
 
         # Test invalid integer
         xml = '<data name="test"><value>not_a_number</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_int_value(element) is None
         assert extract_int_value(element, 0) == 0
 
         # Test empty element
         xml = '<data name="test"></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_int_value(element) is None
         assert extract_int_value(element, 0) == 0
 
@@ -446,12 +446,12 @@ class TestXESessionHelpers:
         """Test extraction of text representation"""
         # Test with text element
         xml = '<data name="test"><value>123</value><text>text_value</text></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_text_representation(element) == 'text_value'
 
         # Test without text element
         xml = '<data name="test"><value>123</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
         assert extract_text_representation(element) is None
         assert extract_text_representation(element, 'default') == 'default'
 
@@ -459,7 +459,7 @@ class TestXESessionHelpers:
         """Test duration extraction specifically"""
         # Test with valid duration
         xml = '<data name="duration"><value>4829704</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
 
         # Test direct function
         event_data = {}
@@ -468,7 +468,7 @@ class TestXESessionHelpers:
 
         # Test with invalid duration
         xml = '<data name="duration"><value>not_a_number</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
 
         # Test direct function
         event_data = {}
@@ -483,7 +483,7 @@ class TestXESessionHelpers:
 
         # For duration field
         xml = '<data name="duration"><value>4829704</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
 
         # Test direct function
         event_data = {'event_name': 'test_event'}
@@ -492,7 +492,7 @@ class TestXESessionHelpers:
 
         # For numeric field
         xml = '<data name="session_id"><value>123</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
 
         # Test direct function
         event_data = {'event_name': 'test_event'}
@@ -507,7 +507,7 @@ class TestXESessionHelpers:
 
         # For text field
         xml = '<data name="result"><value>123</value><text>Success</text></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
 
         # Test direct function
         event_data = {'event_name': 'test_event'}
@@ -516,7 +516,7 @@ class TestXESessionHelpers:
 
         # For regular field
         xml = '<data name="database_name"><value>TestDB</value></data>'
-        element = etree.fromstring(xml)
+        element = fromstring(xml)
 
         # Test direct function
         event_data = {'event_name': 'test_event'}

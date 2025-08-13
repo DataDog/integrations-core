@@ -8,7 +8,7 @@ import math
 import time
 
 from cachetools import TTLCache
-from lxml import etree as ET
+from xml.etree.ElementTree import fromstring, tostring
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
@@ -236,7 +236,7 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
     """
-    tree = ET.fromstring(raw_plan)
+    tree = fromstring(raw_plan)
     for e in tree.iter():
         if e.text:
             e.text = e.text.strip()
@@ -247,7 +247,7 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
             if val:
                 statement = obfuscate_sql_with_metadata(val, obfuscator_options, replace_null_character=True)
                 e.attrib[k] = ensure_unicode(statement['query'])
-    return to_native_string(ET.tostring(tree, encoding="UTF-8"))
+    return to_native_string(tostring(tree, encoding="UTF-8"))
 
 
 class SqlserverStatementMetrics(DBMAsyncJob):

@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from xml.etree.ElementTree import ParseError
+from xml.etree.ElementTree import ParseError, fromstring
 
 import requests
-from lxml import etree
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 
@@ -44,7 +43,7 @@ class IbmWasCheck(AgentCheck):
         data = self.make_request()
 
         try:
-            server_data_xml = etree.fromstring(data)
+            server_data_xml = fromstring(data)
         except ParseError as e:
             self.submit_service_checks(AgentCheck.CRITICAL)
             self.log.Error("Unable to parse the XML response: {}".format(e))
@@ -68,16 +67,15 @@ class IbmWasCheck(AgentCheck):
                         self.process_stats(stats, prefix, server_tags)
 
     def get_node_from_name(self, xml_data, path):
-        # XMLPath returns a list, but there should only be one element here since the function starts
-        # the search within a given Node/Server
-        data = xml_data.xpath('.//Stat[normalize-space(@name)="{}"]'.format(path))
-        if len(data):
-            return data[0]
-        else:
-            self.log.debug('Error finding %s stats in XML output for server name `%s`.', path, xml_data.get('name'))
-            return []
+        # Find all Stat elements with the specified name attribute
+        for stat in xml_data.findall('.//Stat'):
+            if stat.get('name', '').strip() == path:
+                return stat
 
-    def get_node_from_root(self, xml_data, path):
+        self.log.debug('Error finding %s stats in XML output for server name `%s`.', path, xml_data.get('name'))
+        return []
+
+    def get_node_from_root(self, xml_data, path: str):
         return xml_data.findall(path)
 
     def process_stats(self, stats, prefix, tags, recursion_level=0):

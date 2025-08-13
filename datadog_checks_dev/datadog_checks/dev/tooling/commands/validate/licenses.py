@@ -163,7 +163,6 @@ PACKAGE_REPO_OVERRIDES = {
     'dnspython': 'https://github.com/rthalley/dnspython',
     'foundationdb': 'https://github.com/apple/foundationdb',
     'in-toto': 'https://github.com/in-toto/in-toto',
-    'lxml': 'https://github.com/lxml/lxml',
     'packaging': 'https://github.com/pypa/packaging',
     'paramiko': 'https://github.com/paramiko/paramiko',
     'protobuf': 'https://github.com/protocolbuffers/protobuf',

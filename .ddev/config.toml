@@ -101,7 +101,6 @@ PyYAML = 'https://github.com/yaml/pyyaml'
 dnspython = 'https://github.com/rthalley/dnspython'
 foundationdb = 'https://github.com/apple/foundationdb'
 in-toto = 'https://github.com/in-toto/in-toto'
-lxml = 'https://github.com/lxml/lxml'
 packaging = 'https://github.com/pypa/packaging'
 paramiko = 'https://github.com/paramiko/paramiko'
 protobuf = 'https://github.com/protocolbuffers/protobuf'
@@ -158,8 +157,6 @@ exclude = [
     'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
-    # https://github.com/DataDog/integrations-core/pull/16080
-    'lxml',
     # We're not ready to switch to v3 of the postgres library, see:
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',

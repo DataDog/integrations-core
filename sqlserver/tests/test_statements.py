@@ -16,7 +16,7 @@ from unittest.mock import ANY
 
 import mock
 import pytest
-from lxml import etree as ET
+from xml.etree.ElementTree import fromstring
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -491,7 +491,7 @@ def test_statement_metrics_and_plans(
             assert not event['db']['query_signature'], "procedure plans should not have query_signature field set"
         else:
             assert event['db']['plan']['definition'], "event plan definition missing"
-            parsed_plan = ET.fromstring(event['db']['plan']['definition'])
+            parsed_plan = fromstring(event['db']['plan']['definition'])
             assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
             assert not event['sqlserver']['is_plan_encrypted']
             assert not event['sqlserver']['is_statement_encrypted']
@@ -512,7 +512,7 @@ def test_statement_metrics_and_plans(
             else:
                 assert event['db']['plan']['definition'], "event plan definition missing"
                 assert event['db']['plan']['raw_signature'], "event plan raw signature missing"
-                parsed_plan = ET.fromstring(event['db']['plan']['definition'])
+                parsed_plan = fromstring(event['db']['plan']['definition'])
                 assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
                 assert not event['sqlserver']['is_plan_encrypted']
                 assert not event['sqlserver']['is_statement_encrypted']
@@ -867,7 +867,7 @@ def test_plan_collection_deadline(aggregator, dd_run_check, dbm_instance, slow_p
 
 
 def _strip_whitespace(raw_plan):
-    tree = ET.fromstring(raw_plan)
+    tree = fromstring(raw_plan)
     for e in tree.iter():
         if e.text:
             e.text = e.text.strip()

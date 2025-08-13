@@ -5,9 +5,8 @@ import os
 import subprocess
 from datetime import datetime
 from typing import List, Tuple
-from xml.etree.ElementTree import ParseError
+from xml.etree.ElementTree import ParseError, fromstring
 
-from lxml import etree
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.errors import (
@@ -144,7 +143,7 @@ class MacAuditLogsCheck(AgentCheck):
                 if log.strip() in ["<?xml version='1.0' encoding='UTF-8'?>", "<audit>", ""]:
                     continue
 
-                data_xml = etree.fromstring(log)
+                data_xml = fromstring(log)
                 time_value = data_xml.get("time")
                 milli_sec_value = data_xml.get("msec")
 
