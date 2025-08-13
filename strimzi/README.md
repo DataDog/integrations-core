@@ -24,11 +24,17 @@ The Strimzi check collects Prometheus-formatted metrics on the following operato
  
 Follow the instructions below to enable and configure this check for an Agent.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
 1. Edit the `strimzi.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Strimzi performance data. See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -200,6 +206,9 @@ See the [Autodiscovery Integration Templates][3] for guidance on applying the pa
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "strimzi", "service": "<SERVICE_NAME>"}`   |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
