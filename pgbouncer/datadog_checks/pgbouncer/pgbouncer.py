@@ -5,9 +5,8 @@ import re
 import time
 from urllib.parse import urlparse
 
-import psycopg as pg
-from psycopg import ClientCursor
-from psycopg.rows import dict_row
+import psycopg2 as pg
+from psycopg2 import extras as pgextras
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.pgbouncer.metrics import (
@@ -74,50 +73,51 @@ class PgBouncer(AgentCheck):
             metric_scope.append(SERVERS_METRICS)
 
         try:
-            for scope in metric_scope:
-                descriptors = scope['descriptors']
-                metrics = scope['metrics']
-                query = scope['query']
+            with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+                for scope in metric_scope:
+                    descriptors = scope['descriptors']
+                    metrics = scope['metrics']
+                    query = scope['query']
 
-                try:
-                    cursor = db.cursor(row_factory=dict_row)
-                    self.log.debug("Running query: %s", query)
-                    cursor.execute(query)
-                    rows = self.iter_rows(cursor)
+                    try:
+                        self.log.debug("Running query: %s", query)
+                        cursor.execute(query)
+                        rows = self.iter_rows(cursor)
 
-                except (pg.InterfaceError, pg.OperationalError) as e:
-                    self.log.error("Not all metrics may be available: %s", e)
-                    raise ShouldReconnectException
+                    except Exception as e:
+                        self.log.exception("Not all metrics may be available: %s", str(e))
 
-                else:
-                    for row in rows:
-                        if 'key' in row:  # We are processing "config metrics"
-                            # Make a copy of the row to allow mutation
-                            row = row.copy()
-                            # We flip/rotate the row: row value becomes the column name
-                            row[row['key']] = row['value']
-                        # Skip the "pgbouncer" database
-                        elif row.get('database') == self.DB_NAME:
-                            continue
+                    else:
+                        for row in rows:
+                            if 'key' in row:  # We are processing "config metrics"
+                                # Make a copy of the row to allow mutation
+                                # (a `psycopg2.lib.extras.DictRow` object doesn't accept a new key)
+                                row = row.copy()
+                                # We flip/rotate the row: row value becomes the column name
+                                row[row['key']] = row['value']
+                            # Skip the "pgbouncer" database
+                            elif row.get('database') == self.DB_NAME:
+                                continue
 
-                        tags = list(self.tags)
-                        tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
-                        for column, (name, reporter) in metrics:
-                            if column in row:
-                                value = row[column]
-                                if column in ['connect_time', 'request_time']:
-                                    self.log.debug("Parsing timestamp; original value: %s", value)
-                                    # First get rid of any UTC suffix.
-                                    value = re.findall(r'^[^ ]+ [^ ]+', value)[0]
-                                    value = time.strptime(value, '%Y-%m-%d %H:%M:%S')
-                                    value = time.mktime(value)
-                                reporter(self, name, value, tags)
+                            tags = list(self.tags)
+                            tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
+                            for column, (name, reporter) in metrics:
+                                if column in row:
+                                    value = row[column]
+                                    if column in ['connect_time', 'request_time']:
+                                        self.log.debug("Parsing timestamp; original value: %s", value)
+                                        # First get rid of any UTC suffix.
+                                        value = re.findall(r'^[^ ]+ [^ ]+', value)[0]
+                                        value = time.strptime(value, '%Y-%m-%d %H:%M:%S')
+                                        value = time.mktime(value)
+                                    reporter(self, name, value, tags)
 
-                    if not rows:
-                        self.log.warning("No results were found for query: %s", query)
+                        if not rows:
+                            self.log.warning("No results were found for query: %s", query)
 
-        except pg.Error as e:
-            self.log.error("Not all metrics may be available: %s", e)
+        except pg.Error:
+            self.log.exception("Connection error")
+
             raise ShouldReconnectException
 
     def iter_rows(self, cursor):
@@ -138,25 +138,21 @@ class PgBouncer(AgentCheck):
 
     def _get_connect_kwargs(self):
         """
-        Get the params to pass to psycopg.connect() based on passed-in vals
+        Get the params to pass to psycopg2.connect() based on passed-in vals
         from yaml settings file
         """
-        # It's important to set the client_encoding to utf-8
-        # PGBouncer defaults to an encoding of 'UNICODE`, which will cause psycopg to error out
         if self.database_url:
-            return {'conninfo': self.database_url, 'client_encoding': 'utf-8'}
+            return {'dsn': self.database_url}
 
         if self.host in ('localhost', '127.0.0.1') and self.password == '':
             # Use ident method
-            return {'conninfo': "user={} dbname={} client_encoding=utf-8".format(self.user, self.DB_NAME)}
+            return {'dsn': "user={} dbname={}".format(self.user, self.DB_NAME)}
 
         args = {
             'host': self.host,
             'user': self.user,
             'password': self.password,
-            'dbname': self.DB_NAME,
-            'cursor_factory': ClientCursor,
-            'client_encoding': 'utf-8',
+            'database': self.DB_NAME,
         }
         if self.port:
             args['port'] = self.port
@@ -168,9 +164,8 @@ class PgBouncer(AgentCheck):
         connection = None
         try:
             connect_kwargs = self._get_connect_kwargs()
-            # Somewhat counterintuitively, we need to set autocommit to True to avoid a BEGIN/COMMIT block
-            # https://www.psycopg.org/psycopg3/docs/basic/transactions.html#autocommit-transactions
-            connection = pg.connect(**connect_kwargs, autocommit=True)
+            connection = pg.connect(**connect_kwargs)
+            connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             return connection
         except Exception:
             if connection:
@@ -201,7 +196,6 @@ class PgBouncer(AgentCheck):
         return self.database_url
 
     def _close_connection(self):
-        """Close the connection to PgBouncer"""
         if self.connection:
             try:
                 self.connection.close()
@@ -244,31 +238,18 @@ class PgBouncer(AgentCheck):
                 self.set_metadata('version', pgbouncer_version)
 
     def get_version(self, db):
-        """
-        Get the version of PgBouncer.
-        """
         if not db:
             self.log.warning("Cannot get version: no active connection")
             return None
 
         regex = r'\d+\.\d+\.\d+'
-        try:
-            with db.cursor() as cursor:
-                # This command was added in pgbouncer 1.12
-                cursor.execute('SHOW VERSION;')
-                result = cursor.fetchone()
-                if result:
-                    # Result looks like: ['PgBouncer 1.2.3 ...']
-                    version_string = result[0]
-                    return re.findall(regex, version_string)[0]
-                else:
-                    self.log.debug("No version found in result: %s", result)
-                    return None
-        except pg.ProgrammingError as e:
-            # This is expected on versions of pgbouncer < 1.12
-            self.log.debug("Cannot retrieve pgbouncer version using `SHOW VERSION;`: %s", e)
-            return None
-        except Exception as e:
-            self.log.error("An unexpected error occurred when retrieving pgbouncer version: %s", e)
-            return None
-        return None
+        with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+            cursor.execute('SHOW VERSION;')
+            if db.notices:
+                data = db.notices[0]
+            else:
+                data = cursor.fetchone()[0]
+            res = re.findall(regex, data)
+            if res:
+                return res[0]
+            self.log.debug("Couldn't detect version from %s", data)
