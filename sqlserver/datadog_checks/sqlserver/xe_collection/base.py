@@ -290,9 +290,12 @@ class XESessionBase(DBMAsyncJob):
                 xml_stream = BytesIO(xml_data.encode('utf-16'))
 
             # Only parse 'end' events for <event> tags
-            context = iterparse(xml_stream, events=('end',), tag='event')
+            context = iterparse(xml_stream, events=('end',))
 
             for _, elem in context:
+                if elem.tag != 'event':
+                    continue
+
                 try:
                     # Get basic timestamp for filtering
                     timestamp = elem.get('timestamp')
