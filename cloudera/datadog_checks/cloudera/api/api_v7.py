@@ -79,7 +79,7 @@ class ApiV7(Api):
         now_utc = get_timestamp()
         start_time_iso = datetime.utcfromtimestamp(self._check.latest_event_query_utc).isoformat()
         end_time_iso = datetime.utcfromtimestamp(now_utc).isoformat()
-        query = f"timeOccurred=ge={start_time_iso};timeOccurred=le={end_time_iso}"
+        query = f"timeReceived=ge={start_time_iso};timeReceived=le={end_time_iso}"
         self._log.debug("Cloudera event query: %s", query)
         try:
             events = self._api_client.read_events(query)
