@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from json import JSONDecodeError
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.mapreduce.metrics import (

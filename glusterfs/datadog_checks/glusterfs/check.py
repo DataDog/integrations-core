@@ -2,14 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-
-try:
-    from json.decoder import JSONDecodeError
-except ImportError:
-    from simplejson import JSONDecodeError
-
 import os
 import subprocess
+from json.decoder import JSONDecodeError
 from typing import Dict, List  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
