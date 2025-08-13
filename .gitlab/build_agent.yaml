@@ -13,7 +13,7 @@
     RUN_E2E_TESTS: "off"
   # Override AGENT_BRANCH for release branches
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^7\.\d+\.x$/
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^[0-9]+\.[0-9]+\.x$/
       variables:
         AGENT_BRANCH: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
   stage: build
@@ -27,7 +27,7 @@ build-agent-auto:
   extends: .build-agent-tpl
   rules:
     # Do not run on release branches
-    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+    - if: $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+\.x$/
       when: never
     # Only run if the branch is not a Github Merge Queue one.
     - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
@@ -45,7 +45,7 @@ build-agent-manual-release:
   trigger:
     branch: $CI_COMMIT_BRANCH
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+    - if: $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+\.x$/
       when: manual
 
 # Always have the option to run manually the agent build manually against the agent's main
