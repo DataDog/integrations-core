@@ -3,20 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from xml.etree.ElementTree import Element
 
 logger = logging.getLogger(__name__)
 
 
-def extract_value(element, default=None):
+def extract_value(element: Element, default=None):
     """Helper method to extract values from XML elements with consistent handling"""
     if element is None:
         return default
 
     # Try to get text from value element using XPath
     try:
-        value_nodes = element.xpath('./value/text()')
-        if value_nodes and value_nodes[0]:
-            return value_nodes[0].strip()
+        value_node = element.find('./value')
+        if value_node is not None:
+            return value_node.text.strip()
     except (AttributeError, IndexError):
         pass
 
@@ -47,9 +48,9 @@ def extract_text_representation(element, default=None):
 
     # Use XPath to get text from "text" element
     try:
-        text_nodes = element.xpath('./text/text()')
-        if text_nodes and text_nodes[0]:
-            return text_nodes[0].strip()
+        text_node = element.find('./text')
+        if text_node is not None:
+            return text_node.text.strip()
     except (AttributeError, IndexError):
         pass
 

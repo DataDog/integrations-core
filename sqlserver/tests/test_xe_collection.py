@@ -398,6 +398,7 @@ class TestXESessionHandlersInitialization:
             assert handler._is_azure_sql_database is True
 
 
+@pytest.mark.unit
 class TestXESessionHelpers:
     """Tests for XML parsing tools"""
 
