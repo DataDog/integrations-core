@@ -24,5 +24,7 @@ jobs:
     secrets: inherit
 
     permissions:
+       # needed for codecov in pr-test.yml, allows the action to get a JWT signed by Github
+       id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
