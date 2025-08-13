@@ -137,4 +137,4 @@ For any further assistance, contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://www.watchguard.com/wgrd-products/network-security
 [5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
-[6]: https://github.com/DataDog/integrations-core/blob/master/watchguard-firebox/datadog_checks/watchguard-firebox/data/conf.yaml.example
+[6]: https://github.com/DataDog/integrations-core/blob/master/watchguard_firebox/datadog_checks/watchguard_firebox/data/conf.yaml.example
