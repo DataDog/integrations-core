@@ -433,12 +433,13 @@ Datadog's default CloudWatch crawler polls metrics once every 10 minutes. If you
 ### Log collection
 
 You can monitor Fargate logs by using either:
-- The AWS FireLens integration built on Datadog's Fluent Bit output plugin to send logs directly to Datadog
+- The AWS FireLens integration built on Datadog's Fluent Bit output plugin to send logs directly to Datadog (recommended)
 - Using the `awslogs` log driver to store the logs in a CloudWatch Log Group, and then a Lambda function to route logs to Datadog
 
 Datadog recommends using AWS FireLens for the following reasons:
+- Dual shipping to Cloudwatch and Datadog can incur duplicate costs.
 - You can configure Fluent Bit directly in your Fargate tasks.
-- The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][75] uses the tags to correlate logs with ECS resources.
+- The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][75] uses the tags to correlate logs with ECS resources. 
 
 **Note**: Log collection with Fluent Bit and FireLens is not supported for AWS Batch on ECS Fargate.
 
@@ -493,7 +494,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -515,7 +516,7 @@ partial -->
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.us3.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -537,7 +538,7 @@ partial -->
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.us5.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -559,7 +560,7 @@ partial -->
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.datadoghq.eu",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -581,7 +582,7 @@ partial -->
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.ap1.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -603,7 +604,7 @@ partial -->
         "apikey": "<DATADOG_API_KEY>",
         "Host": "http-intake.logs.ddog-gov.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -626,7 +627,7 @@ partial -->
         "Name": "datadog",
         "Host": "http-intake.logs.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -653,7 +654,7 @@ partial -->
         "Name": "datadog",
         "Host": "http-intake.logs.us3.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -680,7 +681,7 @@ partial -->
         "Name": "datadog",
         "Host": "http-intake.logs.us5.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -707,7 +708,7 @@ partial -->
         "Name": "datadog",
         "Host": "http-intake.logs.datadoghq.eu",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -734,7 +735,7 @@ partial -->
         "Name": "datadog",
         "Host": "http-intake.logs.ap1.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -761,7 +762,7 @@ partial -->
         "Name": "datadog",
         "Host": "http-intake.logs.ddog-gov.datadoghq.com",
         "dd_service": "firelens-test",
-        "dd_source": "redis",
+        "dd_source": "ecs",
         "dd_message_key": "log",
         "dd_tags": "project:fluentbit",
         "TLS": "on",
@@ -786,13 +787,13 @@ To provide your Datadog API key as a secret, see [Using secrets](#using-secrets)
 
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
-**Note**: Set your `apikey` as well as the `Host` relative to your respective site `http-intake.logs.`{{< region-param key="dd_site" code="true" >}}. The full list of available parameters is described in the [Datadog Fluent Bit documentation][24].
+**Note**: Set your `dd_source` to `ecs` to ensure log correlation. Set your `apikey` as well as the `Host` relative to your respective site `http-intake.logs.`{{< region-param key="dd_site" code="true" >}}. The full list of available parameters is described in the [Datadog Fluent Bit documentation][24].
 
 [24]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
 {{< /site-region >}}
 partial -->
 
-  The `dd_service`, `dd_source`, and `dd_tags` can be adjusted for your desired tags.
+  The `dd_service` and `dd_tags` can be adjusted for your desired tags.
 
 3. Whenever a Fargate task runs, Fluent Bit sends the container logs to Datadog with information about all of the containers managed by your Fargate tasks. You can see the raw logs on the [Log Explorer page][25], [build monitors][26] for the logs, and use the [Live Container view][27].
 
