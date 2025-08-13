@@ -428,8 +428,6 @@ class PostgreSql(AgentCheck):
                 self.log.info("metadata_samples job loop finished in %s seconds", time() - now)
             self.log.warning("DBM jobs cancelled in %s seconds", time() - now)
         self._close_db_pool()
-        if self._db:
-            self._db.close()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
