@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3c9d29b9-e8c6-44ab-9c00-b32e7075896a",
   "app_id": "servicenow-performance",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

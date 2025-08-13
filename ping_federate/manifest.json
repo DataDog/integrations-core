@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1deb5e7c-e9a9-4566-8d78-12c92d1baff9",
   "app_id": "ping-federate",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

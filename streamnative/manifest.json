@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e92fa53b-f620-4167-bdaa-31ac3bc6be35",
   "app_id": "streamnative",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
