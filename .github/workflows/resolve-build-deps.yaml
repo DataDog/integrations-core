@@ -285,7 +285,7 @@ jobs:
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
     - name: Upload wheels
-      run: python .builders/upload.py targets
+      run: python .builders/upload_and_lock.py targets
 
     - name: Lock files
       run: python .builders/lock.py targets
