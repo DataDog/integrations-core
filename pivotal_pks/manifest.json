@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e8a08b96-bbca-4907-8cc8-b7c3abf2f443",
   "app_id": "pivotal-pks",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

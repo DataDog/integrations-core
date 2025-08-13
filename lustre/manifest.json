@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bbb68905-6876-4287-9a79-49f785e9c16c",
   "app_id": "lustre",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

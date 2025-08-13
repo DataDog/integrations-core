@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "44e491e1-f7c3-447a-b597-e740196479e0",
   "app_id": "powerdns",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
