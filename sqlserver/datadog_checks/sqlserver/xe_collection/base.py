@@ -318,8 +318,8 @@ class XESessionBase(DBMAsyncJob):
 
                 # Free memory for processed elements
                 elem.clear()
-                while elem.getprevious() is not None:
-                    del elem.getparent()[0]
+                # while elem.getprevious() is not None:
+                #     del elem.getparent()[0]
 
                 # Stop if we've reached the maximum number of events
                 if len(processed_events) >= self.max_events:
