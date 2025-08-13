@@ -2,6 +2,7 @@
 .build-agent-tpl:
   variables:
     # Pass these to triggered agent build job.
+    AGENT_BRANCH: "main"
     RELEASE_VERSION_6: "nightly"
     RELEASE_VERSION_7: "nightly-a7"
     BUCKET_BRANCH: "dev"
@@ -10,10 +11,15 @@
     # disable kitchen and e2e tests
     RUN_KITCHEN_TESTS: "false"
     RUN_E2E_TESTS: "off"
+  # Override AGENT_BRANCH for release branches
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^7\.\d+\.x$/
+      variables:
+        AGENT_BRANCH: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
   stage: build
   trigger:
     project: DataDog/datadog-agent
-    branch: main
+    branch: $AGENT_BRANCH
     # It's more convenient to directly show if downstream pipeline succeeded.
     strategy: depend
 
