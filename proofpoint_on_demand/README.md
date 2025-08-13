@@ -1,39 +1,57 @@
-# Agent Check: proofpoint_on_demand
+# Proofpoint On-Demand
 
 ## Overview
 
-This check monitors [proofpoint_on_demand][1].
+[Proofpoint On-Demand][1] helps organizations detect, classify, and mitigate email threats in real-time, securing and managing email communications.
+
+This integration ingests the following logs:
+
+- Message Logs: These logs contain detailed information about email traffic.
+
+This integration collects message logs and send them to Datadog for analysis. The logs are parsed and enriched using Datadog's built-in pipeline, which allows for searching and analysis. Dashboards and Cloud SIEM detection rules are included to help monitor message logs and improve security.
 
 ## Setup
 
-### Installation
+### Get an API key from the Proofpoint On-Demand Portal
 
-The Proofpoint On-Demand check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Log in to the Proofpoint Admin portal.
+2. Go to **Settings > API Key Management**.
+3. Under **PoD Logging**, click **Create New** to generate a new API key.
+4. Enter a unique name for the API key.
+5. Copy **Cluster ID**.
+6. Click **Generate Key**.
+7. After generating the key, select **View Details** from the menu of the new API key.
+8. Copy the generated API key.
 
-### Configuration
 
-!!! Add list of steps to set up this integration !!!
+### Connect your Proofpoint On-Demand Account to Datadog
 
-### Validation
+1. Add your Proofpoint On-Demand credentials.
 
-!!! Add steps to validate integration is functioning as expected !!!
+    | Parameters                            | Description                                                  |
+    | ------------------------------------- | ------------------------------------------------------------ |
+    | Cluster ID                            | The Cluster ID for your Proofpoint On-Demand account         |
+    | API key                               | The API key for your Proofpoint On-Demand account           |
+
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 
+### Logs
+
+The Proofpoint On-Demand integration collects and forwards message logs to Datadog.
+
 ### Metrics
 
-Proofpoint On-Demand does not include any metrics.
+The Proofpoint On-Demand integration does not include any metrics.
 
 ### Events
 
-Proofpoint On-Demand does not include any events.
+The Proofpoint On-Demand integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://www.proofpoint.com/us/products/email-security-and-protection/email-protection
+[2]: https://docs.datadoghq.com/help/
