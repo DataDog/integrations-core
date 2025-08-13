@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 from unittest.mock import Mock, patch
-from xml.ElementTree import fromstring
+from xml.etree.ElementTree import fromstring
 
 import pytest
 
