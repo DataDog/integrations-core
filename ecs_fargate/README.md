@@ -437,7 +437,7 @@ You can monitor Fargate logs by using either:
 - Using the `awslogs` log driver to store the logs in a CloudWatch Log Group, and then a Lambda function to route logs to Datadog
 
 Datadog recommends using AWS FireLens for the following reasons:
-- Dual shipping to Cloudwatch and Datadog can incur duplicate costs.
+- Dual shipping to Cloudwatch and Datadog can incur additional costs.
 - You can configure Fluent Bit directly in your Fargate tasks.
 - The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][75] uses the tags to correlate logs with ECS resources. 
 
