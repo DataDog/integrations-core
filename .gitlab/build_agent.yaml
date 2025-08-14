@@ -2,6 +2,7 @@
 .build-agent-tpl:
   variables:
     # Pass these to triggered agent build job.
+    AGENT_BRANCH: "main"
     RELEASE_VERSION_6: "nightly"
     RELEASE_VERSION_7: "nightly-a7"
     BUCKET_BRANCH: "dev"
@@ -10,10 +11,15 @@
     # disable kitchen and e2e tests
     RUN_KITCHEN_TESTS: "false"
     RUN_E2E_TESTS: "off"
+  # Override AGENT_BRANCH for release branches
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^[0-9]+\.[0-9]+\.x$/
+      variables:
+        AGENT_BRANCH: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
   stage: build
   trigger:
     project: DataDog/datadog-agent
-    branch: main
+    branch: $AGENT_BRANCH
     # It's more convenient to directly show if downstream pipeline succeeded.
     strategy: depend
 
@@ -21,7 +27,7 @@ build-agent-auto:
   extends: .build-agent-tpl
   rules:
     # Do not run on release branches
-    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+    - if: $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+\.x$/
       when: never
     # Only run if the branch is not a Github Merge Queue one.
     - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
@@ -39,7 +45,7 @@ build-agent-manual-release:
   trigger:
     branch: $CI_COMMIT_BRANCH
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
+    - if: $CI_COMMIT_BRANCH =~ /^[0-9]+\.[0-9]+\.x$/
       when: manual
 
 # Always have the option to run manually the agent build manually against the agent's main
