@@ -11,13 +11,13 @@ boto3 @ https://agent-int-packages.datadoghq.com/external/boto3/boto3-1.38.41-py
 botocore @ https://agent-int-packages.datadoghq.com/external/botocore/botocore-1.38.41-py3-none-any.whl#sha256=06069a06f1352accb1f6c9505d6e323753627112be80a9d2e057c6d9c9779ffd
 bytecode @ https://agent-int-packages.datadoghq.com/external/bytecode/bytecode-0.16.2-py3-none-any.whl#sha256=0a7dea0387ec5cae5ec77578690c5ca7470c8a202c50ce64a426d86380cddd7f
 cachetools @ https://agent-int-packages.datadoghq.com/external/cachetools/cachetools-6.1.0-py3-none-any.whl#sha256=1c7bb3cf9193deaf3508b7c5f2a79986c13ea38965c5adcff1f84519cf39163e
-certifi @ https://agent-int-packages.datadoghq.com/external/certifi/certifi-2025.7.14-py3-none-any.whl#sha256=6b31f564a415d79ee77df69d757bb49a5bb53bd9f756cbbe24394ffd6fc1f4b2
+certifi @ https://agent-int-packages.datadoghq.com/external/certifi/certifi-2025.8.3-py3-none-any.whl#sha256=f6c12493cfb1b06ba2ff328595af9350c65d6644968e5d3a2ffd78699af217a5
 cffi @ https://agent-int-packages.datadoghq.com/external/cffi/cffi-1.17.1-cp312-cp312-macosx_11_0_arm64.whl#sha256=733e99bc2df47476e3848417c5a4540522f234dfd4ef3ab7fafdf555b082ec0c
-charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-normalizer/charset_normalizer-3.4.2-cp312-cp312-macosx_10_13_universal2.whl#sha256=0c29de6a1a95f24b9a1aa7aefd27d2487263f00dfd55a77719b530788f75cff7
+charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-normalizer/charset_normalizer-3.4.3-cp312-cp312-macosx_10_13_universal2.whl#sha256=e28e334d3ff134e88989d90ba04b47d84382a828c061d0d1027b1b12a62b39b1
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-macosx_11_0_arm64.whl#sha256=acfa79048ac3b8203feba108c2d637d89ce1dfeaefabc1272a5c4e2dab716314
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-macosx_11_0_arm64.whl#sha256=b7a3e6b0a1eb218e3d870a94c76daaf65da46dca8f6888ea6542f94905c24d88
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20241216144620-py3-none-macosx_10_12_universal2.whl#sha256=72f55306e2e3df9291ee55e3a6b2f6698fe3999db9570a14da0ea56bbf51e5a9
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250729201939-cp312-cp312-macosx_11_0_arm64.whl#sha256=e4a905f2a0631e854fcd53e91318c87d1aef16e104c0adb900c3e90f40600193
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250813132912-cp312-cp312-macosx_11_0_arm64.whl#sha256=c741112411dcb94414c96e7add83c2724f2b0fdc1dd7420a728a8d99e37713f6
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-45.0.4-cp311-abi3-macosx_10_9_universal2.whl#sha256=425a9a6ac2823ee6e46a76a21a4e8342d8fa5c01e08b823c1f19a8b74f096069
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.9.3-cp312-cp312-macosx_12_0_arm64.whl#sha256=ee54a29c53e2cbf8d07f57798f185280409415a249a968e904c887a12bbcf45e
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
@@ -57,7 +57,7 @@ os-service-types @ https://agent-int-packages.datadoghq.com/external/os-service-
 packaging @ https://agent-int-packages.datadoghq.com/external/packaging/packaging-25.0-py3-none-any.whl#sha256=29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484
 paramiko @ https://agent-int-packages.datadoghq.com/external/paramiko/paramiko-3.5.1-py3-none-any.whl#sha256=43b9a0501fc2b5e70680388d9346cf252cfb7d00b0667c39e80eb43a408b8f61
 pathspec @ https://agent-int-packages.datadoghq.com/external/pathspec/pathspec-0.12.1-py3-none-any.whl#sha256=a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08
-pbr @ https://agent-int-packages.datadoghq.com/external/pbr/pbr-6.1.1-py2.py3-none-any.whl#sha256=38d4daea5d9fa63b3f626131b9d34947fd0c8be9b05a29276870580050a25a76
+pbr @ https://agent-int-packages.datadoghq.com/external/pbr/pbr-7.0.0-py2.py3-none-any.whl#sha256=b447e63a2bc04fd975fc0480b8d5ebf979179e2c0ae203bf1eff9ea20073bc38
 platformdirs @ https://agent-int-packages.datadoghq.com/external/platformdirs/platformdirs-4.3.8-py3-none-any.whl#sha256=ff7059bb7eb1179e2685604f4aaf157cfd9535242bd23742eadc3c13542139b4
 ply @ https://agent-int-packages.datadoghq.com/external/ply/ply-3.11-py2.py3-none-any.whl#sha256=096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce
 prometheus-client @ https://agent-int-packages.datadoghq.com/external/prometheus-client/prometheus_client-0.22.1-py3-none-any.whl#sha256=cca895342e308174341b2cbf99a56bef291fbc0ef7b9e5412a0f26d653ba7094
