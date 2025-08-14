@@ -1,6 +1,6 @@
 services:
   zookeeper:
-    image: docker.io/bitnami/zookeeper:${ZK_VERSION}
+    image: docker.io/bitnamilegacy/zookeeper:${ZK_VERSION}
     ports:
       - 2181:2181
     container_name: zookeeper
@@ -15,7 +15,7 @@ services:
       retries: 10
 
   kafka1:
-    image: docker.io/bitnami/kafka:${KAFKA_VERSION}
+    image: docker.io/bitnamilegacy/kafka:${KAFKA_VERSION}
     container_name: kafka1
     hostname: kafka1
     ports:
@@ -48,7 +48,7 @@ services:
         condition: service_healthy
 
   kafka2:
-    image: docker.io/bitnami/kafka:${KAFKA_VERSION}
+    image: docker.io/bitnamilegacy/kafka:${KAFKA_VERSION}
     container_name: kafka2
     hostname: kafka2
     ports:
