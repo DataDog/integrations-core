@@ -48,7 +48,7 @@ jobs:
     with:
       repo: core
 
-      job-name: ${{ inputs.platform }}-${{ inputs.integration }}
+      job-name: "[${{ inputs.integration }} - ${{inputs.agent-image}}] ${{ inputs.platform }}"
       platform: ${{ inputs.platform }}
       runner: ${{ inputs.platform == 'linux' && '["ubuntu-22.04"]' || inputs.platform == 'windows' && '["windows-2022"]' || '["macos-13"]' }}
 
