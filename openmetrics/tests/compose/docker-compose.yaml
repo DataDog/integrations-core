@@ -5,3 +5,14 @@ services:
      - ./config:/etc/prometheus
     ports:
      - 9090:9090
+  
+  custom-metrics:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.9-alpine
+        COPY metrics_server.py /app/
+        WORKDIR /app
+        CMD ["python", "metrics_server.py"]
+    ports:
+     - 8080:8080
