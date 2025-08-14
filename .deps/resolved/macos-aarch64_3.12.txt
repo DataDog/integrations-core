@@ -17,7 +17,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-macosx_11_0_arm64.whl#sha256=acfa79048ac3b8203feba108c2d637d89ce1dfeaefabc1272a5c4e2dab716314
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-macosx_11_0_arm64.whl#sha256=b7a3e6b0a1eb218e3d870a94c76daaf65da46dca8f6888ea6542f94905c24d88
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20241216144620-py3-none-macosx_10_12_universal2.whl#sha256=72f55306e2e3df9291ee55e3a6b2f6698fe3999db9570a14da0ea56bbf51e5a9
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250813094100-cp312-cp312-macosx_11_0_arm64.whl#sha256=ea8184b068e1cbb66928d5f0ac1fb5a0823fb48ecd192d0ea400bfa48c65eaf7
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250814151953-cp312-cp312-macosx_11_0_arm64.whl#sha256=f4183304886300caf9ea78feec765e7bd2b6f68c109b47f95a332c9ff559fb7f
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-45.0.4-cp311-abi3-macosx_10_9_universal2.whl#sha256=425a9a6ac2823ee6e46a76a21a4e8342d8fa5c01e08b823c1f19a8b74f096069
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.9.3-cp312-cp312-macosx_12_0_arm64.whl#sha256=ee54a29c53e2cbf8d07f57798f185280409415a249a968e904c887a12bbcf45e
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
@@ -45,7 +45,6 @@ kubernetes @ https://agent-int-packages.datadoghq.com/external/kubernetes/kubern
 lazy-loader @ https://agent-int-packages.datadoghq.com/external/lazy-loader/lazy_loader-0.4-py3-none-any.whl#sha256=342aa8e14d543a154047afb4ba8ef17f5563baad3fc610d7b15b213b0f119efc
 ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.py3-none-any.whl#sha256=5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
 looseversion @ https://agent-int-packages.datadoghq.com/external/looseversion/looseversion-1.3.0-py2.py3-none-any.whl#sha256=781ef477b45946fc03dd4c84ea87734b21137ecda0e1e122bcb3c8d16d2a56e0
-lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-5.1.1-cp312-cp312-macosx_10_9_universal2.whl#sha256=55e13a19829dcdbf0c5233062977aeb6daf72e65124909128045976f659164e8
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-4.4.4-cp312-cp312-macosx_11_0_arm64.whl#sha256=fff9f3a1ed63d45cb6514bfb8293005dc4141341ce3500abdfeb76124c0b9b2e
 mmh3 @ https://agent-int-packages.datadoghq.com/external/mmh3/mmh3-5.1.0-cp312-cp312-macosx_11_0_arm64.whl#sha256=babf2a78ce5513d120c358722a2e3aa7762d6071cd10cede026f8b32452be322
 msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.33.0-py3-none-any.whl#sha256=c0cd41cecf8eaed733ee7e3be9e040291eba53b0f262d3ae9c58f38b04244273
@@ -58,7 +57,7 @@ os-service-types @ https://agent-int-packages.datadoghq.com/external/os-service-
 packaging @ https://agent-int-packages.datadoghq.com/external/packaging/packaging-25.0-py3-none-any.whl#sha256=29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484
 paramiko @ https://agent-int-packages.datadoghq.com/external/paramiko/paramiko-3.5.1-py3-none-any.whl#sha256=43b9a0501fc2b5e70680388d9346cf252cfb7d00b0667c39e80eb43a408b8f61
 pathspec @ https://agent-int-packages.datadoghq.com/external/pathspec/pathspec-0.12.1-py3-none-any.whl#sha256=a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08
-pbr @ https://agent-int-packages.datadoghq.com/external/pbr/pbr-6.1.1-py2.py3-none-any.whl#sha256=38d4daea5d9fa63b3f626131b9d34947fd0c8be9b05a29276870580050a25a76
+pbr @ https://agent-int-packages.datadoghq.com/external/pbr/pbr-7.0.0-py2.py3-none-any.whl#sha256=b447e63a2bc04fd975fc0480b8d5ebf979179e2c0ae203bf1eff9ea20073bc38
 platformdirs @ https://agent-int-packages.datadoghq.com/external/platformdirs/platformdirs-4.3.8-py3-none-any.whl#sha256=ff7059bb7eb1179e2685604f4aaf157cfd9535242bd23742eadc3c13542139b4
 ply @ https://agent-int-packages.datadoghq.com/external/ply/ply-3.11-py2.py3-none-any.whl#sha256=096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce
 prometheus-client @ https://agent-int-packages.datadoghq.com/external/prometheus-client/prometheus_client-0.22.1-py3-none-any.whl#sha256=cca895342e308174341b2cbf99a56bef291fbc0ef7b9e5412a0f26d653ba7094
@@ -74,7 +73,7 @@ pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2
 pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.33.2-cp312-cp312-macosx_11_0_arm64.whl#sha256=3c6db6e52c6d70aa0d00d45cdb9b40f0433b96380071ea80b09277dba021ddf7
 pyjwt @ https://agent-int-packages.datadoghq.com/external/pyjwt/PyJWT-2.10.1-py3-none-any.whl#sha256=dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb
 pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.8.0-cp312-cp312-macosx_11_0_arm64.whl#sha256=31e4d21201bdf15064cf47ce7b74722d3e1aea2597c6785882244a3bb58c7eab
-pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250813094100-cp312-cp312-macosx_11_0_arm64.whl#sha256=83722e25eb5252718db8cbee477c779d5a693c1e802ba36575c964cc918bce69
+pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250814151954-cp312-cp312-macosx_11_0_arm64.whl#sha256=0f417a692d4a1387132a43855263033288e340d37e51be3646c3f6b3544a1023
 pymysql @ https://agent-int-packages.datadoghq.com/external/pymysql/PyMySQL-1.1.1-py3-none-any.whl#sha256=4de15da4c61dc132f4fb9ab763063e693d521a80fd0e87943b9a453dd4c19d6c
 pynacl @ https://agent-int-packages.datadoghq.com/external/pynacl/PyNaCl-1.5.0-cp36-abi3-macosx_10_10_universal2.whl#sha256=401002a4aaa07c9414132aaed7f6836ff98f59277a234704ff66878c2ee4a0d1
 pyodbc @ https://agent-int-packages.datadoghq.com/external/pyodbc/pyodbc-5.2.0-cp312-cp312-macosx_11_0_arm64.whl#sha256=9f7badd0055221a744d76c11440c0856fd2846ed53b6555cf8f0a8893a3e4b03
