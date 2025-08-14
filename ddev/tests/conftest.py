@@ -11,7 +11,6 @@ import pytest
 import vcr
 from datadog_checks.dev.tooling.utils import set_root
 
-from ddev.cli.application import Application
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import DDEV_TOML, ConfigFileWithOverrides
@@ -22,7 +21,7 @@ from ddev.utils.fs import Path, temp_directory
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
-from .helpers import APPLICATION, PLATFORM
+from .helpers import PLATFORM
 from .helpers.git import ClonedRepo
 from .helpers.runner import CliRunner
 
@@ -40,11 +39,6 @@ def ddev():
 @pytest.fixture(scope='session')
 def platform() -> Platform:
     return PLATFORM
-
-
-@pytest.fixture(scope='session')
-def app() -> Application:
-    return APPLICATION
 
 
 @pytest.fixture(scope='session')

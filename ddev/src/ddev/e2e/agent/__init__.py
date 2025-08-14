@@ -10,14 +10,9 @@ if TYPE_CHECKING:
 
 
 def get_agent_interface(agent_type: str) -> type[AgentInterface]:
-    if agent_type == "docker":
+    if agent_type == 'docker':
         from ddev.e2e.agent.docker import DockerAgent
 
         return DockerAgent
 
-    if agent_type == "vagrant":
-        from ddev.e2e.agent.vagrant import VagrantAgent
-
-        return VagrantAgent
-
-    raise NotImplementedError(f"Unsupported Agent type: {agent_type}")
+    raise NotImplementedError(f'Unsupported Agent type: {agent_type}')

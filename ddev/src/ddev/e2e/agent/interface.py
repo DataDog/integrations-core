@@ -8,7 +8,6 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from ddev.cli.application import Application
     from ddev.integration.core import Integration
     from ddev.utils.fs import Path
     from ddev.utils.platform import Platform
@@ -16,21 +15,17 @@ if TYPE_CHECKING:
 
 class AgentInterface(ABC):
     def __init__(
-        self, app: Application, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
+        self, platform: Platform, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
     ) -> None:
-        self.__app = app
+        self.__platform = platform
         self.__integration = integration
         self.__env = env
         self.__metadata = metadata
         self.__config_file = config_file
 
     @property
-    def app(self) -> Application:
-        return self.__app
-
-    @property
     def platform(self) -> Platform:
-        return self.app.platform
+        return self.__platform
 
     @property
     def integration(self) -> Integration:
