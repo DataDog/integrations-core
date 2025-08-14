@@ -819,6 +819,7 @@ class SQLServer(AgentCheck):
             self._check_connections_by_use_db()
 
     def check(self, _):
+        print("forcetest")
         if self.do_check:
             self.load_static_information()
             # configure custom queries for the check
