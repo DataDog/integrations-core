@@ -50,3 +50,4 @@ build-agent-manual:
     - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
       when: never
     - when: manual
+
