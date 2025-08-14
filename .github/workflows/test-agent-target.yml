@@ -22,11 +22,6 @@ on:
         description: Agent 7 image
         default: "datadog/agent:7-rc"
         type: string
-      agent-image-windows:
-        required: false
-        description: Agent 7 image on Windows
-        default: "datadog/agent:7-rc-servercore"
-        type: string
       test-py2:
         required: false
         description: Run Python 2 tests
@@ -36,11 +31,6 @@ on:
         required: false
         description: Agent 6 image
         default: "datadog/agent:6-rc"
-        type: string
-      agent-image-windows-py2:
-        required: false
-        description: Agent 6 image on Windows
-        default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
       platform:
         required: true
