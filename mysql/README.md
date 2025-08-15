@@ -8,7 +8,7 @@ The MySQL integration tracks the performance of your MySQL instances. It collect
 
 Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
-MySQL version 5.6, 5.7, 8.0, and MariaDB versions 10.5, 10.6, 10.11 and 11.1 are supported.
+MySQL version 5.6, 5.7, 8.0, MariaDB versions 10.5, 10.6, 10.11 and 11.1, and TiDB version 8.1+ are supported.
 
 ## Setup
 
@@ -68,34 +68,22 @@ mysql> GRANT PROCESS ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-Verify the replication client. Replace `<UNIQUEPASSWORD>` with the password you created above:
+##### TiDB-specific setup
+
+For TiDB databases, the user setup is similar to other database like MySQL, MariaDB and so on but with some differences:
+
+- TiDB does not have `performance_schema`, so skip the performance_schema grant
+- TiDB does not support the `REPLICATION CLIENT` privilege, but this is not needed as TiDB uses different replication mechanisms
+- The `innodb_index_stats` table is not available in TiDB
+- TiDB does not have STORED_PROCEDURE, so do not need to create procedure for explain.
+
+For TiDB, create the user with these commands:
 
 ```shell
-mysql -u datadog --password=<UNIQUEPASSWORD> -e "show slave status" && \
-echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
-echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
-```
-
-If enabled, metrics can be collected from the `performance_schema` database by granting an additional privilege:
-
-```shell
-mysql> show databases like 'performance_schema';
-+-------------------------------+
-| Database (performance_schema) |
-+-------------------------------+
-| performance_schema            |
-+-------------------------------+
-1 row in set (0.00 sec)
-
-mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'%';
+mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
-```
 
-To collect index metrics, grant the `datadog` user an additional privilege:
-
-```shell
-
-mysql> GRANT SELECT ON mysql.innodb_index_stats TO 'datadog'@'%';
+mysql> GRANT PROCESS ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -140,6 +128,27 @@ For a full list of available configuration options, see the [sample `mysql.d/con
 **Note**: Wrap your password in single quotes in case a special character is present.
 
 To collect `extra_performance_metrics`, your MySQL server must have `performance_schema` enabled - otherwise set `extra_performance_metrics` to `false`. For more information on `performance_schema`, see [MySQL Performance Schema Quick Start][9].
+
+##### TiDB configuration
+
+For TiDB instances, some configuration options should be adjusted:
+
+```yaml
+init_config:
+
+instances:
+  - host: 127.0.0.1
+    username: datadog
+    password: "<YOUR_CHOSEN_PASSWORD>"
+    port: 4000  # Default TiDB port
+    options:
+      replication: false  # TiDB uses different replication mechanisms
+      galera_cluster: false
+      extra_status_metrics: true
+      extra_innodb_metrics: false  # TiDB doesn't have InnoDB
+      disable_innodb_metrics: true  # Disable InnoDB metrics for TiDB
+      extra_performance_metrics: false  # TiDB doesn't have performance_schema
+```
 
 **Note**: The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
 
@@ -249,6 +258,14 @@ Set [Autodiscovery Integration Templates][11] as Docker labels on your applicati
 LABEL "com.datadoghq.ad.check_names"='["mysql"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
 LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "username": "datadog","password": "<UNIQUEPASSWORD>"}]'
+```
+
+For TiDB instances, add the appropriate configuration options:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["mysql"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "username": "datadog", "password": "<UNIQUEPASSWORD>", "port": 4000, "options": {"disable_innodb_metrics": true, "extra_performance_metrics": false}}]'
 ```
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
@@ -551,6 +568,24 @@ The check does not collect all metrics by default. Set the following boolean con
 | ---------------------- | ----------- |
 | mysql.info.schema.size | GAUGE       |
 
+#### TiDB limitations
+
+When using some extra integration with TiDB, be aware of the following limitations for TiDB:
+
+- **InnoDB metrics**: TiDB doesn't use the InnoDB storage engine, so all InnoDB-related metrics are unavailable
+- **Performance Schema**: TiDB doesn't have MySQL's `performance_schema`, so performance metrics requiring it are unavailable
+- **Replication metrics**: TiDB uses a different replication mechanism (Raft consensus), so traditional MySQL replication metrics don't apply
+- **MyISAM metrics**: TiDB doesn't support MyISAM, so key cache metrics are unavailable
+- **Binary log metrics**: TiDB has a different binlog implementation, so traditional MySQL binlog metrics may not be available
+- **Statement metrics**: TiDB uses `information_schema.cluster_statements_summary` instead of `performance_schema.events_statements_summary_by_digest`
+- **Activity monitoring**: TiDB uses `information_schema.cluster_processlist` instead of `performance_schema.events_statements_current`
+
+For Database Monitoring features:
+- Query samples and explain plans are collected from `cluster_statements_summary` with some approximations
+- Wait events are not available as TiDB doesn't track them in the same way as MySQL. We set 'N/A' for all.
+- Some query metrics are approximated (for example, rows examined is estimated from keys processed)
+- TiDB explain plans are retrieved from the `PLAN` column in `information_schema.cluster_statements_summary` table, which contains pre-collected execution plans in text format with embedded execution statistics. Please be sure it's not realtime explain plan like other database like MySQL, MariaDB.
+
 ### Events
 
 The MySQL check does not include any events.
@@ -570,6 +605,15 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 - [How can I collect more metrics from my SQL Server integration?][28]
 - [Database user lacks privileges][29]
 - [How to collect metrics with a SQL Stored Procedure?][30]
+
+### TiDB-specific troubleshooting
+
+**Missing metrics**: If you see warnings about missing InnoDB or `performance_schema` metrics when monitoring TiDB:
+- This is expected behavior. Set `disable_innodb_metrics: true` and `extra_performance_metrics: false` in your configuration.
+
+**Connection issues**: TiDB typically runs on port 4000 instead of MySQL's default 3306. Make sure to specify the correct port in your configuration.
+
+**High metric collection time**: The `CLUSTER_*` tables in TiDB aggregate data from all TiDB nodes, which can be slow in large clusters. Consider increasing the collection interval if needed.
 
 ## Further Reading
 
