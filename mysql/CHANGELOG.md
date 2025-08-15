@@ -10,7 +10,7 @@
 * Moved logger instantiation in MySQL version compatibility check to the except block to only perform the costly call to `get_check_logger()` when outputting the warning log. ([#20833](https://github.com/DataDog/integrations-core/pull/20833))
 * Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
 
-## 15.7.1 / 2025-07-21
+## 15.7.1 / 2025-07-21 / Agent 7.69.0
 
 ***Fixed***:
 

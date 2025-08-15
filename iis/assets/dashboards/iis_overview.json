@@ -1,6 +1,6 @@
 {
     "title": "IIS - Overview",
-    "description": "\nThis dashboard provides a high-level view of your IIS sites' status, plus breakdowns of requests and detailed views into network metrics. The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, configure the [Datadog's Agent-based IIS Integration](https://docs.datadoghq.com/integrations/iis/?tab=host) or through [OpenTelemetry](https://docs.datadoghq.com/opentelemetry/integrations/iis_metrics/)\n\nFor more on monitoring IIS, see blog posts:\n[Key IIS metrics to monitor](https://www.datadoghq.com/blog/iis-metrics/),  [Collecting metrics with IIS monitoring tools](https://www.datadoghq.com/blog/iis-monitoring-tools/), and \n[IIS monitoring with Datadog](https://www.datadoghq.com/blog/iis-monitoring-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.\n",
+    "description": "This dashboard provides a high-level view of your IIS sites' status, plus breakdowns of requests and detailed views into network metrics. The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, configure the [Datadog's Agent-based IIS Integration](https://docs.datadoghq.com/integrations/iis/?tab=host) or through [OpenTelemetry](https://docs.datadoghq.com/opentelemetry/integrations/iis_metrics/)\n\nFor more on monitoring IIS, see blog posts:\n[Key IIS metrics to monitor](https://www.datadoghq.com/blog/iis-metrics/),  [Collecting metrics with IIS monitoring tools](https://www.datadoghq.com/blog/iis-monitoring-tools/), and \n[IIS monitoring with Datadog](https://www.datadoghq.com/blog/iis-monitoring-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets. ",
     "widgets": [
         {
             "id": 5524054709658582,
@@ -123,9 +123,9 @@
                                 "sum"
                             ],
                             "time": {
-                                "type": "fixed",
-                                "from": 1752859444000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "timeseries",
                             "requests": [
@@ -168,9 +168,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -219,9 +219,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -269,9 +269,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -313,9 +313,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -375,9 +375,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752859444000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -411,9 +411,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752859444000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -470,9 +470,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "requests": [
                                 {
@@ -525,9 +525,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "requests": [
                                 {
@@ -589,9 +589,9 @@
                                 "sum"
                             ],
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "timeseries",
                             "requests": [
@@ -638,9 +638,9 @@
                                 "sum"
                             ],
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "timeseries",
                             "requests": [
@@ -687,9 +687,9 @@
                                 "sum"
                             ],
                             "time": {
-                                "type": "fixed",
-                                "from": 1752859444000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "timeseries",
                             "requests": [
@@ -772,9 +772,9 @@
                                 "sum"
                             ],
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "timeseries",
                             "requests": [
@@ -812,9 +812,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752859444000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -886,9 +886,9 @@
                                 "sum"
                             ],
                             "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "timeseries",
                             "requests": [
@@ -980,9 +980,9 @@
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
-                                "type": "fixed",
-                                "from": 1752859444000,
-                                "to": 1752860044000
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "query_value",
                             "requests": [
@@ -1029,10 +1029,10 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {
-                                "type": "fixed",
-                                "from": 1752845644000,
-                                "to": 1752860044000
+                                "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 15
                             },
                             "type": "timeseries",
                             "requests": [

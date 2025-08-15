@@ -12,7 +12,7 @@
 
 * data streams: Don't retrieve messages for untracked topics and cleanup consumer groups used for Data Streams messages feature. ([#20948](https://github.com/DataDog/integrations-core/pull/20948))
 
-## 6.6.1 / 2025-07-25
+## 6.6.1 / 2025-07-25 / Agent 7.69.0
 
 ***Fixed***:
 
