@@ -9,6 +9,7 @@ import win32service
 import winerror
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.windows import enumerate_windows_services
 
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
@@ -240,15 +241,12 @@ class WindowsService(AgentCheck):
         service_filters = [ServiceFilter.from_config(item, wmi_compat=wmi_compat) for item in services]
         services_unseen = {f.name for f in service_filters if f.name is not None}
 
+        # Use shared enumeration but with raw exceptions to maintain exact error behavior
         try:
-            scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ENUMERATE_SERVICE)
-        except Exception as e:  # no cov
+            service_statuses = enumerate_windows_services(self.log, wrap_errors=False)
+        except Exception as e:
+            # This preserves the EXACT original error behavior
             raise Exception('Unable to open SCManager: {}'.format(e))
-
-        type_filter = win32service.SERVICE_WIN32
-        state_filter = win32service.SERVICE_STATE_ALL
-
-        service_statuses = win32service.EnumServicesStatus(scm_handle, type_filter, state_filter)
 
         # Sort service filters in reverse order on the regex pattern so more specific (longer)
         # regex patterns are tested first. This is to handle cases when a pattern is a prefix of

@@ -32,6 +32,51 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
+The integration collects metrics from the following Windows Performance Objects:
+
+- **NTDS**: Core Active Directory metrics including replication, LDAP operations, and directory service threads
+- **Netlogon**: Authentication performance metrics including semaphore statistics for monitoring authentication bottlenecks
+- **Security System-Wide Statistics**: Authentication protocol usage metrics (NTLM vs Kerberos)
+- **DHCP Server**: DHCP failover and binding update metrics (when DHCP Server role is installed)
+- **DFS Replicated Folders**: DFS replication health, conflicts, and staging metrics (when DFSR role is installed)
+  - Note: Metrics are tagged with `instance` containing the DFS replication group name
+
+#### Netlogon Metrics
+
+The Netlogon metrics help monitor authentication performance and identify bottlenecks in domain controller authentication processing:
+
+- `active_directory.netlogon.semaphore_waiters`: Number of threads waiting for the authentication semaphore
+- `active_directory.netlogon.semaphore_holders`: Number of threads currently holding the semaphore
+- `active_directory.netlogon.semaphore_acquires`: Total number of semaphore acquisitions
+- `active_directory.netlogon.semaphore_timeouts`: Number of timeouts waiting for the semaphore
+- `active_directory.netlogon.semaphore_hold_time`: Average time (in seconds) the semaphore is held
+
+These metrics are particularly useful for monitoring authentication load from network access control (NAC) devices, WiFi authentication, and other authentication-heavy scenarios.
+
+##### Use Cases
+
+The Netlogon and Security metrics help address several monitoring scenarios:
+
+- **Monitor authentication bottlenecks**: Identify when authentication requests are queuing up, particularly from Cisco ISE NAC devices or high-volume WiFi authentication
+- **Track authentication processing times**: Use `semaphore_hold_time` to determine if authentication is taking too long
+- **Identify MaxConcurrentApi tuning needs**: High `semaphore_waiters` values indicate the need to adjust the MaxConcurrentApi registry setting
+- **Monitor authentication protocol usage**: Track the ratio of NTLM vs Kerberos authentications to ensure proper protocol usage
+- **Detect authentication timeouts and failures**: Rising `semaphore_timeouts` indicate authentication infrastructure issues
+
+#### Service-Aware Metric Collection
+
+The integration automatically detects which Windows services are running and only collects metrics for available services. This prevents errors when optional roles like DHCP Server or DFS Replication are not installed. You can control this behavior with:
+
+- `service_check_enabled`: Enable/disable service detection (default: true)
+- `force_all_metrics`: Force collection of all metrics regardless of service state (default: false)
+
+#### Additional Metrics
+
+- **LDAP Write Operations**: `ldap.writes_persec` tracks directory modifications
+- **LDAP Active Threads**: `ldap.active_threads` monitors LDAP subsystem load
+- **Client Binds**: `ds.client_binds_persec` includes all bind attempts (successful and failed)
+- **Last Authentication Time**: `netlogon.last_authentication_time` shows time since last auth
+
 ### Events
 
 The Active Directory check does not include any events.
