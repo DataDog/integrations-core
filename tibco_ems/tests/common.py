@@ -275,6 +275,22 @@ SHOW_MAP = {
                 'receivers': 0,
                 'snfgxibct': '',
             },
+            {
+                'pending_messages': 214,
+                'pending_messages_size': {
+                    'unit': 'Kb',
+                    'value': 214.1,
+                },
+                'pending_persistent_messages': 214,
+                'pending_persistent_messages_size': {
+                    'unit': 'Kb',
+                    'value': 214.1,
+                },
+                'pre': 'none',
+                'queue_name': 'none.prefetch.sample',
+                'receivers': 16,
+                'snfgxibct': '',
+            },
         ],
         'expected_metrics': [
             'tibco_ems.queue.pending_messages',
