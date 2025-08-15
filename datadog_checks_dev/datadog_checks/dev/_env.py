@@ -4,6 +4,7 @@
 import json
 import os
 from base64 import urlsafe_b64decode, urlsafe_b64encode
+from bz2 import decompress, compress
 
 DDTRACE_OPTIONS_LIST = [
     'DD_TAGS',
@@ -181,9 +182,9 @@ def serialize_data(data):
     # 1. Printing to stdout won't fail
     # 2. Easy parsing since there are no spaces
     #
-    return urlsafe_b64encode(data.encode('utf-8')).decode('utf-8')
+    return urlsafe_b64encode(compress(data.encode('utf-8'))).decode('utf-8')
 
 
 def deserialize_data(data):
     decoded = urlsafe_b64decode(data.encode('utf-8'))
-    return json.loads(decoded.decode('utf-8'))
+    return json.loads(decompress(decoded).decode('utf-8'))
