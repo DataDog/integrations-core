@@ -210,7 +210,7 @@ def test_basic_connection(pg_instance: Dict[str, str]):
 
         # Pool state
         assert stats["pool_min"] == 0
-        assert stats["pool_max"] == 1
+        assert stats["pool_max"] == 2
         assert 1 <= stats["pool_size"] <= 2
         assert stats["pool_available"] >= 1  # Should be 1 or 2 after release
 
@@ -228,7 +228,7 @@ def test_basic_connection(pg_instance: Dict[str, str]):
 def test_lru_eviction_and_connection_rotation(pg_instance):
     """
     Opens and closes multiple connections across dogs_n databases and asserts LRU behavior
-    and correct enforcement of min_size=0, max_size=1 per pool.
+    and correct enforcement of min_size=0, max_size=2 per pool.
     """
     conn_args = _create_conn_args(pg_instance, "test_lru_eviction_and_connection_rotation")
     manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args)
@@ -251,8 +251,8 @@ def test_lru_eviction_and_connection_rotation(pg_instance):
     for _dbname, (pool, _last_used, persistent) in manager.pools.items():
         stats = pool.get_stats()
         assert stats["pool_min"] == 0
-        assert stats["pool_max"] == 1
-        assert stats["pool_size"] <= 1
+        assert stats["pool_max"] == 2
+        assert stats["pool_size"] <= 2
         assert persistent is False
 
     manager.close_all()
@@ -635,8 +635,8 @@ def test_concurrent_access_and_thread_safety(pg_instance: Dict[str, str]):
         for dbname in list(manager.pools.keys()):
             stats = manager.get_pool_stats(dbname)
             assert stats is not None, f"Pool stats should be available for {dbname}"
-            assert stats["pool_available"] == 1, f"Pool should have available connections for {dbname}"
-            assert stats["pool_size"] == 1, f"Pool should have size 1 for {dbname}"
+            assert stats["pool_available"] == 2, f"Pool should have available connections for {dbname}"
+            assert stats["pool_size"] == 2, f"Pool should have size 2 for {dbname}"
 
     finally:
         manager.close_all()

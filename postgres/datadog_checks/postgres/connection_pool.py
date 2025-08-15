@@ -105,7 +105,7 @@ class LRUConnectionPoolManager:
         self.pool_config = {
             **(pool_config or {}),
             "min_size": 0,
-            "max_size": 1,
+            "max_size": 2,
             "open": True,
         }
         self.lock = threading.Lock()
