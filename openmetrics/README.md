@@ -72,7 +72,7 @@ By default, the integration skips metrics that come without a type on a Promethe
         "type": "gauge"
 ```
 
-If you are collecting metrics through annotations, please refer to the following example:
+If you are collecting metrics through annotations, refer to the following example:
 
 ```json
   "metrics": [
