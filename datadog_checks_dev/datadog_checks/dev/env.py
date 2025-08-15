@@ -109,7 +109,7 @@ def environment_run(
             if set_up_env():
                 result = set_up_func()
                 # Store the serialized data in the environment
-                set_env_vars({key: serialize_data(result)})
+                # set_env_vars({key: serialize_data(result)})
 
                 if sleep:
                     time.sleep(sleep)
