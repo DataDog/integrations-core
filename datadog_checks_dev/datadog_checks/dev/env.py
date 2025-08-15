@@ -108,8 +108,13 @@ def environment_run(
             key = 'environment_result_{}'.format(up.__class__.__name__.lower())
             if set_up_env():
                 result = set_up_func()
-                # Store the serialized data in the environment
-                set_env_vars({key: serialize_data(result)})
+                data = serialize_data(result)
+                # This is the maximum env var size allowed on windows
+                if len(data) < 32_000:
+                    # Store the serialized data in the environment
+                    set_env_vars({key: serialize_data(result)})
+                else:
+                    print(f"WARNING:Skipping {key} because it's too large: {len(data)} bytes")
 
                 if sleep:
                     time.sleep(sleep)
