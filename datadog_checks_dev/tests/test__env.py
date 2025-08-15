@@ -6,7 +6,7 @@ import tenacity
 from mock import mock
 
 from datadog_checks.dev import EnvVars, environment_run
-from datadog_checks.dev._env import E2E_SET_UP, E2E_TEAR_DOWN, set_up_env, tear_down_env
+from datadog_checks.dev._env import E2E_SET_UP, E2E_TEAR_DOWN, deserialize_data, serialize_data, set_up_env, tear_down_env
 from datadog_checks.dev.ci import running_on_ci
 
 
@@ -69,3 +69,16 @@ def test_environment_run_condition_failed_only_on_first_run():
     with environment_run(up=up, down=down, attempts=3, conditions=[condition]) as result:
         assert condition.call_count == 2
         assert result == "{}"
+
+
+@pytest.mark.unit
+def test_serialize_data():
+    data = {"test": "test"}
+    serialized = serialize_data(data)
+    assert deserialize_data(serialized) == data
+
+@pytest.mark.unit
+def test_serialize_data_large():
+    data = {"test": "test" * 10000}
+    serialized = serialize_data(data)
+    assert deserialize_data(serialized) == data
