@@ -543,6 +543,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /box/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /box/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/jamf_pro/                                                          @DataDog/saas-integrations
+/jamf_pro/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/jamf_pro/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/jamf_pro/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /proofpoint_tap/                                                    @DataDog/saas-integrations
 /proofpoint_tap/*.md                                                @DataDog/saas-integrations @DataDog/documentation
 /proofpoint_tap/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
