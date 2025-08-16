@@ -720,9 +720,12 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
     pg_instance['reported_hostname'] = reported_hostname
 
-    with mock.patch(
-        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value=expected_hostname
-    ) as resolve_db_host:
+    with (
+        mock.patch(
+            'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value=expected_hostname
+        ) as resolve_db_host,
+        mock.patch('datadog_checks.base.stubs.datadog_agent.get_hostname', return_value=expected_hostname),
+    ):
         check = PostgreSql('test_instance', {}, [pg_instance])
         check.run()
         assert resolve_db_host.called is True
@@ -776,6 +779,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'replication_role:master',
         'database_hostname:{}'.format(expected_database_hostname),
         'database_instance:{}'.format(expected_database_instance),
+        'ddagenthostname:{}'.format(expected_database_hostname),
     ]
     check = PostgreSql('test_instance', {}, [pg_instance])
     run_one_check(check)
