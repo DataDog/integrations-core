@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "081f9cd9-a86a-4cea-ae5b-b4f7e163f413",
   "app_id": "ambari",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
