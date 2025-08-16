@@ -223,6 +223,8 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
+        self.log.debug("source: {kwargs.get('source', '')}")
+
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
         if not isinstance(metric_patterns, dict):
             raise ConfigurationError('Setting `metric_patterns` must be a mapping')
