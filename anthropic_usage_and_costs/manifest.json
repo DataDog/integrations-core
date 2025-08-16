@@ -8,9 +8,20 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Enable Anthropic customers to monitor token consumption, track spend, and attribute usage directly within Datadog.",
+    "description": "Optimize your Anthropic usage: monitor token consumption, track your costs, and attribute usage.",
     "title": "Anthropic Usage and Costs",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Anthropic Costs Explorer",
+        "image_url": "anthropic-costs-explorer-for-overview.jpeg"
+      },
+      {
+        "media_type": "image",
+        "caption": "Anthropic Dashboard",
+        "image_url": "anthropic-dashboard-for-overview.jpeg"
+      }
+    ],
     "classifier_tags": [
       "Category::AI/ML",
       "Category::Metrics",
@@ -41,6 +52,14 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Anthropic Usage and Costs Overview": "assets/dashboards/anthropic_usage_and_costs_overview.json"
+    },
+    "monitors": {
+      "Anthropic Usage is Approaching Rate Limit": "assets/monitors/anthropic_token_usage_threshold.json",
+      "Anthropic Cache/Hit Ratio Is Abnormally Low": "assets/monitors/anthropic_cache_hit_ratio_anomaly.json",
+      "Anthropic Token Usage Is Abnormally High": "assets/monitors/anthropic_token_usage_anomaly.json"
     }
   },
   "author": {
