@@ -41,9 +41,9 @@ RELATIVE_PATH="zlib-{{version}}" \
   install-from-source
 
 # libxml & libxslt for lxml
-DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
-VERSION="2.12.6" \
-SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.14/libxml2-{{version}}.tar.xz" \
+VERSION="1.1.43" \
+SHA256="5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a" \
 RELATIVE_PATH="libxml2-{{version}}" \
   install-from-source \
     --without-iconv \
