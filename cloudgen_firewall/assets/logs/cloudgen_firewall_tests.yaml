@@ -1,0 +1,6 @@
+id: cloudgen_firewall
+tests:
+ -
+  sample: "2025-04-09T13:06:41+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:10024 - (D|2|ccactivate|1|License|4700|Query Activation State for 3343643 Failed|sacumentestlocal|1744204001|Querying licensing servers for the license activation state failed)"
+  service: "event"
+  result: null
