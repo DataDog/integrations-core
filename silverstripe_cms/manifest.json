@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "acd6d383-dfe8-4e70-8c68-e5f3b6da84af",
   "app_id": "silverstripe-cms",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
