@@ -1,5 +1,5 @@
 {
-	"version": 1,
+	"version": 2,
 	"created_at": "2025-08-17",
 	"last_updated_at": "2025-08-17",
 	"title": "Anthropic Cache/Hit Ratio Is Abnormally Low",
@@ -35,5 +35,8 @@
 			"new_group_delay": 0
 		},
 		"priority": 2
-	}
+	},
+	"tags": [
+		"integration:anthropic_usage_and_costs"
+	]
 }
