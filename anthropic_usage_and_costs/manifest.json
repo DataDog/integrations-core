@@ -14,12 +14,12 @@
       {
         "media_type": "image",
         "caption": "Anthropic Costs Explorer",
-        "image_url": "images/anthropic-costs-explorer-for-overview.jpeg"
+        "image_url": "images/anthropic-costs-explorer-for-overview.png"
       },
       {
         "media_type": "image",
         "caption": "Anthropic Dashboard",
-        "image_url": "images/anthropic-dashboard-for-overview.jpeg"
+        "image_url": "images/anthropic-dashboard-for-overview.png"
       }
     ],
     "classifier_tags": [
