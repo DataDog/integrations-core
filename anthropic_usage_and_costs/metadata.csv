@@ -1,4 +1,4 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags,
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 anthropic.cache_creation.ephemeral_1h_input_tokens,gauge,,token,,Input tokens used during ephemeral 1 hour cache creation.,0,anthropic_usage_and_costs,cache creation ephemeral 1h input tokens,"api_key_id,context_window,model,model_id,org_id,org_name,service_tier,user_id,user_name,workspace_id,workspace_name",
 anthropic.cache_creation.ephemeral_5m_input_tokens,gauge,,token,,Input tokens used during ephemeral 5 minute cache creation.,0,anthropic_usage_and_costs,cache creation ephemeral 5m input tokens,"api_key_id,context_window,model,model_id,org_id,org_name,service_tier,user_id,user_name,workspace_id,workspace_name",
 anthropic.cache_read_input_tokens,gauge,,token,,Input tokens retrieved from anthropic cache reads.,0,anthropic_usage_and_costs,cache read input tokens,"api_key_id,context_window,model,model_id,org_id,org_name,service_tier,user_id,user_name,workspace_id,workspace_name",
