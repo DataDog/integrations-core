@@ -34,6 +34,6 @@
 		"priority": 1
 	},
 	"tags": [
-		"integration:anthropic_usage_and_costs"
+		"integration:anthropic-usage-and-costs"
 	]
 }
