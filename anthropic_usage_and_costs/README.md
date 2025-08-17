@@ -11,7 +11,7 @@ Datadog's Anthropic Usage and Costs integration allows you to get visibility int
 
 This integration is especially valuable for teams using Anthropic at scale who want to manage spend, understand product adoption, and ensure efficient use of AI resources-all within Datadog. With this data you will be able to introduce and validate optimization strategies to get the best out of Anthropic.
 
-You can also see your Anthropic costs in Datadog [Cloud Cost Management][6], allowing you to answer key questions: Which models or workspaces are generating the most cost? Are workloads using the right service tier (Standard, Batch, or Priority)? Are teams effectively using caching or ephemeral sessions? What’s the cost breakdown between Claude Opus and Claude Sonnet?
+You can also see your Anthropic costs in Datadog [Cloud Cost Management][6], allowing you to answer key questions: Which models or workspaces are generating the most cost? Are workloads using the right service tier (Standard, Batch, or Priority)? Are teams effectively using caching or ephemeral sessions? What's the cost breakdown between Claude Opus and Claude Sonnet?
 
 ## Setup
 
