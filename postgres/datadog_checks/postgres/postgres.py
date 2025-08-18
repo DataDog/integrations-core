@@ -289,6 +289,7 @@ class PostgreSql(AgentCheck):
             with conn.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 cursor.fetchall()
+                self.log.debug("Connection health check passed for database %s", conn.info.dbname)
         except psycopg.Error as e:
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
