@@ -121,10 +121,10 @@ jobs:
     - name: Set environment variables with sanitized paths
       run: |
         # We want to replace leading dots as they will make directories hidden, which will cause them to be ignored by upload-artifact and EnricoMi/publish-unit-test-result-action
-        JOB_NAME=$(echo "${{ inputs.job-name }}" | sed 's/^\./Dot/')
+        JOB_NAME=$(echo "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}" | sed 's/^\./Dot/')
 
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
-        echo "TRACE_CAPTURE_FILE=${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}" >> $GITHUB_ENV
+        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
 
     - name: Set up Windows
       if: runner.os == 'Windows'
