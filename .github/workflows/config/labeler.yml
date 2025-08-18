@@ -635,6 +635,8 @@ integration/supabase:
 - supabase/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/supply_chain_firewall:
+- supply_chain_firewall/**/*
 integration/suricata:
 - suricata/**/*
 integration/symantec_endpoint_protection:
