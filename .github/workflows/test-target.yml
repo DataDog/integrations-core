@@ -124,7 +124,7 @@ jobs:
         JOB_NAME=$(echo "${{ inputs.job-name }}" | sed 's/^\./Dot/')
 
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
-        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+        echo "TRACE_CAPTURE_FILE=${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}" >> $GITHUB_ENV
 
     - name: Set up Windows
       if: runner.os == 'Windows'
