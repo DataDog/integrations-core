@@ -500,17 +500,6 @@ pipeline:
               name: "99"
           target: ocsf.actor.user.type_id
         - type: attribute-remapper
-          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
-          enabled: true
-          sources:
-            - ocsf.actor.user.type_id
-          sourceType: attribute
-          target: ocsf.actor.user.type_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
           name: Map `properties.sessionId` to `ocsf.actor.session.uid`
           enabled: true
           sources:
@@ -577,17 +566,6 @@ pipeline:
                 query: "@evt.category:*"
               name: "99"
           target: ocsf.user.type_id
-        - type: attribute-remapper
-          name: Map `ocsf.user.type_id` to `ocsf.user.type_id`
-          enabled: true
-          sources:
-            - ocsf.user.type_id
-          sourceType: attribute
-          target: ocsf.user.type_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `properties.resourceId` to `ocsf.dst_endpoint.uid`
           enabled: true
@@ -842,7 +820,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.category:AuditLogs @properties.category:(UserManagement OR RoleManagement OR ApplicationManagement)"
+        query: "@evt.category:AuditLogs (@properties.category:(UserManagement OR ApplicationManagement) OR (@properties.category:RoleManagement AND @properties.targetResources.type:(ServicePrincipal OR User)))"
       processors:
         - type: string-builder-processor
           name: Add category uid
@@ -882,7 +860,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: '@evt.name:"Add User"'
+                query: '@evt.name:("Add User" OR "Add service principal")'
               name: "1"
             - filter:
                 query: '@evt.name:"Enable Account"'
@@ -897,13 +875,13 @@ pipeline:
                 query: '@evt.name:"Disable account"'
               name: "5"
             - filter:
-                query: '@evt.name:"*Delete user"'
+                query: '@evt.name:(*Delete\ user OR "Hard delete service principal" OR "Remove service principal")'
               name: "6"
             - filter:
                 query: '@evt.name:Add\ *member\ to\ role*'
               name: "7"
             - filter:
-                query: '@evt.name:"Remove\ *member\ from\ role"'
+                query: '@evt.name:Remove\ *member\ from\ role'
               name: "8"
             - filter:
                 query: "*"
@@ -935,7 +913,7 @@ pipeline:
                 query: '@evt.name:Add\ *member\ to\ role'
               name: "Attach Policy"
             - filter:
-                query: '@evt.name:"Remove\ *member\ from\ role"'
+                query: '@evt.name:Remove\ *member\ from\ role'
               name: "Detach Policy"
           target: ocsf.activity_name
         - type: attribute-remapper
@@ -996,17 +974,6 @@ pipeline:
                 query: "@evt.category:*"
               name: "99"
           target: ocsf.actor.user.type_id
-        - type: attribute-remapper #TODO: should maybe be post-transformation
-          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
-          enabled: true
-          sources:
-            - ocsf.actor.user.type_id
-          sourceType: attribute
-          target: ocsf.actor.user.type_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `properties.correlationId` to `ocsf.actor.session.uid`
           enabled: true
@@ -1055,7 +1022,7 @@ pipeline:
             valueToExtract: value
             type: select
         - type: array-processor
-          name: Move attributes into evidences array
+          name: Move attributes into http_headers array
           enabled: true
           operation:
             source: ocsf.http_header
@@ -1117,6 +1084,14 @@ pipeline:
             valueToExtract: id
             type: select
         - type: array-processor
+          name: Move attributes into policies array
+          enabled: true
+          operation:
+            source: ocsf.policy
+            target: ocsf.policies
+            preserveSource: false
+            type: append
+        - type: array-processor
           name: Extract `userPrincipalName` from `properties.targetResources` array
           enabled: true
           operation:
@@ -1135,6 +1110,37 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.user.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.user.email_addr:*"
+              name: User
+            - filter:
+                query: "*"
+              name: System
+          target: ocsf.user.type
+        - type: category-processor
+          name: OCSF - ocsf.user.type_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.user.email_addr:*"
+              name: "1"
+            - filter:
+                query: "*"
+              name: "3"
+          target: ocsf.user.type_id
+        - type: array-processor
+          name: Extract `displayName` from `properties.targetResources` array
+          enabled: true
+          operation:
+            source: properties.targetResources
+            target: ocsf.user.name
+            filter: "type:ServicePrincipal"
+            valueToExtract: displayName
+            type: select
         - type: array-processor
           name: Extract User id from `properties.targetResources` array
           enabled: true
@@ -1150,7 +1156,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.category:AuditLogs @properties.category:GroupManagement"
+        query: "@evt.category:AuditLogs (@properties.category:GroupManagement OR (@properties.category:RoleManagement AND @properties.targetResources.type:Group))" 
       processors:
         - type: string-builder-processor
           name: Add category uid
@@ -1189,7 +1195,13 @@ pipeline:
           name: OCSF - activity_id mapping
           enabled: true
           categories:
-            - filter: #TODO: should we try to add mappings for assigning/revoking privleges
+            - filter:
+                query: '@evt.name:Add\ *member\ to\ role*'
+              name: "1"
+            - filter:
+                query: '@evt.name:Remove\ *member\ from\ role'
+              name: "2"
+            - filter: 
                 query: '@evt.name:"Add member to group"' 
               name: "3"
             - filter:
@@ -1209,7 +1221,13 @@ pipeline:
           name: OCSF - activity_name mapping
           enabled: true
           categories:
-            - filter: #TODO: should we try to add mappings for assigning/revoking privleges
+            - filter:
+                query: '@evt.name:Add\ *member\ to\ role*'
+              name: "Assign Privileges"
+            - filter:
+                query: '@evt.name:Remove\ *member\ from\ role'
+              name: "Revoke Privileges"
+            - filter: 
                 query: '@evt.name:"Add member to group"' 
               name: "Add User"
             - filter:
@@ -1280,17 +1298,6 @@ pipeline:
                 query: "@evt.category:*"
               name: "99"
           target: ocsf.actor.user.type_id
-        - type: attribute-remapper #TODO: should maybe be post-transformation
-          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
-          enabled: true
-          sources:
-            - ocsf.actor.user.type_id
-          sourceType: attribute
-          target: ocsf.actor.user.type_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `properties.correlationId` to `ocsf.actor.session.uid`
           enabled: true
@@ -1339,7 +1346,7 @@ pipeline:
             valueToExtract: value
             type: select
         - type: array-processor
-          name: Move attributes into evidences array
+          name: Move attributes into http_headers array
           enabled: true
           operation:
             source: ocsf.http_header
@@ -1424,10 +1431,10 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@ocsf.user.name:*"
+                query: "@ocsf.user.email_addr:*"
               name: User
             - filter:
-                query: "*"
+                query: "ocsf.user.name:*"
               name: System
           target: ocsf.user.type
         - type: category-processor
@@ -1435,23 +1442,12 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@ocsf.user.name:*"
+                query: "@ocsf.user.email_addr:*"
               name: "1"
             - filter:
-                query: "*"
+                query: "ocsf.user.name:*"
               name: "3"
           target: ocsf.user.type_id
-        - type: attribute-remapper #TODO: should maybe go in post-transformation 
-          name: Map `ocsf.user.type_id` to `ocsf.user.type_id`
-          enabled: true
-          sources:
-            - ocsf.user.type_id
-          sourceType: attribute
-          target: ocsf.user.type_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
         - type: array-processor
           name: Extract `displayName` from `properties.targetResources` array
           enabled: true
@@ -1469,8 +1465,7 @@ pipeline:
             target: ocsf.group.uid
             filter: "type:Group"
             valueToExtract: id
-            type: select
-    
+            type: select    
     - type: pipeline
       name: OCSF post transformations
       enabled: true
@@ -1548,6 +1543,28 @@ pipeline:
             - ocsf.status_id
           sourceType: attribute
           target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper 
+          name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.actor.user.type_id
+          sourceType: attribute
+          target: ocsf.actor.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.user.type_id` to `ocsf.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.user.type_id
+          sourceType: attribute
+          target: ocsf.user.type_id
           targetType: attribute
           targetFormat: integer
           preserveSource: false
