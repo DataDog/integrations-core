@@ -16,7 +16,7 @@ from .create import BRANCH_NAME_REGEX
 @click.pass_obj
 def tag(app, final):
     """
-    Tag the release branch either as release candidate or final release.
+    Tag the release branch either as release candidate or final release and test.
     """
     branch_name = app.repo.git.current_branch()
     release_branch = BRANCH_NAME_REGEX.match(branch_name)
