@@ -55,4 +55,4 @@ Need help? Contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://github.com/DataDog/integrations-core/blob/master/anthropic_usage_and_costs/metadata.csv
 [5]: https://docs.anthropic.com/en/api/administration-api
-[6]: https://app.datadoghq.com/cost/
+[6]: /cost
