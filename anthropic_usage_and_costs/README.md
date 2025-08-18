@@ -26,7 +26,7 @@ You will need an [Admin API key][5] from Anthropic. This key allows access to us
 
 ### 2. Configure the Datadog Integration
 
-1. In Datadog, go to [**Integrations > Anthropic**](https://app.datadoghq.com/integrations?integrationId=anthropic).
+1. In Datadog, go to [**Integrations > Anthropic**](https://app.datadoghq.com/integrations?integrationId=anthropic-usage-and-costs).
 2. In the configuration panel, provide the **Admin API Key** by pasting the key you generated from Anthropic.
 3. Click **Save Configuration**.
 
