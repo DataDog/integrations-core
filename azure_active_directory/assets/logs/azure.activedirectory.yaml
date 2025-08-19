@@ -405,6 +405,342 @@ pipeline:
           target: ocsf.severity_id
           replaceMissing: false
     - type: pipeline
+      name: OCSF sub pipeline for class Account Change [3001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@evt.category:AuditLogs (@properties.category:(UserManagement OR ApplicationManagement) OR (@properties.category:RoleManagement AND @properties.targetResources.type:(ServicePrincipal OR User)))"
+      processors:
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "3"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Identity & Access Management
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "3001"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: Account Change
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `evt.name` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - evt.name
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+        - type: category-processor
+          name: OCSF - activity_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@evt.name:("Add User" OR "Add service principal")'
+              name: "1"
+            - filter:
+                query: '@evt.name:"Enable Account"'
+              name: "2"
+            - filter:
+                query: '@evt.name:"Change user password"' #Todo: should this include self-service password resets?
+              name: "3"
+            - filter:
+                query: '@evt.name:"Reset password"'
+              name: "4"
+            - filter:
+                query: '@evt.name:"Disable account"'
+              name: "5"
+            - filter:
+                query: '@evt.name:(*Delete\ user OR "Hard delete service principal" OR "Remove service principal")'
+              name: "6"
+            - filter:
+                query: '@evt.name:Add\ *member\ to\ role*'
+              name: "7"
+            - filter:
+                query: '@evt.name:Remove\ *member\ from\ role'
+              name: "8"
+            - filter:
+                query: "*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: category-processor
+          name: OCSF - activity_name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@evt.name:"Add User"'
+              name: "Create"
+            - filter:
+                query: '@evt.name:"Enable Account"'
+              name: "Enable"
+            - filter:
+                query: '@evt.name:"Change user password"'
+              name: "Password Change"
+            - filter:
+                query: '@evt.name:"Reset password"'
+              name: "Password Reset"
+            - filter:
+                query: '@evt.name:"Disable account"'
+              name: "Disable"
+            - filter:
+                query: '@evt.name:"*Delete user"'
+              name: "Delete"
+            - filter:
+                query: '@evt.name:Add\ *member\ to\ role'
+              name: "Attach Policy"
+            - filter:
+                query: '@evt.name:Remove\ *member\ from\ role'
+              name: "Detach Policy"
+          target: ocsf.activity_name
+        - type: attribute-remapper
+          name: Map `usr.name`, `properties.initiatedBy.app.displayName`, `identity` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - usr.name
+            - properties.initiatedBy.app.displayName
+            - identity
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.id`, `properties.initiatedBy.app.servicePrincipalId` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.id
+            - properties.initiatedBy.app.servicePrincipalId
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `usr.id` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - usr.id
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:* OR @usr.name:*"
+              name: User
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId"
+              name: System
+          target: ocsf.actor.user.type
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:*"
+              name: "1"
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId"
+              name: "3"
+            - filter:
+                query: "@evt.category:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `properties.correlationId` to `ocsf.actor.session.uid`
+          enabled: true
+          sources:
+            - properties.correlationId
+          sourceType: attribute
+          target: ocsf.actor.session.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `time` to `ocsf.time`
+          enabled: true
+          sources:
+            - time
+          sourceType: attribute
+          target: ocsf.time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse ocsf.time
+          enabled: true
+          source: ocsf.time
+          samples:
+            - "2025-08-06T22:02:39.2294950Z"
+          grok:
+            supportRules: ""
+            matchRules: parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'"):ocsf.time}
+        - type: array-processor
+          name: Extract `key` from `additionalDetails` array
+          enabled: true
+          operation:
+            source: properties.additionalDetails
+            target: ocsf.http_header.name
+            filter: 'key:"User-Agent"'
+            valueToExtract: key
+            type: select
+        - type: array-processor
+          name: Extract `value` from `additionalDetails` array
+          enabled: true
+          operation:
+            source: properties.additionalDetails
+            target: ocsf.http_header.value
+            filter: 'key:"User-Agent"'
+            valueToExtract: value
+            type: select
+        - type: array-processor
+          name: Move attributes into http_headers array
+          enabled: true
+          operation:
+            source: ocsf.http_header
+            target: ocsf.http_request.http_headers
+            preserveSource: false
+            type: append
+        - type: attribute-remapper
+          name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - network.client.ip
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.resultReason` to `ocsf.status_code`
+          enabled: true
+          sources:
+            - properties.resultReason
+          sourceType: attribute
+          target: ocsf.status_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.status mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@evt.outcome:success"
+              name: "1"
+            - filter:
+                query: "@evt.outcome:failure"
+              name: "2"
+          target: ocsf.status
+        - type: category-processor
+          name: OCSF - ocsf.status mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@evt.outcome:success"
+              name: "Success"
+            - filter:
+                query: "@evt.outcome:failure"
+              name: "Failure"
+            - filter:
+                query: "*"
+              name: "99"
+          target: ocsf.status
+        - type: array-processor
+          name: Extract Role ID from `properties.targetResources` array
+          enabled: true
+          operation:
+            source: properties.targetResources
+            target: ocsf.policy.uid
+            filter: "type:Role"
+            valueToExtract: id
+            type: select
+        - type: array-processor
+          name: Move attributes into policies array
+          enabled: true
+          operation:
+            source: ocsf.policy
+            target: ocsf.policies
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Extract `userPrincipalName` from `properties.targetResources` array
+          enabled: true
+          operation:
+            source: properties.targetResources
+            target: ocsf.user.name
+            filter: "type:User"
+            valueToExtract: userPrincipalName
+            type: select
+        - type: attribute-remapper
+          name: Map `ocsf.user.name` to `ocsf.user.email_addr`
+          enabled: true
+          sources:
+            - ocsf.user.name
+          sourceType: attribute
+          target: ocsf.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.user.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.user.email_addr:*"
+              name: User
+            - filter:
+                query: "*"
+              name: System
+          target: ocsf.user.type
+        - type: category-processor
+          name: OCSF - ocsf.user.type_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.user.email_addr:*"
+              name: "1"
+            - filter:
+                query: "*"
+              name: "3"
+          target: ocsf.user.type_id
+        - type: array-processor
+          name: Extract `displayName` from `properties.targetResources` array
+          enabled: true
+          operation:
+            source: properties.targetResources
+            target: ocsf.user.name
+            filter: "type:ServicePrincipal"
+            valueToExtract: displayName
+            type: select
+        - type: array-processor
+          name: Extract User id from `properties.targetResources` array
+          enabled: true
+          operation:
+            source: properties.targetResources
+            target: ocsf.user.uid
+            filter: "type:User"
+            valueToExtract: id
+            type: select
+    - type: pipeline
       name: OCSF sub pipeline for class Authentication [3002]
       enabled: true
       ocsf:
@@ -815,348 +1151,12 @@ pipeline:
               name: Logon
           target: ocsf.activity_name
     - type: pipeline
-      name: OCSF sub pipeline for class Account Change [3001]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@evt.category:AuditLogs (@properties.category:(UserManagement OR ApplicationManagement) OR (@properties.category:RoleManagement AND @properties.targetResources.type:(ServicePrincipal OR User)))"
-      processors:
-        - type: string-builder-processor
-          name: Add category uid
-          enabled: true
-          template: "3"
-          target: ocsf.category_uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add category name
-          enabled: true
-          template: Identity & Access Management
-          target: ocsf.category_name
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add class uid
-          enabled: true
-          template: "3001"
-          target: ocsf.class_uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add class name
-          enabled: true
-          template: Account Change
-          target: ocsf.class_name
-          replaceMissing: false
-        - type: attribute-remapper
-          name: Map `evt.name` to `ocsf.activity_name`
-          enabled: true
-          sources:
-            - evt.name
-          sourceType: attribute
-          target: ocsf.activity_name
-          targetType: attribute
-          preserveSource: true
-        - type: category-processor
-          name: OCSF - activity_id mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@evt.name:("Add User" OR "Add service principal")'
-              name: "1"
-            - filter:
-                query: '@evt.name:"Enable Account"'
-              name: "2"
-            - filter:
-                query: '@evt.name:"Change user password"' #Todo: should this include self-service password resets?
-              name: "3"
-            - filter:
-                query: '@evt.name:"Reset password"'
-              name: "4"
-            - filter:
-                query: '@evt.name:"Disable account"'
-              name: "5"
-            - filter:
-                query: '@evt.name:(*Delete\ user OR "Hard delete service principal" OR "Remove service principal")'
-              name: "6"
-            - filter:
-                query: '@evt.name:Add\ *member\ to\ role*'
-              name: "7"
-            - filter:
-                query: '@evt.name:Remove\ *member\ from\ role'
-              name: "8"
-            - filter:
-                query: "*"
-              name: "99"
-          target: ocsf.activity_id
-        - type: category-processor
-          name: OCSF - activity_name mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@evt.name:"Add User"'
-              name: "Create"
-            - filter:
-                query: '@evt.name:"Enable Account"'
-              name: "Enable"
-            - filter:
-                query: '@evt.name:"Change user password"'
-              name: "Password Change"
-            - filter:
-                query: '@evt.name:"Reset password"'
-              name: "Password Reset"
-            - filter:
-                query: '@evt.name:"Disable account"'
-              name: "Disable"
-            - filter:
-                query: '@evt.name:"*Delete user"'
-              name: "Delete"
-            - filter:
-                query: '@evt.name:Add\ *member\ to\ role'
-              name: "Attach Policy"
-            - filter:
-                query: '@evt.name:Remove\ *member\ from\ role'
-              name: "Detach Policy"
-          target: ocsf.activity_name
-        - type: attribute-remapper
-          name: Map `usr.name`, `properties.initiatedBy.app.displayName`, `identity` to `ocsf.actor.user.name`
-          enabled: true
-          sources:
-            - usr.name
-            - properties.initiatedBy.app.displayName
-            - identity
-          sourceType: attribute
-          target: ocsf.actor.user.name
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `properties.initiatedBy.user.id`, `properties.initiatedBy.app.servicePrincipalId` to `ocsf.actor.user.uid`
-          enabled: true
-          sources:
-            - properties.initiatedBy.user.id
-            - properties.initiatedBy.app.servicePrincipalId
-          sourceType: attribute
-          target: ocsf.actor.user.uid
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `usr.id` to `ocsf.actor.user.email_addr`
-          enabled: true
-          sources:
-            - usr.id
-          sourceType: attribute
-          target: ocsf.actor.user.email_addr
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: category-processor
-          name: OCSF - ocsf.actor.user.type mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@properties.initiatedBy.user.id:* OR @usr.name:*"
-              name: User
-            - filter:
-                query: "@properties.initiatedBy.app.servicePrincipalId"
-              name: System
-          target: ocsf.actor.user.type
-        - type: category-processor
-          name: OCSF - ocsf.actor.user.type_id mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@properties.initiatedBy.user.id:*"
-              name: "1"
-            - filter:
-                query: "@properties.initiatedBy.app.servicePrincipalId"
-              name: "3"
-            - filter:
-                query: "@evt.category:*"
-              name: "99"
-          target: ocsf.actor.user.type_id
-        - type: attribute-remapper
-          name: Map `properties.correlationId` to `ocsf.actor.session.uid`
-          enabled: true
-          sources:
-            - properties.correlationId
-          sourceType: attribute
-          target: ocsf.actor.session.uid
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `time` to `ocsf.time`
-          enabled: true
-          sources:
-            - time
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: grok-parser
-          name: Parse ocsf.time
-          enabled: true
-          source: ocsf.time
-          samples:
-            - "2025-08-06T22:02:39.2294950Z"
-          grok:
-            supportRules: ""
-            matchRules: parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'"):ocsf.time}
-        - type: array-processor
-          name: Extract `key` from `additionalDetails` array
-          enabled: true
-          operation:
-            source: properties.additionalDetails
-            target: ocsf.http_header.name
-            filter: 'key:"User-Agent"'
-            valueToExtract: key
-            type: select
-        - type: array-processor
-          name: Extract `value` from `additionalDetails` array
-          enabled: true
-          operation:
-            source: properties.additionalDetails
-            target: ocsf.http_header.value
-            filter: 'key:"User-Agent"'
-            valueToExtract: value
-            type: select
-        - type: array-processor
-          name: Move attributes into http_headers array
-          enabled: true
-          operation:
-            source: ocsf.http_header
-            target: ocsf.http_request.http_headers
-            preserveSource: false
-            type: append
-        - type: attribute-remapper
-          name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
-          enabled: true
-          sources:
-            - network.client.ip
-          sourceType: attribute
-          target: ocsf.src_endpoint.ip
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `properties.resultReason` to `ocsf.status_code`
-          enabled: true
-          sources:
-            - properties.resultReason
-          sourceType: attribute
-          target: ocsf.status_code
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: category-processor
-          name: OCSF - ocsf.status mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@evt.outcome:success"
-              name: "1"
-            - filter:
-                query: "@evt.outcome:failure"
-              name: "2"
-          target: ocsf.status
-        - type: category-processor
-          name: OCSF - ocsf.status mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@evt.outcome:success"
-              name: "Success"
-            - filter:
-                query: "@evt.outcome:failure"
-              name: "Failure"
-            - filter:
-                query: "*"
-              name: "99"
-          target: ocsf.status
-        - type: array-processor
-          name: Extract Role ID from `properties.targetResources` array
-          enabled: true
-          operation:
-            source: properties.targetResources
-            target: ocsf.policy.uid
-            filter: "type:Role"
-            valueToExtract: id
-            type: select
-        - type: array-processor
-          name: Move attributes into policies array
-          enabled: true
-          operation:
-            source: ocsf.policy
-            target: ocsf.policies
-            preserveSource: false
-            type: append
-        - type: array-processor
-          name: Extract `userPrincipalName` from `properties.targetResources` array
-          enabled: true
-          operation:
-            source: properties.targetResources
-            target: ocsf.user.name
-            filter: "type:User"
-            valueToExtract: userPrincipalName
-            type: select
-        - type: attribute-remapper
-          name: Map `ocsf.user.name` to `ocsf.user.email_addr`
-          enabled: true
-          sources:
-            - ocsf.user.name
-          sourceType: attribute
-          target: ocsf.user.email_addr
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: category-processor
-          name: OCSF - ocsf.user.type mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@ocsf.user.email_addr:*"
-              name: User
-            - filter:
-                query: "*"
-              name: System
-          target: ocsf.user.type
-        - type: category-processor
-          name: OCSF - ocsf.user.type_id mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@ocsf.user.email_addr:*"
-              name: "1"
-            - filter:
-                query: "*"
-              name: "3"
-          target: ocsf.user.type_id
-        - type: array-processor
-          name: Extract `displayName` from `properties.targetResources` array
-          enabled: true
-          operation:
-            source: properties.targetResources
-            target: ocsf.user.name
-            filter: "type:ServicePrincipal"
-            valueToExtract: displayName
-            type: select
-        - type: array-processor
-          name: Extract User id from `properties.targetResources` array
-          enabled: true
-          operation:
-            source: properties.targetResources
-            target: ocsf.user.uid
-            filter: "type:User"
-            valueToExtract: id
-            type: select
-    - type: pipeline
       name: OCSF sub pipeline for class Group Management [3006]
       enabled: true
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.category:AuditLogs (@properties.category:GroupManagement OR (@properties.category:RoleManagement AND @properties.targetResources.type:Group))" 
+        query: "@evt.category:AuditLogs (@properties.category:GroupManagement OR (@properties.category:RoleManagement AND @properties.targetResources.type:Group))"
       processors:
         - type: string-builder-processor
           name: Add category uid
@@ -1201,8 +1201,8 @@ pipeline:
             - filter:
                 query: '@evt.name:Remove\ *member\ from\ role'
               name: "2"
-            - filter: 
-                query: '@evt.name:"Add member to group"' 
+            - filter:
+                query: '@evt.name:"Add member to group"'
               name: "3"
             - filter:
                 query: '@evt.name:"Remove member from group"'
@@ -1227,8 +1227,8 @@ pipeline:
             - filter:
                 query: '@evt.name:Remove\ *member\ from\ role'
               name: "Revoke Privileges"
-            - filter: 
-                query: '@evt.name:"Add member to group"' 
+            - filter:
+                query: '@evt.name:"Add member to group"'
               name: "Add User"
             - filter:
                 query: '@evt.name:"Remove member from group"'
@@ -1465,7 +1465,301 @@ pipeline:
             target: ocsf.group.uid
             filter: "type:Group"
             valueToExtract: id
-            type: select    
+            type: select
+    - type: pipeline
+      name: OCSF sub pipeline for class API Activity [6003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@evt.category:MicrosoftGraphActivityLogs"
+      processors:
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "6"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: Application Activity
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "6003"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: API Activity
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `properties.requestMethod` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - properties.requestMethod
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+        - type: category-processor
+          name: OCSF - activity_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.requestMethod:POST"
+              name: "1"
+            - filter:
+                query: "@properties.requestMethod:GET"
+              name: "2"
+            - filter:
+                query: "@properties.requestMethod:PATCH"
+              name: "3"
+            - filter:
+                query: "@properties.requestMethod:DELETE"
+              name: "4"
+            - filter:
+                query: "@properties.requestMethod:*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: category-processor
+          name: OCSF - activity_name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.requestMethod:POST"
+              name: "Assign Privileges"
+            - filter:
+                query: "@properties.requestMethod:GET"
+              name: "Revoke Privileges"
+            - filter:
+                query: "@properties.requestMethod:PATCH"
+              name: "Add User"
+            - filter:
+                query: "@properties.requestMethod:DELETE"
+              name: "Remove User"
+          target: ocsf.activity_name
+        - type: attribute-remapper
+          name: Map `properties.signInActivityId` to `ocsf.actor.session.uid`
+          enabled: true
+          sources:
+            - properties.signInActivityId
+          sourceType: attribute
+          target: ocsf.actor.session.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.UserPrincipalObjectID` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - properties.UserPrincipalObjectID
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.servicePrincipalId:*"
+              name: System
+            - filter:
+                query: "@properties.UserPrincipalObjectIDL*"
+              name: User
+          target: ocsf.actor.user.type
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.servicePrincipalId:*"
+              name: "3"
+            - filter:
+                query: "@properties.UserPrincipalObjectID:*"
+              name: "1"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `properties.requestMethod` to `ocsf.api.operation`
+          enabled: true
+          sources:
+            - properties.requestMethod
+          sourceType: attribute
+          target: ocsf.api.operation
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `operationVersion` to `ocsf.api.version`
+          enabled: true
+          sources:
+            - operationVersion
+          sourceType: attribute
+          target: ocsf.api.version
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.ipAddress` to `ocsf.src_endpoint.ip`
+          enabled: true
+          sources:
+            - properties.ipAddress
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+
+        - type: string-builder-processor
+          name: Add dst_endpoint.hostname
+          enabled: true
+          template: "graph.microsoft.com"
+          target: ocsf.dst_endpoint.hostname
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add dst_endpoint.name
+          enabled: true
+          template: "Microsoft Graph API"
+          target: ocsf.dst_endpoint.name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `time` to `ocsf.time`
+          enabled: true
+          sources:
+            - time
+          sourceType: attribute
+          target: ocsf.time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse ocsf.time
+          enabled: true
+          source: ocsf.time
+          samples:
+            - "2025-08-06T22:02:39.2294950Z"
+          grok:
+            supportRules: ""
+            matchRules: parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'"):ocsf.time}
+        - type: attribute-remapper
+          name: Map `properties.durationMs` to `ocsf.duration`
+          enabled: true
+          sources:
+            - properties.durationMs
+          sourceType: attribute
+          target: ocsf.duration
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `level` to `ocsf.severity`
+          enabled: true
+          sources:
+            - level
+          sourceType: attribute
+          target: ocsf.severity
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - severity_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@level:Informational"
+              name: "1"
+            - filter:
+                query: "@level:Low"
+              name: "2"
+            - filter:
+                query: "@level:Medium"
+              name: "3"
+            - filter:
+                query: "@level:High"
+              name: "4"
+            - filter:
+                query: "@level:*"
+              name: "99"
+          target: ocsf.severity_id
+        - type: attribute-remapper
+          name: Map `resultSignature` to `ocsf.status_code`
+          enabled: true
+          sources:
+            - resultSignature
+          sourceType: attribute
+          target: ocsf.status_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `resultSignature` to `ocsf.status`
+          enabled: true
+          sources:
+            - resultSignature
+          sourceType: attribute
+          target: ocsf.status
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - status_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.responseStatusCode:[200 TO 299]"
+              name: "1"
+            - filter:
+                query: "@properties.responseStatusCode:[400 TO 599]"
+              name: "2"
+            - filter:
+                query: "@properties.responseStatusCode:*"
+              name: "99"
+          target: ocsf.status_id
+        - type: category-processor
+          name: OCSF - status mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.responseStatusCode:[200 TO 299]"
+              name: "Success"
+            - filter:
+                query: "@properties.responseStatusCode:[400 TO 599]"
+              name: "Failure"
+            - filter:
+                query: "@properties.responseStatusCode:*"
+              name: "99"
+          target: ocsf.status
+        - type: string-builder-processor
+          name: Add User-Agent header
+          enabled: true
+          template: "User-Agent"
+          target: ocsf.http_header.name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `http.useragent` to `ocsf.http_header.value`
+          enabled: true
+          sources:
+            - http.useragent
+          sourceType: attribute
+          target: ocsf.http_header.value
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: array-processor
+          name: Move attributes into http_headers array
+          enabled: true
+          operation:
+            source: ocsf.http_header
+            target: ocsf.http_request.http_headers
+            preserveSource: false
+            type: append
     - type: pipeline
       name: OCSF post transformations
       enabled: true
@@ -1547,7 +1841,7 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
-        - type: attribute-remapper 
+        - type: attribute-remapper
           name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
           enabled: true
           sources:
