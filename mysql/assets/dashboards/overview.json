@@ -1,150 +1,587 @@
 {
     "title": "MySQL - Overview",
     "description": "This dashboard brings together key metrics from your MySQL servers so you can spot excessive numbers of [slow queries](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/#query-performance) and quickly identify any resource constraints that may be impacting performance. Further reading on MySQL monitoring:\n\n- [Datadog's guide to key metrics for MySQL](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/)\n\n- [How to collect MySQL metrics using built-in tools](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/)\n\n- [How to monitor MySQL using Datadog](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/)\n\n- [Datadog's MySQL integration docs](https://docs.datadoghq.com/integrations/mysql/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
-    "layout_type": "ordered",
-    "template_variables": [
-        {
-            "default": "*",
-            "prefix": null,
-            "name": "scope"
-        }
-    ],
     "widgets": [
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "sum:mysql.net.connections{$scope}"
-                    },
-                    {
-                        "q": "sum:mysql.net.max_connections{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "MySQL connections"
+      {
+        "id": 6275378000844597,
+        "definition": {
+          "title": "MySQL connections",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:mysql.net.connections{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            },
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:mysql.net.max_connections{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ]
             }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "sum:mysql.innodb.data_reads{$scope}"
-                    },
-                    {
-                        "q": "sum:mysql.innodb.data_writes{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "MySQL reads and writes (per sec)"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "sum:mysql.innodb.os_log_fsyncs{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "MySQL fsync op count (per sec)"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "sum:mysql.performance.slow_queries{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "MySQL slow queries"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "rate(sum:mysql.performance.table_locks_waited{$scope})"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "MySQL locking rate (per sec)"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "mysql.performance.user_time{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "MySQL CPU time (per sec)"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "system.load.1{$scope}"
-                    },
-                    {
-                        "q": "system.load.5{$scope}"
-                    },
-                    {
-                        "q": "system.load.15{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "System load"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "CPU usage (%)"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "max:system.cpu.iowait{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "I/O wait (%)"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "System memory"
-            }
-        },
-        {
-            "definition": {
-                "requests": [
-                    {
-                        "q": "sum:system.net.bytes_rcvd{$scope}"
-                    },
-                    {
-                        "q": "sum:system.net.bytes_sent{$scope}"
-                    }
-                ],
-                "type": "timeseries",
-                "title": "Network traffic (per sec)"
-            }
+          ]
         }
-    ]
-}
+      },
+      {
+        "id": 7019698073009104,
+        "definition": {
+          "title": "MySQL reads and writes (per sec)",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:mysql.innodb.data_reads{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            },
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "avg:mysql.innodb.data_writes{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 5054243947202682,
+        "definition": {
+          "title": "MySQL fsync op count (per sec)",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:mysql.innodb.os_log_fsyncs{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 8679042482146834,
+        "definition": {
+          "title": "MySQL slow queries",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:mysql.performance.slow_queries{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 8940192157313818,
+        "definition": {
+          "title": "MySQL locking rate (per sec)",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:mysql.performance.table_locks_waited{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "rate(query1)"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 7211572018463595,
+        "definition": {
+          "title": "MySQL CPU time (per sec)",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "mysql.performance.user_time{$scope}",
+                  "semantic_mode": "native"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 3387110261451077,
+        "definition": {
+          "title": "System load",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "system.load.1{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            },
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "system.load.5{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            },
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "system.load.15{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 5930995066864482,
+        "definition": {
+          "title": "CPU usage (%)",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "system.cpu.idle{$scope}",
+                  "semantic_mode": "combined"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query2",
+                  "query": "system.cpu.system{$scope}",
+                  "semantic_mode": "combined"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query3",
+                  "query": "system.cpu.iowait{$scope}",
+                  "semantic_mode": "combined"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query4",
+                  "query": "system.cpu.user{$scope}",
+                  "semantic_mode": "combined"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query5",
+                  "query": "system.cpu.stolen{$scope}",
+                  "semantic_mode": "combined"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query6",
+                  "query": "system.cpu.guest{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                },
+                {
+                  "formula": "query2"
+                },
+                {
+                  "formula": "query3"
+                },
+                {
+                  "formula": "query4"
+                },
+                {
+                  "formula": "query5"
+                },
+                {
+                  "formula": "query6"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 354700245646769,
+        "definition": {
+          "title": "I/O wait (%)",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "max:system.cpu.iowait{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 1786796664554390,
+        "definition": {
+          "title": "System memory",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:system.mem.usable{$scope}",
+                  "semantic_mode": "combined"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query2",
+                  "query": "sum:system.mem.total{$scope}",
+                  "semantic_mode": "combined"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                },
+                {
+                  "formula": "query2 - query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 6896116482972023,
+        "definition": {
+          "title": "Network traffic (per sec)",
+          "show_legend": true,
+          "legend_layout": "auto",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max",
+            "value",
+            "sum"
+          ],
+          "type": "timeseries",
+          "requests": [
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:system.net.bytes_rcvd{$scope}"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            },
+            {
+              "response_format": "timeseries",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:system.net.bytes_sent{$scope}"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ],
+              "style": {
+                "palette": "dog_classic",
+                "line_type": "solid",
+                "line_width": "normal"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "template_variables": [
+      {
+        "name": "scope",
+        "available_values": [],
+        "default": "*"
+      }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "auto"
+  }

@@ -36,6 +36,12 @@
       "Category::Log Collection",
       "Submitted Data Type::Logs",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-adyen-payments/"
+      }
     ]
   },
   "assets": {

@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: weblogic
 metric_id: weblogic
 backend_only: false

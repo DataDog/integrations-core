@@ -301,20 +301,20 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_extension_query
         if elapsed_s >= self.pg_extensions_collection_interval and self._collect_extensions_enabled:
             self._extensions_cached = self._collect_postgres_extensions()
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_extension",
-            "collection_interval": self.collection_interval,
-            "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._check.cloud_metadata,
-            "metadata": self._extensions_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_extension",
+                "collection_interval": self.pg_extensions_collection_interval,
+                "dbms_version": payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._check.cloud_metadata,
+                "metadata": self._extensions_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):
@@ -336,20 +336,20 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_settings",
-            "collection_interval": self.collection_interval,
-            "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._check.cloud_metadata,
-            "metadata": self._pg_settings_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_settings",
+                "collection_interval": self.pg_settings_collection_interval,
+                "dbms_version": payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._check.cloud_metadata,
+                "metadata": self._pg_settings_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
         if not self._collect_schemas_enabled:
             self._log.debug("Skipping schema collection because it is disabled")

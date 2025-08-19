@@ -1,1 +1,0 @@
-Fixed a bug where the AWS configuration was overwritten for the Postgres integration

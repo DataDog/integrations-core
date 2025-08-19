@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: ambari
 metric_id: ambari
 backend_only: false

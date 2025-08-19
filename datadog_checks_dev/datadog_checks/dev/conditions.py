@@ -5,7 +5,7 @@ import re
 import socket
 import time
 from contextlib import closing
-from typing import Callable, Dict, List, Tuple, Union  # noqa: F401
+from typing import Any, Callable, Dict, List, Tuple, Union  # noqa: F401
 from urllib.request import urlopen
 
 from .errors import RetryError
@@ -17,11 +17,11 @@ from .utils import file_exists
 class WaitFor(LazyFunction):
     def __init__(
         self,
-        func,  # type: Callable
-        attempts=60,  # type: int
-        wait=1,  # type: int
-        args=(),  # type: Tuple
-        kwargs=None,  # type: Dict
+        func: Callable,
+        attempts: int = 60,
+        wait: int = 1,
+        args: Tuple = (),
+        kwargs: Dict[str, Any] | None = None,
     ):
         if kwargs is None:
             kwargs = {}
@@ -61,10 +61,10 @@ class WaitFor(LazyFunction):
 class CheckEndpoints(LazyFunction):
     def __init__(
         self,
-        endpoints,  # type: Union[str, List[str]]
-        timeout=1,  # type: int
-        attempts=60,  # type: int
-        wait=1,  # type: int
+        endpoints: Union[str, List[str]],
+        timeout: int = 1,
+        attempts: int = 60,
+        wait: int = 1,
         send_request=None,
     ):
         self.endpoints = [endpoints] if isinstance(endpoints, str) else endpoints
@@ -101,13 +101,13 @@ class CheckEndpoints(LazyFunction):
 class CheckCommandOutput(LazyFunction):
     def __init__(
         self,
-        command,  # type: Union[str, List[str]]
-        patterns,  # type: Union[str, List[str]]
-        matches=1,  # type: Union[str, int]  #Either 'all' or a number
-        stdout=True,  # type: bool
-        stderr=True,  # type: bool
-        attempts=60,  # type: int
-        wait=1,  # type: int
+        command: Union[str, List[str]],
+        patterns: Union[str, List[str]],
+        matches: Union[str, int] = 1,  # Either 'all' or a number
+        stdout: bool = True,
+        stderr: bool = True,
+        attempts: int = 60,
+        wait: int = 1,
     ):
         """
         Checks if the provided patterns are present in the output of a command
@@ -182,13 +182,14 @@ class CheckCommandOutput(LazyFunction):
 class CheckDockerLogs(CheckCommandOutput):
     def __init__(
         self,
-        identifier,  # type: str
-        patterns,  # type: Union[str, List[str]]
-        matches=1,  # type: Union[str, int]
-        stdout=True,  # type: bool
-        stderr=True,  # type: bool
-        attempts=60,  # type: int
-        wait=1,  # type: int
+        identifier: str,
+        patterns: Union[str, List[str]],
+        matches: Union[str, int] = 1,
+        stdout: bool = True,
+        stderr: bool = True,
+        attempts: int = 60,
+        wait: int = 1,
+        service: str | None = None,
     ):
         """
         Checks if the provided patterns are present in docker logs
@@ -200,9 +201,12 @@ class CheckDockerLogs(CheckCommandOutput):
         :param stderr: Whether to search for the provided patterns in stderr
         :param attempts: How many times to try searching for the patterns
         :param wait: How long, in seconds, to wait between attempts
+        :param service: The service name to check the logs for when using docker compose
         """
         if file_exists(identifier):
             command = ['docker', 'compose', '-f', identifier, 'logs']
+            if service:
+                command.append(service)
         else:
             command = ['docker', 'logs', identifier]
 

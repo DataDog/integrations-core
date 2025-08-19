@@ -40,6 +40,14 @@ files:
       value:
         example: false
         type: boolean
+    - name: max_filegauge_count
+      description: |
+        The maximum number of files to track as gauges. The default is 20. This data is collected by recursively
+        traversing the directory and its subdirectories. Increasing this value may significantly increase host
+        resource usage (CPU and memory). This is only used if `filegauges` is set to `true`.
+      value:
+        example: 20
+        type: integer
     - name: pattern
       description: |
         the `fnmatch` pattern to use when reading the "directory"'s files.

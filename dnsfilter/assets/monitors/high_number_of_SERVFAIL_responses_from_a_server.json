@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2025-05-27",
+	"last_updated_at": "2025-05-27",
+	"title": "High number of SERVFAIL responses from a server",
+	"description": "This monitor alerts on high SERVFAIL DNS responses, indicating the DNS server failed to complete requests. It helps prevent user access issues, service disruptions, and degraded network performance.",
+	"definition": {
+		"id": 173190960,
+		"name": "High number of SERVFAIL responses from a server",
+		"type": "log alert",
+		"query": "logs(\"source:dnsfilter service:traffic-logs @dns.flags.rcode:SERVFAIL\").index(\"*\").rollup(\"count\").by(\"@server_id\").last(\"1d\") > 5",
+		"message": "{{#is_alert}} \nA SERVFAIL response in DNSFilter indicates that the DNS server failed to complete the request, which may prevent users from accessing websites or online services, leading to potential disruptions in connectivity.\n\nA high number of SERVFAIL responses have been detected from one or more DNS servers, which may indicate an upstream DNS issue, server misconfiguration, or connectivity problem. This issue requires immediate attention to ensure DNS resolution is functioning correctly and to avoid user disruption or degraded network performance.\n\nCurrent Threshold: **{{value}}**\nThreshold: {{threshold}}\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"integration:dnsfilter"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 5
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:dnsfilter"
+	]
+}

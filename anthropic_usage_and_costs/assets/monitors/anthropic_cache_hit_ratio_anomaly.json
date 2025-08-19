@@ -1,0 +1,42 @@
+{
+	"version": 2,
+	"created_at": "2025-08-17",
+	"last_updated_at": "2025-08-17",
+	"title": "Anthropic Cache/Hit Ratio Is Abnormally Low",
+	"description": "The token cache ratio is too low",
+	"definition": {
+		"name": "Anthropic Cache/Hit Ratio Is Abnormally Low",
+		"type": "query alert",
+		"query": "avg(last_1d):anomalies((sum:anthropic.messages.cache_read_input_tokens{*} by {workspace_name,org_name,model}.as_count() / (sum:anthropic.messages.cache_read_input_tokens{*} by {workspace_name,org_name,model}.as_count() + sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{*} by {workspace_name,org_name,model}.as_count() + sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{*} by {workspace_name,org_name,model}.as_count())) * 100, 'agile', 3, direction='below', interval=300, alert_window='last_1h', timezone='utc', count_default_zero='true', seasonality='hourly') >= 1",
+		"message": "## Anthropic Cache Hit Ratio Anomaly Alert\n\n{{#is_alert}}\n**ALERT**: Cache hit ratio is abnormally low for Anthropic API usage.\n\n**Current Status**: The cache effectiveness (reads vs total cache operations) has dropped significantly below expected levels.\n\n**Impact**:\n- Increased costs due to reduced cache utilization (cache tokens cost 50% less)\n- Higher latency for requests that should be cached\n- Potential performance degradation for users\n\n**Potential Causes**:\n- Changes in prompt patterns reducing cache reusability\n- Incorrect cache duration selection (5m vs 1h)\n- High variability in prompt prefixes preventing cache hits\n- Recent code changes affecting cache key generation\n- Cache expiration issues or configuration problems\n\n**Recommended Actions**:\n1. Analyze recent prompt pattern changes\n2. Verify cache configuration and TTL settings\n3. Check if prompt templates are being used consistently\n4. Consider adjusting cache duration based on usage patterns\n5. Review any recent deployments that might affect caching\n\n**Workspace**: {{workspace_name.name}}\n{{/is_alert}}\n\n{{#is_recovery}}\n**RECOVERED**: Cache hit ratio has returned to normal levels.\n{{/is_recovery}}",
+		"tags": [
+			"integration:anthropic-usage-and-costs",
+			"alert_type:anomaly",
+			"optimization:cache"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1,
+				"critical_recovery": 0
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"renotify_interval": 0,
+			"threshold_windows": {
+				"trigger_window": "last_1h",
+				"recovery_window": "last_15m"
+			},
+			"timeout_h": 0,
+			"include_tags": true,
+			"escalation_message": "Cache hit ratio remains abnormally low. This is causing increased costs. Please investigate caching strategy.",
+			"evaluation_delay": 0,
+			"avalanche_window": 10,
+			"on_missing_data": "show_no_data",
+			"new_group_delay": 0
+		},
+		"priority": 2
+	},
+	"tags": [
+		"integration:anthropic-usage-and-costs"
+	]
+}

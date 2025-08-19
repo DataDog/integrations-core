@@ -1,3 +1,5 @@
+# bypass-global-grok-parser-rules-checks
+# bypass-global-missing-date-remapper-checks
 id: ibm_db2
 metric_id: ibm-db2
 backend_only: false
