@@ -8,7 +8,6 @@ on:
       # List of files/paths that should trigger the run. The intention is to avoid running all tests if the commit only includes changes on assets or README
     - '*/datadog_checks/**'
     - '*/tests/**'
-    - 'ddev/src/**'
     - 'ddev'
     - 'datadog_check_base'
     - 'datadog_checks_dev'
