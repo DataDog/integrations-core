@@ -173,7 +173,7 @@ def test_metadata_metrics(aggregator, dd_run_check, mock_performance_objects, mo
     """Test that check respects metadata definitions."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
     # apply_pdh_patch(mocker)
-    mock_service_states({service: True for service in MOCK_INSTANCES})
+    mock_service_states(dict.fromkeys(MOCK_INSTANCES, True))
 
     check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
     dd_run_check(check)

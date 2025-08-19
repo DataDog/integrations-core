@@ -156,18 +156,6 @@ instances:
     #
     # empty_default_hostname: false
 
-    ## @param service_check_enabled - boolean - optional - default: true
-    ## Enable/disable service detection. When enabled, the check will determine if
-    ## Active Directory services are running and only collect relevant metrics.
-    #
-    # service_check_enabled: true
-
-    ## @param force_all_metrics - boolean - optional - default: false
-    ## Force collection of all metrics regardless of service state. When true,
-    ## metrics will be collected even if the corresponding services are not running.
-    #
-    # force_all_metrics: false
-
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
