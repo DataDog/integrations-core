@@ -180,7 +180,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     '''
     These files are excluded from the wheel in the agent build:
     https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
-    In order to have more accurate results, this files are excluded when computing the size of the dependencies while
+    In order to have more accurate results, these files are excluded when computing the size of the dependencies while
     the wheels still include them.
     '''
     files_to_remove_path = Path(__file__).parent / "files_to_remove.toml"
