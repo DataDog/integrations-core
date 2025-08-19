@@ -44,6 +44,7 @@ jobs:
           git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
           echo "sha=$base" >> $GITHUB_OUTPUT
+          echo "base=$base" >> $GITHUB_STEP_SUMMARY
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
         env:
