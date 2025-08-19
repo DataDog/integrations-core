@@ -28,6 +28,7 @@ jobs:
       # Options
       minimum-base-package: true
       test-py2: true
+      pytest-args: '-m "not flaky"'
     secrets: inherit
 
   submit-traces:

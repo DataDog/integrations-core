@@ -1649,7 +1649,7 @@
                             "type": "hostmap",
                             "requests": {
                                 "fill": {
-                                    "q": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                    "q": "sum:kubernetes.cpu.usage.total{$scope,$cluster,$label,$node} by {host}"
                                 }
                             },
                             "no_metric_hosts": false,
@@ -1657,9 +1657,7 @@
                             "scope": [
                                 "$scope",
                                 "$node",
-                                "$label",
-                                "$kube_deployment",
-                                "$kube_namespace"
+                                "$label"
                             ],
                             "custom_links": [],
                             "style": {
@@ -1766,7 +1764,7 @@
                             "type": "hostmap",
                             "requests": {
                                 "fill": {
-                                    "q": "sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                    "q": "sum:kubernetes.memory.usage{$scope,$cluster,$label,$node} by {host}"
                                 }
                             },
                             "no_metric_hosts": false,
@@ -1774,9 +1772,7 @@
                             "scope": [
                                 "$scope",
                                 "$node",
-                                "$label",
-                                "$kube_deployment",
-                                "$kube_namespace"
+                                "$label"
                             ],
                             "custom_links": [],
                             "style": {

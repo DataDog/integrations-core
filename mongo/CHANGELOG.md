@@ -12,7 +12,7 @@
 
 * Fix incorrect UTC timestamp parsing for system.profile slow queries when the agent runs in non-UTC timezones. ([#20834](https://github.com/DataDog/integrations-core/pull/20834))
 
-## 10.2.1 / 2025-07-21
+## 10.2.1 / 2025-07-21 / Agent 7.69.0
 
 ***Fixed***:
 
