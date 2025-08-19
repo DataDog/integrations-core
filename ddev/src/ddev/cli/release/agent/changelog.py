@@ -23,6 +23,7 @@ DISPLAY_NAME_MAPPING = {
     'Mesos': 'Mesos Slave'
 }
 
+
 @click.command(
     short_help="Provide a list of updated checks on a given Datadog Agent version, in changelog form",
 )
