@@ -45,7 +45,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         # Caching configuration
         self._service_cache = {}
         self._config_cache = None  # Cache the built configuration
-        
+
         # Validate and set cache duration
         cache_duration = instance.get('service_cache_duration', 300)
         try:
@@ -60,13 +60,12 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
         except (TypeError, ValueError):
             self.log.warning("Invalid service_cache_duration value, using default of 300 seconds")
             cache_duration = 300
-        
+
         self._cache_duration = cache_duration
         self._last_service_check = 0
 
         # Platform detection
         self._is_windows = platform.system() == 'Windows'
-
 
     def get_default_config(self):
         """Build metrics configuration based on service availability."""
@@ -101,11 +100,11 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
             if current_time - self._last_service_check < self._cache_duration:
                 if self._config_cache is not None:
                     return self._config_cache
-            
+
             self.log.debug("Refreshing service state cache")
             self._refresh_service_cache()
             self._last_service_check = current_time
-            
+
             # Build and cache the new config
             self._config_cache = self._build_config_from_cache(METRICS_CONFIG)
             return self._config_cache
@@ -222,7 +221,7 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
                     self.log.debug("Service cache expired after %.1fs - refreshing", now - self._last_service_check)
                     self._refresh_service_cache()
                     self._last_service_check = now
-                    
+
                     # Clear cached config
                     self._config_cache = None
 

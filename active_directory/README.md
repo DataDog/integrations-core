@@ -32,7 +32,7 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
-The integration collects metrics from the following Windows Performance Objects:
+The integration collects metrics from the following Windows performance objects:
 
 - **NTDS**: Core Active Directory metrics including replication, LDAP operations, and directory service threads
 - **Netlogon**: Authentication performance metrics including semaphore statistics for monitoring authentication bottlenecks
@@ -51,13 +51,13 @@ The Netlogon metrics help monitor authentication performance and identify bottle
 - `active_directory.netlogon.semaphore_timeouts`: Number of timeouts waiting for the semaphore
 - `active_directory.netlogon.semaphore_hold_time`: Average time (in seconds) the semaphore is held
 
-These metrics are particularly useful for monitoring authentication load from network access control (NAC) devices, WiFi authentication, and other authentication-heavy scenarios.
+These metrics are particularly useful for monitoring authentication load from network access control (NAC) devices, Wi-Fi authentication, and other authentication-heavy scenarios.
 
 ##### Use Cases
 
 The Netlogon and Security metrics help address several monitoring scenarios:
 
-- **Monitor authentication bottlenecks**: Identify when authentication requests are queuing up, particularly from Cisco ISE NAC devices or high-volume WiFi authentication
+- **Monitor authentication bottlenecks**: Identify when authentication requests are queuing up, particularly from Cisco ISE NAC devices or high-volume Wi-Fi authentication
 - **Track authentication processing times**: Use `semaphore_hold_time` to determine if authentication is taking too long
 - **Identify MaxConcurrentApi tuning needs**: High `semaphore_waiters` values indicate the need to adjust the MaxConcurrentApi registry setting
 - **Monitor authentication protocol usage**: Track the ratio of NTLM vs Kerberos authentications to ensure proper protocol usage
@@ -67,8 +67,8 @@ The Netlogon and Security metrics help address several monitoring scenarios:
 
 The integration automatically detects which Windows services are running and only collects metrics for available services. This prevents errors when optional roles like DHCP Server or DFS Replication are not installed. You can control this behavior with:
 
-- `service_check_enabled`: Enable/disable service detection (default: true)
-- `force_all_metrics`: Force collection of all metrics regardless of service state (default: false)
+- `service_check_enabled`: Enable/disable service detection (default: `true`)
+- `force_all_metrics`: Force collection of all metrics regardless of service state (default: `false`)
 
 #### Additional Metrics
 
