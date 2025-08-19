@@ -194,11 +194,15 @@ def display_diffs_to_html(diffs, platform, python_version):
     print(text)
 
 
+# def send_to_datadog(diffs, platform, python_version, api_key):
+
+
 def main():
     parser = argparse.ArgumentParser(prog='gha_diff', allow_abbrev=False)
     parser.add_argument('--prev-sizes', required=True)
     parser.add_argument('--curr-sizes', required=True)
     parser.add_argument('--output', required=False)  # path to a file to export the diffs to
+    parser.add_argument('--send-to-datadog', action='store_true')
     args = parser.parse_args()
 
     with open(args.prev_sizes, "r") as f:
@@ -208,6 +212,8 @@ def main():
         curr_sizes = json.load(f)
 
     diffs, platform, python_version = calculate_diffs(prev_sizes, curr_sizes)
+
+    # if args.send_to_datadog:
 
     display_diffs_to_html(diffs, platform, python_version)
 

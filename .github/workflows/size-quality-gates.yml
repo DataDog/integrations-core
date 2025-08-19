@@ -82,12 +82,17 @@ jobs:
         run: |
           mv status_compressed_${{ inputs.platform }}.json status_compressed_${{ inputs.platform }}_curr.json
           
-      - name: Calculate diffs
+      - name: Calculate diffs 
         run: |
+          send_to_datadog = ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch }}
           MERGE_BASE_SHORT=$(echo "${{ steps.merge_base.outputs.sha }}" | cut -c1-7)
           echo "Comparing with base [($MERGE_BASE_SHORT)](https://github.com/${{ github.repository }}/commit/${{ steps.merge_base.outputs.sha }})" \
             >> size_diffs_output.txt
-          python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json > size_diffs_output.txt
+          if [ "$send_to_datadog" = true ]; then
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json > size_diffs_output.txt
+          else
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json > size_diffs_output.txt
+          fi
           cat size_diffs_output.txt >> $GITHUB_STEP_SUMMARY
 
       - name: Upload diffs to GitHub
@@ -103,7 +108,7 @@ jobs:
           name: diffs_${{ inputs.platform }}.json
           path: diffs_${{ inputs.platform }}.json
 
-
+     
 
 
 
