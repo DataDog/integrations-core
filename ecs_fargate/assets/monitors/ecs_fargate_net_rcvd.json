@@ -8,8 +8,8 @@
         "name": "[ECS Fargate] Network received error rate is high for service: {{ecs_service.name}} in cluster: {{ecs_cluster.name}}",
         "type": "query alert",
         "query": "sum(last_5m):sum:ecs.fargate.net.rcvd_errors{*} by {ecs_service,ecs_cluster} / sum:ecs.fargate.net.bytes_rcvd{*} by {ecs_service,ecs_cluster} * 100 > 5",
-        "message": "ECS Fargate service {{ecs_service.name}} in cluster {{ecs_cluster.name}} has a network received error rate of {{value}}%, which exceeds the 5% threshold.\n\nThis indicates potential network connectivity issues.\n",
-        "tags": [],
+        "message": "ECS Fargate service {{ecs_service.name}} in cluster {{ecs_cluster.name}} has a network received error rate of {{value}}%, which exceeds the 5% threshold.\n\nThis indicates potential network connectivity issues. To investigate further, view the affected service in the [ECS Explorer](/orchestration/explorer/ecsService?query=ecs_service:{{ecs_service.name}}+ecs_cluster:{{ecs_cluster.name}})",
+        "tags": ["integration:ecs_fargate"],
         "options": {
             "thresholds": {
                 "critical": 5

@@ -8,8 +8,8 @@
         "name": "[ECS Fargate] AWS ECS Task CPU utilization is high",
         "type": "query alert",
         "query": "avg(last_15m):sum:ecs.fargate.cpu.usage{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.cpu.task.limit{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80",
-        "message": "{{#is_warning}}\nAWS ECS Task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) is approaching CPU Utilization threshold\n{{/is_warning}}\n\n{{#is_alert}}\nAWS ECS Task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) has crossed CPU Utilization threshold\n{{/is_alert}}",
-        "tags": [],
+        "message": "{{#is_warning}}\nAWS ECS Task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) is approaching CPU Utilization threshold\n{{/is_warning}}\n\n{{#is_alert}}\nAWS ECS Task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) has crossed CPU Utilization threshold\n{{/is_alert}}\n\nTo investigate further, view the affected task in the [ECS Explorer](/orchestration/explorer/ecsTask?inspect={{task_arn.name}})",
+        "tags": ["integration:ecs_fargate"],
         "options": {
             "thresholds": {
                 "critical": 80

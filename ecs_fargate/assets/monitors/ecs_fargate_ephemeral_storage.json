@@ -8,8 +8,8 @@
         "name": "[ECS Fargate] Ephemeral storage utilization is high for task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}})",
         "type": "query alert",
         "query": "avg(last_15m):sum:ecs.fargate.ephemeral_storage.utilized{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.ephemeral_storage.reserved{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80",
-        "message": "{{#is_warning}}\nAWS ECS Fargate task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) is approaching ephemeral storage utilization threshold\n\nCurrent Usage: {{value}}%\n{{/is_warning}}\n\n{{#is_alert}}\nAWS ECS Fargate task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) has exceeded ephemeral storage utilization threshold\n\nCurrent Usage: {{value}}%\n{{/is_alert}}",
-        "tags": [],
+        "message": "{{#is_warning}}\nAWS ECS Fargate task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) is approaching ephemeral storage utilization threshold\n\nCurrent Usage: {{value}}%\n{{/is_warning}}\n\n{{#is_alert}}\nAWS ECS Fargate task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) has exceeded ephemeral storage utilization threshold\n\nCurrent Usage: {{value}}%\n{{/is_alert}}\n\nTo investigate further, view the affected task in the [ECS Explorer](/orchestration/explorer/ecsTask?inspect={{task_arn.name}})",
+        "tags": ["integration:ecs_fargate"],
         "options": {
             "thresholds": {
                 "critical": 80
