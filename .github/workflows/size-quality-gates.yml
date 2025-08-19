@@ -53,6 +53,7 @@ jobs:
           MERGE_BASE=${{ steps.merge_base.outputs.sha }}
           count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
           count_plus_one=$((count + 1))
+          echo "count=$count" >> $GITHUB_STEP_SUMMARY
           run_id_base=$(
             (
               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
