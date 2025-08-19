@@ -24,8 +24,8 @@ IGNORED_LNET_GROUPS = {
 @dataclass(frozen=True)
 class LustreParam:
     regex: str
-    node_types: Tuple[str]
-    wildcards: Tuple[str] = ()
+    node_types: Tuple[str, ...]
+    wildcards: Tuple[str, ...] = ()
     prefix: str = ''
     fixture: str = ''
 

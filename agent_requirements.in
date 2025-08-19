@@ -13,6 +13,7 @@ confluent-kafka==2.8.0
 cryptography==45.0.4
 ddtrace==3.9.3
 dnspython==2.7.0
+fastavro==1.11.1
 foundationdb==6.3.25
 hazelcast-python-client==5.5.0
 in-toto==2.0.0
@@ -25,7 +26,7 @@ lz4==4.4.4
 mmh3==5.1.0
 oauthlib==3.3.1
 openstacksdk==4.6.0
-orjson==3.10.18
+orjson==3.11.1
 packaging==25.0
 paramiko==3.5.1
 ply==3.11
