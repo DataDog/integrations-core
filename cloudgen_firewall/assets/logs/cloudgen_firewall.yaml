@@ -169,8 +169,6 @@ pipeline:
               %{data:hostname}
               %{data:component}:\s+(%{data:text}:\s+\[\s+)?%{word:level}\s+%{word:source}\s+%{word:status}:
               (%{data::csv("traffic,protocol,srcIf,source_ip,source_port,source_mac,dest_ip,dest_port,dest_service,destIf,rule,info,src_nat,dest_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets,user,session_protocol,application,target,content,urlcat","|")})?\]?
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+ %{word:level} %{data:source} %{data:status}: %{data:message.details}
         - type: grok-parser
           name: Box Firewall IPSDownload
@@ -190,8 +188,6 @@ pipeline:
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{hostname:hostname} %{data:component}:\s+
               %{word:level}\s+%{data:source}\s+%{word:process}:\s+\[%{number:process_id}\]\s+%{word:action}:\s+(%{data::csv("traffic,protocol,sourceIf,source_ip,source_port,source_mac,destip","|")})
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{data:component}:\s+ %{word:level}\s+%{data:source}\s+%{data:message}
         - type: grok-parser
           name: Box Firewall Audit
@@ -215,8 +211,6 @@ pipeline:
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{data:hostname}
               %{data:component}":\s+%{word:level}\s+%{data:source}\s+%{data:status}:\s+(%{data::csv("method,ip,port","|")})
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+%{greedyData:message}
         - type: grok-parser
           name: Box Firewall
@@ -231,8 +225,6 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:log_type}:\s+\[%{word:status}\]\s+%{word:process}:\s+%{data:message}
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:log_type}:\s+\[%{data:status}\s+@%{ip:ip}\]\s+%{word:process}:\s+%{data:message}
         - type: grok-parser
           name: Box Firewall Auditop
@@ -305,8 +297,6 @@ pipeline:
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{data:hostname}
               %{data:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{number:event_id}\]\s+%{data:event}\s+from\s+%{ip:source_ip}:%{port:source_port}\s+-\s+\((%{data::csv("event_type,severity,category,subcategory,action,user_id,username,source_host,session_id,description","|")}\))
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component} %{word:level}  %{data:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
         - type: grok-parser
           name: Box Event Operative
@@ -333,8 +323,6 @@ pipeline:
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{data:hostname}
               %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:process}:\s+\[%{number:process_id}\]%{data:message}
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component} %{word:level}  %{data:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
     - type: pipeline
       name: Box SSH
@@ -389,8 +377,6 @@ pipeline:
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{hostname:hostname}
               %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:service}?:\s+%{word:sub_type}?:\s+%{data:message}
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:message}
     - type: pipeline
       name: Box Config
@@ -441,8 +427,6 @@ pipeline:
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{data:hostname}
               %{data:component}:\s+%{data:level}\s+%{data:source}\s+%{ip:ip}:%{integer:port}\s+%{data:event_type}:\s+%{greedyData:message}
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{data:level}\s+%{data:source}\s+%{greedyData:message}
         - type: grok-parser
           name: Box Config Sync
@@ -489,8 +473,6 @@ pipeline:
             matchRules: >
               autoFilledRule1
               %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+(%{data:action}:)?\s+\[%{data:user_name}\@%{ip:source_ip}\]\s+%{greedyData:message}
-
-
               autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+\[%{data:user_name}\@%{ip:source_ip}(\_%{port:port})?\]\s+%{greedyData:message}
     - type: pipeline
       name: Box Control
