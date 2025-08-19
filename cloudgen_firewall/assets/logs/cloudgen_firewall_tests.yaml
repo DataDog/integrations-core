@@ -6,25 +6,53 @@ tests:
       LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
     service: "firewall"
     result: null
-  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin
-      Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+  - sample: "2025-04-09T23:00:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_IPSDownload:  Security sacumentestlocal
+      fwauthd: [2601509] Block: FWD|UDP|eth0|0.0.0.0|68|bc:d0:74:54:b0:c2|"
     service: "firewall"
     result: null
-  - sample: "2025-03-14T11:04:10+05:30 sacumentestlocal
-      sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
-      [1071065] Drop Event from 127.0.0.1:56866 -
-      (D|3|boxfw|2|Firewall|2500|10.10.16.167:80|sacumentestlocal)"
-    service: "event"
+  - sample: "2025-03-19T09:31:22+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal firewall:
+      [Main] Sync: Authentication audit is set to 'auto', auto detection "
+    service: "firewall"
     result: null
-  - sample: "2025-04-04T12:09:03+05:30 sacumentestlocal
-      sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event:
-      [1071200] starting worker 27849: connected from 10.10.16.167:38188"
-    service: "event"
+  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall:
+      [Request] Configuration: Reload AppDB"
+    service: "firewall"
+    result: null
+  - sample: "2025-04-24T07:25:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal
+      firewall: [Admin Session abhishek@10.10.16.167] AdminAction: 0 VDevs"
+    service: "firewall"
     result: null
   - sample: "2025-04-09T23:25:00+05:30 sacumentestlocal
-      sacumentestlocal/box_SSH_sshd:  Info     sacumentestlocal LOGIN ATTEMPT: :
-      pam_unix(sshd:auth): Login abhishek from sshd: Allowed"
+      sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal firewall:
+      [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+    service: "firewall"
+    result: null
+  - sample: "2025-03-20T14:01:19+05:30 sacumentestlocal
+      sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
+      [1071065] Insert Event from 127.0.0.1:28764 -
+      (D|2|log|2|Login|2420|testuser|sacumentestlocal|1742479279|Login abhishek
+      from 10.10.16.1 : Allowed.)"
+    service: "event"
+    result: null
+  - sample: "2025-03-20T14:01:16+05:30 sacumentestlocal
+      sacumentestlocal/box_Event_operative:  Error     sacumentestlocal event:
+      [1070256] (11) IOStreamSock: Receive() error:068000DF:asn1 encoding
+      routines::too large"
+    service: "event"
+    result: null
+  - sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
+      sacumentestlocal/box_SSH_config:  Internal sacumentestlocal [0210108]
+      writeSSHdconf(): starting handling of ssh daemon configuration"
+    service: "ssh"
+    result: null
+  - sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
+      sacumentestlocal/box_SSH_sshd:  Notice sacumentestlocal sshd: notice:
+      Starting session: shell on pts/0 for testuser from 10.10.16.1 port 61649
+      id 0"
     service: "ssh"
     result: null
   - sample: "2025-03-19T09:27:26+05:30 sacumentestlocal
@@ -33,10 +61,20 @@ tests:
       Location Definitions : 85 (allow box distribution)"
     service: "config"
     result: null
+  - sample: "2025-03-17T10:54:54+05:30 sacumentestlocal
+      sacumentestlocal/box_Config_admin:  Info     sacumentestlocal  challenge
+      sent for localhost_sacumentestlocal"
+    service: "config"
+    result: null
+  - sample: "2025-04-09T23:25:00+05:30 sacumentestlocal
+      sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal Starting
+      main loop pid=5429."
+    service: "config"
+    result: null
   - sample: "2025-04-04T11:49:18+05:30 sacumentestlocal
       sacumentestlocal/box_Config_changes:  Info     sacumentestlocal
-      [username@10.10.16.1_1694]  Deleting session
-      GCSID_username_10.10.16.1_1694_19208"
+      [testuser@10.10.16.1_1694]  Deleting session
+      GCSID_abhishek_10.10.16.1_1694_19208"
     service: "config"
     result: null
   - sample: "2025-03-17T08:24:45+05:30 sacumentestlocal
