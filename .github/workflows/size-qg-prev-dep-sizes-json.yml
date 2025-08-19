@@ -132,3 +132,15 @@ jobs:
     uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
+
+  comment-on-pr:
+    needs: calculate-diffs
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Comment on PR
+        run: |
+          cat $GITHUB_STEP_SUMMARY >> comment.txt
+          gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
