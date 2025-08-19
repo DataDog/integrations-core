@@ -12,6 +12,7 @@ from datadog_checks.postgres.util import DBExplainError
 from datadog_checks.postgres.version_utils import V12
 
 from .common import DB_NAME
+from .utils import requires_over_12
 
 
 @pytest.fixture
@@ -32,6 +33,8 @@ def dbm_instance(pg_instance):
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_12
 @pytest.mark.parametrize(
     "query,expected_explain_err_code",
     [
@@ -45,11 +48,7 @@ def dbm_instance(pg_instance):
 )
 def test_explain_parameterized_queries(integration_check, dbm_instance, query, expected_explain_err_code):
     check = integration_check(dbm_instance)
-    check._connect()
-
     check.check(dbm_instance)
-    if check.version < V12:
-        return
 
     plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
         DB_NAME, query, query, "7231596c8b5536d1"
@@ -60,16 +59,19 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, query, e
 
     explain_param_queries = check.statement_samples._explain_parameterized_queries
     # check that we deallocated the prepared statement after explaining
-    rows = explain_param_queries._execute_query_and_fetch_rows(
-        DB_NAME,
-        "SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'".format(
-            query_signature=compute_sql_signature(query)
-        ),
+    with check.db_pool.get_connection(DB_NAME) as conn:
+        rows = explain_param_queries._execute_query_and_fetch_rows(
+            conn,
+            "SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'".format(
+                query_signature=compute_sql_signature(query)
+            ),
     )
     assert len(rows) == 0
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_12
 @pytest.mark.parametrize(
     "query,expected_generic_values",
     [
@@ -83,30 +85,25 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, query, e
 )
 def test_explain_parameterized_queries_generic_params(integration_check, dbm_instance, query, expected_generic_values):
     check = integration_check(dbm_instance)
-    check._connect()
-
-    check.check(dbm_instance)
-    if check.version < V12:
-        return
 
     query_signature = compute_sql_signature(query)
 
     explain_param_queries = check.statement_samples._explain_parameterized_queries
-    explain_param_queries._create_prepared_statement(DB_NAME, query, query, query_signature)
-    assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
-        DB_NAME, query_signature
+    with check.db_pool.get_connection(DB_NAME) as conn:
+        explain_param_queries._create_prepared_statement(conn, query, query, query_signature)
+        assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
+            conn, query_signature
     )
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_explain_parameterized_queries_version_below_12(integration_check, dbm_instance):
     '''
     For postgres versions below 12, we do not support explaining parameterized queries,
     because plan_cache_mode is not supported. We should return proper error.
     '''
     check = integration_check(dbm_instance)
-    check._connect()
-
     check.check(dbm_instance)
     if check.version >= V12:
         # this test is for versions below 12 to make sure we return proper error for unsupported versions
@@ -253,10 +250,6 @@ def test_create_prepared_statement_exception(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
 
-    check.check(dbm_instance)
-    if check.version < V12:
-        return
-
     query = "SELECT * FROM pg_settings WHERE name = $1"
     query_signature = compute_sql_signature(query)
     with mock.patch(
@@ -269,7 +262,7 @@ def test_create_prepared_statement_exception(integration_check, dbm_instance):
             )
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "query,statement_is_parameterized_query",
     [
@@ -286,6 +279,5 @@ def test_explain_parameterized_queries_is_parameterized_query(
     integration_check, dbm_instance, query, statement_is_parameterized_query
 ):
     check = integration_check(dbm_instance)
-    check._connect()
     explain_param_queries = check.statement_samples._explain_parameterized_queries
     assert statement_is_parameterized_query == explain_param_queries._is_parameterized_query(query)
