@@ -1,11 +1,38 @@
 id: cloudgen_firewall
 tests:
-  - sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
-      sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal Block:
-      FWD|UDP|eth0|10.10.17.9|38721|a0:d0:5b:29:32:2e|10.10.17.255|15600|||BOX-\
-      LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+  -
+    sample: "2025-03-07T12:41:41+05:30 sacumentestlocal sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal Block: FWD|UDP|eth0|10.10.17.9|38721|a0:d0:5b:29:32:2e|10.10.17.255|15600|||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
     service: "firewall"
-    result: null
+    result:
+      custom:
+        component: "sacumentestlocal/box_Firewall_Activity"
+        count: 1.0
+        dest_ip: "10.10.17.255"
+        dest_port: 15600.0
+        duration: 0.0
+        hostname: "sacumentestlocal"
+        info: 4017.0
+        level: "Security"
+        message: "FWD|UDP|eth0|10.10.17.9|38721|a0:d0:5b:29:32:2e|10.10.17.255|15600|||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+        protocol: "UDP"
+        received_bytes: 0.0
+        received_packets: 0.0
+        rule: "BOX-LAN-2-LAN"
+        sent_bytes: 0.0
+        sent_packets: 0.0
+        source: "sacumentestlocal"
+        source_ip: "10.10.17.9"
+        source_mac: "a0:d0:5b:29:32:2e"
+        source_port: 38721.0
+        srcIf: "eth0"
+        status: "Block"
+        timestamp: 1741331501000
+        traffic: "FWD"
+      message: "2025-03-07T12:41:41+05:30 sacumentestlocal sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal Block: FWD|UDP|eth0|10.10.17.9|38721|a0:d0:5b:29:32:2e|10.10.17.255|15600|||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+      service: "firewall"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
   - sample: "2025-04-09T23:00:00+05:30 sacumentestlocal
       sacumentestlocal/box_Firewall_IPSDownload:  Security sacumentestlocal
       fwauthd: [2601509] Block: FWD|UDP|eth0|0.0.0.0|68|bc:d0:74:54:b0:c2|"
