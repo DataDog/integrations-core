@@ -18,18 +18,14 @@ def get_all_windows_service_states(logger=None):
         return {}
     try:
         import win32service
+
         scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ENUMERATE_SERVICE)
         service_statuses = win32service.EnumServicesStatus(
-            scm_handle,
-            win32service.SERVICE_WIN32,
-            win32service.SERVICE_STATE_ALL
+            scm_handle, win32service.SERVICE_WIN32, win32service.SERVICE_STATE_ALL
         )
         win32service.CloseServiceHandle(scm_handle)
         # Build dict of service_name -> state
-        return {
-            name: state_tuple[1]  # state is at index 1
-            for name, display_name, state_tuple in service_statuses
-        }
+        return {name: state_tuple[1] for name, display_name, state_tuple in service_statuses}  # state is at index 1
     except ImportError as e:
         if logger:
             logger.warning("pywin32 not available: %s", e)
