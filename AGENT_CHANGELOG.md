@@ -1,3 +1,7 @@
+## Datadog Agent version [7.69.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7692)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.69.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7691)
 
 * There were no integration updates for this version of the Agent.
@@ -174,7 +178,6 @@
 * Juniper SRX Firewall [1.0.0](https://github.com/DataDog/integrations-core/blob/master/juniper_srx_firewall/CHANGELOG.md)
 * Kafka Consumer [6.5.2](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
 * Karpenter [2.3.0](https://github.com/DataDog/integrations-core/blob/master/karpenter/CHANGELOG.md)
-* Kaspersky [1.0.0](https://github.com/DataDog/integrations-core/blob/master/kaspersky/CHANGELOG.md)
 * Linux Audit Logs [1.0.0](https://github.com/DataDog/integrations-core/blob/master/linux_audit_logs/CHANGELOG.md)
 * Microsoft Sysmon [1.0.0](https://github.com/DataDog/integrations-core/blob/master/microsoft_sysmon/CHANGELOG.md)
 * MongoDB [10.0.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
