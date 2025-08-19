@@ -1,3 +1,7 @@
+## Datadog Agent version [7.69.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7691)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.69.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7690)
 
 * Aerospike [5.0.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md) **BREAKING CHANGE**
