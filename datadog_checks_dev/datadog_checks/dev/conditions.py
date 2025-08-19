@@ -204,7 +204,9 @@ class CheckDockerLogs(CheckCommandOutput):
         :param service: The service name to check the logs for when using docker compose
         """
         if file_exists(identifier):
-            command = ['docker', 'compose', '-f', identifier, 'logs', service or '']
+            command = ['docker', 'compose', '-f', identifier, 'logs']
+            if service:
+                command.append(service)
         else:
             command = ['docker', 'logs', identifier]
 
