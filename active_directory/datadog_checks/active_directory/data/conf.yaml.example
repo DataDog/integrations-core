@@ -127,31 +127,6 @@ instances:
     #     counters:
     #     - DS % Writes from LDAP: writes_from_ldap
 
-    ## @param service_check_enabled - boolean - optional - default: true
-    ## Whether to automatically detect running Windows services and only collect metrics for available services.
-    ## When enabled, the integration checks which AD-related services (NTDS, Netlogon, DHCP Server, DFS Replication)
-    ## are running and only collects metrics for those services. This prevents errors when optional services
-    ## are not installed or running.
-    #
-    # service_check_enabled: true
-
-    ## @param force_all_metrics - boolean - optional - default: false
-    ## Forces collection of all configured metrics regardless of service availability.
-    ## When set to true, this overrides service_check_enabled and attempts to collect all metrics
-    ## even if the corresponding Windows services are not running. This can be useful for debugging
-    ## or when service detection is not working correctly.
-    #
-    # force_all_metrics: false
-
-    ## @param service_cache_duration - number - optional - default: 300
-    ## How long to cache Windows service state information, in seconds.
-    ## The integration caches service availability to reduce the overhead of checking service states.
-    ## Valid range: 60 to 3600 seconds (1 minute to 1 hour).
-    ## Lower values provide more responsive detection of service state changes but increase overhead.
-    ## Higher values reduce overhead but may delay detection of service state changes.
-    #
-    # service_cache_duration: 300
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -180,6 +155,18 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param service_check_enabled - boolean - optional - default: true
+    ## Enable/disable service detection. When enabled, the check will determine if
+    ## Active Directory services are running and only collect relevant metrics.
+    #
+    # service_check_enabled: true
+
+    ## @param force_all_metrics - boolean - optional - default: false
+    ## Force collection of all metrics regardless of service state. When true,
+    ## metrics will be collected even if the corresponding services are not running.
+    #
+    # force_all_metrics: false
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.

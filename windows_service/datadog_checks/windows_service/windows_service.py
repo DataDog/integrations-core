@@ -248,6 +248,13 @@ class WindowsService(AgentCheck):
             # This preserves the EXACT original error behavior
             raise Exception('Unable to open SCManager: {}'.format(e))
 
+        # Open SCManager handle for ServiceView to use for detailed queries
+        # This is needed because ServiceView queries individual service properties
+        try:
+            scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ENUMERATE_SERVICE)
+        except Exception as e:
+            raise Exception('Unable to open SCManager: {}'.format(e))
+
         # Sort service filters in reverse order on the regex pattern so more specific (longer)
         # regex patterns are tested first. This is to handle cases when a pattern is a prefix of
         # another pattern.
