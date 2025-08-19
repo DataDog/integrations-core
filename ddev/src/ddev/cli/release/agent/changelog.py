@@ -23,11 +23,6 @@ DISPLAY_NAME_MAPPING = {
     'Mesos': 'Mesos Slave'
 }
 
-DELETED_INTEGRATIONS = [
-    'kaspersky',
-]
-
-
 @click.command(
     short_help="Provide a list of updated checks on a given Datadog Agent version, in changelog form",
 )
@@ -73,8 +68,6 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
             for name, ver in version_changes.items():
-                if name in DELETED_INTEGRATIONS:
-                    continue
                 display_name = app.repo.integrations.get(name).display_name
                 display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
 
