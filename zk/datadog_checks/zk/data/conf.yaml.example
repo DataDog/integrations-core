@@ -34,7 +34,9 @@ instances:
     ##
     ## Available options are: `leader`, `follower`, `standalone` or an array of one or more of these.
     #
-    # expected_mode: <EXPECTED_MODE>
+    # expected_mode:
+    #   - leader
+    #   - follower
 
     ## @param report_instance_mode - boolean - optional - default: true
     ## Whether to report the current instance mode as a 0/1 gauge.

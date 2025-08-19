@@ -95,7 +95,7 @@ tests:
           "id": 62605996,
           "folder_id": 25077197,
           "tags": [
-            "custfacing"
+            "critical"
           ]
         },
         "project": {
@@ -138,7 +138,7 @@ tests:
           job_succeeded_count: 27941
           lifetime_task_count: 55882
           tags:
-            - "custfacing"
+            - "critical"
         started_at: "2025-06-14T16:06:52.000-07:00"
         status: "error"
         title: "Webhooks: new event via webhook: Accept=*/*, Content length=35, and Content type=application/x-www-form-urlencoded"
@@ -157,7 +157,7 @@ tests:
             "description" : "",
             "id" : 62605996,
             "folder_id" : 25077197,
-            "tags" : [ "custfacing" ]
+            "tags" : [ "critical" ]
           },
           "project" : {
             "name" : "Backend Batch Ops",

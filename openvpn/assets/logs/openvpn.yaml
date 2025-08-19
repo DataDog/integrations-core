@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: openvpn
 metric_id: openvpn
 backend_only: false

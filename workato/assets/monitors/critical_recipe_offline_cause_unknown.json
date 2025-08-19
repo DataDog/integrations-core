@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "created_at": "2025-07-27",
+  "last_updated_at": "2025-07-27",
+  "title": "Critical recipe is offline with cause unknown",
+  "description": "A recipe which has been tagged as critical within Workato is offline with cause unknown.",
+  "definition": {
+    "id": 174536177,
+    "name": "Critical Workato Recipe is {{#is_alert}}offline{{/is_alert}} {{#is_alert_recovery}}online{{/is_alert_recovery}}",
+    "type": "query alert",
+	"query": "avg(last_5m):avg:workato.recipes.failure{workato_tags:*critical*, !stop_cause:*} by {name} > 0",
+	"message": "{{#is_alert}}The recipe {{name}} is offline, possibly due to manual stopping of recipe{{/is_alert}}\n{{#is_alert_recovery}}The recipe {{name}} is online{{/is_alert_recovery}}\n@email@example.com",
+    "tags": [
+            "source:workato"
+    ],
+    "options": {
+            "thresholds": {
+                    "critical": 0
+            },
+            "notify_audit": false,
+            "on_missing_data": "resolve",
+            "include_tags": false,
+            "new_group_delay": 0
+    },
+    "priority": null
+  },
+  "tags": [
+    "integration:workato"
+  ]
+}

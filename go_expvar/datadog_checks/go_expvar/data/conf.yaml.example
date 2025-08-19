@@ -122,7 +122,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -145,7 +145,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

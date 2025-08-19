@@ -1,0 +1,1 @@
+Fix collection of queues with a `none` prefetch value

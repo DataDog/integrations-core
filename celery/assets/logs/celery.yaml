@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: celery
 metric_id: celery
 backend_only: false
