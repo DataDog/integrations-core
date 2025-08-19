@@ -17,9 +17,9 @@ Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualization
     scfw configure
     ```
 
-2. Follow the setup prompts and configure options as needed. During the log forwarding configuration, provide answers based on your preferred method by selecting one of the options below to send logs to Datadog:
+2. Follow the setup prompts and configure the options as needed. During the log forwarding configuration, choose one of the options below to send logs to Datadog, based on your preferences:
 
-    - **Option 1: Sending Logs via Datadog Agent**
+    - **Option 1: Sending Logs through the Datadog Agent**
 
         - Configure log forwarding through the Datadog Agent:
             ```text
@@ -29,7 +29,7 @@ Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualization
             > Log allowed and blocked commands
             ```
 
-        - Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file:
+        - Log collection is disabled by default in the Datadog Agent. Enable it by editing the `datadog.yaml` file:
 
             ```yaml
             logs_enabled: true
@@ -41,7 +41,7 @@ Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualization
             sudo systemctl restart datadog-agent
             ```
 
-    - **Option 2: Sending Logs via API Key**
+    - **Option 2: Sending Logs through an API Key**
 
         - Configure log forwarding using the Datadog API key:
             ```text
@@ -54,13 +54,13 @@ Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualization
 
 3. After setup, update your current shell environment:
 
-    - For **bash**:
+    - For **Bash**:
 
         ```bash
         source ~/.bashrc
         ```
 
-    - For **zsh**:
+    - For **Zsh**:
 
         ```bash
         source ~/.zshrc
@@ -69,7 +69,7 @@ Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualization
 
 ### Validation
 
-If you selected **Option 1** to forward logs via the Datadog Agent, [Run the Agent's status subcommand][2] and look for `scfw` under the Logs Agent section.
+If you selected **Option 1** to forward logs through the Datadog Agent, [run the Agent's status subcommand][2] and look for `scfw` under the Logs Agent section.
 
 ## Data Collected
 
