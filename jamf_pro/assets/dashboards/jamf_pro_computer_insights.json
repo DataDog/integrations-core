@@ -6,8 +6,8 @@
             "id": 7786290606532641,
             "definition": {
                 "type": "image",
-                "url": "https://resources.jamf.com/images/logos/Jamf-Pro-color.png?_gl=1*ak74mo*_gcl_au*MjI4MDE1MzcuMTc1MTUyODAwMA..*_ga*MTU0MzMwNjM3Ni4xNzUxNTI4MDAw*_ga_X3RD84REYK*czE3NTIwNDQ1NTIkbzckZzAkdDE3NTIwNDQ1NTMkajU5JGwwJGgw",
-                "url_dark_theme": "https://resources.jamf.com/images/logos/Jamf-Pro-color.png?_gl=1*ak74mo*_gcl_au*MjI4MDE1MzcuMTc1MTUyODAwMA..*_ga*MTU0MzMwNjM3Ni4xNzUxNTI4MDAw*_ga_X3RD84REYK*czE3NTIwNDQ1NTIkbzckZzAkdDE3NTIwNDQ1NTMkajU5JGwwJGgw",
+                "url": "https://static.datadoghq.com/static/images/logos/jamf-pro_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/jamf-pro_reversed_large.svg",
                 "sizing": "contain",
                 "has_background": false,
                 "has_border": false,

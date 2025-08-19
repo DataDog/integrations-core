@@ -6,8 +6,8 @@
             "id": 7768460652575278,
             "definition": {
                 "type": "image",
-                "url": "https://resources.jamf.com/images/logos/Jamf-Pro-color.png",
-                "url_dark_theme": "https://resources.jamf.com/images/logos/Jamf-Pro-color.png",
+                "url": "https://static.datadoghq.com/static/images/logos/jamf-pro_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/jamf-pro_reversed_large.svg",
                 "sizing": "contain",
                 "has_background": false,
                 "has_border": false,
