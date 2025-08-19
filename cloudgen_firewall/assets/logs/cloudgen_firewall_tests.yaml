@@ -33,90 +33,321 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1
-  - sample: "2025-04-09T23:00:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Firewall_IPSDownload:  Security sacumentestlocal
-      fwauthd: [2601509] Block: FWD|UDP|eth0|0.0.0.0|68|bc:d0:74:54:b0:c2|"
+  -
+    sample: "2025-04-09T23:00:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_IPSDownload:  Security sacumentestlocal fwauthd: [2601509] Block: FWD|UDP|eth0|0.0.0.0|68|bc:d0:74:54:b0:c2|"
     service: "firewall"
-    result: null
-  - sample: "2025-03-19T09:31:22+05:30 sacumentestlocal
-      sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal firewall:
-      [Main] Sync: Authentication audit is set to 'auto', auto detection "
+    result:
+      custom:
+        action: "Block"
+        component: "sacumentestlocal/box_Firewall_IPSDownload"
+        hostname: "sacumentestlocal"
+        level: "Security"
+        log_type: "fwauthd"
+        message: "FWD|UDP|eth0|0.0.0.0|68|bc:d0:74:54:b0:c2|"
+        process: "Block"
+        process_id: 2601509.0
+        protocol: "UDP"
+        source: "sacumentestlocal"
+        sourceIf: "eth0"
+        source_ip: "0.0.0.0"
+        source_mac: "bc:d0:74:54:b0:c2"
+        source_port: 68.0
+        srcIf: "eth0"
+        status: "2601509"
+        timestamp: 1744219800000
+        traffic: "FWD"
+      message: "2025-04-09T23:00:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_IPSDownload:  Security sacumentestlocal fwauthd: [2601509] Block: FWD|UDP|eth0|0.0.0.0|68|bc:d0:74:54:b0:c2|"
+      service: "firewall"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-19T09:31:22+05:30 sacumentestlocal sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal firewall: [Main] Sync: Authentication audit is set to 'auto', auto detection "
     service: "firewall"
-    result: null
-  - sample: "2025-04-22T12:33:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall:
-      [Request] Configuration: Reload AppDB"
+    result:
+      custom:
+        action: "Sync"
+        component: "sacumentestlocal/box_Firewall_audit\""
+        hostname: "sacumentestlocal"
+        level: "Info"
+        log_type: "firewall"
+        message: "Authentication audit is set to 'auto', auto detection"
+        method: "[Main] Sync: Authentication audit is set to 'auto', auto detection"
+        process: "Sync"
+        source: "sacumentestlocal"
+        status: "Main"
+        timestamp: 1742356882000
+        traffic: "[Main] Sync: Authentication audit is set to 'auto', auto detection"
+      message: "2025-03-19T09:31:22+05:30 sacumentestlocal sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal firewall: [Main] Sync: Authentication audit is set to 'auto', auto detection "
+      service: "firewall"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Request] Configuration: Reload AppDB"
     service: "firewall"
-    result: null
-  - sample: "2025-04-24T07:25:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal
-      firewall: [Admin Session abhishek@10.10.16.167] AdminAction: 0 VDevs"
+    result:
+      custom:
+        action: "Configuration"
+        component: "sacumentestlocal/box_Firewall"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        log_type: "firewall"
+        message: "Reload AppDB"
+        process: "Configuration"
+        source: "sacumentestlocal"
+        status: "Request"
+        timestamp: 1745305380000
+        traffic: "[Request] Configuration: Reload AppDB"
+      message: "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Request] Configuration: Reload AppDB"
+      service: "firewall"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-04-24T07:25:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167] AdminAction: 0 VDevs"
     service: "firewall"
-    result: null
-  - sample: "2025-04-09T23:25:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal firewall:
-      [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+    result:
+      custom:
+        Action: "AdminAction: 0 VDevs"
+        component: "sacumentestlocal/box_Firewall_auditop"
+        hostname: "sacumentestlocal"
+        ip: "10.10.16.167"
+        level: "Security"
+        message: "[Admin Session abhishek@10.10.16.167] AdminAction: 0 VDevs"
+        session: "Admin Session abhishek"
+        source: "sacumentestlocal"
+        status: "firewall"
+        timestamp: 1745459700000
+        traffic: "[Admin Session abhishek@10.10.16.167] AdminAction: 0 VDevs"
+      message: "2025-04-24T07:25:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167] AdminAction: 0 VDevs"
+      service: "firewall"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-04-09T23:25:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal firewall: [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
     service: "firewall"
-    result: null
-  - sample: "2025-03-20T14:01:19+05:30 sacumentestlocal
-      sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
-      [1071065] Insert Event from 127.0.0.1:28764 -
-      (D|2|log|2|Login|2420|testuser|sacumentestlocal|1742479279|Login abhishek
-      from 10.10.16.1 : Allowed.)"
+    result:
+      custom:
+        action: "Sync"
+        component: "sacumentestlocal/box_Firewall_threat"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        log_type: "firewall"
+        message: "BOX IP is 10.10.16.167 Box RSA Pub"
+        process: "Sync"
+        source: "sacumentestlocal"
+        status: "Off"
+        timestamp: 1744221300000
+        traffic: "[Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+      message: "2025-04-09T23:25:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal firewall: [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+      service: "firewall"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-20T14:01:19+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:28764 - (D|2|log|2|Login|2420|testuser|sacumentestlocal|1742479279|Login abhishek from 10.10.16.1 : Allowed.)"
     service: "event"
-    result: null
-  - sample: "2025-03-20T14:01:16+05:30 sacumentestlocal
-      sacumentestlocal/box_Event_operative:  Error     sacumentestlocal event:
-      [1070256] (11) IOStreamSock: Receive() error:068000DF:asn1 encoding
-      routines::too large"
+    result:
+      custom:
+        action: "Login"
+        category: "log"
+        component: "sacumentestlocal/box_Event_eventS"
+        description: "Login abhishek from 10.10.16.1 : Allowed."
+        event: "Insert Event"
+        event_id: 1071065.0
+        event_type: "D"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        log_type: "event"
+        message: " Insert Event from 127.0.0.1:28764 - (D|2|log|2|Login|2420|testuser|sacumentestlocal|1742479279|Login abhishek from 10.10.16.1 : Allowed.)"
+        process: "event"
+        process_id: 1071065.0
+        session_id: 1.742479279E9
+        severity: 2.0
+        source: "sacumentestlocal"
+        source_host: "sacumentestlocal"
+        source_ip: "127.0.0.1"
+        source_port: "28764"
+        subcategory: 2.0
+        timestamp: 1742459479000
+        user_id: 2420.0
+        username: "testuser"
+      message: "2025-03-20T14:01:19+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:28764 - (D|2|log|2|Login|2420|testuser|sacumentestlocal|1742479279|Login abhishek from 10.10.16.1 : Allowed.)"
+      service: "event"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-20T14:01:16+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Error     sacumentestlocal event: [1070256] (11) IOStreamSock: Receive() error:068000DF:asn1 encoding routines::too large"
     service: "event"
-    result: null
-  - sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
-      sacumentestlocal/box_SSH_config:  Internal sacumentestlocal [0210108]
-      writeSSHdconf(): starting handling of ssh daemon configuration"
+    result:
+      custom:
+        component: "sacumentestlocal/box_Event_operative"
+        hostname: "sacumentestlocal"
+        level: "Error"
+        message: " (11) IOStreamSock: Receive() error:068000DF:asn1 encoding routines::too large"
+        process: "event"
+        process_id: 1070256.0
+        source: "sacumentestlocal"
+        timestamp: 1742459476000
+      message: "2025-03-20T14:01:16+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Error     sacumentestlocal event: [1070256] (11) IOStreamSock: Receive() error:068000DF:asn1 encoding routines::too large"
+      service: "event"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-07T12:41:41+05:30 sacumentestlocal sacumentestlocal/box_SSH_config:  Internal sacumentestlocal [0210108] writeSSHdconf(): starting handling of ssh daemon configuration"
     service: "ssh"
-    result: null
-  - sample: "2025-03-07T12:41:41+05:30 sacumentestlocal
-      sacumentestlocal/box_SSH_sshd:  Notice sacumentestlocal sshd: notice:
-      Starting session: shell on pts/0 for testuser from 10.10.16.1 port 61649
-      id 0"
+    result:
+      custom:
+        component: "sacumentestlocal/box_SSH_config"
+        function: "writeSSHdconf"
+        hostname: "sacumentestlocal"
+        level: "Internal"
+        message: "[0210108] writeSSHdconf(): starting handling of ssh daemon configuration"
+        process_id: 210108.0
+        source: "sacumentestlocal"
+        timestamp: 1741331501000
+      message: "2025-03-07T12:41:41+05:30 sacumentestlocal sacumentestlocal/box_SSH_config:  Internal sacumentestlocal [0210108] writeSSHdconf(): starting handling of ssh daemon configuration"
+      service: "ssh"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-07T12:41:41+05:30 sacumentestlocal sacumentestlocal/box_SSH_sshd:  Notice sacumentestlocal sshd: notice: Starting session: shell on pts/0 for testuser from 10.10.16.1 port 61649 id 0"
     service: "ssh"
-    result: null
-  - sample: "2025-03-19T09:27:26+05:30 sacumentestlocal
-      sacumentestlocal/box_Config_daemon_download:  Info     sacumentestlocal
-      Download of geo returned: Success: software up to date, version  Geo
-      Location Definitions : 85 (allow box distribution)"
+    result:
+      custom:
+        component: "sacumentestlocal/box_SSH_sshd"
+        hostname: "sacumentestlocal"
+        level: "Notice"
+        message: "Starting session: shell on pts/0 for testuser from 10.10.16.1 port 61649 id 0"
+        service: "sshd"
+        source: "sacumentestlocal"
+        sub_type: "notice"
+        timestamp: 1741331501000
+      message: "2025-03-07T12:41:41+05:30 sacumentestlocal sacumentestlocal/box_SSH_sshd:  Notice sacumentestlocal sshd: notice: Starting session: shell on pts/0 for testuser from 10.10.16.1 port 61649 id 0"
+      service: "ssh"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-19T09:27:26+05:30 sacumentestlocal sacumentestlocal/box_Config_daemon_download:  Info     sacumentestlocal Download of geo returned: Success: software up to date, version  Geo Location Definitions : 85 (allow box distribution)"
     service: "config"
-    result: null
-  - sample: "2025-03-17T10:54:54+05:30 sacumentestlocal
-      sacumentestlocal/box_Config_admin:  Info     sacumentestlocal  challenge
-      sent for localhost_sacumentestlocal"
+    result:
+      custom:
+        component: "sacumentestlocal/box_Config_daemon_download"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        message: "Download of geo returned: Success: software up to date, version  Geo Location Definitions : 85 (allow box distribution)"
+        source: "sacumentestlocal"
+        timestamp: 1742356646000
+      message: "2025-03-19T09:27:26+05:30 sacumentestlocal sacumentestlocal/box_Config_daemon_download:  Info     sacumentestlocal Download of geo returned: Success: software up to date, version  Geo Location Definitions : 85 (allow box distribution)"
+      service: "config"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-17T10:54:54+05:30 sacumentestlocal sacumentestlocal/box_Config_admin:  Info     sacumentestlocal  challenge sent for localhost_sacumentestlocal"
     service: "config"
-    result: null
-  - sample: "2025-04-09T23:25:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal Starting
-      main loop pid=5429."
+    result:
+      custom:
+        component: "sacumentestlocal/box_Config_admin"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        message: " challenge sent for localhost_sacumentestlocal"
+        source: "sacumentestlocal"
+        timestamp: 1742189094000
+      message: "2025-03-17T10:54:54+05:30 sacumentestlocal sacumentestlocal/box_Config_admin:  Info     sacumentestlocal  challenge sent for localhost_sacumentestlocal"
+      service: "config"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-04-09T23:25:00+05:30 sacumentestlocal sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal Starting main loop pid=5429."
     service: "config"
-    result: null
-  - sample: "2025-04-04T11:49:18+05:30 sacumentestlocal
-      sacumentestlocal/box_Config_changes:  Info     sacumentestlocal
-      [testuser@10.10.16.1_1694]  Deleting session
-      GCSID_abhishek_10.10.16.1_1694_19208"
+    result:
+      custom:
+        component: "sacumentestlocal/box_Config_sync"
+        hostname: "sacumentestlocal"
+        level: "Notice"
+        message: "Starting main loop pid=5429."
+        source: "sacumentestlocal"
+        timestamp: 1744221300000
+      message: "2025-04-09T23:25:00+05:30 sacumentestlocal sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal Starting main loop pid=5429."
+      service: "config"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-04-04T11:49:18+05:30 sacumentestlocal sacumentestlocal/box_Config_changes:  Info     sacumentestlocal [testuser@10.10.16.1_1694]  Deleting session GCSID_abhishek_10.10.16.1_1694_19208"
     service: "config"
-    result: null
-  - sample: "2025-03-17T08:24:45+05:30 sacumentestlocal
-      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-      boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
+    result:
+      custom:
+        component: "sacumentestlocal/box_Config_changes"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        message: "Deleting session GCSID_abhishek_10.10.16.1_1694_19208"
+        port: "1694"
+        source: "sacumentestlocal"
+        source_ip: "10.10.16.1"
+        timestamp: 1743747558000
+        user_name: "testuser"
+      message: "2025-04-04T11:49:18+05:30 sacumentestlocal sacumentestlocal/box_Config_changes:  Info     sacumentestlocal [testuser@10.10.16.1_1694]  Deleting session GCSID_abhishek_10.10.16.1_1694_19208"
+      service: "config"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-17T08:24:45+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
     service: "auth"
-    result: null
-  - sample: "2025-07-17T13:18:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal
-      MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte
-      (auto-calculated)"
+    result:
+      custom:
+        component: "sacumentestlocal/box_Auth_access"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        message: "Session localhost_sacumentestlocal"
+        pid: 27474
+        process: "boxconfig"
+        session_status: "Closed"
+        source: "sacumentestlocal"
+        timestamp: 1742180085000
+      message: "2025-03-17T08:24:45+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
+      service: "auth"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-07-17T13:18:00+05:30 sacumentestlocal sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
     service: "control"
-    result: null
-  - sample: "2025-03-17T18:51:54+03:10 sacumentestlocal
-      sacumentestlocal/box_System_mgmaccess:  Info   sacumentestlocal Connected
-      new handler #1296 of type 'Virus Scanner'"
+    result:
+      custom:
+        component: "sacumentestlocal/box_Control_AuthService"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        message: "MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+        source: "sacumentestlocal"
+        timestamp: 1752738480000
+      message: "2025-07-17T13:18:00+05:30 sacumentestlocal sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+      service: "control"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  -
+    sample: "2025-03-17T18:51:54+03:10 sacumentestlocal sacumentestlocal/box_System_mgmaccess:  Info   sacumentestlocal Connected new handler #1296 of type 'Virus Scanner'"
     service: "system"
-    result: null
+    result:
+      custom:
+        component: "sacumentestlocal/box_System_mgmaccess"
+        hostname: "sacumentestlocal"
+        level: "Info"
+        message: "Connected new handler #1296 of type 'Virus Scanner'"
+        source: "sacumentestlocal"
+        timestamp: 1742226114000
+      message: "2025-03-17T18:51:54+03:10 sacumentestlocal sacumentestlocal/box_System_mgmaccess:  Info   sacumentestlocal Connected new handler #1296 of type 'Virus Scanner'"
+      service: "system"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
