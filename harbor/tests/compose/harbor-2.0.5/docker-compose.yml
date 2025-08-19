@@ -84,7 +84,7 @@ services:
       registry:
         condition: service_started
       redis:
-        condition: service_started
+        condition: service_healthy
       postgresql:
         condition: service_healthy
     healthcheck:
