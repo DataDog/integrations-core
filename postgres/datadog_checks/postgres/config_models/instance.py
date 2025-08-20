@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -95,13 +96,22 @@ class CollectSettings(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class Column(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+    type: Optional[Literal['gauge', 'monotonic_count', 'tag', 'tag_list', 'tag_not_null']] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     collection_interval: Optional[int] = None
-    columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    columns: Optional[tuple[Column, ...]] = None
     metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

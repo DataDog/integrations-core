@@ -165,7 +165,7 @@ def _define_validator_functions(model_id, validator_data, need_defaults):
             model_file_lines.append(f'                value = validation.{import_path}(value, field=field)')
 
     if need_defaults:
-        model_file_lines.append('        elif not value:')
+        model_file_lines.append('        elif value is None:')
         model_file_lines.append(
             f"            value = getattr(defaults, f'{model_id}_{{info.field_name}}', lambda: value)()"
         )
