@@ -78,16 +78,11 @@ def test_command(
     from ddev.config.constants import AppEnvVars
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import E2EMetadata
-    from ddev.repo.constants import NOT_E2E_TESTABLE
     from ddev.utils.ci import running_in_ci
     from ddev.utils.structures import EnvVars
 
     app: Application = ctx.obj
     integration = app.repo.integrations.get(intg_name)
-
-    if integration.name in NOT_E2E_TESTABLE:
-        app.display_info(f"Selected target {integration.name!r} does not have E2E tests to run. Skipping.")
-        return
 
     storage = EnvDataStorage(app.data_dir)
     active_envs = storage.get_environments(integration.name)
@@ -120,6 +115,7 @@ def test_command(
         ]
 
     if not env_names:
+        app.display_info(f"Selected target {integration.name!r} does not have E2E tests to run. Skipping.")
         return
 
     app.display_header(integration.display_name)
