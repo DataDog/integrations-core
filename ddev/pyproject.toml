@@ -86,6 +86,7 @@ target-version = ["py312"]
 extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
+extend = "../pyproject.toml"
 exclude = []
 target-version = "py312"
 line-length = 120

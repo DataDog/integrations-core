@@ -95,7 +95,9 @@ def test_command(
     if environment is None:
         environment = 'all' if (not active_envs or running_in_ci()) else 'active'
 
-    if environment == 'all':
+    if environment == 'active':
+        env_names = active_envs
+    else:
         import json
         import sys
 
@@ -111,15 +113,11 @@ def test_command(
         env_names = [
             name
             for name, data in environments.items()
-            if data.get('e2e-env')
+            if data.get('e2e-env', False)
             and (not data.get('platforms') or app.platform.name in data['platforms'])
             and (python_filter is None or data.get('python') == python_filter)
+            and (name == environment or environment == 'all')
         ]
-
-    elif environment == 'active':
-        env_names = active_envs
-    else:
-        env_names = [environment]
 
     if not env_names:
         return

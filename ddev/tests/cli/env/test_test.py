@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from contextlib import nullcontext
 
 import mock
@@ -22,7 +23,8 @@ class MockEnvVars:
 
 def test_env_vars_repo(ddev, helpers, data_dir, write_result_file, mocker):
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': {}, 'config': {}}))
-    mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
+    json_output = json.dumps({'py3.12': {'e2e-env': False}})
+    mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0, stdout=json_output.encode()))
     with mock.patch('ddev.utils.structures.EnvVars', side_effect=MockEnvVars):
         result = ddev('env', 'test', 'postgres', 'py3.12')
         assert result.exit_code == 0, result.output
