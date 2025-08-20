@@ -64,9 +64,7 @@ def mock_size_diff_dependencies():
 
 
 def test_diff_no_args(ddev, mock_size_diff_dependencies):
-    result = ddev("size", "diff", "commit1", "commit2")
-    print("STDOUT:", result.output)
-    assert result.exit_code == 0
+    assert ddev("size", "diff", "commit1", "commit2").exit_code == 0
     assert ddev("size", "diff", "commit1", "commit2", "--compressed").exit_code == 0
     assert ddev("size", "diff", "commit1", "commit2", "--format", "csv,markdown,json,png").exit_code == 0
     assert ddev("size", "diff", "commit1", "commit2", "--show-gui").exit_code == 0
