@@ -611,6 +611,7 @@ pipeline:
           target: ocsf.activity_name
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
         - type: category-processor
           name: OCSF - activity_id mapping
           enabled: true
@@ -1199,6 +1200,7 @@ pipeline:
           target: ocsf.activity_name
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
         - type: category-processor
           name: OCSF - activity_id mapping
           enabled: true
@@ -1357,6 +1359,7 @@ pipeline:
           target: ocsf.activity_name
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
         - type: category-processor
           name: OCSF - activity_id mapping
           enabled: true
@@ -1651,6 +1654,7 @@ pipeline:
           target: ocsf.activity_name
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
         - type: string-builder-processor
           name: Add Activity ID
           enabled: true
@@ -1685,6 +1689,7 @@ pipeline:
           target: ocsf.status_code
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
 
     - type: pipeline
       name: OCSF post transformations
