@@ -157,147 +157,147 @@ tests:
         }
       }
     result:
-    custom:
-      Level: 4
-      correlationId: "d47198c3-f726-47b8-b683-3f6244c9ceb5"
-      duration: 0.0
-      durationMs: 0
-      evt:
-        category: "SignInLogs"
-        name: "Sign-in activity"
-        outcome: "success"
-      http:
-        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
-        useragent_details:
-          browser:
-            family: "Chrome"
-            major: "81"
-            minor: "0"
-            patch: "4044"
-            patch_minor: "138"
-          device:
-            category: "Desktop"
-            family: "Other"
-          os:
-            family: "Windows"
-            major: "10"
-      identity: "Test Test"
-      location: "US"
-      network:
-        client:
-          geoip: {}
-          ip: "192.182.149.21"
-      ocsf:
-        activity_id: 1
-        activity_name: "Logon"
-        actor:
+      custom:
+        Level: 4
+        correlationId: "d47198c3-f726-47b8-b683-3f6244c9ceb5"
+        duration: 0.0
+        durationMs: 0
+        evt:
+          category: "SignInLogs"
+          name: "Sign-in activity"
+          outcome: "success"
+        http:
+          useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
+          useragent_details:
+            browser:
+              family: "Chrome"
+              major: "81"
+              minor: "0"
+              patch: "4044"
+              patch_minor: "138"
+            device:
+              category: "Desktop"
+              family: "Other"
+            os:
+              family: "Windows"
+              major: "10"
+        identity: "Test Test"
+        location: "US"
+        network:
+          client:
+            geoip: {}
+            ip: "192.182.149.21"
+        ocsf:
+          activity_id: 1
+          activity_name: "Logon"
+          actor:
+            user:
+              email_addr: "testtest@datadoghq.com"
+              name: "Test Test"
+              type: "User"
+              type_id: 1
+              uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Authentication"
+          class_uid: 3002
+          dst_endpoint:
+            svc_name: "Windows Azure Active Directory"
+            uid: "00000002-0000-0000-c000-000000000000"
+          metadata:
+            event_code: "Sign-in activity"
+            log_name: "SignInLogs"
+            product:
+              name: "Azure Active Directory"
+              vendor_name: "Microsoft"
+            version: "1.5.0"
+          service:
+            name: "Windows Azure Active Directory"
+            uid: "00000002-0000-0000-c000-000000000000"
+          severity: "Informational"
+          severity_id: 1
+          src_endpoint:
+            ip: "192.182.149.21"
+            location:
+              city: "Kirkland"
+              country: "US"
+              lat: -122.19957733154297
+            os:
+              name: "Windows 10"
+              type_id: 100
+          status_code: "0"
+          time: 1589373319636
+          type_name: "Authentication: Logon"
+          type_uid: 300201
           user:
             email_addr: "testtest@datadoghq.com"
             name: "Test Test"
             type: "User"
             type_id: 1
             uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        dst_endpoint:
-          svc_name: "Windows Azure Active Directory"
-          uid: "00000002-0000-0000-c000-000000000000"
-        metadata:
-          event_code: "Sign-in activity"
-          log_name: "SignInLogs"
-          product:
-            name: "Azure Active Directory"
-            vendor_name: "Microsoft"
-          version: "1.5.0"
-        service:
-          name: "Windows Azure Active Directory"
-          uid: "00000002-0000-0000-c000-000000000000"
-        severity: "Informational"
-        severity_id: 1
-        src_endpoint:
-          ip: "192.182.149.21"
+        operationVersion: "1.0"
+        properties:
+          appDisplayName: "ACOM Azure Website"
+          appId: "23523755-3a2b-41ca-9315-f81f3f566a95"
+          appliedConditionalAccessPolicies:
+            - result: "success"
+              conditionsNotSatisfied: 0
+              conditionsSatisfied: 3
+              enforcedGrantControls:
+                - "Mfa"
+              displayName: "Require MFA"
+              id: "ccb90f89-cdaf-4ae6-9dd1-a9ee6ea86a90"
+          authenticationDetails:
+            - authenticationStepDateTime: "2020-05-13T12:35:19.6363979+00:00"
+              authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
+              authenticationStepRequirement: "MultiConditionalAccess"
+              succeeded: false
+          clientAppUsed: "Browser"
+          conditionalAccessStatus: "success"
+          correlationId: "d47198c3-f726-47b8-b683-3f6244c9ceb5"
+          createdDateTime: "2020-05-13T12:35:19.6363979+00:00"
+          deviceDetail:
+            browser: "Chrome 81.0.4044"
+            deviceId: ""
+            operatingSystem: "Windows 10"
+          id: "b95c8eca-487b-4631-b6e5-0469cb7c0800"
+          ipAddress: "192.182.149.21"
+          isInteractive: false
           location:
             city: "Kirkland"
-            country: "US"
-            lat: -122.19957733154297
-          os:
-            name: "Windows 10"
-            type_id: 100
-        status_code: "0"
-        time: 1589373319636
-        type_name: "Authentication: Logon"
-        type_uid: 300201
-        user:
-          email_addr: "testtest@datadoghq.com"
+            countryOrRegion: "US"
+            geoCoordinates:
+              latitude: 47.654361724853516
+              longitude: -122.19957733154297
+            state: "Washington"
+          originalRequestId: "b95c8eca-487b-4631-b6e5-0469cb7c0800"
+          processingTimeInMilliseconds: 131
+          resourceDisplayName: "Windows Azure Active Directory"
+          resourceId: "00000002-0000-0000-c000-000000000000"
+          riskDetail: "none"
+          riskLevelAggregated: "none"
+          riskLevelDuringSignIn: "none"
+          riskState: "none"
+          servicePrincipalId: ""
+          status:
+            errorCode: 0
+          tokenIssuerName: ""
+          tokenIssuerType: "AzureAD"
+          userId: "0abb8889-005c-4307-85c2-97a5d3cd0964"
+        resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
+        resultSignature: "None"
+        resultType: "0"
+        service: "azure"
+        tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
+        title: "'Sign-in activity' resulted in success initiated by testtest@datadoghq.com "
+        usr:
+          email: "testtest@datadoghq.com"
+          id: "testtest@datadoghq.com"
           name: "Test Test"
-          type: "User"
-          type_id: 1
-          uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
-      operationVersion: "1.0"
-      properties:
-        appDisplayName: "ACOM Azure Website"
-        appId: "23523755-3a2b-41ca-9315-f81f3f566a95"
-        appliedConditionalAccessPolicies:
-          - result: "success"
-            conditionsNotSatisfied: 0
-            conditionsSatisfied: 3
-            enforcedGrantControls:
-              - "Mfa"
-            displayName: "Require MFA"
-            id: "ccb90f89-cdaf-4ae6-9dd1-a9ee6ea86a90"
-        authenticationDetails:
-          - authenticationStepDateTime: "2020-05-13T12:35:19.6363979+00:00"
-            authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
-            authenticationStepRequirement: "MultiConditionalAccess"
-            succeeded: false
-        clientAppUsed: "Browser"
-        conditionalAccessStatus: "success"
-        correlationId: "d47198c3-f726-47b8-b683-3f6244c9ceb5"
-        createdDateTime: "2020-05-13T12:35:19.6363979+00:00"
-        deviceDetail:
-          browser: "Chrome 81.0.4044"
-          deviceId: ""
-          operatingSystem: "Windows 10"
-        id: "b95c8eca-487b-4631-b6e5-0469cb7c0800"
-        ipAddress: "192.182.149.21"
-        isInteractive: false
-        location:
-          city: "Kirkland"
-          countryOrRegion: "US"
-          geoCoordinates:
-            latitude: 47.654361724853516
-            longitude: -122.19957733154297
-          state: "Washington"
-        originalRequestId: "b95c8eca-487b-4631-b6e5-0469cb7c0800"
-        processingTimeInMilliseconds: 131
-        resourceDisplayName: "Windows Azure Active Directory"
-        resourceId: "00000002-0000-0000-c000-000000000000"
-        riskDetail: "none"
-        riskLevelAggregated: "none"
-        riskLevelDuringSignIn: "none"
-        riskState: "none"
-        servicePrincipalId: ""
-        status:
-          errorCode: 0
-        tokenIssuerName: ""
-        tokenIssuerType: "AzureAD"
-        userId: "0abb8889-005c-4307-85c2-97a5d3cd0964"
-      resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
-      resultSignature: "None"
-      resultType: "0"
-      service: "azure"
-      tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
-      title: "'Sign-in activity' resulted in success initiated by testtest@datadoghq.com "
-      usr:
-        email: "testtest@datadoghq.com"
-        id: "testtest@datadoghq.com"
-        name: "Test Test"
-    message: "MFA requirement satisfied by claim in the token"
-    tags:
-      - "source:LOGS_SOURCE"
-    timestamp: 1589373319636
+      message: "MFA requirement satisfied by claim in the token"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1589373319636
   - sample: |-
       {
         "time": "2020-04-08T07:40:53.1695436Z",
