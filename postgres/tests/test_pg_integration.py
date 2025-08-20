@@ -12,7 +12,7 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
-from datadog_checks.postgres.util import BUFFERCACHE_METRICS, DatabaseHealthCheckError, PartialFormatter, fmt
+from datadog_checks.postgres.util import BUFFERCACHE_METRICS, PartialFormatter, fmt
 
 from .common import (
     COMMON_METRICS,
@@ -993,7 +993,7 @@ def test_database_instance_cloud_metadata_aws(
             None,
             None,
             False,
-        ),   
+        ),
     ],
 )
 def test_database_instance_cloud_metadata_azure(

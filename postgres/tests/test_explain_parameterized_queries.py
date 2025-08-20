@@ -65,7 +65,7 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, query, e
             "SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'".format(
                 query_signature=compute_sql_signature(query)
             ),
-    )
+        )
     assert len(rows) == 0
 
 
@@ -93,7 +93,7 @@ def test_explain_parameterized_queries_generic_params(integration_check, dbm_ins
         explain_param_queries._create_prepared_statement(conn, query, query, query_signature)
         assert expected_generic_values == explain_param_queries._get_number_of_parameters_for_prepared_statement(
             conn, query_signature
-    )
+        )
 
 
 @pytest.mark.integration
@@ -122,13 +122,11 @@ def test_explain_parameterized_queries_version_below_12(integration_check, dbm_i
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_12
 def test_explain_parameterized_queries_create_prepared_statement_exception(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
-    check._connect()
-
     check.check(dbm_instance)
-    if check.version < V12:
-        return
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._create_prepared_statement',
@@ -147,13 +145,12 @@ def test_explain_parameterized_queries_create_prepared_statement_exception(integ
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_12
 def test_explain_parameterized_queries_explain_prepared_statement_exception(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
-    check._connect()
 
     check.check(dbm_instance)
-    if check.version < V12:
-        return
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._explain_prepared_statement',
@@ -167,24 +164,24 @@ def test_explain_parameterized_queries_explain_prepared_statement_exception(inte
         assert explain_err_code == DBExplainError.failed_to_explain_with_prepared_statement
         assert err is not None
         assert err == "<class 'psycopg.DatabaseError'>"
-        # check that we deallocated the prepared statement after explaining
-        rows = check.statement_samples._explain_parameterized_queries._execute_query_and_fetch_rows(
-            DB_NAME,
-            "SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'".format(
-                query_signature=compute_sql_signature(query)
-            ),
-        )
+        with check.db_pool.get_connection(DB_NAME) as conn:
+            # check that we deallocated the prepared statement after explaining
+            rows = check.statement_samples._explain_parameterized_queries._execute_query_and_fetch_rows(
+                conn,
+                "SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'".format(
+                    query_signature=compute_sql_signature(query)
+                ),
+            )
         assert len(rows) == 0
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_12
 def test_explain_parameterized_queries_explain_prepared_statement_no_plan_returned(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
-    check._connect()
 
     check.check(dbm_instance)
-    if check.version < V12:
-        return
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._execute_query_and_fetch_rows',
@@ -202,14 +199,10 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
 
 
 @pytest.mark.unit
+@requires_over_12
 def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
-    check._connect()
     test_query_signature = "12345678"
-
-    check.check(dbm_instance)
-    if check.version < V12:
-        return
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._get_number_of_parameters_for_prepared_statement',
@@ -217,21 +210,17 @@ def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_
     ):
         prepared_statement_query = (
             check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
-                DB_NAME, test_query_signature
+                None, test_query_signature
             )
         )
         assert prepared_statement_query == f"EXECUTE dd_{test_query_signature}"
 
 
 @pytest.mark.unit
+@requires_over_12
 def test_generate_prepared_statement_query_three_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
-    check._connect()
     test_query_signature = "12345678"
-
-    check.check(dbm_instance)
-    if check.version < V12:
-        return
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._get_number_of_parameters_for_prepared_statement',
@@ -239,16 +228,16 @@ def test_generate_prepared_statement_query_three_parameters(integration_check, d
     ):
         prepared_statement_query = (
             check.statement_samples._explain_parameterized_queries._generate_prepared_statement_query(
-                DB_NAME, test_query_signature
+                None, test_query_signature
             )
         )
         assert prepared_statement_query == f"EXECUTE dd_{test_query_signature}(null,null,null)"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
+@requires_over_12
 def test_create_prepared_statement_exception(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
-    check._connect()
 
     query = "SELECT * FROM pg_settings WHERE name = $1"
     query_signature = compute_sql_signature(query)
