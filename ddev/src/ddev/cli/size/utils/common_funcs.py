@@ -186,12 +186,12 @@ def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[
     """
     integration_sizes: dict[str, int] = {}
     integration_versions: dict[str, str] = {}
-    py_version = py_version.split(".")[0]
+    py_major_version = py_version.split(".")[0]
 
     for root, _, files in os.walk(repo_path):
         integration_name = str(os.path.relpath(root, repo_path).split(os.sep)[0])
 
-        if not check_version(str(repo_path), integration_name, py_version):
+        if not check_python_version(str(repo_path), integration_name, py_major_version):
             continue
         for file in files:
             file_path = os.path.join(root, file)
@@ -217,19 +217,19 @@ def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[
     ]
 
 
-def check_version(repo_path: str, integration_name: str, version: str) -> bool:
+def check_python_version(repo_path: str, integration_name: str, py_major_version: str) -> bool:
     pyproject_path = os.path.join(repo_path, integration_name, "pyproject.toml")
     if os.path.exists(pyproject_path):
         pyproject = load_toml_file(pyproject_path)
         if "project" not in pyproject or "classifiers" not in pyproject["project"]:
             return False
         classifiers = pyproject["project"]["classifiers"]
-        integration_version = ""
+        integration_py_version = ""
         for classifier in classifiers:
             match = re.match(r"Programming Language :: Python :: (\d+)", classifier)
             if match:
-                integration_version = match.group(1)
-                return integration_version == version
+                integration_py_version = match.group(1)
+                return integration_py_version == py_major_version
     return False
 
 

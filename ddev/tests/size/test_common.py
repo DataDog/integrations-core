@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, mock_open, patch
 
 from ddev.cli.size.utils.common_funcs import (
-    check_version,
+    check_python_version,
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
@@ -204,7 +204,7 @@ def test_get_files_grouped_and_with_versions():
             "ddev.cli.size.utils.common_funcs.convert_to_human_readable_size",
             side_effect=lambda s: f"{s / 1024:.2f} KB",
         ),
-        patch("ddev.cli.size.utils.common_funcs.check_version", return_value=True),
+        patch("ddev.cli.size.utils.common_funcs.check_python_version", return_value=True),
     ):
         result = get_files(repo_path, compressed=False, py_version="3.12")
 
@@ -236,8 +236,8 @@ def test_check_version():
         ),
         patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
     ):
-        assert check_version("fake_repo", "integration1", "3")
-        assert not check_version("fake_repo", "integration1", "2")
+        assert check_python_version("fake_repo", "integration1", "3")
+        assert not check_python_version("fake_repo", "integration1", "2")
 
 
 def test_get_gitignore_files():
