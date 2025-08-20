@@ -97,12 +97,12 @@ jobs:
           fi
           cat size_diffs_output.txt >> $GITHUB_STEP_SUMMARY
 
-      # - name: Upload diffs to GitHub
-      #   run: |
-      #     gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
-      #     gh pr comment ${{ github.event.pull_request.number }} --body-file size_diffs_output.txt
-      #   env:
-      #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload diffs to GitHub
+        run: |
+          # gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+          gh pr comment ${{ github.event.pull_request.number }} --body-file size_diffs_output.txt
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffs artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
