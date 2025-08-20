@@ -290,7 +290,9 @@ jobs:
       platform: ${{ matrix.platform }}
 
   join-size-diffs:
-    needs: calculate-size-diffs-macos,calculate-size-diffs
+    needs:
+      - calculate-size-diffs-macos
+      - calculate-size-diffs
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
