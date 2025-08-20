@@ -1,1 +1,0 @@
-Add option to specify container to check logs from and to wait for health when running docker compose up
