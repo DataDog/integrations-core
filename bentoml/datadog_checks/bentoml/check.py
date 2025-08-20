@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
-
-from datadog_checks.base import AgentCheck  # noqa: F401
-
-from datadog_checks.base import OpenMetricsBaseCheckV2  # noqa: F401
-from datadog_checks.bentoml.metrics import METRICS, ENDPOINT_METRICS
 from urllib.parse import urlparse, urlunparse
+
+from datadog_checks.base import (
+    AgentCheck,  # noqa: F401
+    OpenMetricsBaseCheckV2,  # noqa: F401
+)
+from datadog_checks.bentoml.metrics import ENDPOINT_METRICS, METRICS
 
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -15,7 +16,6 @@ from urllib.parse import urlparse, urlunparse
 
 
 class BentomlCheck(OpenMetricsBaseCheckV2):
-
     # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = 'bentoml'
     DEFAULT_METRIC_LIMIT = 0
@@ -45,7 +45,6 @@ class BentomlCheck(OpenMetricsBaseCheckV2):
         super(BentomlCheck, self).check(instance)
         self.check_health_endpoint()
 
-
     def check_health_endpoint(self):
         endpoint = self.base_url
         for endpoint, metric in ENDPOINT_METRICS.items():
@@ -55,5 +54,5 @@ class BentomlCheck(OpenMetricsBaseCheckV2):
             if response.status_code == 200:
                 self.gauge(metric, 1, tags=self.tags)
             else:
-                self.log.debug(f"Failed to get {metric} from {url}")
+                self.log.debug("Failed to get %s from %s", metric, url)
                 self.gauge(metric, 0, tags=self.tags)

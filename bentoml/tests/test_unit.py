@@ -6,8 +6,8 @@ from typing import Any, Callable, Dict  # noqa: F401
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.bentoml import BentomlCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 
 def test_check(dd_run_check, aggregator, instance):
