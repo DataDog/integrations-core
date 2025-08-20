@@ -186,7 +186,7 @@ jobs:
       run-id: ${{ github.run_id }}
       resolved-deps: true
   
-  calculate-dep-sizes:
+  calculate-size-diffs:
     needs: measure-disk-usage
     strategy:
       matrix:
@@ -194,6 +194,18 @@ jobs:
     uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
+
+  comment-size-diffs-on-pr:
+    needs: calculate-size-diffs
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Comment on PR
+        run: |
+          cat $GITHUB_STEP_SUMMARY >> comment.txt
+          gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
   build-macos:
@@ -281,7 +293,7 @@ jobs:
       run-id: ${{ github.run_id }}
       resolved-deps: true
   
-  calculate-dep-sizes-macos:
+  calculate-size-diffs-macos:
     needs: measure-disk-usage-macos
     strategy:
       matrix:
@@ -289,6 +301,18 @@ jobs:
     uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
+
+  comment-size-diffs-on-pr-macos:
+    needs: calculate-size-diffs-macos
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Comment on PR
+        run: |
+          cat $GITHUB_STEP_SUMMARY >> comment.txt
+          gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 
