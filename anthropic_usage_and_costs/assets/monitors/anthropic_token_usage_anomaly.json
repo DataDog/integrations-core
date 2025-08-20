@@ -1,0 +1,41 @@
+{
+	"version": 2,
+	"created_at": "2025-08-17",
+	"last_updated_at": "2025-08-17",
+	"title": "Anthropic Token Usage Is Abnormally High",
+	"description": "Token usage is abnormally high",
+	"definition": {
+		"name": "Anthropic Token Usage Is Abnormally High",
+		"type": "query alert",
+		"query": "avg(last_4h):anomalies(sum:anthropic.messages.input_tokens{*} by {model,workspace_name,org_name}.as_count() + sum:anthropic.messages.output_tokens{*} by {model,workspace_name,org_name}.as_count() + sum:anthropic.messages.cache_read_input_tokens{*} by {model,workspace_name,org_name}.as_count() + sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{*} by {model,workspace_name,org_name}.as_count() + sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{*} by {model,workspace_name,org_name}.as_count(), 'agile', 3, direction='above', interval=60, alert_window='last_30m', timezone='utc', count_default_zero='true', seasonality='hourly') >= 1",
+		"message": "## Anthropic Token Usage Anomaly Alert\n\n{{#is_alert}}\n**ALERT**: Abnormally high token usage detected for Anthropic API.\n\n**Current Status**: The total token consumption (input + output + cache read + cache write) is significantly higher than expected based on historical patterns.\n\n**Potential Causes**:\n- Unexpected spike in API requests\n- Inefficient prompting or loops in code\n- Potential runaway processes or infinite loops\n- Large batch processing without proper throttling\n- Compromised API keys being misused\n\n**Recommended Actions**:\n1. Review recent deployments or changes that might have increased usage\n2. Verify no infinite loops or runaway processes are consuming tokens\n3. Check for any unauthorized API key usage\n\n**Workspace**: {{workspace_name.name}}\n**Model**: {{model.name}}\n{{/is_alert}}\n\n{{#is_recovery}}\n**RECOVERED**: Token usage has returned to normal levels.\n{{/is_recovery}}",
+		"tags": [
+			"integration:anthropic",
+			"alert_type:anomaly"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1,
+				"critical_recovery": 0
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"renotify_interval": 0,
+			"threshold_windows": {
+				"trigger_window": "last_30m",
+				"recovery_window": "last_30m"
+			},
+			"timeout_h": 0,
+			"include_tags": true,
+			"escalation_message": "Token usage remains abnormally high. Please investigate immediately to prevent unexpected costs.",
+			"evaluation_delay": 0,
+			"avalanche_window": 10,
+			"on_missing_data": "show_no_data",
+			"new_group_delay": 0
+		},
+		"priority": 3
+	},
+	"tags": [
+		"integration:anthropic-usage-and-costs"
+	]
+}
