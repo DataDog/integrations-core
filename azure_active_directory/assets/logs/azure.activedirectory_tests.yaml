@@ -228,4 +228,351 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1589373319636
-
+  sample: |- 
+    {
+      "time": "2020-04-08T07:40:53.1695436Z",
+      "resourceId": "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam",
+      "operationName": "Delete user",
+      "operationVersion": "1.0",
+      "category": "AuditLogs",
+      "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+      "resultSignature": "None",
+      "durationMs": 0,
+      "callerIpAddress": "192.182.149.21",
+      "correlationId": "a13bd0fa-70d0-4e60-ae23-b687377b4695",
+      "Level": 4,
+      "properties": {
+        "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+        "resultType": "",
+        "resultDescription": "",
+        "operationName": "Delete user",
+        "identity": "",
+        "tenantGeo": "NA",
+        "id": "Directory_a13bd0fa-70d0-4e60-ae23-b687377b4695_VTP26_161277857",
+        "category": "UserManagement",
+        "correlationId": "a13bd0fa-70d0-4e60-ae23-b687377b4695",
+        "result": "success",
+        "resultReason": "",
+        "activityDisplayName": "Delete user",
+        "activityDateTime": "2020-04-08T07:40:53.1695436+00:00",
+        "loggedByService": "Core Directory",
+        "operationType": "Delete",
+        "userAgent": null,
+        "initiatedBy": {
+          "user": {
+            "id": "018af091-5465-4aed-9d6f-8c40981b2375",
+            "displayName": null,
+            "userPrincipalName": "test.test@datadoghq.com",
+            "ipAddress": "192.182.149.21",
+            "roles": []
+          }
+        },
+        "targetResources": [
+          {
+            "id": "1606d62c-71bc-42ff-a03c-87809c6b0e68",
+            "displayName": null,
+            "type": "User",
+            "userPrincipalName": "deleted_user@datadoghq.com",
+            "modifiedProperties": [
+              {
+                "displayName": "Is Hard Deleted",
+                "oldValue": null,
+                "newValue": "\"False\""
+              }
+            ],
+            "administrativeUnits": []
+          }
+        ],
+        "additionalDetails": [
+          {
+            "key": "User-Agent",
+            "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:141.0) Gecko/20100101 Firefox/141.0"
+          }
+        ]
+      }
+    }
+  result: null
+  sample: |- 
+    {
+      "time": "2020-04-08T07:40:53.1695436Z",
+      "resourceId": "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam",
+      "operationName": "Add member to role",
+      "operationVersion": "1.0",
+      "category": "AuditLogs",
+      "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+      "resultSignature": "None",
+      "durationMs": 0,
+      "callerIpAddress": "192.182.149.21",
+      "correlationId": "5d3c3340-5c5e-419c-9ae9-193b1669f84e",
+      "Level": 4,
+      "properties": {
+        "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+        "resultType": "",
+        "resultDescription": "",
+        "operationName": "Add member to role",
+        "identity": "",
+        "tenantGeo": "NA",
+        "id": "Directory_5d3c3340-5c5e-419c-9ae9-193b1669f84e_D4P59_168172641",
+        "category": "RoleManagement",
+        "correlationId": "5d3c3340-5c5e-419c-9ae9-193b1669f84e",
+        "result": "success",
+        "resultReason": "",
+        "activityDisplayName": "Add member to role",
+        "activityDateTime": "2020-04-08T07:40:53.1695436+00:00",
+        "loggedByService": "Core Directory",
+        "operationType": "Assign",
+        "userAgent": null,
+        "initiatedBy": {
+          "user": {
+            "id": "9ff6ab06-49d6-49e8-9974-e979522283c1",
+            "displayName": null,
+            "userPrincipalName": "test.user@datadoghq.com",
+            "ipAddress": "192.182.149.21",
+            "roles": []
+          }
+        },
+        "targetResources": [
+          {
+            "id": "febf6383-8bed-4efb-8244-c9a456a1f172",
+            "displayName": "Test Service Principal",
+            "type": "ServicePrincipal",
+            "modifiedProperties": [
+              {
+                "displayName": "Role.ObjectID",
+                "oldValue": null,
+                "newValue": "\"260a316b-1246-41c7-bc20-16569a1bd28d\""
+              },
+              {
+                "displayName": "Role.DisplayName",
+                "oldValue": null,
+                "newValue": "\"Security Administrator\""
+              },
+              {
+                "displayName": "Role.TemplateId",
+                "oldValue": null,
+                "newValue": "\"194ae4cb-b126-40b2-bd5b-6091b380977d\""
+              },
+              {
+                "displayName": "Role.WellKnownObjectName",
+                "oldValue": null,
+                "newValue": "\"SecurityAdmins\""
+              },
+              {
+                "displayName": "TargetId.ServicePrincipalNames",
+                "oldValue": null,
+                "newValue": "\"9205c433-2781-42be-a046-c21ef6b5e608\""
+              }
+            ],
+            "administrativeUnits": []
+          },
+          {
+            "id": "260a316b-1246-41c7-bc20-16569a1bd28d",
+            "displayName": null,
+            "type": "Role",
+            "modifiedProperties": [],
+            "administrativeUnits": []
+          }
+        ],
+        "additionalDetails": [
+          { "key": "AppId", "value": "9205c433-2781-42be-a046-c21ef6b5e608" }
+        ]
+      }
+    } 
+  result: null   
+  sample: |- 
+    {
+      "time": "2020-04-08T07:40:53.1695436Z",
+      "resourceId": "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam",
+      "operationName": "Add member to group",
+      "operationVersion": "1.0",
+      "category": "AuditLogs",
+      "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+      "resultSignature": "None",
+      "durationMs": 0,
+      "callerIpAddress": "192.182.149.21",
+      "correlationId": "67c2eef3-4b38-4017-82dd-ecc064c38151",
+      "Level": 4,
+      "properties": {
+        "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+        "resultType": "",
+        "resultDescription": "",
+        "operationName": "Add member to group",
+        "identity": "",
+        "tenantGeo": "NA",
+        "id": "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951",
+        "category": "GroupManagement",
+        "correlationId": "67c2eef3-4b38-4017-82dd-ecc064c38151",
+        "result": "success",
+        "resultReason": "",
+        "activityDisplayName": "Add member to group",
+        "activityDateTime": "2020-04-08T07:40:53.1695436+00:00",
+        "loggedByService": "Core Directory",
+        "operationType": "Assign",
+        "userAgent": null,
+        "initiatedBy": {
+          "user": {
+            "id": "9ff6ab06-49d6-49e8-9974-e979522283c1",
+            "displayName": null,
+            "userPrincipalName": "test.user@datadoghq.com",
+            "ipAddress": "192.182.149.21",
+            "roles": []
+          }
+        },
+        "targetResources": [
+          {
+            "id": "febf6383-8bed-4efb-8244-c9a456a1f172",
+            "displayName": "Test Application",
+            "type": "ServicePrincipal",
+            "modifiedProperties": [
+              {
+                "displayName": "Group.ObjectID",
+                "oldValue": null,
+                "newValue": "\"3b3bf2cd-049a-4f35-9e63-dc2a0a830807\""
+              },
+              {
+                "displayName": "Group.DisplayName",
+                "oldValue": null,
+                "newValue": "\"Security-Research-Admins\""
+              },
+              {
+                "displayName": "TargetId.ServicePrincipalNames",
+                "oldValue": null,
+                "newValue": "\"9205c433-2781-42be-a046-c21ef6b5e608\""
+              }
+            ],
+            "administrativeUnits": []
+          },
+          {
+            "id": "3b3bf2cd-049a-4f35-9e63-dc2a0a830807",
+            "displayName": null,
+            "type": "Group",
+            "groupType": "unknownFutureValue",
+            "modifiedProperties": [],
+            "administrativeUnits": []
+          }
+        ],
+        "additionalDetails": [
+          {
+            "key": "User-Agent",
+            "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+          },
+          { "key": "AppId", "value": "9205c433-2781-42be-a046-c21ef6b5e608" }
+        ]
+      }
+    }
+  result: null
+  sample: |-
+    {
+      "time": "2020-04-08T07:40:53.1695436Z",
+      "resourceId": "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam",
+      "operationName": "Validate user authentication",
+      "operationVersion": "1.0",
+      "category": "AuditLogs",
+      "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+      "resultSignature": "None",
+      "resultDescription": "Token is valid",
+      "durationMs": 0,
+      "callerIpAddress": "192.182.149.21",
+      "correlationId": "f32c392f-d8a3-4846-b89d-8c4cb9a404d8",
+      "identity": "test.user@datadoghq.com",
+      "Level": 4,
+      "properties": {
+        "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+        "resultType": "",
+        "resultDescription": "Token is valid",
+        "operationName": "Validate user authentication",
+        "identity": "test.user@datadoghq.com",
+        "tenantGeo": "NA",
+        "id": "B2C_f32c392f-d8a3-4846-b89d-8c4cb9a404d8_4d3bac44-0230-4732-9e70-cc00736f0a97_134000182275995730",
+        "category": "Authentication",
+        "correlationId": "f32c392f-d8a3-4846-b89d-8c4cb9a404d8",
+        "result": "success",
+        "resultReason": "Token is valid",
+        "activityDisplayName": "Validate user authentication",
+        "activityDateTime": "2020-04-08T07:40:53.1695436+00:00",
+        "loggedByService": "B2C",
+        "operationType": "Read",
+        "userAgent": null,
+        "initiatedBy": {
+          "user": {
+            "id": "9ff6ab06-49d6-49e8-9974-e979522283c1",
+            "displayName": "test.user@datadoghq.com",
+            "userPrincipalName": "test.user@datadoghq.com",
+            "ipAddress": "192.182.149.21",
+            "roles": []
+          }
+        },
+        "targetResources": [
+          {
+            "id": null,
+            "displayName": "00000000-0000-0000-0000-000000000000",
+            "type": "Other",
+            "modifiedProperties": [],
+            "administrativeUnits": []
+          }
+        ],
+        "additionalDetails": [
+          {
+            "key": "targetTenant",
+            "value": "00000000-0000-0000-0000-000000000000"
+          },
+          { "key": "targetEntityType", "value": "None" },
+          { "key": "actorIdentityType", "value": "UPN" },
+          { "key": "RequestId", "value": "f32c392f-d8a3-4846-b89d-8c4cb9a404d8" }
+        ]
+      }
+    }
+  result: null
+  sample: |-
+    {
+      "time": "2020-04-08T07:40:53.1695436Z",
+      "resourceId": "/TENANTS/4d3bac44-0230-4732-9e70-cc00736f0a97/PROVIDERS/MICROSOFT.AADIAM",
+      "operationName": "Microsoft Graph Activity",
+      "operationVersion": "v1.0",
+      "category": "MicrosoftGraphActivityLogs",
+      "resultSignature": "403",
+      "durationMs": "653489",
+      "callerIpAddress": "192.182.149.21",
+      "correlationId": "89c623b7-6451-4af8-b9f1-e56656de8dd9",
+      "level": "Informational",
+      "location": "East US",
+      "properties":
+        {
+          "__UDI_RequiredFields_TenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+          "__UDI_RequiredFields_UniqueId": "89c623b7-6451-4af8-b9f1-e56656de8dd9",
+          "__UDI_RequiredFields_EventTime": 638906399196346121,
+          "__UDI_RequiredFields_RegionScope": "NA",
+          "timeGenerated": "2020-04-08T07:40:53.1695436Z",
+          "location": "East US",
+          "requestId": "89c623b7-6451-4af8-b9f1-e56656de8dd9",
+          "operationId": "89c623b7-6451-4af8-b9f1-e56656de8dd9",
+          "clientRequestId": "89c623b7-6451-4af8-b9f1-e56656de8dd9",
+          "apiVersion": "v1.0",
+          "requestMethod": "GET",
+          "responseStatusCode": 403,
+          "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
+          "durationMs": 653489,
+          "responseSizeBytes": 266,
+          "signInActivityId": "JzbLMNpZQU29nt7s3hYlAA",
+          "roles": "",
+          "appId": "c83e381f-7d76-48fd-848d-5e443e3d9e37",
+          "UserPrincipalObjectID": "9205c433-2781-42be-a046-c21ef6b5e608",
+          "scopes": "",
+          "identityProvider": "https://sts.windows.net/4d3bac44-0230-4732-9e70-cc00736f0a97/",
+          "clientAuthMethod": "1",
+          "wids": "0997a1d0-0d1d-4acb-b408-d5ca73121e90",
+          "C_Idtyp": "app",
+          "C_Iat": "1755041038",
+          "ipAddress": "192.182.149.21",
+          "userAgent": "Datadog",
+          "requestUri": "https://graph.microsoft.com/v1.0/users?%24top=800&%24select=accountEnabled%2CageGroup%2CassignedLicenses%2CassignedPlans%2CbusinessPhones%2Ccity%2CcompanyName%2CconsentProvidedForMinor%2Ccountry%2CcreatedDateTime%2CcreationType%2CdeletedDateTime%2Cdepartment%2CdisplayName%2CemployeeHireDate%2CemployeeId%2CemployeeOrgData%2CemployeeType%2CexternalUserState%2CexternalUserStateChangeDateTime%2CfaxNumber%2CgivenName%2Cid%2Cidentities%2CimAddresses%2CisResourceAccount%2CjobTitle%2ClastPasswordChangeDateTime%2ClegalAgeGroupClassification%2ClicenseAssignmentStates%2Cmail%2CmailNickname%2CmobilePhone%2CofficeLocation%2ConPremisesDistinguishedName%2ConPremisesDomainName%2ConPremisesExtensionAttributes%2ConPremisesImmutableId%2ConPremisesLastSyncDateTime%2ConPremisesProvisioningErrors%2ConPremisesSamAccountName%2ConPremisesSecurityIdentifier%2ConPremisesSyncEnabled%2ConPremisesUserPrincipalName%2CotherMails%2CpasswordPolicies%2CpasswordProfile%2CpostalCode%2CpreferredDataLocation%2CpreferredLanguage%2CprovisionedPlans%2CproxyAddresses%2CrefreshTokensValidFromDateTime%2CsecurityIdentifier%2CshowInAddressList%2CsignInSessionsValidFromDateTime%2Cstate%2CstreetAddress%2Csurname%2CusageLocation%2CuserPrincipalName%2CuserType",
+          "atContentP": "",
+          "atContentH": "",
+          "C_Sid": "",
+          "C_DeviceId": "",
+          "servicePrincipalId": "9205c433-2781-42be-a046-c21ef6b5e608",
+          "tokenIssuedAt": "2025-08-12T23:23:58.0000000Z"
+        },
+      "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97"
+    }
+  result: null
