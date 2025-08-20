@@ -1,0 +1,37 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c00f61a4-82bf-47d9-a15c-f498c3a83be0",
+  "app_id": "zerofox-cloud-platform",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into ZeroFox Cloud Platform alerts.",
+    "title": "ZeroFox Cloud Platform",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 55693072,
+      "source_type_name": "ZeroFox Cloud Platform",
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
