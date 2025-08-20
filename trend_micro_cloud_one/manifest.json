@@ -23,9 +23,6 @@
       "auto_install": true,
       "source_type_id": 55693496,
       "source_type_name": "Trend Micro Cloud One",
-      "configuration": {
-        "spec": "assets/configuration/spec.yaml"
-      },
       "events": {
         "creates_events": false
       }
