@@ -4,8 +4,6 @@
 
 from typing import Dict, List
 
-import psycopg
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
@@ -74,14 +72,7 @@ class PostgresAutodiscovery(Discovery):
     def _get_databases(self) -> List[str]:
         with self.db_pool.get_connection(self._db) as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute(AUTODISCOVERY_QUERY)
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing the autodiscovery query: %s. ",
-                        e,
-                    )
-                    return []
+                cursor.execute(AUTODISCOVERY_QUERY)
                 databases = list(cursor.fetchall())
                 databases = [
                     x[0] for x in databases

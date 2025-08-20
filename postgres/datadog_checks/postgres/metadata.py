@@ -290,11 +290,8 @@ class PostgresMetadata(DBMAsyncJob):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
         self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
-        try:
-            self.report_postgres_metadata()
-            self.report_postgres_extensions()
-        except Exception:
-            self._log.exception('Unable to collect metadata due to an error')
+        self.report_postgres_metadata()
+        self.report_postgres_extensions()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
@@ -327,14 +324,7 @@ class PostgresMetadata(DBMAsyncJob):
 
                 # Get loaded extensions
                 cursor.execute(PG_EXTENSION_INFO_QUERY)
-                try:
-                    rows = cursor.fetchall()
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return []
+                rows = cursor.fetchall()
 
                 self._log.debug("Loaded %s rows from pg_extension", len(rows))
                 return [dict(row) for row in rows]
@@ -407,35 +397,37 @@ class PostgresMetadata(DBMAsyncJob):
                     if not self._should_collect_metadata(schema["name"], "schema"):
                         continue
 
-                    tables = self._query_tables_for_schema(schema["id"], dbname)
-                    self._log.debug(
-                        "Tables found for schema '{schema}' in database '{database}': {tables}".format(
-                            schema=database["schemas"],
-                            database=dbname,
-                            tables=[table["name"] for table in tables],
-                        )
-                    )
-                    table_chunks = list(get_list_chunks(tables, chunk_size))
+                    with self.db_pool.get_connection(dbname) as conn:
+                        with conn.cursor(row_factory=dict_row) as cursor:
+                            tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
+                            self._log.debug(
+                                "Tables found for schema '{schema}' in database '{database}': {tables}".format(
+                                    schema=database["schemas"],
+                                    database=dbname,
+                                    tables=[table["name"] for table in tables],
+                                )
+                            )
+                            table_chunks = list(get_list_chunks(tables, chunk_size))
 
-                    buffer_column_count = 0
-                    tables_buffer = []
-
-                    for tables in table_chunks:
-                        table_info = self._query_table_information(dbname, tables)
-
-                        tables_buffer = [*tables_buffer, *table_info]
-                        for t in table_info:
-                            buffer_column_count += len(t.get("columns", []))
-
-                        if buffer_column_count >= 100_000:
-                            self._flush_schema(base_event, database, schema, tables_buffer)
-                            total_tables += len(tables_buffer)
-                            tables_buffer = []
                             buffer_column_count = 0
+                            tables_buffer = []
 
-                    if len(tables_buffer) > 0:
-                        self._flush_schema(base_event, database, schema, tables_buffer)
-                        total_tables += len(tables_buffer)
+                            for tables in table_chunks:
+                                table_info = self._query_table_information(cursor, dbname, tables)
+
+                                tables_buffer = [*tables_buffer, *table_info]
+                                for t in table_info:
+                                    buffer_column_count += len(t.get("columns", []))
+
+                                if buffer_column_count >= 100_000:
+                                    self._flush_schema(base_event, database, schema, tables_buffer)
+                                    total_tables += len(tables_buffer)
+                                    tables_buffer = []
+                                    buffer_column_count = 0
+
+                            if len(tables_buffer) > 0:
+                                self._flush_schema(base_event, database, schema, tables_buffer)
+                                total_tables += len(tables_buffer)
         except Exception as e:
             self._log.error("Error collecting schema metadata: %s", e)
             status = "error"
@@ -518,7 +510,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._last_schemas_query_time = time.time()
         return metadata
 
-    def _query_database_information(self, dbname: str) -> Dict[str, Union[str, int]]:
+    def _query_database_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, Union[str, int]]:
         """
         Collect database info. Returns
             description: str
@@ -529,21 +521,11 @@ class PostgresMetadata(DBMAsyncJob):
         """
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
-        with self._check._get_main_db() as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                try:
-                    cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return []
+        cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
+        row = cursor.fetchone()
+        return row
 
-                row = cursor.fetchone()
-                return row
-
-    def _query_schema_information(self, dbname: str) -> Dict[str, str]:
+    def _query_schema_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, str]:
         """
         Collect user schemas. Returns
             id: str
@@ -562,28 +544,17 @@ class PostgresMetadata(DBMAsyncJob):
 
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
-        try:
-            with self.db_pool.get_connection(dbname) as conn:
-                with conn.cursor(row_factory=dict_row) as cursor:
-                    cursor.execute(schema_query_)
-                    rows = cursor.fetchall()
+        cursor.execute(schema_query_)
+        rows = cursor.fetchall()
 
-                    schemas = []
-                    for row in rows:
-                        schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
+        schemas = []
+        for row in rows:
+            schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
 
-                    self._log.debug(
-                        "Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows)
-                    )
-                    return schemas
-        except psycopg.Error as e:
-            self._log.error(
-                "Error while executing query: %s. ",
-                e,
-            )
-            return []
+        self._log.debug("Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows))
+        return schemas
 
-    def _get_table_info(self, dbname, schema_id):
+    def _get_table_info(self, cursor: psycopg.Cursor, dbname, schema_id):
         """
         Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
         the max_tables limit.
@@ -591,51 +562,40 @@ class PostgresMetadata(DBMAsyncJob):
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
         filter = self._get_tables_filter()
-        try:
-            if self._cancel_event.is_set():
-                raise Exception("Job loop cancelled. Aborting query.")
-            with self.db_pool.get_connection(dbname) as conn:
-                with conn.cursor(row_factory=dict_row) as cursor:
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-                        cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
-                    else:
-                        cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+            cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
+        else:
+            cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
 
-                    rows = cursor.fetchall()
-                    table_info = [dict(row) for row in rows]
+        rows = cursor.fetchall()
+        table_info = [dict(row) for row in rows]
 
-                    limit = self._config.schemas_metadata_config.get("max_tables", 300)
+        limit = self._config.schemas_metadata_config.get("max_tables", 300)
 
-                    if len(table_info) <= limit:
-                        return table_info
+        if len(table_info) <= limit:
+            return table_info
 
-                    self._log.debug(
-                        "{table_count} tables found but max_tables is set to {max_tables}."
-                        "{missing_count} tables will be missing from this collection".format(
-                            table_count=len(table_info), max_tables=limit, missing_count=len(table_info) - limit
-                        )
-                    )
-
-                    if not self._config.relations:
-                        self._check.log.warning(
-                            "Number of tables exceeds limit of %d set by max_tables but "
-                            "relation metrics are not configured for %s."
-                            "Please configure relation metrics for all tables to sort by most active."
-                            "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                            "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
-                            "for details on how to enable relation metrics.",
-                            limit,
-                            dbname,
-                        )
-                        return table_info[:limit]
-
-                    return self._sort_and_limit_table_info(dbname, table_info, limit)
-        except psycopg.Error as e:
-            self._log.error(
-                "Error while executing query: %s. ",
-                e,
+        self._log.debug(
+            "{table_count} tables found but max_tables is set to {max_tables}."
+            "{missing_count} tables will be missing from this collection".format(
+                table_count=len(table_info), max_tables=limit, missing_count=len(table_info) - limit
             )
-            return []
+        )
+
+        if not self._config.relations:
+            self._check.log.warning(
+                "Number of tables exceeds limit of %d set by max_tables but "
+                "relation metrics are not configured for %s."
+                "Please configure relation metrics for all tables to sort by most active."
+                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
+                "for details on how to enable relation metrics.",
+                limit,
+                dbname,
+            )
+            return table_info[:limit]
+
+        return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
     def _get_tables_filter(self):
         includes = self._config.schemas_metadata_config.get("include_tables", [])
@@ -657,7 +617,7 @@ class PostgresMetadata(DBMAsyncJob):
         return sql
 
     def _sort_and_limit_table_info(
-        self, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
+        self, cursor: psycopg.Cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
     ) -> List[Dict[str, Union[str, bool]]]:
         def sort_tables(info):
             cache = self._check.metrics_cache.table_activity_metrics
@@ -676,26 +636,19 @@ class PostgresMetadata(DBMAsyncJob):
                 return table_data.get("index_scans", 0) + table_data.get("seq_scans", 0)
             else:
                 # get activity
-                try:
-                    if self._cancel_event.is_set():
-                        raise Exception("Job loop cancelled. Aborting query.")
-                    with self.db_pool.get_connection(dbname) as conn:
-                        with conn.cursor(row_factory=dict_row) as cursor:
-                            cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
-                            row = cursor.fetchone()
-                            return row.get("total_activity", 0) if row is not None else 0
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return []
+                if self._cancel_event.is_set():
+                    raise Exception("Job loop cancelled. Aborting query.")
+                cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
+                row = cursor.fetchone()
+                return row.get("total_activity", 0) if row is not None else 0
 
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
 
-    def _query_tables_for_schema(self, schema_id: str, dbname: str) -> List[Dict[str, Union[str, Dict]]]:
+    def _query_tables_for_schema(
+        self, cursor: psycopg.Cursor, schema_id: str, dbname: str
+    ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect list of tables for a schema. Returns a list of dictionaries
         with key/values:
@@ -708,7 +661,7 @@ class PostgresMetadata(DBMAsyncJob):
             "num_partitions": int (if has partitions)
 
         """
-        tables_info = self._get_table_info(dbname, schema_id)
+        tables_info = self._get_table_info(cursor, dbname, schema_id)
         table_payloads = []
         for table in tables_info:
             this_payload = {}
@@ -725,7 +678,7 @@ class PostgresMetadata(DBMAsyncJob):
         return table_payloads
 
     def _query_table_information(
-        self, dbname: str, table_info: List[Dict[str, Union[str, bool]]]
+        self, cursor: psycopg.Cursor, dbname: str, table_info: List[Dict[str, Union[str, bool]]]
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information . Returns a dictionary
@@ -763,76 +716,67 @@ class PostgresMetadata(DBMAsyncJob):
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
 
         # Get indexes
-        try:
-            if self._cancel_event.is_set():
-                raise Exception("Job loop cancelled. Aborting query.")
-            with self.db_pool.get_connection(dbname) as conn:
-                with conn.cursor(row_factory=dict_row) as cursor:
-                    query = PG_INDEXES_QUERY.format(table_ids=table_ids)
-                    cursor.execute(query)
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+        query = PG_INDEXES_QUERY.format(table_ids=table_ids)
+        cursor.execute(query)
 
-                    rows = cursor.fetchall()
-                    for row in rows:
-                        # Partition indexes in some versions of Postgres have appended digits for each partition
-                        table_name = table_name_lookup.get(str(row.get("table_id")))
-                        while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
-                            table_name = table_name[0:-1]
-                        if tables.get(table_name) is not None:
-                            tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
+        rows = cursor.fetchall()
+        for row in rows:
+            # Partition indexes in some versions of Postgres have appended digits for each partition
+            table_name = table_name_lookup.get(str(row.get("table_id")))
+            while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
+                table_name = table_name[0:-1]
+            if tables.get(table_name) is not None:
+                tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
 
-                    # Get partitions
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-                        cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
-                        rows = cursor.fetchall()
-                        for row in rows:
-                            tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
+        # Get partitions
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
+            cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
+            rows = cursor.fetchall()
+            for row in rows:
+                tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
 
-                        cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
-                        rows = cursor.fetchall()
-                        for row in rows:
-                            table_name = table_name_lookup.get(str(row.get("id")))
-                            tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
+            cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
+            rows = cursor.fetchall()
+            for row in rows:
+                table_name = table_name_lookup.get(str(row.get("id")))
+                tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
 
-                    # Get foreign keys
-                    cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
-                    rows = cursor.fetchall()
-                    for row in rows:
-                        table_name = table_name_lookup.get(str(row.get("id")))
-                        tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [
-                            dict(row)
-                        ]
+        # Get foreign keys
+        cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
+        rows = cursor.fetchall()
+        for row in rows:
+            table_name = table_name_lookup.get(str(row.get("id")))
+            tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
 
-                    # Get columns
-                    cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
-                    rows = cursor.fetchall()
-                    for row in rows:
-                        table_name = table_name_lookup.get(str(row.get("id")))
-                        tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
+        # Get columns
+        cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
+        rows = cursor.fetchall()
+        for row in rows:
+            table_name = table_name_lookup.get(str(row.get("id")))
+            tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
 
-                    return tables.values()
-        except psycopg.Error as e:
-            self._log.error(
-                "Error while executing query: %s. ",
-                e,
-            )
-            return []
+        return tables.values()
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
-        database_info = self._query_database_information(dbname)
-        metadata.update(
-            {
-                "description": database_info["description"],
-                "name": database_info["name"],
-                "id": str(database_info["id"]),
-                "encoding": database_info["encoding"],
-                "owner": database_info["owner"],
-                "schemas": [],
-            }
-        )
-        schema_info = self._query_schema_information(dbname)
-        for schema in schema_info:
-            metadata["schemas"].append(schema)
+        with self.db_pool.get_connection(dbname) as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                database_info = self._query_database_information(cursor, dbname)
+                metadata.update(
+                    {
+                        "description": database_info["description"],
+                        "name": database_info["name"],
+                        "id": str(database_info["id"]),
+                        "encoding": database_info["encoding"],
+                        "owner": database_info["owner"],
+                        "schemas": [],
+                    }
+                )
+                schema_info = self._query_schema_information(cursor, dbname)
+                for schema in schema_info:
+                    metadata["schemas"].append(schema)
 
         return metadata
 
@@ -842,49 +786,42 @@ class PostgresMetadata(DBMAsyncJob):
             raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                try:
-                    # Get loaded extensions
-                    cursor.execute(PG_EXTENSIONS_QUERY)
-                    rows = cursor.fetchall()
-                    query = PG_SETTINGS_QUERY
-                    for row in rows:
-                        extension = row['extname']
-                        if extension in PG_EXTENSION_LOADER_QUERY:
-                            if row['schemaname'] in ['pg_catalog', 'public']:
-                                query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
-                            else:
-                                self._log.warning(
-                                    "unable to collect settings for extension %s in schema %s",
-                                    extension,
-                                    row['schemaname'],
-                                )
+                # Get loaded extensions
+                cursor.execute(PG_EXTENSIONS_QUERY)
+                rows = cursor.fetchall()
+                query = PG_SETTINGS_QUERY
+                for row in rows:
+                    extension = row['extname']
+                    if extension in PG_EXTENSION_LOADER_QUERY:
+                        if row['schemaname'] in ['pg_catalog', 'public']:
+                            query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
                         else:
-                            self._log.warning("unable to collect settings for unknown extension %s", extension)
+                            self._log.warning(
+                                "unable to collect settings for extension %s in schema %s",
+                                extension,
+                                row['schemaname'],
+                            )
+                    else:
+                        self._log.warning("unable to collect settings for unknown extension %s", extension)
 
-                    if self.pg_settings_ignored_patterns:
-                        query = query + " WHERE name NOT LIKE ALL(%s)"
+                if self.pg_settings_ignored_patterns:
+                    query = query + " WHERE name NOT LIKE ALL(%s)"
 
-                    self._log.debug(
-                        "Running query [%s] and patterns are %s",
-                        query,
-                        self.pg_settings_ignored_patterns,
-                    )
-                    self._time_since_last_settings_query = time.time()
-                    cursor.execute(query, (self.pg_settings_ignored_patterns,))
-                    # pg3 returns a set of results for each statement in the multiple statement query
-                    # We want to retrieve the last one that actually has the settings results
-                    rows = []
-                    has_more_results = True
-                    while has_more_results:
-                        if cursor.pgresult.status == psycopg.pq.ExecStatus.TUPLES_OK:
-                            rows = cursor.fetchall()
-                        has_more_results = cursor.nextset()
-                    self._log.debug("Loaded %s rows from pg_settings", rows)
-                    self._log.debug("Loaded %s rows from pg_settings", len(rows))
-                    return rows
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return []
+                self._log.debug(
+                    "Running query [%s] and patterns are %s",
+                    query,
+                    self.pg_settings_ignored_patterns,
+                )
+                self._time_since_last_settings_query = time.time()
+                cursor.execute(query, (self.pg_settings_ignored_patterns,))
+                # pg3 returns a set of results for each statement in the multiple statement query
+                # We want to retrieve the last one that actually has the settings results
+                rows = []
+                has_more_results = True
+                while has_more_results:
+                    if cursor.pgresult.status == psycopg.pq.ExecStatus.TUPLES_OK:
+                        rows = cursor.fetchall()
+                    has_more_results = cursor.nextset()
+                self._log.debug("Loaded %s rows from pg_settings", rows)
+                self._log.debug("Loaded %s rows from pg_settings", len(rows))
+                return rows

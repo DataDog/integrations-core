@@ -264,8 +264,4 @@ class QueryManager(QueryExecutor):
         # This needs to stay here b/c when we construct a QueryManager in a check's __init__
         # there is no check ID at that point
         self.logger = self.check.log
-        try:
-            return super(QueryManager, self).execute(extra_tags)
-        except Exception as e:
-            self.logger.error('Error executing query: %s', e)
-        return None
+        return super(QueryManager, self).execute(extra_tags)

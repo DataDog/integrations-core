@@ -246,14 +246,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
-                try:
-                    cursor.execute(query, params)
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return []
+                cursor.execute(query, params)
                 rows = cursor.fetchall()
 
         self._report_check_hist_metrics(start_time, len(rows), "get_active_connections")
@@ -289,14 +282,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
-                try:
-                    cursor.execute(query, params)
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return []
+                cursor.execute(query, params)
                 rows = cursor.fetchall()
 
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
@@ -352,12 +338,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                             dbname=self._config.dbname,
                             code=DatabaseConfigurationError.undefined_activity_view.value,
                         ),
-                    )
-                    return None
-                except psycopg.Error as e:
-                    self._log.error(
-                        "Error while executing query: %s. ",
-                        e,
                     )
                     return None
 
@@ -486,10 +466,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
-        try:
-            self._collect_statement_samples()
-        except Exception:
-            self._log.exception('Unable to collect statement samples due to an error')
+        self._collect_statement_samples()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
@@ -737,38 +714,34 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
         with self.db_pool.get_connection(dbname) as conn:
-            try:
-                # When sending potentially non-ascii data, e.g. UTF8, we need to force
-                # the client encoding to UTF-8 to match Python string encoding
-                if conn.info.encoding.lower() in ["ascii", "sqlascii", "sql_ascii"]:
-                    self._log.debug(
-                        "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
-                    )
-                    conn.execute("SET client_encoding TO UTF8")
-                with conn.cursor() as cursor:
-                    self._log.debug(
-                        "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
-                    )
-                    cursor.execute(
-                        """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                            explain_function=self._explain_function, statement=statement
-                        ),
-                        ignore_query_metric=True,
-                    )
-                    result = cursor.fetchone()
-                    self._check.histogram(
-                        "dd.postgres.run_explain.time",
-                        (time.time() - start_time) * 1000,
-                        tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                        hostname=self._check.reported_hostname,
-                        raw=True,
-                    )
-                    if not result or len(result) < 1 or len(result[0]) < 1:
-                        return None
-                    return result[0][0]
-            except psycopg.errors.Error as e:
-                # We reraise the error to be handled by _run_explain_safe
-                raise e
+            # When sending potentially non-ascii data, e.g. UTF8, we need to force
+            # the client encoding to UTF-8 to match Python string encoding
+            if conn.info.encoding.lower() in ["ascii", "sqlascii", "sql_ascii"]:
+                self._log.debug(
+                    "Setting client encoding to UTF-8 for dbname=%s, as the current encoding is SQLASCII", dbname
+                )
+                conn.execute("SET client_encoding TO UTF8")
+            with conn.cursor() as cursor:
+                self._log.debug(
+                    "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
+                )
+                cursor.execute(
+                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
+                        explain_function=self._explain_function, statement=statement
+                    ),
+                    ignore_query_metric=True,
+                )
+                result = cursor.fetchone()
+                self._check.histogram(
+                    "dd.postgres.run_explain.time",
+                    (time.time() - start_time) * 1000,
+                    tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+                if not result or len(result) < 1 or len(result[0]) < 1:
+                    return None
+                return result[0][0]
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
@@ -871,12 +844,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                 # dynamically by the user. the goal here is to cache only those queries which there is no reason to
                 # retry
                 self._explain_errors_cache[query_signature] = error_response
-            return error_response
-        except psycopg.Error as e:
-            self._log.debug("Failed to collect execution plan: %s", repr(e))
-            error_response = None, DBExplainError.unknown_error, '{}'.format(type(e))
-            self._explain_errors_cache[query_signature] = error_response
-            self._emit_run_explain_error(dbname, DBExplainError.unknown_error, e)
             return error_response
 
     def _emit_run_explain_error(self, dbname, err_code, err):

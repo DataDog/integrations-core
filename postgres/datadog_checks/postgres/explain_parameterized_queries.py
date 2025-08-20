@@ -82,9 +82,8 @@ class ExplainParameterizedQueries:
             )
             return None, DBExplainError.parameterized_query, '{}'.format(type(e))
         with self._check.db_pool.get_connection(dbname) as conn:
-            self._set_plan_cache_mode(conn)
-
             try:
+                self._set_plan_cache_mode(conn)
                 self._create_prepared_statement(conn, statement, obfuscated_statement, query_signature)
             except psycopg.errors.IndeterminateDatatype as e:
                 return None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
@@ -152,8 +151,8 @@ class ExplainParameterizedQueries:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(self, conn, statement, obfuscated_statement, query_signature):
-        prepared_statement_query = self._generate_prepared_statement_query(conn, query_signature)
         try:
+            prepared_statement_query = self._generate_prepared_statement_query(conn, query_signature)
             return self._execute_query_and_fetch_rows(
                 conn,
                 EXPLAIN_QUERY.format(
@@ -186,25 +185,11 @@ class ExplainParameterizedQueries:
     def _execute_query(self, conn, query):
         with conn.cursor() as cursor:
             logger.debug('Executing query=[%s]', query)
-            try:
-                cursor.execute(query, ignore_query_metric=True)
-            except psycopg.Error as e:
-                logger.error(
-                    "Error while executing query: %s. ",
-                    e,
-                )
-                return []
+            cursor.execute(query, ignore_query_metric=True)
 
     def _execute_query_and_fetch_rows(self, conn, query):
         with conn.cursor() as cursor:
-            try:
-                cursor.execute(query, ignore_query_metric=True)
-            except psycopg.Error as e:
-                logger.error(
-                    "Error while executing query: %s. ",
-                    e,
-                )
-                return []
+            cursor.execute(query, ignore_query_metric=True)
             return cursor.fetchall()
 
     def _is_parameterized_query(self, statement: str) -> bool:
