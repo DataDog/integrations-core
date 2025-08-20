@@ -1,0 +1,22 @@
+id: zerofox-cloud-platform
+tests:
+  - sample: '{"alert_type":"search
+      query","logs":[{"id":1234567890,"timestamp":"2023-01-25T00:40:24+00:00","actor":"ZeroFox
+      Platform Specialist","subject":"","action":"modify
+      tags","detail":""},{"id":1234567290,"timestamp":"2023-01-25T00:40:24+00:00","actor":"","subject":"","action":"open","detail":""}],"offending_content_url":"hxxp://example.com","asset_term":null,"assignee":"test.user@email.com","entity":{"id":10419120,"name":"Web
+      Domains","image":"https://example.com/media/","labels":[],"entity_group":{"id":4321,"name":"Default"}},"entity_term":null,"content_created_at":"2017-01-10T11:00:00+00:00","id":1092345687,"severity":1,"perpetrator":{"name":"Concealed","display_name":"Concealed","id":2031456789,"url":"hxxp://example.com","content":"Test
+      content","type":"page","timestamp":"2017-01-10T11:00:00+00:00","network":"domains"},"rule_group_id":132,"asset":{"id":10419120,"name":"Web
+      Domains","image":"https://example.com/media/","labels":[],"entity_group":{"id":4321,"name":"Default"}},"metadata":null,"status":"Open","timestamp":"2025-02-26T13:37:23+00:00","rule_name":"Advanced
+      Domain Analysis - Typosquat
+      Match","last_modified":"2025-02-26T14:27:56Z","protected_locations":null,"darkweb_term":null,"business_network":null,"reviewed":false,"escalated":false,"network":"domains","protected_social_object":null,"notes":"","reviews":[],"rule_id":34521,"entity_account":null,"entity_email_receiver_id":null,"tags":["irrelevant"],"scan_data":{}}'
+    result: null
+  - sample: '{"alert_type":"impersonating
+      account","logs":[{"id":1234567390,"timestamp":"2023-01-25T00:40:24+00:00","actor":"","subject":"","action":"review","detail":""},{"id":1234567890,"timestamp":"2023-01-25T00:40:24+00:00","actor":"ZeroFox
+      Platform Specialist","subject":"","action":"modify
+      tags","detail":""},{"id":1234567490,"timestamp":"2023-01-25T00:40:24+00:00","actor":"","subject":"","action":"open","detail":""}],"offending_content_url":"hxxp://example.com","asset_term":null,"assignee":"test.user@email.com","entity":{"id":10419220,"name":"V
+      test","image":"https://example.com/media/test.jpeg","labels":[],"entity_group":{"id":4321,"name":"Default"}},"entity_term":null,"content_created_at":"2017-01-10T11:00:00+00:00","id":1092345687,"severity":5,"perpetrator":{"id":10419220,"username":"Vtest","display_name":"V
+      test","account_number":"2240375768","image":"https://example.com/media/test.jpeg","network":"twitter","url":"https://twitter.com/Vtest","type":"account","timestamp":"2013-12-11T07:44:05+00:00","public_url":"","secondary_url":""},"rule_group_id":112,"asset":{"id":10419220,"name":"V
+      test","image":"https://example.com/media/test.jpeg","labels":[],"entity_group":{"id":4321,"name":"Default"}},"metadata":null,"status":"Open","timestamp":"2025-02-26T13:37:23+00:00","rule_name":"Impersonation
+      - Name &
+      Image","last_modified":"2025-02-26T14:27:56Z","protected_locations":null,"darkweb_term":null,"business_network":null,"reviewed":true,"escalated":true,"network":"twitter","protected_social_object":null,"notes":"","reviews":[],"rule_id":34521,"entity_account":null,"entity_email_receiver_id":null,"tags":["irrelevant"],"scan_data":{}}'
+    result: null

@@ -26,6 +26,12 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "ZeroFox Cloud Platform - Alert Insights": "assets/dashboards/zerofox_cloud_platform_alert_insights.json"
+    },
+    "logs": {
+      "source": "zerofox-cloud-platform"
     }
   },
   "author": {
