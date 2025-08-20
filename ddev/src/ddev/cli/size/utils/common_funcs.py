@@ -147,7 +147,7 @@ def get_gitignore_files(repo_path: str | Path) -> list[str]:
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:
-    for unit in [" B", " KB", " MB", " GB"]:
+    for unit in [" B", " KiB", " MiB", " GiB"]:
         if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
         size_bytes /= 1024

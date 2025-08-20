@@ -88,12 +88,12 @@ jobs:
         run: |
           MERGE_BASE_SHORT=$(echo "${{ steps.merge_base.outputs.sha }}" | cut -c1-7)
           echo "Comparing with base [($MERGE_BASE_SHORT)](https://github.com/${{ github.repository }}/commit/${{ steps.merge_base.outputs.sha }})" \
-            >> size_diffs_output.txt
+            > size_diffs_output.txt
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
             # send metrics to datadog if this is a push to master
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json > size_diffs_output.txt
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json >> size_diffs_output.txt
           else
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json > size_diffs_output.txt
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json >> size_diffs_output.txt
           fi
           cat size_diffs_output.txt >> $GITHUB_STEP_SUMMARY
 

@@ -7,7 +7,7 @@ def get_test_sizes():
             "Name": "packageA",
             "Version": "1.0.0",
             "Size_Bytes": 1000,
-            "Size": "1.00 KB",
+            "Size": "1.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -16,7 +16,7 @@ def get_test_sizes():
             "Name": "packageB",
             "Version": "2.0.0",
             "Size_Bytes": 2000,
-            "Size": "2.00 KB",
+            "Size": "2.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -24,8 +24,8 @@ def get_test_sizes():
         {
             "Name": "packageC",
             "Version": "3.0.0",
-            "Size_Bytes": 3000,  # Removed package
-            "Size": "3.00 KB",
+            "Size_Bytes": 3072,  # Removed package
+            "Size": "3.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -36,7 +36,7 @@ def get_test_sizes():
             "Name": "packageA",
             "Version": "1.0.1",
             "Size_Bytes": 1500,  # Changed size and version
-            "Size": "1.50 KB",
+            "Size": "1.50 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -45,7 +45,7 @@ def get_test_sizes():
             "Name": "packageB",
             "Version": "2.0.0",
             "Size_Bytes": 2500,  # Changed size, same version
-            "Size": "2.50 KB",
+            "Size": "2.50 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -54,7 +54,7 @@ def get_test_sizes():
             "Name": "packageD",
             "Version": "4.0.0",
             "Size_Bytes": 4000,  # Added package
-            "Size": "4.00 KB",
+            "Size": "4.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -73,7 +73,7 @@ def test_calculate_diffs():
             "Name": "packageD",
             "Version": "4.0.0",
             "Size_Bytes": 4000,  # Added package
-            "Size": "4.00 KB",
+            "Size": "4.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -83,8 +83,8 @@ def test_calculate_diffs():
         {
             "Name": "packageC",
             "Version": "3.0.0",
-            "Size_Bytes": 3000,
-            "Size": "3.00 KB",
+            "Size_Bytes": 3072,
+            "Size": "3.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
             "Python_Version": "3.x.x",
@@ -116,7 +116,7 @@ def test_calculate_diffs():
             "Percentage": 25,
         },
     ]
-    assert diffs['total_diff'] == 2000
+    assert diffs['total_diff'] == 1928
     assert platform == 'test-platform'
     assert python_version == '3.x.x'
 
@@ -136,13 +136,21 @@ def test_display_diffs():
         sys.stdout = sys_stdout
 
     output = captured_output.getvalue()
-    # Check that the output contains expected lines
-    assert "Dependency Size Differences for test-platform and Python 3.x.x" in output
-    assert "Total size difference: +1.95 KB" in output
+    # New header checks
+    assert f"Size Delta for {platform} and Python {python_version}" in output
+
+    # Total diff line
+    assert "Total size difference: +1.88 KiB" in output
+
+    # Added section
     assert "Added:" in output
-    assert "  + [Dependency] packageD 4.0.0: +4.00 KB" in output
+    assert "  + [Dependency] packageD 4.0.0: +4.00 KiB" in output
+
+    # Removed section
     assert "Removed:" in output
-    assert "  - [Dependency] packageC 3.0.0: -3.00 KB" in output
+    assert "  - [Dependency] packageC 3.0.0: -3.0 KiB" in output
+
+    # Changed section
     assert "Changed:" in output
     assert "  * [Dependency] packageA (1.0.0 -> 1.0.1): +500 B (+50.00%)" in output
     assert "  * [Dependency] packageB (2.0.0): +500 B (+25.00%)" in output
