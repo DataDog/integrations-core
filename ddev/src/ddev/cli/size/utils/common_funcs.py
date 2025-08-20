@@ -120,7 +120,7 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform in name and version in name
 
 
-def is_valid_integration(path: str, repo_path: str) -> bool:
+def is_valid_integration_file(path: str, repo_path: str) -> bool:
     ignored_files = {
         "datadog_checks_dev",
         "datadog_checks_tests_helper",
@@ -196,7 +196,7 @@ def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
-            if not is_valid_integration(relative_path, str(repo_path)):
+            if not is_valid_integration_file(relative_path, str(repo_path)):
                 continue
             size = compress(file_path) if compressed else os.path.getsize(file_path)
             integration_sizes[integration_name] = integration_sizes.get(integration_name, 0) + size

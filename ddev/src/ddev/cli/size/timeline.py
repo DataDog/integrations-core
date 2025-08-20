@@ -28,7 +28,7 @@ from .utils.common_funcs import (
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
-    is_valid_integration,
+    is_valid_integration_file,
     print_table,
     save_csv,
     save_json,
@@ -461,7 +461,7 @@ def get_files(
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
 
-            if not is_valid_integration(relative_path, repo_path):
+            if not is_valid_integration_file(relative_path, repo_path):
                 continue
 
             if file == "__about__.py" and "datadog_checks" in relative_path:

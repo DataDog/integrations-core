@@ -19,7 +19,7 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
-    is_valid_integration,
+    is_valid_integration_file,
     save_csv,
     save_json,
     save_markdown,
@@ -93,13 +93,13 @@ def test_convert_to_human_readable_size():
     assert convert_to_human_readable_size(1073741824) == "1.0 GB"
 
 
-def test_is_valid_integration():
+def test_is_valid_integration_file():
     repo_path = "fake_repo"
     with patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()):
-        assert is_valid_integration(to_native_path("datadog_checks/example.py"), repo_path)
-        assert not is_valid_integration(to_native_path("__pycache__/file.py"), repo_path)
-        assert not is_valid_integration(to_native_path("datadog_checks_dev/example.py"), repo_path)
-        assert not is_valid_integration(to_native_path(".git/config"), repo_path)
+        assert is_valid_integration_file(to_native_path("datadog_checks/example.py"), repo_path)
+        assert not is_valid_integration_file(to_native_path("__pycache__/file.py"), repo_path)
+        assert not is_valid_integration_file(to_native_path("datadog_checks_dev/example.py"), repo_path)
+        assert not is_valid_integration_file(to_native_path(".git/config"), repo_path)
 
 
 def test_get_dependencies_list():
@@ -180,7 +180,7 @@ def test_get_files_grouped_and_with_versions():
         (repo_path / "integration2" / "datadog_checks", [], ["__about__.py"]),
     ]
 
-    def mock_is_valid_integration(path, repo_path):
+    def mock_is_valid_integration_file(path, repo_path):
         return True
 
     def mock_getsize(path):
@@ -198,7 +198,7 @@ def test_get_files_grouped_and_with_versions():
         ),
         patch("ddev.cli.size.utils.common_funcs.os.path.getsize", side_effect=mock_getsize),
         patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.utils.common_funcs.is_valid_integration", side_effect=mock_is_valid_integration),
+        patch("ddev.cli.size.utils.common_funcs.is_valid_integration_file", side_effect=mock_is_valid_integration_file),
         patch("ddev.cli.size.utils.common_funcs.extract_version_from_about_py", return_value="1.2.3"),
         patch(
             "ddev.cli.size.utils.common_funcs.convert_to_human_readable_size",

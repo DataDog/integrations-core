@@ -23,7 +23,7 @@ def test_get_compressed_files():
         patch("ddev.cli.size.timeline.os.path.relpath", return_value=os.path.join("datadog_checks", "__about__.py")),
         patch("ddev.cli.size.timeline.os.path.exists", return_value=True),
         patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.timeline.is_valid_integration", return_value=True),
+        patch("ddev.cli.size.timeline.is_valid_integration_file", return_value=True),
         patch("ddev.cli.size.timeline.compress", return_value=1234),
         patch("ddev.cli.size.timeline.extract_version_from_about_py", return_value='1.1.1'),
     ):
