@@ -293,26 +293,23 @@ jobs:
     needs:
       - calculate-size-diffs-macos
       - calculate-size-diffs
-    strategy:
-      matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     env:
       PYTHON_VERSION: "3.12"
+      PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
     runs-on: ubuntu-22.04
     steps:
-      - name: Download size diffs
-        run: |
-          gh run download ${{ github.run_id }} --name size_diffs_output_${{ matrix.platform }}
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Join size diffs in order
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        # with:
-        #   path: size_diffs_output_${{ matrix.platform }}
-        #   pattern: size_diffs_output_${{ matrix.platform }}
-
-      - name: Get size diffs
         run: |
-          cat size_diffs_output_${{ matrix.platform }}.txt >> comment.txt
+          : > comment.txt
+          for p in $PLATFORMS; do
+            gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}"
+            cat "size_diffs_output_${p}.txt" >> comment.txt
+          done
 
   comment-size-diffs-on-pr:
     needs: join-size-diffs

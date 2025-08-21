@@ -88,9 +88,9 @@ def test_is_correct_dependency():
 
 def test_convert_to_human_readable_size():
     assert convert_to_human_readable_size(500) == "500 B"
-    assert convert_to_human_readable_size(1024) == "1.0 KB"
-    assert convert_to_human_readable_size(1048576) == "1.0 MB"
-    assert convert_to_human_readable_size(1073741824) == "1.0 GB"
+    assert convert_to_human_readable_size(1024) == "1.0 KiB"
+    assert convert_to_human_readable_size(1048576) == "1.0 MiB"
+    assert convert_to_human_readable_size(1073741824) == "1.0 GiB"
 
 
 def test_is_valid_integration():

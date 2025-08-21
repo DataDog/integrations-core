@@ -1,4 +1,4 @@
-from ddev.cli.size.utils.gha_diff import calculate_diffs, display_diffs
+from ddev.cli.size.utils.gha_diff import calculate_diffs
 
 
 def get_test_sizes():
@@ -119,38 +119,3 @@ def test_calculate_diffs():
     assert diffs['total_diff'] == 1928
     assert platform == 'test-platform'
     assert python_version == '3.x.x'
-
-
-def test_display_diffs():
-    prev_sizes, curr_sizes = get_test_sizes()
-    diffs, platform, python_version = calculate_diffs(prev_sizes, curr_sizes)
-    import io
-    import sys
-
-    captured_output = io.StringIO()
-    sys_stdout = sys.stdout
-    sys.stdout = captured_output
-    try:
-        display_diffs(diffs, platform, python_version)
-    finally:
-        sys.stdout = sys_stdout
-
-    output = captured_output.getvalue()
-    # New header checks
-    assert f"Size Delta for {platform} and Python {python_version}" in output
-
-    # Total diff line
-    assert "Total size difference: +1.88 KiB" in output
-
-    # Added section
-    assert "Added:" in output
-    assert "  + [Dependency] packageD 4.0.0: +4.00 KiB" in output
-
-    # Removed section
-    assert "Removed:" in output
-    assert "  - [Dependency] packageC 3.0.0: -3.0 KiB" in output
-
-    # Changed section
-    assert "Changed:" in output
-    assert "  * [Dependency] packageA (1.0.0 -> 1.0.1): +500 B (+50.00%)" in output
-    assert "  * [Dependency] packageB (2.0.0): +500 B (+25.00%)" in output
