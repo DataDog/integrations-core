@@ -1,29 +1,76 @@
 id: barracuda_secure_edge
 tests:
-  - sample: "2025 07 17 19:12:15 +05:30 Info     : pam_unix(sudo:session):
-      pam_unix(sshd:auth): Login sacumen from 10.10.16.1: Denied: Unknown user
-      sacumen"
-    attributes:
-      source: "barracuda_secure_edge"
-      service: "auth"
+  - sample: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ;
+      PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
+    service: "auth"
     result: null
-  - sample: "2025 07 17 19:34:24 +00:00 Warning  firewall: [DNS] Operation: Failed
-      to find file /opt/phion/preserve/customapp.dnsapp. Stopping work on custom
-      apps and clearing respective caches"
-    attributes:
-      source: "barracuda_secure_edge"
-      service: "firewall"
+  - sample: "2025 04 02 12:20:51 +00:00 Security Block:
+      FWD|UDP|p1|10.10.17.18|137|00:41:0e:93:aa:91|10.10.17.255|137|netbios-ns|\
+      |BLOCKALL|4002|||0|1|40|30|20|10||||||"
+    service: "firewall"
     result: null
-  - sample: "2025 04 01 20:15:08 +00:00 Info     event: [1071065] Insert Event from
-      127.0.0.1:18323 - (D|2|ccactivate|1|License|4700|Query Activation State
-      for  Failed|CloudGen-WAN|1743538508|Querying licensing servers for the
+  - sample: "2025 03 31 13:16:17 +00:00 Warning  firewall: [DNS] Operation: DNS
+      server with IP 127.0.0.1 now considererd dead after 4 failed health
+      checks. Will be re-employed when reachable again."
+    service: "firewall"
+    result: null
+  - sample: "2025 04 02 08:19:55 +00:00 Notice   sshd: notice: Shell (/bin/bash)
+      opened for user root@10.10.16.1:57129 (uid=0)"
+    service: "ssh"
+    result: null
+  - sample: "2025 03 31 11:45:27 +00:00 Internal [0210112] writeSSHdconf(): finished
+      activation of ssh daemon configuration "
+    service: "ssh"
+    result: null
+  - sample: "2025 03 31 13:18:30 +00:00 Internal [0140200] 0 0 boxnet(p,ARGS): wrote
+      outer line control parametrisation for xDHCP links to
+      /var/phion/preserve/boxnet/DHCP/xDHCP.opconf"
+    service: "network"
+    result: null
+  - sample: "2025 03 31 11:46:29 +00:00 Info     L2TP server config file changed.
+      restart required "
+    service: "vpn"
+    result: null
+  - sample: "2025 03 31 11:46:35 +00:00 Info     sslvpn: SSL Cipher Spec unspecified
+      - strong ciphers only selected - using:
+      'ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+EXP:-SSLv2'"
+    service: "vpn"
+    result: null
+  - sample: "2025 04 01 10:54:57 +00:00 Info     Handler #17 returned with code 2
+      (IOStreamSock: Connect(10.10.16.116:814): Connection refused)"
+    service: "access"
+    result: null
+  - sample: "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login succeeded:
+      localhost_CloudGen-WAN Valid password and valid challenge"
+    service: "admin"
+    result: null
+  - sample: 2025 05 23 11:46:38 +00:00
+      Info     [localhost_wanhub@127.0.0.1_43774]  COMMIT(add)
+      servers/CSC/services/DHCPR (Generic Service directory for DHCPR)
+    service: "admin"
+    result: null
+  - sample: 2025 05 12 11:46:36 +00:00 Notice   Starting main loop pid=9123
+    service: "admin"
+    result: null
+  - sample: "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login succeeded:
+      localhost_CloudGen-WAN Valid password and valid challenge"
+    service: "admin"
+    result: null
+  - sample: 2025 04 02 11:00:01 +00:00 Info     MSAD-Offline-Groups Setting MSAD
+      offline group sync cache to 117.49 MByte (auto-calculated)
+    service: "admin"
+    result: null
+  - sample: "2025 03 31 11:45:52 +00:00 Info     xdhcp1[4530]: interface dhcp
+      addresses are local=10.10.17.114 and gateway=10.10.16.1"
+    service: "dhcp"
+    result: null
+  - sample: "2025 04 02 09:37:14 +00:00 Info     event: [1071065] Insert Event from
+      127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State
+      for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the
       license activation state failed)"
-    attributes:
-      source: "barracuda_secure_edge"
-      service: "system"
+    service: "system"
     result: null
-
-# The `result` field should be left blank to start. Once you submit your log asset files with
-# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
-# run your raw logs against your pipeline and return the result. If the result output in the
-# validation is accurate, take the output and add it to the `result` field in your test YAML file.
+  - sample: "2025 03 31 11:46:20 +00:00 Internal event: [1070045] Startup
+      CheckEventState (pid=6397): check every 30 sec"
+    service: "system"
+    result: null
