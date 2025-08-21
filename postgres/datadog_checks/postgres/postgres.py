@@ -479,7 +479,6 @@ class PostgreSql(AgentCheck):
                 cursor.execute('SELECT system_identifier FROM pg_control_system();')
                 self.system_identifier = cursor.fetchone()[0]
 
-
     def load_cluster_name(self):
         with self.db() as conn:
             with conn.cursor() as cursor:

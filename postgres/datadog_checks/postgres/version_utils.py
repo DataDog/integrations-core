@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
-import psycopg
 from semver import VersionInfo
 
 from datadog_checks.base.log import get_check_logger
@@ -36,7 +35,6 @@ class VersionUtils(object):
                 cursor.execute('SHOW SERVER_VERSION;')
                 raw_version = cursor.fetchone()[0]
                 return raw_version
-
 
     def is_aurora(self, db):
         if self._is_aurora is not None:
