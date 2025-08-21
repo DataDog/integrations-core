@@ -289,7 +289,7 @@ jobs:
     with:
       platform: ${{ matrix.platform }}
 
-  join-size-diffs:
+  comment-size-diffs-on-pr:
     needs:
       - calculate-size-diffs-macos
       # - calculate-size-diffs
@@ -316,13 +316,6 @@ jobs:
             fi
             cat "size_diffs_output_${p}.txt" >> comment.txt
           done
-
-  comment-size-diffs-on-pr:
-    needs: join-size-diffs
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Comment on PR
         run: |
