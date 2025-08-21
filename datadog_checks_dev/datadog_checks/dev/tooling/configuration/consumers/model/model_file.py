@@ -153,7 +153,7 @@ def _define_validator_functions(model_id, validator_data, need_defaults):
     model_file_lines.append('    def _validate(cls, value, info):')
     model_file_lines.append('        field = cls.model_fields[info.field_name]')
     model_file_lines.append('        field_name = field.alias or info.field_name')
-    model_file_lines.append("        if field_name in info.context['configured_fields']:")
+    model_file_lines.append("        if info.context and field_name in info.context['configured_fields']:")
     model_file_lines.append(
         f"            value = getattr(validators, f'{model_id}_{{info.field_name}}', identity)(value, field=field)"
     )
@@ -165,7 +165,7 @@ def _define_validator_functions(model_id, validator_data, need_defaults):
             model_file_lines.append(f'                value = validation.{import_path}(value, field=field)')
 
     if need_defaults:
-        model_file_lines.append('        else:')
+        model_file_lines.append('        elif value is None:')
         model_file_lines.append(
             f"            value = getattr(defaults, f'{model_id}_{{info.field_name}}', lambda: value)()"
         )
