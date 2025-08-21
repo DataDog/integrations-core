@@ -15,6 +15,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
+import pathspec
 import urllib3
 from dotenv import dotenv_values
 from utils import iter_wheels
@@ -161,11 +162,13 @@ def remove_test_files(wheel_path: Path) -> None:
                 full_dir = Path(root) / d
                 rel = full_dir.relative_to(unpacked_dir).as_posix()
                 if is_excluded_from_wheel(rel):
+                    print(f'Removing {rel}')
                     shutil.rmtree(full_dir)
                     dirs.remove(d)
             for f in files:
                 rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
                 if is_excluded_from_wheel(rel):
+                    print(f'Removing {rel}')
                     os.remove(Path(root) / f)
 
         print(f'Tests removed from {wheel_path.name}')
@@ -175,34 +178,31 @@ def remove_test_files(wheel_path: Path) -> None:
 
     return True
 
-
-def is_excluded_from_wheel(path: str) -> bool:
-    '''
-    These files are excluded from the wheel in the agent build:
-    https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
-    In order to have more accurate results, these files are excluded when computing the size of the dependencies while
-    the wheels still include them.
-    '''
-    files_to_remove_path = Path(__file__).parent / "files_to_remove.toml"
-    with open(files_to_remove_path, "rb") as f:
+@cache
+def _load_excluded_spec() -> pathspec.PathSpec:
+    """
+    Load excluded paths from files_to_remove.toml and compile them
+    with .gitignore-style semantics.
+    """
+    config_path = Path(__file__).parent / "files_to_remove.toml"
+    with open(config_path, "rb") as f:
         config = tomllib.load(f)
-    excluded_test_paths = [os.path.normpath(path) for path in config.get("excluded_test_paths", [])]
 
-    type_annot_libraries = config.get("type_annot_libraries", [])
-    rel_path = Path(path).as_posix()
+    patterns = config.get("excluded_paths", [])
+    return pathspec.PathSpec.from_lines("gitignore", patterns)
 
-    # Test folders
-    for test_folder in excluded_test_paths:
-        if rel_path == test_folder or rel_path.startswith(test_folder + os.sep):
-            return True
+def is_excluded_from_wheel(path: str | Path) -> bool:
+    """
+    Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
+    Matches:
+      - type annotation files: **/*.pyi, **/py.typed
+      - test directories listed with a trailing '/'
+    """
+    spec = _load_excluded_spec()
+    rel = Path(path).as_posix()
 
-    # Python type annotations
-    path_parts = Path(rel_path).parts
-    if path_parts:
-        dependency_name = path_parts[0]
-        if dependency_name in type_annot_libraries:
-            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
-                return True
+    if spec.match_file(rel) or spec.match_file(rel + "/"):
+        return True
 
     return False
 
