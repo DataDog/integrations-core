@@ -33,43 +33,35 @@ class VersionUtils(object):
     def get_raw_version(db):
         with db as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute('SHOW SERVER_VERSION;')
-                    raw_version = cursor.fetchone()[0]
-                    return raw_version
-                except psycopg.Error as e:
-                    get_check_logger().error("Failed to get raw version: %s", repr(e))
-                    return None
+                cursor.execute('SHOW SERVER_VERSION;')
+                raw_version = cursor.fetchone()[0]
+                return raw_version
+
 
     def is_aurora(self, db):
         if self._is_aurora is not None:
             return self._is_aurora
         with db as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute(
-                        "SELECT 1 FROM pg_available_extension_versions "
-                        "WHERE name ILIKE '%aurora%' OR comment ILIKE '%aurora%' "
-                        "LIMIT 1;"
-                    )
-                    if cursor.fetchone():
-                        # This query will pollute PG logs in non aurora versions,
-                        # but is the only reliable way to detect aurora.
-                        # Since we found aurora extensions, this should exist.
-                        try:
-                            cursor.execute('select AURORA_VERSION();')
-                            self._is_aurora = True
-                            return self._is_aurora
-                        except Exception as e:
-                            self.log.debug(
-                                "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
-                            )
-                    self._is_aurora = False
-                    return self._is_aurora
-                except psycopg.Error as e:
-                    self.log.error("Failed to determine if the DB is aurora: %s", repr(e))
-                    self._is_aurora = False
-                    return self._is_aurora
+                cursor.execute(
+                    "SELECT 1 FROM pg_available_extension_versions "
+                    "WHERE name ILIKE '%aurora%' OR comment ILIKE '%aurora%' "
+                    "LIMIT 1;"
+                )
+                if cursor.fetchone():
+                    # This query will pollute PG logs in non aurora versions,
+                    # but is the only reliable way to detect aurora.
+                    # Since we found aurora extensions, this should exist.
+                    try:
+                        cursor.execute('select AURORA_VERSION();')
+                        self._is_aurora = True
+                        return self._is_aurora
+                    except Exception as e:
+                        self.log.debug(
+                            "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
+                        )
+                self._is_aurora = False
+                return self._is_aurora
 
     @staticmethod
     def parse_version(raw_version):

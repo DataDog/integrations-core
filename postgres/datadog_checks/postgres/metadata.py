@@ -393,12 +393,12 @@ class PostgresMetadata(DBMAsyncJob):
                 if not self._should_collect_metadata(dbname, "database"):
                     continue
 
-                for schema in database["schemas"]:
-                    if not self._should_collect_metadata(schema["name"], "schema"):
-                        continue
+                with self.db_pool.get_connection(dbname) as conn:
+                    with conn.cursor(row_factory=dict_row) as cursor:
+                        for schema in database["schemas"]:
+                            if not self._should_collect_metadata(schema["name"], "schema"):
+                                continue
 
-                    with self.db_pool.get_connection(dbname) as conn:
-                        with conn.cursor(row_factory=dict_row) as cursor:
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             self._log.debug(
                                 "Tables found for schema '{schema}' in database '{database}': {tables}".format(
@@ -546,7 +546,6 @@ class PostgresMetadata(DBMAsyncJob):
             raise Exception("Job loop cancelled. Aborting query.")
         cursor.execute(schema_query_)
         rows = cursor.fetchall()
-
         schemas = []
         for row in rows:
             schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
@@ -718,8 +717,7 @@ class PostgresMetadata(DBMAsyncJob):
         # Get indexes
         if self._cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
-        query = PG_INDEXES_QUERY.format(table_ids=table_ids)
-        cursor.execute(query)
+        cursor.execute(PG_INDEXES_QUERY.format(table_ids=table_ids))
 
         rows = cursor.fetchall()
         for row in rows:

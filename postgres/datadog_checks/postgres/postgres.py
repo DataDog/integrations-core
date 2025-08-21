@@ -207,9 +207,8 @@ class PostgreSql(AgentCheck):
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
-            self.cloud_metadata["aws"] = {
-                "instance_endpoint": self.resolved_hostname,
-            }
+            self.cloud_metadata["aws"] = self.cloud_metadata.get("aws", {})
+            self.cloud_metadata["aws"]["instance_endpoint"] = self.resolved_hostname
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             # some `deployment_type`s map to multiple `resource_type`s
@@ -239,15 +238,7 @@ class PostgreSql(AgentCheck):
     def execute_query_raw(self, query, db):
         with db() as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute(query)
-                except psycopg.Error as e:
-                    self.log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return []
-
+                cursor.execute(query)
                 rows = cursor.fetchall()
                 return rows
 
@@ -434,15 +425,7 @@ class PostgreSql(AgentCheck):
     def _get_replication_role(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute('SELECT pg_is_in_recovery();')
-                except psycopg.Error as e:
-                    self.log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return ""
-
+                cursor.execute('SELECT pg_is_in_recovery();')
                 role = cursor.fetchone()[0]
                 # value fetched for role is of <type 'bool'>
                 return "standby" if role else "master"
@@ -493,28 +476,15 @@ class PostgreSql(AgentCheck):
     def load_system_identifier(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute('SELECT system_identifier FROM pg_control_system();')
-                    self.system_identifier = cursor.fetchone()[0]
-                except psycopg.Error as e:
-                    self.log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return ""
+                cursor.execute('SELECT system_identifier FROM pg_control_system();')
+                self.system_identifier = cursor.fetchone()[0]
+
 
     def load_cluster_name(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute('SHOW cluster_name;')
-                    self.cluster_name = cursor.fetchone()[0]
-                except psycopg.Error as e:
-                    self.log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return ""
+                cursor.execute('SHOW cluster_name;')
+                self.cluster_name = cursor.fetchone()[0]
 
     def load_version(self):
         self.raw_version = self._version_utils.get_raw_version(self.db())
@@ -529,16 +499,9 @@ class PostgreSql(AgentCheck):
     def _get_wal_level(self):
         with self.db() as conn:
             with conn.cursor() as cursor:
-                try:
-                    cursor.execute('SHOW wal_level;')
-                    wal_level = cursor.fetchone()[0]
-                    return wal_level
-                except psycopg.Error as e:
-                    self.log.error(
-                        "Error while executing query: %s. ",
-                        e,
-                    )
-                    return ""
+                cursor.execute('SHOW wal_level;')
+                wal_level = cursor.fetchone()[0]
+                return wal_level
 
     @property
     def reported_hostname(self):
@@ -873,15 +836,7 @@ class PostgreSql(AgentCheck):
             # SHOW queries need manual cursor execution so can't be bundled with the metrics
             with self.db() as conn:
                 with conn.cursor() as cursor:
-                    try:
-                        cursor.execute("SHOW data_checksums;")
-                    except psycopg.Error as e:
-                        self.log.error(
-                            "Error while executing query: %s. ",
-                            e,
-                        )
-                        return
-
+                    cursor.execute("SHOW data_checksums;")
                     enabled = cursor.fetchone()[0]
                     self.count(
                         "checksums.enabled",
@@ -1123,6 +1078,7 @@ class PostgreSql(AgentCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+            raise e
         else:
             self.service_check(
                 self.SERVICE_CHECK_NAME,

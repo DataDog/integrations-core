@@ -12,7 +12,7 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
-from datadog_checks.postgres.util import BUFFERCACHE_METRICS, PartialFormatter, fmt
+from datadog_checks.postgres.util import BUFFERCACHE_METRICS, DatabaseHealthCheckError, PartialFormatter, fmt
 
 from .common import (
     COMMON_METRICS,
@@ -318,8 +318,10 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
 
-    check.db = mock.MagicMock(side_effect=AttributeError('foo'))
-    check.check(pg_instance)
+    # Second: keep the connection open but an unexpected error happens during check run
+    with pytest.raises(AttributeError):
+        check.db = mock.MagicMock(side_effect=AttributeError('foo'))
+        check.check(pg_instance)
 
     # Since we can't connect to the host, we can't gather the replication role
     tags_without_role = _get_expected_tags(
@@ -334,15 +336,16 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
 
     # Forth: connection health check failed
-    db = mock.MagicMock()
-    db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
+    with pytest.raises(DatabaseHealthCheckError):
+        db = mock.MagicMock()
+        db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
 
-    @contextlib.contextmanager
-    def mock_db():
-        yield db
+        @contextlib.contextmanager
+        def mock_db():
+            yield db
 
-    check.db = mock_db
-    check.check(pg_instance)
+        check.db = mock_db
+        check.check(pg_instance)
 
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
     aggregator.reset()
@@ -599,7 +602,8 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     throw_exception_first_time.counter = 0
 
     with mock.patch('datadog_checks.postgres.PostgreSql._collect_stats', side_effect=throw_exception_first_time):
-        check.check(pg_instance)
+        with pytest.raises(socket.error):
+            check.check(pg_instance)
     assert_state_clean(check)
 
 
