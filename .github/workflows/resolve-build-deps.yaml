@@ -307,8 +307,14 @@ jobs:
         run: |
           : > comment.txt
           for p in $PLATFORMS; do
-            gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}"
-            cat "size_diffs_output_${p}" >> comment.txt
+            gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
+            echo "Available size_diffs_output files:" >> $GITHUB_STEP_SUMMARY
+            ls -l size_diffs_output* >> $GITHUB_STEP_SUMMARY
+            if [ ! -f "size_diffs_output_${p}.txt" ]; then
+                echo "Failed to download size_diffs_output_${p}.txt" >> $GITHUB_STEP_SUMMARY
+                exit 1
+            fi
+            cat "size_diffs_output_${p}.txt" >> comment.txt
           done
 
   comment-size-diffs-on-pr:
