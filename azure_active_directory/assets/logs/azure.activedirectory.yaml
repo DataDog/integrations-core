@@ -1690,7 +1690,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-
     - type: pipeline
       name: OCSF post transformations
       enabled: true
