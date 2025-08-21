@@ -122,12 +122,14 @@ def diff(
                             progress,
                         )
                     )
-                if format:
-                    export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
                 if to_dd_org or to_dd_key:
                     send_metrics_to_dd(
                         app, modules_plat_ver, to_dd_org, to_dd_key, compressed, "diff", [first_commit, second_commit]
                     )
+                if format:
+                    modules_with_diff = [module for module in modules_plat_ver if module["Size_Bytes"] != 0]
+                    export_format(app, format, modules_with_diff, "diff", platform, version, compressed)
+
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
@@ -159,9 +161,9 @@ def diff_mode(
         for module in formatted_modules:
             if module["Size_Bytes"] > 0:
                 module["Size"] = f"+{module['Size']}"
-
+    modules_with_diff = [module for module in formatted_modules if module["Size_Bytes"] != 0]
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Diff", formatted_modules)
+        print_table(params["app"], "Diff", modules_with_diff)
 
     treemap_path = None
     if params["format"] and "png" in params["format"]:
@@ -170,7 +172,7 @@ def diff_mode(
     if params["show_gui"] or treemap_path:
         plot_treemap(
             params["app"],
-            formatted_modules,
+            modules_with_diff,
             f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "diff",
@@ -256,8 +258,8 @@ def get_diff(
         size_a = a["Size_Bytes"] if a else 0
         delta = size_a - size_b
 
-        if delta == 0:
-            continue
+        # if delta == 0:
+        #     continue
 
         ver_b = b["Version"] if b else ""
         ver_a = a["Version"] if a else ""
