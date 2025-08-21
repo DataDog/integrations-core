@@ -301,10 +301,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download size diffs
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          path: size_diffs_output_${{ matrix.platform }}
-          pattern: size_diffs_output_${{ matrix.platform }}.txt
+        run: |
+          gh run download ${{ github.run_id }} --name size_diffs_output_${{ matrix.platform }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        # with:
+        #   path: size_diffs_output_${{ matrix.platform }}
+        #   pattern: size_diffs_output_${{ matrix.platform }}
 
       - name: Get size diffs
         run: |
