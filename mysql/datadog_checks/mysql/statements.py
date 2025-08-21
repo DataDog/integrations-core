@@ -122,6 +122,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
     def run_job(self):
         start = time.time()
+        self._statement_rows.expire()
         self.collect_per_statement_metrics()
         self._check.gauge(
             "dd.mysql.statement_metrics.collect_metrics.elapsed_ms",
