@@ -41,7 +41,7 @@ SHOW_METRIC_DATA = {
         'regex': re.compile(
             r'^\s*[*\s]*(?P<queue_name>\S+)\s+'
             r'(?P<snfgxibct>[-+*]*)\s+'
-            r'(?P<pre>\d+\*?)\s+'
+            r'(?P<pre>(?:\d+\*?|none))\s+'
             r'(?P<receivers>\d+)\s+'
             r'(?P<pending_messages>\d+)\s+'
             r'(?P<pending_messages_size>\d+\.?\d*\s*\S+)\s+'

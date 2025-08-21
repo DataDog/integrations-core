@@ -1,6 +1,6 @@
 {
     "title": "Kubernetes - Overview",
-    "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
+    "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
             "id": 2212964864025960,
@@ -424,7 +424,7 @@
                                             "data_source": "events",
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:kubernetes $node"
+                                                "query": "source:kubernetes $node $cluster"
                                             },
                                             "indexes": [
                                                 "*"
@@ -466,7 +466,7 @@
                             "requests": [
                                 {
                                     "query": {
-                                        "query_string": "source:kubernetes $node",
+                                        "query_string": "source:kubernetes $node $cluster",
                                         "data_source": "event_stream",
                                         "event_size": "s"
                                     },
@@ -1615,7 +1615,7 @@
                             "type": "hostmap",
                             "requests": {
                                 "fill": {
-                                    "q": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                    "q": "sum:kubernetes.cpu.usage.total{$scope,$cluster,$label,$node} by {host}"
                                 }
                             },
                             "no_metric_hosts": false,
@@ -1623,9 +1623,7 @@
                             "scope": [
                                 "$scope",
                                 "$node",
-                                "$label",
-                                "$kube_deployment",
-                                "$kube_namespace"
+                                "$label"
                             ],
                             "custom_links": [],
                             "style": {
@@ -1730,7 +1728,7 @@
                             "type": "hostmap",
                             "requests": {
                                 "fill": {
-                                    "q": "sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                    "q": "sum:kubernetes.memory.usage{$scope,$cluster,$label,$node} by {host}"
                                 }
                             },
                             "no_metric_hosts": false,
@@ -1738,9 +1736,7 @@
                             "scope": [
                                 "$scope",
                                 "$node",
-                                "$label",
-                                "$kube_deployment",
-                                "$kube_namespace"
+                                "$label"
                             ],
                             "custom_links": [],
                             "style": {
