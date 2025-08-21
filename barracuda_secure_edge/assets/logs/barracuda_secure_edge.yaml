@@ -1,81 +1,79 @@
 id: barracuda_secure_edge
-# See app_id in your integration's manifest.json file to learn more:
-# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: barracuda-secure-edge
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
 backend_only: false
+installation_sources:
+  - barracuda_secure_edge
 facets:
-  - description: ""
+  - description: "Destination IP address of secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: dest_ip
-    path: dest_ip
+    path: secure_edge.dest_ip
     source: log
     type: string
-  - description: ""
+  - description: "Event ID of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: event_id
-    path: event_id
+    path: secure_edge.event_id
     source: log
     type: string
-  - description: ""
+  - description: "Event name of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: eventname
-    path: eventname
+    path: secure_edge.eventname
     source: log
     type: string
-  - description: ""
+  - description: "Level of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: level
-    path: level
+    path: secure_edge.level
     source: log
     type: string
-  - description: ""
+  - description: "Module of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: module
-    path: module
+    path: secure_edge.module
     source: log
     type: string
-  - description: ""
+  - description: "Product name of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: productname
-    path: productname
+    path: secure_edge.productname
     source: log
     type: string
-  - description: ""
+  - description: "Protocol of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: protocol
-    path: protocol
+    path: secure_edge.protocol
     source: log
     type: string
-  - description: ""
+  - description: "Rule of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: rule
-    path: rule
+    path: secure_edge.rule
     source: log
     type: string
-  - description: ""
+  - description: "Source IP address of the secure edge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
     name: src_ip
-    path: src_ip
+    path: secure_edge.src_ip
     source: log
     type: string
 pipeline:
@@ -85,36 +83,11 @@ pipeline:
   filter:
     query: source:barracuda_secure_edge
   processors:
-    - type: attribute-remapper
-      name: " Map timestamp to syslog.timestamp"
-      enabled: true
-      sources:
-        - timestamp
-      sourceType: attribute
-      target: syslog.timestamp
-      targetType: attribute
-      preserveSource: true
-      overrideOnConflict: false
-    - type: status-remapper
-      name: Status Remapper from Level to Status
-      enabled: true
-      sources:
-        - level
-    - type: status-remapper
-      name: Remapper level to status
-      enabled: true
-      sources:
-        - level
-    - type: date-remapper
-      name: "Define `timestamp` as the official date of the log "
-      enabled: true
-      sources:
-        - timestamp
     - type: pipeline
       name: Box Auth Access
       enabled: true
       filter:
-        query: service:auth
+        query: source:barracuda_secure_edge service:auth
       processors:
         - type: grok-parser
           name: Box Auth Access
@@ -137,20 +110,14 @@ pipeline:
             matchRules: >-
               autoFilledRule3 %{date("yyyy MM dd HH:mm:ss
               Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*%{data:meesage}
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{data}%{ip:src}%{data}%{number:port}%{data}
-
-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{data:type}\[%{number:type_id}\]:\s*%{data:message}
-
-
               autoFilledRule4 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?%{data:message}
     - type: pipeline
       name: Box Firewall Activity
       enabled: true
       filter:
-        query: service:firewall
+        query: source:barracuda_secure_edge service:firewall
       processors:
         - type: grok-parser
           name: Box Firewall Activity
@@ -171,9 +138,7 @@ pipeline:
             matchRules: >-
               autoFilledRule3 %{date("yyyy MM dd HH:mm:ss
               Z"):timestamp}\s+%{word:level}\s*%{word:action}:\s*\[%{word:event_type}\]\s*%{word:module}:\s*%{data:message}
-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data::csv("type,protocol,src_if,src_ip,src_port,src_mac,dest_ip,dest_port,dest_service,dest_if,rule,info,src_nat, dst_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets, user,prot,application,target,content,uricat","|")}
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data:message}
         - type: grok-parser
           name: Box Firewall
@@ -203,7 +168,7 @@ pipeline:
       name: "SSH "
       enabled: true
       filter:
-        query: service:ssh
+        query: source:barracuda_secure_edge service:ssh
       processors:
         - type: grok-parser
           name: Box SSH sshd
@@ -223,8 +188,6 @@ pipeline:
             matchRules: >+
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*(%{data:module})?(\[%{number:id}\])?:\s*%{data:message}
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*%{data:message}
 
         - type: grok-parser
@@ -289,7 +252,6 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{word:module}\:%{data:message}
-
               autoFilledRule3 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
         - type: grok-parser
           name: VPN sslvpn
@@ -331,8 +293,6 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{data}%{ip:ip}:%{number:port}\):\s+%{data:message}\)
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
     - type: pipeline
       name: Admin
@@ -363,8 +323,6 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s*(%{ip:source_ip}:%{number:source_port})?\s+%{data:message}
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+%{data:message}
         - type: grok-parser
           name: Box Config changes
@@ -384,8 +342,6 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s+\[%{data:initiator}\]\s+%{word}\(%{word:commit_action}\)\s+%{notSpace:path}\s+\(%{data:message}\)
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+\[%{data:initiator}\]\s+%{data:message}
         - type: grok-parser
           name: Box Config sync
@@ -421,8 +377,6 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s*(%{ip:source_ip}:%{number:source_port})?\s+%{data:message}
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+%{data:message}
         - type: grok-parser
           name: Box Control AuthService
@@ -440,8 +394,6 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s+%{word:auth_component}:\s+%{word:auth_process}:\s+%{data:event}\s+for\s+%{data:auth_type}
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+(%{word:auth_component}:\s+%{word:auth_process}:\s+)?%{data:message}
     - type: pipeline
       name: Box Network dhcp
@@ -470,16 +422,9 @@ pipeline:
             matchRules: >+
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{word:process}\[%{number:process_id}\]:\s+%{data:message}
-
-
               autoFilledRule4 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*\[%{number:proccess_id}\]\s*%{data}\s*\:\s*%{word:action}\s*%{data:message}
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:module}\s:*%{data}=\s*%{ip:local_ip}\s*%{data}=%{ip:gateway_ip}
-
-
               autoFilledRule3 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
-
     - type: pipeline
       name: System
       enabled: true
@@ -502,7 +447,6 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+event:\s+\[%{number:id}\]\s+%{data:text}%{ip:ip_address}\:%{port:port}\s+\-\s+\(%{data::csv("type,notification_id,module,severity,eventname,event_id,demo,productname,epoch,message","|")}\)
         - type: grok-parser
           name: Box Event operative
@@ -525,6 +469,29 @@ pipeline:
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{word:event_action}\s+\(worker:
               %{number:worker_id}\)\s+from\s+%{ip:source_ip},\s+User\s+\[%{data}\]\s+-\s+\(%{data::csv("type,severity,component,code,action,session_id,username,system_name","|")}\)
-
-
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{data:message}
+    - type: status-remapper
+      name: Status Remapper from Level to Status
+      enabled: true
+      sources:
+        - level
+    - type: status-remapper
+      name: Remapper level to status
+      enabled: true
+      sources:
+        - level
+    - type: attribute-remapper
+      name: " Map timestamp to syslog.timestamp"
+      enabled: true
+      sources:
+        - timestamp
+      sourceType: attribute
+      target: syslog.timestamp
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: date-remapper
+      name: "Define `timestamp` as the official date of the log "
+      enabled: true
+      sources:
+        - timestamp
