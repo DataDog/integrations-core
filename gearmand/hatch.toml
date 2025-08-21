@@ -9,5 +9,4 @@ matrix.version.env-vars = [
   { key = "GEARMAND_VERSION", value = "1.1.18", if = ["1.1"] },
   { key = "DOCKER_IMAGE", value = "artefactual/gearmand", if = ["1.1"] },
   { key = "DOCKER_TAG", value = "1.1.18-alpine", if = ["1.1"] },
-  { key = "DOCKER_TAG", value = "1.1.18-alpine", if = ["1.1"] },
 ]
