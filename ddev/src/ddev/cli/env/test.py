@@ -9,6 +9,7 @@ import click
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.utils.hatch import Environment
 
 
 @click.command('test')
@@ -72,6 +73,8 @@ def test_command(
     \b
     https://datadoghq.dev/integrations-core/testing/
     """
+    from functools import partial
+
     from ddev.cli.env.start import start
     from ddev.cli.env.stop import stop
     from ddev.cli.test import test
@@ -79,6 +82,7 @@ def test_command(
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import E2EMetadata
     from ddev.utils.ci import running_in_ci
+    from ddev.utils.hatch import HatchCommandError, list_environment_names
     from ddev.utils.structures import EnvVars
 
     app: Application = ctx.obj
@@ -93,29 +97,19 @@ def test_command(
     if environment == 'active':
         env_names = active_envs
     else:
-        import json
-        import sys
-
-        with integration.path.as_cwd():
-            env_data_output = app.platform.check_command_output(
-                [sys.executable, '-m', 'hatch', '--no-color', '--no-interactive', 'env', 'show', '--json']
+        try:
+            env_names = list_environment_names(
+                app.platform,
+                integration,
+                filters=[
+                    is_e2e_environment,
+                    partial(uses_python_version, python_filter=python_filter),
+                    partial(uses_platform, platform=app.platform.name),
+                    partial(is_selected_environment, environment_name=environment),
+                ],
             )
-            try:
-                environments = json.loads(env_data_output)
-            except json.JSONDecodeError:
-                app.abort(f'Failed to parse environments for `{integration.name}`:\n{repr(env_data_output)}')
-
-        no_python_filter = python_filter is None
-        all_environments = environment == 'all'
-
-        env_names = [
-            name
-            for name, data in environments.items()
-            if data.get('e2e-env', False)
-            and (not data.get('platforms') or app.platform.name in data['platforms'])
-            and (no_python_filter or data.get('python') == python_filter)
-            and (name == environment or all_environments)
-        ]
+        except HatchCommandError as error:
+            app.abort(f'Failed to list environments for `{integration.name}`:\n{error}')
 
     if not env_names:
         app.display_info(f"Selected target {integration.name!r} disabled by e2e-env option.")
@@ -155,3 +149,19 @@ def test_command(
                 )
         finally:
             ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=env_active)
+
+
+def is_e2e_environment(environment: Environment) -> bool:
+    return environment.e2e_env
+
+
+def uses_python_version(environment: Environment, python_filter: str | None) -> bool:
+    return python_filter is None or environment.python == python_filter
+
+
+def uses_platform(environment: Environment, platform: str) -> bool:
+    return not environment.platforms or platform in environment.platforms
+
+
+def is_selected_environment(environment: Environment, environment_name: str) -> bool:
+    return environment.name == environment_name or environment_name == 'all'
