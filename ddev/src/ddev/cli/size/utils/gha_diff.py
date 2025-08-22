@@ -191,7 +191,6 @@ def display_diffs_to_html(diffs, platform, python_version):
     else:
         text += "No changed dependencies/integrations\n\n"
     text += "</details>\n"
-    print(text)
     return text
 
 
