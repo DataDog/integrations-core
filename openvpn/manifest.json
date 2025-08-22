@@ -45,7 +45,7 @@
       }
     },
     "dashboards": {
-      "OpenVPN - Overview": "assets/dashboards/openvpn_overview.json"
+      "OpenVPN - Overview":"assets/dashboards/openvpn_overview.json"
     },
     "logs": {
       "source": "openvpn"
