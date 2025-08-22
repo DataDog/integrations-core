@@ -76,26 +76,6 @@ def hash_file(path: Path) -> str:
         return sha256(f.read()).hexdigest()
 
 
-def iter_wheel_dirs(targets_dir: str) -> Iterator[Path]:
-    """Iterate over 'built'/'external' folders that contain wheels ready for upload.
-
-    The directory structure that this assumes under `targets_dir` is:
-    {platform} / py{2,3} / wheels / {built,external}
-    {platform} / py{2,3} / frozen.txt
-    """
-    for target in Path(targets_dir).iterdir():
-        display_message_block(f'Target {target.name}')
-        for python_version in target.iterdir():
-            if not python_version.name.startswith('py'):
-                continue
-
-            display_message_block(f'Python version {python_version.name}')
-
-            wheel_dir = python_version / 'wheels'
-            for entry in sorted(wheel_dir.iterdir(), key=lambda p: p.name):
-                yield entry
-
-
 def _build_number_of_wheel_blob(wheel_path: Blob) -> int:
     """Extract the build number from a blob object representing a wheel."""
     wheel_name = PurePosixPath(wheel_path.name).stem
@@ -286,4 +266,4 @@ if __name__ == '__main__':
     parser.add_argument('targets_dir')
     args = parser.parse_args()
     lockfiles = upload(args.targets_dir)
-    generate_lockfiles(lockfiles)
+    generate_lockfiles(args.targets_dir, lockfiles)
