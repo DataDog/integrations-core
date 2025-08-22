@@ -39,7 +39,12 @@
     "dashboards": {
         "Versa SD-WAN": "assets/dashboards/versa.json"
     },
-    "monitors": {},
+    "monitors": {
+      "Inbound Link Utilization >90%": "assets/monitors/inbound_link_utilization_high.json",
+      "Outbound Link Utilization >90%": "assets/monitors/outbound_link_utilization_high.json",
+      "SLA Breach PDU Loss >1%": "assets/monitors/sla_pdu_loss_high.json",
+      "Device is unreachable": "assets/monitors/device_unreachable.json"
+    },
     "saved_views": {}
   },
   "author": {
