@@ -1,6 +1,9 @@
 ## Overview
 
-[ZeroFox Cloud Platform][1] is a digital risk protection solution that safeguards organizations from external threats across social media, the surface, deep, and dark web. It detects and analyzes cyber threats, impersonations, data leaks, and brand abuse in real time.
+[ZeroFox Cloud Platform][1] is a digital risk protection platform that monitors social, dark web, domains, apps, and collaboration channels to identify brand, executive, and attack surface threats.
+
+This integration ingests the following logs:
+- **Platform Alerts**: Provides information about malicious or suspicious activity that violates defined ZeroFox rules.
 
 Integrate ZeroFox Cloud Platform with Datadog to gain insights into Alerts using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 

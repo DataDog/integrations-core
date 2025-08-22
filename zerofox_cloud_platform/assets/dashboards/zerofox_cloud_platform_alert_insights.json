@@ -25,7 +25,7 @@
             "id": 1581777107596299,
             "definition": {
                 "type": "note",
-                "content": "[ZeroFox Cloud Platform](https://www.zerofox.com/platform/) is a digital risk protection solution that safeguards organizations from external threats across social media, the surface, deep, and dark web. It detects and analyzes cyber threats, impersonations, data leaks, and brand abuse in real time.\n\nThis dashboard provides a comprehensive summary of ZeroFox Cloud Platform alerts.\n\nFor more information, see the [ZeroFox Cloud Platform Integration Documentation](https://docs.datadoghq.com/integrations/zerofox_cloud_platform/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "[ZeroFox Cloud Platform](https://www.zerofox.com/platform/) is a digital risk protection platform that monitors social, dark web, domains, apps, and collaboration channels to identify brand, executive, and attack surface threats.\n\nThis dashboard provides a comprehensive summary of ZeroFox Cloud Platform alerts.\n\nFor more information, see the [ZeroFox Cloud Platform Integration Documentation](https://docs.datadoghq.com/integrations/zerofox_cloud_platform/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "gray",
                 "font_size": "14",
                 "text_align": "left",
@@ -2353,7 +2353,7 @@
                                     },
                                     "formulas": [
                                         {
-                                            "cell_display_mode": "bar",
+                                            "cell_display_mode": "number",
                                             "alias": "Count",
                                             "formula": "query1"
                                         }
