@@ -832,7 +832,7 @@
          "type": "stacked",
          "legend": "automatic"
         },
-        "palette": "datadog16"
+        "palette": "datadog_classic"
        }
       },
       "layout": {
@@ -887,7 +887,7 @@
          ],
          "response_format": "timeseries",
          "style": {
-          "palette": "datadog16",
+          "palette": "dog_classic",
           "order_by": "values",
           "line_type": "solid",
           "line_width": "normal"
@@ -964,7 +964,7 @@
          "type": "stacked",
          "legend": "automatic"
         },
-        "palette": "datadog16"
+        "palette": "datadog_classic"
        }
       },
       "layout": {
@@ -1035,7 +1035,7 @@
          "type": "stacked",
          "legend": "automatic"
         },
-        "palette": "datadog16"
+        "palette": "datadog_classic"
        }
       },
       "layout": {
@@ -1106,7 +1106,7 @@
          "type": "stacked",
          "legend": "automatic"
         },
-        "palette": "datadog16"
+        "palette": "datadog_classic"
        }
       },
       "layout": {
@@ -1364,7 +1364,7 @@
          "type": "stacked",
          "legend": "automatic"
         },
-        "palette": "datadog16"
+        "palette": "datadog_classic"
        }
       },
       "layout": {
@@ -1441,7 +1441,7 @@
          "type": "stacked",
          "legend": "automatic"
         },
-        "palette": "datadog16"
+        "palette": "datadog_classic"
        }
       },
       "layout": {
@@ -1518,7 +1518,7 @@
          "type": "stacked",
          "legend": "automatic"
         },
-        "palette": "datadog16"
+        "palette": "datadog_classic"
        }
       },
       "layout": {
