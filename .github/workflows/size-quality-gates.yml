@@ -39,28 +39,24 @@ jobs:
       - name: Get merge base commit
         id: merge_base
         run: |
-          # git fetch origin master:refs/remotes/origin/master
-          # git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
-          # base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
-          # echo "sha=$base" >> $GITHUB_OUTPUT
           git fetch origin master:refs/remotes/origin/master
-          base=$(git merge-base HEAD origin/master)
+          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
+          base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
           echo "sha=$base" >> $GITHUB_OUTPUT
           echo "sha=$base" >> $GITHUB_STEP_SUMMARY
-
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MERGE_BASE=${{ steps.merge_base.outputs.base_sha }}
-          count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
+          count=$(git rev-list --count ${{ steps.merge_base.outputs.base_sha }}..origin/master)
           count_plus_one=$((count + 1))
           echo "count=$count" >> $GITHUB_STEP_SUMMARY
           run_id_base=$(
             (
               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-            ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
+            ) | jq -s '[.[][]] | .[] | select(.headSha == '"'"$MERGE_BASE"'"') | .databaseId' | head -n 1
           )
           echo "run_id_base=$run_id_base" >> $GITHUB_OUTPUT
           if [ -z "$run_id_base" ]; then

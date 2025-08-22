@@ -302,14 +302,24 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 1
+      
+      - name: Get merge base commit
+        id: merge_base
+        run: |
+          git fetch origin master:refs/remotes/origin/master
+          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
+          base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
+          echo "sha=$base" >> $GITHUB_OUTPUT
 
       - name: Join size diffs in order
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          BASE_SHA="${{ steps.merge_base.outputs.sha }}"
+          BASE_SHORT="${BASE_SHA:0:7}"
           echo "<h3>Dependency Size Changes</h3>" > comment.txt
           echo >> comment.txt
-          echo "Comparing with base [(${{ needs.calculate-size-diffs_macos.outputs.base_sha }})](https://github.com/${{ github.repository }}/commit/${{ needs.calculate-size-diffs.outputs.merge_base }})" >> comment.txt
+          echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
           for p in $PLATFORMS; do
             gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
             cat "size_diffs_output_${p}.txt" >> comment.txt
@@ -317,7 +327,7 @@ jobs:
           if [ $(wc -c < comment.txt) -gt 65536 ]; then
             echo "<h3>Dependency Size Changes</h3>" > comment.txt
             echo >> comment.txt
-            echo "Comparing with base [(${{ needs.calculate-size-diffs-macos.outputs.sha }})](https://github.com/${{ github.repository }}/commit/${{ needs.calculate-size-diffs-macos.outputs.sha }})" >> comment.txt
+            echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
             for p in $PLATFORMS; do
               gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
               cat "size_diffs_output_short_${p}.txt" >> comment.txt
