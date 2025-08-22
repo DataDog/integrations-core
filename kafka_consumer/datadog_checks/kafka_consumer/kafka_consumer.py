@@ -22,8 +22,6 @@ MAX_TIMESTAMPS = 1000
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
 DATA_STREAMS_MESSAGES_CACHE_KEY = 'get_messages_cache'
 
-# Dummy change
-
 
 class KafkaCheck(AgentCheck):
     __NAMESPACE__ = 'kafka'

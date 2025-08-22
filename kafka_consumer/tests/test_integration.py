@@ -18,6 +18,25 @@ from .common import assert_check_kafka, metrics
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
+@pytest.fixture(autouse=True)
+def _time_get_highwater_offsets(monkeypatch, request):
+    import time
+    from datadog_checks.kafka_consumer.kafka_consumer import KafkaCheck
+
+    original = KafkaCheck.get_highwater_offsets
+
+    def wrapped(self, *args, **kwargs):
+        start = time.perf_counter()
+        try:
+            return original(self, *args, **kwargs)
+        finally:
+            duration = time.perf_counter() - start
+            print(f"[perf] {request.node.nodeid} get_highwater_offsets: {duration:.3f}s")
+
+    monkeypatch.setattr(KafkaCheck, 'get_highwater_offsets', wrapped)
+    yield
+
+
 def mocked_read_persistent_cache(cache_key):
     cached_offsets = defaultdict(dict)
     cached_offsets["marvel_0"][25] = 150
