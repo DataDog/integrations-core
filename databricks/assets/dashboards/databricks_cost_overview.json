@@ -794,7 +794,7 @@
   {
    "id": 3812785000101592,
    "definition": {
-    "title": "Cluster Cost & Resource Utilization ",
+    "title": "Cluster Cost and Resource Utilization",
     "background_color": "vivid_green",
     "show_title": true,
     "type": "group",
@@ -804,7 +804,7 @@
       "id": 4442505189704330,
       "definition": {
        "type": "note",
-       "content": "Set up [Data Jobs Monitoring **(recommended)**](https://docs.datadoghq.com/data_jobs/) or our [Databricks Integration](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly)  to see data below. Dive deeper in [Databricks Overview](https://app.datadoghq.com/dash/integration/30437/databricks-overview?fromUser=false&refresh_mode=sliding&from_ts=1725645420213&to_ts=1725649020213&live=true).",
+       "content": "Set up [Data Jobs Monitoring **(recommended)**](https://docs.datadoghq.com/data_jobs/) or our [Databricks Integration](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly) to see data below. Dive deeper in [Databricks Overview](/dash/integration/Databricks%20Overview%20Dashboard).",
        "background_color": "green",
        "font_size": "14",
        "text_align": "center",
