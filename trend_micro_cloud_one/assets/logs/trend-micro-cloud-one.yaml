@@ -52,7 +52,7 @@ pipeline:
   name: Trend Micro Cloud One
   enabled: true
   filter:
-    query: "source:trend-micro-cloud-one"
+    query: "source:trend-micro-cloud-one "
   processors:
     - type: grok-parser
       name: For Workload Security
@@ -60,14 +60,23 @@ pipeline:
       source: message
       samples:
         - <134>2025-07-21T10:41:59Z deepsecurity LEEF:2.0|Trend Micro|Deep
-          Security Agent|50.0.3930|21|cat=Firewall	name=Deny Internal IP
-          Ranges	desc=Deny Internal IP Ranges	sev=5	cn1=67	cn1Label=Host
-          ID	dvchost=rhel7-50-5-112	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	act=Deny	dstMAC=FF:FF:FF:FF:FF:FF	srcMAC=00:50:56:83:90:7B	TrendMicroDsFrameType=IP  src=10.50.2.210	dst=10.50.15.255	in=0	proto=UDP	srcPort=12276	dstPort=5055	cnt=172
+          Security Agent|50.0.3930|21|cat=Firewall name=Deny Internal IP Ranges
+          desc=Deny Internal IP Ranges sev=5 cn1=67 cn1Label=Host ID
+          dvchost=rhel7-50-5-112 TrendMicroDsTenant=279555847073
+          TrendMicroDsTenantId=146271 act=Deny dstMAC=FF:FF:FF:FF:FF:FF
+          srcMAC=00:50:56:83:90:7B TrendMicroDsFrameType=IP src=10.50.2.210
+          dst=10.50.15.255 in=0 proto=UDP srcPort=12276 dstPort=5055 cnt=172
         - <134>2025-07-29T02:37:51Z deepsecurity LEEF:2.0|Trend Micro|Deep
-          Security
-          Agent|50.0.3945|6002200|cat=AppControl        name=blocked        desc=blocked        sev=6        cn1=102        cn1Label=Host
-          ID        dvchost=admin        TrendMicroDsTenant=279555847073        TrendMicroDsTenantId=146271        fileHash=93FA129820D7DD585924E7A2A0633CA424D12836547AC8A8BBD461B5915DEB2F        suser=admin\\crest        suid=S-1-5-21-2195366824-2826071503-3266291696-1001        act=blocked        filePath=C:\\Program
-          Files\\WindowsApps\\Microsoft.WindowsFeedbackHub_1.2506.12104.0_x64__8wekyb3d8bbwe\\\\PilotshubApp.dll        fsize=36801024        aggregationType=0        repeatCount=1        cs1=notWhitelisted        cs1Label=actionReason        cs2=14B28E4364B27B823ECE3D0ACB3665A020BB7259        cs2Label=sha1        cs3=68279BF3A9044AC30953EE11180F5BBD        cs3Label=md5
+          Security Agent|50.0.3945|6002200|cat=AppControl name=blocked
+          desc=blocked sev=6 cn1=102 cn1Label=Host ID dvchost=admin
+          TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271
+          fileHash=93FA129820D7DD585924E7A2A0633CA424D12836547AC8A8BBD461B5915DEB2F
+          suser=admin\\crest suid=S-1-5-21-2195366824-2826071503-3266291696-1001
+          act=blocked filePath=C:\\Program
+          Files\\WindowsApps\\Microsoft.WindowsFeedbackHub_1.2506.12104.0_x64__8wekyb3d8bbwe\\\\PilotshubApp.dll
+          fsize=36801024 aggregationType=0 repeatCount=1 cs1=notWhitelisted
+          cs1Label=actionReason cs2=14B28E4364B27B823ECE3D0ACB3665A020BB7259
+          cs2Label=sha1 cs3=68279BF3A9044AC30953EE11180F5BBD cs3Label=md5
       grok:
         supportRules: >-
           extract_data_till_pipe_delimited %{regex("[^|]*")}
