@@ -131,6 +131,7 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
     expected_metric_tags = tags.METRIC_TAGS + (
         f'database_hostname:{dd_default_hostname}',
         f'database_instance:{dd_default_hostname}',
+        f'ddagenthostname:{dd_default_hostname}',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
     if MYSQL_FLAVOR in ('mysql', 'percona'):
@@ -444,6 +445,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(expected_hostname),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
     )
     aggregator.assert_service_check(
         'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
@@ -816,6 +818,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
         "database_instance:{}".format(expected_database_instance),
         'dd.internal.resource:database_instance:{}'.format(expected_database_instance),
         "dbms_flavor:{}".format(MYSQL_FLAVOR.lower()),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
     )
 
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
@@ -885,6 +888,7 @@ def test_propagate_agent_tags(
         + (
             'database_hostname:stubbed.hostname',
             'database_instance:forced_hostname',
+            'ddagenthostname:stubbed.hostname',
             'server:{}'.format(HOST),
             'port:{}'.format(PORT),
             'dd.internal.resource:database_instance:forced_hostname',

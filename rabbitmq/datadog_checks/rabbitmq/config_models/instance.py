@@ -146,6 +146,8 @@ class InstanceConfig(BaseModel):
     queues: Optional[tuple[str, ...]] = None
     queues_regexes: Optional[tuple[str, ...]] = None
     rabbitmq_api_url: Optional[str] = None
+    rabbitmq_pass: Optional[str] = None
+    rabbitmq_user: Optional[str] = None
     raw_line_filters: Optional[tuple[str, ...]] = None
     raw_metric_prefix: Optional[str] = None
     read_timeout: Optional[float] = None
