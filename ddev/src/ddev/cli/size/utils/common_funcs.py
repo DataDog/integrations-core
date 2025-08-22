@@ -109,8 +109,9 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
     """
     resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
     versions = []
+    pattern = re.compile(r"\d+\.\d+")
     for file in os.listdir(resolved_path):
-        match = re.search(r"\d+\.\d+", file)
+        match = pattern.search(file)
         if match:
             versions.append(match.group())
     return set(versions)
@@ -120,13 +121,40 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform in name and version in name
 
 
-def is_valid_integration_file(path: str, repo_path: str) -> bool:
-    ignored_files = {
-        "datadog_checks_dev",
-        "datadog_checks_tests_helper",
-    }
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
+def is_valid_integration_file(
+    path: str,
+    repo_path: str,
+    ignored_files: set[str] | None = None,
+    included_folder: str | None = None,
+    git_ignore: list[str] | None = None,
+) -> bool:
+    """
+    Check if a file would be packaged with an integration.
+
+    Used to estimate integration package size by excluding:
+    - Hidden files (starting with ".")
+    - Files outside "datadog_checks"
+    - Helper/test-only packages (e.g. datadog_checks_dev)
+    - Files ignored by .gitignore
+
+    Args:
+        path (str): File path to check.
+        repo_path (str): Repository root, for loading .gitignore rules.
+
+    Returns:
+        bool: True if the file would be packaged, False otherwise.
+    """
+    if ignored_files is None:
+        ignored_files = {
+            "datadog_checks_dev",
+            "datadog_checks_tests_helper",
+        }
+
+    if included_folder is None:
+        included_folder = "datadog_checks" + os.sep
+
+    if git_ignore is None:
+        git_ignore = get_gitignore_files(repo_path)
     # It is not an integration
     if path.startswith("."):
         return False
@@ -225,8 +253,9 @@ def check_python_version(repo_path: str, integration_name: str, py_major_version
             return False
         classifiers = pyproject["project"]["classifiers"]
         integration_py_version = ""
+        pattern = re.compile(r"Programming Language :: Python :: (\d+)")
         for classifier in classifiers:
-            match = re.match(r"Programming Language :: Python :: (\d+)", classifier)
+            match = pattern.match(classifier)
             if match:
                 integration_py_version = match.group(1)
                 return integration_py_version == py_major_version
@@ -273,8 +302,9 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
     versions = []
     with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
+        pattern = re.compile(r"([\w\-\d\.]+) @ (https?://[^\s#]+)")
         for line in file_content.splitlines():
-            match = re.search(r"([\w\-\d\.]+) @ (https?://[^\s#]+)", line)
+            match = pattern.search(line)
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
