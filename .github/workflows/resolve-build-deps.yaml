@@ -309,7 +309,7 @@ jobs:
         run: |
           echo "<h3>Dependency Size Changes</h3>" > comment.txt
           echo >> comment.txt
-          echo "Comparing with base [(${{ needs.calculate-size-diffs_macos.outputs.sha }})](https://github.com/${{ github.repository }}/commit/${{ needs.calculate-size-diffs.outputs.merge_base }})" >> comment.txt
+          echo "Comparing with base [(${{ needs.calculate-size-diffs_macos.outputs.base_sha }})](https://github.com/${{ github.repository }}/commit/${{ needs.calculate-size-diffs.outputs.merge_base }})" >> comment.txt
           for p in $PLATFORMS; do
             gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
             cat "size_diffs_output_${p}.txt" >> comment.txt
