@@ -300,24 +300,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 1
 
       - name: Join size diffs in order
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          : > comment.txt
+          echo "<h3>Dependency Size Changes</h3>" > comment.txt
+          echo >> comment.txt
+          echo "Comparing with base [(${{ needs.calculate-size-diffs.outputs.merge_base }})](https://github.com/${{ github.repository }}/commit/${{ needs.calculate-size-diffs.outputs.merge_base }})" >> comment.txt
           for p in $PLATFORMS; do
             gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
-            echo "Available size_diffs_output files:" >> $GITHUB_STEP_SUMMARY
-            ls -l size_diffs_output* >> $GITHUB_STEP_SUMMARY
-            if [ ! -f "size_diffs_output_${p}.txt" ]; then
-                echo "Failed to download size_diffs_output_${p}.txt" >> $GITHUB_STEP_SUMMARY
-                exit 1
-            fi
             cat "size_diffs_output_${p}.txt" >> comment.txt
           done
           if [ $(wc -c < comment.txt) -gt 65536 ]; then
-            : > comment.txt
+            echo "<h3>Dependency Size Changes</h3>" > comment.txt
+            echo >> comment.txt
+            echo "Comparing with base [(${{ needs.calculate-size-diffs.outputs.merge_base }})](https://github.com/${{ github.repository }}/commit/${{ needs.calculate-size-diffs.outputs.merge_base }})" >> comment.txt
             for p in $PLATFORMS; do
               gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
               cat "size_diffs_output_short_${p}.txt" >> comment.txt
