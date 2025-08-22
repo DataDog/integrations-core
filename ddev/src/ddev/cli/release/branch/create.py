@@ -81,7 +81,7 @@ def update_build_agent_yaml(branch_name: str) -> None:
     # Update the build-agent-manual-release job to use the correct agent branch
     # Find the line with 'branch: main' and replace it
     old_pattern = r'(\s+branch:\s+)main'
-    new_replacement = r'\1' + branch_name
+    new_replacement = lambda match: match.group(1) + branch_name
     
     if re.search(old_pattern, content):
         updated_content = re.sub(old_pattern, new_replacement, content)
