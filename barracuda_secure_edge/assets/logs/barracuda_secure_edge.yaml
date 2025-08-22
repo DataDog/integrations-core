@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: barracuda_secure_edge
 metric_id: barracuda-secure-edge
 backend_only: false
