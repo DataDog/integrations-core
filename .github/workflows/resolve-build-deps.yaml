@@ -287,9 +287,6 @@ jobs:
     - name: Upload wheels
       run: python .builders/upload_and_lock.py targets
 
-    - name: Lock files
-      run: python .builders/lock.py targets
-
     - name: Clean up repository
       run: |-
         rm ${{ steps.auth.outputs.credentials_file_path }}
