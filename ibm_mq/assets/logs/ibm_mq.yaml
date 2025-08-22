@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: ibm_mq
 metric_id: ibm-mq
 backend_only: false

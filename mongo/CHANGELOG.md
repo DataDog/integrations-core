@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 10.2.1 / 2025-07-21
+## 10.3.0 / 2025-08-07
+
+***Added***:
+
+* Collect index stats metric `mongodb.collection.indexes.accesses.opsps` on replica set secondary nodes. ([#20819](https://github.com/DataDog/integrations-core/pull/20819))
+
+***Fixed***:
+
+* Fix incorrect UTC timestamp parsing for system.profile slow queries when the agent runs in non-UTC timezones. ([#20834](https://github.com/DataDog/integrations-core/pull/20834))
+
+## 10.2.1 / 2025-07-21 / Agent 7.69.0
 
 ***Fixed***:
 

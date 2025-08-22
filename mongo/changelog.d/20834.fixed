@@ -1,1 +1,0 @@
-Fix incorrect UTC timestamp parsing for system.profile slow queries when the agent runs in non-UTC timezones.
