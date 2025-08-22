@@ -1,0 +1,130 @@
+id: trend-micro-cloud-one
+tests:
+  - sample: <134>2025-08-14T07:11:22Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3982|20|cat=Firewall	name=New Firewall
+      Rule_3_CDS	desc=New Firewall Rule_3_CDS	sev=1	cn1=331	cn1Label=Host
+      ID	dvchost=win-edr.edr.local	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	act=Log	dstMAC=A8:46:9D:23:D2:7A	srcMAC=00:50:56:81:C2:07	TrendMicroDsFrameType=IP	src=10.50.13.81	dst=10.0.1.94	out=244	proto=ICMP	srcPort=0	dstPort=0	cs4=3
+      3	cs4Label=ICMP	cnt=1
+    result: null
+  - sample: <134>2025-08-14T07:26:45Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3982|20|cat=Firewall	name=New Firewall
+      Rule_3_CDS	desc=New Firewall Rule_3_CDS	sev=1	cn1=331	cn1Label=Host
+      ID	dvchost=win-edr.edr.local	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	act=Log	dstMAC=A8:46:9D:23:D2:7A	srcMAC=00:50:56:81:C2:07	TrendMicroDsFrameType=IP	src=10.50.13.81	dst=34.205.5.12	out=66	cs3=DF
+      0	cs3Label=Fragmentation Bits	proto=TCP	srcPort=50119	dstPort=443	cs2=CWR
+      ECE SYN	cs2Label=TCP Flags	cnt=1
+    result: null
+  - sample: <134>2025-08-14T07:26:45Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3982|20|cat=Firewall	name=New Firewall
+      Rule_3_CDS	desc=New Firewall Rule_3_CDS	sev=1	cn1=331	cn1Label=Host
+      ID	dvchost=win-edr.edr.local	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	act=Log	dstMAC=A8:46:9D:23:D2:7A	srcMAC=00:50:56:81:C2:07	TrendMicroDsFrameType=IP	src=10.50.13.81	dst=34.205.5.12	out=66	cs3=DF
+      0	cs3Label=Fragmentation Bits	proto=TCP	srcPort=50119	dstPort=443	cs2=CWR
+      ECE SYN	cs2Label=TCP Flags	cnt=1  TrendMicroDsUserName=test
+    result: null
+  - sample: <134>2025-08-14T07:34:48Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Manager|50.0.3982|1909|cat=System	name=AWS Account
+      Synchronization Finished	desc=Description
+      Omitted	sev=3	src=192.168.145.250	usrName=System	target=125832268643 -
+      125832268643	msg=Description
+      Omitted	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271
+    result: null
+  - sample: <134>2025-08-12T12:35:06Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security
+      Agent|50.0.3970|4000010|cat=Anti-Malware	name=Joke.Win32.LauncherRepeat.A	desc=Joke.Win32.LauncherRepeat.A	sev=6	cn1=102	cn1Label=Host
+      ID	dvchost=admin	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	cs3=C:\\Users\\crest\\Downloads\\The-MALWARE-Repo-master_2\\The-MALWARE-Repo-master\\The-MALWARE-Repo-master\\Joke\\Launcher.exe	cs3Label=Infected
+      Resource	cs4=10	cs4Label=Resource Type	cs5=0	cs5Label=Risk
+      Level	act=Quarantine	result=Quarantined	msg=Realtime
+    result: null
+  - sample: <134>2025-08-13T06:20:41Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security
+      Agent|50.0.3970|4000000|cat=Anti-Malware	name=TROJ_RANSOM_BL13015C.TOMC	desc=TROJ_RANSOM_BL13015C.TOMC	sev=6	cn1=102	cn1Label=Host
+      ID	dvchost=admin	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	cn2=139585	cn2Label=Quarantine
+      File
+      Size	filePath=C:\\Users\\crest\\Downloads\\The-MALWARE-Repo-master_2\\The-MALWARE-Repo-master\\The-MALWARE-Repo-master\\Ransomware\\PowerPoint.exe	fileInCompressedFile=	act=Delete	result=Deleted	msg=Realtime	TrendMicroDsFileSHA1=C71799A6A6D09EE758B04CDF90A4AB76FBD2A7E3	TrendMicroDsProcessPid=0  cs6=ContainerImageName
+      | ContainerName | ContainerID  suser=test
+    result: null
+  - sample: <134>2025-08-14T08:20:22Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security
+      Agent|50.0.3982|6001200|cat=AppControl	name=detectOnly	desc=detectOnly	sev=6	cn1=102	cn1Label=Host
+      ID	dvchost=admin	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	fileHash=37BB66FAE59084AF5AD0DD5CBBB572ACAB4B174525BEA348397A92D1E04CE528	suser=admin\\crest	suid=S-1-5-21-2195366824-2826071503-3266291696-1001	act=detectOnly	filePath=C:\\Windows\\System32\\\\schannel.dll	fsize=671744	aggregationType=0	repeatCount=1	cs1=notWhitelisted	cs1Label=actionReason	cs2=427E12D08F38ADDD4544398266DE884783AA0F50	cs2Label=sha1	cs3=467ED538239D726F7F564085AD624DD0	cs3Label=md5
+    result: null
+  - sample: <134>2025-08-12T19:05:03Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3970|1005293|cat=Intrusion Prevention	name=Prevent
+      Windows Administrator User Login Over SMB (ATT&CK
+      T1078.002,T1078.001,T1021.002)	desc=Prevent Windows Administrator User
+      Login Over SMB (ATT&CK
+      T1078.002,T1078.001,T1021.002)	sev=8	cn1=331	cn1Label=Host
+      ID	dvchost=win-edr.edr.local	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	dstMAC=00:50:56:81:C2:07	srcMAC=00:50:56:81:97:C5	TrendMicroDsFrameType=IP	src=10.50.12.233	dst=10.50.13.81	in=649	cs3=DF
+      0	cs3Label=Fragmentation Bits	proto=TCP	srcPort=49999	dstPort=445	cs2=ACK
+      PSH	cs2Label=TCP Flags	cnt=1	act=IDS:Reset	cn3=226	cn3Label=DPI Packet
+      Position	cs5=745	cs5Label=DPI Stream
+      Position 	cs1="adminlogin2"	cs1Label=DPI Note	cs6=8	cs6Label=DPI
+      Flags	cs7=FWD	cs7Label=Flow
+    result: null
+  - sample: <134>2025-08-12T19:05:03Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3970|1005293|cat=Intrusion Prevention	name=Prevent
+      Windows Administrator User Login Over SMB (ATT&CK
+      T1078.002,T1078.001,T1021.002)	desc=Prevent Windows Administrator User
+      Login Over SMB (ATT&CK
+      T1078.002,T1078.001,T1021.002)	sev=8	cn1=331	cn1Label=Host
+      ID	dvchost=win-edr.edr.local	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	dstMAC=00:50:56:81:C2:07	srcMAC=00:50:56:81:97:C5	TrendMicroDsFrameType=IP	src=10.50.12.233	dst=10.50.13.81	out=649	cs3=DF
+      0	cs3Label=Fragmentation Bits	proto=TCP	srcPort=49999	dstPort=445	cs2=ACK
+      PSH	cs2Label=TCP Flags	cnt=1	act=IDS:Reset	cn3=226	cn3Label=DPI Packet
+      Position	cs5=745	cs5Label=DPI Stream
+      Position 	cs1="adminlogin2"	cs1Label=DPI Note	cs6=8	cs6Label=DPI
+      Flags	cs7=FWD	cs7Label=Flow
+    result: null
+  - sample: "<134>2025-08-14T05:11:26Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3982|2007210|cat=Integrity Monitor\tname=TMTR-0018:
+      Suspicious Files Detected In User Profile Directory (ATT&CK
+      T1560.001)\tdesc=TMTR-0018: Suspicious Files Detected In User Profile
+      Directory (ATT&CK T1560.001)\tsev=6\tcn1=102\tcn1Label=Host
+      ID\tdvchost=admin\tTrendMicroDsTenant=279555847073\tTrendMicroDsTenantId=\
+      146271\tact=deleted\tfilePath=c:\\\\users\\\\crest\\\\appdata\\\\local\\\
+      \\google\\\\chrome\\\\user
+      data\\\\default\\\\indexeddb\\\\https_www.thesun.co.uk_0.indexeddb.blob\\\
+      \\2\\\\00\\\\3\tsuser=admin\\crest\tsproc=C:\\\\Program
+      Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\tentityType=File\t\
+      msg=No description is available."
+    result: null
+  - sample: "<134>2025-08-14T07:43:58Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3982|3002828|cat=Log Inspection\tname=Application -
+      Secure Shell Daemon (SSHD)\tdesc=SSHD brute force trying to get access to
+      the system (ATTACK T1110)\tsev=10\tcn1=67\tcn1Label=Host
+      ID\tdvchost=rhel7-50-5-112\tTrendMicroDsTenant=279555847073\tTrendMicroDs\
+      TenantId=146271\tcs1=SSHD brute force trying to get access to the system
+      (ATTACK T1110)\tcs1Label=LI
+      Description\tfname=/var/log/secure\tsrc=10.50.10.195\tduser=zyfwp\tshost=\
+      rhel7-50-5-112\tmsg=Aug 14 13:13:56 rhel7-50-5-112 sshd[10767]: Invalid
+      user zyfwp from 10.50.10.195 port 12036"
+    result: null
+  - sample: <134>2025-08-14T05:23:45Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3982|5000000|cat=Web
+      Reputation	name=WebReputation	desc=WebReputation	sev=5	cn1=102	cn1Label=Host
+      ID	dvchost=admin	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	request=https://1.envato.market/c/1295728/298927/4662?u\=https%3A%2F%2F1.envato.market%2FrQn5&svlink\=4291&level\=1&brwsr\=d8f0ef3e-78ce-11f0-b1b1-5f2e6327fcf4&brwsrsig\=1uAw0axGsUALRpr3O12NNSt40AR2Za	msg=Untested
+    result: null
+  - sample: <134>2025-08-13T06:15:39Z deepsecurity LEEF:2.0|Trend Micro|Deep
+      Security Agent|50.0.3970|7001000|cat=Device
+      Control	name=DeviceControl	desc=DeviceControl	sev=6	cn1=364	cn1Label=Host
+      ID	dvchost=AssetTag-EID	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	device=USB
+      Flash DISK USB
+      Device	vendor=USB	serial=1408033910001641	model=1000	computerName=ASSETTAG-EID	domainName=WORKGROUP	deviceType=1	permission=0
+    result: null
+  - sample: '772 <37>1 2025-08-12T06:37:36.027+00:00 NetworkSecurityPoC
+      LOGID_10-REP_BLOCK-NOTICE - - [meta sequenceId="1391"]
+      ﻿<37>2025-08-12T06:37:36.027+00:00 NetworkSecurityPoC IPS:
+      CEF:0|TippingPoint|vTPS Cloud|2024.9.0.13694|7610|IP
+      Reputation|1|dvchost=NetworkSecurityPoC dvc=192.0.2.2 cat=ReputationBlock
+      deviceFacility=Reputation act=Block
+      cs2=e19397df-f749-4cdb-a2fa-6aa71f1326ed cs2Label=Policy UUID
+      cs3=00000001-0001-0001-0001-000000007610 cs3Label=Signature UUID
+      src=185.94.111.1 spt=48518 dst=10.0.0.160 dpt=4786 start=Jul 31 2025
+      22:31:28+0000 cnt=1 deviceInboundInterface=1B deviceOutboundInterface=1A
+      cs1=cloud formation cs1Label=Virtual Segment cn2=0 cn2Label=SSL Flag
+      c6a1=185.94.111.1 c6a1Label=Client IPv4 cs6=185.94.111.1 Geolocation
+      Filtering cs6Label=Parameters'
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.

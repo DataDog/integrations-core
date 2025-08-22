@@ -1,7 +1,4 @@
 # CHANGELOG - Trend Micro Cloud One
 
-## 1.0.0 / 2025-08-20
+<!-- towncrier release notes start -->
 
-***Added***:
-
-* Initial Release
