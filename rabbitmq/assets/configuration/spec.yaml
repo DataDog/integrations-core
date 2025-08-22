@@ -73,6 +73,16 @@ files:
         value:
           type: string
           example: http://localhost:15672/api/
+      - name: rabbitmq_user
+        description: The username to use for the RabbitMQ Management Plugin
+        value:
+          type: string
+          example: guest
+      - name: rabbitmq_pass
+        description: The password to use for the RabbitMQ Management Plugin
+        value:
+          type: string
+          example: guest
       - name: tag_families
         description: To tag queue "families" based off of regex matching.
         value:

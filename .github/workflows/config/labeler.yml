@@ -55,6 +55,8 @@ integration/ambari:
 - ambari/**/*
 integration/anthropic:
 - anthropic/**/*
+integration/anthropic_usage_and_costs:
+- anthropic_usage_and_costs/**/*
 integration/anyscale:
 - anyscale/**/*
 integration/apache:
@@ -85,6 +87,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/beyondtrust_identity_security_insights:
+- beyondtrust_identity_security_insights/**/*
 integration/beyondtrust_password_safe:
 - beyondtrust_password_safe/**/*
 integration/bitdefender:
@@ -325,6 +329,8 @@ integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
 integration/ivanti_nzta:
 - ivanti_nzta/**/*
+integration/jamf_pro:
+- jamf_pro/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -561,8 +567,6 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
-integration/servicenow_performance:
-- servicenow_performance/**/*
 integration/shopify:
 - shopify/**/*
 integration/sidekiq:

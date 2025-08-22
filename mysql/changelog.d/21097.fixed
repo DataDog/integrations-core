@@ -1,0 +1,1 @@
+Change statement_rows to TTL cache to fix mysql memory leaks
