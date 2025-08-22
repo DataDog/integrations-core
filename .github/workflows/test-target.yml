@@ -112,6 +112,8 @@ jobs:
       # Capture traces for a separate job to do the submission
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
+      # Ensure pytest prints (including perf timings) are visible in CI logs
+      PYTEST_ADDOPTS: "--capture=tee-sys"
 
     permissions:
        # needed for compute-matrix in test-target.yml
