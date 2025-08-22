@@ -1,5 +1,5 @@
-id: trend-micro-cloud-one
-metric_id: trend-micro-cloud-one
+id: "trend-micro-cloud-one"
+metric_id: "trend-micro-cloud-one"
 backend_only: false
 facets:
   - groups:
