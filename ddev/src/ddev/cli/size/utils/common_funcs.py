@@ -116,7 +116,7 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
 
 
 def is_correct_dependency(platform: str, version: str, name: str) -> bool:
-    return platform in name and version in name
+    return platform in name and version in name.split('_')[-1]
 
 
 def is_valid_integration(path: str, included_folder: str, ignored_files: set[str], git_ignore: list[str]) -> bool:
@@ -147,7 +147,7 @@ def get_gitignore_files(repo_path: str | Path) -> list[str]:
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:
-    for unit in [" B", " KB", " MB", " GB"]:
+    for unit in [" B", " KiB", " MiB", " GiB"]:
         if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
         size_bytes /= 1024
@@ -324,6 +324,29 @@ def get_dependencies_sizes(
         )
 
     return file_data
+
+
+def get_dependencies_from_json(
+    dependency_sizes: str, platform: str, version: str, compressed: bool
+) -> list[FileDataEntry]:
+    # for fname in os.listdir(dependency_sizes):
+    #     if is_correct_dependency(platform, version.split(".")[0], fname):
+    #         sizes_json = os.path.join(dependency_sizes, fname)
+    # if sizes_json is None:
+    #     raise ValueError(f"No dependency sizes found for platform {platform} and version {version}")
+    with open(dependency_sizes, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    size_key = "compressed" if compressed else "uncompressed"
+    return [
+        {
+            "Name": name,
+            "Version": sizes.get("version", ""),
+            "Size_Bytes": int(sizes.get(size_key, 0)),
+            "Size": convert_to_human_readable_size(sizes.get(size_key, 0)),
+            "Type": "Dependency",
+        }
+        for name, sizes in data.items()
+    ]
 
 
 def is_excluded_from_wheel(path: str) -> bool:
@@ -518,47 +541,22 @@ def export_format(
     compressed: bool,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
+    name = f"{mode}_{size_type}"
+    if platform:
+        name += f"_{platform}"
+    if version:
+        name += f"_{version}"
     for output_format in format:
         if output_format == "csv":
-            csv_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.csv"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.csv"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.csv"
-                    if platform
-                    else f"{size_type}_{mode}.csv"
-                )
-            )
+            csv_filename = f"{name}.csv"
             save_csv(app, modules, csv_filename)
 
         elif output_format == "json":
-            json_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.json"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.json"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.json"
-                    if platform
-                    else f"{size_type}_{mode}.json"
-                )
-            )
+            json_filename = f"{name}.json"
             save_json(app, json_filename, modules)
 
         elif output_format == "markdown":
-            markdown_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.md"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.md"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.md"
-                    if platform
-                    else f"{size_type}_{mode}.md"
-                )
-            )
+            markdown_filename = f"{name}.md"
             save_markdown(app, "Status", modules, markdown_filename)
 
 

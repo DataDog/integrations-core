@@ -34,6 +34,10 @@ env:
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
 
+permissions:
+  contents: read
+  pull-requests: write
+  
 jobs:
   test:
     name: Run tests
@@ -65,7 +69,7 @@ jobs:
           image: linux-aarch64
         - os: ubuntu-22.04
           image: linux-x86_64
-        - os: windows-2022
+        - os: windows-2022 
           image: windows-x86_64
 
     permissions:
@@ -171,6 +175,26 @@ jobs:
         name: target-${{ matrix.job.image }}
         path: output
 
+  measure-disk-usage:
+    needs: build
+    strategy:
+      matrix:
+        platform: [linux-x86_64, linux-aarch64, windows-x86_64]
+    uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+      run-id: ${{ github.run_id }}
+      resolved-deps: true
+  
+  calculate-size-diffs:
+    needs: measure-disk-usage
+    strategy:
+      matrix:
+        platform: [linux-x86_64, linux-aarch64, windows-x86_64]
+    uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+
   build-macos:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
     runs-on: ${{ matrix.job.os }}
@@ -243,6 +267,81 @@ jobs:
       with:
         name: target-macos-${{ matrix.job.arch }}
         path: output
+
+  # ----------- CHANGE TO MASTER BRANCH ------------
+  measure-disk-usage-macos:
+    needs: build-macos # change to both builds, that way it is only in one place
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64]
+    uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+      run-id: ${{ github.run_id }}
+      resolved-deps: true
+  
+  calculate-size-diffs-macos:
+    needs: measure-disk-usage-macos
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64]
+    uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
+    with:
+      platform: ${{ matrix.platform }}
+
+  comment-size-diffs-on-pr:
+    needs:
+      - calculate-size-diffs-macos
+      # - calculate-size-diffs
+    env:
+      PYTHON_VERSION: "3.12"
+      PLATFORMS: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 1
+      
+      - name: Get merge base commit
+        id: merge_base
+        run: |
+          git fetch origin master:refs/remotes/origin/master
+          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
+          base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
+          echo "sha=$base" >> $GITHUB_OUTPUT
+
+      - name: Join size diffs in order
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_SHA="${{ steps.merge_base.outputs.sha }}"
+          BASE_SHORT="${BASE_SHA:0:7}"
+          echo "<h3>Dependency Size Changes</h3>" > comment.txt
+          echo >> comment.txt
+          echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
+          for p in $PLATFORMS; do
+            gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
+            cat "size_diffs_output_${p}.txt" >> comment.txt
+          done
+          if [ $(wc -c < comment.txt) -gt 65536 ]; then
+            echo "<h3>Dependency Size Changes</h3>" > comment.txt
+            echo >> comment.txt
+            echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
+            for p in $PLATFORMS; do
+              gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
+              cat "size_diffs_output_short_${p}.txt" >> comment.txt
+            done
+          fi
+
+      - name: Output results
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
 
   publish:
     name: Publish artifacts and update lockfiles via PR
