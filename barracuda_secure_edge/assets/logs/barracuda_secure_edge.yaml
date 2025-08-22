@@ -108,8 +108,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss
-              Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*%{data:meesage}
+              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*%{data:message}
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{data}%{ip:src}%{data}%{number:port}%{data}
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{data:type}\[%{number:type_id}\]:\s*%{data:message}
               autoFilledRule4 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?%{data:message}
@@ -422,7 +421,7 @@ pipeline:
             matchRules: >+
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{word:process}\[%{number:process_id}\]:\s+%{data:message}
-              autoFilledRule4 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*\[%{number:proccess_id}\]\s*%{data}\s*\:\s*%{word:action}\s*%{data:message}
+              autoFilledRule4 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*\[%{number:process_id}\]\s*%{data}\s*\:\s*%{word:action}\s*%{data:message}
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:module}\s:*%{data}=\s*%{ip:local_ip}\s*%{data}=%{ip:gateway_ip}
               autoFilledRule3 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
     - type: pipeline
