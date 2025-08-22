@@ -163,7 +163,8 @@ pipeline:
           extract_data_till_pipe_delimited %{regex("[^|]*")}
 
           extract_key_value_pair %{data::keyvalue("=", "\\]\\[{}\"\" :;,/!''\\(\\)*~#&$%^?+\\\\")}
-        matchRules: "trend_micro_cloud_one_rule1 %{notSpace} %{notSpace} %{notSpace}
+        matchRules:
+          "trend_micro_cloud_one_rule1 %{notSpace} %{notSpace} %{notSpace}
           %{notSpace} %{notSpace:sev} %{notSpace} %{notSpace}
           %{regex(\"(.*?)(?=])\")}]\\s*%{regex(\"(.*?)(?=>)\")}>%{date(\"yyyy-M\
           -d'T'H:m:s.SSSZZ\"):time} %{notSpace} %{regex(\"(.*?)(?=:)\")}\\:
@@ -255,15 +256,18 @@ pipeline:
             query: "@severity:(LOGID_10-REP_BLOCK-NOTICE OR LOGID_10-IPS_BLOCK-NOTICE)"
           name: notice
         - filter:
-            query: "@severity:(LOGID_10-REP_BLOCK-ERROR OR LOGID_10-IPS_BLOCK-ERROR OR [5 TO
+            query:
+              "@severity:(LOGID_10-REP_BLOCK-ERROR OR LOGID_10-IPS_BLOCK-ERROR OR [5 TO
               7])"
           name: error
         - filter:
-            query: "@severity:(LOGID_10-REP_BLOCK-WARNING OR LOGID_10-IPS_BLOCK-WARNING OR
+            query:
+              "@severity:(LOGID_10-REP_BLOCK-WARNING OR LOGID_10-IPS_BLOCK-WARNING OR
               [2 TO 4])"
           name: warning
         - filter:
-            query: "@severity:(LOGID_10-REP_BLOCK-CRIT OR LOGID_10-IPS_BLOCK-CRIT OR [8 TO
+            query:
+              "@severity:(LOGID_10-REP_BLOCK-CRIT OR LOGID_10-IPS_BLOCK-CRIT OR [8 TO
               10])"
           name: critical
         - filter:
