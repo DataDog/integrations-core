@@ -11,6 +11,7 @@ pytestmark = [pytest.mark.e2e]
 @pytest.fixture(autouse=True)
 def _time_get_highwater_offsets(monkeypatch, request):
     import time
+
     from datadog_checks.kafka_consumer.kafka_consumer import KafkaCheck
 
     original = KafkaCheck.get_highwater_offsets
@@ -25,6 +26,7 @@ def _time_get_highwater_offsets(monkeypatch, request):
 
     monkeypatch.setattr(KafkaCheck, 'get_highwater_offsets', wrapped)
     yield
+
 
 def test_e2e(dd_agent_check, kafka_instance):
     aggregator = dd_agent_check(kafka_instance)

@@ -21,6 +21,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 @pytest.fixture(autouse=True)
 def _time_get_highwater_offsets(monkeypatch, request):
     import time
+
     from datadog_checks.kafka_consumer.kafka_consumer import KafkaCheck
 
     original = KafkaCheck.get_highwater_offsets
