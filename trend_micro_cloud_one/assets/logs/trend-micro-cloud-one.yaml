@@ -1,5 +1,5 @@
-id: "trend-micro-cloud-one"
-metric_id: "trend-micro-cloud-one"
+id: trend-micro-cloud-one
+metric_id: trend-micro-cloud-one
 backend_only: false
 facets:
   - groups:
@@ -52,7 +52,7 @@ pipeline:
   name: Trend Micro Cloud One
   enabled: true
   filter:
-    query: "source:trend-micro-cloud-one "
+    query: "source:trend-micro-cloud-one"
   processors:
     - type: grok-parser
       name: For Workload Security
@@ -62,7 +62,7 @@ pipeline:
         - <134>2025-07-21T10:41:59Z deepsecurity LEEF:2.0|Trend Micro|Deep
           Security Agent|50.0.3930|21|cat=Firewall	name=Deny Internal IP
           Ranges	desc=Deny Internal IP Ranges	sev=5	cn1=67	cn1Label=Host
-          ID	dvchost=rhel7-50-5-112	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	act=Deny	dstMAC=FF:FF:FF:FF:FF:FF	srcMAC=00:50:56:83:90:7B	TrendMicroDsFrameType=IP	src=10.50.2.210	dst=10.50.15.255	in=0	proto=UDP	srcPort=12276	dstPort=5055	cnt=172
+          ID	dvchost=rhel7-50-5-112	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	act=Deny	dstMAC=FF:FF:FF:FF:FF:FF	srcMAC=00:50:56:83:90:7B	TrendMicroDsFrameType=IP  src=10.50.2.210	dst=10.50.15.255	in=0	proto=UDP	srcPort=12276	dstPort=5055	cnt=172
         - <134>2025-07-29T02:37:51Z deepsecurity LEEF:2.0|Trend Micro|Deep
           Security
           Agent|50.0.3945|6002200|cat=AppControl        name=blocked        desc=blocked        sev=6        cn1=102        cn1Label=Host
