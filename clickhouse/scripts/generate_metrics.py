@@ -10,7 +10,7 @@ import os
 import pprint
 import re
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import Iterable
 
 import requests
@@ -25,22 +25,22 @@ QUERIES_DIR = os.path.join(INTEGRATION_DIR, 'datadog_checks', 'clickhouse', 'que
 TESTS_DIR = os.path.join(INTEGRATION_DIR, 'tests')
 METADATAFILE_PATH = os.path.join(INTEGRATION_DIR, 'metadata.csv')
 
-GENERATED_FILE_TEMPLATES = {
-    'metrics.py': os.path.join(TESTS_DIR, 'metrics.py'),
-    'system_events.py': os.path.join(QUERIES_DIR, 'system_events.py'),
-    'system_metrics.py': os.path.join(QUERIES_DIR, 'system_metrics.py'),
-}
-
 PREFIX_CURRENT_METRICS = 'ClickHouseMetrics'
 PREFIX_PROFILE_EVENTS = 'ClickHouseProfileEvents'
-
+PREFIX_ASYNC_METRICS = 'ClickHouseAsyncMetrics'
 
 METRIC_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)"\)\s*\\?')
 METRIC_TYPE_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)",\s*(?P<type>[\w:]+)\)\s*\\?')
+ASYNC_METRICS_PATTERN = re.compile(
+    r'new_values\["(?P<metric>[\w.]+)"\]\s*=\s*\{.*,\s*(?P<description>"[^}]*")*?\s*(?:\w+\s*)?\}',
+    re.MULTILINE
+)
 
-RAW_SRC_URL = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/Common/'
-SOURCE_URL_CURRENT_METRICS = RAW_SRC_URL + 'CurrentMetrics.cpp'
-SOURCE_URL_PROFILE_EVENTS = RAW_SRC_URL + 'ProfileEvents.cpp'
+RAW_SRC_URL = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/'
+SOURCE_URL_CURRENT_METRICS = RAW_SRC_URL + 'Common/CurrentMetrics.cpp'
+SOURCE_URL_PROFILE_EVENTS = RAW_SRC_URL + 'Common/ProfileEvents.cpp'
+SOURCE_URL_ASYNC_METRICS = RAW_SRC_URL + 'Common/AsynchronousMetrics.cpp'
+SOURCE_URL_SERVER_ASYNC_METRICS = RAW_SRC_URL + 'Interpreters/ServerAsynchronousMetrics.cpp'
 
 INTEGRATION_NAME = 'clickhouse'
 
@@ -66,6 +66,41 @@ VALUE_TYPE_POSTFIX_24_8 = {
     'Nanoseconds': VALUE_TYPE_NANOSECONDS,
 }
 
+class MetricKind(StrEnum):
+    ASYNC_METRICS = 'async_metrics'
+    METRICS = 'metrics'
+    EVENTS = 'events'
+
+@dataclass
+class Template:
+    source_path: str
+    target_path: str
+
+@dataclass
+class MetricsGenerator:
+    kind: MetricKind
+    template: Template
+    is_optional: bool = False
+
+
+class Templates(Enum):
+    QUERY_ASYNC_METRICS = Template(
+        source_path='system_async_metrics.py',
+        target_path=os.path.join(QUERIES_DIR, 'system_async_metrics.py'),
+    )
+    QUERY_EVENTS = Template(
+        source_path='system_events.py',
+        target_path=os.path.join(QUERIES_DIR, 'system_events.py'),
+    )
+    QUERY_METRICS = Template(
+        source_path='system_metrics.py',
+        target_path=os.path.join(QUERIES_DIR, 'system_metrics.py'),
+    )
+    TESTS_METRICS = Template(
+        source_path='metrics.py',
+        target_path=os.path.join(TESTS_DIR, 'metrics.py'),
+    )
+
 
 def indent_line(string: str, indent: int=4) -> str:
     return ' ' * indent + string
@@ -78,14 +113,14 @@ def write_file(file, contents, encoding='utf-8'):
     with open(file, 'w', encoding=encoding) as f:
         f.write(contents)
 
-def generate_queries_file(template: str, config: dict):
-    target_path = GENERATED_FILE_TEMPLATES.get(template)
-    if target_path is None:
-        print(f'Unknown template file: {template}')
+def generate_queries_file(template: Template, config: dict):
+    source_path = os.path.join(TEMPLATES_DIR, template.source_path)
+    if not os.path.exists(source_path):
+        print(f'Unknown template file: {source_path}')
         exit(1)
-    template_path = os.path.join(TEMPLATES_DIR, template)
-    data = read_file(template_path)
-    write_file(target_path, data.format(**config))
+
+    data = read_file(source_path)
+    write_file(template.target_path, data.format(**config))
 
 
 @dataclass
@@ -150,6 +185,13 @@ def fetch_current_metrics(version: str) -> dict[str, ClickhouseMetric]:
 
 
 def fetch_profile_events(version: str) -> dict[str, ClickhouseMetric]:
+    def extract_value_type_24_8(metric: str):
+        for metric_postfix in VALUE_TYPE_POSTFIX_24_8:
+            if metric.endswith(metric_postfix):
+                return VALUE_TYPE_POSTFIX_24_8[metric_postfix]
+
+        return VALUE_TYPE_COUNTER
+
     raw_metrics = requests.get(SOURCE_URL_PROFILE_EVENTS.format(branch=version), timeout=10).text
 
     result = {}
@@ -177,15 +219,29 @@ def fetch_profile_events(version: str) -> dict[str, ClickhouseMetric]:
     return result
 
 
-def extract_value_type_24_8(metric: str):
-    for metric_postfix in VALUE_TYPE_POSTFIX_24_8:
-        if metric.endswith(metric_postfix):
-            return VALUE_TYPE_POSTFIX_24_8[metric_postfix]
+def fetch_async_metrics(version: str) -> dict[str, ClickhouseMetric]:
+    def clean_description(description: str) -> str:
+        description = description.replace('"', ' ')
 
-    return VALUE_TYPE_COUNTER
+        return re.sub(r"\s+", " ", description).strip()
 
+    result = {}
+    # common
+    raw_metrics = requests.get(SOURCE_URL_ASYNC_METRICS.format(branch=version), timeout=10).text
+    for match in ASYNC_METRICS_PATTERN.finditer(raw_metrics):
+        name, description = match.groups()
+        m = ClickhouseMetric(name=name, description=clean_description(description), prefix=PREFIX_ASYNC_METRICS)
+        result[m.metric_name()] = m
+    # server
+    raw_metrics = requests.get(SOURCE_URL_SERVER_ASYNC_METRICS.format(branch=version), timeout=10).text
+    for match in ASYNC_METRICS_PATTERN.finditer(raw_metrics):
+        name, description = match.groups()
+        m = ClickhouseMetric(name=name, description=clean_description(description), prefix=PREFIX_ASYNC_METRICS)
+        result[m.metric_name()] = m
 
-def generate_queries(template: str, metrics: Iterable[ClickhouseMetric]):
+    return result
+
+def generate_queries(template: Template, metrics: Iterable[ClickhouseMetric]):
     config = {
         'items': ',\n'.join(indent_line(metric.get_query_item(), 16) for metric in sorted(metrics)),
     }
@@ -193,7 +249,7 @@ def generate_queries(template: str, metrics: Iterable[ClickhouseMetric]):
 
 
 def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
-    HEADERS = [
+    FILE_HEADERS = [
         'metric_name',
         'metric_type',
         'interval',
@@ -209,7 +265,7 @@ def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
     metadata = []
 
     def add_metadata(metric: ClickhouseMetric, metric_type: str, metric_postfix: str = ''):
-        meta = dict.fromkeys(HEADERS, '')
+        meta = dict.fromkeys(FILE_HEADERS, '')
         meta['metric_name'] = metric.integration_name(postfix=metric_postfix)
         meta['metric_type'] = metric_type
         meta['description'] = metric.description
@@ -227,7 +283,7 @@ def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
                 add_metadata(metric, metric_type='gauge')
 
     with open(METADATAFILE_PATH, 'w', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=HEADERS)
+        writer = csv.DictWriter(f, fieldnames=FILE_HEADERS)
         writer.writeheader()
         writer.writerows(sorted(metadata, key=lambda x: x.get('metric_name')))
 
@@ -264,11 +320,6 @@ class CalculatedMetrics:
         return result
 
 
-class MetricKind(StrEnum):
-    METRICS = 'metrics'
-    EVENTS = 'events'
-
-
 def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
     all_metrics: dict[str, ClickhouseMetric] = {}
     versioned_metrics: dict[str, set[str]] = {}
@@ -281,6 +332,9 @@ def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
                 metrics = fetch_current_metrics(version)
             case MetricKind.EVENTS:
                 metrics = fetch_profile_events(version)
+                is_optional = True
+            case MetricKind.ASYNC_METRICS:
+                metrics = fetch_async_metrics(version)
                 is_optional = True
             case _:
                 print(f'Unknown metric kind: {metric_kind}')
@@ -333,6 +387,16 @@ def generate_test_data(metrics_data: list[CalculatedMetrics]):
 
         return ',\n'.join(result)
 
+    def deep_merge(left: dict[str, set[str]], right: dict[str, set[str]]) -> dict[str, set[str]]:
+        result = left.copy()
+        for key, value in right.items():
+            if key in result:
+                result[key] = result[key] | value
+            else:
+                result[key] = value
+
+        return result
+
     base_metrics: list[str] = []
     optional_metrics: list[str] = []
     versioned_base_metrics: dict[str, set[str]] = {}
@@ -343,10 +407,10 @@ def generate_test_data(metrics_data: list[CalculatedMetrics]):
         versioned = data.get_versioned_metrics()
         if data.optional:
             optional_metrics.extend(common)
-            versioned_optional_metrics.update(versioned)
+            versioned_optional_metrics = deep_merge(versioned_optional_metrics, versioned)
         else:
             base_metrics.extend(common)
-            versioned_base_metrics.update(versioned)
+            versioned_base_metrics = deep_merge(versioned_base_metrics, versioned)
 
     config = {
         'versions': ', '.join(VERSIONS),
@@ -357,22 +421,43 @@ def generate_test_data(metrics_data: list[CalculatedMetrics]):
         'base_version_mapper': printable_consts_mapper(versioned_base_metrics),
         'optional_version_mapper': printable_consts_mapper(versioned_optional_metrics, optional=True),
     }
-    generate_queries_file('metrics.py', config)
+    generate_queries_file(Templates.TESTS_METRICS.value, config)
 
 
 def generate():
+    METRIC_GENERATORS = [
+        MetricsGenerator(
+            kind=MetricKind.ASYNC_METRICS,
+            template=Templates.QUERY_ASYNC_METRICS.value,
+            is_optional=True,
+        ),
+        MetricsGenerator(
+            kind=MetricKind.EVENTS,
+            template=Templates.QUERY_EVENTS.value,
+            is_optional=True,
+        ),
+        MetricsGenerator(
+            kind=MetricKind.METRICS,
+            template=Templates.QUERY_METRICS.value,
+            is_optional=False,
+        ),
+    ]
+
     all: dict[str, ClickhouseMetric] = {}
-    all_metrics = calculate_metrics(MetricKind.METRICS)
-    all_events = calculate_metrics(MetricKind.EVENTS)
-    all.update(all_metrics.all)
-    all.update(all_events.all)
+    calculated: list[CalculatedMetrics] = []
 
-    generate_queries('system_metrics.py', all_metrics.all.values())
-    generate_queries('system_events.py', all_events.all.values())
+    # generate query modules
+    for generator in METRIC_GENERATORS:
+        metrics = calculate_metrics(generator.kind)
+        generate_queries(generator.template, metrics.all.values())
+        all.update(metrics.all)
+        calculated.append(metrics)
 
+    # generate metadata.csv file
     generate_metadata_file(all.values())
 
-    generate_test_data([all_metrics, all_events])
+    # generate unit test metrics
+    generate_test_data(calculated)
 
 
 def main():
