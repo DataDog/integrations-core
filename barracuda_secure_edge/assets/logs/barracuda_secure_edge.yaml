@@ -108,10 +108,9 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*%{data:message}
-              autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{data}%{ip:src}%{data}%{number:port}%{data}
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{data:type}\[%{number:type_id}\]:\s*%{data:message}
-              autoFilledRule4 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?%{data:message}
+              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*(?<message>.+)
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{word:type}\[%{number:type_id}\]:\s*(?<message>.+)
+              autoFilledRule4 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?(?<message>.+)
     - type: pipeline
       name: Box Firewall Activity
       enabled: true
@@ -135,8 +134,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss
-              Z"):timestamp}\s+%{word:level}\s*%{word:action}:\s*\[%{word:event_type}\]\s*%{word:module}:\s*%{data:message}
+              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:\s*\[%{word:event_type}\]\s*%{word:module}:\s*%{data:message}
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data::csv("type,protocol,src_if,src_ip,src_port,src_mac,dest_ip,dest_port,dest_service,dest_if,rule,info,src_nat, dst_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets, user,prot,application,target,content,uricat","|")}
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data:message}
         - type: grok-parser
