@@ -14,7 +14,7 @@
 * Lift `pyodbc` dependency exclusion for macOS on AArch64/ARM64 ([#20812](https://github.com/DataDog/integrations-core/pull/20812))
 * Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
 
-## 22.7.1 / 2025-07-10
+## 22.7.1 / 2025-07-10 / Agent 7.69.0
 
 ***Fixed***:
 
