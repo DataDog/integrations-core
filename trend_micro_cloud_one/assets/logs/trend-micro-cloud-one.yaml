@@ -68,58 +68,6 @@ pipeline:
           Agent|50.0.3945|6002200|cat=AppControl        name=blocked        desc=blocked        sev=6        cn1=102        cn1Label=Host
           ID        dvchost=admin        TrendMicroDsTenant=279555847073        TrendMicroDsTenantId=146271        fileHash=93FA129820D7DD585924E7A2A0633CA424D12836547AC8A8BBD461B5915DEB2F        suser=admin\\crest        suid=S-1-5-21-2195366824-2826071503-3266291696-1001        act=blocked        filePath=C:\\Program
           Files\\WindowsApps\\Microsoft.WindowsFeedbackHub_1.2506.12104.0_x64__8wekyb3d8bbwe\\\\PilotshubApp.dll        fsize=36801024        aggregationType=0        repeatCount=1        cs1=notWhitelisted        cs1Label=actionReason        cs2=14B28E4364B27B823ECE3D0ACB3665A020BB7259        cs2Label=sha1        cs3=68279BF3A9044AC30953EE11180F5BBD        cs3Label=md5
-        - >-
-          <134>2025-08-12T07:23:15Z deepsecurity LEEF:2.0|Trend Micro|Deep
-          Security Manager|50.0.3970|7032|cat=System    name=Sending Application
-          Control Ruleset Succeeded    desc=Sending Application Control Ruleset
-          succeeded.
-
-
-          Ruleset name: admin
-
-          Ruleset version: 4
-
-          Ruleset type: Local    sev=3    src=192.168.157.11    usrName=System    target=admin    msg=Sending Application Control Ruleset succeeded.
-
-
-          Ruleset name: admin
-
-          Ruleset version: 4
-
-          Ruleset type: Local    TrendMicroDsTenant=279555847073    TrendMicroDsTenantId=146271
-        - >
-          <134>2025-08-12T09:09:13Z deepsecurity LEEF:2.0|Trend Micro|Deep
-          Security Agent|50.0.3974|2002781|cat=Integrity
-          Monitor    name=Microsoft Windows - Attributes of services modified
-          (ATT&CK T1036.004, T1543.003)    desc=Microsoft Windows - Attributes
-          of services modified (ATT&CK T1036.004,
-          T1543.003)    sev=6    cn1=102    cn1Label=Host
-          ID    dvchost=admin    TrendMicroDsTenant=279555847073    TrendMicroDsTenantId=146271    act=updated    filePath=VSS    suser=N/A    sproc=N/A    entityType=Service    msg=When
-          scanned the following changes were detected:
-
-             State changed from "stopped" to "running"
-
-          After the change the Service had the following attributes:
-
-             Binary Path Name: C:\\Windows\\system32\\vssvc.exe
-             Start Type: manual
-             State: running
-        - >-
-          <134>2025-08-18T10:13:57Z deepsecurity LEEF:2.0|Trend Micro|Deep
-          Security Agent|50.0.3990|2006076|cat=Integrity Monitor	name=Microsoft
-          Windows - Task scheduler entries modified (ATT&CK
-          T1053.005)	desc=Microsoft Windows - Task scheduler entries modified
-          (ATT&CK T1053.005)	sev=6	cn1=102	cn1Label=Host
-          ID	dvchost=admin	TrendMicroDsTenant=279555847073	TrendMicroDsTenantId=146271	act=updated	filePath=c:\\windows\\system32\\tasks\\microsoft\\windows\\softwareprotectionplatform\\svcrestarttask	suser=NT
-          AUTHORITY\NETWORK
-          SERVICE	sproc=C:\\Windows\\System32\\svchost.exe	entityType=File	msg=When
-          scanned the following changes were detected:
-
-             SHA-256 changed from "58123C226E9216C7B62B5EAE90787286452EFA0325EFFEBB06FB26DE1905A1D7" to "FE92A5C12E69B215D77D9C5EF1CD3E6CC174381A824D60C8E69965D5DE7CCC98"
-
-          After the change the File had the following attributes:
-
-             SHA-256: FE92A5C12E69B215D77D9C5EF1CD3E6CC174381A824D60C8E69965D5DE7CCC98
       grok:
         supportRules: >-
           extract_data_till_pipe_delimited %{regex("[^|]*")}
@@ -163,8 +111,7 @@ pipeline:
           extract_data_till_pipe_delimited %{regex("[^|]*")}
 
           extract_key_value_pair %{data::keyvalue("=", "\\]\\[{}\"\" :;,/!''\\(\\)*~#&$%^?+\\\\")}
-        matchRules:
-          "trend_micro_cloud_one_rule1 %{notSpace} %{notSpace} %{notSpace}
+        matchRules: "trend_micro_cloud_one_rule1 %{notSpace} %{notSpace} %{notSpace}
           %{notSpace} %{notSpace:sev} %{notSpace} %{notSpace}
           %{regex(\"(.*?)(?=])\")}]\\s*%{regex(\"(.*?)(?=>)\")}>%{date(\"yyyy-M\
           -d'T'H:m:s.SSSZZ\"):time} %{notSpace} %{regex(\"(.*?)(?=:)\")}\\:
@@ -256,18 +203,15 @@ pipeline:
             query: "@severity:(LOGID_10-REP_BLOCK-NOTICE OR LOGID_10-IPS_BLOCK-NOTICE)"
           name: notice
         - filter:
-            query:
-              "@severity:(LOGID_10-REP_BLOCK-ERROR OR LOGID_10-IPS_BLOCK-ERROR OR [5 TO
+            query: "@severity:(LOGID_10-REP_BLOCK-ERROR OR LOGID_10-IPS_BLOCK-ERROR OR [5 TO
               7])"
           name: error
         - filter:
-            query:
-              "@severity:(LOGID_10-REP_BLOCK-WARNING OR LOGID_10-IPS_BLOCK-WARNING OR
+            query: "@severity:(LOGID_10-REP_BLOCK-WARNING OR LOGID_10-IPS_BLOCK-WARNING OR
               [2 TO 4])"
           name: warning
         - filter:
-            query:
-              "@severity:(LOGID_10-REP_BLOCK-CRIT OR LOGID_10-IPS_BLOCK-CRIT OR [8 TO
+            query: "@severity:(LOGID_10-REP_BLOCK-CRIT OR LOGID_10-IPS_BLOCK-CRIT OR [8 TO
               10])"
           name: critical
         - filter:
