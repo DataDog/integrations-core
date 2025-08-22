@@ -2,16 +2,13 @@
 
 ## Overview
 
-[Microsoft Copilot][1] is an AI assistant component of Microsoft 365, a cloud-based suite of productivity and communication tools including Microsoft Office
-applications. Once a user within the Microsoft 365 organization is assigned a Copilot license, Microsoft Copilot can be used directly via Copilot Chat or 
-through the various Microsoft 365 applications, including Outlook, Word, Excel, PowerPoint, OneNote, and Teams.
+[Microsoft Copilot][1] is an AI assistant integrated into Microsoft 365, the cloud-based suite of productivity and communication tools that includes Microsoft Office applications. Once a user within the Microsoft 365 organization is assigned a Copilot license, they can access Copilot directly through Copilot Chat or through Microsoft 365 applications, including Outlook, Word, Excel, PowerPoint, OneNote, and Teams.
 
-By integrating Microsoft Copilot usage tracking with Datadog, you can ingest and analyze user activity that provides insight into the
-value of Microsoft Copilot within your Microsoft 365 environment.
+By integrating Microsoft Copilot usage tracking with Datadog, you can ingest and analyze user activity to gain insight into the value Microsoft Copilot delivers within your Microsoft 365 environment.
 
 With this integration, you can:
-- Track user activity via logs which capture individual user "last activity" per Microsoft 365 application.
-- Identify the number of Microsoft Copilot licenses not being used for extended periods of time.
+- Track user activity through logs that capture each user's "last activity" per Microsoft 365 application.
+- Identify the number of Microsoft Copilot licenses that have not been used for extended periods of time.
 
 ## Setup
 
