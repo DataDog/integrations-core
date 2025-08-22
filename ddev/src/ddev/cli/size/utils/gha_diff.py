@@ -198,7 +198,6 @@ def display_diffs_to_html_short(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
     text = f"<details><summary><h3>Size Delta for {platform} and Python {python_version}:\n"
     text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h3></summary>\n\n"
-    text += "</details>\n"
     total_added = sum(int(entry.get("Size_Bytes", 0)) for entry in diffs["added"])
     total_removed = sum(int(entry.get("Size_Bytes", 0)) for entry in diffs["removed"])
     total_changed = sum(entry.get("Diff", 0) for entry in diffs["changed"])
@@ -206,6 +205,8 @@ def display_diffs_to_html_short(diffs, platform, python_version):
     text += f"Total added: {convert_to_human_readable_size(total_added)}\n"
     text += f"Total removed: -{convert_to_human_readable_size(total_removed)}\n"
     text += f"Total changed: {convert_to_human_readable_size(total_changed)}\n"
+    text += "</details>\n"
+
     return text
 
 
