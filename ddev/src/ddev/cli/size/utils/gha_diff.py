@@ -192,6 +192,22 @@ def display_diffs_to_html(diffs, platform, python_version):
         text += "No changed dependencies/integrations\n\n"
     text += "</details>\n"
     print(text)
+    return text
+
+
+def display_diffs_to_html_short(diffs, platform, python_version):
+    sign = "+" if diffs['total_diff'] > 0 else ""
+    text = f"<details><summary><h3>Size Delta for {platform} and Python {python_version}:\n"
+    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h3></summary>\n\n"
+    text += "</details>\n"
+    total_added = sum(int(entry.get("Size_Bytes", 0)) for entry in diffs["added"])
+    total_removed = sum(int(entry.get("Size_Bytes", 0)) for entry in diffs["removed"])
+    total_changed = sum(entry.get("Diff", 0) for entry in diffs["changed"])
+
+    text += f"Total added: {convert_to_human_readable_size(total_added)}\n"
+    text += f"Total removed: -{convert_to_human_readable_size(total_removed)}\n"
+    text += f"Total changed: {convert_to_human_readable_size(total_changed)}\n"
+    return text
 
 
 # def send_to_datadog(diffs, platform, python_version, api_key):
@@ -203,6 +219,8 @@ def main():
     parser.add_argument('--curr-sizes', required=True)
     parser.add_argument('--output', required=False)  # path to a file to export the diffs to
     parser.add_argument('--send-to-datadog', action='store_true')
+    parser.add_argument('--html-long-out', required=False)  # path to write long HTML output
+    parser.add_argument('--html-short-out', required=False)  # path to write short HTML output
     args = parser.parse_args()
 
     with open(args.prev_sizes, "r") as f:
@@ -215,7 +233,15 @@ def main():
 
     # if args.send_to_datadog:
 
-    display_diffs_to_html(diffs, platform, python_version)
+    long_text = display_diffs_to_html(diffs, platform, python_version)
+    short_text = display_diffs_to_html_short(diffs, platform, python_version)
+
+    if args.html_long_out:
+        with open(args.html_long_out, "w") as f:
+            f.write(long_text)
+    if args.html_short_out:
+        with open(args.html_short_out, "w") as f:
+            f.write(short_text)
 
     if args.output:
         with open(args.output, "w") as f:

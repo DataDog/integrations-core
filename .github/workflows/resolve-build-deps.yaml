@@ -316,8 +316,15 @@ jobs:
             fi
             cat "size_diffs_output_${p}.txt" >> comment.txt
           done
+          if [ $(wc -c < comment.txt) -gt 65536 ]; then
+            : > comment.txt
+            for p in $PLATFORMS; do
+              gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
+              cat "size_diffs_output_short_${p}.txt" >> comment.txt
+            done
+          fi
 
-      - name: Comment on PR
+      - name: Output results
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt

@@ -7,12 +7,6 @@ on:
         required: true
         type: string
 
-# on:
-#   workflow_run:
-#     workflows: 
-#       - "Measure Disk Usage" 
-#     types:
-#       - completed
 env:
   PYTHON_VERSION: "3.12"
 
@@ -91,18 +85,26 @@ jobs:
             > size_diffs_output.txt
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
             # send metrics to datadog if this is a push to master
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json >> size_diffs_output_${{ inputs.platform }}.txt
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.html --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
           else
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json >> size_diffs_output_${{ inputs.platform }}.txt
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.html --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
           fi
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload size diffs as artifact
+      - name: Upload long size diffs output as artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: size_diffs_output_${{ inputs.platform }}.txt
           path: size_diffs_output_${{ inputs.platform }}.txt
+          retention-days: 1
 
+      - name: Upload short size diffs output as artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: size_diffs_output_short_${{ inputs.platform }}.txt
+          path: size_diffs_output_short_${{ inputs.platform }}.txt
+          retention-days: 1
+          
       - name: Upload diffs artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
