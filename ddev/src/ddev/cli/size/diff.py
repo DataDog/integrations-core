@@ -27,6 +27,7 @@ from .utils.common_funcs import (
     get_valid_versions,
     plot_treemap,
     print_table,
+    send_metrics_to_dd,
 )
 
 console = Console(stderr=True)
@@ -38,6 +39,8 @@ MINIMUM_LENGTH_COMMIT = 7
 @click.argument("first_commit")
 @click.argument("second_commit")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
+@click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
@@ -49,6 +52,8 @@ def diff(
     compressed: bool,
     format: list[str],
     show_gui: bool,
+    to_dd_org: str,
+    to_dd_key: str,
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -117,8 +122,14 @@ def diff(
                             progress,
                         )
                     )
+                if to_dd_org or to_dd_key:
+                    send_metrics_to_dd(
+                        app, modules_plat_ver, to_dd_org, to_dd_key, compressed, "diff", [first_commit, second_commit]
+                    )
                 if format:
-                    export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
+                    modules_with_diff = [module for module in modules_plat_ver if module["Size_Bytes"] != 0]
+                    export_format(app, format, modules_with_diff, "diff", platform, version, compressed)
+
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
@@ -150,9 +161,9 @@ def diff_mode(
         for module in formatted_modules:
             if module["Size_Bytes"] > 0:
                 module["Size"] = f"+{module['Size']}"
-
+    modules_with_diff = [module for module in formatted_modules if module["Size_Bytes"] != 0]
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Diff", formatted_modules)
+        print_table(params["app"], "Diff", modules_with_diff)
 
     treemap_path = None
     if params["format"] and "png" in params["format"]:
@@ -161,7 +172,7 @@ def diff_mode(
     if params["show_gui"] or treemap_path:
         plot_treemap(
             params["app"],
-            formatted_modules,
+            modules_with_diff,
             f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "diff",
@@ -247,8 +258,8 @@ def get_diff(
         size_a = a["Size_Bytes"] if a else 0
         delta = size_a - size_b
 
-        if delta == 0:
-            continue
+        # if delta == 0:
+        #     continue
 
         ver_b = b["Version"] if b else ""
         ver_a = a["Version"] if a else ""

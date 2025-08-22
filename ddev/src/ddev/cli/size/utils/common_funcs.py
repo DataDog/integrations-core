@@ -14,7 +14,7 @@ import zlib
 from datetime import date
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Callable, Literal, Optional, Type, TypedDict, overload
 
 import requests
 import squarify
@@ -22,7 +22,7 @@ from datadog import api, initialize
 
 from ddev.cli.application import Application
 
-METRIC_VERSION = 2
+METRIC_VERSION = 1
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -65,16 +65,16 @@ class CLIParameters(TypedDict):
     platform: str  # Target platform for analysis (e.g. linux-aarch64)
     version: str  # Target Python version for analysis
     compressed: bool  # Whether to analyze compressed file sizes
-    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    format: list[str] | None  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
 
 
 class CLIParametersTimeline(TypedDict):
     app: Application  # Main application instance for CLI operations
     module: str  # Name of module to analyze
-    threshold: Optional[int]  # Minimum size threshold for filtering
+    threshold: int | None  # Minimum size threshold for filtering
     compressed: bool  # Whether to analyze compressed file sizes
-    format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
+    format: list[str] | None  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
 
 
@@ -301,17 +301,7 @@ def get_dependencies_sizes(
                 with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                     zip_ref.extractall(extract_path)
 
-                size = 0
-                for dirpath, _, filenames in os.walk(extract_path):
-                    rel_dir = os.path.relpath(dirpath, extract_path)
-                    if is_excluded_from_wheel(rel_dir):
-                        continue
-                    for name in filenames:
-                        file_path = os.path.join(dirpath, name)
-                        rel_file = os.path.relpath(file_path, extract_path)
-                        if is_excluded_from_wheel(rel_file):
-                            continue
-                        size += os.path.getsize(file_path)
+                size = filtered_uncompressed_size(extract_path, filter_func=is_excluded_from_wheel)
 
         file_data.append(
             {
@@ -326,44 +316,65 @@ def get_dependencies_sizes(
     return file_data
 
 
+def filtered_uncompressed_size(path: Path, filter_func: Callable[[str], bool]) -> int:
+    size = 0
+    for dirpath, _, filenames in os.walk(path):
+        rel_dir = os.path.relpath(dirpath, path)
+        if filter_func(rel_dir):
+            continue
+        for name in filenames:
+            file_path = os.path.join(dirpath, name)
+            rel_file = os.path.relpath(file_path, path)
+            if filter_func(rel_file):
+                continue
+            size += os.path.getsize(file_path)
+    return size
+
+
 def is_excluded_from_wheel(path: str) -> bool:
-    '''
+    """
     These files are excluded from the wheel in the agent build:
     https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
     In order to have more accurate results, this files are excluded when computing the size of the dependencies while
     the wheels still include them.
-    '''
+    """
     excluded_test_paths = [
         os.path.normpath(path)
         for path in [
-            'idlelib/idle_test',
-            'bs4/tests',
-            'Cryptodome/SelfTest',
-            'gssapi/tests',
-            'keystoneauth1/tests',
-            'openstack/tests',
-            'os_service_types/tests',
-            'pbr/tests',
-            'pkg_resources/tests',
-            'psutil/tests',
-            'securesystemslib/_vendor/ed25519/test_data',
-            'setuptools/_distutils/tests',
-            'setuptools/tests',
-            'simplejson/tests',
-            'stevedore/tests',
-            'supervisor/tests',
-            'test',  # cm-client
-            'vertica_python/tests',
-            'websocket/tests',
+            "idlelib/idle_test",
+            "bs4/tests",
+            "Cryptodome/SelfTest",
+            "gssapi/tests",
+            "keystoneauth1/tests",
+            "lazy_loader/tests",
+            "openstack/tests",
+            "os_service_types/tests",
+            "pbr/tests",
+            "pkg_resources/tests",
+            "pip/_vendor/colorama/tests",
+            "psutil/tests",
+            "requests_unixsocket/tests",
+            "securesystemslib/_vendor/ed25519/test_data",
+            "setuptools/_distutils/compilers/C/tests",
+            "setuptools/_vendor/packaging/tests",
+            "setuptools/_distutils/tests",
+            "setuptools/tests",
+            "simplejson/tests",
+            "stevedore/tests",
+            "supervisor/tests",
+            "test",  # cm-client
+            "vertica_python/tests",
+            "websocket/tests",
+            "win32com/test",
         ]
     ]
 
     type_annot_libraries = [
-        'krb5',
-        'Cryptodome',
-        'ddtrace',
-        'pyVmomi',
-        'gssapi',
+        "krb5",
+        "Cryptodome",
+        "ddtrace",
+        "pyVmomi",
+        "gssapi",
     ]
     rel_path = Path(path).as_posix()
 
@@ -377,7 +388,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     if path_parts:
         dependency_name = path_parts[0]
         if dependency_name in type_annot_libraries:
-            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
+            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
                 return True
 
     return False
@@ -780,13 +791,41 @@ def draw_treemap_rects_with_labels(
             )
 
 
+@overload
 def send_metrics_to_dd(
     app: Application,
     modules: list[FileDataEntryPlatformVersion],
     org: str,
     key: str,
     compressed: bool,
+    mode: Literal["status"],
+    commits: None,
+) -> None: ...
+
+
+@overload
+def send_metrics_to_dd(
+    app: Application,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str,
+    key: str,
+    compressed: bool,
+    mode: Literal["diff"],
+    commits: list[str],
+) -> None: ...
+
+
+def send_metrics_to_dd(
+    app: Application,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str,
+    key: str,
+    compressed: bool,
+    mode: Literal["status", "diff"],
+    commits: list[str] | None,
 ) -> None:
+    if not modules:
+        return
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
@@ -798,8 +837,15 @@ def send_metrics_to_dd(
     if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
-    message, tickets, prs = get_last_commit_data()
-    timestamp = get_last_commit_timestamp()
+    if mode == "status":
+        message, tickets, prs = get_last_commit_data()
+        timestamp = get_last_commit_timestamp()
+    elif mode == "diff":
+        if not commits:
+            raise Exception("commits must not be None or empty in diff mode")
+        prev_commit = check_commits(commits)
+        message, tickets, prs = get_last_commit_data(commits[1])
+        timestamp = get_last_commit_timestamp(commits[1])
 
     metrics = []
     n_integrations_metrics = []
@@ -811,12 +857,12 @@ def send_metrics_to_dd(
     for item in modules:
         metrics.append(
             {
-                "metric": f"{metric_name}.size",
+                "metric": f"{metric_name}.size_{mode}",
                 "type": "gauge",
                 "points": [(timestamp, item["Size_Bytes"])],
                 "tags": [
-                    f"name:{item['Name']}",
-                    f"type:{item['Type']}",
+                    f"module_name:{item['Name']}",
+                    f"module_type:{item['Type']}",
                     f"name_type:{item['Type']}({item['Name']})",
                     f"python_version:{item['Python_Version']}",
                     f"module_version:{item['Version']}",
@@ -827,47 +873,49 @@ def send_metrics_to_dd(
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                     f"commit_message:{message}",
-                ],
+                ]
+                + ([f"to_prev_commit:{prev_commit}"] if mode == "diff" else []),
             }
         )
-        key_count = (item['Platform'], item['Python_Version'])
+        key_count = (item["Platform"], item["Python_Version"])
         if key_count not in n_integrations:
             n_integrations[key_count] = 0
         if key_count not in n_dependencies:
             n_dependencies[key_count] = 0
-        if item['Type'] == 'Integration':
+        if item["Type"] == "Integration":
             n_integrations[key_count] += 1
-        elif item['Type'] == 'Dependency':
+        elif item["Type"] == "Dependency":
             n_dependencies[key_count] += 1
 
-    for (platform, py_version), count in n_integrations.items():
-        n_integrations_metrics.append(
-            {
-                "metric": f"{metric_name}.integration_count",
-                "type": "gauge",
-                "points": [(timestamp, count)],
-                "tags": [
-                    f"platform:{platform}",
-                    f"python_version:{py_version}",
-                    "team:agent-integrations",
-                    f"metrics_version:{METRIC_VERSION}",
-                ],
-            }
-        )
-    for (platform, py_version), count in n_dependencies.items():
-        n_dependencies_metrics.append(
-            {
-                "metric": f"{metric_name}.dependency_count",
-                "type": "gauge",
-                "points": [(timestamp, count)],
-                "tags": [
-                    f"platform:{platform}",
-                    f"python_version:{py_version}",
-                    "team:agent-integrations",
-                    f"metrics_version:{METRIC_VERSION}",
-                ],
-            }
-        )
+    if mode == "status":
+        for (platform, py_version), count in n_integrations.items():
+            n_integrations_metrics.append(
+                {
+                    "metric": f"{metric_name}.integration_count",
+                    "type": "gauge",
+                    "points": [(timestamp, count)],
+                    "tags": [
+                        f"platform:{platform}",
+                        f"python_version:{py_version}",
+                        "team:agent-integrations",
+                        f"metrics_version:{METRIC_VERSION}",
+                    ],
+                }
+            )
+        for (platform, py_version), count in n_dependencies.items():
+            n_dependencies_metrics.append(
+                {
+                    "metric": f"{metric_name}.dependency_count",
+                    "type": "gauge",
+                    "points": [(timestamp, count)],
+                    "tags": [
+                        f"platform:{platform}",
+                        f"python_version:{py_version}",
+                        "team:agent-integrations",
+                        f"metrics_version:{METRIC_VERSION}",
+                    ],
+                }
+            )
 
     initialize(
         api_key=config_file_info["api_key"],
@@ -875,8 +923,9 @@ def send_metrics_to_dd(
     )
 
     api.Metric.send(metrics=metrics)
-    api.Metric.send(metrics=n_integrations_metrics)
-    api.Metric.send(metrics=n_dependencies_metrics)
+    if mode == "status":
+        api.Metric.send(metrics=n_integrations_metrics)
+        api.Metric.send(metrics=n_dependencies_metrics)
 
 
 def get_org(app: Application, org: str) -> dict[str, str]:
@@ -912,15 +961,23 @@ def is_everything_committed() -> bool:
     return result.stdout.strip() == ""
 
 
-def get_last_commit_timestamp() -> int:
-    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
+def get_last_commit_timestamp(commit: str | None = None) -> int:
+    if commit:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%ct", commit], capture_output=True, text=True, check=True
+        )
+    else:
+        result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
     return int(result.stdout.strip())
 
 
-def get_last_commit_data() -> tuple[str, list[str], list[str]]:
-    result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
-    ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
-    pr_pattern = r'#(\d+)'
+def get_last_commit_data(commit: str | None = None) -> tuple[str, list[str], list[str]]:
+    if commit:
+        result = subprocess.run(["git", "log", "-1", "--format=%s", commit], capture_output=True, text=True, check=True)
+    else:
+        result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
+    ticket_pattern = r"\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b"
+    pr_pattern = r"#(\d+)"
 
     message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
@@ -931,6 +988,28 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
     if not prs:
         prs = [""]
     return message, tickets, prs
+
+
+def check_commits(commits: list[str]) -> bool:
+    # Check if commits are from master branch
+    for commit in commits:
+        result = subprocess.run(["git", "branch", "--contains", commit], capture_output=True, text=True, check=True)
+        if "master" not in result.stdout:
+            return False
+
+    # Check if commits are in sequence by verifying commit2 is parent of commit1
+    result = subprocess.run(
+        ["git", "rev-parse", f"{commits[1]}^"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    parent_commit = result.stdout.strip()
+
+    if parent_commit != commits[0]:
+        raise ValueError("Second commit must be the direct parent of first commit. Metrics cannot be uploaded.")
+
+    return True
 
 
 class WrongDependencyFormat(Exception):
@@ -961,7 +1040,7 @@ class GitRepo:
         return result.stdout.strip().split("\n")
 
     def get_module_commits(
-        self, module_path: str, initial: Optional[str], final: Optional[str], time: Optional[str]
+        self, module_path: str, initial: str | None, final: str | None, time: str | None
     ) -> list[str]:
         """
         Returns the list of commits (SHA) that modified a given module, filtered by time or commit range.
@@ -1032,9 +1111,9 @@ class GitRepo:
 
     def __exit__(
         self,
-        exception_type: Optional[Type[BaseException]],
-        exception_value: Optional[BaseException],
-        exception_traceback: Optional[TracebackType],
+        exception_type: Type[BaseException] | None,
+        exception_value: BaseException | None,
+        exception_traceback: TracebackType | None,
     ) -> None:
         if self.repo_dir and os.path.exists(self.repo_dir):
             shutil.rmtree(self.repo_dir)
