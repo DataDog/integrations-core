@@ -29,7 +29,26 @@
       },
       "metrics": {
         "prefix": "microsoft_copilot.",
-        "check": [],
+        "check": [
+          "microsoft_copilot.teams.users.enabled",
+          "microsoft_copilot.teams.users.active",
+          "microsoft_copilot.word.users.enabled",
+          "microsoft_copilot.word.users.active",
+          "microsoft_copilot.powerpoint.users.enabled",
+          "microsoft_copilot.powerpoint.users.active",
+          "microsoft_copilot.outlook.users.enabled",
+          "microsoft_copilot.outlook.users.active",
+          "microsoft_copilot.excel.users.enabled",
+          "microsoft_copilot.excel.users.active",
+          "microsoft_copilot.onenote.users.enabled",
+          "microsoft_copilot.onenote.users.active",
+          "microsoft_copilot.loop.users.enabled",
+          "microsoft_copilot.loop.users.active",
+          "microsoft_copilot.anyapp.users.enabled",
+          "microsoft_copilot.anyapp.users.active",
+          "microsoft_copilot.copilotchat.users.enabled",
+          "microsoft_copilot.copilotchat.users.active"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
