@@ -2,7 +2,13 @@ import argparse
 import csv
 import json
 
-from ddev.cli.size.utils.common_funcs import convert_to_human_readable_size
+
+def convert_to_human_readable_size(size_bytes: float) -> str:
+    for unit in [" B", " KiB", " MiB", " GiB"]:
+        if abs(size_bytes) < 1024:
+            return str(round(size_bytes, 2)) + unit
+        size_bytes /= 1024
+    return str(round(size_bytes, 2)) + " TB"
 
 
 def calculate_diffs(prev_sizes, curr_sizes):
