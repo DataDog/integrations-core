@@ -179,7 +179,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
         + variables.BINLOG_VARS
-        + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
@@ -220,14 +219,6 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
 
     # Test metrics
     for mname in testable_metrics:
-        # These three are currently not guaranteed outside of a Linux
-        # environment.
-        if mname == 'mysql.performance.user_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.kernel_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
-            continue
         # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
         # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
         if (
@@ -262,6 +253,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.OPTIONAL_INNODB_VARS
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
+        + variables.SYSTEM_METRICS # Can only be collected when Postgres is running locally to tests
     )
     # Note, this assertion will pass even if some metrics are not present.
     # Manual testing is required for optional metrics
@@ -320,7 +312,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
         + variables.BINLOG_VARS
-        + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
@@ -357,14 +348,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 
     # Test metrics
     for mname in testable_metrics:
-        # These two are currently not guaranteed outside of a Linux
-        # environment.
-        if mname == 'mysql.performance.user_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.kernel_time' and not Platform.is_linux():
-            continue
-        if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
-            continue
         if mname == 'mysql.performance.query_run_time.avg':
             aggregator.assert_metric(mname, tags=expected_tags + ('schema:testdb',), at_least=1)
 
@@ -393,6 +376,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.OPTIONAL_INNODB_VARS
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
+        + variables.SYSTEM_METRICS # Can only be collected when Postgres is running locally to tests
     )
     # Note, this assertion will pass even if some metrics are not present.
     # Manual testing is required for optional metrics
@@ -472,7 +456,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     optional_metrics = (
         variables.COMPLEX_STATUS_VARS
         + variables.COMPLEX_VARIABLES_VARS
-        + variables.SYSTEM_METRICS
+        + variables.SYSTEM_METRICS # Can only be collected when Postgres is running locally to tests
         + variables.SYNTHETIC_VARS
     )
 
