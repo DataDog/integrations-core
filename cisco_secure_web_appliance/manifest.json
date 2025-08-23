@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0973c912-7ad3-4cf3-ad50-d43660e031dd",
   "app_id": "cisco-secure-web-appliance",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

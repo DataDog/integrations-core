@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b613759e-89ca-4d98-a2c1-4d465c42e413",
   "app_id": "coredns",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
