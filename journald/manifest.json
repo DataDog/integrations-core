@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "2ee4cbe2-2d88-435b-9ed9-dbe07ca1d059",
   "app_id": "journald",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
