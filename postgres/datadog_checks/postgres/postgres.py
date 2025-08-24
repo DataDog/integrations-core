@@ -14,6 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -24,6 +25,7 @@ from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
+from datadog_checks.postgres.health import HealthEvent, PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -103,6 +105,7 @@ class PostgreSql(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
+        self.health = PostgresHealth(self)
         self._resolved_hostname = None
         self._database_identifier = None
         self._agent_hostname = None
@@ -126,10 +129,13 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
+
+        # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
         self._config = PostgresConfig(self.instance, self.init_config, self)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         self.add_core_tags()
+
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
@@ -160,6 +166,14 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
+        # Placeholder event, to be enhanced later
+        self.health.submit_health_event(
+            HealthEvent.INITIALIZATION,
+            HealthStatus.OK,
+            config=sanitize(self._config.__dict__),
+            features=[],
+        )
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
@@ -1094,3 +1108,10 @@ class PostgreSql(AgentCheck):
     def _update_tag_sets(self, tags):
         self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
         self.tags_without_db = list(set(self.tags_without_db) | set(tags))
+
+
+def sanitize(dict: dict):
+    sanitized = copy.deepcopy(dict)
+    sanitized['password'] = '***' if sanitized.get('password') else None
+    sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
+    return sanitized
