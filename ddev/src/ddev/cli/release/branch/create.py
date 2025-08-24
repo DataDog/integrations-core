@@ -97,6 +97,6 @@ def update_build_agent_yaml(app: Application, branch_name: str) -> None:
         with open(build_agent_yaml, 'w') as f:
             f.write(updated_content)
 
-        app.display_success(f'Updated {build_agent_yaml} to use agent branch: {branch_name}')
+        app.display_success(f'Updated build_agent.yaml file to use Agent branch: {branch_name}')
     else:
         app.display_warning(f'Warning: Could not find branch pattern to update in {build_agent_yaml}')

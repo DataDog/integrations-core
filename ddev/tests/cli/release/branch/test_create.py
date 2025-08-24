@@ -77,4 +77,4 @@ build-agent-auto:
 
     assert 'branch: 7.99.x' in updated_content
     assert 'branch: main' not in updated_content
-    app_mock.display_success.assert_called_once_with('Updated .gitlab/build_agent.yaml to use agent branch: 7.99.x')
+    app_mock.display_success.assert_called_once_with('Updated build_agent.yaml file to use Agent branch: 7.99.x')
