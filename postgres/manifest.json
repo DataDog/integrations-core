@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e6b3c5ec-b293-4a22-9145-277a12a9abd4",
   "app_id": "postgres",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
