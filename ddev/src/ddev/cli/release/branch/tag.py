@@ -1,6 +1,4 @@
 import re
-import os
-from pathlib import Path
 
 import click
 from packaging.version import Version
@@ -26,9 +24,6 @@ def tag(app, final):
         app.abort(
             f'Invalid branch name: {branch_name}. Branch name must match the pattern {BRANCH_NAME_REGEX.pattern}.'
         )
-    
-    # Update the build_agent.yaml file with the correct agent branch
-    
     click.echo(app.repo.git.pull(branch_name))
     click.echo(app.repo.git.fetch_tags())
     major_minor_version = branch_name.replace('.x', '')

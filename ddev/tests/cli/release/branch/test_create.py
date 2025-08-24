@@ -30,6 +30,8 @@ def test_create_branch(ddev, mocker):
         mocker.call('checkout', 'master'),
         mocker.call('pull', 'origin', 'master'),
         mocker.call('checkout', '-B', '5.5.x'),
+        mocker.call('add', '.gitlab/build_agent.yaml'),
+        mocker.call('commit', '-m', 'Update build_agent.yaml to use agent branch: 5.5.x'),
         mocker.call('push', 'origin', '5.5.x'),
     ]
 
