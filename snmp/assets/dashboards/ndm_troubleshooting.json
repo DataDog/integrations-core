@@ -1198,6 +1198,68 @@
                         }
                     },
                     {
+                        "id": 4847596063506126,
+                        "definition": {
+                            "title": "SNMP request count by device",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.snmp.requests{agent_host:$Agent_Hostname.value,snmp_device:$SNMP_Device.value,$Custom_Tag} by {snmp_device,snmp_host}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.snmp.requests{agent_host:$Agent_Hostname.value,$Custom_Tag}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Request count",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "warm",
+                                                "palette_index": 5
+                                            },
+                                            "alias": "Average request count",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
                         "definition": {
                             "custom_links": [
                                 {
