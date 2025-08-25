@@ -1,5 +1,10 @@
 # CHANGELOG - GPU
 
+## 0.4.1
+
+***Added***:
+
+* Added GPU device level memory metrics: `gpu.memory.free`, `gpu.memory.reserved`.
 
 ## 0.4.0
 
