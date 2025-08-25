@@ -758,6 +758,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      checkpoint_harmony_endpoint:
+        target: 75
+        flags:
+        - checkpoint_harmony_endpoint
       dcgm:
         target: 75
         flags:
@@ -920,6 +924,11 @@ flags:
     paths:
     - cert_manager/datadog_checks/cert_manager
     - cert_manager/tests
+  checkpoint_harmony_endpoint:
+    carryforward: true
+    paths:
+    - checkpoint_harmony_endpoint/datadog_checks/checkpoint_harmony_endpoint
+    - checkpoint_harmony_endpoint/tests
   cilium:
     carryforward: true
     paths:
