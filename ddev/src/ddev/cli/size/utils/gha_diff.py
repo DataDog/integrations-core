@@ -502,7 +502,7 @@ def main():
 
     if args.output:
         with open(args.output, "w") as f:
-            f.write(json.dumps({diffs}, indent=2))
+            f.write(json.dumps(diffs, indent=2))
 
 
 if __name__ == "__main__":
