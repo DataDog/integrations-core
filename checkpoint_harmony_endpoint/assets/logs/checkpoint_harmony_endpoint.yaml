@@ -9,7 +9,7 @@ facets:
     groups:
       - checkpoint harmony endpoint
     name: action
-    path: action
+    path: checkpoint_endpoint.action
     source: log
     type: string
   - description: "shows the status of the attack detected by the endpoint security client."
@@ -17,7 +17,7 @@ facets:
     groups:
       - checkpoint harmony endpoint
     name: attack_status
-    path: attack_status
+    path: checkpoint_endpoint.attack_status
     source: log
     type: string
   - description: "shows the client ip address of the endpoint security client."
@@ -25,7 +25,7 @@ facets:
     groups:
       - checkpoint harmony endpoint
     name: client_ip
-    path: client_ip
+    path: checkpoint_endpoint.client_ip
     source: log
     type: string
   - description: "shows the description of the event detected by the endpoint security client."
@@ -33,7 +33,7 @@ facets:
     groups:
       - checkpoint harmony endpoint
     name: description
-    path: description
+    path: checkpoint_endpoint.description
     source: log
     type: string
   - description: "shows the detection method used by the endpoint security client."
@@ -41,7 +41,7 @@ facets:
     groups:
       - checkpoint harmony endpoint
     name: detected_by
-    path: detected_by
+    path: checkpoint_endpoint.detected_by
     source: log
     type: string
   - description: "shows the product name of the endpoint security client."
@@ -49,7 +49,7 @@ facets:
     groups:
       - checkpoint harmony endpoint
     name: product
-    path: product
+    path: checkpoint_endpoint.product
     source: log
     type: string
   - description: "shows the protection name of the endpoint security client."
@@ -57,7 +57,7 @@ facets:
     groups:
       - checkpoint harmony endpoint
     name: protection_name
-    path: protection_name
+    path: checkpoint_endpoint.protection_name
     source: log
     type: string
 pipeline:
