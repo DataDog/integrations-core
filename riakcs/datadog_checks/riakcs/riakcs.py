@@ -2,11 +2,11 @@
 # (C) Jon Glick <jglick@basho.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 from collections import defaultdict
 from copy import deepcopy
 
 import boto3
-import simplejson as json
 from botocore.config import Config
 
 from datadog_checks.base import AgentCheck
