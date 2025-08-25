@@ -32,7 +32,7 @@
       },
       "metrics": {
         "prefix": "versa.",
-        "check": "",
+        "check": "versa.device.reachable",
         "metadata_path": "metadata.csv"
       }
     },
