@@ -65,13 +65,16 @@ jobs:
           fi
   
       - name: Download artifact from merge-base run
-        run: gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # ${{ inputs.platform }}_compressed_status.json
+        run: |
+          gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # $status_compressed_${{ inputs.platform }}.json
+          gh run download ${{ steps.find_run.outputs.run_id_base}} --name uncompressed_status.csv # $status_uncompressed_${{ inputs.platform }}.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename previous sizes artifact
         run: |
           mv compressed_status.csv status_compressed_${{ inputs.platform }}_prev.csv
+          mv uncompressed_status.csv status_uncompressed_${{ inputs.platform }}_prev.csv
 
       - name: Download current sizes artifact
         run: gh run download ${{ github.run_id }} --name status_compressed_${{ inputs.platform }}.json
@@ -87,9 +90,9 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
             # send metrics to datadog if this is a push to master
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog ${{secrets.DD_API_KEY}} --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
           else
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --curr-sizes status_compressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
+            python ddev/src/ddev/cli/size/utils/gha_diff.py --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
           fi
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
 

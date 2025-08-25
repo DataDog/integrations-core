@@ -23,7 +23,7 @@ from datadog import api, initialize
 from ddev.cli.application import Application
 
 METRIC_VERSION = 2
-
+METRIC_NAME = "datadog.agent_integrations"
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Patch
@@ -785,7 +785,7 @@ def send_metrics_to_dd(
     key: str,
     compressed: bool,
 ) -> None:
-    metric_name = "datadog.agent_integrations"
+    metric_name = METRIC_NAME
     size_type = "compressed" if compressed else "uncompressed"
 
     config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
