@@ -62,7 +62,7 @@ pipeline:
         supportRules: key_value %{data::keyvalue("=", ":\\[\\]")}
         matchRules: >-
           double_rule
-          %{key_value}\s%{regex("[^=]*"):target_name}\s%{key_value}\s%{regex("[^=]*"):source_name}
+          %{key_value}\s%{regex("[^=]*"):target_name}\ss=%{notSpace:s}\ssp=%{notSpace:sp}\s%{regex("[^=]*"):source_name}
 
           single_rule %{key_value}(\s%{regex("[^=]*"):target_name})?
     - type: grok-parser
