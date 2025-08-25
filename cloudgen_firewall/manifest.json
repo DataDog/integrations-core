@@ -19,12 +19,12 @@
       {
         "media_type": "image",
         "caption": "Other Event types of CloudGen Firewall",
-        "image_url": "images/cloudgen_firewall_logs1.png"
+        "image_url": "images/cloudgen_firewall_logs.png"
       },
       {
         "media_type": "image",
         "caption": "Some more Events types of CloudGen Firewall",
-        "image_url": "images/cloudgen_firewall_logs2.png"
+        "image_url": "images/cloudgen_firewall_logs1.png"
       }
     ],
     "classifier_tags": [
