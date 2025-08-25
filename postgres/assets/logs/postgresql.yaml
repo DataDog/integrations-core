@@ -1,6 +1,9 @@
 id: postgresql
 metric_id: postgres
 backend_only: false
+installation_sources:
+  - postgres
+  - postgresql
 facets:
   - groups:
       - Database
@@ -37,7 +40,7 @@ pipeline:
   name: Postgresql
   enabled: true
   filter:
-    query: source:postgresql
+    query: source:(postgres OR postgresql)
   processors:
     - type: grok-parser
       name: Parsing Postgresql logs
