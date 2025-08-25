@@ -612,6 +612,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
 /klaviyo/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/zerofox_cloud_platform/                                             @DataDog/saas-integrations
+/zerofox_cloud_platform/*.md                                         @DataDog/saas-integrations @DataDog/documentation
+/zerofox_cloud_platform/manifest.json                                @DataDog/saas-integrations @DataDog/documentation
+/zerofox_cloud_platform/assets/logs/                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /beyondtrust_password_safe/                                          @DataDog/saas-integrations @DataDog/agent-integrations
 /beyondtrust_password_safe/*.md                                      @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
 /beyondtrust_password_safe/manifest.json                             @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
