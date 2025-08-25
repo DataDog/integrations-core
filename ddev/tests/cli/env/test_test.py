@@ -16,6 +16,21 @@ from ddev.utils.fs import Path
 from tests.helpers.mocks import MockPopen
 from tests.helpers.runner import CliRunner
 
+BASE_ENV_CONFIG = {
+    'type': 'virtual',
+    'dependencies': [],
+    'test-env': True,
+    'e2e-env': True,
+    'benchmark-env': True,
+    'latest-env': True,
+    'python': '3.12',
+    'scripts': {},
+    'platforms': [],
+    'pre-install-commands': [],
+    'post-install-commands': [],
+    'skip-install': False,
+}
+
 
 def setup(
     mocker: MockerFixture,
@@ -96,7 +111,7 @@ def test_env_vars_repo(
     predicate: Callable[[Result], bool],
     mock_commands: tuple[MockType, MockType, MockType],
 ):
-    setup(mocker, write_result_file, hatch_json_output={'py3.12': {'e2e-env': e2e_env}})
+    setup(mocker, write_result_file, hatch_json_output={'py3.12': {**BASE_ENV_CONFIG, 'e2e-env': e2e_env}})
     mocker.patch.object(EnvData, 'read_metadata', return_value={})
 
     result = ddev('env', 'test', 'postgres', 'py3.12')
@@ -119,7 +134,11 @@ def test_environment_runs_for_enabled_environments(
     setup(
         mocker,
         write_result_file,
-        hatch_json_output={'py3.12': {'e2e-env': True}, 'py3.13': {'e2e-env': False}, 'py3.13-v1': {'e2e-env': True}},
+        hatch_json_output={
+            'py3.12': BASE_ENV_CONFIG,
+            'py3.13': {**BASE_ENV_CONFIG, 'e2e-env': False},
+            'py3.13-v1': BASE_ENV_CONFIG,
+        },
     )
     with mocker.patch.object(EnvData, 'read_metadata', return_value={}):
         result = ddev('env', 'test', 'postgres', environment)
@@ -145,7 +164,7 @@ def test_runningin_ci_triggers_all_environments_when_not_supplied(
     mocker: MockerFixture,
     mock_commands: tuple[MockType, MockType, MockType],
 ):
-    setup(mocker, write_result_file, hatch_json_output={'py3.12': {'e2e-env': True}, 'py3.13': {'e2e-env': True}})
+    setup(mocker, write_result_file, hatch_json_output={'py3.12': BASE_ENV_CONFIG, 'py3.13': BASE_ENV_CONFIG})
     mocker.patch('ddev.utils.ci.running_in_ci', return_value=True)
 
     with mocker.patch.object(EnvData, 'read_metadata', return_value={}):
@@ -161,7 +180,7 @@ def test_run_only_active_environments_when_not_running_in_ci_and_active_environm
     mocker: MockerFixture,
     mock_commands: tuple[MockType, MockType, MockType],
 ):
-    setup(mocker, write_result_file, hatch_json_output={'py3.12': {'e2e-env': True}, 'py3.13': {'e2e-env': True}})
+    setup(mocker, write_result_file, hatch_json_output={'py3.12': BASE_ENV_CONFIG, 'py3.13': BASE_ENV_CONFIG})
     mocker.patch('ddev.utils.ci.running_in_ci', return_value=False)
 
     with (
