@@ -199,7 +199,7 @@ pipeline:
           ll_pipe_delimited}\\|%{extract_data_till_pipe_delimited}\\|%{extract_\
           key_value_pair}"
     - type: date-remapper
-      name: Define `time` as the official time of the log
+      name: Define `time` as the official date of the log
       enabled: true
       sources:
         - time
