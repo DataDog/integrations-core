@@ -23,6 +23,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+from datadog_checks.postgres.diagnosis import PostgresDiagnostics
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
@@ -160,6 +161,9 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
+        diag = PostgresDiagnostics(self)
+        self.diagnosis.register(*diag.get_diagnostic_functions())
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
@@ -1021,6 +1025,7 @@ class PostgreSql(AgentCheck):
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
+
         try:
             # Check version
             self._connect()
