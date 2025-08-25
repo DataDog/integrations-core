@@ -75,11 +75,12 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
             aggregator.assert_metric(mname, at_least=1)
 
     optional_metrics = (
-        variables.COMPLEX_STATUS_VARS
-        + variables.COMPLEX_VARIABLES_VARS
-        + variables.SYSTEM_METRICS
-        + variables.SYNTHETIC_VARS
+        variables.SYSTEM_METRICS
     )
+
+    # Query cache and synthetic variables are not available in MySQL/Percona 8+
+    if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
+        optional_metrics += variables.QCACHE_VARS
 
     _test_optional_metrics(aggregator, optional_metrics)
 
@@ -109,7 +110,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME],
     )
 
 
@@ -151,7 +152,7 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        exclude=['alice.age', 'bob.age'] + variables.E2E_OPERATION_TIME_METRIC_NAME + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age'] + variables.E2E_OPERATION_TIME_METRIC_NAME,
     )
 
 
@@ -174,19 +175,21 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         )
     testable_metrics = (
         variables.STATUS_VARS
-        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
-        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SCHEMA_VARS
-        + variables.SYNTHETIC_VARS
-        + variables.STATEMENT_VARS
         + variables.TABLE_VARS
-        + variables.ROW_TABLE_STATS_VARS
         + variables.INDEX_SIZE_VARS
         + variables.INDEX_USAGE_VARS
     )
+
+    if MYSQL_FLAVOR.lower() in ('mariadb', 'percona'):
+        testable_metrics.extend(variables.ROW_TABLE_STATS_VARS)
+
+    # Query cache and synthetic variables are not available in MySQL/Percona 8+
+    if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
+        testable_metrics.extend(variables.QCACHE_VARS)
 
     if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
         testable_metrics.extend(variables.INNODB_MUTEX_VARS)
@@ -197,19 +200,19 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
 
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
-        additional_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
+        group_replication_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
         if MYSQL_VERSION_PARSED >= parse_version('8.0'):
             testable_metrics.extend(variables.GROUP_REPLICATION_VARS_8_0_2)
-            additional_tags += ('member_role:PRIMARY',)
+            group_replication_tags += ('member_role:PRIMARY',)
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
-            tags=service_check_tags + additional_tags,
+            tags=service_check_tags + group_replication_tags,
             count=1,
         )
         operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
     else:
-        testable_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
+        operation_time_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
@@ -234,8 +237,31 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=1)
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=1)
-        else:
+        elif mname in ('mysql.info.table.data_size', 'mysql.info.table.index_size'):
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users',), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema', 'table:VIEWS',), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema', 'table:users',), count=1)
+        elif mname in ('mysql.index.size', 'mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes'):
+            aggregator.assert_metric(mname, tags=metric_tags + ('db:testdb', 'table:users', 'index:id'), count=1)
+        elif mname == 'mysql.replication.slave_running':
+            aggregator.assert_metric(mname, tags=metric_tags + ('replication_mode:source',), count=1)
+        elif mname == 'mysql.performance.user_connections':
+            if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0'):
+                processlist_state = "executing"
+            else:
+                processlist_state = "Sending data"
+            aggregator.assert_metric(mname, tags=metric_tags + ('processlist_host:192.168.65.1', 'processlist_state:{}'.format(processlist_state), 'processlist_user:dog', 'processlist_db:None'), count=1)
+        elif mname == 'mysql.replication.group.member_status':
+            aggregator.assert_metric(mname, tags=metric_tags + group_replication_tags, count=1)
+        elif mname in ('mysql.replication.group.conflicts_detected', 'mysql.replication.group.transactions', 'mysql.replication.group.transactions_check', 'mysql.replication.group.transactions_validating', 'mysql.replication.group.transactions_in_applier_queue', 'mysql.replication.group.transactions_applied', 'mysql.replication.group.transactions_proposed', 'mysql.replication.group.transactions_rollback'):
+            aggregator.assert_metric(mname, tags=metric_tags + ('channel_name:group_replication_applier',), count=1)
+        elif mname in variables.ROW_TABLE_STATS_VARS:
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users',), count=1)
+        elif mname == 'mysql.performance.qcache.utilization.instant':
+            # This metric will only be collected if query_cache_type is enabled and on a second check run
             aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
+        else:
+            aggregator.assert_metric(mname, tags=metric_tags, at_least=1)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -307,18 +333,18 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
 
     testable_metrics = (
         variables.STATUS_VARS
-        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
-        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SCHEMA_VARS
-        + variables.SYNTHETIC_VARS
-        + variables.STATEMENT_VARS
         + variables.TABLE_VARS
         + variables.ROW_TABLE_STATS_VARS
         + variables.INDEX_SIZE_VARS
     )
+
+    # Query cache and synthetic variables are not available in MySQL/Percona 8+
+    if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
+        testable_metrics.extend(variables.QCACHE_VARS)
 
     if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_VERSION_PARSED < parse_version('5.7'):
         testable_metrics.extend(variables.INNODB_MUTEX_VARS)
@@ -389,7 +415,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME] + variables.STATEMENT_VARS,
+        exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME],
     )
 
     # Make sure group replication is not detected
@@ -454,11 +480,12 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         aggregator.assert_metric(mname, hostname=expected_hostname, count=1)
 
     optional_metrics = (
-        variables.COMPLEX_STATUS_VARS
-        + variables.COMPLEX_VARIABLES_VARS
-        + variables.SYSTEM_METRICS # Can only be collected when Postgres is running locally to tests
-        + variables.SYNTHETIC_VARS
+        variables.SYSTEM_METRICS # Can only be collected when Postgres is running locally to tests
     )
+
+    # Query cache and synthetic variables are not available in MySQL/Percona 8+
+    if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
+        optional_metrics += variables.QCACHE_VARS
 
     for mname in optional_metrics:
         aggregator.assert_metric(mname, hostname=expected_hostname, at_least=0)
