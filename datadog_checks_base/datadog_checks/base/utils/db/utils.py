@@ -232,6 +232,17 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
+# /Users/seth.samuel/dd/dbm/lexer-rs/target/release/liblexer_rs.dylib
+import os
+from cffi import FFI
+ffi = FFI()
+ffi.cdef("""
+    char * obfuscate(const char *);
+""")
+# lexer_rs = ffi.dlopen("/Users/seth.samuel/dd/dbm/lexer-rs/target/release/liblexer_rs.dylib")
+lexer_rs = ffi.dlopen(os.path.join(os.path.dirname(__file__), "./liblexer_rs.dylib"))
+
+
 def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
     """
     Obfuscate a SQL query and return the obfuscated query and metadata.
@@ -251,11 +262,13 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
         # replace embedded null characters \x00 before obfuscating
         query = query.replace('\x00', '')
 
-    statement = datadog_agent.obfuscate_sql(query, options)
+    # statement = datadog_agent.obfuscate_sql(query, options)
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
-    statement = to_native_string(statement.strip())
-
+    # statement = to_native_string(statement.strip())
+    obfuscated_bytes = lexer_rs.obfuscate(query.encode('utf-8'))
+    statement = ffi.string(obfuscated_bytes).decode('utf-8')
+    
     # Older agents may not have the new metadata API which returns a JSON string, so we must support cases where
     # newer integrations are running on an older agent. We use this "shortcut" to determine if we've received
     # a JSON string to avoid throwing excessive exceptions. We found that orjson leaks memory when failing
