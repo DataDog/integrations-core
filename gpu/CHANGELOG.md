@@ -5,6 +5,8 @@
 ***Added***:
 
 * Added GPU device level memory metrics: `gpu.memory.free`, `gpu.memory.reserved`.
+* Renamed gpu.core.usage to gpu.process.core.usage for naming consistency.
+* Renamed gpu.memory.usage to gpu.process.memory.usage for naming consistency.
 
 ## 0.4.0
 
