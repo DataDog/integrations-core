@@ -20,7 +20,7 @@ def convert_to_human_readable_size(size_bytes: float) -> str:
     return str(round(size_bytes, 2)) + " TB"
 
 
-def calculate_diffs(prev_sizes, curr_sizes):
+def calculate_diffs(prev_compressed_sizes, curr_compressed_sizes, prev_uncompressed_sizes, curr_uncompressed_sizes):
     def key(entry):
         return (
             entry.get("Name"),
@@ -29,10 +29,12 @@ def calculate_diffs(prev_sizes, curr_sizes):
             entry.get("Type"),
         )
 
-    prev_map = {key(e): e for e in prev_sizes}
-    curr_map = {key(e): e for e in curr_sizes}
-    platform = curr_sizes[0]['Platform']
-    python_version = curr_sizes[0]['Python_Version']
+    prev_compressed_map = {key(e): e for e in prev_compressed_sizes}
+    curr_compressed_map = {key(e): e for e in curr_compressed_sizes}
+    prev_uncompressed_map = {key(e): e for e in prev_uncompressed_sizes}
+    curr_uncompressed_map = {key(e): e for e in curr_uncompressed_sizes}
+    platform = curr_compressed_sizes[0]['Platform']
+    python_version = curr_compressed_sizes[0]['Python_Version']
 
     added = []
     removed = []
@@ -41,16 +43,29 @@ def calculate_diffs(prev_sizes, curr_sizes):
 
     total_diff = 0
     # Find added and changed
-    for curr_key, curr_entry in curr_map.items():
-        if curr_key not in prev_map:
-            added.append(curr_entry)
+    for curr_key, curr_entry in curr_compressed_map.items():
+        if curr_key not in prev_compressed_map:
+            # Add both compressed and uncompressed size info for added entries
+            added.append(
+                {
+                    **{k if k != "Size_Bytes" else "Compressed Size Bytes": v for k, v in curr_entry.items()},
+                    "Uncompressed_Size_Bytes": int(curr_uncompressed_map.get(curr_key, {}).get("Size_Bytes", 0)),
+                }
+            )
             total_diff += int(curr_entry.get("Size_Bytes", 0))
         else:
-            prev_entry = prev_map[curr_key]
+            prev_entry = prev_compressed_map[curr_key]
             prev_size = int(prev_entry.get("Size_Bytes", 0))
             curr_size = int(curr_entry.get("Size_Bytes", 0))
+            uncompressed_prev_size = int(prev_uncompressed_map[curr_key].get("Size_Bytes", 0))
+            uncompressed_curr_size = int(curr_uncompressed_map[curr_key].get("Size_Bytes", 0))
             if prev_size != curr_size:
-                percentage = ((curr_size - prev_size) / prev_size) * 100 if prev_size != 0 else 0
+                compressed_percentage = ((curr_size - prev_size) / prev_size) * 100 if prev_size != 0 else 0
+                uncompressed_percentage = (
+                    ((uncompressed_curr_size - uncompressed_prev_size) / uncompressed_prev_size) * 100
+                    if uncompressed_prev_size != 0
+                    else 0
+                )
                 changed.append(
                     {
                         "Name": curr_entry.get("Name"),
@@ -61,8 +76,10 @@ def calculate_diffs(prev_sizes, curr_sizes):
                         "Type": curr_entry.get("Type"),
                         "Prev_Size_Bytes": prev_size,
                         "Curr_Size_Bytes": curr_size,
-                        "Diff": curr_size - prev_size,
-                        "Percentage": percentage,
+                        "Compressed_Diff": curr_size - prev_size,
+                        "Uncompressed_Diff": uncompressed_curr_size - uncompressed_prev_size,
+                        "Compressed_Percentage": compressed_percentage,
+                        "Uncompressed_Percentage": uncompressed_percentage,
                     }
                 )
             else:
@@ -74,22 +91,28 @@ def calculate_diffs(prev_sizes, curr_sizes):
                         "Platform": curr_entry.get("Platform"),
                         "Python_Version": curr_entry.get("Python_Version"),
                         "Type": curr_entry.get("Type"),
-                        "Diff": 0,
+                        "Compressed_Diff": 0,
+                        "Uncompressed_Diff": 0,
                         "Percentage": 0,
                     }
                 )
             total_diff += curr_size - prev_size
     # Find removed
-    for prev_key, prev_entry in prev_map.items():
-        if prev_key not in curr_map:
-            removed.append(prev_entry)
+    for prev_key, prev_entry in prev_compressed_map.items():
+        if prev_key not in curr_compressed_map:
+            removed.append(
+                {
+                    **{k if k != "Size_Bytes" else "Compressed Size Bytes": v for k, v in prev_entry.items()},
+                    "Uncompressed_Size_Bytes": int(prev_uncompressed_map[prev_key].get("Size_Bytes", 0)),
+                }
+            )
             total_diff -= int(prev_entry.get("Size_Bytes", 0))
 
     return (
         {
-            "added": order_by(added, "Size_Bytes"),
-            "removed": order_by(removed, "Size_Bytes"),
-            "changed": order_by(changed, "Percentage"),
+            "added": order_by(added, "Compressed Size Bytes"),
+            "removed": order_by(removed, "Compressed Size Bytes"),
+            "changed": order_by(changed, "Compressed_Percentage"),
             "total_diff": total_diff,
         },
         platform,
@@ -101,60 +124,60 @@ def order_by(diffs, key):
     return sorted(diffs, key=lambda x: x[key], reverse=True)
 
 
-def display_diffs(diffs, platform, python_version):
-    sign = "+" if diffs['total_diff'] > 0 else ""
-    print("=" * 52)
-    print(f"Size Delta for {platform} and Python {python_version}")
-    print("=" * 52)
-    print(f"Total size difference: {sign}{convert_to_human_readable_size(diffs['total_diff'])}")
-    print()
+# def display_diffs(diffs, platform, python_version):
+#     sign = "+" if diffs['total_diff'] > 0 else ""
+#     print("=" * 52)
+#     print(f"Size Delta for {platform} and Python {python_version}")
+#     print("=" * 52)
+#     print(f"Total size difference: {sign}{convert_to_human_readable_size(diffs['total_diff'])}")
+#     print()
 
-    if diffs["added"]:
-        print("Added:")
-        for entry in diffs["added"]:
-            name = entry.get("Name", "")
-            version = entry.get("Version", "")
-            size = entry.get("Size", 0)
-            typ = entry.get("Type", "")
-            print(f"  + [{typ}] {name} {version}: +{size}")
-        print()
-    else:
-        print("Added: None\n")
+#     if diffs["added"]:
+#         print("Added:")
+#         for entry in diffs["added"]:
+#             name = entry.get("Name", "")
+#             version = entry.get("Version", "")
+#             size = entry.get("Size", 0)
+#             typ = entry.get("Type", "")
+#             print(f"  + [{typ}] {name} {version}: +{size}")
+#         print()
+#     else:
+#         print("Added: None\n")
 
-    if diffs["removed"]:
-        print("Removed:")
-        for entry in diffs["removed"]:
-            name = entry.get("Name", "")
-            version = entry.get("Version", "")
-            size = int(entry.get("Size_Bytes", 0))
-            typ = entry.get("Type", "")
-            print(f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}")
-        print()
-    else:
-        print("Removed: None\n")
+#     if diffs["removed"]:
+#         print("Removed:")
+#         for entry in diffs["removed"]:
+#             name = entry.get("Name", "")
+#             version = entry.get("Version", "")
+#             size = int(entry.get("Size_Bytes", 0))
+#             typ = entry.get("Type", "")
+#             print(f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}")
+#         print()
+#     else:
+#         print("Removed: None\n")
 
-    if diffs["changed"]:
-        print("Changed:")
-        for entry in diffs["changed"]:
-            name = entry.get("Name", "")
-            version = entry.get("Version", "")
-            typ = entry.get("Type", "")
-            percentage = entry.get("Percentage", 0)
-            diff = entry.get("Diff", 0)
-            sign = "+" if diff > 0 else "-"
-            version_diff = (
-                f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)}"
-                if entry.get('Prev Version', version) != entry.get('Version', version)
-                else version
-            )
-            print(
-                f"  * [{typ}] {name} ({version_diff}): "
-                f"{sign}{convert_to_human_readable_size(abs(diff))} ({sign}{percentage:.2f}%)"
-            )
-        print()
-    else:
-        print("Changed: None\n")
-    print("=" * 60)
+#     if diffs["changed"]:
+#         print("Changed:")
+#         for entry in diffs["changed"]:
+#             name = entry.get("Name", "")
+#             version = entry.get("Version", "")
+#             typ = entry.get("Type", "")
+#             percentage = entry.get("Percentage", 0)
+#             diff = entry.get("Diff", 0)
+#             sign = "+" if diff > 0 else "-"
+#             version_diff = (
+#                 f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)}"
+#                 if entry.get('Prev Version', version) != entry.get('Version', version)
+#                 else version
+#             )
+#             print(
+#                 f"  * [{typ}] {name} ({version_diff}): "
+#                 f"{sign}{convert_to_human_readable_size(abs(diff))} ({sign}{percentage:.2f}%)"
+#             )
+#         print()
+#     else:
+#         print("Changed: None\n")
+#     print("=" * 60)
 
 
 def display_diffs_to_html(diffs, uncompressed_diffs, platform, python_version):
@@ -165,13 +188,16 @@ def display_diffs_to_html(diffs, uncompressed_diffs, platform, python_version):
     if diffs["added"]:
         text += "<details><summary>Added</summary>\n"
         text += "<table>\n"
-        text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th></tr>\n"
+        text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Compressed Size Delta</th>"
+        text += "<th>Uncompressed Size Delta</th></tr>\n"
         for entry in diffs["added"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = entry.get("Size", 0)
+            compressed_size = entry.get("Compressed_Size_Bytes", 0)
+            uncompressed_size = entry.get("Uncompressed_Size_Bytes", 0)
             typ = entry.get("Type", "")
-            text += f"<tr><td>{typ}</td><td>{name}</td><td>{version}</td><td>+{size}</td><td>+{size}</td></tr>\n"
+            text += f"<tr><td>{typ}</td><td>{name}</td><td>{version}</td><td>+{compressed_size}</td>"
+            text += f"<td>+{uncompressed_size}</td></tr>\n"
         text += "</table>\n"
         text += "</details>\n\n"
     else:
@@ -180,14 +206,17 @@ def display_diffs_to_html(diffs, uncompressed_diffs, platform, python_version):
     if diffs["removed"]:
         text += "<details><summary>Removed</summary>\n"
         text += "<table>\n"
-        text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th></tr>\n"
+        text += "<tr><th>Type</th><th>Name</th><th>Version</th><th>Compressed Size Delta</th>"
+        text += "<th>Uncompressed Size Delta</th></tr>\n"
         for entry in diffs["removed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
-            size = int(entry.get("Size_Bytes", 0))
+            compressed_size = int(entry.get("Compressed_Size_Bytes", 0))
+            uncompressed_size = int(entry.get("Uncompressed_Size_Bytes", 0))
             typ = entry.get("Type", "")
             text += f"<tr><td>{typ}</td><td>{name}</td>"
-            text += f"<td>{version}</td><td>-{convert_to_human_readable_size(size)}</td></tr>\n"
+            text += f"<td>{version}</td><td>-{convert_to_human_readable_size(compressed_size)}</td>"
+            text += f"<td>-{convert_to_human_readable_size(uncompressed_size)}</td></tr>\n"
         text += "</table>\n"
         text += "</details>\n\n"
     else:
@@ -197,14 +226,17 @@ def display_diffs_to_html(diffs, uncompressed_diffs, platform, python_version):
         text += "<details><summary>Changed</summary>\n"
         text += "<table>\n"
         text += "<tr><th>Type</th><th>Name</th><th>Version</th>"
-        text += "<th>Size Delta</th><th>Percentage</th></tr>\n"
+        text += "<th>Compressed Size Delta</th><th>Uncompressed Size Delta</th><th>Compressed Percentage</th>"
+        text += "<th>Uncompressed Percentage</th></tr>\n"
         for entry in diffs["changed"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             typ = entry.get("Type", "")
-            percentage = entry.get("Percentage", 0)
-            diff = entry.get("Diff", 0)
-            sign = "+" if diff > 0 else "-"
+            compressed_percentage = entry.get("Compressed_Percentage", 0)
+            uncompressed_percentage = entry.get("Uncompressed_Percentage", 0)
+            compressed_diff = entry.get("Compressed_Diff", 0)
+            uncompressed_diff = entry.get("Uncompressed_Diff", 0)
+            sign = "+" if compressed_diff > 0 else "-"
             version_diff = (
                 f"{entry.get('Prev Version', version)} → {entry.get('Version', version)}"
                 if entry.get('Prev Version', version) != entry.get('Version', version)
@@ -212,8 +244,10 @@ def display_diffs_to_html(diffs, uncompressed_diffs, platform, python_version):
             )
             text += (
                 f"<tr><td>{typ}</td><td>{name}</td><td>{version_diff}</td>"
-                f"<td>{sign}{convert_to_human_readable_size(abs(diff))}</td>"
-                f"<td>{sign}{percentage:.2f}%</td></tr>\n"
+                f"<td>{sign}{convert_to_human_readable_size(abs(compressed_diff))}</td>"
+                f"<td>{sign}{convert_to_human_readable_size(abs(uncompressed_diff))}</td>"
+                f"<td>{sign}{compressed_percentage:.2f}%</td>"
+                f"<td>{sign}{uncompressed_percentage:.2f}%</td></tr>\n"
             )
         text += "</table>\n"
         text += "</details>\n\n"
@@ -227,9 +261,9 @@ def display_diffs_to_html_short(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
     text = f"<details><summary><h4>Size Delta for {platform} and Python {python_version}:\n"
     text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h4></summary>\n\n"
-    total_added = sum(int(entry.get("Size_Bytes", 0)) for entry in diffs["added"])
-    total_removed = sum(int(entry.get("Size_Bytes", 0)) for entry in diffs["removed"])
-    total_changed = sum(entry.get("Diff", 0) for entry in diffs["changed"])
+    total_added = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["added"])
+    total_removed = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["removed"])
+    total_changed = sum(entry.get("Compressed_Diff", 0) for entry in diffs["changed"])
     total_changed_sign = "+" if total_changed > 0 else "-"
     text += f"Total added: +{convert_to_human_readable_size(total_added)}\n"
     text += f"Total removed: -{convert_to_human_readable_size(total_removed)}\n"
@@ -243,16 +277,14 @@ def send_to_datadog(diffs, platform, python_version, compression, api_key):
     api_info = {"api_key": api_key, "site": "datadoghq.com"}
     message, tickets, prs = get_last_commit_data()
     timestamp = get_last_commit_timestamp()
-
     metrics = []
 
     for entry in diffs["unchanged"]:
-        metrics.append(
+        metrics.extend(
             {
                 "metric": f"{METRIC_NAME}.size_diff",
                 "type": "gauge",
-                "points": [(timestamp, entry.get("Diff"))],
-                "size": entry.get("Diff"),
+                "points": [(timestamp, entry.get("Compressed_Diff"))],
                 "tags": [
                     f"name:{entry.get('Name')}",
                     f"type:{entry.get('Type')}",
@@ -261,21 +293,17 @@ def send_to_datadog(diffs, platform, python_version, compression, api_key):
                     f"module_version:{entry.get('Version')}",
                     f"platform:{platform}",
                     "team:agent-integrations",
-                    f"compression:{compression}",
+                    "compression:compressed",
                     f"metrics_version:{METRIC_VERSION}",
                     "diff_type:unchanged",
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                 ],
-            }
-        )
-    for entry in diffs["changed"]:
-        metrics.append(
+            },
             {
                 "metric": f"{METRIC_NAME}.size_diff",
                 "type": "gauge",
-                "points": [(timestamp, entry.get("Diff"))],
-                "size": entry.get("Diff"),
+                "points": [(timestamp, entry.get("Uncompressed_Diff"))],
                 "tags": [
                     f"name:{entry.get('Name')}",
                     f"type:{entry.get('Type')}",
@@ -284,21 +312,39 @@ def send_to_datadog(diffs, platform, python_version, compression, api_key):
                     f"module_version:{entry.get('Version')}",
                     f"platform:{platform}",
                     "team:agent-integrations",
-                    f"compression:{compression}",
+                    "compression:uncompressed",
+                    f"metrics_version:{METRIC_VERSION}",
+                    "diff_type:unchanged",
+                    f"jira_ticket:{tickets[0]}",
+                    f"pr_number:{prs[-1]}",
+                ],
+            },
+        )
+    for entry in diffs["changed"]:
+        metrics.extend(
+            {
+                "metric": f"{METRIC_NAME}.size_diff",
+                "type": "gauge",
+                "points": [(timestamp, entry.get("Compressed_Diff"))],
+                "tags": [
+                    f"name:{entry.get('Name')}",
+                    f"type:{entry.get('Type')}",
+                    f"name_type:{entry.get('Type')}({entry.get('Name')})",
+                    f"python_version:{python_version}",
+                    f"module_version:{entry.get('Version')}",
+                    f"platform:{platform}",
+                    "team:agent-integrations",
+                    "compression:compressed",
                     f"metrics_version:{METRIC_VERSION}",
                     "diff_type:changed",
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                 ],
-            }
-        )
-    for entry in diffs["added"]:
-        metrics.append(
+            },
             {
                 "metric": f"{METRIC_NAME}.size_diff",
                 "type": "gauge",
-                "points": [(timestamp, entry.get("Size_Bytes"))],
-                "size": entry.get("Size_Bytes"),
+                "points": [(timestamp, entry.get("Uncompressed_Diff"))],
                 "tags": [
                     f"name:{entry.get('Name')}",
                     f"type:{entry.get('Type')}",
@@ -307,21 +353,41 @@ def send_to_datadog(diffs, platform, python_version, compression, api_key):
                     f"module_version:{entry.get('Version')}",
                     f"platform:{platform}",
                     "team:agent-integrations",
-                    f"compression:{compression}",
+                    "compression:uncompressed",
+                    f"metrics_version:{METRIC_VERSION}",
+                    "diff_type:changed",
+                    f"jira_ticket:{tickets[0]}",
+                    f"pr_number:{prs[-1]}",
+                ],
+            },
+        )
+    for entry in diffs["added"]:
+        metrics.extend(
+            {
+                "metric": f"{METRIC_NAME}.size_diff",
+                "type": "gauge",
+                "points": [(timestamp, entry.get("Compressed_Size_Bytes"))],
+                "size": entry.get("Compressed_Size_Bytes"),
+                "tags": [
+                    f"name:{entry.get('Name')}",
+                    f"type:{entry.get('Type')}",
+                    f"name_type:{entry.get('Type')}({entry.get('Name')})",
+                    f"python_version:{python_version}",
+                    f"module_version:{entry.get('Version')}",
+                    f"platform:{platform}",
+                    "team:agent-integrations",
+                    "compression:compressed",
                     f"metrics_version:{METRIC_VERSION}",
                     "diff_type:added",
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                 ],
-            }
-        )
-    for entry in diffs["removed"]:
-        metrics.append(
+            },
             {
                 "metric": f"{METRIC_NAME}.size_diff",
                 "type": "gauge",
-                "points": [(timestamp, entry.get("Size_Bytes"))],
-                "size": entry.get("Size_Bytes"),
+                "points": [(timestamp, entry.get("Uncompressed_Size_Bytes"))],
+                "size": entry.get("Uncompressed_Size_Bytes"),
                 "tags": [
                     f"name:{entry.get('Name')}",
                     f"type:{entry.get('Type')}",
@@ -330,13 +396,56 @@ def send_to_datadog(diffs, platform, python_version, compression, api_key):
                     f"module_version:{entry.get('Version')}",
                     f"platform:{platform}",
                     "team:agent-integrations",
-                    f"compression:{compression}",
+                    "compression:uncompressed",
+                    f"metrics_version:{METRIC_VERSION}",
+                    "diff_type:added",
+                    f"jira_ticket:{tickets[0]}",
+                    f"pr_number:{prs[-1]}",
+                ],
+            },
+        )
+    for entry in diffs["removed"]:
+        metrics.extend(
+            {
+                "metric": f"{METRIC_NAME}.size_diff",
+                "type": "gauge",
+                "points": [(timestamp, entry.get("Compressed_Size_Bytes"))],
+                "size": entry.get("Compressed_Size_Bytes"),
+                "tags": [
+                    f"name:{entry.get('Name')}",
+                    f"type:{entry.get('Type')}",
+                    f"name_type:{entry.get('Type')}({entry.get('Name')})",
+                    f"python_version:{python_version}",
+                    f"module_version:{entry.get('Version')}",
+                    f"platform:{platform}",
+                    "team:agent-integrations",
+                    "compression:compressed",
                     f"metrics_version:{METRIC_VERSION}",
                     "diff_type:removed",
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                 ],
-            }
+            },
+            {
+                "metric": f"{METRIC_NAME}.size_diff",
+                "type": "gauge",
+                "points": [(timestamp, entry.get("Uncompressed_Size_Bytes"))],
+                "size": entry.get("Uncompressed_Size_Bytes"),
+                "tags": [
+                    f"name:{entry.get('Name')}",
+                    f"type:{entry.get('Type')}",
+                    f"name_type:{entry.get('Type')}({entry.get('Name')})",
+                    f"python_version:{python_version}",
+                    f"module_version:{entry.get('Version')}",
+                    f"platform:{platform}",
+                    "team:agent-integrations",
+                    "compression:uncompressed",
+                    f"metrics_version:{METRIC_VERSION}",
+                    "diff_type:removed",
+                    f"jira_ticket:{tickets[0]}",
+                    f"pr_number:{prs[-1]}",
+                ],
+            },
         )
     initialize(
         api_key=api_info["api_key"],
@@ -368,15 +477,15 @@ def main():
     with open(args.uncompressed_curr_sizes, "r") as f:
         curr_uncompressed_sizes = json.load(f)
 
-    compressed_diffs, platform, python_version = calculate_diffs(prev_compressed_sizes, curr_compressed_sizes)
-    uncompressed_diffs, platform, python_version = calculate_diffs(prev_uncompressed_sizes, curr_uncompressed_sizes)
+    diffs, platform, python_version = calculate_diffs(
+        prev_compressed_sizes, curr_compressed_sizes, prev_uncompressed_sizes, curr_uncompressed_sizes
+    )
 
     if args.send_to_datadog:
-        send_to_datadog(compressed_diffs, platform, python_version, "compressed", args.send_to_datadog)
-        send_to_datadog(uncompressed_diffs, platform, python_version, "uncompressed", args.send_to_datadog)
+        send_to_datadog(diffs, platform, python_version, args.send_to_datadog)
 
-    long_text = display_diffs_to_html(compressed_diffs, uncompressed_diffs, platform, python_version)
-    short_text = display_diffs_to_html_short(compressed_diffs, uncompressed_diffs, platform, python_version)
+    long_text = display_diffs_to_html(diffs, platform, python_version)
+    short_text = display_diffs_to_html_short(diffs, platform, python_version)
 
     if args.html_long_out:
         with open(args.html_long_out, "w") as f:
@@ -387,7 +496,7 @@ def main():
 
     if args.output:
         with open(args.output, "w") as f:
-            f.write(json.dumps({"compressed": compressed_diffs, "uncompressed": uncompressed_diffs}, indent=2))
+            f.write(json.dumps({diffs}, indent=2))
 
 
 if __name__ == "__main__":

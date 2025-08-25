@@ -77,7 +77,9 @@ jobs:
           mv uncompressed_status.csv status_uncompressed_${{ inputs.platform }}_prev.csv
 
       - name: Download current sizes artifact
-        run: gh run download ${{ github.run_id }} --name status_compressed_${{ inputs.platform }}.json
+        run: |
+          gh run download ${{ github.run_id }} --name status_compressed_${{ inputs.platform }}.json
+          gh run download ${{ github.run_id }} --name status_uncompressed_${{ inputs.platform }}.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -85,6 +87,7 @@ jobs:
       - name: Rename current sizes artifact
         run: |
           mv status_compressed_${{ inputs.platform }}.json status_compressed_${{ inputs.platform }}_curr.json
+          mv status_uncompressed_${{ inputs.platform }}.json status_uncompressed_${{ inputs.platform }}_curr.json
           
       - name: Calculate diffs 
         run: |
