@@ -2362,27 +2362,27 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.13-4.4-standalone
-        - py3.13-4.4-shard
-        - py3.13-4.4-auth
-        - py3.13-4.4-tls
-        - py3.13-5.0-standalone
-        - py3.13-5.0-shard
-        - py3.13-5.0-auth
-        - py3.13-5.0-tls
-        - py3.13-6.0-standalone
-        - py3.13-6.0-shard
-        - py3.13-6.0-auth
-        - py3.13-6.0-tls
-        - py3.13-7.0-standalone
-        - py3.13-7.0-shard
-        - py3.13-7.0-auth
-        - py3.13-7.0-tls
-        - py3.13-8.0-standalone
-        - py3.13-8.0-shard
-        - py3.13-8.0-auth
-        - py3.13-8.0-tls
-        - py3.13-8.0-standalone-newyork
+        - ${{ inputs.python-version }}-4.4-standalone
+        - ${{ inputs.python-version }}-4.4-shard
+        - ${{ inputs.python-version }}-4.4-auth
+        - ${{ inputs.python-version }}-4.4-tls
+        - ${{ inputs.python-version }}-5.0-standalone
+        - ${{ inputs.python-version }}-5.0-shard
+        - ${{ inputs.python-version }}-5.0-auth
+        - ${{ inputs.python-version }}-5.0-tls
+        - ${{ inputs.python-version }}-6.0-standalone
+        - ${{ inputs.python-version }}-6.0-shard
+        - ${{ inputs.python-version }}-6.0-auth
+        - ${{ inputs.python-version }}-6.0-tls
+        - ${{ inputs.python-version }}-7.0-standalone
+        - ${{ inputs.python-version }}-7.0-shard
+        - ${{ inputs.python-version }}-7.0-auth
+        - ${{ inputs.python-version }}-7.0-tls
+        - ${{ inputs.python-version }}-8.0-standalone
+        - ${{ inputs.python-version }}-8.0-shard
+        - ${{ inputs.python-version }}-8.0-auth
+        - ${{ inputs.python-version }}-8.0-tls
+        - ${{ inputs.python-version }}-8.0-standalone-newyork
       fail-fast: false
   j211906c:
     uses: ./.github/workflows/test-target.yml
@@ -2407,16 +2407,16 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.13-5.7
-        - py3.13-8.0.36
-        - py3.13-8.4.0
-        - py3.13-8.0-group
-        - py3.13-mariadb-10.5
-        - py3.13-mariadb-10.6
-        - py3.13-mariadb-10.11
-        - py3.13-mariadb-11.4
-        - py3.13-percona-8.0.42
-        - py3.13-percona-8.4
+        - ${{ inputs.python-version }}-5.7
+        - ${{ inputs.python-version }}-8.0.36
+        - ${{ inputs.python-version }}-8.4.0
+        - ${{ inputs.python-version }}-8.0-group
+        - ${{ inputs.python-version }}-mariadb-10.5
+        - ${{ inputs.python-version }}-mariadb-10.6
+        - ${{ inputs.python-version }}-mariadb-10.11
+        - ${{ inputs.python-version }}-mariadb-11.4
+        - ${{ inputs.python-version }}-percona-8.0.42
+        - ${{ inputs.python-version }}-percona-8.4
       fail-fast: false
   j5df646e:
     uses: ./.github/workflows/test-target.yml
@@ -2726,23 +2726,23 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.13-9.6-UTF8
-        - py3.13-10.0-UTF8
-        - py3.13-11.0-UTF8
-        - py3.13-12.17-UTF8
-        - py3.13-13.0-UTF8
-        - py3.13-14.0-UTF8
-        - py3.13-15.0-UTF8
-        - py3.13-16.0-UTF8
-        - py3.13-17.0-UTF8
-        - py3.13-10.0-C
-        - py3.13-11.0-C
-        - py3.13-12.17-C
-        - py3.13-13.0-C
-        - py3.13-14.0-C
-        - py3.13-15.0-C
-        - py3.13-16.0-C
-        - py3.13-17.0-C
+        - ${{ inputs.python-version }}-9.6-UTF8
+        - ${{ inputs.python-version }}-10.0-UTF8
+        - ${{ inputs.python-version }}-11.0-UTF8
+        - ${{ inputs.python-version }}-12.17-UTF8
+        - ${{ inputs.python-version }}-13.0-UTF8
+        - ${{ inputs.python-version }}-14.0-UTF8
+        - ${{ inputs.python-version }}-15.0-UTF8
+        - ${{ inputs.python-version }}-16.0-UTF8
+        - ${{ inputs.python-version }}-17.0-UTF8
+        - ${{ inputs.python-version }}-10.0-C
+        - ${{ inputs.python-version }}-11.0-C
+        - ${{ inputs.python-version }}-12.17-C
+        - ${{ inputs.python-version }}-13.0-C
+        - ${{ inputs.python-version }}-14.0-C
+        - ${{ inputs.python-version }}-15.0-C
+        - ${{ inputs.python-version }}-16.0-C
+        - ${{ inputs.python-version }}-17.0-C
       fail-fast: false
   j8e38a40:
     uses: ./.github/workflows/test-target.yml
@@ -3261,16 +3261,16 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.13-linux-FreeTDS-2019-single
-        - py3.13-linux-FreeTDS-2019-ha
-        - py3.13-linux-FreeTDS-2022-single
-        - py3.13-linux-FreeTDS-2022-ha
-        - py3.13-linux-odbc-2019-single
-        - py3.13-linux-odbc-2019-ha
-        - py3.13-linux-odbc-2022-single
-        - py3.13-linux-odbc-2022-ha
-        - py3.13-linux-2022-newyork
-        - py3.13-linux-2022-tokyo
+        - ${{ inputs.python-version }}-linux-FreeTDS-2019-single
+        - ${{ inputs.python-version }}-linux-FreeTDS-2019-ha
+        - ${{ inputs.python-version }}-linux-FreeTDS-2022-single
+        - ${{ inputs.python-version }}-linux-FreeTDS-2022-ha
+        - ${{ inputs.python-version }}-linux-odbc-2019-single
+        - ${{ inputs.python-version }}-linux-odbc-2019-ha
+        - ${{ inputs.python-version }}-linux-odbc-2022-single
+        - ${{ inputs.python-version }}-linux-odbc-2022-ha
+        - ${{ inputs.python-version }}-linux-2022-newyork
+        - ${{ inputs.python-version }}-linux-2022-tokyo
       fail-fast: false
   jaf4b616:
     uses: ./.github/workflows/test-target.yml
