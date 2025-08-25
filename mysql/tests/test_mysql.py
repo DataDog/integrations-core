@@ -8,7 +8,6 @@ import mock
 import pytest
 from packaging.version import parse as parse_version
 
-from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.__about__ import __version__
@@ -74,9 +73,7 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
         else:
             aggregator.assert_metric(mname, at_least=1)
 
-    optional_metrics = (
-        variables.SYSTEM_METRICS
-    )
+    optional_metrics = variables.SYSTEM_METRICS
 
     # Query cache and synthetic variables are not available in MySQL/Percona 8+
     if not (MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0')):
@@ -156,7 +153,9 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
     )
 
 
-def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname', e2e=False, is_replica=False):
+def _assert_complex_config(
+    aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname', e2e=False, is_replica=False
+):
     # Set replication mode once for reuse
     replication_mode = 'source' if not is_replica else 'replica'
 
@@ -240,11 +239,35 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
             if not is_replica:
                 aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=1)
                 aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=1)
-        elif mname in ('mysql.info.table.data_size', 'mysql.info.table.index_size'):
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users',), count=1)
+        elif mname in variables.TABLE_VARS:
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + (
+                    'schema:testdb',
+                    'table:users',
+                ),
+                count=1,
+            )
             if not is_replica:
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema', 'table:VIEWS',), count=1)
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema', 'table:users',), count=1)
+                aggregator.assert_metric(
+                    mname,
+                    tags=metric_tags
+                    + (
+                        'schema:information_schema',
+                        'table:VIEWS',
+                    ),
+                    count=1,
+                )
+                aggregator.assert_metric(
+                    mname,
+                    tags=metric_tags
+                    + (
+                        'schema:performance_schema',
+                        'table:users',
+                    ),
+                    count=1,
+                )
         elif mname == 'mysql.replication.slave_running':
             aggregator.assert_metric(mname, tags=metric_tags + (f'replication_mode:{replication_mode}',), count=1)
         elif mname == 'mysql.performance.user_connections':
@@ -252,13 +275,31 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
                 processlist_state = "executing"
             else:
                 processlist_state = "Sending data"
-            aggregator.assert_metric(mname, tags=metric_tags + ('processlist_host:192.168.65.1', 'processlist_state:{}'.format(processlist_state), 'processlist_user:dog', 'processlist_db:None'), count=1)
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + (
+                    'processlist_host:192.168.65.1',
+                    'processlist_state:{}'.format(processlist_state),
+                    'processlist_user:dog',
+                    'processlist_db:None',
+                ),
+                count=1,
+            )
         elif mname == 'mysql.replication.group.member_status':
             aggregator.assert_metric(mname, tags=metric_tags + group_replication_tags, count=1)
-        elif mname in ('mysql.replication.group.conflicts_detected', 'mysql.replication.group.transactions', 'mysql.replication.group.transactions_check', 'mysql.replication.group.transactions_validating', 'mysql.replication.group.transactions_in_applier_queue', 'mysql.replication.group.transactions_applied', 'mysql.replication.group.transactions_proposed', 'mysql.replication.group.transactions_rollback'):
+        elif mname in variables.GROUP_REPLICATION_VARS + variables.GROUP_REPLICATION_VARS_8_0_2:
             aggregator.assert_metric(mname, tags=metric_tags + ('channel_name:group_replication_applier',), count=1)
         elif mname in variables.ROW_TABLE_STATS_VARS:
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb', 'table:users',), count=1)
+            aggregator.assert_metric(
+                mname,
+                tags=metric_tags
+                + (
+                    'schema:testdb',
+                    'table:users',
+                ),
+                count=1,
+            )
         elif mname == 'mysql.performance.qcache.utilization.instant':
             # This metric will only be collected if query_cache_type is enabled and on a second check run
             aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
@@ -281,7 +322,7 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
         + variables.OPTIONAL_INNODB_VARS
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
-        + variables.SYSTEM_METRICS # Can only be collected when Postgres is running locally to tests
+        + variables.SYSTEM_METRICS  # Can only be collected when Postgres is running locally to tests
     )
     # Note, this assertion will pass even if some metrics are not present.
     # Manual testing is required for optional metrics
@@ -403,7 +444,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         aggregator.assert_metric(mname, hostname=expected_hostname, count=1)
 
     optional_metrics = (
-        variables.SYSTEM_METRICS # Can only be collected when Postgres is running locally to tests
+        variables.SYSTEM_METRICS  # Can only be collected when Postgres is running locally to tests
     )
 
     # Query cache and synthetic variables are not available in MySQL/Percona 8+
