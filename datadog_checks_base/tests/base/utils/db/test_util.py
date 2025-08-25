@@ -317,14 +317,13 @@ def test_dbm_async_job_cancel(aggregator):
 
 def test_dbm_async_job_cancel_returns_early_on_long_sleep():
     # Configure a very low rate so the sleep interval would be ~60s without cancellation
-    # Use a small chunk so the cancel check happens rapidly
     job = JobForTesting(AgentCheck(), rate_limit=1 / 60.0, max_sleep_chunk_s=0.1)
     job.run_job_loop([])
     # Allow the thread to start and enter the sleep window
     time.sleep(0.2)
     start = time.time()
     job.cancel()
-    # Should finish well before the full ~60s rate-limiter interval due to cancel-aware chunked sleep
+    # Should finish well before the full ~10s timeout and 60s rate-limiter interval
     job._job_loop_future.result(timeout=10)
     elapsed = time.time() - start
     assert elapsed < 10, "Job did not cancel before the full sleep interval"
