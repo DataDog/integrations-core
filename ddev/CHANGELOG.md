@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 12.2.0 / 2025-07-31
+
+***Added***:
+
+* Run integration tests in parallel for single integrations ([#20816](https://github.com/DataDog/integrations-core/pull/20816))
+
+## 12.1.0 / 2025-07-15
+
+***Added***:
+
+* Add back F401 rule to the linter ([#20661](https://github.com/DataDog/integrations-core/pull/20661))
+* Update ci validation command to account for the new ddev test skip params ([#20705](https://github.com/DataDog/integrations-core/pull/20705))
+* Add the skip-ddev option to ci validation script ([#20708](https://github.com/DataDog/integrations-core/pull/20708))
+
+***Fixed***:
+
+* Add rule to lint for relative imports from non parent packages ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* [MINPROC-2319] remove the integration exception mapper ([#20697](https://github.com/DataDog/integrations-core/pull/20697))
+
 ## 12.0.0 / 2025-07-01
 
 ***Changed***:

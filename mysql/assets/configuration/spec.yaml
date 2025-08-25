@@ -428,7 +428,6 @@ files:
                   type: number
                   example: 60
           - name: schemas_collection
-            hidden: true
             deprecation:
               Agent version: 7.69.0
               Migration: Use `collect_schemas` instead.

@@ -82,14 +82,17 @@ def test_command(
     from ddev.utils.structures import EnvVars
 
     app: Application = ctx.obj
-    storage = EnvDataStorage(app.data_dir)
     integration = app.repo.integrations.get(intg_name)
+
+    storage = EnvDataStorage(app.data_dir)
     active_envs = storage.get_environments(integration.name)
 
     if environment is None:
         environment = 'all' if (not active_envs or running_in_ci()) else 'active'
 
-    if environment == 'all':
+    if environment == 'active':
+        env_names = active_envs
+    else:
         import json
         import sys
 
@@ -102,19 +105,20 @@ def test_command(
             except json.JSONDecodeError:
                 app.abort(f'Failed to parse environments for `{integration.name}`:\n{repr(env_data_output)}')
 
+        no_python_filter = python_filter is None
+        all_environments = environment == 'all'
+
         env_names = [
             name
             for name, data in environments.items()
-            if data.get('e2e-env')
+            if data.get('e2e-env', False)
             and (not data.get('platforms') or app.platform.name in data['platforms'])
-            and (python_filter is None or data.get('python') == python_filter)
+            and (no_python_filter or data.get('python') == python_filter)
+            and (name == environment or all_environments)
         ]
-    elif environment == 'active':
-        env_names = active_envs
-    else:
-        env_names = [environment]
 
     if not env_names:
+        app.display_info(f"Selected target {integration.name!r} disabled by e2e-env option.")
         return
 
     app.display_header(integration.display_name)

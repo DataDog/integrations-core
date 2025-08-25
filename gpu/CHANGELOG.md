@@ -1,6 +1,18 @@
 # CHANGELOG - GPU
 
 
+## 0.4.0
+
+***Added***:
+
+* Added BAR1 GPU memory metrics: `gpu.memory.bar1.free`, `gpu.memory.bar1.total`, `gpu.memory.bar1.used`.
+
+## 0.3.0
+
+***Added***:
+
+* Added process-level GPU metrics with PID tags: `gpu.process.sm_active`, `gpu.process.dram_active`, `gpu.process.encoder_utilization`, and `gpu.process.decoder_utilization`.
+
 ## 0.2.0
 
 ***Removed***:

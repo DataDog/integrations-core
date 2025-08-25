@@ -4,7 +4,7 @@
 
 from unittest.mock import ANY, MagicMock, patch
 
-import psycopg as pg
+import psycopg2 as pg
 import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -32,7 +32,7 @@ def test_connection_cleanup_on_error(instance, use_cached):
     This test ensures that connection resources are properly cleaned up when a connection fails to establish.
     """
     instance['use_cached'] = use_cached
-    with patch('psycopg.connect', side_effect=Exception("Connection failed")):
+    with patch('psycopg2.connect', side_effect=Exception("Connection failed")):
         check = PgBouncer('pgbouncer', {}, [instance])
         with pytest.raises(Exception):
             check._get_connection()
@@ -52,7 +52,7 @@ def test_connection_lifecycle_with_caching(instance):
     mock_connection.notices = []
     mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['1.2.3']
 
-    with patch('psycopg.connect', return_value=mock_connection) as mock_connect:
+    with patch('psycopg2.connect', return_value=mock_connection) as mock_connect:
         instance['use_cached'] = True
         check = PgBouncer('pgbouncer', {}, [instance])
 
@@ -75,7 +75,7 @@ def test_connection_lifecycle(instance, use_cached):
     mock_connection.notices = []
     mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['1.2.3']
     instance['use_cached'] = use_cached
-    with patch('psycopg.connect', return_value=mock_connection) as mock_connect:
+    with patch('psycopg2.connect', return_value=mock_connection) as mock_connect:
         check = PgBouncer('pgbouncer', {}, [instance])
 
         # Run the check
@@ -94,23 +94,16 @@ def test_connection_lifecycle(instance, use_cached):
 @pytest.mark.unit
 def test_metadata_collection(instance):
     """
-    This test verifies that metadata collection works correctly by checking
-    that `set_metadata` is called with the correct version.
+    This test verifies that metadata collection works correctly.
     """
     mock_connection = MagicMock()
-    # The version query `SHOW VERSION;` returns a full string like 'PgBouncer 1.2.3 ...'
-    # The `get_version` method is responsible for parsing this.
-    mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = [
-        'PgBouncer 1.2.3 some other info'
-    ]
+    mock_connection.notices = []
+    mock_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['PgBouncer 1.2.3']
 
-    with patch('datadog_checks.pgbouncer.pgbouncer.pg.connect', return_value=mock_connection):
+    with patch('psycopg2.connect', return_value=mock_connection):
         check = PgBouncer('pgbouncer', {}, [instance])
-        # We patch `set_metadata` on the check instance to intercept the final call
         with patch.object(check, 'set_metadata') as mock_set_metadata:
             check.check(instance)
-
-            # Assert that the version was correctly parsed and submitted
             mock_set_metadata.assert_called_once_with('version', '1.2.3')
 
 
@@ -125,6 +118,26 @@ def test_metadata_collection_without_connection(instance):
     with patch.object(check, 'set_metadata') as mock_set_metadata:
         check._collect_metadata(None)
         mock_set_metadata.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('use_cached', [True, False])
+def test_connection_cleanup_on_isolation_level_error(instance, use_cached):
+    """
+    This test ensures that connection resources are properly cleaned up when setting the isolation level fails.
+    """
+    instance['use_cached'] = use_cached
+    mock_connection = MagicMock()
+    mock_connection.set_isolation_level.side_effect = Exception("Failed to set isolation level")
+
+    with patch('psycopg2.connect', return_value=mock_connection):
+        check = PgBouncer('pgbouncer', {}, [instance])
+        with pytest.raises(Exception):
+            check.check(instance)
+
+        # Verify connection was closed and not stored
+        assert mock_connection.close.call_count == 1
+        assert check.connection is None
 
 
 @pytest.mark.unit
@@ -150,7 +163,7 @@ def test_connection_lifecycle_pg_error_once(instance, use_cached):
     mock_conn2.cursor.return_value = fake_cursor
 
     # pg.connect will return mock_conn1 first, then mock_conn2.
-    with patch('psycopg.connect', side_effect=[mock_conn1, mock_conn2]) as mock_connect:
+    with patch('psycopg2.connect', side_effect=[mock_conn1, mock_conn2]) as mock_connect:
         check = PgBouncer('pgbouncer', {}, [instance])
         # Patch _collect_metadata to avoid its side effects
         with patch.object(check, '_collect_metadata', return_value=None):
@@ -190,7 +203,7 @@ def test_connection_lifecycle_pg_error_twice(instance, use_cached):
     mock_conn2 = MagicMock()
     mock_conn2.cursor.side_effect = pg.Error("Simulated pg.Error on second connection")
 
-    with patch('psycopg.connect', side_effect=[mock_conn1, mock_conn2]) as mock_connect:
+    with patch('psycopg2.connect', side_effect=[mock_conn1, mock_conn2]) as mock_connect:
         check = PgBouncer('pgbouncer', {}, [instance])
         with patch.object(check, '_collect_metadata', return_value=None):
             with patch.object(check, 'service_check') as service_check_patch:
@@ -222,7 +235,7 @@ def test_no_new_connection_when_cached_exists(instance):
     mock_existing_connection.notices = []
     mock_existing_connection.cursor.return_value.__enter__.return_value.fetchone.return_value = ['1.2.3']
 
-    with patch('psycopg.connect') as mock_connect:
+    with patch('psycopg2.connect') as mock_connect:
         check = PgBouncer('pgbouncer', {}, [instance])
 
         # Set the existing connection

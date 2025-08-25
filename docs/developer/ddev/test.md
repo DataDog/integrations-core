@@ -41,6 +41,56 @@ def dd_environment():
 
 Read [the reference](#datadog_checks.dev.docker.docker_run) for more information.
 
+### Vagrant
+
+The Vagrant environment type allows you to test integrations using virtual machines. This is particularly useful for testing scenarios that require:
+
+- Full operating system environments
+- Specific OS configurations
+- System-level integrations that cannot be containerized
+
+#### Prerequisites
+
+- [Vagrant](https://developer.hashicorp.com/vagrant/install) must be installed on your machine
+- A virtualization provider (e.g., VirtualBox, VMware, Hyper-V)
+
+#### Usage
+
+To use Vagrant VMs for testing, configure your `dd_environment` fixture to return metadata specifying the `agent_type` as `vagrant`:
+
+```python
+@pytest.fixture(scope='session')
+def dd_environment():
+    # Set up your test environment (e.g., services, configurations)
+    yield {
+        'instances': [{'host': '%HOST%', 'port': 8080}]  # %HOST% will be replaced with the VM's IP
+    }, {
+        'agent_type': 'vagrant',
+        'vagrant_box': 'generic/ubuntu2004',  # Optional: specify the Vagrant box to use
+        'env': {
+            'MY_ENV_VAR': 'value'  # Environment variables for the Agent
+        },
+        'start_commands': [  # Commands to run when starting the VM
+            'sudo apt-get update',
+            'sudo apt-get install -y some-package'
+        ],
+        'post_install_commands': [  # Commands to run after Agent installation
+            'sudo systemctl start my-service'
+        ]
+    }
+```
+
+The Vagrant VM will be automatically provisioned with:
+
+- The Datadog Agent installed and configured
+- Your integration's configuration mounted at the appropriate location
+- Any specified environment variables set
+- A private network interface with IP `172.30.1.5`
+
+You can use the `%HOST%` template variable in your configuration instead of hardcoding IP addresses. This variable will be automatically replaced with the VM's IP address (`172.30.1.5`).
+
+Note: Vagrant environments are not supported in CI environments due to virtualization constraints.
+
 ### Terraform
 
 The `terraform_run` utility makes it easy to create services from a directory of [Terraform][terraform-home] files.
