@@ -751,6 +751,8 @@ integration/zero_networks:
 - zero_networks/**/*
 integration/zk:
 - zk/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt
