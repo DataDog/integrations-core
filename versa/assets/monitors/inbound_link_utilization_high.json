@@ -1,7 +1,7 @@
 {
 	"version": 2,
-	"created_at": "2025-08-22T17:14:46.249-04:00",
-	"last_updated_at": "2025-08-22T17:14:46.249-04:00",
+	"created_at": "2025-08-22",
+	"last_updated_at": "2025-08-22",
 	"title": "Inbound Link Utilization >90%",
 	"description": "This monitor detects when the inbound link utilization across an access circuit over the last 5 minutes is greater than 90%.",
 	"definition": {

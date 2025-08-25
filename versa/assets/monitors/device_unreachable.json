@@ -1,7 +1,7 @@
 {
 	"version": 2,
-	"created_at": "2025-08-22T14:53:39.483-04:00",
-	"last_updated_at": "2025-08-22T14:53:39.483-04:00",
+	"created_at": "2025-08-22",
+	"last_updated_at": "2025-08-22",
 	"title": "Versa Device is unreachable",
 	"description": "This monitor checks the reachability of Versa devices. It triggers an alert if a device becomes unreachable, indicating potential network connectivity issues.",
 	"definition": {
