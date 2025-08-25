@@ -8,18 +8,24 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Checkpoint Harmony Endpoint is an endpoint security designed to prevent, detect, and respond to threats on user devices",
     "title": "checkpoint_harmony_endpoint",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Checkpoint Harmony Endpoint Overview",
+        "image_url": "images/checkpoint_harmony_endpoint_overview.png"
+      }
+    ],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
@@ -40,10 +46,8 @@
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
-    "monitors": {},
-    "saved_views": {}
+        "Checkpoint Harmony Endpoint Overview": "assets/dashboards/checkpoint_harmony_endpoint_overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
