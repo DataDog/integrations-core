@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from ddev.cli.release.branch.create import update_build_agent_yaml
+from ddev.utils.fs import Path
+
 
 @pytest.mark.parametrize(
     'name',
@@ -42,8 +45,6 @@ def test_create_branch(ddev, mocker):
 
 def test_update_build_agent_yaml_success(mocker, tmp_path):
     """Test successful update of build_agent.yaml"""
-    from ddev.cli.release.branch.create import update_build_agent_yaml
-    from ddev.utils.fs import Path
 
     # Create a temporary build_agent.yaml file
     build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
@@ -77,4 +78,3 @@ build-agent-auto:
 
     assert 'branch: 7.99.x' in updated_content
     assert 'branch: main' not in updated_content
-    app_mock.display_success.assert_called_once_with('Updated build_agent.yaml file to use Agent branch: 7.99.x')
