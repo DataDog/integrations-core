@@ -1,0 +1,7 @@
+# HELP datadog_csi_driver_node_publish_volume_attempts Counts the number of publish volume requests received by the csi node server
+# TYPE datadog_csi_driver_node_publish_volume_attempts counter
+datadog_csi_driver_node_publish_volume_attempts{path="/var/run/datadog",status="success",type="DSDSocketDirectory"} 6
+
+# HELP datadog_csi_driver_node_unpublish_volume_attempts Counts the number of unpublish volume requests received by the csi node server
+# TYPE datadog_csi_driver_node_unpublish_volume_attempts counter
+datadog_csi_driver_node_unpublish_volume_attempts{path="/var/run/datadog",status="success",type="DSDSocketDirectory"} 6
