@@ -94,7 +94,7 @@ def status_mode(
     params: CLIParameters,
 ) -> list[FileDataEntryPlatformVersion]:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
-        modules = get_files(repo_path, params["compressed"]) + get_dependencies(
+        modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
             repo_path, params["platform"], params["version"], params["compressed"]
         )
 
