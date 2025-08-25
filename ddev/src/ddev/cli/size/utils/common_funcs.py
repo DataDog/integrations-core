@@ -208,7 +208,7 @@ def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[
     The pyproject.toml file should have a classifier with this format:
         classifiers = [
             ...
-            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
             ...
         ]
     """
