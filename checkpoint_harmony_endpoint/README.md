@@ -74,3 +74,4 @@ Need help? Contact [Datadog support][3].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://app.datadoghq.com/integrations?search=checkpoint_harmony_endpoint
 [6]: https://github.com/DataDog/integrations-core/blob/master/checkpoint_harmony_endpoint/assets/service_checks.json
+[7]: https://app.datadoghq.com/logs/livetail
