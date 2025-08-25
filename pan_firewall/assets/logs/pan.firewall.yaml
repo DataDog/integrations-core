@@ -191,7 +191,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: "Palo Alto Networks Firewall"
+  name: Palo Alto Networks Firewall
   enabled: true
   filter:
     query: source:pan.firewall
@@ -201,18 +201,11 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - timestamp=2019/05/06 16:43:53, serial=001801010877,
-          type=AUTHENTICATION, subtype=virus,
-          vsys=testVM,  network.client.ip=10.2.75.414,
-          usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy,
-          repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder,
-          serverprofile=serverprofile,
-          message=thisIsSampleMessage, 	clienttype=securityApp, evt.name=alert,
-          factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000,
-          vsys_name=JVM, device_name=tab,  vsys_id=786,	authproto=authproto
+        - "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
       grok:
         matchRules: |
           rule_panos %{data::keyvalue("="," \"")}
+        supportRules: ''
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
@@ -235,6 +228,7 @@ pipeline:
       name: Setting title attribute using usr.id, evt.name and country.name
       enabled: true
       target: title
+      template: '%{usr.id} performed event %{evt.name} from %{network.client.geoip.country.name}'
       replaceMissing: false
       - type: pipeline
       name: OCSF pre transformations
