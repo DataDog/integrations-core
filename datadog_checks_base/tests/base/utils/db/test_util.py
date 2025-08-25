@@ -247,6 +247,7 @@ def test_obfuscate_sql_with_metadata():
     assert statement['query'] == 'SELECT * FROM datadog WHERE user = ?'
     assert statement['metadata'] == {}
 
+
 class JobForTesting(DBMAsyncJob):
     def __init__(
         self,

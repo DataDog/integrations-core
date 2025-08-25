@@ -240,7 +240,10 @@ ffi.cdef("""
     char * obfuscate(const char *);
 """)
 # lexer_rs = ffi.dlopen("/Users/seth.samuel/dd/dbm/lexer-rs/target/release/liblexer_rs.dylib")
-lexer_rs = ffi.dlopen(os.path.join(os.path.dirname(__file__), "./liblexer_rs.dylib"))
+# lexer_rs = ffi.dlopen(os.path.join(os.path.dirname(__file__), "./liblexer_rs.dylib"))
+import platform
+lib_ext = "so" if platform.system() == "Linux" else "dylib"
+lexer_rs = ffi.dlopen(os.path.join(os.path.dirname(__file__), f"./liblexer_rs.{lib_ext}"))
 
 
 def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
