@@ -242,7 +242,7 @@ ffi.cdef("""
 # lexer_rs = ffi.dlopen("/Users/seth.samuel/dd/dbm/lexer-rs/target/release/liblexer_rs.dylib")
 # lexer_rs = ffi.dlopen(os.path.join(os.path.dirname(__file__), "./liblexer_rs.dylib"))
 import platform
-lib_ext = "so" if platform.system() == "Linux" else "dylib"
+lib_ext = "dylib" if platform.system() == "Darwin" else "so"
 lexer_rs = ffi.dlopen(os.path.join(os.path.dirname(__file__), f"./liblexer_rs.{lib_ext}"))
 
 
