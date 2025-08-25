@@ -180,7 +180,7 @@ def order_by(diffs, key):
 #     print("=" * 60)
 
 
-def display_diffs_to_html(diffs, uncompressed_diffs, platform, python_version):
+def display_diffs_to_html(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
     text = f"<details><summary><h4>Size Delta for {platform} and Python {python_version}:\n"
     text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h4></summary>\n\n"
@@ -261,13 +261,19 @@ def display_diffs_to_html_short(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
     text = f"<details><summary><h4>Size Delta for {platform} and Python {python_version}:\n"
     text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h4></summary>\n\n"
-    total_added = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["added"])
-    total_removed = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["removed"])
-    total_changed = sum(entry.get("Compressed_Diff", 0) for entry in diffs["changed"])
-    total_changed_sign = "+" if total_changed > 0 else "-"
-    text += f"Total added: +{convert_to_human_readable_size(total_added)}\n"
-    text += f"Total removed: -{convert_to_human_readable_size(total_removed)}\n"
-    text += f"Total changed: {total_changed_sign}{convert_to_human_readable_size(abs(total_changed))}\n"
+    total_added_compressed = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["added"])
+    total_removed_compressed = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["removed"])
+    total_changed_compressed = sum(entry.get("Compressed_Diff", 0) for entry in diffs["changed"])
+    total_added_uncompressed = sum(int(entry.get("Uncompressed_Size_Bytes", 0)) for entry in diffs["added"])
+    total_removed_uncompressed = sum(int(entry.get("Uncompressed_Size_Bytes", 0)) for entry in diffs["removed"])
+    total_changed_uncompressed = sum(entry.get("Uncompressed_Diff", 0) for entry in diffs["changed"])
+    total_changed_sign = "+" if total_changed_compressed > 0 else "-"
+    text += f"Total added: +{convert_to_human_readable_size(total_added_compressed)}\n (Compressed) "
+    text += f"+{convert_to_human_readable_size(total_added_uncompressed)}\n"
+    text += f"Total removed: -{convert_to_human_readable_size(total_removed_compressed)}\n (Compressed)"
+    text += f" -{convert_to_human_readable_size(total_removed_uncompressed)}\n"
+    text += f"Total changed: {total_changed_sign}{convert_to_human_readable_size(abs(total_changed_compressed))}\n "
+    text += f"(Compressed) {total_changed_sign}{convert_to_human_readable_size(abs(total_changed_uncompressed))}\n"
     text += "</details>\n"
 
     return text
