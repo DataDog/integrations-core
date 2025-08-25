@@ -301,14 +301,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 1
+          fetch-depth: 0
       
       - name: Get merge base commit
         id: merge_base
         run: |
           git fetch origin master:refs/remotes/origin/master
-          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
-          base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
+          base=$(git merge-base HEAD origin/master)
           echo "sha=$base" >> $GITHUB_OUTPUT
 
       - name: Join size diffs in order
