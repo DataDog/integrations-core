@@ -295,7 +295,7 @@ jobs:
       - calculate-size-diffs
     env:
       PYTHON_VERSION: "3.12"
-      PLATFORMS: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
+      PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
