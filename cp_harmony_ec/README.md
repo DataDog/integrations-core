@@ -32,7 +32,7 @@ cp_harmony_ec does not include any metrics.
 
 ### Events
 
-The cp_harmony_ec integration does not include any events.
+The Checkpoint Harmony Email and Collaboration integration does not include any events.
 
 ### Service Checks
 
