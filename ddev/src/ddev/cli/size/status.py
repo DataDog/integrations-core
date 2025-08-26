@@ -99,14 +99,13 @@ def status_mode(
 ) -> list[FileDataEntryPlatformVersion]:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
         if dependency_sizes:
-            modules = get_files(repo_path, params["compressed"]) + get_dependencies_from_json(
+            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies_from_json(
                 dependency_sizes, params["platform"], params["version"], params["compressed"]
             )
         else:
-            modules = get_files(repo_path, params["compressed"]) + get_dependencies(
+            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
                 repo_path, params["platform"], params["version"], params["compressed"]
             )
-
 
     formatted_modules = format_modules(modules, params["platform"], params["version"])
     formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)

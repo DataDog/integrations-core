@@ -246,7 +246,8 @@ def test_get_dependencies_from_json():
     ):
         result = get_dependencies_from_json("fake_path", "linux-x86_64", "3.12", True)
     assert result == expected
-    
+
+
 def test_check_version():
     with (
         patch(
