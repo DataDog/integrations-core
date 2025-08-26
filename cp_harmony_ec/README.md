@@ -1,6 +1,5 @@
 # Agent Check: cp_harmony_ec
 
-[Checkpoint Harmony Email and Collaboration][1] specializes in cybersecurity for cloud-based communication platforms by providing advanced protection for email and collaboration tools such as Microsoft 365 and Google Workspace. By analyzing email content, user behavior, and threat indicators, Harmony enables features like phishing prevention, malware detection, and data leak protection. This functionality is crucial for safeguarding sensitive information, ensuring business continuity, and enhancing organizational security posture.
 
 ## Overview
 
