@@ -272,10 +272,10 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
     # statement = to_native_string(statement.strip())
-    logger = get_check_logger()
+    # logger = get_check_logger()
     # logger.info(f"OBFUSCATOR: Obfuscating {query}")
-    start = time.time()
-    finished = False
+    # start = time.time()
+    # finished = False
     # async def check_timeout():
     #     await asyncio.sleep(1)
     #     if not finished:
@@ -285,8 +285,8 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     # asyncio.run(check_timeout())
 
     obfuscated_bytes = lexer_rs.obfuscate(query.encode('utf-8'))
-    finished = True
-    end = time.time()
+    # finished = True
+    # end = time.time()
     # logger.info(f"OBFUSCATOR: Obfuscated {query} in {end - start} seconds")
     statement = ffi.string(obfuscated_bytes).decode('utf-8')
     lexer_rs.release(obfuscated_bytes)
