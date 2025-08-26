@@ -233,3 +233,8 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: date-remapper
+      name: Date
+      enabled: true
+      sources:
+        - timestamp
