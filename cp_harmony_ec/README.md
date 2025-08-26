@@ -36,7 +36,7 @@ The cp_harmony_ec integration does not include any events.
 
 ### Service Checks
 
-The cp_harmony_ec integration does not include any service checks.
+The Checkpoint Harmony Email and Collaboration integration does not include any service checks.
 
 ## Troubleshooting
 
