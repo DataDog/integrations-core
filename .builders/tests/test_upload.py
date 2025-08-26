@@ -4,7 +4,7 @@ from unittest import mock
 from zipfile import ZipFile
 
 import pytest
-import upload_and_lock
+import upload
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def setup_fake_bucket(monkeypatch):
         client = mock.Mock()
         client.bucket.return_value = bucket
 
-        monkeypatch.setattr(upload_and_lock.storage, 'Client', mock.Mock(return_value=client))
+        monkeypatch.setattr(upload.storage, 'Client', mock.Mock(return_value=client))
         return bucket, uploads
 
     return _setup_bucket
@@ -83,7 +83,7 @@ def setup_fake_hash(monkeypatch):
         def fake_hash(path: Path):
             return mapping.get(path.name, '')
 
-        monkeypatch.setattr(upload_and_lock, 'hash_file', fake_hash)
+        monkeypatch.setattr(upload, 'hash_file', fake_hash)
 
     return _setup_hash
 
@@ -91,7 +91,7 @@ def setup_fake_hash(monkeypatch):
 @pytest.fixture
 def frozen_timestamp(monkeypatch):
     timestamp = 20241327_090504
-    monkeypatch.setattr(upload_and_lock, 'timestamp_build_number', mock.Mock(return_value=timestamp))
+    monkeypatch.setattr(upload, 'timestamp_build_number', mock.Mock(return_value=timestamp))
     return timestamp
 
 
@@ -113,7 +113,7 @@ def test_upload_external(setup_targets_dir, setup_fake_bucket):
     }
     bucket, uploads = setup_fake_bucket(bucket_files)
 
-    upload_and_lock.upload(targets_dir)
+    upload.upload(targets_dir)
 
     bucket_files = [f.name for f in bucket.list_blobs()]
     assert 'external/all-new/all_new-2.31.0-py3-none-any.whl' in bucket_files
@@ -133,7 +133,7 @@ def test_upload_built_no_conflict(setup_targets_dir, setup_fake_bucket, frozen_t
 
     bucket, uploads = setup_fake_bucket({})
 
-    upload_and_lock.upload(targets_dir)
+    upload.upload(targets_dir)
 
     bucket_files = [f.name for f in bucket.list_blobs()]
     assert (
@@ -166,7 +166,7 @@ def test_upload_built_existing_sha_match_does_not_upload(
         'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': whl_hash,
     })
 
-    upload_and_lock.upload(targets_dir)
+    upload.upload(targets_dir)
 
     assert not uploads
 
@@ -197,7 +197,7 @@ def test_upload_built_existing_different_sha_does_upload(
         'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': new_hash,
     })
 
-    upload_and_lock.upload(targets_dir)
+    upload.upload(targets_dir)
 
     uploads = {str(Path(f).name) for f in uploads}
 
@@ -241,7 +241,7 @@ def test_upload_built_existing_sha_match_does_not_upload_multiple_existing_build
         'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': matching_hash,
     })
 
-    upload_and_lock.upload(targets_dir)
+    upload.upload(targets_dir)
 
     assert not uploads
 
@@ -274,7 +274,7 @@ def test_upload_built_existing_different_sha_does_upload_multiple_existing_build
         'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': new_hash,
     })
 
-    targets = upload_and_lock.upload(targets_dir)
+    targets = upload.upload(targets_dir)
 
     uploads = {str(Path(f).name) for f in uploads}
 
@@ -309,7 +309,7 @@ def test_external_wheel_priority(tmp_path, setup_targets_dir, setup_fake_bucket,
     })
 
     bucket, uploads = setup_fake_bucket(bucket_files)
-    targets = upload_and_lock.upload(targets_dir)
+    targets = upload.upload(targets_dir)
     assert targets ==  {'linux-x86_64': [
         f'existing @ https://agent-int-packages.datadoghq.com/external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl#sha256={external_hash}',
           '']}
@@ -340,7 +340,7 @@ def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_bucket, se
     })
 
     bucket, uploads = setup_fake_bucket(bucket_files)
-    targets = upload_and_lock.upload(targets_dir)
+    targets = upload.upload(targets_dir)
     assert targets ==  {'linux-x86_64': [
         f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256={built_hash}',
           '']}
@@ -361,10 +361,10 @@ def test_lockfile_generation(tmp_path, setup_targets_dir):
     fake_deps_dir.mkdir()
     fake_resolved_dir.mkdir()
 
-    with mock.patch.object(upload_and_lock, "RESOLUTION_DIR", fake_deps_dir), \
-         mock.patch.object(upload_and_lock, "LOCK_FILE_DIR", fake_resolved_dir):
+    with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
 
-        upload_and_lock.generate_lockfiles(targets_dir, lockfile)
+        upload.generate_lockfiles(targets_dir, lockfile)
         lock_files = list(fake_resolved_dir.glob("*.txt"))
         assert lock_files, "No lock files generated"
         lockfile_map = {lock_file.name: lock_file.read_text().strip() for lock_file in lock_files}
