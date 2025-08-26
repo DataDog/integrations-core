@@ -584,9 +584,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         rows = []
         if (not self._config.incremental_query_metrics) or self._check.version < V10:
             rows = self._load_pg_stat_statements()
-            self._log.info(f"OBFUSCATOR: loaded rows: {len(rows)}")
+            # self._log.info(f"OBFUSCATOR: loaded rows: {len(rows)}")
             rows = self._normalize_queries(rows)
-            self._log.info(f"OBFUSCATOR: normalized rows: {len(rows)}")
+            # self._log.info(f"OBFUSCATOR: normalized rows: {len(rows)}")
         elif len(self._baseline_metrics) == 0:
             # When we don't have baseline metrics (either on the first run or after cache expiry),
             # we fetch all rows from pg_stat_statements, and update the initial state of relevant
@@ -604,15 +604,15 @@ class PostgresStatementMetrics(DBMAsyncJob):
             rows = self._apply_called_queries(rows)
 
         if not rows:
-            self._log.info(f"OBFUSCATOR: no rows")
+            # self._log.info(f"OBFUSCATOR: no rows")
             return []
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
 
-        self._log.info(f"OBFUSCATOR: computing derivative rows")
+        # self._log.info(f"OBFUSCATOR: computing derivative rows")
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key, execution_indicators=['calls'])
-        self._log.info(f"OBFUSCATOR: computed derivative rows: {len(rows)}")
+        # self._log.info(f"OBFUSCATOR: computed derivative rows: {len(rows)}")
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
@@ -625,7 +625,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
-        self._log.info(f"OBFUSCATOR: normalizing queries {len(rows)}")
+        # self._log.info(f"OBFUSCATOR: normalizing queries {len(rows)}")
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
@@ -638,9 +638,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )
-                self._log.info(f"OBFUSCATOR: obfuscating query: {query_text}")
+                # self._log.info(f"OBFUSCATOR: obfuscating query: {query_text}")
                 statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
-                self._log.info(f"OBFUSCATOR: obfuscated query: {statement}")
+                # self._log.info(f"OBFUSCATOR: obfuscated query: {statement}")
             except Exception as e:
                 if True or self._config.log_unobfuscated_queries:
                     self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
@@ -658,7 +658,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
 
-        self._log.info(f"OBFUSCATOR: normalized queries {len(normalized_rows)}")
+        # self._log.info(f"OBFUSCATOR: normalized queries {len(normalized_rows)}")
         return normalized_rows
 
     def _rows_to_fqt_events(self, rows):
