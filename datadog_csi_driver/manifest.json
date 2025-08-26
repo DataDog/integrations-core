@@ -12,14 +12,10 @@
     "title": "datadog_csi_driver",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
-      "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Containers",
+      "Offering::Integration"
     ]
   },
   "assets": {
