@@ -272,11 +272,11 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.
     # statement = to_native_string(statement.strip())
     logger = get_check_logger()
-    logger.info(f"Obfuscating {query}")
+    logger.info(f"OBFUSCATOR: Obfuscating {query}")
     start = time.time()
     obfuscated_bytes = lexer_rs.obfuscate(query.encode('utf-8'))
     end = time.time()
-    logger.info(f"Obfuscated {query} in {end - start} seconds")
+    logger.info(f"OBFUSCATOR: Obfuscated {query} in {end - start} seconds")
     statement = ffi.string(obfuscated_bytes).decode('utf-8')
     lexer_rs.release(obfuscated_bytes)
     
