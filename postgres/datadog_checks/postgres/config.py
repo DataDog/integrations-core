@@ -116,6 +116,7 @@ class PostgresConfig:
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.query_encodings = instance.get('query_encodings')
         self.managed_identity = instance.get('managed_identity', {})
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
@@ -244,8 +245,9 @@ class PostgresConfig:
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                         raise ConfigurationError(
-                            'Collector method {} is not known. '
-                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
+                            'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(
+                                cap_mtype
+                            )
                         )
 
                     m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)

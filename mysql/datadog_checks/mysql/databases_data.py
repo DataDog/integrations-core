@@ -5,7 +5,7 @@
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
 from collections import defaultdict
@@ -20,11 +20,9 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
-    SQL_INDEXES,
-    SQL_INDEXES_8_0_13,
-    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_PARTITION,
     SQL_TABLES,
+    get_indexes_query,
 )
 
 from .util import get_list_chunks
@@ -33,7 +31,6 @@ DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
-
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._base_event = base_event
@@ -118,7 +115,6 @@ def agent_check_getter(self):
 
 
 class DatabasesData:
-
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -169,8 +165,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
         tables = self._get_tables(db_name, cursor)
-        tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-        for tables_chunk in tables_chunks:
+        for tables_chunk in get_list_chunks(tables, self.TABLES_CHUNK_SIZE):
             schema_collection_elapsed_time = time.time() - start_time
             if schema_collection_elapsed_time > self._max_execution_time:
                 self._data_submitter.submit()
@@ -316,7 +311,6 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):
-
         if len(table_list) == 0:
             return 0, []
 
@@ -357,12 +351,7 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
-        query = (
-            SQL_INDEXES_8_0_13.format(table_names)
-            if cursor.fetchone()["column_count"] > 0
-            else SQL_INDEXES.format(table_names)
-        )
+        query = get_indexes_query(self._check.version, self._check.is_mariadb, table_names)
         self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
         if not rows:
@@ -376,7 +365,10 @@ class DatabasesData:
 
             # Update index-level info
             index_data["name"] = index_name
-            index_data["cardinality"] = int(row["cardinality"])
+
+            # in-memory table BTREE indexes have no cardinality apparently, so we default to 0
+            # https://bugs.mysql.com/bug.php?id=58520
+            index_data["cardinality"] = int(row["cardinality"]) if row["cardinality"] is not None else 0
             index_data["index_type"] = str(row["index_type"])
             index_data["non_unique"] = bool(row["non_unique"])
             if row["expression"]:

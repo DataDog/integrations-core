@@ -45,7 +45,7 @@ class CheckCluster(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError('Redis cluster boot timed out!\n' 'Master: {}\n' 'Replica: {}'.format(master, replica))
+            raise RetryError('Redis cluster boot timed out!\nMaster: {}\nReplica: {}'.format(master, replica))
 
 
 @pytest.fixture(scope='session')

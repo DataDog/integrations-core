@@ -1,1 +1,0 @@
-Set lock_wait_timeout session variable lower in order to avoid stalling on acquiring metadata locks when explaining queries

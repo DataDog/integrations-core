@@ -20,11 +20,10 @@ from cachetools import TTLCache
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
-
-from ..common import to_native_string
 
 logger = logging.getLogger(__file__)
 
@@ -108,21 +107,33 @@ class ConstantRateLimiter:
     Basic rate limiter that sleeps long enough to ensure the rate limit is not exceeded. Not thread safe.
     """
 
-    def __init__(self, rate_limit_s):
+    def __init__(self, rate_limit_s, max_sleep_chunk_s=5):
         """
         :param rate_limit_s: rate limit in seconds
+        :param max_sleep_chunk_s: maximum size of each sleep chunk while waiting for the next period
         """
         self.rate_limit_s = max(rate_limit_s, 0)
         self.period_s = 1.0 / self.rate_limit_s if self.rate_limit_s > 0 else 0
         self.last_event = 0
+        self.max_sleep_chunk_s = max(0, max_sleep_chunk_s)
 
-    def update_last_time_and_sleep(self):
+    def update_last_time_and_sleep(self, cancel_event: Optional[threading.Event] = None):
         """
         Sleeps long enough to enforce the rate limit
         """
-        elapsed_s = time.time() - self.last_event
-        sleep_amount = max(self.period_s - elapsed_s, 0)
-        time.sleep(sleep_amount)
+        if self.period_s <= 0:
+            self.update_last_time()
+            return
+
+        deadline = self.last_event + self.period_s
+        while True:
+            now = time.time()
+            remaining = deadline - now
+            if remaining <= 0:
+                break
+            if cancel_event is not None and cancel_event.is_set():
+                break
+            time.sleep(min(remaining, self.max_sleep_chunk_s if self.max_sleep_chunk_s > 0 else remaining))
         self.update_last_time()
 
     def shall_execute(self):
@@ -276,6 +287,7 @@ class DBMAsyncJob(object):
         min_collection_interval=15,
         dbms="TODO",
         rate_limit=1,
+        max_sleep_chunk_s=1,
         run_sync=False,
         enabled=True,
         expected_db_exceptions=(),
@@ -296,7 +308,8 @@ class DBMAsyncJob(object):
         self._last_check_run = 0
         self._shutdown_callback = shutdown_callback
         self._dbms = dbms
-        self._rate_limiter = ConstantRateLimiter(rate_limit)
+        self._rate_limiter = ConstantRateLimiter(rate_limit, max_sleep_chunk_s=max_sleep_chunk_s)
+        self._max_sleep_chunk_s = max_sleep_chunk_s
         self._run_sync = run_sync
         self._enabled = enabled
         self._expected_db_exceptions = expected_db_exceptions
@@ -335,7 +348,7 @@ class DBMAsyncJob(object):
         try:
             self._log.info("[%s] Starting job loop", self._job_tags_str)
             while True:
-                if self._cancel_event.isSet():
+                if self._cancel_event.is_set():
                     self._log.info("[%s] Job loop cancelled", self._job_tags_str)
                     self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
                     break
@@ -354,7 +367,7 @@ class DBMAsyncJob(object):
                 else:
                     self._run_job_rate_limited()
         except Exception as e:
-            if self._cancel_event.isSet():
+            if self._cancel_event.is_set():
                 # canceling can cause exceptions if the connection is closed the middle of the check run
                 # in this case we still want to report it as a cancellation instead of a crash
                 self._log.debug("[%s] Job loop error after cancel: %s", self._job_tags_str, e)
@@ -388,7 +401,7 @@ class DBMAsyncJob(object):
 
     def _set_rate_limit(self, rate_limit):
         if self._rate_limiter.rate_limit_s != rate_limit:
-            self._rate_limiter = ConstantRateLimiter(rate_limit)
+            self._rate_limiter = ConstantRateLimiter(rate_limit, max_sleep_chunk_s=self._max_sleep_chunk_s)
 
     def _run_sync_job_rate_limited(self):
         if self._rate_limiter.shall_execute():
@@ -401,8 +414,8 @@ class DBMAsyncJob(object):
         except:
             raise
         finally:
-            if not self._cancel_event.isSet():
-                self._rate_limiter.update_last_time_and_sleep()
+            if not self._cancel_event.is_set():
+                self._rate_limiter.update_last_time_and_sleep(cancel_event=self._cancel_event)
             else:
                 self._rate_limiter.update_last_time()
 

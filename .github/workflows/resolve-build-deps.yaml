@@ -172,12 +172,21 @@ jobs:
         path: output
 
   build-macos:
-    name: Target macOS
-    runs-on: macos-13
-
+    name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+        - arch: x86_64
+          os: macos-13
+          macosx_version_min: "10.12"
+        - arch: aarch64
+          os: macos-13-xlarge # "macOS 13 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
+          macosx_version_min: "11.0"
     env:
-      TARGET_NAME: macos-x86_64
-      OUT_DIR: output/macos-x86_64
+      TARGET_NAME: macos-${{ matrix.job.arch }}
+      OUT_DIR: output/macos-${{ matrix.job.arch }}
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
 
     permissions:
@@ -213,12 +222,12 @@ jobs:
       with:
         path: |
           ~/builder_root
-        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/resolve-build-deps.yml') }}
+        key: macos-${{ matrix.job.arch }}-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/resolve-build-deps.yml') }}
 
     - name: Run the build
       env:
         # This sets the minimum macOS version compatible for all built artifacts
-        MACOSX_DEPLOYMENT_TARGET: "10.12"
+        MACOSX_DEPLOYMENT_TARGET: ${{ matrix.job.macosx_version_min }}
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |-
         # If we hit the cache, we can skip the builder setup
@@ -232,7 +241,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: target-macos
+        name: target-macos-${{ matrix.job.arch }}
         path: output
 
   publish:

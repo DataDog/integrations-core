@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.3.1 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 5.3.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Add work duration (`WORK_DUR`) metrics ([#20368](https://github.com/DataDog/integrations-core/pull/20368))
+
 ## 5.2.1 / 2025-03-19 / Agent 7.65.0
 
 ***Fixed***:

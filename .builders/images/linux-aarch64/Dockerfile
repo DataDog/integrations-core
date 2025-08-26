@@ -68,7 +68,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 # krb5 for dependencies that require kerberos support
 RUN \
- DOWNLOAD_URL="https://kerberos.org/dist/krb5/1.20/krb5-{{version}}.tar.gz" \
+ DOWNLOAD_URL="https://web.mit.edu/kerberos/dist/krb5/1.20/krb5-1.20.1.tar.gz" \
  VERSION="1.20.1" \
  SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851" \
  RELATIVE_PATH="krb5-{{version}}/src" \
@@ -76,9 +76,9 @@ RUN \
 
 # libxml & libxslt for lxml
 RUN \
- DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
- VERSION="2.12.6" \
- SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.14/libxml2-{{version}}.tar.xz" \
+ VERSION="2.14.5" \
+ SHA256="03d006f3537616833c16c53addcdc32a0eb20e55443cba4038307e3fa7d8d44b" \
  RELATIVE_PATH="libxml2-{{version}}" \
  bash install-from-source.sh \
  --without-iconv \
@@ -94,8 +94,8 @@ RUN \
 
 RUN \
  DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
- VERSION="1.1.39" \
- SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
+ VERSION="1.1.43" \
+ SHA256="5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a" \
  RELATIVE_PATH="libxslt-{{version}}" \
  bash install-from-source.sh \
  --without-python \
@@ -154,8 +154,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.12.1" \
- SHA256="7b40ea64947e0b440716a4d7f0b7aa56230a5341c8377d7b609649d4aea8dbcf" \
+ VERSION="8.15.0" \
+ SHA256="d85cfc79dc505ff800cb1d321a320183035011fa08cb301356425d86be8fc53c" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

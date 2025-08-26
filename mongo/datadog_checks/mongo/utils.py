@@ -59,7 +59,7 @@ def parse_mongo_uri(server, sanitize_username=False):
     clean_server_name = decoded_server.replace(password, "*" * 5) if password else decoded_server
 
     if sanitize_username and username:
-        username_pattern = u"{}[@:]".format(re.escape(username))
+        username_pattern = "{}[@:]".format(re.escape(username))
         clean_server_name = re.sub(username_pattern, "", clean_server_name)
 
     return username, password, db_name, nodelist, clean_server_name, auth_source

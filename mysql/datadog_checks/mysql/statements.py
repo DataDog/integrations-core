@@ -25,7 +25,7 @@ from .util import DatabaseConfigurationError, connect_with_session_variables, wa
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 PyMysqlRow = Dict[str, Any]
 Row = Dict[str, Any]
@@ -96,7 +96,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
         # statement_rows: cache of all rows for each digest, keyed by (schema_name, query_signature)
         # This is used to cache the metrics for queries that have the same query_signature but different digests
-        self._statement_rows = {}  # type: Dict[(str, str), Dict[str, PyMysqlRow]]
+        self._statement_rows = TTLCache(
+            maxsize=self._config.statement_rows_cache_max_size,
+            ttl=self._config.statement_rows_cache_ttl,
+        )
 
     def _get_db_connection(self):
         """
@@ -119,11 +122,12 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
     def run_job(self):
         start = time.time()
+        self._statement_rows.expire()
         self.collect_per_statement_metrics()
         self._check.gauge(
             "dd.mysql.statement_metrics.collect_metrics.elapsed_ms",
             (time.time() - start) * 1000,
-            tags=self._check.tags + self._check._get_debug_tags(),
+            tags=self._check.tag_manager.get_tags() + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
@@ -246,9 +250,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
             {}
-            """.format(
-            condition
-        )
+            """.format(condition)
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             args = [self._last_seen] if only_query_recent_statements else None
@@ -302,9 +304,9 @@ class MySQLStatementMetrics(DBMAsyncJob):
         """
         for row in rows:
             key = (row['schema_name'], row['query_signature'])
-            if key not in self._statement_rows:
-                self._statement_rows[key] = {}
-            self._statement_rows[key][row['digest']] = row
+            digest_rows = self._statement_rows.get(key, {})
+            digest_rows[row['digest']] = row
+            self._statement_rows[key] = digest_rows
 
         return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]
 

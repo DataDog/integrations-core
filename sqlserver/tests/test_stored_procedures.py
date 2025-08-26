@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2023-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -17,6 +17,7 @@ from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_EXPRESS,
     ENGINE_EDITION_PERSONAL,
     ENGINE_EDITION_STANDARD,
+    STATIC_INFO_SERVERNAME,
 )
 from datadog_checks.sqlserver.stored_procedures import SQL_SERVER_PROCEDURE_METRICS_COLUMNS
 
@@ -39,7 +40,13 @@ logger = logging.getLogger(__name__)
 
 
 def _expected_dbm_instance_tags(check):
-    return check._config.tags
+    return check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "ddagenthostname:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
 
 
 @pytest.fixture(autouse=True)
@@ -257,6 +264,9 @@ def test_procedure_metrics(
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
     expected_instance_tags.add("database_hostname:stubbed.hostname")
     expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("ddagenthostname:{}".format("stubbed.hostname"))
+    expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
+    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -346,12 +356,9 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     check.procedure_metrics._job_loop_future.result()
-    print("natasha heree")
-    print(['job:procedure-metrics'] + _expected_dbm_instance_tags(check))
-    print(['job:procedure-metrics'] + check._config.tags)
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
-        tags=['job:procedure-metrics'] + check._config.tags,
+        tags=['job:procedure-metrics'] + _expected_dbm_instance_tags(check),
         hostname='',
     )
 

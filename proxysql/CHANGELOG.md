@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.2.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Add new `proxysql.all_backends.count` metric. ([#20582](https://github.com/DataDog/integrations-core/pull/20582))
+
 ## 7.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

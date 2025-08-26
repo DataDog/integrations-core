@@ -55,6 +55,8 @@ integration/ambari:
 - ambari/**/*
 integration/anthropic:
 - anthropic/**/*
+integration/anthropic_usage_and_costs:
+- anthropic_usage_and_costs/**/*
 integration/anyscale:
 - anyscale/**/*
 integration/apache:
@@ -85,8 +87,14 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/beyondtrust_identity_security_insights:
+- beyondtrust_identity_security_insights/**/*
+integration/beyondtrust_password_safe:
+- beyondtrust_password_safe/**/*
 integration/bitdefender:
 - bitdefender/**/*
+integration/bitwarden:
+- bitwarden/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
@@ -101,6 +109,8 @@ integration/cacti:
 - cacti/**/*
 integration/calico:
 - calico/**/*
+integration/carbon_black_cloud:
+- carbon_black_cloud/**/*
 integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
@@ -185,10 +195,10 @@ integration/directory:
 - directory/**/*
 integration/disk:
 - disk/**/*
-integration/dnsfilter:
-- dnsfilter/**/*
 integration/dns_check:
 - dns_check/**/*
+integration/dnsfilter:
+- dnsfilter/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
 integration/docusign:
@@ -209,6 +219,8 @@ integration/elastic:
 - elastic/**/*
 integration/envoy:
 - envoy/**/*
+integration/eset_protect:
+- eset_protect/**/*
 integration/esxi:
 - esxi/**/*
 integration/etcd:
@@ -297,6 +309,8 @@ integration/ibm_mq:
 - ibm_mq/**/*
 integration/ibm_was:
 - ibm_was/**/*
+integration/iboss:
+- iboss/**/*
 integration/ignite:
 - ignite/**/*
 integration/iis:
@@ -315,6 +329,8 @@ integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
 integration/ivanti_nzta:
 - ivanti_nzta/**/*
+integration/jamf_pro:
+- jamf_pro/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -329,14 +345,18 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
-integration/kaspersky:
-- kaspersky/**/*
 integration/keda:
 - keda/**/*
+integration/keeper:
+- keeper/**/*
 integration/keycloak:
 - keycloak/**/*
+integration/klaviyo:
+- klaviyo/**/*
 integration/kong:
 - kong/**/*
+integration/krakend:
+- krakend/**/*
 integration/kube_apiserver_metrics:
 - kube_apiserver_metrics/**/*
 integration/kube_controller_manager:
@@ -371,6 +391,8 @@ integration/kubevirt_controller:
 - kubevirt_controller/**/*
 integration/kubevirt_handler:
 - kubevirt_handler/**/*
+integration/kuma:
+- kuma/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
@@ -387,6 +409,12 @@ integration/linux_audit_logs:
 - linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/litellm:
+- litellm/**/*
+integration/lustre:
+- lustre/**/*
+integration/mac_audit_logs:
+- mac_audit_logs/**/*
 integration/mailchimp:
 - mailchimp/**/*
 integration/mapr:
@@ -507,6 +535,12 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
+integration/proofpoint_on_demand:
+- proofpoint_on_demand/**/*
+integration/proofpoint_tap:
+- proofpoint_tap/**/*
+integration/proxmox:
+- proxmox/**/*
 integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
@@ -533,8 +567,6 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
-integration/servicenow_performance:
-- servicenow_performance/**/*
 integration/shopify:
 - shopify/**/*
 integration/sidekiq:
@@ -575,6 +607,8 @@ integration/snmp_netapp:
 - snmp_netapp/**/*
 integration/snowflake:
 - snowflake/**/*
+integration/solarwinds:
+- solarwinds/**/*
 integration/solr:
 - solr/**/*
 integration/sonarqube:
@@ -693,6 +727,8 @@ integration/win32_event_log:
 - win32_event_log/**/*
 integration/wincrashdetect:
 - wincrashdetect/**/*
+integration/windows_certificate:
+- windows_certificate/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
 integration/windows_registry:
@@ -705,6 +741,8 @@ integration/wlan:
 - wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
+integration/workato:
+- workato/**/*
 integration/yarn:
 - yarn/**/*
 integration/zeek:

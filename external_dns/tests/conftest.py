@@ -19,7 +19,7 @@ def mock_external_dns():
         text_data = f.read()
 
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split('\n'), headers={'Content-Type': 'text/plain'}
         ),

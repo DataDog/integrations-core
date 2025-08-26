@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -87,8 +88,8 @@ def diff(
                 date = datetime.strptime(date_str, "%b %d %Y").date()
                 if date < MINIMUM_DATE:
                     raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
-                valid_platforms = get_valid_platforms(gitRepo.repo_dir)
                 valid_versions = get_valid_versions(gitRepo.repo_dir)
+                valid_platforms = get_valid_platforms(gitRepo.repo_dir, valid_versions)
                 if platform and platform not in valid_platforms:
                     raise ValueError(f"Invalid platform: {platform}")
                 elif version and version not in valid_versions:
@@ -139,7 +140,7 @@ def diff_mode(
     dependencies = get_diff(dependencies_b, dependencies_a, "Dependency")
 
     if integrations + dependencies == []:
-        params["app"].display_error(
+        params["app"].display(
             f"No size differences were detected between the selected commits for {params['platform']}"
         )
         return []
@@ -151,16 +152,15 @@ def diff_mode(
                 module["Size"] = f"+{module['Size']}"
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Status", formatted_modules)
+        print_table(params["app"], "Diff", formatted_modules)
 
-    treemap_path = (
-        f"treemap_{params['platform']}_{params['version']}.png"
-        if params["format"] and "png" in params["format"]
-        else None
-    )
+    treemap_path = None
+    if params["format"] and "png" in params["format"]:
+        treemap_path = os.path.join("size_diff_visualizations", f"treemap_{params['platform']}_{params['version']}.png")
 
     if params["show_gui"] or treemap_path:
         plot_treemap(
+            params["app"],
             formatted_modules,
             f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
@@ -204,13 +204,13 @@ def get_repo_info(
         repo = gitRepo.repo_dir
         task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
         gitRepo.checkout_commit(first_commit)
-        files_b = get_files(repo, compressed)
+        files_b = get_files(repo, compressed, version)
         dependencies_b = get_dependencies(repo, platform, version, compressed)
         progress.remove_task(task)
 
         task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
         gitRepo.checkout_commit(second_commit)
-        files_a = get_files(repo, compressed)
+        files_a = get_files(repo, compressed, version)
         dependencies_a = get_dependencies(repo, platform, version, compressed)
         progress.remove_task(task)
 

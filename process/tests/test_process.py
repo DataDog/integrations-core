@@ -168,7 +168,7 @@ def mock_psutil_wrapper(method, accessors):
     if accessors is None:
         result = 0
     else:
-        result = {accessor: 0 for accessor in accessors}
+        result = dict.fromkeys(accessors, 0)
     return result
 
 
@@ -355,7 +355,7 @@ def test_relocated_procfs(aggregator, dd_run_check):
                     'cancelled_write_bytes: 0\n'
                 ),
             },
-            'stat': ("cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\n" "btime 1448632481\n"),
+            'stat': ("cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\nbtime 1448632481\n"),
         }
     )
 
@@ -374,9 +374,12 @@ def test_relocated_procfs(aggregator, dd_run_check):
     process = ProcessCheck(common.CHECK_NAME, config['init_config'], config['instances'])
 
     try:
-        with patch('socket.AF_PACKET', create=True), patch('sys.platform', 'linux'), patch(
-            'psutil._psutil_linux', create=True
-        ), patch('psutil._psutil_posix', create=True):
+        with (
+            patch('socket.AF_PACKET', create=True),
+            patch('sys.platform', 'linux'),
+            patch('psutil._psutil_linux', create=True),
+            patch('psutil._psutil_posix', create=True),
+        ):
             dd_run_check(process)
     finally:
         shutil.rmtree(my_procfs)
@@ -399,3 +402,23 @@ def test_process_service_check(aggregator):
     aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)
+
+
+def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):
+    """Test that reset() is called/not called based on reset_cache_on_process_changes config."""
+    # Config=True (default)
+    init_config = {'reset_cache_on_process_changes': True}
+    instance = {'name': 'nonexistent_process_12345', 'search_string': ['nonexistent_process_12345']}
+    process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
+    with patch.object(process.process_list_cache, 'reset') as mock_reset:
+        dd_run_check(process)
+        # Should call reset since the config is true
+        mock_reset.assert_called()
+    # Config=False
+    init_config = {'reset_cache_on_process_changes': False}
+    instance = {'name': 'nonexistent_process_12345', 'search_string': ['nonexistent_process_12345']}
+    process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
+    with patch.object(process.process_list_cache, 'reset') as mock_reset:
+        dd_run_check(process)
+        # Should NOT call reset since the config is false
+        mock_reset.assert_not_called()

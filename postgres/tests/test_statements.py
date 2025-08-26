@@ -37,8 +37,11 @@ from datadog_checks.postgres.version_utils import V12
 from .common import (
     DB_NAME,
     HOST,
+    PASSWORD_ADMIN,
     PORT_REPLICA2,
+    POSTGRES_LOCALE,
     POSTGRES_VERSION,
+    USER_ADMIN,
     _get_expected_replication_tags,
     _get_expected_tags,
 )
@@ -61,7 +64,7 @@ SAMPLE_QUERIES = [
         "ON hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid = B.personid WHERE B.city = %s",
         "hello",
     ),
-    ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
+    (USER_ADMIN, PASSWORD_ADMIN, "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
@@ -784,7 +787,7 @@ def test_failed_explain_handling(
             "bob",
             "bob",
             "datadog_test",
-            u"SELECT city as city0, city as city1, city as city2, city as city3, "
+            "SELECT city as city0, city as city1, city as city2, city as city3, "
             "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
             "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
             "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
@@ -798,7 +801,7 @@ def test_failed_explain_handling(
             "FROM persons WHERE city = %s",
             # Use some multi-byte characters (the euro symbol) so we can validate that the code is correctly
             # looking at the length in bytes when testing for truncated statements
-            u'\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC',
+            "€€€€€€€€€€€€€€€€€€€€€€€€€€",
             "error:explain-query_truncated-track_activity_query_size=1024",
             [{'code': 'query_truncated', 'message': 'track_activity_query_size=1024'}],
             StatementTruncationState.truncated.value,
@@ -842,6 +845,7 @@ def test_statement_samples_collect(
     check._connect()
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+    conn.set_client_encoding('utf8')
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as
@@ -1305,7 +1309,6 @@ def test_activity_snapshot_collection(
 
 
 def test_activity_raw_statement_collection(aggregator, integration_check, dbm_instance, datadog_agent):
-
     if POSTGRES_VERSION.split('.')[0] == "9":
         # cannot catch any queries from other users
         # only can see own queries
@@ -1669,9 +1672,9 @@ def test_pg_settings_caching(integration_check, dbm_instance):
     check._connect()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    assert (
-        "test_key" in check.pg_settings
-    ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
+    assert "test_key" in check.pg_settings, (
+        "key should not have been blown away. If it was then pg_settings was not cached correctly"
+    )
 
 
 def _check_until_time(check, dbm_instance, sleep_time, check_interval):
@@ -2223,3 +2226,76 @@ def test_get_query_metrics_payload_rows():
         statement_metrics.batch_max_content_size = tc.max_size
         rows = statement_metrics._get_query_metrics_payloads(wrapper, tc.rows)
         assert len(rows) == tc.expected
+
+
+@requires_over_10
+def test_metrics_encoding(
+    aggregator,
+    integration_check,
+    dbm_instance,
+):
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    if POSTGRES_LOCALE == 'C':
+        dbm_instance['query_encodings'] = ['latin1', 'utf-8']
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    # dbm_instance['query_activity']['enabled'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user='bob', password='bob') as conn:
+        with conn.cursor() as cursor:
+            conn.set_client_encoding('latin1')
+            # This should be funké in latin1
+            query = b"select 'funk\xe9' as funk\xe9;"
+            cursor.execute(query)
+            run_one_check(check, cancel=False)
+            cursor.execute(query)
+            run_one_check(check, cancel=False)
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-metrics")
+
+    expected_query = "select $1 as funké"
+
+    # Find matching events by checking if the expected query starts with the event statement. Using this
+    # instead of a direct equality check covers cases of truncated statements
+    matching = [row for e in dbm_samples for row in e['postgres_rows'] if row['query'] == expected_query]
+
+    assert len(matching) == 1, "missing captured event"
+    event = matching[0]
+    # we expect to get a duration because the connections are in "idle" state
+    assert event['query_signature']
+
+
+@requires_over_10
+def test_samples_encoding(
+    aggregator,
+    integration_check,
+    dbm_instance,
+):
+    dbm_instance['query_metrics']['enabled'] = False
+    if POSTGRES_LOCALE == 'C':
+        dbm_instance['query_encodings'] = ['latin1', 'utf-8']
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user='bob', password='bob') as conn:
+        with conn.cursor() as cursor:
+            conn.set_client_encoding('latin1')
+            # This should be funké in latin1
+            query = b"select 'funk\xe9' as funk\xe9;"
+            cursor.execute(query)
+            run_one_check(check, cancel=False)
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+    expected_query = "select 'funké' as funké;"
+
+    # Find matching events by checking if the expected query starts with the event statement. Using this
+    # instead of a direct equality check covers cases of truncated statements
+    matching = [e for e in dbm_samples if e['db']['statement'] == expected_query and e['dbm_type'] == 'plan']
+
+    assert len(matching) == 1, "missing captured event"
+    event = matching[0]
+    # we expect to get a duration because the connections are in "idle" state
+    assert event['duration']

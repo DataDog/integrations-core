@@ -42,7 +42,7 @@ platforms = ["linux", "windows"]
 
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2019"] }
+runners = { windows = ["windows-2022"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
@@ -133,6 +133,9 @@ exclude = [
     'http_check',
     'kubelet',
     'kubevirt',
+    'kubevirt_api',
+    'kubevirt_handler',
+    'kubevirt_controller',
     'kubernetes_state',
     'network',
     'ntp',
@@ -161,7 +164,9 @@ exclude = [
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
     'psutil',
+    'pyvmomi', # 9+ has breaking changes
     'pymongo', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'foundationdb', # 7+ has a breaking changes
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

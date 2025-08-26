@@ -15,7 +15,8 @@ from .common import (
     CONNECTION_LIMIT_METRICS,
     CONNECTION_LIMIT_STAT_PREFIX_TAG,
     ENVOY_VERSION,
-    EXT_METRICS,
+    EXT_AUTHZ_METRICS,
+    EXT_PROC_METRICS,
     FLAVOR,
     HOST,
     INSTANCES,
@@ -139,7 +140,8 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
     instance.update(extra_config)
     check = check(instance)
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         dd_run_check(check)
@@ -189,7 +191,7 @@ def test_metadata_with_exception(
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    with mock.patch('requests.get', side_effect=exception):
+    with mock.patch('requests.Session.get', side_effect=exception):
         check._collect_metadata()
         datadog_agent.assert_metadata_count(0)
         check.log.warning.assert_called_with(*log_call_parameters)
@@ -260,10 +262,16 @@ def test_metadata_not_collected(datadog_agent, check):
     ('fixture_file', 'metrics', 'standard_tags', 'optional_tags'),
     [
         (
-            './legacy/stat_prefix',
-            EXT_METRICS,
+            './legacy/stat_prefix_ext_authz',
+            EXT_AUTHZ_METRICS,
             ['cluster_name:foo', 'envoy_cluster:foo'],
             ['stat_prefix:bar'],
+        ),
+        (
+            './legacy/stat_prefix_ext_proc',
+            EXT_PROC_METRICS,
+            ['stat_prefix:bar'],
+            [],
         ),
         (
             './legacy/rbac_enforce_metrics.txt',
@@ -279,7 +287,8 @@ def test_metadata_not_collected(datadog_agent, check):
         ),
     ],
     ids=[
-        "stats_prefix_ext_auth",
+        "stats_prefix_ext_authz",
+        "stats_prefix_ext_proc",
         "rbac_enforce_metrics",
         "rbac_shadow_metrics",
     ],
@@ -308,11 +317,12 @@ def test_stats_prefix_optional_tags(
         aggregator.assert_metric(metric, value=index, tags=standard_tags)
 
         # With optional tags.
-        aggregator.assert_metric(
-            metric,
-            value=index + len(metrics),
-            tags=standard_tags + optional_tags,
-        )
+        if len(optional_tags) > 0:
+            aggregator.assert_metric(
+                metric,
+                value=index + len(metrics),
+                tags=standard_tags + optional_tags,
+            )
 
 
 def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):

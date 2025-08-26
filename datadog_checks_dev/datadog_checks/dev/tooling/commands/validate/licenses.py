@@ -16,17 +16,25 @@ import orjson
 import requests
 from packaging.requirements import Requirement
 
-from ....fs import file_exists, read_file_lines, write_file_lines
-from ...constants import (
+from datadog_checks.dev.fs import file_exists, read_file_lines, write_file_lines
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import (
     get_agent_requirements,
     get_copyright_ignore_re,
     get_copyright_locations_re,
     get_copyright_re,
     get_license_attribution_file,
 )
-from ...github import get_auth_info
-from ...utils import get_extra_license_files, read_license_file_rows
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
+from datadog_checks.dev.tooling.github import get_auth_info
+from datadog_checks.dev.tooling.utils import get_extra_license_files, read_license_file_rows
 
 EXPLICIT_LICENSES = {
     # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE

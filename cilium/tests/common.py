@@ -7,16 +7,16 @@ import pytest
 
 from datadog_checks.dev.ci import running_on_ci
 
-CHECK_NAME = 'cilium'
-NAMESPACE = 'cilium.'
-CILIUM_VERSION = os.getenv('CILIUM_VERSION')
-CILIUM_LEGACY = os.getenv('CILIUM_LEGACY')
+CHECK_NAME = "cilium"
+NAMESPACE = "cilium."
+CILIUM_VERSION = os.getenv("CILIUM_VERSION")
+CILIUM_LEGACY = os.getenv("CILIUM_LEGACY")
 
 requires_legacy_environment = pytest.mark.skipif(
-    CILIUM_LEGACY != 'true', reason='Requires legacy Openmetrics V1 environment'
+    CILIUM_LEGACY != "true", reason="Requires legacy Openmetrics V1 environment"
 )
 requires_new_environment = pytest.mark.skipif(
-    CILIUM_LEGACY != 'false', reason='Requires `use_openmetrics` config environment'
+    CILIUM_LEGACY != "false", reason="Requires `use_openmetrics` config environment"
 )
 
 ON_CI = running_on_ci()
@@ -130,15 +130,15 @@ AGENT_V2_METRICS = [
 
 AGENT_V2_METRICS_1_14 = [
     # E2E not updated yet to 1.14+ of Cilium
-    'cilium.cidrgroup.policies',
-    'cilium.k8s_client.rate_limiter_duration.seconds.bucket',
-    'cilium.k8s_client.rate_limiter_duration.seconds.count',
-    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
-    'cilium.policy.change.count',
-    'cilium.services.events.count',
+    "cilium.cidrgroup.policies",
+    "cilium.k8s_client.rate_limiter_duration.seconds.bucket",
+    "cilium.k8s_client.rate_limiter_duration.seconds.count",
+    "cilium.k8s_client.rate_limiter_duration.seconds.sum",
+    "cilium.policy.change.count",
+    "cilium.services.events.count",
     # 1.16+
-    'cilium.fqdn.selectors',
-    'cilium.identity.label_sources',
+    "cilium.fqdn.selectors",
+    "cilium.identity.label_sources",
 ]
 
 AGENT_V1_METRICS = [
@@ -236,14 +236,14 @@ AGENT_V1_METRICS = [
 
 AGENT_V1_METRICS_1_14 = [
     # E2E not updated yet to 1.14+ of Cilium
-    'cilium.cidrgroup.policies',
-    'cilium.k8s_client.rate_limiter_duration.seconds.count',
-    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
-    'cilium.policy.change.total',
-    'cilium.services.events.total',
+    "cilium.cidrgroup.policies",
+    "cilium.k8s_client.rate_limiter_duration.seconds.count",
+    "cilium.k8s_client.rate_limiter_duration.seconds.sum",
+    "cilium.policy.change.total",
+    "cilium.services.events.total",
     # 1.16+
-    'cilium.fqdn.selectors',
-    'cilium.identity.label_sources',
+    "cilium.fqdn.selectors",
+    "cilium.identity.label_sources",
 ]
 
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
@@ -269,8 +269,8 @@ AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK = [
     "cilium.policy.implementation_delay.sum",
     "cilium.proxy.upstream_reply.seconds.count",
     "cilium.proxy.upstream_reply.seconds.sum",
-    'cilium.k8s_client.rate_limiter_duration.seconds.count',
-    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
+    "cilium.k8s_client.rate_limiter_duration.seconds.count",
+    "cilium.k8s_client.rate_limiter_duration.seconds.sum",
 ]
 
 OPERATOR_V2_PROCESS_METRICS = [

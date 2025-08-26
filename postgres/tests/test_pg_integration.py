@@ -37,6 +37,7 @@ from .common import (
     check_metrics_metadata,
     check_performance_metrics,
     check_physical_replication_slots,
+    check_recovery_prefetch_metrics,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_io_metrics,
@@ -44,6 +45,7 @@ from .common import (
     check_stat_replication_physical_slot,
     check_stat_wal_metrics,
     check_uptime_metrics,
+    check_wait_event_metrics,
     check_wal_receiver_metrics,
     requires_static_version,
 )
@@ -94,6 +96,15 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+    check_recovery_prefetch_metrics(aggregator, expected_tags=expected_tags)
+    expected_wait_event_tags = expected_tags + [
+        'app:datadog-agent',
+        'user:datadog',
+        'db:datadog_test',
+        'backend_type:client backend',
+        'wait_event:NoWaitEvent',
+    ]
+    check_wait_event_metrics(aggregator, expected_tags=expected_wait_event_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
 
@@ -597,49 +608,6 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     assert_state_clean(check)
 
 
-@requires_over_14
-@pytest.mark.parametrize(
-    'is_aurora',
-    [True, False],
-)
-@pytest.mark.flaky(max_runs=5)
-def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
-    conn = _get_superconn(pg_instance)
-    with conn.cursor() as cur:
-        cur.execute("select wal_records, wal_fpi, wal_bytes from pg_stat_wal;")
-        (wal_records, wal_fpi, wal_bytes) = cur.fetchall()[0]
-        cur.execute("insert into persons (lastname) values ('test');")
-
-    # Wait for pg_stat_wal to be updated
-    for _ in range(10):
-        with conn.cursor() as cur:
-            cur.execute("select wal_records, wal_bytes from pg_stat_wal;")
-            new_wal_records = cur.fetchall()[0][0]
-            if new_wal_records > wal_records:
-                break
-        time.sleep(0.1)
-
-    check = integration_check(pg_instance)
-    check.is_aurora = is_aurora
-    if is_aurora is True:
-        return
-    check.run()
-
-    expected_tags = _get_expected_tags(check, pg_instance)
-    aggregator.assert_metric('postgresql.wal.records', count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.wal.bytes', count=1, tags=expected_tags)
-
-    # Expect at least one Heap + one Transaction additional records in the WAL
-    assert_metric_at_least(
-        aggregator, 'postgresql.wal.records', tags=expected_tags, count=1, lower_bound=wal_records + 2
-    )
-    # We should have at least one full page write
-    assert_metric_at_least(aggregator, 'postgresql.wal.bytes', tags=expected_tags, count=1, lower_bound=wal_bytes + 100)
-    assert_metric_at_least(
-        aggregator, 'postgresql.wal.full_page_images', tags=expected_tags, count=1, lower_bound=wal_fpi
-    )
-
-
 def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
@@ -650,33 +618,7 @@ def test_query_timeout(integration_check, pg_instance):
                 cursor.execute("select pg_sleep(2000)")
 
 
-@requires_over_10
-@pytest.mark.parametrize(
-    'is_aurora',
-    [True, False],
-)
-def test_wal_metrics(aggregator, integration_check, pg_instance, is_aurora):
-    check = integration_check(pg_instance)
-    check.is_aurora = is_aurora
-
-    if is_aurora is True:
-        return
-    # Default PG's wal size is 16MB
-    wal_size = 16777216
-
-    postgres_conn = _get_superconn(pg_instance)
-    with postgres_conn.cursor() as cur:
-        cur.execute("select count(*) from pg_ls_waldir();")
-        expected_num_wals = cur.fetchall()[0][0]
-
-    check.run()
-
-    expected_wal_size = expected_num_wals * wal_size
-    dd_agent_tags = _get_expected_tags(check, pg_instance)
-    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
-
-
+@pytest.mark.flaky(max_runs=10)
 def test_pg_control(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()
@@ -703,6 +645,45 @@ def test_pg_control(aggregator, integration_check, pg_instance):
     assert_metric_at_least(
         aggregator, 'postgresql.control.redo_delay_bytes', count=1, higher_bound=300, tags=dd_agent_tags
     )
+
+
+def test_pg_control_wal_level(aggregator, integration_check, pg_instance):
+    """
+    Makes sure that we only get the control checkpoint metrics in the correct environment
+    """
+
+    # The control checkpoint metrics is not possible to collect in aurora if wal_level is not logical
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=True)
+    check._get_wal_level = mock.MagicMock(return_value="replica")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=0)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=0)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=0)
+
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=True)
+    check._get_wal_level = mock.MagicMock(return_value="logical")
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=1)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=1)
+
+    # We should be able to collect the control checkpoint metrics in non-aurora environments no matter the wal_level
+    check = integration_check(pg_instance)
+    check._version_utils.is_aurora = mock.MagicMock(return_value=False)
+    check._get_wal_level = mock.MagicMock(return_value="replica")
+    aggregator.reset()
+    check.run()
+
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay', count=1)
+    aggregator.assert_metric('postgresql.control.checkpoint_delay_bytes', count=1)
+    aggregator.assert_metric('postgresql.control.redo_delay_bytes', count=1)
 
 
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
@@ -739,9 +720,12 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
     pg_instance['reported_hostname'] = reported_hostname
 
-    with mock.patch(
-        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value=expected_hostname
-    ) as resolve_db_host:
+    with (
+        mock.patch(
+            'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value=expected_hostname
+        ) as resolve_db_host,
+        mock.patch('datadog_checks.base.stubs.datadog_agent.get_hostname', return_value=expected_hostname),
+    ):
         check = PostgreSql('test_instance', {}, [pg_instance])
         check.run()
         assert resolve_db_host.called is True
@@ -795,6 +779,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'replication_role:master',
         'database_hostname:{}'.format(expected_database_hostname),
         'database_instance:{}'.format(expected_database_instance),
+        'ddagenthostname:{}'.format(expected_database_hostname),
     ]
     check = PostgreSql('test_instance', {}, [pg_instance])
     run_one_check(check)
