@@ -184,6 +184,9 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
 
             if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
                 continue
+
+            type = "Integration" if "datadog_checks_base" not in relative_path else "Dependency"
+
             path = Path(relative_path)
             parts = path.parts
 
@@ -202,7 +205,7 @@ def get_files(repo_path: str | Path, compressed: bool) -> list[FileDataEntry]:
             "Version": integration_versions.get(name, ""),
             "Size_Bytes": size,
             "Size": convert_to_human_readable_size(size),
-            "Type": "Integration",
+            "Type": type,
         }
         for name, size in integration_sizes.items()
     ]
