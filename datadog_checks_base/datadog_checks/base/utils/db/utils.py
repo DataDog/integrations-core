@@ -117,12 +117,10 @@ class ConstantRateLimiter:
         self.last_event = 0
         self.max_sleep_chunk_s = max(0, max_sleep_chunk_s)
 
-    def update_last_time_and_sleep(self, cancel_event=None):
+    def update_last_time_and_sleep(self, cancel_event: Optional[threading.Event] = None):
         """
         Sleeps long enough to enforce the rate limit
         """
-        # Sleep in smaller chunks (max 5 seconds) to remain responsive
-        # to cancellation or other periodic signals in calling code.
         if self.period_s <= 0:
             self.update_last_time()
             return
@@ -133,7 +131,7 @@ class ConstantRateLimiter:
             remaining = deadline - now
             if remaining <= 0:
                 break
-            if cancel_event is not None and getattr(cancel_event, 'is_set', None) and cancel_event.is_set():
+            if cancel_event is not None and cancel_event.is_set():
                 break
             time.sleep(min(remaining, self.max_sleep_chunk_s if self.max_sleep_chunk_s > 0 else remaining))
         self.update_last_time()
