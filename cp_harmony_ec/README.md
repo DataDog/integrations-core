@@ -13,9 +13,7 @@ Set up the [Datadog Forwarder][2].
 
 Configure an [AWS S3 bucket to receive logs][3].
 
-### Installation
-
-The Datadog Agent need not be installed for this integration.
+The Datadog Agent is not required for this integration.
 
 ### Configuration
 
