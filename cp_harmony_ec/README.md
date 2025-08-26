@@ -9,9 +9,8 @@ This integration enables visibility into threat types, user targeting patterns, 
 
 ## Setup
 
-Set up the [Datadog Forwarder][2].
-
-Configure an [AWS S3 bucket to receive logs][3].
+1. Set up the [Datadog Forwarder][2].
+1. Configure an [AWS S3 bucket to receive logs][3].
 
 The Datadog Agent is not required for this integration.
 
