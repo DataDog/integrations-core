@@ -2,6 +2,32 @@
 
 <!-- towncrier release notes start -->
 
+## 22.17.0 / 2025-08-07
+
+***Added***:
+
+* PG: Add valid tag to index metrics ([#20731](https://github.com/DataDog/integrations-core/pull/20731))
+* PG: Add per index blocks hit and blocks read ([#20767](https://github.com/DataDog/integrations-core/pull/20767))
+
+***Fixed***:
+
+* Fixed a bug where the AWS configuration was overwritten for the Postgres integration ([#20774](https://github.com/DataDog/integrations-core/pull/20774))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Avoid sending empty Postgres extensions and settings payloads ([#20939](https://github.com/DataDog/integrations-core/pull/20939))
+
+## 22.16.0 / 2025-07-29 / Agent 7.69.0
+
+***Added***:
+
+* Reverts upgrade to psycopg3 ([#20885](https://github.com/DataDog/integrations-core/pull/20885))
+* Reverts the fix to the `e.pgerror` ([#20883](https://github.com/DataDog/integrations-core/pull/20883))
+
+## 22.15.1 / 2025-07-25
+
+***Fixed***:
+
+* Fixes the reference to the now non-existent `e.pgerror` ([#20848](https://github.com/DataDog/integrations-core/pull/20848))
+
 ## 22.15.0 / 2025-07-10
 
 ***Added***:

@@ -1,3 +1,4 @@
+# bypass-global-missing-date-remapper-checks
 id: contentful
 metric_id: contentful
 backend_only: false

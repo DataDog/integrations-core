@@ -107,6 +107,7 @@ def status_mode(
                 repo_path, params["platform"], params["version"], params["compressed"]
             )
 
+
     formatted_modules = format_modules(modules, params["platform"], params["version"])
     formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
 

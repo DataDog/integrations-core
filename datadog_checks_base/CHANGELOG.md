@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 37.16.0 / 2025-07-10
+## 37.17.0 / 2025-08-07
+
+***Added***:
+
+* Update orjson to 3.11.1 ([#20958](https://github.com/DataDog/integrations-core/pull/20958))
+
+***Fixed***:
+
+* Fixes deprecation warnings on isSet() usage in DBMAsyncJob ([#20947](https://github.com/DataDog/integrations-core/pull/20947))
+
+## 37.16.0 / 2025-07-10 / Agent 7.69.0
 
 ***Added***:
 
