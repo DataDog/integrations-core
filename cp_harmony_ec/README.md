@@ -3,15 +3,9 @@
 
 ## Overview
 
-Here are some insights that can be drawn from the dashboard:
+[Checkpoint Harmony Email and Collaboration][1] provides advanced protection for email and collaboration platforms such as Microsoft 365 and Google Workspace. It analyzes email content, user behavior, and threat indicators to detect phishing attempts, malware, and data leaks, helping organizations secure sensitive information and maintain business continuity.
 
-- **Threat Activity Trends**: Monitor types of threats and suspicious email behavior over time.
-Targeted User Analysis: Identify and track the most frequently targeted users.
-- **Sender Insights**: Analyze top sender IP addresses and domains to detect recurring threat sources.
-- **Log Volume Breakdown**: View log volume segmented by matched security tools and verdicts.
-- **Confidence Level Monitoring**: Track trends in detection confidence levels to assess alert reliability.
-- **Domain-Level Analytics**: Examine log volume by customer domain for focused security insights.
-- **Behavioral Monitoring**: Evaluate user and domain behaviors to identify anomalies and potential threats.
+This integration enables visibility into threat types, user targeting patterns, sender activity, and domain-level log analytics. Pre-built dashboard visualizations provide additional insights to help detect anomalies and assess security posture.
 
 ## Setup
 
