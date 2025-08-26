@@ -266,6 +266,7 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
         # replace embedded null characters \x00 before obfuscating
         query = query.replace('\x00', '')
 
+
     # statement = datadog_agent.obfuscate_sql(query, options)
     # The `obfuscate_sql` testing stub returns bytes, so we have to handle that here.
     # The actual `obfuscate_sql` method in the agent's Go code returns a JSON string.

@@ -397,6 +397,14 @@ class PostgresStatementSamples(DBMAsyncJob):
                 obfuscated_query = backend_type
                 normalized_row['query_signature'] = compute_sql_signature(backend_type)
             else:
+                self._check.count(
+                    "dd.postgres.obfuscate_sql",
+                    1,
+                    tags=self.tags + ["kind:statement_sample"],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
                 obfuscated_query = statement['query']
                 metadata = statement['metadata']
@@ -882,6 +890,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             # if we're using the orjson implementation then json.dumps returns bytes
             raw_plan = raw_plan.decode('utf-8') if isinstance(raw_plan, bytes) else raw_plan
             try:
+                self._check.count(
+                    "dd.postgres.obfuscate_sql",
+                    1,
+                    tags=self.tags + ["kind:exec_plan"],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(raw_plan, normalize=True)
                 obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(raw_plan)
             except Exception as e:

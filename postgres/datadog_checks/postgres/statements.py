@@ -624,6 +624,15 @@ class PostgresStatementMetrics(DBMAsyncJob):
             normalized_row = dict(copy.copy(row))
             try:
                 query_text = row['query']
+
+                self._check.count(
+                    "dd.postgres.obfuscate_sql",
+                    1,
+                    tags=self.tags + ["kind:statement"],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+
                 statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
