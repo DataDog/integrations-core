@@ -1,6 +1,6 @@
 services:
   gearman:
-    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
+    image: artefactual/gearmand:${DOCKER_TAG}
     ports:
       - 15440:4730
     command: ["--log-file", "/var/log/gearmand.log"]
