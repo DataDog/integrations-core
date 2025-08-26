@@ -20,6 +20,11 @@
                 "caption": "ZeroFox Cloud Platform - Alert Insights",
                 "image_url": "images/zerofox_cloud_platform_alert_insights_2.png",
                 "media_type": "image"
+            },
+            {
+                "caption": "ZeroFox Cloud Platform - Alert Insights",
+                "image_url": "images/zerofox_cloud_platform_alert_insights_3.png",
+                "media_type": "image"
             }
         ],
         "classifier_tags": [

@@ -244,7 +244,7 @@
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 7,
+                            "width": 8,
                             "height": 4
                         }
                     },
@@ -312,78 +312,8 @@
                             }
                         },
                         "layout": {
-                            "x": 7,
+                            "x": 8,
                             "y": 3,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 1724315462720652,
-                        "definition": {
-                            "title": "Alerts by Status",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zerofox-cloud-platform service:alerts -@status:\"\" $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@status",
-                                                    "limit": 15,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "dog_classic"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 7,
                             "width": 4,
                             "height": 4
                         }
@@ -452,8 +382,270 @@
                             }
                         },
                         "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1724315462720652,
+                        "definition": {
+                            "title": "Alerts by Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts -@status:\"\" $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "hide_total": true,
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
                             "x": 4,
                             "y": 7,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 280540021140029,
+                        "definition": {
+                            "title": "Total Impacted Assets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@entity.id"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_bg_color": "#fba2a2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7417815912576139,
+                        "definition": {
+                            "title": "Alerts over Time by Asset",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@entity.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 11,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 153907505742573,
+                        "definition": {
+                            "title": "Most Impacted Assets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@entity.name",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
                             "width": 4,
                             "height": 4
                         }
@@ -522,156 +714,8 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 7,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 280540021140029,
-                        "definition": {
-                            "title": "Most Impacted Assets",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@entity.name",
-                                                    "limit": 15,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 11,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 1098794365853903,
-                        "definition": {
-                            "title": "Alerts by Asset Group",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@entity.entity_group.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@entity.entity_group.id",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 100,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
                             "x": 4,
-                            "y": 11,
+                            "y": 14,
                             "width": 4,
                             "height": 4
                         }
@@ -746,7 +790,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 11,
+                            "y": 14,
                             "width": 4,
                             "height": 4
                         }
@@ -801,7 +845,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 15,
+                            "y": 18,
                             "width": 3,
                             "height": 3
                         }
@@ -860,7 +904,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 15,
+                            "y": 18,
                             "width": 9,
                             "height": 3
                         }
@@ -936,7 +980,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 18,
+                            "y": 21,
                             "width": 4,
                             "height": 4
                         }
@@ -1022,9 +1066,274 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 18,
+                            "y": 21,
                             "width": 8,
                             "height": 4
+                        }
+                    },
+                    {
+                        "id": 6225932116283399,
+                        "definition": {
+                            "title": "Top Users Acting on Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts -@actors:\"\" $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@actors",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 25,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3798391797121697,
+                        "definition": {
+                            "title": "Action Taken on Alert",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@logs.action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "hide_total": true,
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 25,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7413590605133165,
+                        "definition": {
+                            "title": "Total Assigned User",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts -@assignee:\"\" $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@assignee"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#fba2a2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 29,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2509743197056636,
+                        "definition": {
+                            "title": "Alerts over Time by Assigned User",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts -@assignee:\"\" $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@assignee",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 29,
+                            "width": 9,
+                            "height": 3
                         }
                     },
                     {
@@ -1090,7 +1399,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 22,
+                            "y": 32,
                             "width": 4,
                             "height": 4
                         }
@@ -1160,7 +1469,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 22,
+                            "y": 32,
                             "width": 4,
                             "height": 4
                         }
@@ -1237,7 +1546,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 22,
+                            "y": 32,
                             "width": 4,
                             "height": 4
                         }
@@ -1245,10 +1554,11 @@
                     {
                         "id": 2206780194792775,
                         "definition": {
-                            "title": "Most Triggered Rules",
+                            "title": "Triggered Rule Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
+                            "time": {},
+                            "type": "query_table",
                             "requests": [
                                 {
                                     "queries": [
@@ -1290,11 +1600,6 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "sort": {
                                         "count": 100,
                                         "order_by": [
@@ -1304,27 +1609,29 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    }
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
+                            "has_search_bar": "auto"
                         },
                         "layout": {
                             "x": 0,
-                            "y": 26,
-                            "width": 6,
+                            "y": 36,
+                            "width": 7,
                             "height": 4
                         }
                     },
                     {
-                        "id": 6225932116283399,
+                        "id": 3759102672191919,
                         "definition": {
-                            "title": "Top Users Acting on Alerts",
+                            "title": "Top Offending Content URLs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1335,14 +1642,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zerofox-cloud-platform service:alerts -@actors:\"\" $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@actors",
+                                                    "facet": "@offending_content_url",
                                                     "limit": 15,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1380,24 +1687,23 @@
                                 "display": {
                                     "type": "stacked",
                                     "legend": "automatic"
-                                },
-                                "palette": "datadog16"
+                                }
                             }
                         },
                         "layout": {
-                            "x": 6,
-                            "y": 26,
-                            "width": 6,
+                            "x": 7,
+                            "y": 36,
+                            "width": 5,
                             "height": 4
                         }
                     },
                     {
-                        "id": 3798391797121697,
+                        "id": 3213221178524276,
                         "definition": {
-                            "title": "Action Taken on Alert",
+                            "title": "Protected Locations Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
+                            "type": "query_table",
                             "requests": [
                                 {
                                     "queries": [
@@ -1412,8 +1718,38 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@logs.action",
+                                                    "facet": "@protected_locations.properties.name",
                                                     "limit": 50,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@protected_locations.properties.address",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@protected_locations.geometry.type",
+                                                    "limit": 2,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@protected_locations.geometry.coordinates",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
@@ -1429,13 +1765,80 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "sort": {
+                                        "count": 5000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 40,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6669461233871160,
+                        "definition": {
+                            "title": "Alerts by Business Network Protection Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@business_network.protection_status.display_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 50,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1446,18 +1849,15 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
                             }
                         },
                         "layout": {
                             "x": 0,
-                            "y": 30,
-                            "width": 4,
+                            "y": 44,
+                            "width": 8,
                             "height": 4
                         }
                     },
@@ -1524,8 +1924,8 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 30,
+                            "x": 8,
+                            "y": 44,
                             "width": 4,
                             "height": 4
                         }
@@ -1593,214 +1993,8 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 30,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3759102672191919,
-                        "definition": {
-                            "title": "Top Offending Content URLs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@offending_content_url",
-                                                    "limit": 15,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
                             "x": 0,
-                            "y": 34,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6669461233871160,
-                        "definition": {
-                            "title": "Alerts by Business Network Protection Status",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@business_network.protection_status.display_name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 5,
-                            "y": 34,
-                            "width": 7,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3213221178524276,
-                        "definition": {
-                            "title": "Top Protected Locations",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:zerofox-cloud-platform service:alerts $Alert-Type $Risk-Rating $Status $Asset-Name $Tag"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@protected_locations.properties.name",
-                                                    "limit": 15,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 38,
+                            "y": 48,
                             "width": 4,
                             "height": 4
                         }
@@ -1832,7 +2026,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 38,
+                            "y": 48,
                             "width": 8,
                             "height": 4
                         }
@@ -1843,7 +2037,6 @@
                             "title": "Alert Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1877,7 +2070,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 42,
+                            "y": 52,
                             "width": 12,
                             "height": 4
                         }
@@ -1888,7 +2081,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 47
+                "height": 57
             }
         },
         {
@@ -2114,7 +2307,6 @@
                             "title": "Alerts by Post Type",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -2459,9 +2651,10 @@
             },
             "layout": {
                 "x": 0,
-                "y": 50,
+                "y": 0,
                 "width": 12,
-                "height": 21
+                "height": 21,
+                "is_column_break": true
             }
         },
         {
@@ -2871,7 +3064,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 71,
+                "y": 21,
                 "width": 12,
                 "height": 12
             }
@@ -3370,7 +3563,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 83,
+                "y": 33,
                 "width": 12,
                 "height": 10
             }
