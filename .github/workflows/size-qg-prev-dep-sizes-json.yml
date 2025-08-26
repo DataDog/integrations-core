@@ -1,146 +1,146 @@
-name: Fetch Previous Sizes JSON
+# name: Fetch Previous Sizes JSON
 
-on:
-  pull_request:
-    branches:
-      - master
-  push:
-    branches:
-      - master
+# on:
+#   pull_request:
+#     branches:
+#       - master
+#   push:
+#     branches:
+#       - master
 
-jobs:
-  # only runs if dependency sizes have not changed
-  check-file-changes:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+# jobs:
+#   # only runs if dependency sizes have not changed
+#   check-file-changes:
+#     runs-on: ubuntu-22.04
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Use path filter to check for changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
-        id: filter
-        with:
-          filters: 
-            builders:
-              - '.builders/**'
-              - '.github/workflows/resolve-build-deps.yml'
-              - 'agent_requirements.in'
+#       - name: Use path filter to check for changes
+#         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+#         id: filter
+#         with:
+#           filters: 
+#             builders:
+#               - '.builders/**'
+#               - '.github/workflows/resolve-build-deps.yml'
+#               - 'agent_requirements.in'
 
-  get-merge-base:
-    needs: check-file-changes
-    if: needs.check-file-changes.outputs.builders_changed == 'false'
-    runs-on: ubuntu-22.04
-    outputs:
-      run_id: ${{ steps.find_run.outputs.run_id }}
-    steps:
-      - name: Fetch master and PR branch
-        run: |
-          git fetch origin master:refs/remotes/origin/master
-          git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
+#   get-merge-base:
+#     needs: check-file-changes
+#     if: needs.check-file-changes.outputs.builders_changed == 'false'
+#     runs-on: ubuntu-22.04
+#     outputs:
+#       run_id: ${{ steps.find_run.outputs.run_id }}
+#     steps:
+#       - name: Fetch master and PR branch
+#         run: |
+#           git fetch origin master:refs/remotes/origin/master
+#           git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
 
-      - name: Get merge base commit
-        id: merge_base
-        run: |
-          base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
+#       - name: Get merge base commit
+#         id: merge_base
+#         run: |
+#           base=$(git merge-base origin/temp-${{ github.head_ref }} origin/master)
         
-      - name: Find workflow run at exact merge-base SHA 
-        id: find_run
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          MERGE_BASE=${{ steps.merge_base.outputs.sha }}
+#       - name: Find workflow run at exact merge-base SHA 
+#         id: find_run
+#         env:
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           MERGE_BASE=${{ steps.merge_base.outputs.sha }}
 
-          count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
-          count_plus_one=$((count + 1))
-          run_id=$(
-            (
-              gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-              gh run list --workflow "Fetch Previous Sizes JSON" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-            ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
-          )
-          if [ -z "$run_id" ]; then
-            echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
+#           count=$(git rev-list --count ${{ steps.merge_base.outputs.sha }}..origin/master)
+#           count_plus_one=$((count + 1))
+#           run_id=$(
+#             (
+#               gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
+#               gh run list --workflow "Fetch Previous Sizes JSON" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
+#             ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
+#           )
+#           if [ -z "$run_id" ]; then
+#             echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
+#             exit 1
+#           fi
 
-  download-artifacts:
-    needs: get-merge-base
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
-    steps:
-      - name: Download artifact from merge-base run
-        run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name dependency_sizes_${{ matrix.platform }}.json
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload platform.json artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: dependency_sizes_${{ matrix.platform }}.json
-          path: dependency_sizes_${{ matrix.platform }}.json
-          if-no-files-found: error
+#   download-artifacts:
+#     needs: get-merge-base
+#     runs-on: ubuntu-22.04
+#     strategy:
+#       matrix:
+#         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+#     steps:
+#       - name: Download artifact from merge-base run
+#         run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name dependency_sizes_${{ matrix.platform }}.json
+#         env:
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Upload platform.json artifact
+#         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+#         with:
+#           name: dependency_sizes_${{ matrix.platform }}.json
+#           path: dependency_sizes_${{ matrix.platform }}.json
+#           if-no-files-found: error
 
-  measure-disk-usage:
-    needs: download-artifacts
-    strategy:
-      matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
-    env:
-      PYTHON_VERSION: "3.12"
-    uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
-    with:
-      platform: ${{ matrix.platform }}
-      run-id: ${{ github.run_id }}
-      resolved-deps: false
+#   measure-disk-usage:
+#     needs: download-artifacts
+#     strategy:
+#       matrix:
+#         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+#     env:
+#       PYTHON_VERSION: "3.12"
+#     uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
+#     with:
+#       platform: ${{ matrix.platform }}
+#       run-id: ${{ github.run_id }}
+#       resolved-deps: false
 
-    #   - name: Set up Python ${{ env.PYTHON_VERSION }}
-    #   uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
-    #   with:
-    #     python-version: ${{ env.PYTHON_VERSION }}
-    # - name: Install ddev
-    #   run: |
-    #     pip install -e ./datadog_checks_dev[cli]
-    #     pip install -e ./ddev
+#     #   - name: Set up Python ${{ env.PYTHON_VERSION }}
+#     #   uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+#     #   with:
+#     #     python-version: ${{ env.PYTHON_VERSION }}
+#     # - name: Install ddev
+#     #   run: |
+#     #     pip install -e ./datadog_checks_dev[cli]
+#     #     pip install -e ./ddev
 
-    # - name: Configure ddev
-    #   run: |
-    #     ddev config set repos.core .
-    #     ddev config set repo core
+#     # - name: Configure ddev
+#     #   run: |
+#     #     ddev config set repos.core .
+#     #     ddev config set repo core
 
-    # - name: Measure disk usage
-    #   run: |
-    #     ddev size status --platform ${{ matrix.platform }} --dependency-sizes ${{ matrix.platform }}.json --format json
-    #     ddev size status --platform ${{ matrix.platform }} --compressed --dependency-sizes ${{ matrix.platform }}.json --format json
+#     # - name: Measure disk usage
+#     #   run: |
+#     #     ddev size status --platform ${{ matrix.platform }} --dependency-sizes ${{ matrix.platform }}.json --format json
+#     #     ddev size status --platform ${{ matrix.platform }} --compressed --dependency-sizes ${{ matrix.platform }}.json --format json
     
-    # - name: Upload JSON uncompressed sizes artifact
-    #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-    #   with:
-    #     name: ${{ matrix.platform }}_uncompressed_status.json
-    #     path: ${{ matrix.platform }}_uncompressed_status.json
-    #     if-no-files-found: error
-    # - name: Upload JSON compressed sizes artifact
-    #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-    #   with:
-    #     name: ${{ matrix.platform }}_compressed_status.json
-    #     path: ${{ matrix.platform }}_compressed_status.json
-    #     if-no-files-found: error
+#     # - name: Upload JSON uncompressed sizes artifact
+#     #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+#     #   with:
+#     #     name: ${{ matrix.platform }}_uncompressed_status.json
+#     #     path: ${{ matrix.platform }}_uncompressed_status.json
+#     #     if-no-files-found: error
+#     # - name: Upload JSON compressed sizes artifact
+#     #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+#     #   with:
+#     #     name: ${{ matrix.platform }}_compressed_status.json
+#     #     path: ${{ matrix.platform }}_compressed_status.json
+#     #     if-no-files-found: error
 
-  calculate-diffs:
-    needs: measure-disk-usage
-    runs-on: ubuntu-22.04
-    uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
-    with:
-      platform: ${{ matrix.platform }}
+#   calculate-diffs:
+#     needs: measure-disk-usage
+#     runs-on: ubuntu-22.04
+#     uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
+#     with:
+#       platform: ${{ matrix.platform }}
 
-  comment-on-pr:
-    needs: calculate-diffs
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Comment on PR
-        run: |
-          cat $GITHUB_STEP_SUMMARY >> comment.txt
-          gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
-          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
-        env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#   comment-on-pr:
+#     needs: calculate-diffs
+#     runs-on: ubuntu-22.04
+#     steps:
+#       - name: Comment on PR
+#         run: |
+#           cat $GITHUB_STEP_SUMMARY >> comment.txt
+#           gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+#           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+#         env:
+#             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

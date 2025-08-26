@@ -71,11 +71,11 @@ jobs:
       run: |
         # if this is a push to master, sends metrics to datadog
         if github.event_name == 'push' && github.ref_name == github.event.repository.default_branch; then
-          ddev size status --platform ${{ inputs.platform }} --dependency-sizes dependency_sizes_${{ inputs.platform }}.json --format json
-          ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes dependency_sizes_${{ inputs.platform }}.json --format json
-        else
           ddev size status --platform ${{ inputs.platform }} --dependency-sizes dependency_sizes_${{ inputs.platform }}.json --format json --to-dd-key ${{secrets.DD_API_KEY}}
           ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes dependency_sizes_${{ inputs.platform }}.json --format json --to-dd-key ${{secrets.DD_API_KEY}}
+        else
+          ddev size status --platform ${{ inputs.platform }} --dependency-sizes dependency_sizes_${{ inputs.platform }}.json --format json 
+          ddev size status --platform ${{ inputs.platform }} --compressed --dependency-sizes dependency_sizes_${{ inputs.platform }}.json --format json 
         fi
     - name: Upload platform.json artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
