@@ -19,7 +19,7 @@ from datadog_checks.dev.tooling.utils import get_codeowners, get_codeowners_file
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
-LOGS_TEAM = '@DataDog/logs-backend'
+LOGS_TEAM = '@DataDog/logs-integrations-reviewers'
 
 # Integrations that are known to be tiles and have email-based codeowners
 IGNORE_TILES = {

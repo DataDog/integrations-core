@@ -139,6 +139,8 @@ def test_parse_get_version():
         assert v.version == '5.5.12'
         assert v.flavor == 'MySQL'
         assert v.build == 'log'
+        assert v.version_compatible(compat_version=(5, 4, 3))
+        assert not v.version_compatible(compat_version=(8, 0, 43))
 
 
 @pytest.mark.parametrize(
@@ -307,6 +309,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -318,6 +321,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -328,6 +332,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -339,6 +344,7 @@ def test__get_is_aurora():
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
     ],

@@ -150,6 +150,12 @@ instances:
     #
     # auto_discover_queues: false
 
+    ## @param auto_discover_queues_via_names - boolean - optional - default: false
+    ## Autodiscover queues via names. Discovers all queue names, then collects metrics per queue. More resilient to
+    ## individual queue failures (e.g., permissions, broken queues), but uses more resources than bulk collection.
+    #
+    # auto_discover_queues_via_names: false
+
     ## @param collect_statistics_metrics - boolean - optional - default: false
     ## Collect metrics from Statistics Messages. Statistics collected are:
     ##   - channel statistics (MQCMD_STATISTICS_CHANNEL)
