@@ -22,7 +22,7 @@ The Datadog Agent is not required for this integration.
 
 ### Validation
 
-Once the configuration is done, you can validate it by confirming if the logs are being ingested in Datadog Platform.
+After setup, verify that logs appear in Datadog by checking the Logs Explorer.
 
 ## Data Collected
 
