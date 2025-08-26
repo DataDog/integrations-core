@@ -20,7 +20,7 @@ MOCKED_INSTANCE = {
 
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-NAMESPACE = 'datadog.csi_driver'
+NAMESPACE = 'datadog_csi_driver'
 
 METRICS = [
     'node_publish_volume_attempts.count',
