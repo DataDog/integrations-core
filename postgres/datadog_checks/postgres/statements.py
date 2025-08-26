@@ -625,6 +625,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
+        self._log.info(f"OBFUSCATOR: normalizing queries {len(rows)}")
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
@@ -637,8 +638,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )
-
+                self._log.info(f"OBFUSCATOR: obfuscating query: {query_text}")
                 statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
+                self._log.info(f"OBFUSCATOR: obfuscated query: {statement}")
             except Exception as e:
                 if True or self._config.log_unobfuscated_queries:
                     self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
@@ -656,6 +658,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
 
+        self._log.info(f"OBFUSCATOR: normalized queries {len(normalized_rows)}")
         return normalized_rows
 
     def _rows_to_fqt_events(self, rows):

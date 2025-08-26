@@ -246,6 +246,7 @@ import platform
 lib_ext = "dylib" if platform.system() == "Darwin" else "so"
 lexer_rs = ffi.dlopen(os.path.join(os.path.dirname(__file__), f"./liblexer_rs.{lib_ext}"))
 
+import asyncio
 
 def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
     """
@@ -274,7 +275,17 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     logger = get_check_logger()
     # logger.info(f"OBFUSCATOR: Obfuscating {query}")
     start = time.time()
+    finished = False
+    # async def check_timeout():
+    #     await asyncio.sleep(1)
+    #     if not finished:
+    #         logger.info(f"OBFUSCATOR: Obfuscation timed out {query}")
+    #         raise Exception("Obfuscation timed out")
+
+    # asyncio.run(check_timeout())
+
     obfuscated_bytes = lexer_rs.obfuscate(query.encode('utf-8'))
+    finished = True
     end = time.time()
     # logger.info(f"OBFUSCATOR: Obfuscated {query} in {end - start} seconds")
     statement = ffi.string(obfuscated_bytes).decode('utf-8')
