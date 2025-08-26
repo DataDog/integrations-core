@@ -28,7 +28,7 @@ After setup, verify that logs appear in Datadog by checking the Logs Explorer.
 
 ### Metrics
 
-cp_harmony_ec does not include any metrics.
+The Checkpoint Harmony Email and Collaboration integration does not include any metrics.
 
 ### Events
 
