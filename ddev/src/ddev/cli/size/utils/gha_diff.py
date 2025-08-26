@@ -268,13 +268,13 @@ def display_diffs_to_html_short(diffs, platform, python_version):
     total_removed_uncompressed = sum(int(entry.get("Uncompressed_Size_Bytes", 0)) for entry in diffs["removed"])
     total_changed_uncompressed = sum(entry.get("Uncompressed_Diff", 0) for entry in diffs["changed"])
     total_changed_sign = "+" if total_changed_compressed > 0 else "-"
-    text += f"Total added: \n\t +{convert_to_human_readable_size(total_added_compressed)} (Compressed) "
-    text += f"\n\t +{convert_to_human_readable_size(total_added_uncompressed)} (Uncompressed)\n"
-    text += f"Total removed: \n\t -{convert_to_human_readable_size(total_removed_compressed)} (Compressed)"
-    text += f"\n\t -{convert_to_human_readable_size(total_removed_uncompressed)} (Uncompressed)\n"
-    text += f"Total changed: \n\t {total_changed_sign}{convert_to_human_readable_size(abs(total_changed_compressed))} "
-    text += f"(Compressed) \n\t {total_changed_sign}{convert_to_human_readable_size(abs(total_changed_uncompressed))} "
-    text += "(Uncompressed)\n"
+    text += f"Total added: \n&emsp +{convert_to_human_readable_size(total_added_compressed)} (Compressed) "
+    text += f"\n&emsp +{convert_to_human_readable_size(total_added_uncompressed)} (Uncompressed)\n"
+    text += f"Total removed: \n&emsp -{convert_to_human_readable_size(total_removed_compressed)} (Compressed)"
+    text += f"\n&emsp -{convert_to_human_readable_size(total_removed_uncompressed)} (Uncompressed)\n"
+    text += f"Total changed: \n&emsp {total_changed_sign}"
+    text += f"{convert_to_human_readable_size(abs(total_changed_compressed))} (Compressed) \n&emsp {total_changed_sign}"
+    text += f"{convert_to_human_readable_size(abs(total_changed_uncompressed))} (Uncompressed)\n"
     text += "</details>\n"
 
     return text
