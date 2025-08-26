@@ -175,25 +175,25 @@ jobs:
         name: target-${{ matrix.job.image }}
         path: output
 
-  measure-disk-usage:
-    needs: build
-    strategy:
-      matrix:
-        platform: [linux-x86_64, linux-aarch64, windows-x86_64]
-    uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
-    with:
-      platform: ${{ matrix.platform }}
-      run-id: ${{ github.run_id }}
-      resolved-deps: true
+  # measure-disk-usage:
+  #   needs: build
+  #   strategy:
+  #     matrix:
+  #       platform: [linux-x86_64, linux-aarch64, windows-x86_64]
+  #   uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
+  #   with:
+  #     platform: ${{ matrix.platform }}
+  #     run-id: ${{ github.run_id }}
+  #     resolved-deps: true
   
-  calculate-size-diffs:
-    needs: measure-disk-usage
-    strategy:
-      matrix:
-        platform: [linux-x86_64, linux-aarch64, windows-x86_64]
-    uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
-    with:
-      platform: ${{ matrix.platform }}
+  # calculate-size-diffs:
+  #   needs: measure-disk-usage
+  #   strategy:
+  #     matrix:
+  #       platform: [linux-x86_64, linux-aarch64, windows-x86_64]
+  #   uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
+  #   with:
+  #     platform: ${{ matrix.platform }}
 
   build-macos:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
@@ -269,29 +269,30 @@ jobs:
         path: output
 
   # ----------- CHANGE TO MASTER BRANCH ------------
-  measure-disk-usage-macos:
-    needs: build-macos # change to both builds, that way it is only in one place
+  measure-disk-usage:
+    needs:
+      - build
+      - build-macos
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64]
+        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
       run-id: ${{ github.run_id }}
       resolved-deps: true
   
-  calculate-size-diffs-macos:
-    needs: measure-disk-usage-macos
+  calculate-size-diffs:
+    needs: measure-disk-usage
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64]
+        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
     with:
       platform: ${{ matrix.platform }}
 
   comment-size-diffs-on-pr:
     needs:
-      - calculate-size-diffs-macos
       - calculate-size-diffs
     env:
       PYTHON_VERSION: "3.12"
@@ -331,6 +332,8 @@ jobs:
               gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
               cat "size_diffs_output_short_${p}.txt" >> comment.txt
             done
+            GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> comment.txt
           fi
 
       - name: Output results
