@@ -1,39 +1,54 @@
-# Agent Check: Proofpoint TAP
-
 ## Overview
 
-This check monitors [Proofpoint TAP][1].
+[Proofpoint TAP (Targeted Attack Protection)][1] is a cybersecurity solution designed to detect, mitigate, and block advanced threats that target people through email. It uses a next-generation email security platform to provide visibility into all email communications.
+
+This integration ingests the following logs:
+
+- **Click Events**: These logs provide information about user interactions with links in emails, including whether clicks were permitted or blocked, along with associated threat identification.
+- **Message Events**: These logs provide information about email messages analyzed by Proofpoint TAP, including detection outcomes, delivery status (such as delivered or blocked), and threat identification.
+
+This integration gathers and forwards above mentioned events to Datadog for seamless analysis. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Proofpoint TAP platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
-### Installation
+### Generate Service Credentials in Proofpoint TAP
 
-The Proofpoint TAP check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Login to the **Proofpoint TAP** dashboard.
+2. Navigate to **Settings > Connected Applications**.
+3. Click **Create New Credential**.
+4. Name the **new credential set** and click **Generate**.
+5. Copy the **Service Principal** and **Secret**.
 
-### Configuration
+### Connect your Proofpoint TAP Account to Datadog
 
-!!! Add list of steps to set up this integration !!!
-
-### Validation
-
-!!! Add steps to validate integration is functioning as expected !!!
+1. Add your Service Principal and Secret.
+   | Parameters | Description |
+   | ---------------------------- | ------------------------------------------------------------------------------------------- |
+   | Service Principal | The Service Principal of your Proofpoint TAP account. |
+   | Secret | The Secret of your Proofpoint TAP account. |
+   | Get Click Blocked Events | Control the collection of Click Blocked Events from Proofpoint TAP. Enabled by default. |
+   | Get Click Permitted Events | Control the collection of Click Permitted Events from Proofpoint TAP. Enabled by default. |
+   | Get Message Blocked Events | Control the collection of Message Blocked Events from Proofpoint TAP. Enabled by default. |
+   | Get Message Delivered Events | Control the collection of Message Delivered Events from Proofpoint TAP. Enabled by default. |
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
+### Logs
+
+The Proofpoint TAP integration collects and forwards click and message events to Datadog.
+
 ### Metrics
 
-Proofpoint TAP does not include any metrics.
+The Proofpoint TAP integration does not include any metrics.
 
 ### Events
 
-Proofpoint TAP does not include any events.
+The Proofpoint TAP integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+For any further assistance, contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://www.proofpoint.com/uk/products/advanced-threat-protection/targeted-attack-protection
+[2]: https://docs.datadoghq.com/help/

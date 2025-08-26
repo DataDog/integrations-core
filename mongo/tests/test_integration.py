@@ -782,6 +782,7 @@ def test_integration_replicaset_secondary(
         'dbstats-local',
         'fsynclock',
         'hostinfo',
+        'indexes-stats',
     ]
     if collect_custom_queries:
         metrics_categories.append('custom-queries')

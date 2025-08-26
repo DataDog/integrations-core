@@ -71,8 +71,10 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
   json_output: true
   http_output:
     enabled: true
-    url: <DATADOG_WEBHOOK_URL> # such as https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<DD_API_KEY>&ddsource=falco
+    url: <DATADOG_WEBHOOK_URL> 
   ```
+  
+  **Note:** Replace `<DATADOG_WEBHOOK_URL>` with the correct intake URL for your [Datadog site][7], such as `https://http-intake.logs.us3.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco` for US3. 
 
   - Restart the Falco using below command:
 
@@ -85,14 +87,25 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
   ```bash
   helm upgrade -i falco falcosecurity/falco \
   --set falco.http_output.enabled=true \
-  --set falco.http_output.url="https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco" \
+  --set falco.http_output.url="<DATADOG_WEBHOOK_URL>" \
   --set falco.json_output=true \
   --set json_include_output_property=true
   ```
 
+  **Note:** Replace `<DATADOG_WEBHOOK_URL>` with the correct intake URL for your [Datadog site][7], such as `https://http-intake.logs.us3.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco` for US3. 
+
 <!-- xxz tab xxx -->
 <!-- xxx tab "Agent" xxx -->
 ##### Agent
+Update the settings in the configuration file (`falco.yaml`) as shown below:
+
+  ```yaml
+  json_output: true
+  file_output:
+    enabled: true
+    filename: <PATH TO LOGS>
+  ```
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -105,7 +118,7 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
    logs:
      - type: file
        path: <PATH TO LOGS>
-       service: myservice
+       service: <SERVICE NAME>
        source: falco
    ```
 
@@ -116,6 +129,7 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
 **Note**: Ensure the `datadog-agent` user has read and execute access to tail the log files you want to collect from.
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+>>>>>>> master
 
 ## Data Collected
 
@@ -141,3 +155,5 @@ For further assistance, contact [Datadog Support][2].
 [4]: https://github.com/DataDog/integrations-core/blob/master/falco/datadog_checks/falco/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/containers/kubernetes/integrations/
+[7]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
+

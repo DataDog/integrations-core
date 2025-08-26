@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, mock_open, patch
 
 from ddev.cli.size.utils.common_funcs import (
+    check_python_version,
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
@@ -19,7 +20,7 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
-    is_valid_integration,
+    is_valid_integration_file,
     save_csv,
     save_json,
     save_markdown,
@@ -93,17 +94,13 @@ def test_convert_to_human_readable_size():
     assert convert_to_human_readable_size(1073741824) == "1.0 GiB"
 
 
-def test_is_valid_integration():
-    included_folder = "datadog_checks" + os.sep
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = [".git", "__pycache__"]
-
-    assert is_valid_integration(to_native_path("datadog_checks/example.py"), included_folder, ignored_files, git_ignore)
-    assert not is_valid_integration(to_native_path("__pycache__/file.py"), included_folder, ignored_files, git_ignore)
-    assert not is_valid_integration(
-        to_native_path("datadog_checks_dev/example.py"), included_folder, ignored_files, git_ignore
-    )
-    assert not is_valid_integration(to_native_path(".git/config"), included_folder, ignored_files, git_ignore)
+def test_is_valid_integration_file():
+    repo_path = "fake_repo"
+    with patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()):
+        assert is_valid_integration_file(to_native_path("datadog_checks/example.py"), repo_path)
+        assert not is_valid_integration_file(to_native_path("__pycache__/file.py"), repo_path)
+        assert not is_valid_integration_file(to_native_path("datadog_checks_dev/example.py"), repo_path)
+        assert not is_valid_integration_file(to_native_path(".git/config"), repo_path)
 
 
 def test_get_dependencies_list():
@@ -184,7 +181,7 @@ def test_get_files_grouped_and_with_versions():
         (repo_path / "integration2" / "datadog_checks", [], ["__about__.py"]),
     ]
 
-    def mock_is_valid_integration(path, included_folder, ignored, ignored_files):
+    def mock_is_valid_integration_file(path, repo_path):
         return True
 
     def mock_getsize(path):
@@ -202,14 +199,15 @@ def test_get_files_grouped_and_with_versions():
         ),
         patch("ddev.cli.size.utils.common_funcs.os.path.getsize", side_effect=mock_getsize),
         patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.utils.common_funcs.is_valid_integration", side_effect=mock_is_valid_integration),
+        patch("ddev.cli.size.utils.common_funcs.is_valid_integration_file", side_effect=mock_is_valid_integration_file),
         patch("ddev.cli.size.utils.common_funcs.extract_version_from_about_py", return_value="1.2.3"),
         patch(
             "ddev.cli.size.utils.common_funcs.convert_to_human_readable_size",
             side_effect=lambda s: f"{s / 1024:.2f} KB",
         ),
+        patch("ddev.cli.size.utils.common_funcs.check_python_version", return_value=True),
     ):
-        result = get_files(repo_path, compressed=False)
+        result = get_files(repo_path, compressed=False, py_version="3.12")
 
     expected = [
         {
@@ -248,6 +246,17 @@ def test_get_dependencies_from_json():
     ):
         result = get_dependencies_from_json("fake_path", "linux-x86_64", "3.12", True)
     assert result == expected
+    
+def test_check_version():
+    with (
+        patch(
+            "ddev.cli.size.utils.common_funcs.load_toml_file",
+            return_value={"project": {"classifiers": ["Programming Language :: Python :: 3.12"]}},
+        ),
+        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
+    ):
+        assert check_python_version("fake_repo", "integration1", "3")
+        assert not check_python_version("fake_repo", "integration1", "2")
 
 
 def test_get_gitignore_files():

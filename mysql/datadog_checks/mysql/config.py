@@ -45,6 +45,8 @@ class MySQLConfig(object):
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1
         )
+        self.statement_rows_cache_max_size = instance.get('statement_rows_cache_max_size', 10000)
+        self.statement_rows_cache_ttl = instance.get('statement_rows_cache_ttl', 3600)
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.settings_config = instance.get('collect_settings', {}) or {}
