@@ -41,7 +41,7 @@
   "assets": {
     "integration": {
       "auto_install": true,
-      "source_type_id": 48848597,
+      "source_type_id": 47743103,
       "source_type_name": "cloudgen_firewall",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
