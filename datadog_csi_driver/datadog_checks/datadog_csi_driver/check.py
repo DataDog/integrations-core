@@ -1,9 +1,15 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-METRICS_MAP = [{
-    'datadog_csi_driver_node_publish_volume_attempts': {'name': 'node_publish_volume_attempts'},
-    'datadog_csi_driver_node_unpublish_volume_attempts': {'name': 'node_unpublish_volume_attempts'},
-}]
+METRICS_MAP = [
+    {
+        'datadog_csi_driver_node_publish_volume_attempts': {'name': 'node_publish_volume_attempts'},
+        'datadog_csi_driver_node_unpublish_volume_attempts': {'name': 'node_unpublish_volume_attempts'},
+    }
+]
+
 
 class DatadogCSIDriverCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'datadog.csi_driver'
