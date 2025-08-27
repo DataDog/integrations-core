@@ -1217,7 +1217,7 @@ If you cannot build a custom Agent image, you can follow the steps below to add 
 This configuration deletes all the preexisting files in the <code>/etc/datadog-agent</code> folder, including:<br /> 
 - All the Autodiscovery config files (<code><INTEGRATION>/auto_conf.yaml</code>)<br /> 
 - JMX <code>metrics.yaml</code> files<br />
-- The main ECS Fargate <code>/etc/datadog-agent/conf.d/ecs_fargate.d/conf.yaml.default</code> file<br /> 
+- The main ECS Fargate <code>/etc/datadog-agent/conf.d/ecs_fargate.d/conf.yaml.default</code> file<br /><br /> 
 As such, you must set up the integration with Autodiscovery Docker labels on the Datadog Agent container. This requires setting the <code>ignore_autodiscovery_tag: true</code> flag in the configuration. Otherwise, metrics from the app container are double-tagged with the Agent container's tags.
 </div>
 
