@@ -132,13 +132,11 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     check = integration_check(pg_replica_instance2)
 
     replica_con = _get_superconn(pg_replica_instance2)
-    replica_con.set_session(autocommit=False)
     replica_cur = replica_con.cursor()
     replica_cur.execute('BEGIN;')
     replica_cur.execute('select * from persons;')
 
     conn = _get_superconn(pg_instance)
-    conn.set_session(autocommit=True)
     cur = conn.cursor()
     cur.execute('update persons SET personid = 1 where personid = 1;')
     cur.execute('vacuum full persons;')
@@ -164,13 +162,11 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     check = integration_check(pg_replica_instance2)
 
     replica2_con = _get_superconn(pg_replica_instance2)
-    replica2_con.set_session(autocommit=False)
     replica2_cur = replica2_con.cursor()
     replica2_cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     replica2_cur.execute('select * from persons;')
 
-    conn = _get_superconn(pg_instance)
-    conn.set_session(autocommit=True)
+    conn = _get_superconn(pg_instance, autocommit=True)
     cur = conn.cursor()
     cur.execute('update persons SET personid = 1 where personid = 1;')
     time.sleep(1.2)

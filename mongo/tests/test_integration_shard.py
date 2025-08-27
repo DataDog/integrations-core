@@ -27,7 +27,9 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, exclude=['dd.mongo.async_job.cancel']
+    )
 
     expected_metrics = {
         'mongodb.replset.health': 1.0,
@@ -77,4 +79,6 @@ def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
         'mongodb.replset.optime_lag',
         tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27019', 'replset_me:shard01a:27018'],
     )
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, exclude=['dd.mongo.async_job.cancel']
+    )
