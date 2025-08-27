@@ -378,8 +378,10 @@ class PostgreSql(AgentCheck):
             if self._config.dbm_enabled:
                 queries.append(STAT_IO_METRICS)
 
-        if self._config.dbm_enabled:
-            per_database_queries.append(IDLE_TX_LOCK_AGE_METRICS)
+        if self._config.dbm_enabled and self._config.locks_idle_in_transaction['enabled']:
+            query_def = copy.deepcopy(IDLE_TX_LOCK_AGE_METRICS)
+            query_def['collection_interval'] = self._config.locks_idle_in_transaction['collection_interval']
+            per_database_queries.append(query_def)
 
         if not queries:
             self.log.debug("no dynamic queries defined")

@@ -1090,7 +1090,6 @@ LIMIT 200
 # Limits result set to 10 rows to avoid tag explosion.
 IDLE_TX_LOCK_AGE_METRICS = {
     'name': 'idle_tx_lock_age_metrics',
-    'collection_interval': 5,
     'query': (
         """
 SELECT

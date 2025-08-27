@@ -282,6 +282,21 @@ files:
       value:
         type: boolean
         example: true
+    - name: locks_idle_in_transaction
+      description: Configure collection of idle in transaction lock age metrics
+      options:
+        - name: enabled
+          description: Enable collection of idle in transaction lock age metrics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+        - name: collection_interval
+          description: Set the collection interval (in seconds) for idle in transaction lock age metrics.
+          value:
+            type: number
+            example: 300
+            display_default: 300
     - name: collect_checksum_metrics
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
