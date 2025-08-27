@@ -10,16 +10,20 @@ on:
       base_sha:
         description: Merge-base SHA
         value: ${{ jobs.get-diff.outputs.base_sha }}
+      passes_qg:
+        description: Whether the quality gates passed
+        value: ${{ jobs.get-diff.outputs.passes_qg }}
 
 env:
   PYTHON_VERSION: "3.12"
 
 jobs:
-  get-diff:
+  get-diff: 
     runs-on: ubuntu-22.04
     outputs:
       run_id_base: ${{ steps.find_run.outputs.run_id_base }}
       base_sha: ${{ steps.merge_base.outputs.base_sha }}
+      total_diff: ${{ steps.calculate_diffs.outputs.total_diff }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -90,10 +94,11 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
             # send metrics to datadog if this is a push to master
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog ${{secrets.DD_API_KEY}} --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
+            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog ${{secrets.DD_API_KEY}} --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt) --threshold 1
           else
-            python ddev/src/ddev/cli/size/utils/gha_diff.py --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt
+            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt) --threshold 1
           fi
+          echo "passes_qg=$PASSES_QG" >> $GITHUB_OUTPUT
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
 
       - name: Upload long size diffs output as artifact
@@ -115,6 +120,7 @@ jobs:
         with:
           name: diffs_${{ inputs.platform }}.json
           path: diffs_${{ inputs.platform }}.json
+
 
      
 

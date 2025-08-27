@@ -124,62 +124,6 @@ def order_by(diffs, key):
     return sorted(diffs, key=lambda x: x[key], reverse=True)
 
 
-# def display_diffs(diffs, platform, python_version):
-#     sign = "+" if diffs['total_diff'] > 0 else ""
-#     print("=" * 52)
-#     print(f"Size Delta for {platform} and Python {python_version}")
-#     print("=" * 52)
-#     print(f"Total size difference: {sign}{convert_to_human_readable_size(diffs['total_diff'])}")
-#     print()
-
-#     if diffs["added"]:
-#         print("Added:")
-#         for entry in diffs["added"]:
-#             name = entry.get("Name", "")
-#             version = entry.get("Version", "")
-#             size = entry.get("Size", 0)
-#             typ = entry.get("Type", "")
-#             print(f"  + [{typ}] {name} {version}: +{size}")
-#         print()
-#     else:
-#         print("Added: None\n")
-
-#     if diffs["removed"]:
-#         print("Removed:")
-#         for entry in diffs["removed"]:
-#             name = entry.get("Name", "")
-#             version = entry.get("Version", "")
-#             size = int(entry.get("Size_Bytes", 0))
-#             typ = entry.get("Type", "")
-#             print(f"  - [{typ}] {name} {version}: -{convert_to_human_readable_size(size)}")
-#         print()
-#     else:
-#         print("Removed: None\n")
-
-#     if diffs["changed"]:
-#         print("Changed:")
-#         for entry in diffs["changed"]:
-#             name = entry.get("Name", "")
-#             version = entry.get("Version", "")
-#             typ = entry.get("Type", "")
-#             percentage = entry.get("Percentage", 0)
-#             diff = entry.get("Diff", 0)
-#             sign = "+" if diff > 0 else "-"
-#             version_diff = (
-#                 f"{entry.get('Prev Version', version)} -> {entry.get('Version', version)}"
-#                 if entry.get('Prev Version', version) != entry.get('Version', version)
-#                 else version
-#             )
-#             print(
-#                 f"  * [{typ}] {name} ({version_diff}): "
-#                 f"{sign}{convert_to_human_readable_size(abs(diff))} ({sign}{percentage:.2f}%)"
-#             )
-#         print()
-#     else:
-#         print("Changed: None\n")
-#     print("=" * 60)
-
-
 def display_diffs_to_html(diffs, platform, python_version):
     sign = "+" if diffs['total_diff'] > 0 else ""
     text = f"<details><summary><h4>Size Delta for {platform} and Python {python_version}:\n"
@@ -472,6 +416,7 @@ def main():
     parser.add_argument('--send-to-datadog', required=False)  # api key to send metrics to datadog
     parser.add_argument('--html-long-out', required=False)  # path to write long HTML output
     parser.add_argument('--html-short-out', required=False)  # path to write short HTML output
+    parser.add_argument('--threshold', required=False)  # threshold for size increase
     args = parser.parse_args()
 
     with open(args.compressed_prev_sizes, "r") as f:
@@ -491,6 +436,9 @@ def main():
     if args.send_to_datadog:
         send_to_datadog(diffs, platform, python_version, args.send_to_datadog)
 
+    if args.threshold:
+        if diffs['total_diff'] < args.threshold:
+            return True
     long_text = display_diffs_to_html(diffs, platform, python_version)
     short_text = display_diffs_to_html_short(diffs, platform, python_version)
 
@@ -504,6 +452,8 @@ def main():
     if args.output:
         with open(args.output, "w") as f:
             f.write(json.dumps(diffs, indent=2))
+
+    return False
 
 
 if __name__ == "__main__":
