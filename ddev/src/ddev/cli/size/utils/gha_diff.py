@@ -437,7 +437,7 @@ def main():
         send_to_datadog(diffs, platform, python_version, args.send_to_datadog)
 
     if args.threshold:
-        if diffs['total_diff'] < args.threshold:
+        if diffs['total_diff'] < int(args.threshold):
             return True
     long_text = display_diffs_to_html(diffs, platform, python_version)
     short_text = display_diffs_to_html_short(diffs, platform, python_version)
