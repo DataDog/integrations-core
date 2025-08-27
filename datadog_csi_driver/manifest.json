@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Tracks metrics of the Datadog CSI Driver.",
     "title": "datadog_csi_driver",
     "media": [],
     "classifier_tags": [
@@ -30,13 +30,16 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "datadog_csi_driver.",
-        "check": "",
+        "prefix": "datadog.csi_driver.",
+        "check": [
+          "datadog.csi_driver.node_publish_volume_attempts.count",
+          "datadog.csi_driver.node_unpublish_volume_attempts.count"
+        ],
         "metadata_path": "metadata.csv"
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
+        "Datadog CSI Driver Overview": "assets/dashboards/datadog_csi_driver_overview.json"
     },
     "monitors": {},
     "saved_views": {}

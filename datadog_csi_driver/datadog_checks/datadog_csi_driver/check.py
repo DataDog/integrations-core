@@ -12,7 +12,7 @@ METRICS_MAP = [
 
 
 class DatadogCSIDriverCheck(OpenMetricsBaseCheckV2):
-    __NAMESPACE__ = 'datadog_csi_driver'
+    __NAMESPACE__ = 'datadog.csi_driver'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -25,5 +25,4 @@ class DatadogCSIDriverCheck(OpenMetricsBaseCheckV2):
         }
 
     def check(self, instance):
-        print("called")
         super().check(instance)
