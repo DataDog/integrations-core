@@ -534,7 +534,7 @@ files:
             Enable collection of sys.configurations. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to
