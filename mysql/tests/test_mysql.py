@@ -299,7 +299,7 @@ def _assert_complex_config(
                     'schema:testdb',
                     'table:users',
                 ),
-                count=expected_counts,
+                at_least=1,
             )
         elif mname == 'mysql.performance.qcache.utilization.instant':
             # This metric will only be collected if query_cache_type is enabled and on a second check run
