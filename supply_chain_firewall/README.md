@@ -51,6 +51,7 @@ Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualization
             [?] Select the desired log level for Datadog logging:
             > Log allowed and blocked commands
             ```
+        - By default, the Datadog instance site is set to `us1`. If your instance uses a different site, set the `DD_SITE` environment variable accordingly using the appropriate `Site Parameter` from the [Datadog site documentation][3].
 
 3. After setup, update your current shell environment:
 
@@ -87,8 +88,9 @@ The Supply Chain Firewall integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][4].
 
 [1]: https://github.com/DataDog/supply-chain-firewall
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[3]: https://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
+[4]: https://docs.datadoghq.com/help/
