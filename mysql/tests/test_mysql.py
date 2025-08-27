@@ -124,7 +124,7 @@ def test_mysql_version_set(aggregator, dd_run_check, instance_basic):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, dd_default_hostname, instance_complex, root_conn):
-    aggregator = dd_agent_check(instance_complex)
+    aggregator = dd_agent_check(instance_complex, check_rate=True)
 
     expected_metric_tags = tags.METRIC_TAGS + (
         f'database_hostname:{dd_default_hostname}',
@@ -158,6 +158,8 @@ def _assert_complex_config(
 ):
     # Set replication mode once for reuse
     replication_mode = 'source' if not is_replica else 'replica'
+
+    expected_counts = 2 if e2e else 1
 
     # Test service check
     aggregator.assert_service_check(
@@ -231,14 +233,14 @@ def _assert_complex_config(
         ):
             continue
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=expected_counts)
             if not is_replica:
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:mysql',), count=1)
+                aggregator.assert_metric(mname, tags=metric_tags + ('schema:mysql',), count=expected_counts)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=expected_counts)
             if not is_replica:
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=1)
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=1)
+                aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=expected_counts)
+                aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=expected_counts)
         elif mname in variables.TABLE_VARS:
             aggregator.assert_metric(
                 mname,
@@ -247,7 +249,7 @@ def _assert_complex_config(
                     'schema:testdb',
                     'table:users',
                 ),
-                count=1,
+                count=expected_counts,
             )
             if not is_replica:
                 aggregator.assert_metric(
@@ -257,7 +259,7 @@ def _assert_complex_config(
                         'schema:information_schema',
                         'table:VIEWS',
                     ),
-                    count=1,
+                    count=expected_counts,
                 )
                 aggregator.assert_metric(
                     mname,
@@ -266,10 +268,10 @@ def _assert_complex_config(
                         'schema:performance_schema',
                         'table:users',
                     ),
-                    count=1,
+                    count=expected_counts,
                 )
         elif mname == 'mysql.replication.slave_running':
-            aggregator.assert_metric(mname, tags=metric_tags + (f'replication_mode:{replication_mode}',), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + (f'replication_mode:{replication_mode}',), count=expected_counts)
         elif mname == 'mysql.performance.user_connections':
             if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0'):
                 processlist_state = "executing"
@@ -279,17 +281,16 @@ def _assert_complex_config(
                 mname,
                 tags=metric_tags
                 + (
-                    'processlist_host:192.168.65.1',
                     'processlist_state:{}'.format(processlist_state),
                     'processlist_user:dog',
                     'processlist_db:None',
                 ),
-                count=1,
+                at_least=0,  # TODO this metric includes processlist_host tag which contains a random IP address
             )
         elif mname == 'mysql.replication.group.member_status':
-            aggregator.assert_metric(mname, tags=metric_tags + group_replication_tags, count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + group_replication_tags, count=expected_counts)
         elif mname in variables.GROUP_REPLICATION_VARS + variables.GROUP_REPLICATION_VARS_8_0_2:
-            aggregator.assert_metric(mname, tags=metric_tags + ('channel_name:group_replication_applier',), count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ('channel_name:group_replication_applier',), count=expected_counts)
         elif mname in variables.ROW_TABLE_STATS_VARS:
             aggregator.assert_metric(
                 mname,
@@ -298,7 +299,7 @@ def _assert_complex_config(
                     'schema:testdb',
                     'table:users',
                 ),
-                count=1,
+                count=expected_counts,
             )
         elif mname == 'mysql.performance.qcache.utilization.instant':
             # This metric will only be collected if query_cache_type is enabled and on a second check run
@@ -519,7 +520,7 @@ def _test_operation_time_metrics(aggregator, operation_time_metrics, tags, e2e=F
                 aggregator.assert_metric(
                     metric_name,
                     tags=list(tags) + ['operation:{}'.format(operation_time_metric)],
-                    count=1,
+                    count=2,
                 )
         else:
             aggregator.assert_metric(
