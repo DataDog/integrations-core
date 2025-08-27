@@ -99,7 +99,9 @@ jobs:
             PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold 1)
           fi
           echo "passes_qg=$PASSES_QG" >> $GITHUB_OUTPUT
-          cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
+          if [[ "$PASSES_QG" == "false" ]]; then
+            cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload long size diffs output as artifact
         if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}
