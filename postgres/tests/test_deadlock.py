@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import copy
-import select
+import threading
 import time
 
-import psycopg2
+import psycopg
 import pytest
+from psycopg import ClientCursor
 
 from .common import DB_NAME, HOST, POSTGRES_VERSION, _get_expected_tags
 
@@ -48,27 +48,17 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     conn = check._new_connection(pg_instance['dbname'])
     cursor = conn.cursor()
 
-    def wait(conn):
-        while True:
-            state = conn.poll()
-            if state == psycopg2.extensions.POLL_OK:
-                break
-            elif state == psycopg2.extensions.POLL_WRITE:
-                select.select([], [conn.fileno()], [])
-            elif state == psycopg2.extensions.POLL_READ:
-                select.select([conn.fileno()], [], [])
-            else:
-                raise psycopg2.OperationalError("poll() returned %s" % state)
-            time.sleep(0.1)
-
-    conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
-    conn_args_async = copy.copy(conn_args)
-    conn_args_async["async_"] = 1
-    conn1 = psycopg2.connect(**conn_args)
-    conn1.autocommit = False
-
-    conn2 = psycopg2.connect(**conn_args_async)
-    wait(conn2)
+    def execute_in_thread(q, args):
+        with psycopg.connect(
+            host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
+        ) as tconn:
+            with tconn.cursor() as cur:
+                # this will block, and eventually throw when
+                # the deadlock is created
+                try:
+                    cur.execute(q, args)
+                except psycopg.errors.DeadlockDetected:
+                    pass
 
     appname = 'deadlock sess'
     appname1 = appname + '1'
@@ -80,20 +70,23 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     cursor.execute(deadlock_count_sql, (DB_NAME,))
     deadlocks_before = cursor.fetchone()[0]
 
+    conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
+    conn1 = psycopg.connect(**conn_args, autocommit=False, cursor_factory=ClientCursor)
+
     cur1 = conn1.cursor()
     cur1.execute(appname_sql, (appname1,))
     cur1.execute(update_sql, (1,))
 
-    cur2 = conn2.cursor()
-    cur2.execute(
-        """SET application_name=%s;
+    args = (appname2, 2, 1)
+    query = """SET application_name=%s;
 begin transaction;
 {};
 {};
 commit;
-""".format(update_sql, update_sql),
-        (appname2, 2, 1),
-    )
+""".format(update_sql, update_sql)
+    # ... now execute the test query in a separate thread
+    lock_task = threading.Thread(target=execute_in_thread, args=(query, args))
+    lock_task.start()
 
     lock_count_sql = """SELECT COUNT(1)
    FROM  pg_catalog.pg_locks         blocked_locks
@@ -123,11 +116,10 @@ commit;
     try:
         cur1.execute(update_sql, (2,))
         cur1.execute("commit")
-    except psycopg2.errors.DeadlockDetected:
+    except psycopg.errors.DeadlockDetected:
         pass
 
     conn1.close()
-    conn2.close()
 
     dd_run_check(check)
 
