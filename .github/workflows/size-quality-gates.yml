@@ -102,13 +102,16 @@ jobs:
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
 
       - name: Upload long size diffs output as artifact
+        if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: size_diffs_output_${{ inputs.platform }}.txt
           path: size_diffs_output_${{ inputs.platform }}.txt
           retention-days: 1
+          
 
       - name: Upload short size diffs output as artifact
+        if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: size_diffs_output_short_${{ inputs.platform }}.txt

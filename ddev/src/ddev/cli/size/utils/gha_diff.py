@@ -435,7 +435,9 @@ def main():
 
     if args.send_to_datadog:
         send_to_datadog(diffs, platform, python_version, args.send_to_datadog)
-
+    if args.output:
+        with open(args.output, "w") as f:
+            f.write(json.dumps(diffs, indent=2))
     if args.threshold:
         if diffs['total_diff'] < int(args.threshold):
             return True
@@ -448,10 +450,6 @@ def main():
     if args.html_short_out:
         with open(args.html_short_out, "w") as f:
             f.write(short_text)
-
-    if args.output:
-        with open(args.output, "w") as f:
-            f.write(json.dumps(diffs, indent=2))
 
     return False
 
