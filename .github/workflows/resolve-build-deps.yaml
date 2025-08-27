@@ -275,7 +275,9 @@ jobs:
   comment-size-diffs-on-pr:
     needs:
       - calculate-size-diffs
-    if: contains(github.event.pull_request.labels.*.name, 'show-size-delta') && steps.calculate-size-diffs.outputs.passes_qg == 'false'
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'show-size-delta')
+      && needs.calculate-size-diffs.outputs.passes_qg == 'false'
     env:
       PYTHON_VERSION: "3.12"
       PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
