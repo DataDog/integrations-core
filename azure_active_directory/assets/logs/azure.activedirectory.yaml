@@ -1742,7 +1742,6 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
-
         - type: arithmetic-processor
           name: Type ID calculator
           enabled: true
