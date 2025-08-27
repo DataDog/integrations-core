@@ -6,12 +6,12 @@ tests:
     custom:
       lustre:
         extended_flags: "0x13"
+        group: 0
         nid: "172.31.38.176@tcp"
         parent_fid: "[0x200000007:0x1:0x0]"
         target_fid: "[0x200000bd1:0x3:0x0]"
         target_name: "some_dir"
         uid_gid: "0:0"
-        group: 0
       network:
         client:
           ip: "172.31.38.176"
@@ -21,6 +21,7 @@ tests:
     message: "t=[0x200000bd1:0x3:0x0] ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] some_dir"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
 -
   sample: "t=[0x200000bd1:0x14:0x0] j=vim.0 ef=0x1b u=0:0 nid=172.31.38.176@tcp x=user.job p=[0x200000007:0x1:0x0]"
   result:
@@ -28,12 +29,12 @@ tests:
       lustre:
         extended_attribute: "user.job"
         extended_flags: "0x1b"
+        group: 0
         job_id: "vim.0"
         nid: "172.31.38.176@tcp"
         parent_fid: "[0x200000007:0x1:0x0]"
         target_fid: "[0x200000bd1:0x14:0x0]"
         uid_gid: "0:0"
-        group: 0
       network:
         client:
           ip: "172.31.38.176"
@@ -43,12 +44,14 @@ tests:
     message: "t=[0x200000bd1:0x14:0x0] j=vim.0 ef=0x1b u=0:0 nid=172.31.38.176@tcp x=user.job p=[0x200000007:0x1:0x0]"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
 -
   sample: "t=[0:0x0:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] vim_edited_file.txt~ s=[0x200000bd1:0x26:0x0] sp=[0x200000007:0x1:0x0] vim_edited_file.txt"
   result:
     custom:
       lustre:
         extended_flags: "0x13"
+        group: 0
         job_id: "vim.0"
         nid: "172.31.38.176@tcp"
         parent_fid: "[0x200000007:0x1:0x0]"
@@ -58,7 +61,6 @@ tests:
         target_fid: "[0:0x0:0x0]"
         target_name: "vim_edited_file.txt~"
         uid_gid: "0:0"
-        group: 0
       network:
         client:
           ip: "172.31.38.176"
@@ -68,17 +70,18 @@ tests:
     message: "t=[0:0x0:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp p=[0x200000007:0x1:0x0] vim_edited_file.txt~ s=[0x200000bd1:0x26:0x0] sp=[0x200000007:0x1:0x0] vim_edited_file.txt"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
 -
   sample: "t=[0x200000bd1:0x2b:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp"
   result:
     custom:
       lustre:
         extended_flags: "0x13"
+        group: 0
         job_id: "vim.0"
         nid: "172.31.38.176@tcp"
         target_fid: "[0x200000bd1:0x2b:0x0]"
         uid_gid: "0:0"
-        group: 0
       network:
         client:
           ip: "172.31.38.176"
@@ -88,3 +91,4 @@ tests:
     message: "t=[0x200000bd1:0x2b:0x0] j=vim.0 ef=0x13 u=0:0 nid=172.31.38.176@tcp"
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1
