@@ -1179,7 +1179,7 @@ VOLUME /etc/datadog-agent
 ADD datadog.yaml /etc/datadog-agent/datadog.yaml
 ```
 
-2. Build the container image. Datadog recommends tagging it with the version and type; for example, `docker.io/example/agent:7.62.2-rofs` (**r**ead **o**nly **f**ile**s**ystem).
+2. Build the container image. Datadog recommends tagging it with the version and type; for example, `docker.io/example/agent:7.62.2-rofs` (**r**ead **o**nly **f**ile **s**ystem).
 3. Reference the image in your task definition, as shown in the example below.
 4. Set `"readonlyRootFilesystem": true` on the Agent container, as shown in the example below.
 
