@@ -46,6 +46,7 @@ from .util import (
     CONNECTION_METRICS,
     COUNT_METRICS,
     FUNCTION_METRICS,
+    IDLE_TX_LOCK_AGE_METRICS,
     INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_CONTROL_CHECKPOINT_LT_10,
@@ -376,6 +377,9 @@ class PostgreSql(AgentCheck):
         if self.version >= V16:
             if self._config.dbm_enabled:
                 queries.append(STAT_IO_METRICS)
+
+        if self._config.dbm_enabled:
+            per_database_queries.append(IDLE_TX_LOCK_AGE_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")

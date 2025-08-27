@@ -1085,3 +1085,45 @@ LIMIT 200
         {'name': 'io.writes', 'type': 'monotonic_count'},
     ],
 }
+
+# Measures the age (in seconds) of idle-in-transaction sessions holding exclusive relation locks.
+# Limits result set to 10 rows to avoid tag explosion.
+IDLE_TX_LOCK_AGE_METRICS = {
+    'name': 'idle_tx_lock_age_metrics',
+    'collection_interval': 5,
+    'query': (
+        """
+SELECT
+    l.pid,
+    a.datname,
+    a.usename             AS session_user,
+    a.application_name,
+    a.client_hostname,
+    l.mode,
+    c.oid::regclass       AS relation,
+    r.rolname             AS relation_owner,
+    EXTRACT(EPOCH FROM (now() - a.xact_start)) AS xact_age
+FROM pg_locks l
+JOIN pg_stat_activity a ON a.pid = l.pid
+JOIN pg_class c         ON c.oid = l.relation
+JOIN pg_roles r         ON r.oid = c.relowner
+WHERE l.locktype = 'relation'
+  AND l.granted = true
+  AND a.state = 'idle in transaction'
+  AND a.xact_start IS NOT NULL
+  AND now() - a.xact_start > interval '60 seconds'
+ORDER BY xact_age DESC
+LIMIT 10 ;        """
+    ).strip(),
+    'columns': [
+        {'name': 'pid', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'session_user', 'type': 'tag'},
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'client_hostname', 'type': 'tag_not_null'},
+        {'name': 'lock_mode', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'relation_owner', 'type': 'tag'},
+        {'name': 'locks.idle_in_transaction.xact_age', 'type': 'gauge'},
+    ],
+}
