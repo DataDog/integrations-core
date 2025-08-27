@@ -14,11 +14,6 @@ This integration enables visibility into threat types, user targeting patterns, 
 
 The Datadog Agent is not required for this integration.
 
-### Configuration
-
-**Configuring the Checkpoint Harmony Email and Collaboration platform to send logs to your S3 bucket**
-- Refer to this [link][4] to more on this.
-
 ### Validation
 
 After setup, verify that logs appear in Datadog by checking the Logs Explorer.
