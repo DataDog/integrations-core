@@ -143,6 +143,7 @@ class LocksIdleInTransaction(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    max_rows: Optional[int] = None
 
 
 class ManagedIdentity(BaseModel):
