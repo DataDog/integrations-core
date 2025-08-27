@@ -1123,6 +1123,6 @@ LIMIT 10 ;        """
         {'name': 'lock_mode', 'type': 'tag'},
         {'name': 'relation', 'type': 'tag'},
         {'name': 'relation_owner', 'type': 'tag'},
-        {'name': 'locks.idle_in_transaction.xact_age', 'type': 'gauge'},
+        {'name': 'locks.idle_in_transaction_age', 'type': 'gauge'},
     ],
 }
