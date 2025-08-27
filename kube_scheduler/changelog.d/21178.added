@@ -1,0 +1,1 @@
+Add support for openmetrics_endpoint configuration parameter as an alternative to prometheus_url

@@ -76,8 +76,16 @@ def instance_namespace():
     return 'service'
 
 
+def instance_openmetrics_endpoint():
+    return 'http://localhost:10251/metrics'
+
+
 def instance_persist_connections():
     return False
+
+
+def instance_prometheus_url():
+    return 'http://localhost:10251/metrics'
 
 
 def instance_request_size():

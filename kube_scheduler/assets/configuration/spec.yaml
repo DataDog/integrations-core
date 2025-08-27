@@ -31,10 +31,23 @@ files:
       value:
         type: string
         example: http://localhost:10251/healthz
+    - name: openmetrics_endpoint
+      description: |
+        The URL exposing metrics in the OpenMetrics format.
+        One of openmetrics_endpoint or prometheus_url parameter is required.
+      required: false
+      value:
+        type: string
+        example: http://localhost:10251/metrics
+        display_priority: 1
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:10251/metrics
-        prometheus_url.display_priority: 1
+        prometheus_url.display_priority: 2
+        prometheus_url.required: false
+        prometheus_url.description: |
+          The URL where your application metrics are exposed by Prometheus.
+          One of openmetrics_endpoint or prometheus_url parameter is required.
 
 - name: auto_conf.yaml
   options:

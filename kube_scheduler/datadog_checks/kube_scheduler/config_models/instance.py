@@ -119,10 +119,11 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     namespace: Optional[str] = None
     ntlm_domain: Optional[str] = None
+    openmetrics_endpoint: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     prometheus_metrics_prefix: Optional[str] = None
-    prometheus_url: str
+    prometheus_url: Optional[str] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
