@@ -13,17 +13,7 @@
     "media": [
         {
             "caption": "BlazeMeter - Functional Test Results",
-            "image_url": "images/blazemeter_functional_test_results_1.png",
-            "media_type": "image"
-          },
-          {
-            "caption": "BlazeMeter - Functional Test Results",
-            "image_url": "images/blazemeter_functional_test_results_2.png",
-            "media_type": "image"
-          },
-          {
-            "caption": "BlazeMeter - Functional Test Results",
-            "image_url": "images/blazemeter_functional_test_results_3.png",
+            "image_url": "images/blazemeter_functional_test_results.png",
             "media_type": "image"
           },
           {
