@@ -239,8 +239,12 @@ def _assert_complex_config(
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname, tags=metric_tags + ('schema:testdb',), count=expected_counts)
             if not is_replica:
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:information_schema',), count=expected_counts)
-                aggregator.assert_metric(mname, tags=metric_tags + ('schema:performance_schema',), count=expected_counts)
+                aggregator.assert_metric(
+                    mname, tags=metric_tags + ('schema:information_schema',), count=expected_counts
+                )
+                aggregator.assert_metric(
+                    mname, tags=metric_tags + ('schema:performance_schema',), count=expected_counts
+                )
         elif mname in variables.TABLE_VARS:
             aggregator.assert_metric(
                 mname,
@@ -271,7 +275,9 @@ def _assert_complex_config(
                     count=expected_counts,
                 )
         elif mname == 'mysql.replication.slave_running':
-            aggregator.assert_metric(mname, tags=metric_tags + (f'replication_mode:{replication_mode}',), count=expected_counts)
+            aggregator.assert_metric(
+                mname, tags=metric_tags + (f'replication_mode:{replication_mode}',), count=expected_counts
+            )
         elif mname == 'mysql.performance.user_connections':
             if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_VERSION_PARSED >= parse_version('8.0'):
                 processlist_state = "executing"
@@ -290,7 +296,9 @@ def _assert_complex_config(
         elif mname == 'mysql.replication.group.member_status':
             aggregator.assert_metric(mname, tags=metric_tags + group_replication_tags, count=expected_counts)
         elif mname in variables.GROUP_REPLICATION_VARS + variables.GROUP_REPLICATION_VARS_8_0_2:
-            aggregator.assert_metric(mname, tags=metric_tags + ('channel_name:group_replication_applier',), count=expected_counts)
+            aggregator.assert_metric(
+                mname, tags=metric_tags + ('channel_name:group_replication_applier',), count=expected_counts
+            )
         elif mname in variables.ROW_TABLE_STATS_VARS:
             aggregator.assert_metric(
                 mname,
