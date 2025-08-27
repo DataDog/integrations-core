@@ -38,7 +38,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "psycopg2-binary==2.9.9",
-    "PyMySQL==1.1.1"
+    "pymysql==1.1.2",
 ]
 
 [project.urls]
