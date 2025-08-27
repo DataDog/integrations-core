@@ -101,6 +101,7 @@ postgresql.last_autovacuum_age,gauge,,second,,"Last time at which this table was
 postgresql.last_vacuum_age,gauge,,second,,"Last time at which this table was manually vacuumed (not counting VACUUM FULL). This metric is tagged with db, schema, table.",0,postgres,age vacuum,,
 postgresql.live_rows,gauge,,row,,"Enabled with `relations`. The estimated number of live rows. This metric is tagged with db, schema, table.",0,postgres,live rows,,
 postgresql.locks,gauge,,lock,,"Enabled with `relations`. The number of locks active for this database. This metric is tagged with db, lock_mode, lock_type, schema, table, granted.",0,postgres,locks,,
+postgresql.locks.idle_in_transaction.xact_age,gauge,,second,,Transaction age of idle in transaction sessions holding exclusive relation locks.,0,postgres,idle tx age with locks,"pid,db,session_user,app,client_hostname,lock_mode,relation,relation_owner"
 postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns,,
 postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns,,
 postgresql.pg_stat_statements.dealloc,count,,,,The number of times pg_stat_statements had to evict least executed queries because pg_stat_statements.max was reached.,-1,postgres,pgss dealloc,,
@@ -236,4 +237,3 @@ postgresql.wal_receiver.last_msg_send_age,gauge,,second,,The age of the latest m
 postgresql.wal_receiver.latest_end_age,gauge,,second,,Time since the reception of the last message from the WAL sender with an WAL location update. This metric is tagged with status.,0,postgres,wal receiver latest end,,
 postgresql.wal_receiver.received_timeline,gauge,,,,"Timeline number of last write-ahead log location received and flushed to disk, the initial value of this field being the timeline number of the first log location used when WAL receiver is started. This metric is tagged with status.",0,postgres,wal receiver tli,,
 postgresql.wal_size,gauge,,byte,,The sum of all WAL files on disk.,-1,postgres,wal size,,
-postgresql.locks.idle_in_transaction.xact_age,gauge,,second,,Age of idle in transaction sessions holding exclusive relation locks. Tagged with pid, db, session_user, app, client_hostname, lock_mode, relation, relation_owner.,0,postgres,locks idle in tx age,,
