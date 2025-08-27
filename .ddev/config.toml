@@ -158,6 +158,7 @@ exclude = [
     'aerospike',  # v8+ breaks agent build.
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
+    'psycopg', # Pinning psycopg binary to 3.2.7 to align OpenSSL version with the agent until we build wheels ourselves.
     'psutil',
     'pyvmomi', # 9+ has breaking changes
     'pymongo', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
