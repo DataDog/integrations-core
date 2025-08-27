@@ -1,7 +1,7 @@
 name: Quality Gates
 
 on:
-  workflow_call:
+  workflow_call: # this is used by the resolve-build-deps and size-qg-prev-dep-sizes-json workflows 
     inputs:
       platform:
         required: true
