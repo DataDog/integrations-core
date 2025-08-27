@@ -381,7 +381,6 @@ class PostgreSql(AgentCheck):
         if self._config.dbm_enabled and self._config.locks_idle_in_transaction['enabled']:
             query_def = copy.deepcopy(IDLE_TX_LOCK_AGE_METRICS)
             query_def['collection_interval'] = self._config.locks_idle_in_transaction['collection_interval']
-            # Apply row limit parameter (default 100)
             max_rows = self._config.locks_idle_in_transaction.get('max_rows', 100)
             query_def['query'] = query_def['query'].format(max_rows=max_rows)
             per_database_queries.append(query_def)
