@@ -344,7 +344,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(
-        check, pg_instance, db="dogs", table="breed", index="breed_names", schema="public"
+        check, pg_instance, db="dogs", table="breed", index="breed_names", schema="public", valid="true"
     )
     for name in IDX_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
