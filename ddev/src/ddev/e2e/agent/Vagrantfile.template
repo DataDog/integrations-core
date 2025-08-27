@@ -1,0 +1,35 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$set_environment_variables = <<SCRIPT
+tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
+
+export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
+export DD_HOSTNAME=$(hostname)
+{{ exported_env_vars_str }}
+
+EOF
+SCRIPT
+
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "{{ vagrant_box }}"
+  config.vm.box_version = "1.1"
+
+  {{ synced_folders_str | safe }}
+  config.vm.network "private_network", ip: "172.30.1.5"
+
+  config.vm.define "{{ vm_hostname }}" do |node|
+    node.vm.hostname = "{{ vm_hostname }}"
+
+    node.vm.provision "shell", inline: $set_environment_variables, run: "always"
+
+    node.vm.provision "shell", inline: <<-SHELL, run: "always"
+      sudo apt update
+      {{ agent_install_env_vars_str }} bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+      sudo service datadog-agent start && echo "Agent started successfully"
+      echo "VM {{ vm_hostname }} is ready"
+    SHELL
+  end
+
+end 

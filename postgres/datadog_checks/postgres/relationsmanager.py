@@ -61,26 +61,54 @@ SELECT mode,
 }
 
 
-# The pg_stat_all_indexes view will contain one row for each index in the current database,
-# showing statistics about accesses to that specific index.
-# The pg_stat_user_indexes view contain the same information, but filtered to only show user indexes.
+# This is similar to pg_stat_user_indexes view
 IDX_METRICS = {
-    'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
-    'metrics': {
-        'idx_scan': ('index_scans', AgentCheck.rate),
-        'idx_tup_read': ('index_rows_read', AgentCheck.rate),
-        'idx_tup_fetch': ('index_rows_fetched', AgentCheck.rate),
-        'pg_relation_size(indexrelid) as index_size': ('individual_index_size', AgentCheck.gauge),
-    },
+    'name': 'pg_index',
     'query': """
-SELECT relname,
-       schemaname,
-       indexrelname,
-       {metrics_columns}
-  FROM pg_stat_user_indexes
- WHERE {relations}""",
-    'relation': True,
-    'name': 'idx_metrics',
+SELECT
+  current_database(),
+  schemaname,
+  relname,
+  indexrelname,
+  is_valid,
+  idx_scan,
+  idx_tup_read,
+  idx_tup_fetch,
+  idx_blks_read,
+  idx_blks_hit,
+  index_size
+FROM (SELECT
+      N.nspname AS schemaname,
+      C.relname AS relname,
+      I.relname AS indexrelname,
+      X.indisvalid::text AS is_valid,
+      pg_stat_get_numscans(I.oid) AS idx_scan,
+      pg_stat_get_tuples_returned(I.oid) AS idx_tup_read,
+      pg_stat_get_tuples_fetched(I.oid) AS idx_tup_fetch,
+      pg_stat_get_blocks_fetched(I.oid) - pg_stat_get_blocks_hit(I.oid) AS idx_blks_read,
+      pg_stat_get_blocks_hit(I.oid) AS idx_blks_hit,
+      pg_relation_size(indexrelid) as index_size
+    FROM pg_class C JOIN
+      pg_index X ON C.oid = X.indrelid JOIN
+      pg_class I ON I.oid = X.indexrelid
+      LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+    AND C.relkind IN ('r', 'm')
+    AND N.nspname NOT IN ('pg_catalog', 'information_schema')
+) s WHERE {relations}
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'index', 'type': 'tag'},
+        {'name': 'valid', 'type': 'tag'},
+        {'name': 'index_scans', 'type': 'rate'},
+        {'name': 'index_rows_read', 'type': 'rate'},
+        {'name': 'index_rows_fetched', 'type': 'rate'},
+        {'name': 'index.index_blocks_read', 'type': 'rate'},
+        {'name': 'index.index_blocks_hit', 'type': 'rate'},
+        {'name': 'individual_index_size', 'type': 'gauge'},
+    ],
 }
 
 
@@ -386,8 +414,8 @@ INDEX_BLOAT = {
     'name': 'index_bloat_metrics',
 }
 
-RELATION_METRICS = [LOCK_METRICS, IDX_METRICS, STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE]
+RELATION_METRICS = [LOCK_METRICS, STATIO_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS]
 
 
 class RelationsManager(object):

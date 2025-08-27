@@ -17,11 +17,13 @@ HERE = get_here()
 def setup_tekton():
     run_command(["kubectl", "create", "namespace", "tekton-operator"])
     run_command(["kubectl", "apply", "-f", os.path.join(HERE, "kind", "tekton-operator.yaml"), "-n", "tekton-operator"])
+    print("Waiting for tekton-operator to be ready...")
     time.sleep(30)
     run_command(
         ["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "tekton-operator"]
     )
     time.sleep(60)
+    print("Waiting for tekton-pipelines-controller to be ready...")
     run_command(
         [
             "kubectl",
@@ -35,6 +37,7 @@ def setup_tekton():
             "tekton-pipelines",
         ]
     )
+    print("Waiting for tekton-triggers-controller to be ready...")
     run_command(
         [
             "kubectl",
@@ -49,40 +52,16 @@ def setup_tekton():
         ]
     )
 
-    run_command(
-        ["kubectl", "apply", "-f", os.path.join(HERE, "kind", "tekton-pipeline-hello.yaml"), "-n", "tekton-pipelines"]
-    )
+    configs_to_apply = ["pipeline", "pipelinerun", "task", "taskrun"]
 
-    run_command(
-        [
-            "kubectl",
-            "apply",
-            "-f",
-            os.path.join(HERE, "kind", "tekton-pipelinerun-hello.yaml"),
-            "-n",
-            "tekton-pipelines",
-        ]
-    )
-
-    for task in ("hello", "sleep"):
-        for kind in ("task", "pipeline"):
+    for config in configs_to_apply:
+        for action in ["hello", "sleep"]:
             run_command(
                 [
                     "kubectl",
                     "apply",
                     "-f",
-                    os.path.join(HERE, "kind", f"tekton-{kind}-{task}.yaml"),
-                    "-n",
-                    "tekton-pipelines",
-                ]
-            )
-
-            run_command(
-                [
-                    "kubectl",
-                    "apply",
-                    "-f",
-                    os.path.join(HERE, "kind", f"tekton-{kind}run-{task}.yaml"),
+                    os.path.join(HERE, "kind", f"tekton-{config}-{action}.yaml"),
                     "-n",
                     "tekton-pipelines",
                 ]

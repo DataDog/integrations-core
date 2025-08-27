@@ -29,7 +29,7 @@ dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=35.1",
+    "datadog-checks-dev[cli]~=35.2",
     "hatch>=1.8.1",
     "httpx",
     "jsonpointer",
@@ -86,6 +86,7 @@ target-version = ["py312"]
 extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
+extend = "../pyproject.toml"
 exclude = []
 target-version = "py312"
 line-length = 120
@@ -113,7 +114,6 @@ ignore = [
   "B027",
   # Ignore McCabe complexity
   "C901",
-  "F401",
 ]
 unfixable = [
   # Don't touch unused imports

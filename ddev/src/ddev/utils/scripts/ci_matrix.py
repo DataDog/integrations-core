@@ -217,6 +217,42 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             else:
                 platform_ids = ['linux']
 
+        hatch_toml = root / target / 'hatch.toml'
+        target_envs: dict[str, list[str]] = {}
+        if hatch_toml.is_file():
+            hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
+            env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
+            # convert the env matrix to a list of targets for each combination of values
+            if env_matrix:
+                for env in env_matrix:
+                    if not isinstance(env, dict):
+                        continue
+
+                    # Create a list of all combinations of values
+                    keys = env.keys()
+                    values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
+                    if not values:
+                        continue
+
+                    # Generate all combinations of values
+                    from itertools import product
+
+                    # This maps the lists of target envs into all their permutations
+                    # For example, if the env matrix is:
+                    # { 'foo': ['bar', 'baz'], 'python': ['3.8', '3.9'] }
+                    # The permutations would be:
+                    # - bar-py3.8
+                    # - bar-py3.9
+                    # - baz-py3.8
+                    # - baz-py3.9
+                    # If 'os' is one of the keys, we use it to put the combinations into the right platform
+                    # so that we can get the correct runner for the target-env
+
+                    os_index = list(keys).index('os') if 'os' in keys else -1
+                    for combination in product(*values):
+                        os = combination[os_index] if os_index != -1 else platform_ids[0]
+                        target_envs.setdefault(os, []).append('-'.join(combination))
+
         runners = matrix_overrides.get('runners', {})
         for platform_id in platform_ids:
             if platform_id not in PLATFORMS:
@@ -247,8 +283,15 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             if supported_python_versions:
                 config['python-support'] = ''.join(supported_python_versions)
 
-            config['name'] = normalize_job_name(config['name'])
-            job_matrix.append(config)
+            job_name = normalize_job_name(config['name'])
+            if platform_id in target_envs:
+                for target_env in target_envs[platform_id]:
+                    if target_env != target:
+                        config['name'] = f'{job_name} ({target_env})'
+                    job_matrix.append({**config, 'target-env': target_env})
+            else:
+                config['name'] = job_name
+                job_matrix.append({**config})
 
     return job_matrix
 

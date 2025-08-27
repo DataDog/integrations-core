@@ -228,6 +228,8 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
 def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
+    from packaging.version import Version
+
     exclusions = [re.compile(s) for s in [
         # pymqi
         r'pymqe\.cpython-\d+-darwin\.so',
@@ -277,12 +279,17 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
             shutil.move(wheel, Path(built_dir) / dest)
             continue
 
+        # Platform dependent wheels: rename with single arch and verify target macOS version
+        single_arch = os.uname().machine
+        dest = str(wheel_name._replace(platform_tag=wheel_name.platform_tag.replace('universal2', single_arch)))
         copied_libs = delocate_wheel(
             str(wheel),
-            os.path.join(built_dir, wheel.name),
+            os.path.join(built_dir, dest),
             copy_filt_func=copy_filt_func,
+            # require_archs=[single_arch],  TODO(regis): address multi-arch confluent_kafka/cimpl.cpython-312-darwin.so
+            require_target_macos_version=Version(os.environ["MACOSX_DEPLOYMENT_TARGET"]),
         )
-        print('Repaired wheel')
+        print(f'Repaired wheel to {dest}')
         if copied_libs:
             print('Libraries copied into the wheel:')
             print('\n'.join(copied_libs))

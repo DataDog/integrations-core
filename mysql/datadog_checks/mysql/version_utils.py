@@ -56,13 +56,12 @@ class MySQLVersion(namedtuple('MySQLVersion', ['version', 'flavor', 'build'])):
     def version_compatible(self, compat_version):
         # some patch version numbers contain letters (e.g. 5.0.51a)
         # so let's be careful when we compute the version number
-        log = get_check_logger()
         try:
             mysql_version = self.version.split('.')
         except Exception as e:
-            log.warning("Cannot compute mysql version, assuming it's older.: %s", e)
+            log = get_check_logger()
+            log.warning("Cannot compute MySQL version, assuming it's older: %s", e)
             return False
-        log.debug("MySQL version %s", mysql_version)
 
         patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)

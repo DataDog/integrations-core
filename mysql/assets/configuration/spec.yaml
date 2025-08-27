@@ -395,7 +395,7 @@ files:
                   Enable collection of performance_schema.global_variables. Requires `dbm: true`.
                 value:
                   type: boolean
-                  example: false
+                  example: true
               - name: collection_interval
                 description: |
                   Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -428,7 +428,6 @@ files:
                   type: number
                   example: 60
           - name: schemas_collection
-            hidden: true
             deprecation:
               Agent version: 7.69.0
               Migration: Use `collect_schemas` instead.

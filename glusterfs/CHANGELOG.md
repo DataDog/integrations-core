@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.0.2 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Stop relying on hardcoded value of run_path, and use the value in the agent config ([#20574](https://github.com/DataDog/integrations-core/pull/20574))
+
 ## 3.0.1 / 2024-10-10 / Agent 7.59.0
 
 ***Fixed***:

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Avoid logging noise while searching for the Gunicorn master process ([#19310](https://github.com/DataDog/integrations-core/pull/19310))
+
 ## 4.1.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:

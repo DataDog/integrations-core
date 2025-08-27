@@ -27,7 +27,7 @@ def test_check_falco(dd_run_check, aggregator, instance):
         MockResponse(file_path=get_fixture_path("falco_metrics.txt")),
     ]
 
-    with mock.patch('requests.get', side_effect=mock_responses):
+    with mock.patch('requests.Session.get', side_effect=mock_responses):
         dd_run_check(FalcoCheck('falco', {}, [instance]))
 
     for metric in METRICS:

@@ -128,14 +128,16 @@ def test_statement_metrics(
     with (
         mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql,
         mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
-        mock.patch.object(mysql_check, '_get_runtime_aurora_tags', passthrough=True) as m_get_runtime_aurora_tags,
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
     ):
         m_obfuscate_sql.side_effect = _obfuscate_sql
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = {}
+        m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         # Run a query
         run_query(query)
@@ -432,13 +434,15 @@ def test_statement_samples_collect(
 
     with (
         mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
-        mock.patch.object(mysql_check, '_get_runtime_aurora_tags', passthrough=True) as m_get_runtime_aurora_tags,
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
     ):
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = {}
+        m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         logger.debug("running first check")
         dd_run_check(mysql_check)
@@ -875,6 +879,7 @@ def _expected_dbm_instance_tags(dbm_instance, check):
     _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
@@ -892,6 +897,7 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     _tags = dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',

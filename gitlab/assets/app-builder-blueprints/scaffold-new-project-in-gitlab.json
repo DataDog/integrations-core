@@ -1215,7 +1215,7 @@
         "workflow_output": {}
     },
     "tile_background": "table-with-modal",
-    "tile_icon_action_fqn": "com.datadoghq.github.getProjectDeployments",
+    "tile_icon_action_fqn": "com.datadoghq.gitlab.getProjectDeployments",
     "tags": [
         "software_delivery"
     ],

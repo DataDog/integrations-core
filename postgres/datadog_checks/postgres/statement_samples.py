@@ -140,7 +140,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         collection_interval = float(
             config.statement_samples_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -167,7 +167,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config
@@ -242,6 +241,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
@@ -275,6 +276,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
 
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
@@ -295,6 +298,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 try:
@@ -403,7 +408,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
             else:
-                self._log.warning("Failed to obfuscate query | err=[%s]", e)
+                self._log.debug("Failed to obfuscate query | err=[%s]", e)
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
@@ -462,7 +467,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_statement_samples()
-        self.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
@@ -643,7 +647,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self.db_pool.get_connection(dbname, self._conn_ttl_ms)
+            self.db_pool.get_connection(dbname)
         except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -707,7 +711,9 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+        with self.db_pool.get_connection(dbname) as conn:
             # When sending potentially non-ascii data, e.g. UTF8, we need to force
             # the client encoding to UTF-8 to match Python string encoding
             if conn.info.encoding.lower() in ["ascii", "sqlascii", "sql_ascii"]:

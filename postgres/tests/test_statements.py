@@ -419,8 +419,6 @@ def test_statement_metrics_cloud_metadata(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
@@ -436,7 +434,7 @@ def test_statement_metrics_cloud_metadata(
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -461,8 +459,6 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     connections = {}
 
@@ -476,7 +472,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -496,8 +492,6 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -612,7 +606,7 @@ def test_successful_explain(
     check._connect()
 
     # run check so all internal state is correctly initialized
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -699,7 +693,7 @@ def test_failed_explain_handling(
         pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -956,11 +950,7 @@ def test_statement_metadata(
 ):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
-    dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
-    # This prevents DBMAsync from skipping job executions, as a job should not be executed
-    # more frequently than its collection period.
-    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -989,11 +979,11 @@ def test_statement_metadata(
         cursor.execute(
             query,
         )
-        run_one_check(check)
+        run_one_check(check, cancel=False)
         cursor.execute(
             query,
         )
-        run_one_check(check)
+        run_one_check(check, cancel=False)
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -1043,16 +1033,11 @@ def test_statement_reported_hostname(
     reported_hostname,
     expected_hostname,
 ):
-    dbm_instance['query_samples']['run_sync'] = True
-    dbm_instance['query_metrics']['run_sync'] = True
-    # This prevents DBMAsync from skipping job executions, as a job should not be executed
-    # more frequently than its collection period.
-    dbm_instance['query_samples']['collection_interval'] = 0.0000001
     dbm_instance['reported_hostname'] = reported_hostname
 
     check = integration_check(dbm_instance)
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     run_one_check(check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -1142,7 +1127,6 @@ def test_statement_reported_hostname(
         ),
     ],
 )
-@pytest.mark.unit
 def test_activity_snapshot_collection(
     aggregator,
     integration_check,
@@ -1496,7 +1480,7 @@ def test_statement_run_explain_errors(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain(
         "datadog_test", query, query, "7231596c8b5536d1"
     )
@@ -1552,7 +1536,7 @@ def test_statement_run_explain_parameterized_queries(
     if check.version < V12:
         return
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain(
         "datadog_test", query, query, "7231596c8b5536d1"
     )
@@ -1844,7 +1828,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
+    assert check.db_pool.pools.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
@@ -1888,79 +1872,9 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
-class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
-    """
-    A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
-    has it as read-only and not settable at construction-time
-    """
-
-    def __init__(self, pg_error):
-        self.pg_error = pg_error
-
-    def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
-        else:
-            return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
-
-    def __str__(self):
-        return self.pg_error
-
-
-class UndefinedTable(psycopg.errors.UndefinedTable):
-    """
-    A fake UndefinedTable that allows setting pg_error on construction since UndefinedTable
-    has it as read-only and not settable at construction-time
-    """
-
-    def __init__(self, pg_error):
-        self.pg_error = pg_error
-
-    def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
-        else:
-            return super(UndefinedTable, self).__getattribute__(attr)
-
-    def __str__(self):
-        return self.pg_error
-
-
 @pytest.mark.parametrize(
     "error,metric_columns,expected_error_tag,expected_warnings",
     [
-        (
-            ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
-            [],
-            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
-            [
-                'Unable to collect statement metrics because pg_stat_statements extension is '
-                "not loaded in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statements-not-loaded'
-                ' for more details\ncode=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
-            ],
-        ),
-        (
-            UndefinedTable('ERROR:  relation "pg_stat_statements" does not exist'),
-            [],
-            'error:database-UndefinedTable-pg_stat_statements_not_created',
-            [
-                'Unable to collect statement metrics because pg_stat_statements is not '
-                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
-                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
-                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
-            ],
-        ),
-        (
-            ObjectNotInPrerequisiteState('cannot insert into view'),
-            [],
-            'error:database-ObjectNotInPrerequisiteState',
-            [
-                "Unable to collect statement metrics because of an error running queries in database 'datadog_test'. "
-                "See https://docs.datadoghq.com/database_monitoring/troubleshooting for help: cannot insert into view\n"
-                "dbname=datadog_test host=stubbed.hostname"
-            ],
-        ),
         (
             psycopg.errors.DatabaseError('connection reset'),
             [],
@@ -1996,6 +1910,52 @@ def test_statement_metrics_database_errors(
         side_effect=error,
     ):
         run_one_check(check)
+
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + [expected_error_tag]
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )
+
+    assert check.warnings == expected_warnings
+
+
+@pytest.mark.parametrize(
+    "error,metric_columns,expected_error_tag,expected_warnings",
+    [
+        (
+            'not-created',
+            [],
+            'error:database-UndefinedTable-pg_stat_statements_not_created',
+            [
+                'Unable to collect statement metrics because pg_stat_statements is not '
+                "created in database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/"
+                'setup_postgres/troubleshooting#pg-stat-statements-not-created'
+                ' for more details\ncode=pg-stat-statements-not-created dbname=datadog_test host=stubbed.hostname',
+            ],
+        ),
+    ],
+)
+def test_statement_metrics_database_extension_errors(
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
+):
+    # don't need samples for this test
+    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
+    check = integration_check(dbm_instance)
+
+    # Break databased on purpose to simulate the extension not being loaded or created
+    if error == 'not-created':
+        superconn = _get_superconn(dbm_instance)
+        with superconn.cursor() as cur:
+            cur.execute("DROP EXTENSION pg_stat_statements CASCADE;")
+
+            run_one_check(check)
+
+            # Restore extension for next test
+            cur.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;")
 
     expected_tags = _get_expected_tags(
         check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
@@ -2125,8 +2085,6 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     connections = {}
 
@@ -2140,7 +2098,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     _run_queries()
     run_one_check(check)
 
@@ -2161,7 +2119,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 @pytest.mark.unit
 def test_get_query_metrics_payload_rows():
     config = PostgresConfig({"host": "host", "username": "user"}, {}, None)
-    statement_metrics = PostgresStatementMetrics({}, config, None)
+    statement_metrics = PostgresStatementMetrics({}, config)
     wrapper = {}
 
     TestCase = namedtuple('TestCase', 'rows max_size expected')
@@ -2211,7 +2169,6 @@ def test_metrics_encoding(
     integration_check,
     dbm_instance,
 ):
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if POSTGRES_LOCALE == 'C':
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     dbm_instance['query_samples'] = {'enabled': False}
