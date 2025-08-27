@@ -240,6 +240,11 @@ instances:
         #
         # collection_interval: 300
 
+        ## @param max_rows - integer - optional - default: 100
+        ## Set the maximum number of rows to collect per check run.
+        #
+        # max_rows: 100
+
     ## @param collect_checksum_metrics - boolean - optional - default: false
     ## Collect counts of database failed checksums. Only supported on versions >= 12.
     #

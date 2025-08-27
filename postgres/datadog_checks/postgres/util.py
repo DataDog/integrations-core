@@ -1112,7 +1112,7 @@ WHERE l.locktype = 'relation'
   AND a.xact_start IS NOT NULL
   AND now() - a.xact_start > interval '60 seconds'
 ORDER BY xact_age DESC
-LIMIT 10 ;        """
+LIMIT {max_rows} ;        """
     ).strip(),
     'columns': [
         {'name': 'pid', 'type': 'tag'},

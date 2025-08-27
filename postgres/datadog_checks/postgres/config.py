@@ -96,6 +96,7 @@ class PostgresConfig:
         self.locks_idle_in_transaction = {
             'enabled': is_affirmative(locks_idle_cfg.get('enabled', True)),
             'collection_interval': int(locks_idle_cfg.get('collection_interval', 300)),
+            'max_rows': int(locks_idle_cfg.get('max_rows', 100)),
         }
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)

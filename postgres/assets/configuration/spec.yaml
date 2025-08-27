@@ -297,6 +297,12 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: max_rows
+          description: Set the maximum number of rows to collect per check run.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
     - name: collect_checksum_metrics
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
