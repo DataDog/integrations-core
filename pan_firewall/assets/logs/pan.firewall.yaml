@@ -230,4 +230,872 @@ pipeline:
       target: title
       template: '%{usr.id} performed event %{evt.name} from %{network.client.geoip.country.name}'
       replaceMissing: false
-
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@type:(TRAFFIC OR THREAT)"
+      processors:
+        - type: grok-parser
+          name: Parsing event time
+          enabled: true
+          source: time_generated
+          samples:
+            - "2025-04-08 07:14:34"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              nine %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSSSS"):ocsf.time}
+              eight %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSSS"):ocsf.time}
+              seven %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSS"):ocsf.time}
+              six %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSS"):ocsf.time}
+              five %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSS"):ocsf.time}
+              four %{date("yyyy/MM/dd' 'HH:mm:ss.SSSS"):ocsf.time}
+              three %{date("yyyy/MM/dd' 'HH:mm:ss.SSS"):ocsf.time}
+              two %{date("yyyy/MM/dd' 'HH:mm:ss.SS"):ocsf.time}
+              one %{date("yyyy/MM/dd' 'HH:mm:ss.S"):ocsf.time}
+              zero %{date("yyyy/MM/dd' 'HH:mm:ss"):ocsf.time}
+        - type: attribute-remapper
+          name: Sequence Number
+          enabled: true
+          sources:
+            - seqno
+          sourceType: attribute
+          target: ocsf.metadata.sequence
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Product Name
+          enabled: true
+          template: Firewall
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Product UID
+          enabled: true
+          sources:
+            - serial
+          sourceType: attribute
+          target: ocsf.metadata.product.uid
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Vendor Name
+          enabled: true
+          template: Palo Alto
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: '"1.5.0" - in attribute ocsf.metadata.version'
+          enabled: true
+          template: '1.5.0'
+          target: ocsf.metadata.version
+          replaceMissing: false
+    - type: pipeline
+      name: Traffic Activity [4001] Class
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@type:"TRAFFIC"'
+      processors:
+        - type: category-processor
+          name: Category UID
+          enabled: true
+          categories:
+            - filter:
+                query: "@type:TRAFFIC"
+              name: "4"
+          target: ocsf.category_uid
+        - type: string-builder-processor
+          name: Network Activity - in attribute ocsf.class_name
+          enabled: true
+          template: Network Activity
+          target: ocsf.class_name
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Info - in attribute ocsf.severity
+          enabled: true
+          template: informational
+          target: ocsf.severity
+          replaceMissing: false
+        - type: string-builder-processor
+          name: 4001 - in attribute ocsf.class_uid
+          enabled: true
+          template: "4001"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: category-processor
+          name: Map Severity Info
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.severity:informational"
+              name: "1"
+          target: ocsf.severity_id
+        - type: category-processor
+          name: Activity ID Category
+          enabled: true
+          categories:
+            - filter:
+                query: "@subtype:start"
+              name: "1"
+            - filter:
+                query: "@subtype:end"
+              name: "2"
+            - filter:
+                query: "@subtype:drop"
+              name: "3"
+            - filter:
+                query: "@subtype:deny"
+              name: "5"
+          target: ocsf.activity_id
+        - type: attribute-remapper
+          name: remap 'network.destination.ip' to 'ocsf.dst_endpoint.ip'
+          enabled: true
+          sources:
+            - network.destination.ip
+          sourceType: attribute
+          target: ocsf.dst_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.client.ip' to 'ocsf.src_endpoint.ip'
+          enabled: true
+          sources:
+            - network.client.ip
+          sourceType: attribute
+          target: ocsf.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.destination.port' to 'ocsf.dst_endpoint.port'
+          enabled: true
+          sources:
+            - network.destination.port
+          sourceType: attribute
+          target: ocsf.dst_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.client.port' to 'ocsf.src_endpoint.port'
+          enabled: true
+          sources:
+            - network.client.port
+          sourceType: attribute
+          target: ocsf.src_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: 99 - in attribute ocsf.connection_info.direction_id
+          enabled: true
+          template: "99"
+          target: ocsf.connection_info.direction_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: 0 - in attribute ocsf.connection_info.direction_id
+          enabled: true
+          template: "0"
+          target: ocsf.connection_info.direction_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Remap `sessionid` to `ocsf.connection_info.session.uid`
+          enabled: true
+          sources:
+            - sessionid
+          sourceType: attribute
+          target: ocsf.connection_info.session.uid
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'app' to 'ocsf.connection_info.protocol_name'
+          enabled: true
+          sources:
+            - proto
+          sourceType: attribute
+          target: ocsf.connection_info.protocol_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'bytes' to 'ocsf.traffic.bytes'
+          enabled: true
+          sources:
+            - bytes
+          sourceType: attribute
+          target: ocsf.traffic.bytes
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'bytes_out' to 'ocsf.traffic.bytes_out'
+          enabled: true
+          sources:
+            - bytes_out
+          sourceType: attribute
+          target: ocsf.traffic.bytes_out
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'bytes_in' to 'ocsf.traffic.bytes_in'
+          enabled: true
+          sources:
+            - bytes_in
+          sourceType: attribute
+          target: ocsf.traffic.bytes_in
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'pkts' to 'ocsf.traffic.packets'
+          enabled: true
+          sources:
+            - pkts
+          sourceType: attribute
+          target: ocsf.traffic.packets
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'pkts_sent' to 'ocsf.traffic.packets_out'
+          enabled: true
+          sources:
+            - pkts_sent
+          sourceType: attribute
+          target: ocsf.traffic.packets_out
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'pkts_received' to 'ocsf.traffic.packets_in'
+          enabled: true
+          sources:
+            - pkts_received
+          sourceType: attribute
+          target: ocsf.traffic.packets_in
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'chunks' to 'ocsf.traffic.chunks'
+          enabled: true
+          sources:
+            - chunks
+          sourceType: attribute
+          target: ocsf.traffic.chunks
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'chunks_sent' to 'ocsf.traffic.chunks_out'
+          enabled: true
+          sources:
+            - chunks_sent
+          sourceType: attribute
+          target: ocsf.traffic.chunks_out
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'chunks_received' to 'ocsf.traffic.chunks_in'
+          enabled: true
+          sources:
+            - chunks_received
+          sourceType: attribute
+          target: ocsf.traffic.chunks_in
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.destination.port' to 'ocsf.dst_endpoint.port'
+          enabled: true
+          sources:
+            - network.destination.port
+          sourceType: attribute
+          target: ocsf.dst_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.client.port' to 'ocsf.src_endpoint.port'
+          enabled: true
+          sources:
+            - network.client.port
+          sourceType: attribute
+          target: ocsf.src_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: Detection Finding [2004] Class
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@type:THREAT"
+      processors:
+        - type: category-processor
+          name: Severity ID Mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@severity:informational"
+              name: "1"
+            - filter:
+                query: "@severity:low"
+              name: "2"
+            - filter:
+                query: "@severity:medium"
+              name: "3"
+            - filter:
+                query: "@severity:high"
+              name: "4"
+            - filter:
+                query: "@severity:critical"
+              name: "5"
+          target: ocsf.severity_id
+        - type: category-processor
+          name: Severity Name Mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@severity:informational"
+              name: Informational
+            - filter:
+                query: "@severity:low"
+              name: Low
+            - filter:
+                query: "@severity:medium"
+              name: Medium
+            - filter:
+                query: "@severity:high"
+              name: High
+            - filter:
+                query: "@severity:critical"
+              name: Critical
+          target: ocsf.severity
+        - type: string-builder-processor
+          name: 1 - in attribute ocsf.activity_id
+          enabled: true
+          template: "1"
+          target: ocsf.activity_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Create - in attribute ocsf.activity_name
+          enabled: true
+          template: Create
+          target: ocsf.activity_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: 2 - in attribute ocsf.category_uid
+          enabled: true
+          template: "2"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Findings - in attribute ocsf.category_name
+          enabled: true
+          template: Findings
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: 2 - in attribute ocsf.status_id
+          enabled: true
+          template: "2"
+          target: ocsf.status_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: 2004 - in attribute ocsf.class_uid
+          enabled: true
+          template: "2004"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Detection Finding - in attribute ocsf.class_name
+          enabled: true
+          template: Detection Finding
+          target: ocsf.class_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Firewall - in attribute ocsf.finding_info.product.name
+          enabled: true
+          template: Firewall
+          target: ocsf.finding_info.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Palo Alto - in attribute ocsf.finding_info.product.vendor_name
+          enabled: true
+          template: Palo Alto
+          target: ocsf.finding_info.product.vendor_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: 0 - in attribute ocsf.confidence_id
+          enabled: true
+          template: "0"
+          target: ocsf.confidence_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: add 'ocsf.evidence.device.type_id'
+          enabled: true
+          template: "1"
+          target: ocsf.evidence.device.type_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: remap 'device_name' to 'ocsf.evidence.device.name'
+          enabled: true
+          sources:
+            - device_name
+          sourceType: attribute
+          target: ocsf.evidence.device.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'threatid' to 'ocsf.finding_info.title'
+          enabled: true
+          sources:
+            - threatid
+          sourceType: attribute
+          target: ocsf.finding_info.title
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: True - in attribute ocsf.is_alert
+          enabled: true
+          template: "true"
+          target: ocsf.is_alert
+          replaceMissing: false
+        - type: string-builder-processor
+          name: 1 - in attribute ocsf.status_id
+          enabled: true
+          template: "1"
+          target: ocsf.status_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: New - in attribute ocsf.status
+          enabled: true
+          template: New
+          target: ocsf.status
+          replaceMissing: false
+        - type: attribute-remapper
+          name: remap 'action' to 'ocsf.status_detail'
+          enabled: true
+          sources:
+            - action
+          sourceType: attribute
+          target: ocsf.status_detail
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: 1 - in attribute ocsf.finding_info.analytic.type_id
+          enabled: true
+          template: "1"
+          target: ocsf.finding_info.analytic.type_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: rule - in attribute ocsf.finding_info.analytic.type
+          enabled: true
+          template: Rule
+          target: ocsf.finding_info.analytic.type
+          replaceMissing: false
+        - type: attribute-remapper
+          name: remap 'rule' to 'ocsf.finding_info.analytic.name'
+          enabled: true
+          sources:
+            - rule
+          sourceType: attribute
+          target: ocsf.finding_info.analytic.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'rule_uuid' to 'ocsf.finding_info.analytic.uid'
+          enabled: true
+          sources:
+            - rule_uuid
+          sourceType: attribute
+          target: ocsf.finding_info.analytic.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'seqno' to 'ocsf.finding_info.uid'
+          enabled: true
+          sources:
+            - seqno
+          sourceType: attribute
+          target: ocsf.finding_info.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'srcuser' to 'ocsf.evidence.actor.user'
+          enabled: true
+          sources:
+            - srcuser
+          sourceType: attribute
+          target: ocsf.evidence.actor.user
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'sessionid' to 'ocsf.evidence.actor.session.uid'
+          enabled: true
+          sources:
+            - sessionid
+          sourceType: attribute
+          target: ocsf.evidence.actor.session.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'app' to 'ocsf.evidence.actor.app_name'
+          enabled: true
+          sources:
+            - app
+          sourceType: attribute
+          target: ocsf.evidence.actor.app_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: set 'ocsf.evidence.connection_info.direction_id'
+          enabled: true
+          template: "0"
+          target: ocsf.evidence.connection_info.direction_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: remap 'proto' to 'ocsf.evidence.connection_info.protocol_name'
+          enabled: true
+          sources:
+            - proto
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.protocol_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.destination.ip' to 'ocsf.evidence.dst_endpoint.ip'
+          enabled: true
+          sources:
+            - network.destination.ip
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.destination.port' to 'ocsf.evidence.dst_endpoint.port'
+          enabled: true
+          sources:
+            - network.destination.port
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'to' to 'ocsf.evidence.dst_endpoint.zone'
+          enabled: true
+          sources:
+            - to
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.zone
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.client.ip' to 'ocsf.evidence.src_endpoint.ip'
+          enabled: true
+          sources:
+            - network.client.ip
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'network.client.port' to 'ocsf.evidence.src_endpoint.port'
+          enabled: true
+          sources:
+            - network.client.port
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'from' to 'ocsf.evidence.src_endpoint.zone'
+          enabled: true
+          sources:
+            - from
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.zone
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: OCSF Post Transformation
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: attribute-remapper
+          name: remap `ocsf.severity_id` from string to integer
+          enabled: true
+          sources:
+            - ocsf.severity_id
+          sourceType: attribute
+          target: ocsf.severity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap ocsf.connection_info.direction_id string to integer
+          enabled: true
+          sources:
+            - ocsf.connection_info.direction_id
+          sourceType: attribute
+          target: ocsf.connection_info.direction_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap ocsf.evidence.connection_info.direction_id string to integer
+          enabled: true
+          sources:
+            - ocsf.evidence.connection_info.direction_id
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.direction_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap ocsf.activity_id string to integer
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap ocsf.category_uid string to integer
+          enabled: true
+          sources:
+            - ocsf.category_uid
+          sourceType: attribute
+          target: ocsf.category_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap ocsf.status_id string to integer
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.class_uid' string to integer
+          enabled: true
+          sources:
+            - ocsf.class_uid
+          sourceType: attribute
+          target: ocsf.class_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.confidence_id' string to integer
+          enabled: true
+          sources:
+            - ocsf.confidence_id
+          sourceType: attribute
+          target: ocsf.confidence_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.evidence.device.type_id' string to integer
+          enabled: true
+          sources:
+            - ocsf.evidence.device.type_id
+          sourceType: attribute
+          target: ocsf.evidence.device.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.status_id' string to integer
+          enabled: true
+          sources:
+            - ocsf.status_id
+          sourceType: attribute
+          target: ocsf.status_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.finding_info.analytic.type_id' string to integer
+          enabled: true
+          sources:
+            - ocsf.finding_info.analytic.type_id
+          sourceType: attribute
+          target: ocsf.finding_info.analytic.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.src_endpoint.port' string to integer
+          enabled: true
+          sources:
+              - ocsf.src_endpoint.port
+          sourceType: attribute
+          target: ocsf.src_endpoint.port
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.dst_endpoint.port' string to integer
+          enabled: true
+          sources:
+            - ocsf.dst_endpoint.port
+          sourceType: attribute
+          target: ocsf.dst_endpoint.port
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Convert 'ocsf.evidence.src_endpoint.port' string to integer
+          enabled: true
+          sources:
+            - ocsf.evidence.src_endpoint.port
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.port
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Convert 'ocsf.evidence.dst_endpoint.port' string to integer
+          enabled: true
+          sources:
+            - ocsf.evidence.dst_endpoint.port
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.port
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: arithmetic-processor
+          name: Type ID calculator
+          enabled: true
+          expression: (ocsf.class_uid * 100) + ocsf.activity_id
+          target: ocsf.type_uid_float
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.type_uid_float` to `ocsf.type_uid`
+          enabled: true
+          sources:
+            - ocsf.type_uid_float
+          sourceType: attribute
+          target: ocsf.type_uid
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: Type Name
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.type_uid:400101"
+              name: 'Network Activity: Open'
+            - filter:
+                query: "@ocsf.type_uid:400102"
+              name: 'Network Activity: Close'
+            - filter:
+                query: "@ocsf.type_uid:400103"
+              name: 'Network Activity: Reset'
+            - filter:
+                query: "@ocsf.type_uid:400105"
+              name: 'Network Activity: Refuse'
+            - filter:
+                query: "@ocsf.type_uid:200400"
+                name: 'Detection Finding: Unknown'
+            - filter:
+                query: "@ocsf.type_uid:200401"
+                name: 'Detection Finding: Create'
+            - filter:
+                query: "@ocsf.type_uid:200402"
+                name: 'Detection Finding: Update'
+            - filter:
+                query: "@ocsf.type_uid:200403"
+                name: 'Detection Finding: Close'
+            - filter:
+                query: "@ocsf.type_uid:200499"
+                name: 'Detection Finding: Unknown'
+          target: ocsf.type_name
+        - type: grok-parser
+          name: Convert `ocsf.is_alert` to boolean type
+          enabled: true
+          source: ocsf.is_alert
+          samples:
+            - "true"
+            - "false"
+          grok:
+            supportRules: ""
+            matchRules: |
+              convert_to_boolean %{boolean("true","false"):ocsf.is_alert}
+        - type: array-processor
+          name: Move attributes into ocsf.evidences array
+          enabled: true
+          operation:
+            source: ocsf.evidence
+            target: ocsf.evidences
+            preserveSource: false
+            type: append
