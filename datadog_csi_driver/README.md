@@ -26,7 +26,7 @@ No additional installation is needed on your server.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `datadog_csi_driver` under the Checks section.
+[Run the Agent's status subcommand][6] and verify that `datadog_csi_driver` appears under the Checks section.
 
 ## Data Collected
 
