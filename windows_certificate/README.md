@@ -40,9 +40,9 @@ instances:
     days_warning: 10
     days_critical: 5
 ```
-Beginning with Agent v7.69.0, the integration can monitor the expiration of [certificate revocation lists (CRL)][11] in a given certificate store. When CRL monitoring is enabled, all CRLs in that store are monitored. To enable CRL monitoring set `enable_crl_monitoring: true` in the integration.
+Beginning with Agent v7.69.0, the integration can monitor the expiration of [certificate revocation lists (CRL)][11] in a given certificate store. When CRL monitoring is enabled, all CRLs in that store are monitored. To enable CRL monitoring, set `enable_crl_monitoring: true` in the integration.
 
-This example configuration monitors Microsoft and Verisign certificates and all CRLs in the local machines's `CA` store:
+This example configuration monitors Microsoft and Verisign certificates, and all CRLs in the local machine's `CA` store:
 
 ```yaml
 instances:
@@ -53,7 +53,7 @@ instances:
     enable_crl_monitoring: true
 ```
 
-Begnning with Agent v7.70, the integration can validate certificates and their certificate chains. To enable the certificate chain validation set the following in the integration:
+Begnning with Agent v7.70, the integration can validate certificates and their certificate chains. To enable the certificate chain validation, set the following in the integration:
 ```yaml
 instances:    
   - certificate_store: CA
@@ -68,7 +68,7 @@ The `policy_validation_flags` [suppress specific validation errors][12] that may
 
 ### Tags
 
-The integration automatically tags all metrics and service checks with the name of the store in the `certificate_store:<STORE>` tag. Certificate metrics and service checks are tagged with the certificate's subjects, thumbprints and serial numbers. CRL metrics and service checks are tagged with the crl's issuer and thumbprint.
+The integration automatically tags all metrics and service checks with the name of the store in the `certificate_store:<STORE>` tag. Certificate metrics and service checks are tagged with the certificate's subjects, thumbprints and serial numbers. CRL metrics and service checks are tagged with the CRL's issuer and thumbprint.
 
 ### Validation
 

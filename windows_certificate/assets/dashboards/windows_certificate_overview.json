@@ -240,7 +240,7 @@
                     {
                         "definition": {
                             "background_color": "yellow",
-                            "content": "Included service check:\n\n* `windows_certificate.cert_chain_validation` - Returns `CRITICAL` if the certificate chain validation fails, otherwise returns `OK`.",
+                            "content": "Included service check:\n\n* `windows_certificate.cert_chain_validation` - Returns `CRITICAL` if the certificate chain validation fails. Otherwise, returns `OK`.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
@@ -308,7 +308,7 @@
                     {
                         "definition": {
                             "background_color": "yellow",
-                            "content": "Included service check:\n\n* `windows_certificate.crl_expiration` - Returns `CRITICAL` if the certificate revocation list(CRL) has expired, returns `WARNING` if the CRL expires in less than `crl_days_warning`, otherwise returns `OK`.",
+                            "content": "Included service check:\n\n* `windows_certificate.crl_expiration` - Returns `CRITICAL` if the certificate revocation list (CRL) has expired. Returns `WARNING` if the CRL expires in less than `crl_days_warning`. Otherwise, returns `OK`.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
