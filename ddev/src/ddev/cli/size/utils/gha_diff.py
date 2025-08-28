@@ -440,6 +440,7 @@ def main():
             f.write(json.dumps(diffs, indent=2))
     if args.threshold:
         if diffs['total_diff'] < int(args.threshold):
+            print(f"Size increase does not exceed threshold of {args.threshold} bytes")
             return True
     long_text = display_diffs_to_html(diffs, platform, python_version)
     short_text = display_diffs_to_html_short(diffs, platform, python_version)
