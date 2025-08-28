@@ -8,13 +8,18 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Falco alert logs.",
+    "description": "Gain insights into Falco alert logs and metrics",
     "title": "Falco",
     "media": [
       {
         "media_type": "image",
         "caption": "Falco - Alerts",
-        "image_url": "images/falco_alerts.png"
+        "image_url": "images/falco_alerts_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Falco - Alerts",
+        "image_url": "images/falco_alerts_2.png"
       }
     ],
     "classifier_tags": [
