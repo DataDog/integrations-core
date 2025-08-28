@@ -742,6 +742,12 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: string-builder-processor
+          name: add 'ocsf.finding_info.evidence.file.type_id'
+          enabled: true
+          template: "0"
+          target: ocsf.finding_info.evidence.file.type_id
+          replaceMissing: false
         - type: attribute-remapper
           name: remap 'rule_uuid' to 'ocsf.finding_info.analytic.uid'
           enabled: true
@@ -1057,12 +1063,6 @@ pipeline:
                 query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
               name: 'Filename'
           target: ocsf.finding_info.evidence.file.name
-        - type: string-builder-processor
-          name: add 'ocsf.finding_info.evidence.file.type_id'
-          enabled: true
-          template: "0"
-          target: ocsf.finding_info.evidence.file.type_id
-          replaceMissing: false
         - type: arithmetic-processor
           name: Type ID calculator
           enabled: true
