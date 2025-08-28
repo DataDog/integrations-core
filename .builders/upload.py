@@ -111,7 +111,7 @@ def upload(targets_dir):
             if not is_valid_project_name(project_name):
                 message = f'Invalid project name `{project_name}` found in wheel: {wheel.name}'
                 raise RuntimeError(message)
-
+            print(f'Project name: {project_name}')
             upload_data.append((normalize_project_name(project_name), project_metadata, wheel))
 
         queued = len(upload_data)
