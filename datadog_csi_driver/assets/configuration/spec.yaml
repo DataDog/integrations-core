@@ -7,4 +7,4 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/default
+    - template: instances/openmetrics
