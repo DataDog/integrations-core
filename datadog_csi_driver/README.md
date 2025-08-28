@@ -20,7 +20,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `datadog_csi_driver.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your datadog_csi_driver performance data. See the [sample datadog_csi_driver.d/conf.yaml][4] for all available configuration options.
+1. Edit the `datadog_csi_driver.d/conf.yaml` file, located in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your datadog_csi_driver performance data. See the [sample datadog_csi_driver.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
