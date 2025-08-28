@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "clickhouse-cityhash @ git+https://github.com/otetard/clickhouse-cityhash.git@python3.13-wheels",
+    "clickhouse-cityhash @ git+https://github.com/otetard/clickhouse-cityhash.git@c9781cad911e989595672a9b86cfb96f6b858382",
     "clickhouse-driver==0.2.9",
     "lz4==4.4.4",
 ]
@@ -61,3 +61,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
