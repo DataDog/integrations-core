@@ -46,6 +46,7 @@ jobs:
           git fetch origin master:refs/remotes/origin/master
           base=$(git merge-base HEAD origin/master)
           echo "base_sha=$base" >> $GITHUB_OUTPUT
+          echo "base_sha=$base" >> $GITHUB_STEP_SUMMARY
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
         env:
