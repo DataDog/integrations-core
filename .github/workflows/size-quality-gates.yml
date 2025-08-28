@@ -92,7 +92,6 @@ jobs:
           
       - name: Calculate diffs 
         run: |
-          THRESHOLD=-10000000000
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
             # send metrics to datadog if this is a push to master
             PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog ${{secrets.DD_API_KEY}} --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
@@ -102,7 +101,8 @@ jobs:
           echo "passes_qg=$PASSES_QG" >> $GITHUB_OUTPUT
           echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
-          
+        env:
+          THRESHOLD: -10000000000
 
       - name: Upload long size diffs output as artifact
         if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}
