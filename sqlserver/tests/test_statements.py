@@ -382,16 +382,16 @@ def test_statement_metrics_and_plans(
     # 3) emit the query metrics based on the diff of current and last state
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
-        dd_run_check(check)
+        dd_run_check(check, cancel=False)
         for _ in range(0, exe_count):
             for params in param_groups:
                 bob_conn.execute_with_retries(query, params, database=database)
-        dd_run_check(check)
+        dd_run_check(check, cancel=False)
         aggregator.reset()
         for _ in range(0, exe_count):
             for params in param_groups:
                 bob_conn.execute_with_retries(query, params, database=database)
-        dd_run_check(check)
+        dd_run_check(check, cancel=False)
 
     _conn_key_prefix = "dbm-"
     with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
