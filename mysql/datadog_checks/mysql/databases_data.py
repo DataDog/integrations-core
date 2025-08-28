@@ -248,7 +248,7 @@ class DatabasesData:
                             - data_length (int): The data length of the partition in bytes. If partition has
                                                  subpartitions, this is the sum of all subpartitions data_length.
         """
-        self._data_submitter.reset() # Ensure we start fresh
+        self._data_submitter.reset()  # Ensure we start fresh
         self._tags = tags
         self._data_submitter.set_base_event_data(
             self._check.reported_hostname,
@@ -265,7 +265,7 @@ class DatabasesData:
                 self._fetch_for_databases(db_infos, cursor)
                 self._data_submitter.submit()
         finally:
-            self._data_submitter.reset() # Ensure we reset in case of errors
+            self._data_submitter.reset()  # Ensure we reset in case of errors
         self._log.debug("Finished collect_databases_data")
 
     def _fetch_for_databases(self, db_infos, cursor):
