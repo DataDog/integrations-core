@@ -70,7 +70,7 @@ class PostgresAutodiscovery(Discovery):
         return items_parsed
 
     def _get_databases(self) -> List[str]:
-        with self.db_pool.get_connection(self._db, self._default_ttl) as conn:
+        with self.db_pool.get_connection(self._db) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(AUTODISCOVERY_QUERY)
                 databases = list(cursor.fetchall())
