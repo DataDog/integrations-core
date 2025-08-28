@@ -357,6 +357,13 @@ pipeline:
               name: "5"
           target: ocsf.activity_id
         - type: attribute-remapper
+          name: remap 'subtype' to 'ocsf.activity_name'
+          enabled: true
+          sources:
+            - subtype
+          sourceType: attribute
+          target: ocsf.activity_name
+        - type: attribute-remapper
           name: remap 'network.destination.ip' to 'ocsf.dst_endpoint.ip'
           enabled: true
           sources:
@@ -672,16 +679,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: attribute-remapper
-          name: remap 'threatid' to 'ocsf.finding_info.title'
-          enabled: true
-          sources:
-            - threatid
-          sourceType: attribute
-          target: ocsf.finding_info.title
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: string-builder-processor
           name: True - in attribute ocsf.is_alert
           enabled: true
@@ -729,6 +726,16 @@ pipeline:
             - rule
           sourceType: attribute
           target: ocsf.finding_info.analytic.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'subtype' to 'ocsf.finding_info.analytic.category'
+          enabled: true
+          sources:
+            - subtype
+          sourceType: attribute
+          target: ocsf.finding_info.analytic.category
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
@@ -1031,6 +1038,28 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
+        - type: category-processor
+          name: URL extraction
+          enabled: true
+          categories:
+            - filter:
+                query: "@misc:* @subtype:url"
+              name: 'URL Paths'
+          target: ocsf.finding_info.evidence.url.path
+        - type: category-processor
+          name: filename extraction
+          enabled: true
+          categories:
+            - filter:
+                query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
+              name: 'Filename'
+          target: ocsf.finding_info.evidence.file.name
+        - type: string-builder-processor
+          name: add 'ocsf.finding_info.evidence.file.type_id'
+          enabled: true
+          template: "0"
+          target: ocsf.finding_info.evidence.file.type_id
+          replaceMissing: false
         - type: arithmetic-processor
           name: Type ID calculator
           enabled: true
