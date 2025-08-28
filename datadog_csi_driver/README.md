@@ -36,7 +36,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The datadog_csi_driver integration does not include any events.
+This integration does not include any events.
 
 ### Service Checks
 
