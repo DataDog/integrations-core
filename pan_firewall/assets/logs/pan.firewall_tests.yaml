@@ -230,6 +230,7 @@ tests:
       serial: 23001016210
       session_end_reason: "aged-out"
       sessionid: 136240
+      subtype: "end"
       to: "dclan2lan"
       tunnelid: 0
       type: "TRAFFIC"
