@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "clickhouse-cityhash==1.0.2.4",
+    "clickhouse-cityhash @ git+https://github.com/otetard/clickhouse-cityhash.git@python3.13-wheels",
     "clickhouse-driver==0.2.9",
     "lz4==4.4.4",
 ]
