@@ -467,6 +467,7 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     check_tags = sqlserver_check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
+        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
     ]
