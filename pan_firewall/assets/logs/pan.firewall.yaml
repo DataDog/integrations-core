@@ -364,7 +364,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.activity_name
           targetType: attribute
-          replaceMissing: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: remap 'network.destination.ip' to 'ocsf.dst_endpoint.ip'
