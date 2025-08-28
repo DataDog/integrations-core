@@ -21,7 +21,7 @@ class DatadogCSIDriverCheck(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             'metrics': METRICS_MAP,
-            'prometheus_url': 'http://localhost:5000/metrics',
+            'openmetrics_endpoint': 'http://localhost:5000/metrics',
         }
 
     def check(self, instance):
