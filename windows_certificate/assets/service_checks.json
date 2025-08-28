@@ -27,9 +27,9 @@
         "integration": "Windows Certificate Store",
         "groups": [
             "certificate_store",
-            "crl_iisuer_l",
-            "subject_ou",
-            "subject_o",
+            "crl_issuer_l",
+            "crl_issuer_ou",
+            "crl_issuer_o",
             "crl_thumbprint",
             "server"
         ],
@@ -63,6 +63,6 @@
             "warning"
         ],
         "name": "Certificate chain validation",
-        "description": "Returns `CRITICAL` if the Certificate chain validation fails, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the certificate chain validation fails, otherwise returns `OK`."
     }
 ]
