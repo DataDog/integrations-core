@@ -1111,7 +1111,7 @@ WHERE l.locktype = 'relation'
   AND l.mode like '%Exclusive%'
   AND a.state = 'idle in transaction'
   AND a.xact_start IS NOT NULL
-  AND now() - a.xact_start > interval '60 seconds'
+  AND now() - a.state_change > interval '60 seconds'
 ORDER BY xact_age DESC
 LIMIT {max_rows} ;        """
     ).strip(),
