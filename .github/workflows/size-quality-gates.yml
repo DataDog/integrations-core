@@ -101,9 +101,8 @@ jobs:
           fi
           echo "passes_qg=$PASSES_QG" >> $GITHUB_OUTPUT
           echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
-          if [[ "$PASSES_QG" == "false" ]]; then
-            cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
-          fi
+          cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
+          
 
       - name: Upload long size diffs output as artifact
         if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}

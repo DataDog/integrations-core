@@ -438,10 +438,8 @@ def main():
     if args.output:
         with open(args.output, "w") as f:
             f.write(json.dumps(diffs, indent=2))
-    if args.threshold:
-        if diffs['total_diff'] < int(args.threshold):
-            print(f"Size increase does not exceed threshold of {args.threshold} bytes")
-            return True
+
+    # Always generate HTML output for the workflow
     long_text = display_diffs_to_html(diffs, platform, python_version)
     short_text = display_diffs_to_html_short(diffs, platform, python_version)
 
@@ -452,8 +450,22 @@ def main():
         with open(args.html_short_out, "w") as f:
             f.write(short_text)
 
-    return False
+    # Check threshold if provided
+    if args.threshold:
+        threshold_value = int(args.threshold)
+        if diffs['total_diff'] < threshold_value:
+            print(f"Size increase does not exceed threshold of {args.threshold} bytes")
+            return True
+        else:
+            print(f"Size increase exceeds threshold of {args.threshold} bytes")
+            return False
+
+    # No threshold specified, so it passes by default
+    return True
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    success = main()
+    sys.exit(0 if success else 1)
