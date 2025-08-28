@@ -130,7 +130,6 @@ class PostgreSql(AgentCheck):
                 " Please use the new azure.managed_authentication option instead."
             )
 
-        # Initializing config will raise ConfigurationError if the config is too invalid to even construct the check
         self._config = PostgresConfig(self.instance, self.init_config, self)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
@@ -166,14 +165,6 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
-
-        # Placeholder event, to be enhanced later
-        self.health.submit_health_event(
-            HealthEvent.INITIALIZATION,
-            HealthStatus.OK,
-            config=sanitize(self._config.__dict__),
-            features=[],
-        )
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
@@ -1114,10 +1105,3 @@ class PostgreSql(AgentCheck):
     def _update_tag_sets(self, tags):
         self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
         self.tags_without_db = list(set(self.tags_without_db) | set(tags))
-
-
-def sanitize(dict: dict):
-    sanitized = copy.deepcopy(dict)
-    sanitized['password'] = '***' if sanitized.get('password') else None
-    sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
-    return sanitized
