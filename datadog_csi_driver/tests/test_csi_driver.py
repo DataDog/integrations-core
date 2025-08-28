@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
+from datadog_checks.base import AgentCheck
 from datadog_checks.datadog_csi_driver import DatadogCSIDriverCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 

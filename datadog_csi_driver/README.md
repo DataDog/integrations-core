@@ -4,10 +4,7 @@
 
 This check monitors [datadog_csi_driver][1] through the Datadog Agent. 
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+The Datadog CSI Driver integration collects and monitors metrics from your Datadog CSI Driver, providing visibility into publish/unpublish requests and pod health for improved troubleshooting and performance monitoring.
 
 ## Setup
 
@@ -48,8 +45,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
-
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://docs.datadoghq.com/containers/csi_driver/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/datadog_csi_driver/datadog_checks/datadog_csi_driver/data/conf.yaml.example

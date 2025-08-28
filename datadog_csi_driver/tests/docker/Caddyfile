@@ -1,4 +1,4 @@
-:9090 {
+:5000 {
   root * /metrics
   file_server
 }

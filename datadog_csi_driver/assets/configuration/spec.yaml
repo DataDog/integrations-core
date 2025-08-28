@@ -8,3 +8,14 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+        - csi-driver
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+        - openmetrics_endpoint:  http://%%host%%:5000/metrics
