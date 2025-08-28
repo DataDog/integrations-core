@@ -1108,6 +1108,7 @@ JOIN pg_class c         ON c.oid = l.relation
 JOIN pg_roles r         ON r.oid = c.relowner
 WHERE l.locktype = 'relation'
   AND l.granted = true
+  AND l.mode like '%Exclusive%'
   AND a.state = 'idle in transaction'
   AND a.xact_start IS NOT NULL
   AND now() - a.xact_start > interval '60 seconds'
