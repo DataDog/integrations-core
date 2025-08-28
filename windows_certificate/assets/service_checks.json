@@ -40,7 +40,7 @@
             "warning"
         ],
         "name": "CRL expiration",
-        "description": "Returns `CRITICAL` if the certificate revocation list(CRL) has expired, returns `WARNING` if the certificate expires in less than `crl_days_warning`, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the certificate revocation list(CRL) has expired, returns `WARNING` if the CRL expires in less than `crl_days_warning`, otherwise returns `OK`."
     },
     {
         "agent_version": "7.70.0",
