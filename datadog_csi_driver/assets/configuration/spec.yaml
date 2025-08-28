@@ -1,4 +1,4 @@
-name: datadog_csi_driver
+name: Datadog CSI Driver
 files:
 - name: datadog_csi_driver.yaml
   options:
@@ -10,12 +10,8 @@ files:
     - template: instances/openmetrics
 - name: auto_conf.yaml
   options:
-  - template: ad_identifiers
-    overrides:
-      value.example:
-        - csi-driver
-  - template: init_config
-    options: []
   - template: instances
     options:
-        - openmetrics_endpoint:  http://%%host%%:5000/metrics
+    - template: instances/openmetrics
+    overrides:
+      openmetrics_endpoint.value.example: http://%%host%%:5000/metrics
