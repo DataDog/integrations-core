@@ -230,21 +230,6 @@ instances:
     #
     # locks_idle_in_transaction:
 
-        ## @param enabled - boolean - optional - default: true
-        ## Enable collection of idle in transaction lock age metrics.
-        #
-        # enabled: true
-
-        ## @param collection_interval - number - optional - default: 300
-        ## Set the collection interval (in seconds) for idle in transaction lock age metrics.
-        #
-        # collection_interval: 300
-
-        ## @param max_rows - integer - optional - default: 100
-        ## Set the maximum number of rows to collect per check run.
-        #
-        # max_rows: 100
-
     ## @param collect_checksum_metrics - boolean - optional - default: false
     ## Collect counts of database failed checksums. Only supported on versions >= 12.
     #
