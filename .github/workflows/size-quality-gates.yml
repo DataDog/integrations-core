@@ -102,7 +102,7 @@ jobs:
           echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
         env:
-          THRESHOLD: -10000000000
+          THRESHOLD: -1000000000000000000000000000
 
       - name: Upload long size diffs output as artifact
         if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}
