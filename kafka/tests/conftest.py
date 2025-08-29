@@ -18,6 +18,14 @@ def dd_environment():
 
     with docker_run(
         compose_file,
-        conditions=[CheckDockerLogs(compose_file, [r'\[KafkaServer id=\d+\] started'], matches="all", service="kafka")],
+        conditions=[
+            CheckDockerLogs(
+                compose_file,
+                [r'\[KafkaServer id=\d+\] started'],
+                matches="all",
+                service="kafka",
+            ),
+        ],
+        waith_for_health=True,
     ):
         yield load_jmx_config(), {'use_jmx': True}
