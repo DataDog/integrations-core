@@ -1,1 +1,1 @@
-Add submit function for sending health events from database monitoring integrations
+Add database health object for sending DBM health events
