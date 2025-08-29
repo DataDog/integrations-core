@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 # v22 of gunicorn is the first that supports python 3.12
 version = ["22", "23"]
 

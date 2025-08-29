@@ -9,7 +9,7 @@
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py312"]
+target-version = ["py313"]
 
 
 [tool.mypy]
@@ -54,7 +54,7 @@ exclude = [
     "**/config_models/shared.py",
     "**/config_models/defaults.py",
 ]
-target-version = "py312"
+target-version = "py313"
 line-length = 120
 namespace-packages = ["datadog_checks"]
 
