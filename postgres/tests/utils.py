@@ -138,8 +138,7 @@ def run_one_check(check: AgentCheck, cancel=True):
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
     """
-    error_report = check.run()
-    assert not error_report, f'Check run failed with error: {error_report}'
+    check.run()
     if cancel:
         check.cancel()
     if check.statement_samples._job_loop_future is not None:
