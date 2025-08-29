@@ -170,63 +170,65 @@ attempts_wait (int):
 <span class=linenos data-linenos="176 "></span>        <span class=n>composeFileArgs</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;compose_file&#39;</span><span class=p>:</span> <span class=n>compose_file</span><span class=p>,</span> <span class=s1>&#39;build&#39;</span><span class=p>:</span> <span class=n>build</span><span class=p>,</span> <span class=s1>&#39;service_name&#39;</span><span class=p>:</span> <span class=n>service_name</span><span class=p>}</span>
 <span class=linenos data-linenos="177 "></span>        <span class=k>if</span> <span class=n>capture</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
 <span class=linenos data-linenos="178 "></span>            <span class=n>composeFileArgs</span><span class=p>[</span><span class=s1>&#39;capture&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>capture</span>
-<span class=linenos data-linenos="179 "></span>        <span class=n>set_up</span> <span class=o>=</span> <span class=n>ComposeFileUp</span><span class=p>(</span><span class=o>**</span><span class=n>composeFileArgs</span><span class=p>)</span>
-<span class=linenos data-linenos="180 "></span>        <span class=k>if</span> <span class=n>down</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
-<span class=linenos data-linenos="181 "></span>            <span class=n>tear_down</span> <span class=o>=</span> <span class=n>down</span>
-<span class=linenos data-linenos="182 "></span>        <span class=k>else</span><span class=p>:</span>
-<span class=linenos data-linenos="183 "></span>            <span class=n>tear_down</span> <span class=o>=</span> <span class=n>ComposeFileDown</span><span class=p>(</span><span class=n>compose_file</span><span class=p>)</span>
-<span class=linenos data-linenos="184 "></span>        <span class=k>if</span> <span class=n>on_error</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
-<span class=linenos data-linenos="185 "></span>            <span class=n>on_error</span> <span class=o>=</span> <span class=n>ComposeFileLogs</span><span class=p>(</span><span class=n>compose_file</span><span class=p>)</span>
-<span class=linenos data-linenos="186 "></span>    <span class=k>else</span><span class=p>:</span>
-<span class=linenos data-linenos="187 "></span>        <span class=n>set_up</span> <span class=o>=</span> <span class=n>up</span>
-<span class=linenos data-linenos="188 "></span>        <span class=n>tear_down</span> <span class=o>=</span> <span class=n>down</span>
-<span class=linenos data-linenos="189 "></span>
-<span class=linenos data-linenos="190 "></span>    <span class=n>docker_conditions</span> <span class=o>=</span> <span class=p>[]</span>
+<span class=linenos data-linenos="179 "></span>        <span class=k>if</span> <span class=n>waith_for_health</span><span class=p>:</span>
+<span class=linenos data-linenos="180 "></span>            <span class=n>composeFileArgs</span><span class=p>[</span><span class=s1>&#39;waith_for_health&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=n>waith_for_health</span>
+<span class=linenos data-linenos="181 "></span>        <span class=n>set_up</span> <span class=o>=</span> <span class=n>ComposeFileUp</span><span class=p>(</span><span class=o>**</span><span class=n>composeFileArgs</span><span class=p>)</span>
+<span class=linenos data-linenos="182 "></span>        <span class=k>if</span> <span class=n>down</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+<span class=linenos data-linenos="183 "></span>            <span class=n>tear_down</span> <span class=o>=</span> <span class=n>down</span>
+<span class=linenos data-linenos="184 "></span>        <span class=k>else</span><span class=p>:</span>
+<span class=linenos data-linenos="185 "></span>            <span class=n>tear_down</span> <span class=o>=</span> <span class=n>ComposeFileDown</span><span class=p>(</span><span class=n>compose_file</span><span class=p>)</span>
+<span class=linenos data-linenos="186 "></span>        <span class=k>if</span> <span class=n>on_error</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+<span class=linenos data-linenos="187 "></span>            <span class=n>on_error</span> <span class=o>=</span> <span class=n>ComposeFileLogs</span><span class=p>(</span><span class=n>compose_file</span><span class=p>)</span>
+<span class=linenos data-linenos="188 "></span>    <span class=k>else</span><span class=p>:</span>
+<span class=linenos data-linenos="189 "></span>        <span class=n>set_up</span> <span class=o>=</span> <span class=n>up</span>
+<span class=linenos data-linenos="190 "></span>        <span class=n>tear_down</span> <span class=o>=</span> <span class=n>down</span>
 <span class=linenos data-linenos="191 "></span>
-<span class=linenos data-linenos="192 "></span>    <span class=k>if</span> <span class=n>log_patterns</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
-<span class=linenos data-linenos="193 "></span>        <span class=k>if</span> <span class=n>compose_file</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
-<span class=linenos data-linenos="194 "></span>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span>
-<span class=linenos data-linenos="195 "></span>                <span class=s1>&#39;The `log_patterns` convenience is unavailable when using &#39;</span>
-<span class=linenos data-linenos="196 "></span>                <span class=s1>&#39;a custom setup. Please use a custom condition instead.&#39;</span>
-<span class=linenos data-linenos="197 "></span>            <span class=p>)</span>
-<span class=linenos data-linenos="198 "></span>        <span class=n>docker_conditions</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>CheckDockerLogs</span><span class=p>(</span><span class=n>compose_file</span><span class=p>,</span> <span class=n>log_patterns</span><span class=p>,</span> <span class=s1>&#39;all&#39;</span><span class=p>))</span>
-<span class=linenos data-linenos="199 "></span>
-<span class=linenos data-linenos="200 "></span>    <span class=k>if</span> <span class=n>conditions</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
-<span class=linenos data-linenos="201 "></span>        <span class=n>docker_conditions</span><span class=o>.</span><span class=n>extend</span><span class=p>(</span><span class=n>conditions</span><span class=p>)</span>
-<span class=linenos data-linenos="202 "></span>
-<span class=linenos data-linenos="203 "></span>    <span class=n>wrappers</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=n>wrappers</span><span class=p>)</span> <span class=k>if</span> <span class=n>wrappers</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=k>else</span> <span class=p>[]</span>
+<span class=linenos data-linenos="192 "></span>    <span class=n>docker_conditions</span> <span class=o>=</span> <span class=p>[]</span>
+<span class=linenos data-linenos="193 "></span>
+<span class=linenos data-linenos="194 "></span>    <span class=k>if</span> <span class=n>log_patterns</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+<span class=linenos data-linenos="195 "></span>        <span class=k>if</span> <span class=n>compose_file</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+<span class=linenos data-linenos="196 "></span>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span>
+<span class=linenos data-linenos="197 "></span>                <span class=s1>&#39;The `log_patterns` convenience is unavailable when using &#39;</span>
+<span class=linenos data-linenos="198 "></span>                <span class=s1>&#39;a custom setup. Please use a custom condition instead.&#39;</span>
+<span class=linenos data-linenos="199 "></span>            <span class=p>)</span>
+<span class=linenos data-linenos="200 "></span>        <span class=n>docker_conditions</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>CheckDockerLogs</span><span class=p>(</span><span class=n>compose_file</span><span class=p>,</span> <span class=n>log_patterns</span><span class=p>,</span> <span class=s1>&#39;all&#39;</span><span class=p>))</span>
+<span class=linenos data-linenos="201 "></span>
+<span class=linenos data-linenos="202 "></span>    <span class=k>if</span> <span class=n>conditions</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+<span class=linenos data-linenos="203 "></span>        <span class=n>docker_conditions</span><span class=o>.</span><span class=n>extend</span><span class=p>(</span><span class=n>conditions</span><span class=p>)</span>
 <span class=linenos data-linenos="204 "></span>
-<span class=linenos data-linenos="205 "></span>    <span class=k>if</span> <span class=n>mount_logs</span><span class=p>:</span>
-<span class=linenos data-linenos="206 "></span>        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>,</span> <span class=nb>dict</span><span class=p>):</span>
-<span class=linenos data-linenos="207 "></span>            <span class=n>wrappers</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>shared_logs</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>[</span><span class=s1>&#39;logs&#39;</span><span class=p>]))</span>
-<span class=linenos data-linenos="208 "></span>        <span class=c1># Easy mode, read example config</span>
-<span class=linenos data-linenos="209 "></span>        <span class=k>else</span><span class=p>:</span>
-<span class=linenos data-linenos="210 "></span>            <span class=c1># An extra level deep because of the context manager</span>
-<span class=linenos data-linenos="211 "></span>            <span class=n>check_root</span> <span class=o>=</span> <span class=n>find_check_root</span><span class=p>(</span><span class=n>depth</span><span class=o>=</span><span class=mi>2</span><span class=p>)</span>
-<span class=linenos data-linenos="212 "></span>
-<span class=linenos data-linenos="213 "></span>            <span class=n>example_log_configs</span> <span class=o>=</span> <span class=n>_read_example_logs_config</span><span class=p>(</span><span class=n>check_root</span><span class=p>)</span>
-<span class=linenos data-linenos="214 "></span>            <span class=k>if</span> <span class=n>mount_logs</span> <span class=ow>is</span> <span class=kc>True</span><span class=p>:</span>
-<span class=linenos data-linenos="215 "></span>                <span class=n>wrappers</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>shared_logs</span><span class=p>(</span><span class=n>example_log_configs</span><span class=p>))</span>
-<span class=linenos data-linenos="216 "></span>            <span class=k>elif</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>,</span> <span class=p>(</span><span class=nb>list</span><span class=p>,</span> <span class=nb>set</span><span class=p>)):</span>
-<span class=linenos data-linenos="217 "></span>                <span class=n>wrappers</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>shared_logs</span><span class=p>(</span><span class=n>example_log_configs</span><span class=p>,</span> <span class=n>mount_whitelist</span><span class=o>=</span><span class=n>mount_logs</span><span class=p>))</span>
-<span class=linenos data-linenos="218 "></span>            <span class=k>else</span><span class=p>:</span>
-<span class=linenos data-linenos="219 "></span>                <span class=k>raise</span> <span class=ne>TypeError</span><span class=p>(</span>
-<span class=linenos data-linenos="220 "></span>                    <span class=s1>&#39;mount_logs: expected True, a list or a set, but got </span><span class=si>{}</span><span class=s1>&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=nb>type</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>)</span><span class=o>.</span><span class=vm>__name__</span><span class=p>)</span>
-<span class=linenos data-linenos="221 "></span>                <span class=p>)</span>
-<span class=linenos data-linenos="222 "></span>
-<span class=linenos data-linenos="223 "></span>    <span class=k>with</span> <span class=n>environment_run</span><span class=p>(</span>
-<span class=linenos data-linenos="224 "></span>        <span class=n>up</span><span class=o>=</span><span class=n>set_up</span><span class=p>,</span>
-<span class=linenos data-linenos="225 "></span>        <span class=n>down</span><span class=o>=</span><span class=n>tear_down</span><span class=p>,</span>
-<span class=linenos data-linenos="226 "></span>        <span class=n>on_error</span><span class=o>=</span><span class=n>on_error</span><span class=p>,</span>
-<span class=linenos data-linenos="227 "></span>        <span class=n>sleep</span><span class=o>=</span><span class=n>sleep</span><span class=p>,</span>
-<span class=linenos data-linenos="228 "></span>        <span class=n>endpoints</span><span class=o>=</span><span class=n>endpoints</span><span class=p>,</span>
-<span class=linenos data-linenos="229 "></span>        <span class=n>conditions</span><span class=o>=</span><span class=n>docker_conditions</span><span class=p>,</span>
-<span class=linenos data-linenos="230 "></span>        <span class=n>env_vars</span><span class=o>=</span><span class=n>env_vars</span><span class=p>,</span>
-<span class=linenos data-linenos="231 "></span>        <span class=n>wrappers</span><span class=o>=</span><span class=n>wrappers</span><span class=p>,</span>
-<span class=linenos data-linenos="232 "></span>        <span class=n>attempts</span><span class=o>=</span><span class=n>attempts</span><span class=p>,</span>
-<span class=linenos data-linenos="233 "></span>        <span class=n>attempts_wait</span><span class=o>=</span><span class=n>attempts_wait</span><span class=p>,</span>
-<span class=linenos data-linenos="234 "></span>    <span class=p>)</span> <span class=k>as</span> <span class=n>result</span><span class=p>:</span>
-<span class=linenos data-linenos="235 "></span>        <span class=k>yield</span> <span class=n>result</span>
+<span class=linenos data-linenos="205 "></span>    <span class=n>wrappers</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=n>wrappers</span><span class=p>)</span> <span class=k>if</span> <span class=n>wrappers</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=k>else</span> <span class=p>[]</span>
+<span class=linenos data-linenos="206 "></span>
+<span class=linenos data-linenos="207 "></span>    <span class=k>if</span> <span class=n>mount_logs</span><span class=p>:</span>
+<span class=linenos data-linenos="208 "></span>        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>,</span> <span class=nb>dict</span><span class=p>):</span>
+<span class=linenos data-linenos="209 "></span>            <span class=n>wrappers</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>shared_logs</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>[</span><span class=s1>&#39;logs&#39;</span><span class=p>]))</span>
+<span class=linenos data-linenos="210 "></span>        <span class=c1># Easy mode, read example config</span>
+<span class=linenos data-linenos="211 "></span>        <span class=k>else</span><span class=p>:</span>
+<span class=linenos data-linenos="212 "></span>            <span class=c1># An extra level deep because of the context manager</span>
+<span class=linenos data-linenos="213 "></span>            <span class=n>check_root</span> <span class=o>=</span> <span class=n>find_check_root</span><span class=p>(</span><span class=n>depth</span><span class=o>=</span><span class=mi>2</span><span class=p>)</span>
+<span class=linenos data-linenos="214 "></span>
+<span class=linenos data-linenos="215 "></span>            <span class=n>example_log_configs</span> <span class=o>=</span> <span class=n>_read_example_logs_config</span><span class=p>(</span><span class=n>check_root</span><span class=p>)</span>
+<span class=linenos data-linenos="216 "></span>            <span class=k>if</span> <span class=n>mount_logs</span> <span class=ow>is</span> <span class=kc>True</span><span class=p>:</span>
+<span class=linenos data-linenos="217 "></span>                <span class=n>wrappers</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>shared_logs</span><span class=p>(</span><span class=n>example_log_configs</span><span class=p>))</span>
+<span class=linenos data-linenos="218 "></span>            <span class=k>elif</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>,</span> <span class=p>(</span><span class=nb>list</span><span class=p>,</span> <span class=nb>set</span><span class=p>)):</span>
+<span class=linenos data-linenos="219 "></span>                <span class=n>wrappers</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>shared_logs</span><span class=p>(</span><span class=n>example_log_configs</span><span class=p>,</span> <span class=n>mount_whitelist</span><span class=o>=</span><span class=n>mount_logs</span><span class=p>))</span>
+<span class=linenos data-linenos="220 "></span>            <span class=k>else</span><span class=p>:</span>
+<span class=linenos data-linenos="221 "></span>                <span class=k>raise</span> <span class=ne>TypeError</span><span class=p>(</span>
+<span class=linenos data-linenos="222 "></span>                    <span class=s1>&#39;mount_logs: expected True, a list or a set, but got </span><span class=si>{}</span><span class=s1>&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=nb>type</span><span class=p>(</span><span class=n>mount_logs</span><span class=p>)</span><span class=o>.</span><span class=vm>__name__</span><span class=p>)</span>
+<span class=linenos data-linenos="223 "></span>                <span class=p>)</span>
+<span class=linenos data-linenos="224 "></span>
+<span class=linenos data-linenos="225 "></span>    <span class=k>with</span> <span class=n>environment_run</span><span class=p>(</span>
+<span class=linenos data-linenos="226 "></span>        <span class=n>up</span><span class=o>=</span><span class=n>set_up</span><span class=p>,</span>
+<span class=linenos data-linenos="227 "></span>        <span class=n>down</span><span class=o>=</span><span class=n>tear_down</span><span class=p>,</span>
+<span class=linenos data-linenos="228 "></span>        <span class=n>on_error</span><span class=o>=</span><span class=n>on_error</span><span class=p>,</span>
+<span class=linenos data-linenos="229 "></span>        <span class=n>sleep</span><span class=o>=</span><span class=n>sleep</span><span class=p>,</span>
+<span class=linenos data-linenos="230 "></span>        <span class=n>endpoints</span><span class=o>=</span><span class=n>endpoints</span><span class=p>,</span>
+<span class=linenos data-linenos="231 "></span>        <span class=n>conditions</span><span class=o>=</span><span class=n>docker_conditions</span><span class=p>,</span>
+<span class=linenos data-linenos="232 "></span>        <span class=n>env_vars</span><span class=o>=</span><span class=n>env_vars</span><span class=p>,</span>
+<span class=linenos data-linenos="233 "></span>        <span class=n>wrappers</span><span class=o>=</span><span class=n>wrappers</span><span class=p>,</span>
+<span class=linenos data-linenos="234 "></span>        <span class=n>attempts</span><span class=o>=</span><span class=n>attempts</span><span class=p>,</span>
+<span class=linenos data-linenos="235 "></span>        <span class=n>attempts_wait</span><span class=o>=</span><span class=n>attempts_wait</span><span class=p>,</span>
+<span class=linenos data-linenos="236 "></span>    <span class=p>)</span> <span class=k>as</span> <span class=n>result</span><span class=p>:</span>
+<span class=linenos data-linenos="237 "></span>        <span class=k>yield</span> <span class=n>result</span>
 </code></pre></div> </details> </div> </div> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.dev.docker.get_docker_hostname class="doc doc-heading"> <code class="highlight language-python"><span class=n>get_docker_hostname</span><span class=p>()</span></code> <a href=#datadog_checks.dev.docker.get_docker_hostname class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>Determine the hostname Docker uses based on the environment, defaulting to <code>localhost</code>.</p> <details class=quote> <summary>Source code in <code>datadog_checks_dev/datadog_checks/dev/docker.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos="23 "></span><span class=k>def</span> <span class=nf>get_docker_hostname</span><span class=p>():</span>
 <span class=linenos data-linenos="24 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
 <span class=linenos data-linenos="25 "></span><span class=sd>    Determine the hostname Docker uses based on the environment, defaulting to `localhost`.</span>
