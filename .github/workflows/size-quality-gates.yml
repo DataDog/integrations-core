@@ -111,7 +111,7 @@ jobs:
           THRESHOLD: "-1000000000000000000000000000"
 
       - name: Upload long size diffs output as artifact
-        if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}
+        if: ${{ steps.calculate_diffs.outputs.passes_qg == false }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: size_diffs_output_${{ inputs.platform }}.txt
@@ -120,7 +120,7 @@ jobs:
           
 
       - name: Upload short size diffs output as artifact
-        if: ${{ steps.calculate_diffs.outputs.passes_qg == 'false' }}
+        if: ${{ steps.calculate_diffs.outputs.passes_qg == false }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: size_diffs_output_short_${{ inputs.platform }}.txt
