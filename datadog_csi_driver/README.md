@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [datadog_csi_driver][1] through the Datadog Agent. 
+This check monitors [`datadog_csi_driver`][1] through the Datadog Agent. 
 
 The Datadog CSI Driver integration collects and monitors metrics from your Datadog CSI Driver, providing visibility into publish/unpublish requests and pod health for improved troubleshooting and performance monitoring.
 
