@@ -37,7 +37,7 @@ This integration does not include any events.
 
 ### Service Checks
 
-The datadog_csi_driver integration does not include any service checks.
+This integration does not include any service checks.
 
 ## Troubleshooting
 
