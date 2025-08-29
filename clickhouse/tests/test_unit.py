@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from clickhouse_connect.errors import Error, NetworkError
+from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.clickhouse import ClickhouseCheck, queries
 
@@ -110,7 +110,7 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
     # Test 1 healthy connection --> 2 Unhealthy service checks --> 1 healthy connection. Recovered
     with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
         check.check({})
-    with mock.patch('clickhouse_connect.get_client', side_effect=NetworkError('Connection refused')):
+    with mock.patch('clickhouse_connect.get_client', side_effect=OperationalError('Connection refused')):
         with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', return_value=False):
             with pytest.raises(Exception):
                 check.check({})
