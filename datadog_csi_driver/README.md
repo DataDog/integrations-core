@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The datadog_csi_driver check is included in the [Datadog Agent][2] package.
+The `datadog_csi_driver` check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
