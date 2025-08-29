@@ -24,7 +24,7 @@ from ddev.cli.application import Application
 from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
-
+METRIC_NAME = "datadog.agent_integrations"
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Patch
@@ -118,7 +118,7 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
 
 
 def is_correct_dependency(platform: str, version: str, name: str) -> bool:
-    return platform in name and version in name
+    return platform in name and version in name.split('_')[-1]
 
 
 def is_valid_integration_file(
@@ -182,7 +182,7 @@ def get_gitignore_files(repo_path: str | Path) -> list[str]:
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:
-    for unit in [" B", " KB", " MB", " GB"]:
+    for unit in [" B", " KiB", " MiB", " GiB"]:
         if abs(size_bytes) < 1024:
             return str(round(size_bytes, 2)) + unit
         size_bytes /= 1024
@@ -226,6 +226,11 @@ def get_files(repo_path: str | Path, compressed: bool, py_version: str) -> list[
             relative_path = os.path.relpath(file_path, repo_path)
             if not is_valid_integration_file(relative_path, str(repo_path)):
                 continue
+            path = Path(relative_path)
+            parts = path.parts
+
+            integration_name = parts[0]
+
             size = compress(file_path) if compressed else os.path.getsize(file_path)
             integration_sizes[integration_name] = integration_sizes.get(integration_name, 0) + size
 
@@ -381,44 +386,67 @@ def get_dependencies_sizes(
     return file_data
 
 
+def get_dependencies_from_json(
+    dependency_sizes: str, platform: str, version: str, compressed: bool
+) -> list[FileDataEntry]:
+    # for fname in os.listdir(dependency_sizes):
+    #     if is_correct_dependency(platform, version.split(".")[0], fname):
+    #         sizes_json = os.path.join(dependency_sizes, fname)
+    # if sizes_json is None:
+    #     raise ValueError(f"No dependency sizes found for platform {platform} and version {version}")
+    with open(dependency_sizes, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    size_key = "compressed" if compressed else "uncompressed"
+    return [
+        {
+            "Name": name,
+            "Version": sizes.get("version", ""),
+            "Size_Bytes": int(sizes.get(size_key, 0)),
+            "Size": convert_to_human_readable_size(sizes.get(size_key, 0)),
+            "Type": "Dependency",
+        }
+        for name, sizes in data.items()
+    ]
+
+
 def is_excluded_from_wheel(path: str) -> bool:
-    """
+    '''
     These files are excluded from the wheel in the agent build:
     https://github.com/DataDog/datadog-agent/blob/main/omnibus/config/software/datadog-agent-integrations-py3.rb
     In order to have more accurate results, this files are excluded when computing the size of the dependencies while
     the wheels still include them.
-    """
+    '''
     excluded_test_paths = [
         os.path.normpath(path)
         for path in [
-            "idlelib/idle_test",
-            "bs4/tests",
-            "Cryptodome/SelfTest",
-            "gssapi/tests",
-            "keystoneauth1/tests",
-            "openstack/tests",
-            "os_service_types/tests",
-            "pbr/tests",
-            "pkg_resources/tests",
-            "psutil/tests",
-            "securesystemslib/_vendor/ed25519/test_data",
-            "setuptools/_distutils/tests",
-            "setuptools/tests",
-            "simplejson/tests",
-            "stevedore/tests",
-            "supervisor/tests",
-            "test",  # cm-client
-            "vertica_python/tests",
-            "websocket/tests",
+            'idlelib/idle_test',
+            'bs4/tests',
+            'Cryptodome/SelfTest',
+            'gssapi/tests',
+            'keystoneauth1/tests',
+            'openstack/tests',
+            'os_service_types/tests',
+            'pbr/tests',
+            'pkg_resources/tests',
+            'psutil/tests',
+            'securesystemslib/_vendor/ed25519/test_data',
+            'setuptools/_distutils/tests',
+            'setuptools/tests',
+            'simplejson/tests',
+            'stevedore/tests',
+            'supervisor/tests',
+            'test',  # cm-client
+            'vertica_python/tests',
+            'websocket/tests',
         ]
     ]
 
     type_annot_libraries = [
-        "krb5",
-        "Cryptodome",
-        "ddtrace",
-        "pyVmomi",
-        "gssapi",
+        'krb5',
+        'Cryptodome',
+        'ddtrace',
+        'pyVmomi',
+        'gssapi',
     ]
     rel_path = Path(path).as_posix()
 
@@ -432,7 +460,7 @@ def is_excluded_from_wheel(path: str) -> bool:
     if path_parts:
         dependency_name = path_parts[0]
         if dependency_name in type_annot_libraries:
-            if path.endswith(".pyi") or os.path.basename(path) == "py.typed":
+            if path.endswith('.pyi') or os.path.basename(path) == 'py.typed':
                 return True
 
     return False
@@ -573,47 +601,22 @@ def export_format(
     compressed: bool,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
+    name = f"{mode}_{size_type}"
+    if platform:
+        name += f"_{platform}"
+    if version:
+        name += f"_{version}"
     for output_format in format:
         if output_format == "csv":
-            csv_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.csv"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.csv"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.csv"
-                    if platform
-                    else f"{size_type}_{mode}.csv"
-                )
-            )
+            csv_filename = f"{name}.csv"
             save_csv(app, modules, csv_filename)
 
         elif output_format == "json":
-            json_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.json"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.json"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.json"
-                    if platform
-                    else f"{size_type}_{mode}.json"
-                )
-            )
+            json_filename = f"{name}.json"
             save_json(app, json_filename, modules)
 
         elif output_format == "markdown":
-            markdown_filename = (
-                f"{platform}_{version}_{size_type}_{mode}.md"
-                if platform and version
-                else (
-                    f"{version}_{size_type}_{mode}.md"
-                    if version
-                    else f"{platform}_{size_type}_{mode}.md"
-                    if platform
-                    else f"{size_type}_{mode}.md"
-                )
-            )
+            markdown_filename = f"{name}.md"
             save_markdown(app, "Status", modules, markdown_filename)
 
 
@@ -842,7 +845,7 @@ def send_metrics_to_dd(
     key: str,
     compressed: bool,
 ) -> None:
-    metric_name = "datadog.agent_integrations"
+    metric_name = METRIC_NAME
     size_type = "compressed" if compressed else "uncompressed"
 
     config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
@@ -885,14 +888,14 @@ def send_metrics_to_dd(
                 ],
             }
         )
-        key_count = (item["Platform"], item["Python_Version"])
+        key_count = (item['Platform'], item['Python_Version'])
         if key_count not in n_integrations:
             n_integrations[key_count] = 0
         if key_count not in n_dependencies:
             n_dependencies[key_count] = 0
-        if item["Type"] == "Integration":
+        if item['Type'] == 'Integration':
             n_integrations[key_count] += 1
-        elif item["Type"] == "Dependency":
+        elif item['Type'] == 'Dependency':
             n_dependencies[key_count] += 1
 
     for (platform, py_version), count in n_integrations.items():
@@ -974,8 +977,8 @@ def get_last_commit_timestamp() -> int:
 
 def get_last_commit_data() -> tuple[str, list[str], list[str]]:
     result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
-    ticket_pattern = r"\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b"
-    pr_pattern = r"#(\d+)"
+    ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
+    pr_pattern = r'#(\d+)'
 
     message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
