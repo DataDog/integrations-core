@@ -16,7 +16,6 @@ services:
 
   kafka1:
     image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
-    platform: linux/arm64/v8
     container_name: kafka1
     hostname: kafka1
     ports:
@@ -46,7 +45,6 @@ services:
 
   kafka2:
     image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
-    platform: linux/arm64/v8
     container_name: kafka2
     hostname: kafka2
     ports:
