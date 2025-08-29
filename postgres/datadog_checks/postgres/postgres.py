@@ -79,6 +79,7 @@ from .util import (
     warning_with_tags,
 )
 from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionUtils
+from .dbm_custom_queries import PostgresDBMCustomQueries
 
 try:
     import datadog_agent
@@ -141,6 +142,7 @@ class PostgreSql(AgentCheck):
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
+        self.dbm_custom_queries = PostgresDBMCustomQueries(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
@@ -403,6 +405,7 @@ class PostgreSql(AgentCheck):
             self.statement_samples.cancel()
             self.statement_metrics.cancel()
             self.metadata_samples.cancel()
+            self.dbm_custom_queries.cancel()
         self._close_db_pool()
         if self._db:
             self._db.close()
@@ -1057,10 +1060,12 @@ class PostgreSql(AgentCheck):
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
+            self.log.info(f"DBM ENABLED: {self._config.dbm_enabled}")
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
                 self.metadata_samples.run_job_loop(tags)
+                self.dbm_custom_queries.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
