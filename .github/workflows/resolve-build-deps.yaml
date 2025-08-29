@@ -276,7 +276,7 @@ jobs:
     needs:
       - calculate-size-diffs
     if: >
-      contains(github.event.pull_request.labels.*.name, 'show-size-delta')
+      contains(github.event.pull_request.labels.*.name, 'show-size-delta') &&
       needs.calculate-size-diffs.outputs.passes_qg == false
     env:
       PYTHON_VERSION: "3.12"
