@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import clickhouse_driver
+import clickhouse_connect
 import pytest
 
 from datadog_checks.dev import docker_run
@@ -46,7 +46,7 @@ def instance():
 
 def ping_clickhouse(host, port, username, password):
     def _ping_clickhouse():
-        client = clickhouse_driver.Client(
+        client = clickhouse_connect.get_client(
             host=host,
             port=port,
             user=username,
