@@ -2,6 +2,8 @@
 
 ## Overview
 
+this is a new line.
+
 Integration that allows to:
 
 - Visualize and monitor metrics collected with GitLab and Gitaly through Prometheus
