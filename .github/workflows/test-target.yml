@@ -106,7 +106,7 @@ jobs:
       TEST_RESULTS_BASE_DIR: "test-results"
       # Tracing to monitor our test suite
       DD_ENV: "ci"
-      DD_SERVICE: "ddev-integrations-${{ inputs.repo }}"
+      DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
       DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       # Capture traces for a separate job to do the submission
@@ -187,10 +187,10 @@ jobs:
         ddev config set repo ${{ inputs.repo }}
 
     - name: Lint
-      run: |
+      run: |-
         ddev test --lint ${{ inputs.target }} || {
-          echo "::error::Lint failed! ddev has been updated to version 12.0.0."
-          echo "::error::Please update to the latest version of ddev and then run 'ddev test --fmt ${{ inputs.target }}' to fix formatting issues."
+          echo "::error::Lint failed!"
+          echo "::error::Please update to the latest version of ddev to ensure you are using the latest linting rules and then run 'ddev test --fmt ${{ inputs.target }}' to fix formatting issues."
           exit 1
         }
 
