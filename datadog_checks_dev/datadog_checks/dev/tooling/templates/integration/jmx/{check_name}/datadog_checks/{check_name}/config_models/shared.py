@@ -36,9 +36,9 @@ class SharedConfig(BaseModel):
     def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
-        if field_name in info.context['configured_fields']:
+        if info.context and field_name in info.context['configured_fields']:
             value = getattr(validators, f'shared_{{info.field_name}}', identity)(value, field=field)
-        else:
+        elif value is None:
             value = getattr(defaults, f'shared_{{info.field_name}}', lambda: value)()
 
         return validation.utils.make_immutable(value)
