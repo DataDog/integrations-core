@@ -55,6 +55,7 @@ from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
+from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 try:
     import datadog_agent
@@ -116,7 +117,7 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 
-class SQLServer(AgentCheck):
+class SQLServer(DBCheck):
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True

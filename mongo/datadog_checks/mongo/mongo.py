@@ -44,6 +44,7 @@ from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
 from datadog_checks.mongo.dbm.schemas import MongoSchemas
 from datadog_checks.mongo.dbm.slow_operations import MongoSlowOperations
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
+from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 from . import metrics
 
@@ -55,7 +56,7 @@ except ImportError:
 long = int
 
 
-class MongoDb(AgentCheck):
+class MongoDb(DBCheck):
     """
     MongoDB agent check.
 
