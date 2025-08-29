@@ -13,7 +13,6 @@ services:
       retries: 5
   kafka:
     image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
-    platform: linux/arm64/v8
     ports:
       - 9092:9092
       - 9999:9999
