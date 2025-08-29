@@ -25,6 +25,7 @@ from ddev.cli.dep.common import (
 @click.pass_context
 @click.pass_obj
 def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
+    "Testing test target"
     ignore_deps = set(app.repo.config.get('/overrides/dep/updates/exclude', []))
 
     if not include_security_deps:
