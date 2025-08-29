@@ -12,7 +12,7 @@ DD_QUERY_ATTRIBUTES = {
 }
 
 
-class BaseCommenterCursor:
+class BaseCommenterCursor(psycopg.ClientCursor):
     def __init__(self, *args, **kwargs):
         self.__attributes = DD_QUERY_ATTRIBUTES
         super().__init__(*args, **kwargs)
@@ -25,10 +25,13 @@ class BaseCommenterCursor:
         query = add_sql_comment(query, prepand=True, **self.__attributes)
         if ignore_query_metric:
             query = '{} {}'.format('/* DDIGNORE */', query)
+
+        if super().connection.closed:
+            raise psycopg.OperationalError('Connection is closed')
         return super().execute(query, params, binary=binary, prepare=prepare)
 
 
-class CommenterCursor(BaseCommenterCursor, psycopg.ClientCursor):
+class CommenterCursor(BaseCommenterCursor):
     pass
 
 

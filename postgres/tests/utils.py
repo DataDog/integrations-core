@@ -7,6 +7,8 @@ import time
 import psycopg
 import pytest
 
+from datadog_checks.base import AgentCheck
+
 from .common import PASSWORD_ADMIN, POSTGRES_VERSION, USER_ADMIN
 
 requires_over_10 = pytest.mark.skipif(
@@ -131,12 +133,13 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
     return run_query_thread(pg_instance, vacuum_query, application_name, init_stmts)
 
 
-def run_one_check(check, cancel=True):
+def run_one_check(check: AgentCheck, cancel=True):
     """
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
     """
-    check.run()
+    error_report = check.run()
+    assert not error_report, f'Check run failed with error: {error_report}'
     if cancel:
         check.cancel()
     if check.statement_samples._job_loop_future is not None:

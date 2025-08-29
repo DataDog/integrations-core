@@ -21,7 +21,7 @@ class PostgresConnectionArgs:
     """
 
     application_name: str
-    user: str
+    username: str
     host: Optional[str] = None
     port: Optional[int] = None
     password: Optional[str] = None
@@ -43,7 +43,7 @@ class PostgresConnectionArgs:
         """
         kwargs = {
             "application_name": self.application_name,
-            "user": self.user,
+            "user": self.username,
             "dbname": dbname,
             "sslmode": self.ssl_mode,
         }
