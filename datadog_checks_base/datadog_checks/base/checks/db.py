@@ -2,9 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-from datadog_checks_base.datadog_checks.base.checks.base import AgentCheck
-
+from . import AgentCheck
 
 class DBCheck(AgentCheck):
     def database_monitoring_query_sample(self, raw_event):
