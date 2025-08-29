@@ -128,7 +128,7 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
 
-        if not wheel_was_built(wheel) or 'ddtrace' in wheel.name:
+        if not wheel_was_built(wheel):
             print('Using existing wheel')
 
             check_unacceptable_files(
