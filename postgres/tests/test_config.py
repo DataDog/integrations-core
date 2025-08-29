@@ -15,6 +15,7 @@ from datadog_checks.postgres.config import (
     build_config,
     sanitize,
 )
+from datadog_checks.postgres.config_models.instance import Relations
 
 
 @pytest.fixture
@@ -242,3 +243,20 @@ def test_invalid_numbers(mock_check, minimal_instance):
     config, result = build_config(check=mock_check, init_config={}, instance=instance)
     assert any("query_metrics.collection_interval must be greater than 0" in w for w in result.warnings)
     assert config.query_metrics.collection_interval == DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
+
+
+def test_relations_validation(mock_check, minimal_instance):
+    minimal_instance["relations"] = [
+        {"relation_regex": ".*", "schemas": ["hello", "hello2"]},
+        # Empty schemas means all schemas, even though the first relation matches first.
+        {"relation_regex": r"[pP]ersons[-_]?(dup\d)?"},
+    ]
+
+    config, result = build_config(check=mock_check, init_config={}, instance=minimal_instance)
+    assert result.errors == []
+    assert result.valid
+    assert config.relations == (
+        Relations(relation_regex=".*", schemas=("hello", "hello2")),
+        # Empty schemas means all schemas, even though the first relation matches first.
+        Relations(relation_regex=r"[pP]ersons[-_]?(dup\d)?"),
+    )

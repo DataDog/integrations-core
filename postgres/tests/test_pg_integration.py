@@ -697,6 +697,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         for tag in expected_tags
         if not tag.startswith('database_instance:')
         and not tag.startswith('database_hostname:')
+        and not tag.startswith('ddagenthostname:')
         and not tag.startswith('dd.internal')
     ]
 
