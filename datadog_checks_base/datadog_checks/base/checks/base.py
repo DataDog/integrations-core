@@ -690,13 +690,6 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
-    def database_monitoring_health(self, raw_event):
-        # type: (str) -> None
-        if raw_event is None:
-            return
-
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-health")
-
     def event_platform_event(self, raw_event, event_track_type):
         # type: (str, str) -> None
         """Send an event platform event.
