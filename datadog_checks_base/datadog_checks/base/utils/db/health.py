@@ -10,6 +10,7 @@ import time
 from typing import TYPE_CHECKING
 
 from datadog_checks.base.utils.serialization import json
+from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 if TYPE_CHECKING:
     from datadog_checks.base import AgentCheck
@@ -42,7 +43,7 @@ class HealthStatus(Enum):
 
 
 class Health:
-    def __init__(self, check: AgentCheck):
+    def __init__(self, check: DBCheck):
         """
         Initialize the HealthCheck instance.
 
