@@ -137,7 +137,7 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
-def remove_test_files(wheel_path: Path) -> None:
+def remove_test_files(wheel_path: Path) -> bool:
     '''
     Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
     '''
@@ -148,33 +148,40 @@ def remove_test_files(wheel_path: Path) -> None:
     if not excluded_members:
         # Nothing to strip, so skip rewriting the wheel
         return False
-
     with TemporaryDirectory() as td:
         td_path = Path(td)
 
         # Unpack the wheel into temp dir
         unpack(wheel_path, dest=td_path)
         unpacked_dir = next(td_path.iterdir())
-
         # Remove excluded files/folders
         for root, dirs, files in os.walk(td, topdown=False):
             for d in list(dirs):
                 full_dir = Path(root) / d
                 rel = full_dir.relative_to(unpacked_dir).as_posix()
                 if is_excluded_from_wheel(rel):
-                    print(f'Removing {rel}')
                     shutil.rmtree(full_dir)
                     dirs.remove(d)
             for f in files:
                 rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
                 if is_excluded_from_wheel(rel):
-                    print(f'Removing {rel}')
                     os.remove(Path(root) / f)
 
         print(f'Tests removed from {wheel_path.name}')
-
+        
+        dest_dir = wheel_path.parent
+        before = {p.resolve() for p in dest_dir.glob("*.whl")}
         # Repack to same directory, regenerating RECORD
-        pack(unpacked_dir, dest_dir=wheel_path.parent, build_number=None)
+        pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
+
+        # The wheel might not be platform-specific, so repacking restores its original name.
+        # We need to move the repacked wheel to wheel_path, which was changed to be platform-specific.
+        after = {p.resolve() for p in wheel_path.parent.glob("*.whl")}
+        new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
+
+        if new_files:
+            shutil.move(str(new_files[0]), str(wheel_path))
+
 
     return True
 
@@ -324,6 +331,7 @@ def main():
             new_path = built_wheels_dir / wheel.name
             wheel.rename(new_path)
             wheel = new_path
+            print(f'Moved {wheel.name} to built directory')
 
         add_dependency(dependencies, wheel)
 
