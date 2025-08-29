@@ -107,12 +107,12 @@ class ClickhouseCheck(AgentCheck):
                 database=self._db,
                 connect_timeout=self._connect_timeout,
                 send_receive_timeout=self._read_timeout,
-                secure=self._tls_verify,        # True/False for TLS
-                ca_cert=self._tls_ca_cert,      # Path to CA cert
-                verify=self._verify,            # Whether to verify cert
+                secure=self._tls_verify,  # True/False for TLS
+                ca_cert=self._tls_ca_cert,  # Path to CA cert
+                verify=self._verify,  # Whether to verify cert
                 client_name=f'datadog-{self.check_id}',  # Custom client name
                 compression=self._compression,  # 'lz4', 'zstd', or None
-                settings={},                    # Any session-level settings
+                settings={},  # Any session-level settings
             )
             client.connection.connect()
         except Exception as e:

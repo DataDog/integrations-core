@@ -15,7 +15,7 @@ pytestmark = pytest.mark.unit
 def test_config(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test-clickhouse'
-    
+
     with mock.patch('clickhouse_connect.get_client') as m:
         mock_client = mock.MagicMock()
         m.return_value = mock_client
