@@ -8,6 +8,7 @@ import time
 from copy import deepcopy
 
 from cachetools import TTLCache
+from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -44,7 +45,6 @@ from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
 from datadog_checks.mongo.dbm.schemas import MongoSchemas
 from datadog_checks.mongo.dbm.slow_operations import MongoSlowOperations
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
-from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 from . import metrics
 

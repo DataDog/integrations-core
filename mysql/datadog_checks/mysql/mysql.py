@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
 from cachetools import TTLCache
+from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
@@ -28,7 +29,6 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
-from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 from .__about__ import __version__
 from .activity import MySQLActivity

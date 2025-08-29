@@ -10,11 +10,9 @@ import time
 from typing import TYPE_CHECKING
 
 from datadog_checks.base.utils.serialization import json
-from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 if TYPE_CHECKING:
-    from datadog_checks.base import AgentCheck
-
+    from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 try:
     import datadog_agent
 except ImportError:

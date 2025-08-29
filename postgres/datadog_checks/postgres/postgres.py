@@ -8,9 +8,9 @@ import os
 from string import Template
 from time import time
 
-from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 import psycopg
 from cachetools import TTLCache
+from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
