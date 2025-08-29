@@ -1973,7 +1973,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 # that requires booting up the database and makes it very slow to run compared to other unit tests
 def test_get_query_metrics_payload_rows():
     config, _ = build_config(check={}, init_config={}, instance={"host": "host", "username": "user"})
-    statement_metrics = PostgresStatementMetrics({}, config, None)
+    statement_metrics = PostgresStatementMetrics({}, config)
     wrapper = {}
 
     TestCase = namedtuple('TestCase', 'rows max_size expected')

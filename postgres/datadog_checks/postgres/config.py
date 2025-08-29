@@ -431,6 +431,10 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         }
     )
 
+    if args.get('database_autodiscovery', {}).get('enabled') and not instance.get('dbname'):
+        # Don't use the default dbname if autodiscovery is enabled
+        args['dbname'] = None
+
     validation_result = ValidationResult()
 
     if safefloat(args['query_metrics']['collection_interval']) <= 0:

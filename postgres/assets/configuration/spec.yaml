@@ -352,8 +352,7 @@ files:
       value:
         type: string
         example: /usr/local/pgsql/data
-        display_default: null
-        default: null
+        display_default: /usr/local/pgsql/data
     - name: tag_replication_role
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
