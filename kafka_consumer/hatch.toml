@@ -7,13 +7,14 @@ post-install-commands = [
   "python -m pip install --no-binary confluent-kafka confluent-kafka==2.8.0",
 ]
 
-[envs.default.env-vars]
-AUTHENTICATION = "noauth"
+[[envs.default.matrix]]
+python = ["3.12"]
+kafka_version = ["3.3"]
 
 [[envs.default.matrix]]
 python = ["3.12"]
 kafka_version = ["3.3"]
-auth = ["ssl", "kerberos"]
+auth = ["ssl", "kerberos", "noauth"]
 
 [envs.default.overrides]
 # See mappings between kafka version and confluent versions here: https://docs.confluent.io/platform/current/installation/versions-interoperability.html
