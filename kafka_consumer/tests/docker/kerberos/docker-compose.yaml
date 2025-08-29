@@ -84,9 +84,6 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
-    depends_on:
-      zookeeper:
-        condition: service_healthy
 
   broker2:
     image: confluentinc/cp-server:${CONFLUENT_VERSION}
@@ -128,9 +125,6 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
-    depends_on:
-      zookeeper:
-        condition: service_healthy
 
 networks:
   default:
