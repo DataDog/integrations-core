@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import clickhouse_driver
+import clickhouse_connect
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
@@ -79,7 +79,7 @@ class ClickhouseCheck(AgentCheck):
             raise ConfigurationError('the `server` setting is required')
 
     def ping_clickhouse(self):
-        return self._client.connection.ping()
+        return self._client.ping()
 
     def connect(self):
         if self.instance.get('user'):
@@ -99,24 +99,21 @@ class ClickhouseCheck(AgentCheck):
                 self._client = None
 
         try:
-            client = clickhouse_driver.Client(
+            client = clickhouse_connect.get_client(
                 host=self._server,
                 port=self._port,
-                user=self._user,
+                username=self._user,
                 password=self._password,
                 database=self._db,
                 connect_timeout=self._connect_timeout,
                 send_receive_timeout=self._read_timeout,
-                sync_request_timeout=self._connect_timeout,
-                compression=self._compression,
-                secure=self._tls_verify,
-                ca_certs=self._tls_ca_cert,
-                verify=self._verify,
-                settings={},
-                # Make every client unique for server logs
-                client_name='datadog-{}'.format(self.check_id),
+                secure=self._tls_verify,  # True/False for TLS
+                ca_cert=self._tls_ca_cert,  # Path to CA cert
+                verify=self._verify,  # Whether to verify cert
+                client_name=f'datadog-{self.check_id}',  # Custom client name
+                compression=self._compression,  # 'lz4', 'zstd', or None
+                settings={},  # Any session-level settings
             )
-            client.connection.connect()
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))

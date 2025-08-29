@@ -8,7 +8,7 @@ dependencies = [
 # Rabbitmq versions 3.8+ introduce the Prometheus plugin. This is the preferred way to collect metrics.
 # We still support metrics from management plugin as a legacy option.
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = ["3.7", "3.11","4.0"]
 flavor = ["mgmt", "openmetrics"]
 
