@@ -79,7 +79,7 @@ class ClickhouseCheck(AgentCheck):
             raise ConfigurationError('the `server` setting is required')
 
     def ping_clickhouse(self):
-        return self._client.connection.ping()
+        return self._client.ping()
 
     def connect(self):
         if self.instance.get('user'):
@@ -114,7 +114,6 @@ class ClickhouseCheck(AgentCheck):
                 compression=self._compression,  # 'lz4', 'zstd', or None
                 settings={},  # Any session-level settings
             )
-            client.connection.connect()
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))

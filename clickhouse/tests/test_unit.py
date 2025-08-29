@@ -35,7 +35,6 @@ def test_config(instance):
             compression=False,
             settings={},
         )
-        mock_client.connection.connect.assert_called_once()
 
 
 def test_error_query(instance, dd_run_check):
