@@ -10,10 +10,6 @@ post-install-commands = [
 [[envs.default.matrix]]
 python = ["3.12"]
 kafka_version = ["3.3"]
-
-[[envs.default.matrix]]
-python = ["3.12"]
-kafka_version = ["3.3"]
 auth = ["ssl", "kerberos", "noauth"]
 
 [envs.default.overrides]
