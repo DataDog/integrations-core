@@ -101,6 +101,7 @@ postgresql.last_autovacuum_age,gauge,,second,,"Last time at which this table was
 postgresql.last_vacuum_age,gauge,,second,,"Last time at which this table was manually vacuumed (not counting VACUUM FULL). This metric is tagged with db, schema, table.",0,postgres,age vacuum,,
 postgresql.live_rows,gauge,,row,,"Enabled with `relations`. The estimated number of live rows. This metric is tagged with db, schema, table.",0,postgres,live rows,,
 postgresql.locks,gauge,,lock,,"Enabled with `relations`. The number of locks active for this database. This metric is tagged with db, lock_mode, lock_type, schema, table, granted.",0,postgres,locks,,
+postgresql.locks.idle_in_transaction_age,gauge,,second,,Transaction age of idle in transaction sessions holding exclusive relation locks.,0,postgres,idle tx age with locks,,"pid,db,session_user,app,client_hostname,lock_mode,relation,relation_owner"
 postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns,,
 postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns,,
 postgresql.pg_stat_statements.dealloc,count,,,,The number of times pg_stat_statements had to evict least executed queries because pg_stat_statements.max was reached.,-1,postgres,pgss dealloc,,
