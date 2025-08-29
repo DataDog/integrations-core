@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import subprocess
 import os
+import subprocess
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
@@ -241,7 +241,11 @@ def test_fetch_audit_logs(mock_popen, instance):
 
     # Check that Popen was called with the correct arguments
     mock_popen.assert_any_call(
-        f"sudo auditreduce -a {time_filter_arg} {file_path}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env={**os.environ, "TZ": "UTC"}
+        f"sudo auditreduce -a {time_filter_arg} {file_path}",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env={**os.environ, "TZ": "UTC"},
     )
     mock_popen.assert_any_call(
         'sudo praudit -xsl', shell=True, stdin=mock_auditreduce_stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE
