@@ -8,10 +8,9 @@ import time
 from copy import deepcopy
 
 from cachetools import TTLCache
-from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
 from packaging.version import Version
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, DBCheck, is_affirmative
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.mongo.__about__ import __version__
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi

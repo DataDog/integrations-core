@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from datadog_checks.base.utils.serialization import json
 
 if TYPE_CHECKING:
-    from datadog_checks_base.datadog_checks.base.checks.db import DBCheck
+    from datadog_checks.base import DBCheck
 try:
     import datadog_agent
 except ImportError:
