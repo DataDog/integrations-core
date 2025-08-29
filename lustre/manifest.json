@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bbb68905-6876-4287-9a79-49f785e9c16c",
   "app_id": "lustre",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
