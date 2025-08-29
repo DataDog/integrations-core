@@ -34,6 +34,7 @@ from datadog_checks.postgres.metadata import (
     DEFAULT_SETTINGS_COLLECTION_INTERVAL,
     DEFAULT_SETTINGS_IGNORED_PATTERNS,
 )
+from datadog_checks.postgres.relationsmanager import RelationsManager
 from datadog_checks.postgres.statement_samples import (
     DEFAULT_ACTIVITY_COLLECTION_INTERVAL as DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL,
 )
@@ -41,7 +42,6 @@ from datadog_checks.postgres.statement_samples import (
     DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL,
 )
 from datadog_checks.postgres.statements import DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
-from datadog_checks.postgres.relationsmanager import RelationsManager
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql

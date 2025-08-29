@@ -14,14 +14,12 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
-
-from datadog_checks.base.utils.db.health import HealthStatus
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
-from datadog_checks.base.utils.db.health import HealthEvent
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs
