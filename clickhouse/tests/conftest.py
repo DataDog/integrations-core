@@ -49,7 +49,7 @@ def ping_clickhouse(host, port, username, password):
         client = clickhouse_connect.get_client(
             host=host,
             port=port,
-            user=username,
+            username=username,
             password=password,
         )
         client.connection.connect()
