@@ -4,6 +4,12 @@
 
 This check monitors [`datadog_csi_driver`][1] through the Datadog Agent. 
 
+The Datadog CSI Driver is a DaemonSet that runs a gRPC server implementing the CSI specifications on each node of your Kubernetes cluster.
+
+Installing Datadog CSI driver on a Kubernetes cluster allows using CSI volumes by specifying the name of Datadog CSI driver.
+
+The Datadog CSI node server is responsible for managing Datadog CSI volume lifecycle, allowing mounting UDS sockets for high performance dogstatsd and tracing without breaking constraints set by [`kubernetes pod security standards`][10]. 
+
 The Datadog CSI Driver integration collects and monitors metrics from your Datadog CSI Driver, providing visibility into publish/unpublish requests and pod health for improved troubleshooting and performance monitoring.
 
 ## Setup
@@ -52,3 +58,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/datadog_csi_driver/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/datadog_csi_driver/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://kubernetes.io/docs/concepts/security/pod-security-standards/
