@@ -44,7 +44,7 @@ services:
         -Dzookeeper.requireClientAuthScheme=sasl
 
   broker:
-    image: confluentinc/cp-server:7.3.0
+    image: confluentinc/cp-server:${CONFLUENT_VERSION}
     hostname: broker.kerberos-demo.local
     container_name: broker
     ports:
@@ -84,9 +84,12 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
+    depends_on:
+      zookeeper:
+        condition: service_healthy
 
   broker2:
-    image: confluentinc/cp-server:7.3.0
+    image: confluentinc/cp-server:${CONFLUENT_VERSION}
     hostname: broker2.kerberos-demo.local
     container_name: broker2
     ports:
@@ -125,6 +128,9 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
+    depends_on:
+      zookeeper:
+        condition: service_healthy
 
 networks:
   default:
