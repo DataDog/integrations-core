@@ -1,1 +1,1 @@
-Add submit function for sending health events from Postgres integration
+Add Postgres Health class for submitting Postgres health events
