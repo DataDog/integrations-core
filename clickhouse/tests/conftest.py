@@ -52,8 +52,6 @@ def ping_clickhouse(host, port, username, password):
             username=username,
             password=password,
         )
-        client.connection.connect()
-        client.connection.ping()
-        return True
+        return client.ping()
 
     return _ping_clickhouse
