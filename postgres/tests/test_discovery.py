@@ -284,7 +284,6 @@ def test_autodiscovery_exceeds_min_interval(aggregator, integration_check, pg_in
     assert test_structure.match(check.warnings[0])
 
 
-
 def _set_allow_connection(dbname: str, allow: bool):
     with get_postgres_connection() as conn:
         cursor = conn.cursor()
