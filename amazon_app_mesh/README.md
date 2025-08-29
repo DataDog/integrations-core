@@ -5,8 +5,8 @@
 
 ## Setup
 
-{{< tabs >}}
-{{% tab "EKS" %}}
+<!-- xxx tabs xxx -->
+<!-- xxx tab "EKS" xxx -->
 
 Use the instructions below to enable metric collection for the AWS App Mesh proxy sidecar, called Envoy. Users can choose to add sidecars in one of three modes: deploying, patching the deployment later, or using the AWS App Mesh injector controller. All modes are supported by the following steps.
 
@@ -56,12 +56,15 @@ Use the instructions below to enable metric collection for the AWS App Mesh prox
 
 #### Log collection
 
+<!-- partial
 {{< site-region region="us3" >}}
 
 Log collection is not supported for this site.
 
 {{< /site-region >}}
+partial -->
 
+<!-- partial
 {{< site-region region="us,eu,gov" >}}
 
 To enable log collection, update the Agent’s DaemonSet with the dedicated [Kubernetes log collection instructions][1].
@@ -69,6 +72,7 @@ To enable log collection, update the Agent’s DaemonSet with the dedicated [Kub
 [1]: https://docs.datadoghq.com/integrations/ecs_fargate/#log-collection
 
 {{< /site-region >}}
+partial -->
 
 #### Trace collection
 
@@ -91,7 +95,8 @@ Alternatively, the appmesh injector can be deployed by following the [App Mesh w
 [2]: /agent/kubernetes/daemonset_setup/#log-collection
 [3]: https://github.com/aws/aws-app-mesh-examples/blob/master/walkthroughs/eks/base.md#install-app-mesh--kubernetes-components
 
-{{% /tab %}}
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS Fargate" xxx -->
 {{% tab "ECS Fargate" %}}
 
 #### Metric collection
@@ -112,12 +117,15 @@ Alternatively, the appmesh injector can be deployed by following the [App Mesh w
 
 #### Log collection
 
+<!-- partial
 {{< site-region region="us3" >}}
 
 Log collection is not supported for this site.
 
 {{< /site-region >}}
+partial -->
 
+<!-- partial
 {{< site-region region="us,eu,gov" >}}
 
 Enable log collection with the instructions in the [ECS Fargate integration documentation][1].
@@ -125,6 +133,7 @@ Enable log collection with the instructions in the [ECS Fargate integration docu
 [1]: https://docs.datadoghq.com/integrations/ecs_fargate/#log-collection
 
 {{< /site-region >}}
+partial -->
 
 #### Trace collection
 
@@ -138,8 +147,8 @@ Set the AWS App Mesh parameters `ENABLE_ENVOY_DATADOG_TRACING` and `DATADOG_TRAC
 [4]: https://docs.datadoghq.com/integrations/ecs_fargate/#trace-collection
 [5]: https://docs.aws.amazon.com/app-mesh/latest/userguide/envoy.html
 
-{{% /tab %}}
-{{% tab "ECS EC2" %}}
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS EC2" xxx -->
 
 #### Metric collection
 
@@ -159,12 +168,15 @@ Set the AWS App Mesh parameters `ENABLE_ENVOY_DATADOG_TRACING` and `DATADOG_TRAC
 
 #### Log collection
 
+<!-- partial
 {{< site-region region="us3" >}}
 
 Log collection is not supported for this site.
 
 {{< /site-region >}}
+partial -->
 
+<!-- partial
 {{< site-region region="us,eu,gov" >}}
 
 Enable log collection with the instructions in the [ECS integration documentation][1].
@@ -172,6 +184,7 @@ Enable log collection with the instructions in the [ECS integration documentatio
 [1]: https://docs.datadoghq.com/integrations/amazon_ecs/#log-collection
 
 {{< /site-region >}}
+partial -->
 
 #### Trace collection
 
@@ -185,8 +198,8 @@ Enable log collection with the instructions in the [ECS integration documentatio
 [4]: https://docs.datadoghq.com/integrations/amazon_ecs/#trace-collection
 [5]: https://docs.aws.amazon.com/app-mesh/latest/userguide/envoy.html
 
-{{% /tab %}}
-{{< /tabs >}}
+<!-- xxz tab xxx -->
+<!-- xxx tabs xxx -->
 
 ## Data Collected
 
