@@ -93,12 +93,17 @@ jobs:
           
       - name: Calculate diffs 
         run: |
+          set +e
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
             # send metrics to datadog if this is a push to master
             PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog ${{secrets.DD_API_KEY}} --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
           else
             PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
           fi
+             status=$?      # 0 = passes, 1 = fails
+          set -e
+
+          if [ "$status" -eq 0 ]; then PASSES_QG=true; else PASSES_QG=false; fi
           echo "passes_qg=$PASSES_QG" >> $GITHUB_OUTPUT
           echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
