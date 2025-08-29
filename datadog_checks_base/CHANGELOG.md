@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.18.0 / 2025-08-29
+
+***Added***:
+
+* Add database Health class for sending DBM health events ([#20739](https://github.com/DataDog/integrations-core/pull/20739))
+
 ## 37.17.1 / 2025-08-26
 
 ***Fixed***:
