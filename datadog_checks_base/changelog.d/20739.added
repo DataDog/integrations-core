@@ -1,1 +1,1 @@
-Add submit function for sending health events from Postgres integration
+Add database health object for sending DBM health events

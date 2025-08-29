@@ -62,7 +62,7 @@ class Health:
             Tags to associate with the health event.
         :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
-        self.check.database_monitoring_health(
+        self.check.event_platform_event(
             json.dumps(
                 {
                     'timestamp': time.time() * 1000,
@@ -76,5 +76,6 @@ class Health:
                     'ddagenthostname': datadog_agent.get_hostname(),
                     'data': {**kwargs},
                 }
-            )
+            ),
+            "dbm-health",
         )
