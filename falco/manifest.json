@@ -14,7 +14,12 @@
       {
         "media_type": "image",
         "caption": "Falco - Alerts",
-        "image_url": "images/falco_alerts.png"
+        "image_url": "images/falco_alerts_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Falco - Alerts",
+        "image_url": "images/falco_alerts_2.png"
       }
     ],
     "classifier_tags": [

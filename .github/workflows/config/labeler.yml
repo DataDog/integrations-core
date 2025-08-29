@@ -329,6 +329,8 @@ integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
 integration/ivanti_nzta:
 - ivanti_nzta/**/*
+integration/jamf_pro:
+- jamf_pro/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
