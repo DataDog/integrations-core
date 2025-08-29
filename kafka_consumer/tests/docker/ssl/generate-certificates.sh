@@ -125,7 +125,7 @@ for kafkaHost in kafka1 kafka2 localhost; do
 
   keytool -keystore $keystoreWorkDir/"$keystoreFileName" \
     -alias localhost -validity $validity -genkey -keyalg RSA \
-    -noprompt -dname "C=$country, ST=$state, L=$location, O=$OU, CN=$kafkaHost" \
+    -noprompt -dname "C=$country, ST=$state, L=$location, O=$OU, CN=localhost" \
     -keypass $password -storepass $password
 
   echo
@@ -150,7 +150,7 @@ for kafkaHost in kafka1 kafka2 localhost; do
   echo
   openssl x509 -req -CA $caKey -CAkey $truststorePrivateKey \
     -in $keystoreSignInRequest -out $keystoreSignedCert \
-    -days $validity -CAcreateserial -sha256 -extfile <(printf "subjectAltName=DNS:$kafkaHost,DNS:localhost")
+    -days $validity -CAcreateserial -sha256
   # creates $keystoreSignRequestSrl which is never used or needed.
 
   echo
