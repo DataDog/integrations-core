@@ -109,16 +109,20 @@ class MacAuditLogsCheck(AgentCheck):
         praudit_command = "sudo praudit -xsl"
 
         try:
-            # passing in TZ=UTC due to issue where auditreduce does not translate daylight savings time to UTC properly and always assume standard time
+            # use TZ=UTC because auditreduce does not translate daylight savings to UTC and always uses standard time
             auditreduce_process = subprocess.Popen(
-                auditreduce_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env={**os.environ, "TZ": "UTC"}
+                auditreduce_command,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env={**os.environ, "TZ": "UTC"},
             )
             praudit_process = subprocess.Popen(
                 praudit_command,
                 shell=True,
                 stdin=auditreduce_process.stdout,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
 
             auditreduce_process.stdout.close()
