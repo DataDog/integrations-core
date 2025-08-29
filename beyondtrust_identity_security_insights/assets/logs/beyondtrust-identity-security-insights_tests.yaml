@@ -1,0 +1,52 @@
+id: "beyondtrust-identity-security-insights"
+tests:
+ -
+  sample: |-
+    {
+      "severity" : "Critical",
+      "entityType" : "account",
+      "entityName" : "john.briley@gmail.com",
+      "incidentType" : "Detection",
+      "link" : "https://app.beyondtrust.io/insights/dfrijfr/detections/details/f17987fed-81c9-46f2-8157-67ca3ca2a6b8/instance/1c77442c780bfb068550f6e8c35bec6e",
+      "tenantId" : "7945s164-2f4b-45a7-8eca-44d36144f061",
+      "location" : "okta/https://trial-1345678.okta.com",
+      "source" : "okta/https://trial-1345678.okta.com",
+      "incidentId" : "1c77442b840bfb068550f6e8c35bec6e",
+      "definitionId" : "f1201fed-46c9-46f2-8157-67ca3ca2a6b8",
+      "timestamp" : "07/02/2025 12:45:14"
+    }
+  result:
+    custom:
+      definitionId: "f1201fed-46c9-46f2-8157-67ca3ca2a6b8"
+      entityName: "john.briley@gmail.com"
+      entityType: "account"
+      incidentId: "1c77442b840bfb068550f6e8c35bec6e"
+      incidentType: "Detection"
+      link: "https://app.beyondtrust.io/insights/dfrijfr/detections/details/f17987fed-81c9-46f2-8157-67ca3ca2a6b8/instance/1c77442c780bfb068550f6e8c35bec6e"
+      location: "okta/https://trial-1345678.okta.com"
+      provider: "okta"
+      service: "okta-detection"
+      severity: "Critical"
+      source: "okta/https://trial-1345678.okta.com"
+      status: "critical"
+      tenantId: "7945s164-2f4b-45a7-8eca-44d36144f061"
+      timestamp: 1751460314000
+    message: |-
+      {
+        "severity" : "Critical",
+        "entityType" : "account",
+        "entityName" : "john.briley@gmail.com",
+        "incidentType" : "Detection",
+        "link" : "https://app.beyondtrust.io/insights/dfrijfr/detections/details/f17987fed-81c9-46f2-8157-67ca3ca2a6b8/instance/1c77442c780bfb068550f6e8c35bec6e",
+        "tenantId" : "7945s164-2f4b-45a7-8eca-44d36144f061",
+        "location" : "okta/https://trial-1345678.okta.com",
+        "source" : "okta/https://trial-1345678.okta.com",
+        "incidentId" : "1c77442b840bfb068550f6e8c35bec6e",
+        "definitionId" : "f1201fed-46c9-46f2-8157-67ca3ca2a6b8",
+        "timestamp" : "07/02/2025 12:45:14"
+      }
+    service: "okta-detection"
+    status: "critical"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1751460314000

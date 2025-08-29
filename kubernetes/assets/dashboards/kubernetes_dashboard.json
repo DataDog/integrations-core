@@ -415,8 +415,42 @@
                             "title": "Events per node",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "event_timeline",
-                            "query": "source:kubernetes $node"
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "events",
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:kubernetes $node $cluster"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "semantic"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
                         },
                         "layout": {
                             "x": 0,
@@ -432,7 +466,7 @@
                             "requests": [
                                 {
                                     "query": {
-                                        "query_string": "source:kubernetes $node",
+                                        "query_string": "source:kubernetes $node $cluster",
                                         "data_source": "event_stream",
                                         "event_size": "s"
                                     },
@@ -504,13 +538,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "desc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
@@ -601,13 +641,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 100,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "desc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
@@ -699,13 +745,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 100,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "desc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
@@ -1563,7 +1615,7 @@
                             "type": "hostmap",
                             "requests": {
                                 "fill": {
-                                    "q": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                    "q": "sum:kubernetes.cpu.usage.total{$scope,$cluster,$label,$node} by {host}"
                                 }
                             },
                             "no_metric_hosts": false,
@@ -1571,9 +1623,7 @@
                             "scope": [
                                 "$scope",
                                 "$node",
-                                "$label",
-                                "$kube_deployment",
-                                "$kube_namespace"
+                                "$label"
                             ],
                             "custom_links": [],
                             "style": {
@@ -1645,13 +1695,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "desc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
@@ -1672,7 +1728,7 @@
                             "type": "hostmap",
                             "requests": {
                                 "fill": {
-                                    "q": "sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                                    "q": "sum:kubernetes.memory.usage{$scope,$cluster,$label,$node} by {host}"
                                 }
                             },
                             "no_metric_hosts": false,
@@ -1680,9 +1736,7 @@
                             "scope": [
                                 "$scope",
                                 "$node",
-                                "$label",
-                                "$kube_deployment",
-                                "$kube_namespace"
+                                "$label"
                             ],
                             "custom_links": [],
                             "style": {
@@ -1754,13 +1808,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "desc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
