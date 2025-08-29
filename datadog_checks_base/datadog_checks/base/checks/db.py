@@ -4,6 +4,7 @@
 
 from . import AgentCheck
 
+
 class DBCheck(AgentCheck):
     def database_monitoring_query_sample(self, raw_event):
         # type: (str) -> None
