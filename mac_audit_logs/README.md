@@ -24,7 +24,7 @@ To install the Mac Audit Logs integration, run the following Agent installation 
 
 For Mac, run:
   ```shell
-  sudo datadog-agent integration install datadog-mac-audit-logs==1.0.0
+  sudo datadog-agent integration install datadog-mac-audit-logs==1.0.1
   ```
 
 
