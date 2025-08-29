@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 import subprocess
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
@@ -235,12 +236,16 @@ def test_fetch_audit_logs(mock_popen, instance):
 
     # Call the method
     file_path = "/var/audit/20250605082138.20250605082142"
-    time_filter_arg = "20250605082138"
+    time_filter_arg = "20250605132138"
     output, error = check.fetch_audit_logs(file_path, time_filter_arg)
 
     # Check that Popen was called with the correct arguments
     mock_popen.assert_any_call(
-        f"sudo auditreduce -a {time_filter_arg} {file_path}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        f"sudo auditreduce -a {time_filter_arg} {file_path}",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env={**os.environ, "TZ": "UTC"},
     )
     mock_popen.assert_any_call(
         'sudo praudit -xsl', shell=True, stdin=mock_auditreduce_stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -269,5 +274,5 @@ def test_process_and_ingest_log_entries_skipping_logs_milli_seconds(mock_send_lo
     )
     log_entries = logs.split("\n")
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    check.process_and_ingest_log_entries(log_entries, "20250605082138.20250605082142", "+0530", " + 278 msec")
+    check.process_and_ingest_log_entries(log_entries, "20250605082138.20250605082142", "+0000", " + 278 msec")
     assert mock_send_log.call_count == 2
