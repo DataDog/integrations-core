@@ -401,7 +401,11 @@ class HTTPCheck(AgentCheck):
 
         sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
         proxies = self.http.options.get('proxies', {})
-        if proxies and (proxy_url := proxies.get('https')) and not should_bypass_proxy(url, self.http.no_proxy_uris or []):
+        if (
+            proxies
+            and (proxy_url := proxies.get("https"))
+            and not should_bypass_proxy(url, self.http.no_proxy_uris or [])
+        ):
             proxy = parse_proxy_url(proxy_url)
             sock.set_proxy(**proxy)
 
