@@ -20,7 +20,6 @@ PORT = 9402
 
 
 def setup_cert_manager():
-
     # Deploy Cert Manager
     run_command(
         [

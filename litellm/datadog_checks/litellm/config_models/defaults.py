@@ -84,6 +84,10 @@ def instance_non_cumulative_histogram_buckets():
     return False
 
 
+def instance_openmetrics_endpoint():
+    return 'http://localhost:4000/metrics'
+
+
 def instance_persist_connections():
     return False
 

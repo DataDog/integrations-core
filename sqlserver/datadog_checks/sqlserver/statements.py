@@ -28,7 +28,7 @@ from datadog_checks.sqlserver.utils import is_azure_sql_database
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
@@ -626,7 +626,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
-                obfuscated_plan, collection_errors = None, None
+                obfuscated_plan = None
+                collection_errors = []
 
                 try:
                     if raw_plan:
@@ -639,13 +640,21 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
-                    collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
+                    collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
                     )
                 tags = self._check.tag_manager.get_tags()
+
+                if is_plan_encrypted:
+                    collection_errors.append({'code': "plan_encrypted", 'message': "cannot collect encrypted plan"})
+
+                # Do not submit plan events if no plan is available and there is no collection error.
+                # This avoids sending empty plan events when a plan is not available in the cache.
+                if not raw_plan and not collection_errors:
+                    continue
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
@@ -677,7 +686,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "plan": {
                             "definition": obfuscated_plan,
                             "signature": row['query_plan_hash'],
-                            "collection_errors": collection_errors,
+                            "collection_errors": collection_errors if collection_errors else None,
                         },
                         "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),

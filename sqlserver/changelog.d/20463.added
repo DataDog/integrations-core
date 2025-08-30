@@ -1,1 +1,0 @@
-Add `sys.dm_exec_sessions.client_interface_name` to activity samples payload.

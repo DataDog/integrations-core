@@ -109,7 +109,6 @@ class BTRFS(AgentCheck):
         results = []
 
         with FileDescriptor(mountpoint) as fd:
-
             # Get the struct size needed
             # https://github.com/spotify/linux/blob/master/fs/btrfs/ioctl.h#L46-L50
             ret = sized_array(TWO_LONGS_STRUCT.size)
@@ -135,7 +134,6 @@ class BTRFS(AgentCheck):
         unallocated_bytes = 0
 
         with FileDescriptor(mountpoint) as fd:
-
             # Retrieve the fs info to get the number of devices and max device id
             fs_info = sized_array(BTRFS_FS_INFO_STRUCT.size)
             fcntl.ioctl(fd, BTRFS_IOC_FS_INFO, fs_info)

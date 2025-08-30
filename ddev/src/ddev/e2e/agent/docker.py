@@ -259,8 +259,7 @@ class DockerAgent(AgentInterface):
                 if process.returncode:
                     self._show_logs()
                     raise RuntimeError(
-                        f'Unable to install package `{local_package.name}` in Agent container '
-                        f'`{self._container_name}`'
+                        f'Unable to install package `{local_package.name}` in Agent container `{self._container_name}`'
                     )
 
         if post_install_commands:

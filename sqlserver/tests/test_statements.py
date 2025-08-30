@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -358,6 +358,7 @@ def test_statement_metrics_and_plans(
         expected_instance_tags.add("raw_query_statement:enabled")
     expected_instance_tags.add("database_hostname:stubbed.hostname")
     expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("ddagenthostname:stubbed.hostname")
     expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
@@ -381,16 +382,16 @@ def test_statement_metrics_and_plans(
     # 3) emit the query metrics based on the diff of current and last state
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
-        dd_run_check(check)
+        dd_run_check(check, cancel=False)
         for _ in range(0, exe_count):
             for params in param_groups:
                 bob_conn.execute_with_retries(query, params, database=database)
-        dd_run_check(check)
+        dd_run_check(check, cancel=False)
         aggregator.reset()
         for _ in range(0, exe_count):
             for params in param_groups:
                 bob_conn.execute_with_retries(query, params, database=database)
-        dd_run_check(check)
+        dd_run_check(check, cancel=False)
 
     _conn_key_prefix = "dbm-"
     with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
@@ -423,9 +424,9 @@ def test_statement_metrics_and_plans(
         matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
     assert len(matching_rows) == len(expected_queries_patterns), "missing expected matching rows"
     total_execution_count = sum([r['execution_count'] for r in matching_rows])
-    assert (
-        total_execution_count == len(param_groups) * len(expected_queries_patterns) * exe_count
-    ), "wrong execution count"
+    assert total_execution_count == len(param_groups) * len(expected_queries_patterns) * exe_count, (
+        "wrong execution count"
+    )
     for row in matching_rows:
         if is_encrypted:
             # we get NULL text for encrypted statements so we have no calculated query signature
@@ -471,9 +472,9 @@ def test_statement_metrics_and_plans(
         if disable_secondary_tags:
             assert set(event['ddtags'].split(',')) == expected_instance_tags, "wrong instance tags for plan event"
         else:
-            assert (
-                set(event['ddtags'].split(',')) == expected_instance_tags_with_db
-            ), "wrong instance tags for plan event"
+            assert set(event['ddtags'].split(',')) == expected_instance_tags_with_db, (
+                "wrong instance tags for plan event"
+            )
 
     plan_events = [s for s in matching_samples if s['dbm_type'] == "plan"]
     # plan sampling should limit the number of plans we collect per query/ proc
@@ -518,9 +519,9 @@ def test_statement_metrics_and_plans(
                 assert not event['sqlserver']['is_statement_encrypted']
 
     fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
-    assert len(fqt_events) == len(
-        expected_queries_patterns
-    ), "should have collected an FQT event per unique query signature"
+    assert len(fqt_events) == len(expected_queries_patterns), (
+        "should have collected an FQT event per unique query signature"
+    )
 
     # internal debug metrics
     aggregator.assert_metric(
@@ -911,6 +912,7 @@ def _expected_dbm_instance_tags(check):
     return check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
+        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
     ]
@@ -1001,13 +1003,7 @@ def test_statement_conditional_stored_procedure_with_temp_table(
     assert dbm_samples, "should have collected at least one sample"
 
     matched_events = [s for s in dbm_samples if s['dbm_type'] == "plan" and "#Ids" in s['db']['statement']]
-    assert matched_events, "should have collected plan event"
-
-    for event in matched_events:
-        assert event['db']['plan']['definition'] is None
-        assert event['sqlserver']['plan_handle'] is not None
-        assert event['sqlserver']['query_hash'] is not None
-        assert event['sqlserver']['query_plan_hash'] is not None
+    assert not matched_events, "should not have collected plan event because there is no plan definition"
 
 
 @pytest.mark.integration
@@ -1197,9 +1193,9 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
     if filter_to_configured_database:
-        assert all(
-            row['database_name'] == configured_database for row in sqlserver_rows
-        ), "should have only collected metrics for configured database"
+        assert all(row['database_name'] == configured_database for row in sqlserver_rows), (
+            "should have only collected metrics for configured database"
+        )
     else:
         database_names = {row['database_name'] for row in sqlserver_rows}
         assert 'datadog_test-1' in database_names, "should have collected metrics for datadog_test-1 databases"

@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: azure.activedirectory
 metric_id: azure-active-directory
 backend_only: false

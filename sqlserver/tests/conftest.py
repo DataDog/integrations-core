@@ -334,7 +334,7 @@ def dd_environment(full_e2e_config):
     completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
         completion_message = (
-            'Always On Availability Groups connection with primary database established ' 'for secondary database'
+            'Always On Availability Groups connection with primary database established for secondary database'
         )
     if 'compose-high-cardinality' in os.environ["COMPOSE_FOLDER"]:
         # This env is a highly loaded database and is expected to take a while to setup.

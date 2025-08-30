@@ -7,10 +7,11 @@ from contextlib import contextmanager, suppress
 import pywintypes
 import win32pdh
 
-from ....config import is_affirmative
-from ....errors import ConfigTypeError, ConfigurationError
-from ....utils.functions import raise_exception
-from ... import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigTypeError, ConfigurationError
+from datadog_checks.base.utils.functions import raise_exception
+
 from .connection import Connection
 from .counter import PerfObject
 

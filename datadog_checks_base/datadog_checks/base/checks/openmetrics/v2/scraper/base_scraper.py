@@ -4,11 +4,13 @@
 import fnmatch
 import inspect
 import re
+from collections.abc import Generator
 from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
@@ -237,18 +239,20 @@ class OpenMetricsScraper:
         """
         runtime_data = {'flush_first_value': bool(self.flush_first_value), 'static_tags': self.static_tags}
 
-        # Determine which consume method to use based on target_info config
-        if self.target_info:
-            consume_method = self.consume_metrics_w_target_info
-        else:
-            consume_method = self.consume_metrics
-
-        for metric in consume_method(runtime_data):
+        for metric in self.yield_metrics(runtime_data):
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
 
             transformer(metric, self.generate_sample_data(metric), runtime_data)
+
+    def yield_metrics(self, runtime_data: dict) -> Generator[Metric]:
+        if self.target_info:
+            consume_method = self.consume_metrics_w_target_info
+        else:
+            consume_method = self.consume_metrics
+
+        yield from consume_method(runtime_data)
 
     def scrape(self):
         try:

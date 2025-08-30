@@ -4,14 +4,15 @@
 """
 Helpers to parse the `metric_tags` section of a config file.
 """
+
 import re
 from typing import Dict, List, NamedTuple, TypedDict
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.snmp.models import OID
+from datadog_checks.snmp.pysnmp_types import ObjectIdentity
+from datadog_checks.snmp.resolver import OIDResolver  # noqa: F401
 
-from ..models import OID
-from ..pysnmp_types import ObjectIdentity
-from ..resolver import OIDResolver  # noqa: F401
 from .parsed_metrics import ParsedMatchMetricTag, ParsedMetricTag, ParsedSimpleMetricTag
 
 SymbolTag = NamedTuple('SymbolTag', [('parsed_metric_tag', ParsedMetricTag), ('symbol', str)])
@@ -89,8 +90,9 @@ def parse_metric_tag(metric_tag):
         parsed_metric_tag = _parse_regex_metric_tag(metric_tag)
     else:
         raise ConfigurationError(
-            'A metric tag must specify either a tag, '
-            'or a mapping of tags and a regular expression: {}'.format(metric_tag)
+            'A metric tag must specify either a tag, or a mapping of tags and a regular expression: {}'.format(
+                metric_tag
+            )
         )
     return parsed_metric_tag
 

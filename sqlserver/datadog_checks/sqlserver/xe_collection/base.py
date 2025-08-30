@@ -24,6 +24,8 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database
 
+from .xml_tools import extract_int_value, extract_value
+
 try:
     import datadog_agent
 except ImportError:
@@ -329,6 +331,25 @@ class XESessionBase(DBMAsyncJob):
             self._log.error(f"Error processing ring buffer events: {e}")
             return []
 
+    def _process_action_elements(self, event, event_data):
+        """Process common action elements for all event types"""
+        for action in event.findall('./action'):
+            action_name = action.get('name')
+            if not action_name:
+                continue
+
+            if action_name == 'attach_activity_id':
+                event_data['activity_id'] = extract_value(action)
+            elif action_name == 'attach_activity_id_xfer':
+                event_data['activity_id_xfer'] = extract_value(action)
+            elif action_name == 'session_id' or action_name == 'request_id':
+                # These are numeric values in the actions
+                value = extract_int_value(action)
+                if value is not None:
+                    event_data[action_name] = value
+            else:
+                event_data[action_name] = extract_value(action)
+
     @abstractmethod
     def _normalize_event_impl(self, event):
         """
@@ -447,7 +468,6 @@ class XESessionBase(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": self._determine_dbm_type(),
-            "event_source": self.session_name,
             "collection_interval": self.collection_interval,
             "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time() * 1000,
@@ -579,7 +599,6 @@ class XESessionBase(DBMAsyncJob):
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": self._determine_dbm_type(),
-                "event_source": self.session_name,
                 "collection_interval": self.collection_interval,
                 "ddtags": self._check.tag_manager.get_tags(),
                 "timestamp": time() * 1000,
@@ -778,7 +797,6 @@ class XESessionBase(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "rqt",
-            "event_source": self.session_name,
             "ddtags": ",".join(self._check.tag_manager.get_tags()),
             'service': self._config.service,
             "db": db_fields,

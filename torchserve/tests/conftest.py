@@ -65,16 +65,19 @@ def dd_environment():
             ):
                 run_prediction(model)
 
-        yield {
-            "init_config": {
-                "service": "my_torchserve",
+        yield (
+            {
+                "init_config": {
+                    "service": "my_torchserve",
+                },
+                "instances": [
+                    OPENMETRICS_INSTANCE,
+                    INFERENCE_INSTANCE,
+                    MANAGEMENT_INSTANCE,
+                ],
             },
-            "instances": [
-                OPENMETRICS_INSTANCE,
-                INFERENCE_INSTANCE,
-                MANAGEMENT_INSTANCE,
-            ],
-        }, E2E_METADATA
+            E2E_METADATA,
+        )
 
 
 @pytest.fixture

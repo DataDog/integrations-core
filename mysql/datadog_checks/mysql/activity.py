@@ -23,7 +23,7 @@ from .util import DatabaseConfigurationError, connect_with_session_variables, ge
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 
 ACTIVITY_QUERY = """\
@@ -145,7 +145,6 @@ def agent_check_getter(self):
 
 
 class MySQLActivity(DBMAsyncJob):
-
     DEFAULT_COLLECTION_INTERVAL = 10
     MAX_PAYLOAD_BYTES = 19e6
 

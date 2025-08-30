@@ -1,0 +1,150 @@
+{
+    "version": 3,
+    "$schema": "https://www.krakend.io/schema/v2.10/krakend.json",
+    "name": "KrakenD Test Gateway",
+    "timeout": "1000ms",
+    "output_encoding": "json",
+    "port": 8080,
+    "host": [
+        "http://localhost"
+    ],
+    "debug_endpoint": true,
+    "echo_endpoint": true,
+    "extra_config": {
+        "telemetry/opentelemetry": {
+            "service_name": "krakend-gateway",
+            "service_version": "1.0.0",
+            "exporters": {
+                "prometheus": [
+                    {
+                        "name": "krakend_metrics",
+                        "port": 9090,
+                        "listen_ip": "0.0.0.0",
+                        "process_metrics": true,
+                        "go_metrics": true
+                    }
+                ]
+            },
+            "layers": {
+                "global": {
+                    "disable_metrics": false
+                },
+                "proxy": {
+                    "disable_metrics": false
+                },
+                "backend": {
+                    "metrics": {
+                        "disable_stage": false,
+                        "round_trip": true,
+                        "read_payload": true,
+                        "detailed_connection": true,
+                        "static_attributes": [
+                            {
+                                "key": "backend_type",
+                                "value": "test_api"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "telemetry/logging": {
+            "level": "DEBUG",
+            "prefix": "[KRAKEND]",
+            "stdout": true,
+            "format": "logstash"
+        }
+    },
+    "endpoints": [
+        {
+            "endpoint": "/api/valid",
+            "method": "GET",
+            "output_encoding": "json",
+            "backend": [
+                {
+                    "url_pattern": "/valid/",
+                    "encoding": "json",
+                    "method": "GET",
+                    "host": [
+                        "api:8000"
+                    ]
+                }
+            ]
+        },
+        {
+            "endpoint": "/api/invalid",
+            "method": "GET",
+            "output_encoding": "json",
+            "backend": [
+                {
+                    "url_pattern": "/invalid/",
+                    "encoding": "json",
+                    "method": "GET",
+                    "host": [
+                        "api:8000"
+                    ]
+                }
+            ]
+        },
+        {
+            "endpoint": "/api/timeout",
+            "method": "GET",
+            "output_encoding": "json",
+            "backend": [
+                {
+                    "url_pattern": "/timeout/",
+                    "encoding": "json",
+                    "method": "GET",
+                    "host": [
+                        "api:8000"
+                    ]
+                }
+            ]
+        },
+        {
+            "endpoint": "/api/cancelled",
+            "method": "GET",
+            "output_encoding": "json",
+            "backend": [
+                {
+                    "url_pattern": "/cancelled/",
+                    "encoding": "json",
+                    "method": "GET",
+                    "host": [
+                        "api:8000"
+                    ]
+                }
+            ]
+        },
+        {
+            "endpoint": "/api/no-content-length",
+            "method": "GET",
+            "output_encoding": "json",
+            "backend": [
+                {
+                    "url_pattern": "/no-content-length/",
+                    "encoding": "json",
+                    "method": "GET",
+                    "host": [
+                        "api:8000"
+                    ]
+                }
+            ]
+        },
+        {
+            "endpoint": "/api/not-found",
+            "method": "GET",
+            "output_encoding": "json",
+            "backend": [
+                {
+                    "url_pattern": "/hastalavista/",
+                    "encoding": "json",
+                    "method": "GET",
+                    "host": [
+                        "api:8000"
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -125,17 +125,19 @@ def test_statement_metrics(
                     cursor.execute("USE " + default_schema)
                 cursor.execute(q)
 
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql, mock.patch.object(
-        mysql_check, '_get_is_aurora', passthrough=True
-    ) as m_get_is_aurora, mock.patch.object(
-        mysql_check, '_get_runtime_aurora_tags', passthrough=True
-    ) as m_get_runtime_aurora_tags:
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql,
+        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
+    ):
         m_obfuscate_sql.side_effect = _obfuscate_sql
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = {}
+        m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         # Run a query
         run_query(query)
@@ -159,7 +161,7 @@ def test_statement_metrics(
     expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
-    elif MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+    elif MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
         expected_tags.add("replication_role:primary")
     assert set(event['tags']) == expected_tags
     query_signature = compute_sql_signature(query)
@@ -381,8 +383,7 @@ def test_statement_metrics_cloud_metadata(
         ),
         (
             'testdb',
-            'SELECT {} FROM users where '
-            'name=\'Johannes Chrysostomus Wolfgangus Theophilus Mozart\''.format(
+            'SELECT {} FROM users where name=\'Johannes Chrysostomus Wolfgangus Theophilus Mozart\''.format(
                 ", ".join("name as name{}".format(i) for i in range(244))
             ),
             [
@@ -431,14 +432,17 @@ def test_statement_samples_collect(
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
 
-    with mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora, mock.patch.object(
-        mysql_check, '_get_runtime_aurora_tags', passthrough=True
-    ) as m_get_runtime_aurora_tags:
+    with (
+        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
+    ):
         m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = {}
+        m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
             m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         logger.debug("running first check")
         dd_run_check(mysql_check)
@@ -469,7 +473,9 @@ def test_statement_samples_collect(
         statement[:1021] + '...'
         if len(statement) > 1024
         and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
-        else statement[:4093] + '...' if len(statement) > 4096 else statement
+        else statement[:4093] + '...'
+        if len(statement) > 4096
+        else statement
     )
 
     matching = [e for e in events if expected_statement_prefix.startswith(e['db']['statement'])]
@@ -838,7 +844,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
         expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
             expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
         aggregator.assert_metric(
             "dd.mysql.async_job.inactive_stop",
@@ -864,7 +870,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
         expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
             expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
         aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
 
@@ -873,11 +879,12 @@ def _expected_dbm_instance_tags(dbm_instance, check):
     _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(check.server_uuid),)
         if MYSQL_REPLICATION == 'classic':
             _tags += ('cluster_uuid:{}'.format(check.cluster_uuid),)
@@ -890,12 +897,13 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     _tags = dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(check.server_uuid),)
     return _tags
 
@@ -947,8 +955,7 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     consumer_to_disable = 'events_statements_history_long'
     with closing(root_conn.cursor()) as cursor:
         cursor.execute(
-            "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = "
-            "'{}';".format(consumer_to_disable)
+            "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = '{}';".format(consumer_to_disable)
         )
 
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
@@ -986,7 +993,7 @@ def test_normalize_queries(dbm_instance):
             'digest': '44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb',
             'schema': 'network',
             'digest_text': 'SELECT * from table where name = ?',
-            'query_signature': u'761498b7d5f04d11',
+            'query_signature': '761498b7d5f04d11',
             'dd_commands': None,
             'dd_comments': None,
             'dd_tables': None,

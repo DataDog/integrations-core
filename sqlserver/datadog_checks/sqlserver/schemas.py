@@ -5,7 +5,7 @@
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 import json
 import time
@@ -141,7 +141,6 @@ def agent_check_getter(self):
 
 
 class Schemas(DBMAsyncJob):
-
     TABLES_CHUNK_SIZE = 500
     # Note: in async mode execution time also cannot exceed 2 checks.
     DEFAULT_MAX_EXECUTION_TIME = 10
@@ -225,17 +224,13 @@ class Schemas(DBMAsyncJob):
                         except StopIteration as e:
                             self._log.error(
                                 """While executing fetch schemas for databse {},
-                                   the following exception occured {}""".format(
-                                    db_name, e
-                                )
+                                   the following exception occured {}""".format(db_name, e)
                             )
                             break
                         except Exception as e:
                             self._log.error(
                                 """While executing fetch schemas for databse {},
-                                   the following exception occured {}""".format(
-                                    db_name, e
-                                )
+                                   the following exception occured {}""".format(db_name, e)
                             )
                 finally:
                     # Switch DB back to MASTER

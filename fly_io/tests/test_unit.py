@@ -81,7 +81,6 @@ def test_no_machines_endpoint(dd_run_check, aggregator, instance):
 
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
     for metric in APP_UP_METRICS:
@@ -241,7 +240,6 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
 )
 @pytest.mark.usefixtures('mock_http_get')
 def test_app_status_failed(dd_run_check, aggregator, instance, caplog, log_lines):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     caplog.set_level(logging.DEBUG)
     dd_run_check(check)
@@ -271,7 +269,6 @@ def test_app_status_failed(dd_run_check, aggregator, instance, caplog, log_lines
 
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_machine_guest_metrics(dd_run_check, aggregator, instance):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
     for metric in MACHINE_GUEST_METRICS:
@@ -282,7 +279,6 @@ def test_rest_api_machine_guest_metrics(dd_run_check, aggregator, instance):
 
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_machine_init_metrics(dd_run_check, aggregator, instance):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
     for metric in MACHINE_INIT_METRICS:
@@ -293,7 +289,6 @@ def test_rest_api_machine_init_metrics(dd_run_check, aggregator, instance):
 
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_volume_metrics(dd_run_check, aggregator, instance):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
     for metric in VOLUME_METRICS:

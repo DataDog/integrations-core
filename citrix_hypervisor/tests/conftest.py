@@ -50,5 +50,5 @@ def mock_requests_get(url, *args, **kwargs):
 
 @pytest.fixture
 def mock_responses():
-    with mock.patch('requests.get', side_effect=mock_requests_get):
+    with mock.patch('requests.Session.get', side_effect=mock_requests_get):
         yield

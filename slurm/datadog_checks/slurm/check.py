@@ -51,7 +51,6 @@ def parse_duration(time_str):
 
 
 class SlurmCheck(AgentCheck, ConfigMixin):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'slurm'
 

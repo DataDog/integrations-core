@@ -59,7 +59,7 @@ from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handl
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver import metrics
 from datadog_checks.sqlserver.__about__ import __version__
@@ -235,6 +235,8 @@ class SQLServer(AgentCheck):
         """
         self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
+        if self.agent_hostname:
+            self.tag_manager.set_tag("ddagenthostname", self.agent_hostname, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:

@@ -2,6 +2,71 @@
 
 <!-- towncrier release notes start -->
 
+## 22.17.0 / 2025-08-07
+
+***Added***:
+
+* PG: Add valid tag to index metrics ([#20731](https://github.com/DataDog/integrations-core/pull/20731))
+* PG: Add per index blocks hit and blocks read ([#20767](https://github.com/DataDog/integrations-core/pull/20767))
+
+***Fixed***:
+
+* Fixed a bug where the AWS configuration was overwritten for the Postgres integration ([#20774](https://github.com/DataDog/integrations-core/pull/20774))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Avoid sending empty Postgres extensions and settings payloads ([#20939](https://github.com/DataDog/integrations-core/pull/20939))
+
+## 22.16.0 / 2025-07-29 / Agent 7.69.0
+
+***Added***:
+
+* Reverts upgrade to psycopg3 ([#20885](https://github.com/DataDog/integrations-core/pull/20885))
+* Reverts the fix to the `e.pgerror` ([#20883](https://github.com/DataDog/integrations-core/pull/20883))
+
+## 22.15.1 / 2025-07-25
+
+***Fixed***:
+
+* Fixes the reference to the now non-existent `e.pgerror` ([#20848](https://github.com/DataDog/integrations-core/pull/20848))
+
+## 22.15.0 / 2025-07-10
+
+***Added***:
+
+* PG: Add recovery prefetch metrics ([#20464](https://github.com/DataDog/integrations-core/pull/20464))
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* PG: Add wait events counts from pg_stat_activity ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
+* Upgrade psycopg to version 3 for Postgres integration ([#20617](https://github.com/DataDog/integrations-core/pull/20617))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 22.14.2 / 2025-07-02 / Agent 7.68.0
+
+***Fixed***:
+
+* Ensure extension IDs are sent as text, not integer ([#20605](https://github.com/DataDog/integrations-core/pull/20605))
+
+## 22.14.1 / 2025-06-26
+
+***Fixed***:
+
+* checking wal_level and if is aurora before querying for control checkpoint metrics ([#20500](https://github.com/DataDog/integrations-core/pull/20500))
+
+## 22.14.0 / 2025-06-12
+
+***Added***:
+
+* Collect and forward list of PostgreSQL extensions ([#20266](https://github.com/DataDog/integrations-core/pull/20266))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399)), ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+* Added a configuration option to support SQL_ASCII encoded Postgres databases with clients making requests in other encodings ([#20441](https://github.com/DataDog/integrations-core/pull/20441))
+
+***Fixed***:
+
+* Check for aws extensions before querying aurora_version() ([#20310](https://github.com/DataDog/integrations-core/pull/20310))
+* Allow EXPLAIN on multi-statement SQL where one or more SET commands appear before another supported statement type ([#20319](https://github.com/DataDog/integrations-core/pull/20319))
+* Checks wal_level before collecting control checkpoint metrics ([#20490](https://github.com/DataDog/integrations-core/pull/20490))
+
 ## 22.13.1 / 2025-05-19 / Agent 7.67.0
 
 ***Fixed***:

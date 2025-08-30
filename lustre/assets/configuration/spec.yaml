@@ -1,0 +1,86 @@
+name: Lustre
+files:
+- name: lustre.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: node_type
+      description: |
+        Specify the type of Lustre node: client, mds, or oss.
+        If not specified, the integration will attempt to auto-detect the node type.
+      required: false
+      value:
+        type: string
+        enum:
+        - client
+        - mds
+        - oss
+    - name: filesystems
+      description: |
+        List of specific filesystems to monitor.
+        If not specified, all available filesystems will be monitored.
+      required: false
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - lustre1
+        - lustre2
+    - name: enable_changelogs
+      description: |
+        Enable changelog collection on client nodes.
+        Requires changelog users to be registered.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - name: lctl_path
+      description: Path to the lctl binary.
+      required: false
+      value:
+        type: string
+        default: /usr/sbin/lctl
+    - name: lnetctl_path
+      description: Path to the lnetctl binary.
+      required: false
+      value:
+        type: string
+        default: /usr/sbin/lnetctl
+    - name: lfs_path
+      description: Path to the lfs binary.
+      required: false
+      value:
+        type: string
+        default: /usr/bin/lfs
+    - name: enable_lnetctl_detailed
+      description: Enable detailed LNET statistics collection.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - name: enable_extra_params
+      description: |
+        Enable collection of additional Lustre parameters.
+        This includes MDS, OSS, and client-specific advanced metrics.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - name: changelog_lines_per_check
+      description: |
+        Number of changelog lines to process per check run (client nodes only).
+        Higher values may impact performance.
+      required: false
+      value:
+        type: integer
+        example: 1000
+    - template: instances/default
+  - template: logs
+    example:
+    - type: integration
+      source: lustre
+      service: <SERVICE>

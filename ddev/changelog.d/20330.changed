@@ -1,1 +1,0 @@
-Replaced multiple format flags with a single `--format` option in the `ddev size` command.

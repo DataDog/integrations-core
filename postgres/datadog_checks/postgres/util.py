@@ -91,6 +91,8 @@ class DBExplainError(Enum):
     # PostgreSQL cannot determine the data type of a parameter in the query
     indeterminate_datatype = 'indeterminate_datatype'
 
+    unknown_error = 'unknown_error'
+
 
 class DatabaseHealthCheckError(Exception):
     pass
@@ -554,6 +556,23 @@ SELECT
     total_txns, total_bytes
 FROM pg_stat_replication_slots AS stat
 JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
+""".strip(),
+}
+
+QUERY_PG_WAIT_EVENT_METRICS = {
+    'name': 'wait_event_stats',
+    'columns': [
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'user', 'type': 'tag_not_null'},
+        {'name': 'wait_event', 'type': 'tag'},
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'activity.wait_event', 'type': 'gauge'},
+    ],
+    'query': """
+SELECT application_name, datname, usename, COALESCE(wait_event, 'NoWaitEvent'), backend_type, COUNT(*)
+FROM pg_stat_activity
+GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
 

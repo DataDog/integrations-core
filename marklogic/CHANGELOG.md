@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.3 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 6.1.2 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
 ## 6.1.1 / 2025-03-19 / Agent 7.65.0
 
 ***Fixed***:

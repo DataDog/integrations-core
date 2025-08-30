@@ -399,7 +399,6 @@ class Couchbase(AgentCheck):
 
     # Takes a string with a time and a unit (e.g '3.45ms') and returns the value in seconds
     def extract_seconds_value(self, value):
-
         # When couchbase is set up, most of values are equal to 0 and are exposed as "0" and not "0s"
         # This statement is preventing values to be searched by the pattern (and break things)
         if value == '0':
