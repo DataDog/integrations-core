@@ -33,9 +33,9 @@ services:
 
   mockbin:
     container_name: mockbin
-    image: dockette/mockbin
+    image: mashape/mockbin
     ports:
-      - "8080:8000"
+      - "8080:8080"
 
   tinyproxy:
     container_name: tinyproxy
