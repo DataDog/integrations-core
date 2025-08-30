@@ -88,6 +88,7 @@ def test_autodiscovery_simple(integration_check, pg_instance):
     pg_instance['relations'] = ['pg_index']
     del pg_instance['dbname']
     check = integration_check(pg_instance)
+    print(check._config)
     run_one_check(check, pg_instance)
 
     assert check.autodiscovery is not None

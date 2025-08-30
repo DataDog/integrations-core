@@ -277,7 +277,7 @@ instances:
     #
     # collect_wal_metrics: true
 
-    ## @param data_directory - string - optional
+    ## @param data_directory - string - optional - default: /usr/local/pgsql/data
     ## The data directory of your postgres installation
     ## Required when collecting WAL metrics on Postgres 9.6.
     #

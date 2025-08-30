@@ -46,151 +46,12 @@ from datadog_checks.postgres.statements import DEFAULT_COLLECTION_INTERVAL as DE
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
-
-
-class PostgresConfig(InstanceConfig):
-    RATE = AgentCheck.rate
-    GAUGE = AgentCheck.gauge
-    MONOTONIC = AgentCheck.monotonic_count
-
-    def __init__(self, check: PostgreSql, init_config: dict):
-        self._check = check
-        self._init_config = init_config
-
-    def _build_tags(self, custom_tags, propagate_agent_tags, additional_tags):
-        # Clean up tags in case there was a None entry in the instance
-        # e.g. if the yaml contains tags: but no actual tags
-        if custom_tags is None:
-            tags = []
-        else:
-            tags = list(set(custom_tags))
-
-        # preset tags to host
-        if not self.disable_generic_tags:
-            tags.append('server:{}'.format(self.host))
-        if self.port:
-            tags.append('port:{}'.format(self.port))
-        else:
-            tags.append('port:socket')
-
-        # preset tags to the database name
-        tags.extend(["db:%s" % self.dbname])
-
-        rds_tags = rds_parse_tags_from_endpoint(self.host)
-        if rds_tags:
-            tags.extend(rds_tags)
-
-        if propagate_agent_tags:
-            try:
-                agent_tags = get_agent_host_tags()
-                tags.extend(agent_tags)
-            except Exception as e:
-                raise ConfigurationError(
-                    'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
-                )
-
-        if additional_tags:
-            tags.extend(additional_tags)
-        return tags
-
-    @staticmethod
-    def _get_custom_metrics(custom_metrics):
-        # Otherwise pre-process custom metrics and verify definition
-        required_parameters = ("descriptors", "metrics", "query", "relation")
-
-        for m in custom_metrics:
-            for param in required_parameters:
-                if param not in m:
-                    raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
-
-            # Old formatting to new formatting. The first params is always the columns names from which to
-            # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
-            # relations names.
-            if m['relation']:
-                m['query'] = m['query'] % ('{metrics_columns}', '{relations_names}')
-            else:
-                m['query'] = m['query'] % '{metrics_columns}'
-
-            try:
-                for ref, (_, mtype) in m['metrics'].items():
-                    cap_mtype = mtype.upper()
-                    if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
-                        raise ConfigurationError(
-                            'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(
-                                cap_mtype
-                            )
-                        )
-
-                    m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)
-            except Exception as e:
-                raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
-        return custom_metrics
-
-    @staticmethod
-    def _aws_managed_authentication(aws, password):
-        if 'managed_authentication' not in aws:
-            # for backward compatibility
-            # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
-            managed_authentication = {}
-            managed_authentication['enabled'] = 'region' in aws and not password
-        else:
-            managed_authentication = aws['managed_authentication']
-            enabled = is_affirmative(managed_authentication.get('enabled', False))
-            if enabled and 'region' not in aws:
-                raise ConfigurationError('AWS region must be set when using AWS managed authentication')
-            managed_authentication['enabled'] = enabled
-        return managed_authentication
-
-    @staticmethod
-    def _azure_managed_authentication(azure, managed_identity):
-        if 'managed_authentication' not in azure:
-            # for backward compatibility
-            # if managed_authentication is not set, we assume it is enabled if client_id is set in managed_identity
-            managed_authentication = {}
-            if managed_identity:
-                managed_authentication['enabled'] = 'client_id' in managed_identity
-                managed_authentication.update(managed_identity)
-            else:
-                managed_authentication['enabled'] = False
-        else:
-            # if managed_authentication is set, we ignore the legacy managed_identity config
-            managed_authentication = azure['managed_authentication']
-            enabled = is_affirmative(managed_authentication.get('enabled', False))
-            if enabled and 'client_id' not in managed_authentication:
-                raise ConfigurationError('Azure client_id must be set when using Azure managed authentication')
-            managed_authentication['enabled'] = enabled
-        return managed_authentication
-
-    @staticmethod
-    def _should_collect_wal_metrics(collect_wal_metrics) -> Optional[bool]:
-        if collect_wal_metrics is not None:
-            # if the user has explicitly set the value, return the boolean
-            return is_affirmative(collect_wal_metrics)
-
-        return None
-
-    @staticmethod
-    def _should_propagate_agent_tags(instance, init_config) -> bool:
-        '''
-        return True if the agent tags should be propagated to the check
-        '''
-        instance_propagate_agent_tags = instance.get('propagate_agent_tags')
-        init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
-
-        if instance_propagate_agent_tags is not None:
-            # if the instance has explicitly set the value, return the boolean
-            return instance_propagate_agent_tags
-        if init_config_propagate_agent_tags is not None:
-            # if the init_config has explicitly set the value, return the boolean
-            return init_config_propagate_agent_tags
-        # if neither the instance nor the init_config has set the value, return False
-        return False
 
 
 class FeatureKey(Enum):
@@ -555,11 +416,6 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
         )
 
-    if config.dbname and config.database_autodiscovery.enabled:
-        validation_result.add_error(
-            '"dbname" parameter must not be set when using the "database_autodiscovery" parameter.'
-        )
-
     if config.empty_default_hostname:
         validation_result.add_warning(
             'The `empty_default_hostname` option has no effect in the Postgres check. '
@@ -638,6 +494,13 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
     return tags, errors
 
 
+METRIC_TYPES = {
+    'RATE': AgentCheck.rate,
+    'GAUGE': AgentCheck.gauge,
+    'MONOTONIC': AgentCheck.monotonic_count,
+}
+
+
 def map_custom_metrics(custom_metrics):
     # Pre-process custom metrics and verify definition
     required_parameters = ("descriptors", "metrics", "query", "relation")
@@ -663,7 +526,7 @@ def map_custom_metrics(custom_metrics):
                         'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
                     )
 
-                m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)
+                m['metrics'][ref][1] = METRIC_TYPES[cap_mtype]
         except Exception as e:
             raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
     return custom_metrics
