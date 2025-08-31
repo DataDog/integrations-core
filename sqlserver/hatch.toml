@@ -19,12 +19,13 @@ tz = ["newyork", "tokyo"]
 # ideally we'd test this against all sql server versions but that makes the test take too long and time out.
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
-[[envs.default.matrix]]
-python = ["3.12"]
-os = ["windows"]
-driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
-version = ["2019", "2022"]
-setup = ["single"]
+# TODO: Re-enable windows test suites once the sqlserver windows image is fixed on windows 2022 runner
+# [[envs.default.matrix]]
+# python = ["3.12"]
+# os = ["windows"]
+# driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
+# version = ["2019", "2022"]
+# setup = ["single"]
 
 # The high cardinality environment is meant to be used for local dev/testing
 # for example, when we want to do performance testing on local changes to the metrics
