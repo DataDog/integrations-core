@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ed426432-3df4-4ab8-ab2f-a5a85900c59b",
   "app_id": "airflow",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

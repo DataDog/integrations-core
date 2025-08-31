@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b18f92f2-2aa5-435e-b04e-84ce3538fa2d",
   "app_id": "cacti",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

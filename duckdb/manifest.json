@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a905fbe6-135f-4189-b027-4bdc58e51e29",
   "app_id": "duckdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
