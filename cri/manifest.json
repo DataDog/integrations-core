@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "81805522-0f55-45a4-95f6-23dd9ea46361",
   "app_id": "cri",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

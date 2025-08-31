@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1b01568a-d25e-4e8d-98f6-c999f1d253c7",
   "app_id": "kubernetes",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
