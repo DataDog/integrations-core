@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "41e7a8cb-07b6-46cc-a087-53e87736b5c7",
   "app_id": "kong",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

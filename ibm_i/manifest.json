@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "30045928-4be2-4efd-9a08-160e904494a1",
   "app_id": "ibm-i",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
