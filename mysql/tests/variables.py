@@ -49,11 +49,19 @@ STATUS_VARS = [
     'mysql.myisam.key_writes',
 ]
 
-COMPLEX_STATUS_VARS = [
+QCACHE_VARS = [
     # Query Cache Metrics
+    'mysql.performance.qcache_free_blocks',
+    'mysql.performance.qcache_free_memory',
     'mysql.performance.qcache_hits',
     'mysql.performance.qcache_inserts',
     'mysql.performance.qcache_lowmem_prunes',
+    'mysql.performance.qcache_not_cached',
+    'mysql.performance.qcache_queries_in_cache',
+    'mysql.performance.qcache_size',
+    'mysql.performance.qcache_total_blocks',
+    'mysql.performance.qcache.utilization',
+    'mysql.performance.qcache.utilization.instant',
 ]
 
 TABLE_VARS = [
@@ -76,10 +84,6 @@ VARIABLES_VARS = [
     'mysql.performance.thread_cache_size',
 ]
 
-COMPLEX_VARIABLES_VARS = [
-    'mysql.performance.qcache_size',
-]
-
 INNODB_VARS = [
     # InnoDB metrics
     'mysql.innodb.data_reads',
@@ -95,14 +99,17 @@ INNODB_VARS = [
     'mysql.innodb.deadlocks',
 ]
 
-COMPLEX_INNODB_VARS = [
-    'mysql.innodb.mutex_spin_waits',
-    'mysql.innodb.mutex_spin_rounds',
-    'mysql.innodb.mutex_os_waits',
+INNODB_ROW_LOCK_VARS = [
     'mysql.innodb.row_lock_waits',
     'mysql.innodb.row_lock_time',
     'mysql.innodb.row_lock_current_waits',
-    # 'mysql.innodb.current_row_locks', MariaDB status
+]
+
+# Only available in Mysql 5.6
+INNODB_MUTEX_VARS = [
+    'mysql.innodb.mutex_spin_waits',
+    'mysql.innodb.mutex_spin_rounds',
+    'mysql.innodb.mutex_os_waits',
 ]
 
 # Calculated from "SHOW MASTER LOGS;"
@@ -139,11 +146,6 @@ OPTIONAL_STATUS_VARS = [
     'mysql.performance.handler_update',
     'mysql.performance.handler_write',
     'mysql.performance.opened_tables',
-    'mysql.performance.qcache_total_blocks',
-    'mysql.performance.qcache_free_blocks',
-    'mysql.performance.qcache_free_memory',
-    'mysql.performance.qcache_not_cached',
-    'mysql.performance.qcache_queries_in_cache',
     'mysql.performance.select_full_join',
     'mysql.performance.select_full_range_join',
     'mysql.performance.select_range',
@@ -260,10 +262,6 @@ QUERY_EXECUTOR_METRIC_SETS = {
 }
 
 SCHEMA_VARS = ['mysql.info.schema.size']
-
-SYNTHETIC_VARS = ['mysql.performance.qcache.utilization', 'mysql.performance.qcache.utilization.instant']
-
-STATEMENT_VARS = ['dd.mysql.queries.query_rows_raw', 'dd.mysql.queries.query_rows_limited']
 
 GROUP_REPLICATION_VARS = [
     'mysql.replication.group.member_status',
