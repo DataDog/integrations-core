@@ -46,7 +46,6 @@ jobs:
           git fetch origin master:refs/remotes/origin/master
           base=$(git merge-base HEAD origin/master)
           echo "base_sha=$base" >> $GITHUB_OUTPUT
-          echo "base_sha=$base" >> $GITHUB_STEP_SUMMARY
       - name: Find workflow run at exact merge-base SHA 
         id: find_run
         env:
@@ -75,8 +74,8 @@ jobs:
 
       - name: Rename previous sizes artifact
         run: |
-          mv compressed_status.csv status_compressed_${{ inputs.platform }}_prev.csv
-          mv uncompressed_status.csv status_uncompressed_${{ inputs.platform }}_prev.csv
+          mv compressed_status.csv status_compressed_${{ inputs.platform }}_prev.csv # $status_compressed_${{ inputs.platform }}.json
+          mv uncompressed_status.csv status_uncompressed_${{ inputs.platform }}_prev.csv # $status_uncompressed_${{ inputs.platform }}.json
 
       - name: Download current sizes artifact
         run: |
@@ -108,10 +107,9 @@ jobs:
           echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
         env:
-          THRESHOLD: "-10000000000000000000" # 51200 50KB
+          THRESHOLD: "-100000000000000000000000000000" # 50KB
 
       - name: Upload long size diffs output as artifact
-        if: ${{ steps.calculate_diffs.outputs.passes_qg == false }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: size_diffs_output_${{ inputs.platform }}.txt
@@ -120,7 +118,6 @@ jobs:
           
 
       - name: Upload short size diffs output as artifact
-        if: ${{ steps.calculate_diffs.outputs.passes_qg == false }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: size_diffs_output_short_${{ inputs.platform }}.txt

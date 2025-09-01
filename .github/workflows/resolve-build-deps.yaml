@@ -249,7 +249,6 @@ jobs:
         name: target-macos-${{ matrix.job.arch }}
         path: output
 
-  # ----------- CHANGE TO MASTER BRANCH ------------
   measure-disk-usage:
     needs:
       - build
