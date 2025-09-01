@@ -43,28 +43,28 @@ device_tags_101 = [
     'device_id:{}:{}'.format(namespace, node101),
     'device_ip:{}'.format(node101),
     'device_namespace:{}'.format(namespace),
-    'dd.internal.resource:ndm_device_user_tags:default:10.0.200.0',
+    'dd.internal.resource:ndm_device:default:10.0.200.0',
 ]
 device_tags_102 = [
     'device_hostname:{}'.format(device_hn102),
     'device_id:{}:{}'.format(namespace, node102),
     'device_ip:{}'.format(node102),
     'device_namespace:{}'.format(namespace),
-    'dd.internal.resource:ndm_device_user_tags:default:10.0.200.1',
+    'dd.internal.resource:ndm_device:default:10.0.200.1',
 ]
 device_tags_201 = [
     'device_hostname:{}'.format(device_hn201),
     'device_id:{}:{}'.format(namespace, node201),
     'device_ip:{}'.format(node201),
     'device_namespace:{}'.format(namespace),
-    'dd.internal.resource:ndm_device_user_tags:default:10.0.200.5',
+    'dd.internal.resource:ndm_device:default:10.0.200.5',
 ]
 device_tags_1 = [
     'device_hostname:{}'.format(device_hn1),
     'device_id:{}:{}'.format(namespace, node1),
     'device_ip:{}'.format(node1),
     'device_namespace:{}'.format(namespace),
-    'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
+    'dd.internal.resource:ndm_device:default:10.0.200.4',
 ]
 
 tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
@@ -129,7 +129,7 @@ def test_fabric_mocked(aggregator):
                 'device_hostname:{}'.format(device_hn),
                 'device_id:{}'.format(interface.device_id),
                 'status:{}'.format(interface.status),
-                'dd.internal.resource:ndm_device_user_tags:{}'.format(interface.device_id),
+                'dd.internal.resource:ndm_device:{}'.format(interface.device_id),
                 'dd.internal.resource:ndm_interface:{}:{}'.format(interface.device_id, interface.index),
             ]
             aggregator.assert_metric('cisco_aci.fabric.port.status', value=1.0, tags=interface_tags, hostname=device_hn)
