@@ -145,11 +145,11 @@ def main():
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
             str(staged_wheel_dir),
-            # '--extra-index-url',
-            # CUSTOM_EXTERNAL_INDEX,
+            '--extra-index-url',
+            CUSTOM_EXTERNAL_INDEX,
         ]
-        # if args.use_built_index:
-        #     command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
+        if args.use_built_index:
+            command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
 
         check_process(command_args, env=env_vars)
 
@@ -170,7 +170,7 @@ def main():
 
     dependencies: dict[str, tuple[str, str]] = {}
     sizes: dict[str, dict[str, int]] = {}
-    
+
     target_name: str | None = None
 
     for wheel_dir in wheels_dir.iterdir():
