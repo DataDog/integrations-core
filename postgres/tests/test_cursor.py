@@ -5,7 +5,6 @@ import pytest
 
 from .utils import _get_superconn
 
-
 @pytest.mark.integration
 @pytest.mark.flaky
 @pytest.mark.usefixtures('dd_environment')
@@ -39,7 +38,8 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
 def __check_prepand_sql_comment(pg_instance, ignore):
     # collect query_text from pg_stat_activity
     # assert /* service='datadog-agent' */ is present in the query
-    super_conn = _get_superconn(pg_instance)
+    app = 'generate_series'
+    super_conn = _get_superconn(pg_instance, application_name=app)
     super_conn.execute("SET client_encoding TO 'UTF8'")
     with super_conn.cursor() as cursor:
         cursor.execute(
@@ -54,4 +54,10 @@ def __check_prepand_sql_comment(pg_instance, ignore):
         if ignore:
             comment = '{} {}'.format('/* DDIGNORE */', comment)
         assert result[0][0].startswith(comment)
+    super_conn.close()
+    super_conn = _get_superconn(pg_instance, application_name="test_connection")
+    with super_conn.cursor() as cursor:
+        cursor.execute("SELECT count(*) FROM pg_stat_activity WHERE application_name = %s", (app,))
+        result = cursor.fetchone()
+        assert result[0] == 0, f"Expected no active sessions for application_name={app}, found {result[0]}"
     super_conn.close()
