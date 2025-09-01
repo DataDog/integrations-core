@@ -45,11 +45,6 @@
         "caption": "Microsoft Sysmon - Overview 7",
         "image_url": "images/microsoft_sysmon_overview_7.png",
         "media_type": "image"
-      },
-      {
-        "caption": "Microsoft Sysmon - Overview 8",
-        "image_url": "images/microsoft_sysmon_overview_8.png",
-        "media_type": "image"
       }
     ],
     "classifier_tags": [
