@@ -34,7 +34,7 @@
 
 * PG: Add recovery prefetch metrics ([#20464](https://github.com/DataDog/integrations-core/pull/20464))
 * Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
-* PG: Add wait events counts from `pg_stat_activity` ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
+* PG: Add wait events counts from pg_stat_activity ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
 * Upgrade psycopg to version 3 for Postgres integration ([#20617](https://github.com/DataDog/integrations-core/pull/20617))
 
 ***Fixed***:

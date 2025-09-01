@@ -176,6 +176,8 @@ def docker_run(
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
             composeFileArgs['capture'] = capture
+        if waith_for_health:
+            composeFileArgs['waith_for_health'] = waith_for_health
         set_up = ComposeFileUp(**composeFileArgs)
         if down is not None:
             tear_down = down

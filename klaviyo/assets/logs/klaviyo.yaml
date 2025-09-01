@@ -1,0 +1,391 @@
+id: klaviyo
+metric_id: klaviyo
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: URL Path
+    path: http.url
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - description: ''
+    facetType: list
+    groups:
+      - others
+    name: Campaign Name
+    path: klaviyo.campaign_name
+    source: log
+    type: string
+  - description: ''
+    facetType: list
+    groups:
+      - others
+    name: Flow Name
+    path: klaviyo.flow_name
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Klaviyo
+  enabled: true
+  filter:
+    query: source:klaviyo
+  processors:
+    - type: date-remapper
+      name: Define `attribute.datetime` as the official date of the log
+      enabled: true
+      sources:
+        - attributes.datetime
+    - name: Define `service` based on lookup of `metric_name`
+      enabled: true
+      source: metric_name
+      target: service
+      lookupTable: |-
+        Active on Site,ecommerce-events
+        Added to Cart,ecommerce-events
+        Cancelled Order,ecommerce-events
+        Fulfilled Order,ecommerce-events
+        Ordered Product,ecommerce-events
+        Placed Order,ecommerce-events
+        Refunded Order,ecommerce-events
+        Started Checkout,ecommerce-events
+        Checkout Started,ecommerce-events
+        Viewed Product,ecommerce-events
+        Bounced Email,marketing-events
+        Clicked email to unsubscribe,marketing-events
+        Clicked Email,marketing-events
+        Clicked SMS,marketing-events
+        Dropped Email,marketing-events
+        Failed to Deliver Automated Response SMS,marketing-events
+        Failed to Deliver SMS,marketing-events
+        Marked Email as Spam,marketing-events
+        Opened Email,marketing-events
+        Received Automated Response SMS,marketing-events
+        Received Email,marketing-events
+        Received SMS,marketing-events
+        Sent SMS,marketing-events
+        Subscribed to SMS Marketing,marketing-events
+        Subscribed to SMS Transactional,marketing-events
+        Subscribed to Email Marketing,marketing-events
+        Subscribed to List,marketing-events
+        Unsubscribed from Email Marketing,marketing-events
+        Unsubscribed from SMS Marketing,marketing-events
+      defaultLookup: other-events
+      type: lookup-processor
+    - type: attribute-remapper
+      name: "Remapper: Map `flow_name` to `klaviyo.flow_name`"
+      enabled: true
+      sources:
+        - flow_name
+      sourceType: attribute
+      target: klaviyo.flow_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: pipeline
+      name: marketing events
+      enabled: true
+      filter:
+        query: source:klaviyo service:marketing-events
+      processors:
+        - type: attribute-remapper
+          name: 'Remapper: Map `attributes.event_properties."Campaign Name"` to
+            `klaviyo.campaign_name`'
+          enabled: true
+          sources:
+            - attributes.event_properties.Campaign Name
+            - attributes.event_properties.Message Name
+          sourceType: attribute
+          target: klaviyo.campaign_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: 'Remapper: Map `attributes.event_properties."Bounce Type"` to
+            `klaviyo.bounce_type`'
+          enabled: true
+          sources:
+            - attributes.event_properties.Bounce Type
+          sourceType: attribute
+          target: klaviyo.bounce_type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: "Remapper: Map `attributes.event_properties.URL` to `http.url`"
+          enabled: true
+          sources:
+            - attributes.event_properties.URL
+          sourceType: attribute
+          target: http.url
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - name: Lookup for `metric_name` to `status` field
+          enabled: true
+          source: metric_name
+          target: status
+          lookupTable: |-
+            Bounced Email,warning
+            Clicked email to unsubscribe,warning
+            Clicked Email,info
+            Clicked SMS,info
+            Dropped Email,error
+            Failed to Deliver Automated Response SMS,error
+            Failed to Deliver SMS,error
+            Marked Email as Spam,warning
+            Opened Email,info
+            Received Automated Response SMS,info
+            Received Email,info
+            Received SMS,info
+            Sent SMS,info
+            Subscribed to SMS Marketing,info
+            Subscribed to SMS Transactional,info
+            Subscribed to Email Marketing,info
+            Subscribed to List,info
+            Unsubscribed from Email Marketing,warning
+            Unsubscribed from SMS Marketing,warning
+          defaultLookup: info
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `status` as the official status of the log
+          enabled: true
+          sources:
+            - status
+        - type: geo-ip-parser
+          name: Define `attributes.event_properties._ip` as GeoIp source
+          enabled: true
+          sources:
+            - attributes.event_properties._ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: ecommerce events - Ordered/Viewed Product
+      enabled: true
+      filter:
+        query: source:klaviyo service:ecommerce-events @metric_name:("Ordered Product"
+          OR "Viewed Product")
+      processors:
+        - type: string-builder-processor
+          name: Define `klaviyo.products` equal to `ProductID` - 'Name`|`ProductName`
+          enabled: true
+          template: "%{attributes.event_properties.ProductID} -
+            %{attributes.event_properties.Name}%{attributes.event_properties.Pr\
+            oductName}"
+          target: klaviyo.products
+          replaceMissing: true
+    - type: pipeline
+      name: ecommerce events - Klaviyo Placed/Refunded Order
+      enabled: true
+      filter:
+        query: source:klaviyo service:ecommerce-events
+          -@attributes.event_properties.$extra @metric_name:("Placed Order" OR
+          "Refunded Order")
+      processors:
+        - type: string-builder-processor
+          name: Define `klaviyo.shipping_region_code` equal to
+            ShippingAddress.CountryCode-ShippingAddress.RegionCode
+          enabled: true
+          template: "%{attributes.event_properties.ShippingAddress.CountryCode}-%{attribu\
+            tes.event_properties.ShippingAddress.RegionCode}"
+          target: klaviyo.shipping_region_code
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Define `klaviyo.billing_region_code` equal to
+            BillingAddress.CountryCode-BillingAddress.RegionCode
+          enabled: true
+          template: "%{attributes.event_properties.BillingAddress.CountryCode}-%{attribut\
+            es.event_properties.BillingAddress.RegionCode}"
+          target: klaviyo.billing_region_code
+          replaceMissing: true
+        - type: attribute-remapper
+          name: "Remapper: Map `attributes.event_properties.ShippingAddress.Zip` to
+            `klaviyo.shipping_zip_code`"
+          enabled: true
+          sources:
+            - attributes.event_properties.ShippingAddress.Zip
+          sourceType: attribute
+          target: klaviyo.shipping_zip_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: "Remapper: Map `attributes.event_properties.BillingAddress.Zip` to
+            `klaviyo.billing_zip_code`"
+          enabled: true
+          sources:
+            - attributes.event_properties.BillingAddress.Zip
+          sourceType: attribute
+          target: klaviyo.billing_zip_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Define `klaviyo.product_categories` equal to concatenated
+            `attributes.event_properties.Categories`
+          enabled: true
+          template: "%{attributes.event_properties.Categories}"
+          target: klaviyo.product_categories
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Define `klaviyo.products` equal to concatenated `ProductID` -
+            `ProductName`
+          enabled: true
+          template: "%{attributes.event_properties.Items.ProductID} -
+            %{attributes.event_properties.Items.ProductName}"
+          target: klaviyo.products
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Define `klaviyo.refund_reason` equal to
+            `attributes.event_properties.Reason`
+          enabled: true
+          template: "%{attributes.event_properties.Reason}"
+          target: klaviyo.refund_reason
+          replaceMissing: false
+    - type: pipeline
+      name: ecommerce events - Shopify Placed/Refunded Order
+      enabled: true
+      filter:
+        query: source:klaviyo service:ecommerce-events
+          @attributes.event_properties.$extra:* @metric_name:("Placed Order" OR
+          "Refunded Order")
+      processors:
+        - type: string-builder-processor
+          name: Define `klaviyo.shipping_region_code` equal to Shopify
+            shipping_address.country_code-shipping_address.province_code
+          enabled: true
+          template: "%{attributes.event_properties.$extra.shipping_address.country_code}-\
+            %{attributes.event_properties.$extra.shipping_address.province_code\
+            }"
+          target: klaviyo.shipping_region_code
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Define `klaviyo.billing_region_code` equal to Shopify
+            billing_address.country_code-billing_address.province_code
+          enabled: true
+          template: "%{attributes.event_properties.$extra.billing_address.country_code}-%\
+            {attributes.event_properties.$extra.billing_address.province_code}"
+          target: klaviyo.billing_region_code
+          replaceMissing: true
+        - type: attribute-remapper
+          name: "Remapper: Map `attributes.event_properties.$extra.billing_address.zip` to
+            `klaviyo.billing_zip_code`"
+          enabled: true
+          sources:
+            - attributes.event_properties.$extra.billing_address.zip
+          sourceType: attribute
+          target: klaviyo.billing_zip_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: "Remapper: Map `attributes.event_properties.$extra.shipping_address.zip`
+            to `klaviyo.shipping_zip_code`"
+          enabled: true
+          sources:
+            - attributes.event_properties.$extra.shipping_address.zip
+          sourceType: attribute
+          target: klaviyo.shipping_zip_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Define `klaviyo.product_categories` equal to concatenated Shopify
+            `attributes.event_properties.$extra.line_items.product.product_type`
+          enabled: true
+          template: "%{attributes.event_properties.$extra.line_items.product.product_type\
+            }"
+          target: klaviyo.product_categories
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Define `klaviyo.products` equal to concatenated Shopify line_items
+            `product.id` - `product.title`
+          enabled: true
+          template: "%{attributes.event_properties.$extra.line_items.product.id} -
+            %{attributes.event_properties.$extra.line_items.product.title}"
+          target: klaviyo.products
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Define `klaviyo.refund_reason` equal to concatenated Shopify refunds
+            `note`
+          enabled: true
+          template: "%{attributes.event_properties.$extra.refunds.note}"
+          target: klaviyo.refund_reason
+          replaceMissing: false
+    - type: pipeline
+      name: ecommerce events - common
+      enabled: true
+      filter:
+        query: source:klaviyo service:ecommerce-events
+      processors:
+        - type: attribute-remapper
+          name: "Remapper: Map `attributes.event_properties.page|URL` to `http.url`"
+          enabled: true
+          sources:
+            - attributes.event_properties.page
+            - attributes.event_properties.URL
+          sourceType: attribute
+          target: http.url
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - name: Lookup for `metric_name` to `status` field
+          enabled: true
+          source: metric_name
+          target: status
+          lookupTable: |-
+            Active on Site,info
+            Added to Cart,info
+            Cancelled Order,warning
+            Fulfilled Order,info
+            Ordered Product,info
+            Placed Order,info
+            Refunded Order,warning
+            Started Checkout,info
+            Checkout Started,info
+            Viewed Product,info
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `status` as the official status of the log
+          enabled: true
+          sources:
+            - status
