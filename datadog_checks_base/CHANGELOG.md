@@ -14,7 +14,7 @@
 
 * Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
 
-## 37.17.0 / 2025-08-07
+## 37.17.0 / 2025-08-07 / Agent 7.70.0
 
 ***Added***:
 
