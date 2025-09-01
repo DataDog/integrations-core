@@ -999,3 +999,40 @@ def test_build_schema_none_handling():
     # Test Protobuf schema with None - should raise TypeError or base64.binascii.Error
     with pytest.raises((TypeError, base64.binascii.Error)):
         build_protobuf_schema(None)
+
+
+def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):
+    mock_client = seed_mock_client()
+    # Set up two partitions for same topic to check multiple contexts in same consumer group
+    partitions = ['partition1', 'partition2']
+    offsets = [2, 3]
+    topic = 'topic1'
+    consumer_group = 'consumer_group1'
+    mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
+        'cluster_id',
+        [(topic, partitions)],
+    )
+    mock_client.get_partitions_for_topic.return_value = partitions
+    consumer_group_offsets = [(topic, p, o) for p, o in zip(partitions, offsets)]
+    mock_client.list_consumer_group_offsets.return_value = [
+        (
+            consumer_group,
+            consumer_group_offsets,
+        )
+    ]
+    kafka_instance["collect_consumer_group_state"] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    # Check that the consumer group state is fetched only once
+    assert mock_client.describe_consumer_group.call_count == 1
+
+    # Check that both partitions include the state tag
+    for metric in ("kafka.consumer_offset", "kafka.consumer_lag"):
+        for partition in partitions:
+            aggregator.assert_metric_has_tags(
+                metric,
+                tags=[f'partition:{partition}', 'consumer_group_state:STABLE'],
+            )
