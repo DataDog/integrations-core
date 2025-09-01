@@ -12,7 +12,7 @@ facets:
     path: checkpoint_endpoint.action
     source: log
     type: string
-  - description: "shows the status of the attack detected by the endpoint security client."
+  - description: "Shows the status of the attack detected by the endpoint security client."
     facetType: list
     groups:
       - checkpoint harmony endpoint
@@ -20,7 +20,7 @@ facets:
     path: checkpoint_endpoint.attack_status
     source: log
     type: string
-  - description: "shows the client ip address of the endpoint security client."
+  - description: "Shows the client ip address of the endpoint security client."
     facetType: list
     groups:
       - checkpoint harmony endpoint
@@ -28,7 +28,7 @@ facets:
     path: checkpoint_endpoint.client_ip
     source: log
     type: string
-  - description: "shows the description of the event detected by the endpoint security client."
+  - description: "Shows the description of the event detected by the endpoint security client."
     facetType: list
     groups:
       - checkpoint harmony endpoint
@@ -36,7 +36,7 @@ facets:
     path: checkpoint_endpoint.description
     source: log
     type: string
-  - description: "shows the detection method used by the endpoint security client."
+  - description: "Shows the detection method used by the endpoint security client."
     facetType: list
     groups:
       - checkpoint harmony endpoint
@@ -44,7 +44,7 @@ facets:
     path: checkpoint_endpoint.detected_by
     source: log
     type: string
-  - description: "shows the product name of the endpoint security client."
+  - description: "Shows the product name of the endpoint security client."
     facetType: list
     groups:
       - checkpoint harmony endpoint
@@ -52,7 +52,7 @@ facets:
     path: checkpoint_endpoint.product
     source: log
     type: string
-  - description: "shows the protection name of the endpoint security client."
+  - description: "Shows the protection name of the endpoint security client."
     facetType: list
     groups:
       - checkpoint harmony endpoint

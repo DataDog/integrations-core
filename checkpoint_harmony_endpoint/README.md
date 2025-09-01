@@ -2,7 +2,7 @@
 
 ## Overview
 
-Checkpoint Harmony Endpoint is a next-generation endpoint security solution designed to prevent, detect, and respond to threats on user devices (desktops, laptops, servers, etc). This integration monitors [Checkpoint Harmony Endpoint][1].
+Checkpoint Harmony Endpoint is a next-generation endpoint security solution designed to prevent, detect, and respond to threats on user devices, such as desktops, laptops, and servers. This integration monitors [Checkpoint Harmony Endpoint][1].
 
 ## Setup
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
@@ -30,26 +30,37 @@ The checkpoint harmony endpoint check is included in the [Datadog Agent][2] pack
 
 ### Prerequisites
 
-1. Administrative access to Checkpoint Harmony Endpoint - Gaia installed on your server.
-2. The Datadog Agent installed and running (on a server or container that can receive syslog messages).
-3. Network Access between the endpoint and the Datadog Agent (usually port 514, but may be a custom value). Enable log exporter in the Smart Console for log streaming.
-4. Syslog support enabled in the Datadog Agent (with a TCP or UDP  listener configured).
+- Administrative access to Checkpoint Harmony Endpoint - Gaia installed on your server.
+- The Datadog Agent installed and running (on a server or container that can receive syslog messages).
+- Network Access between the endpoint and the Datadog Agent, over port 514, unless you're using a custom port value. Enable log exporter in the Smart Console for log streaming.
+- Syslog support enabled in the Datadog Agent (with a TCP or UDP  listener configured).
 
 ### Validation
 
 1. Confirm the Datadog Agent is listening on the correct port (`514` in the following examples)
-    `sudo netstat -tunlp | grep 514`
-    If using TCP and UDP listeners, use the following command:
-    `sudo lsof -i :514`
+   ```sh
+   sudo netstat -tunlp | grep 514
+   ```
+   
+   If using TCP and UDP listeners, use the following command:
+   ```sh
+   sudo lsof -i :514
+   ```
 2. Confirm logs are reaching the Agent from the correct log source.
-    `tail -f /var/log/datadog/syslog.log`
+   ```sh
+   tail -f /var/log/datadog/syslog.log
+   ```
 **Note**: If the file doesn't exist, verify that syslog logs are being written by your configuration.
+
 3. Use the tcpdump command to confirm network traffic. On the Datadog Agent host:
-    `sudo tcpdump -i any port 514`
-After running this command, you should see traffic from the Checkpoint endpoint client's IP address. If you don't see any such traffic, check the firewall rules between Checkpoint Endpoint and the Datadog Agent. Confirm the correct protocol (UDP or TCP) is being used on both sides.
+   ```sh
+   sudo tcpdump -i any port 514
+   ```
+   After running this command, you should see traffic from the Checkpoint endpoint client's IP address. If you don't see any such traffic, check the firewall rules between Checkpoint Endpoint and the Datadog Agent. Confirm the correct protocol (UDP or TCP) is being used on both sides.
+
 4. Check the Datadog [Live Tail][7] in Datadog for logs from the source and service you defined in the `conf.yaml` file.
-5. After following these steps, you can create a test log on the harmony client by triggering an event.
-6. Check for tags or facets to use them for better filtering based on the required data.
+5. Create a test log on the harmony client by triggering an event.
+6. Check for tags or facets to use for better filtering based on the required data.
 
 ### Metrics
 
@@ -57,8 +68,18 @@ The Checkpoint Harmony Endpoint integration does not include any metrics.
 
 ### Log collection
 ## Data Collected
-The Checkpoint Harmony Endpoint logs contain key information of the endpoint client such as the event timestamp, detected_by and client IPs and ports, protocol used, firewall action (allow/deny), the matched rule name, user identity (if available), log type (e.g., forensic, malware, etc), action used, device name, and status of the operation, all of which help monitor endpoint behavior, access control, and system activity and many more which are collected by DataDog.
-
+To help monitor endpoint data collected by Datadog, the Checkpoint Harmony Endpoint logs contain key information of the endpoint client, such as:
+- event timestamp
+- detected_by
+- client IPs and ports
+- the protocol used
+- firewall actions (allow/deny)
+- matched rule name
+- user identity (if available)
+- log type (for example, forensic or malware)
+- action used
+- device name
+- status of the operation
 
 ### Events
 
