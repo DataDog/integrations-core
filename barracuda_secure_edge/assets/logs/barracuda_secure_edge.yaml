@@ -109,9 +109,9 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*%{greedyData:message}
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{word:type}\[%{number:type_id}\]:\s*%{greedyData:message}
-              autoFilledRule4 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?%{greedyData:message}
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*%{greedyData:message}
+              autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{word:type}\[%{number:type_id}\]:\s*%{greedyData:message}
+              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?%{greedyData:message}
     - type: pipeline
       name: Box Firewall Activity
       enabled: true
@@ -135,9 +135,9 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:\s*\[%{word:event_type}\]\s*%{word:module}:\s*%{data:message}
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data::csv("type,protocol,src_if,src_ip,src_port,src_mac,dest_ip,dest_port,dest_service,dest_if,rule,info,src_nat, dst_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets, user,prot,application,target,content,uricat","|")}
-              autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data:message}
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:\s*\[%{word:event_type}\]\s*%{word:module}:\s*%{data:message}
+              autoFilledRule2 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data::csv("type,protocol,src_if,src_ip,src_port,src_mac,dest_ip,dest_port,dest_service,dest_if,rule,info,src_nat, dst_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets, user,prot,application,target,content,uricat","|")}
+              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s+%{word:level}\s*%{word:action}:%{data:message}
         - type: grok-parser
           name: Box Firewall
           enabled: true
@@ -163,7 +163,7 @@ pipeline:
             matchRules: autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s+%{word:log_source}:\s+\[%{word:service}\]\s+%{word:operation_type}:\s+%{data:message}
     - type: pipeline
-      name: "SSH "
+      name: "SSH"
       enabled: true
       filter:
         query: source:barracuda_secure_edge service:ssh
@@ -183,9 +183,8 @@ pipeline:
               session: shell on pts/0 for root from 10.10.16.1 port 63675 id 0"
           grok:
             supportRules: ""
-            matchRules: >+
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
-              ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*(%{data:module})?(\[%{number:id}\])?:\s*%{data:message}
+            matchRules: >-
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*(%{data:module})?(\[%{number:id}\])?:\s*%{data:message}
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*%{data:message}
 
         - type: grok-parser
@@ -250,7 +249,7 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{word:module}\:%{data:message}
-              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
+              autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
         - type: grok-parser
           name: VPN sslvpn
           enabled: true
@@ -319,8 +318,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
-              ZZ"):timestamp}\s+%{word:level}\s*(%{ip:source_ip}:%{number:source_port})?\s+%{data:message}
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*(%{ip:source_ip}:%{number:source_port})?\s+%{data:message}
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+%{data:message}
         - type: grok-parser
           name: Box Config changes
@@ -352,30 +350,6 @@ pipeline:
             supportRules: ""
             matchRules: autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s*%{data:message}\s+pid=%{number:process_id}
-        - type: grok-parser
-          name: Box Config admin
-          enabled: true
-          source: message
-          samples:
-            - "2025 04 02 01:45:51 +00:00 Notice   127.0.0.1:23697 login
-              succeeded: localhost_CloudGen-WAN Valid password and valid
-              challenge"
-            - 2025 04 02 02:15:51 +00:00 Info     New Session
-              GCSID_localhost_CloudGen-WAN_127.0.0.1_63219_19688
-            - "2025 04 01 11:11:24 +00:00 Notice   127.0.0.1:4425 login
-              succeeded: root Valid token"
-            - 2025 04 01 06:15:51 +00:00 Info     New Session
-              GCSID_localhost_CloudGen-WAN_127.0.0.1_22883_31238
-            - "2025 03 31 11:46:39 +00:00
-              Info     [localhost_wanhub@127.0.0.1_43774]  Commit operation: 0
-              Remove(disabled)
-              /opt/phion/config/active/servers/CSC/services/DHCPR/service.conf"
-          grok:
-            supportRules: ""
-            matchRules: >-
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
-              ZZ"):timestamp}\s+%{word:level}\s*(%{ip:source_ip}:%{number:source_port})?\s+%{data:message}
-              autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+%{data:message}
         - type: grok-parser
           name: Box Control AuthService
           enabled: true
@@ -417,9 +391,8 @@ pipeline:
               DOMAIN=no "
           grok:
             supportRules: ""
-            matchRules: >+
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
-              ZZ"):timestamp}\s*%{word:level}\s*%{word:process}\[%{number:process_id}\]:\s+%{data:message}
+            matchRules: >-
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{word:process}\[%{number:process_id}\]:\s+%{data:message}
               autoFilledRule4 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*\[%{number:process_id}\]\s*%{data}\s*\:\s*%{word:action}\s*%{data:message}
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:module}\s:*%{data}=\s*%{ip:local_ip}\s*%{data}=%{ip:gateway_ip}
               autoFilledRule3 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
@@ -464,22 +437,15 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
-              ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{word:event_action}\s+\(worker:
-              %{number:worker_id}\)\s+from\s+%{ip:source_ip},\s+User\s+\[%{data}\]\s+-\s+\(%{data::csv("type,severity,component,code,action,session_id,username,system_name","|")}\)
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{word:event_action}\s+\(worker:%{number:worker_id}\)\s+from\s+%{ip:source_ip},\s+User\s+\[%{data}\]\s+-\s+\(%{data::csv("type,severity,component,code,action,session_id,username,system_name","|")}\)
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{data:message}
     - type: status-remapper
       name: Status Remapper from Level to Status
       enabled: true
       sources:
         - level
-    - type: status-remapper
-      name: Remapper level to status
-      enabled: true
-      sources:
-        - level
     - type: attribute-remapper
-      name: " Map timestamp to syslog.timestamp"
+      name: "Map timestamp to syslog.timestamp"
       enabled: true
       sources:
         - timestamp
@@ -489,7 +455,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: date-remapper
-      name: "Define `timestamp` as the official date of the log "
+      name: "Define `timestamp` as the official date of the log"
       enabled: true
       sources:
         - timestamp
