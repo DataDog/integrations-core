@@ -587,7 +587,7 @@ class MySql(DBCheck):
             else:
                 with tracked_query(self, operation="innodb_metrics"):
                     results.update(self.innodb_stats.get_stats_from_innodb_status(db))
-                self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
+            self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
