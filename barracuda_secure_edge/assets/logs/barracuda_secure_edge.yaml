@@ -109,9 +109,9 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*(?<message>.+)
-              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{word:type}\[%{number:type_id}\]:\s*(?<message>.+)
-              autoFilledRule4 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?(?<message>.+)
+              autoFilledRule3 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{word:module}\s*:\s*%{greedyData:message}
+              autoFilledRule1 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*%{data:action}:\s*%{word:type}\[%{number:type_id}\]:\s*%{greedyData:message}
+              autoFilledRule4 %{date("yyyy MM dd HH:mm:ss Z"):timestamp}\s*%{word:level}\s*(:\s+)?%{greedyData:message}
     - type: pipeline
       name: Box Firewall Activity
       enabled: true
