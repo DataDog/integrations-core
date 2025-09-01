@@ -3,7 +3,7 @@
 SNMP profiles are our way of providing out-of-the-box monitoring for certain makes and models of network devices.
 
 !!! warning
-    This page describes an old workflow for building SNMP profiles. The recommended way to create and manage profiles is now through the **SNMP Profile Manager**, which provides a guided, GUI-based experience.
+    This page describes the manual workflow for building SNMP profiles manually. The recommended way to create and manage profiles is now through the **SNMP Profile Manager**, which provides a guided, GUI-based experience.
 
     See the updated guide: [Getting Started with Device Profiles](https://docs.datadoghq.com/network_monitoring/devices/guide/device_profiles/?tab=devicescanrecommended).
 
