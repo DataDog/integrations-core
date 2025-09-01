@@ -86,7 +86,7 @@ jobs:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     env:
       PYTHON_VERSION: "3.12"
-    uses: DataDog/integrations-core/.github/workflows/size-qg-measure-disk-use.yml@lucia-sb/calculate-dep-sizes
+    uses: ./.github/workflows/size-qg-measure-disk-use.yml
     with:
       platform: ${{ matrix.platform }}
       run-id: ${{ github.run_id }}
@@ -97,7 +97,7 @@ jobs:
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
-    uses: DataDog/integrations-core/.github/workflows/size-quality-gates.yml@lucia-sb/calculate-dep-sizes
+    uses: ./.github/workflows/size-quality-gates.yml
     with:
       platform: ${{ matrix.platform }}
 
