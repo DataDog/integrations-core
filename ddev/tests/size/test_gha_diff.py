@@ -134,7 +134,7 @@ def test_calculate_diffs():
         {
             "Name": "packageD",
             "Version": "4.0.0",
-            "Compressed Size Bytes": 4000,  # Added package
+            "Compressed_Size_Bytes": 4000,  # Added package
             "Size": "4.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",
@@ -146,7 +146,7 @@ def test_calculate_diffs():
         {
             "Name": "packageC",
             "Version": "3.0.0",
-            "Compressed Size Bytes": 3072,
+            "Compressed_Size_Bytes": 3072,
             "Size": "3.00 KiB",
             "Type": "Dependency",
             "Platform": "test-platform",

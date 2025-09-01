@@ -48,7 +48,8 @@ def calculate_diffs(prev_compressed_sizes, curr_compressed_sizes, prev_uncompres
             # Add both compressed and uncompressed size info for added entries
             added.append(
                 {
-                    **{"Compressed_Size_Bytes": int(curr_entry.get("Size_Bytes", 0))},
+                    **{k: v for k, v in curr_entry.items() if k != "Size_Bytes"},
+                    "Compressed_Size_Bytes": int(curr_entry.get("Size_Bytes", 0)),
                     "Uncompressed_Size_Bytes": int(curr_uncompressed_map.get(curr_key, {}).get("Size_Bytes", 0)),
                 }
             )
@@ -102,7 +103,8 @@ def calculate_diffs(prev_compressed_sizes, curr_compressed_sizes, prev_uncompres
         if prev_key not in curr_compressed_map:
             removed.append(
                 {
-                    **{"Compressed_Size_Bytes": int(prev_entry.get("Size_Bytes", 0))},
+                    **{k: v for k, v in prev_entry.items() if k != "Size_Bytes"},
+                    "Compressed_Size_Bytes": int(prev_entry.get("Size_Bytes", 0)),
                     "Uncompressed_Size_Bytes": int(prev_uncompressed_map[prev_key].get("Size_Bytes", 0)),
                 }
             )
@@ -110,8 +112,8 @@ def calculate_diffs(prev_compressed_sizes, curr_compressed_sizes, prev_uncompres
 
     return (
         {
-            "added": order_by(added, "Compressed Size Bytes"),
-            "removed": order_by(removed, "Compressed Size Bytes"),
+            "added": order_by(added, "Compressed_Size_Bytes"),
+            "removed": order_by(removed, "Compressed_Size_Bytes"),
             "changed": order_by(changed, "Compressed_Percentage"),
             "total_diff": total_diff,
         },
