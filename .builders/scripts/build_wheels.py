@@ -17,22 +17,22 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 
-TARGET_TAG_PATTERNS = {
-    'linux-x86_64': r'manylinux.*_x86_64|linux_x86_64',
-    'linux-aarch64': r'manylinux.*_aarch64|linux_aarch64',
-    'windows-x86_64': r'win_amd64',
-    'macos-x86_64': r'macosx.*_(x86_64|intel|universal2)',
-    'macos-aarch64': r'macosx.*_(aarch64|arm64|universal2)',
-}
+# TARGET_TAG_PATTERNS = {
+#     'linux-x86_64': r'manylinux.*_x86_64|linux_x86_64',
+#     'linux-aarch64': r'manylinux.*_aarch64|linux_aarch64',
+#     'windows-x86_64': r'win_amd64',
+#     'macos-x86_64': r'macosx.*_(x86_64|intel|universal2)',
+#     'macos-aarch64': r'macosx.*_(aarch64|arm64|universal2)',
+# }
 
 
-def classify_target(platform_tag: str) -> str:
-    """Return the canonical target name (linux-x86_64, macos-aarch64, etc.) for a given wheel platform tag."""
-    for target_name, pattern in TARGET_TAG_PATTERNS.items():
-        if re.search(pattern, platform_tag):
-            return target_name
-    # Fallback – treat non-specific wheels as "any" so we still record their size
-    return 'any'
+# def classify_target(platform_tag: str) -> str:
+#     """Return the canonical target name (linux-x86_64, macos-aarch64, etc.) for a given wheel platform tag."""
+#     for target_name, pattern in TARGET_TAG_PATTERNS.items():
+#         if re.search(pattern, platform_tag):
+#             return target_name
+#     # Fallback – treat non-specific wheels as "any" so we still record their size
+#     return 'any'
 
 
 if sys.platform == 'win32':
@@ -171,11 +171,11 @@ def main():
     dependencies: dict[str, tuple[str, str]] = {}
     sizes: dict[str, dict[str, int]] = {}
 
-    target_name: str | None = None
+    # target_name: str | None = None
 
     for wheel_dir in wheels_dir.iterdir():
         for wheel in wheel_dir.iterdir():
-            wheel_name = WheelName.parse(wheel.name)
+            # wheel_name = WheelName.parse(wheel.name)
             # platform_tag = wheel_name.platform_tag
             project_metadata = extract_metadata(wheel)
             project_name = normalize_project_name(project_metadata['Name'])
