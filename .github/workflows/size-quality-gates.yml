@@ -67,15 +67,15 @@ jobs:
   
       - name: Download artifact from merge-base run
         run: |
-          gh run download ${{ steps.find_run.outputs.run_id_base}} --name compressed_status.csv # $status_compressed_${{ inputs.platform }}.json
-          gh run download ${{ steps.find_run.outputs.run_id_base}} --name uncompressed_status.csv # $status_uncompressed_${{ inputs.platform }}.json
+          gh run download ${{ steps.find_run.outputs.run_id_base}} --name status_compressed_${{ inputs.platform }}.json
+          gh run download ${{ steps.find_run.outputs.run_id_base}} --name  status_uncompressed_${{ inputs.platform }}.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename previous sizes artifact
         run: |
-          mv compressed_status.csv status_compressed_${{ inputs.platform }}_prev.csv # $status_compressed_${{ inputs.platform }}.json
-          mv uncompressed_status.csv status_uncompressed_${{ inputs.platform }}_prev.csv # $status_uncompressed_${{ inputs.platform }}.json
+          mv status_compressed_${{ inputs.platform }}.json status_compressed_${{ inputs.platform }}_prev.json
+          mv status_uncompressed_${{ inputs.platform }}.json status_uncompressed_${{ inputs.platform }}_prev.json
 
       - name: Download current sizes artifact
         run: |
@@ -95,9 +95,9 @@ jobs:
           set +e
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
             # send metrics to datadog if this is a push to master
-            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog ${{secrets.DD_API_KEY}} --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
+            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --send-to-datadog ${{secrets.DD_API_KEY}} --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.json --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.json --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
           else
-            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
+            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.json --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.json --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json --output diffs_${{ inputs.platform }}.json --html-long-out size_diffs_output_${{ inputs.platform }}.txt --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
           fi
              status=$?      # 0 = passes, 1 = fails
           set -e
@@ -107,7 +107,7 @@ jobs:
           echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
         env:
-          THRESHOLD: "-100000000000000000000000000000" # 50KB
+          THRESHOLD: "51200" # 50KB
 
       - name: Upload long size diffs output as artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -1,4 +1,4 @@
-name: Fetch Previous Sizes JSON
+name: Size Delta with Master (No Dependency Resolution)
 
 on:   # only runs if dependency sizes have not changed
   pull_request:

@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -11,28 +10,11 @@ from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 from dotenv import dotenv_values
-from utils import WheelName, extract_metadata, normalize_project_name
+from utils import extract_metadata, normalize_project_name
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
-
-# TARGET_TAG_PATTERNS = {
-#     'linux-x86_64': r'manylinux.*_x86_64|linux_x86_64',
-#     'linux-aarch64': r'manylinux.*_aarch64|linux_aarch64',
-#     'windows-x86_64': r'win_amd64',
-#     'macos-x86_64': r'macosx.*_(x86_64|intel|universal2)',
-#     'macos-aarch64': r'macosx.*_(aarch64|arm64|universal2)',
-# }
-
-
-# def classify_target(platform_tag: str) -> str:
-#     """Return the canonical target name (linux-x86_64, macos-aarch64, etc.) for a given wheel platform tag."""
-#     for target_name, pattern in TARGET_TAG_PATTERNS.items():
-#         if re.search(pattern, platform_tag):
-#             return target_name
-#     # Fallback – treat non-specific wheels as "any" so we still record their size
-#     return 'any'
 
 
 if sys.platform == 'win32':
@@ -171,22 +153,13 @@ def main():
     dependencies: dict[str, tuple[str, str]] = {}
     sizes: dict[str, dict[str, int]] = {}
 
-    # target_name: str | None = None
-
     for wheel_dir in wheels_dir.iterdir():
         for wheel in wheel_dir.iterdir():
-            # wheel_name = WheelName.parse(wheel.name)
-            # platform_tag = wheel_name.platform_tag
             project_metadata = extract_metadata(wheel)
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
 
-            # Determine the builder target once (skip wheels that are "any")
-            # if target_name is None or target_name == 'any':
-            #     classified = classify_target(platform_tag)
-            #     if classified != 'any':
-            #         target_name = classified
 
             project_sizes = calculate_wheel_sizes(wheel)
             project_sizes['version'] = project_version
