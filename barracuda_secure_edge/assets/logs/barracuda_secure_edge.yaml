@@ -186,7 +186,6 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*(%{data:module})?(\[%{number:id}\])?:\s*%{data:message}
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*%{data:message}
-
         - type: grok-parser
           name: Box SSH config
           enabled: true
