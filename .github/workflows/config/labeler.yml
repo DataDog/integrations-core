@@ -753,6 +753,8 @@ integration/zero_networks:
 - zero_networks/**/*
 integration/zk:
 - zk/**/*
+integration/zscaler_private_access:
+- zscaler_private_access/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt
