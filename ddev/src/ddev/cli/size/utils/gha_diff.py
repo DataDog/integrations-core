@@ -1,5 +1,4 @@
 import argparse
-import csv
 import json
 
 from datadog import api, initialize
@@ -7,17 +6,10 @@ from datadog import api, initialize
 from ddev.cli.size.utils.common_funcs import (
     METRIC_NAME,
     METRIC_VERSION,
+    convert_to_human_readable_size,
     get_last_commit_data,
     get_last_commit_timestamp,
 )
-
-
-def convert_to_human_readable_size(size_bytes: float) -> str:
-    for unit in [" B", " KiB", " MiB", " GiB"]:
-        if abs(size_bytes) < 1024:
-            return str(round(size_bytes, 2)) + unit
-        size_bytes /= 1024
-    return str(round(size_bytes, 2)) + " TB"
 
 
 def calculate_diffs(prev_compressed_sizes, curr_compressed_sizes, prev_uncompressed_sizes, curr_uncompressed_sizes):
@@ -450,12 +442,11 @@ def main():
     args = parser.parse_args()
 
     with open(args.compressed_prev_sizes, "r") as f:
-        prev_compressed_sizes = list(csv.DictReader(f))
-        # prev_sizes = json.load(f)
+        prev_compressed_sizes = json.load(f)
     with open(args.compressed_curr_sizes, "r") as f:
         curr_compressed_sizes = json.load(f)
     with open(args.uncompressed_prev_sizes, "r") as f:
-        prev_uncompressed_sizes = list(csv.DictReader(f))
+        prev_uncompressed_sizes = json.load(f)
     with open(args.uncompressed_curr_sizes, "r") as f:
         curr_uncompressed_sizes = json.load(f)
 
