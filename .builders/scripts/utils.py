@@ -4,32 +4,11 @@ import email
 import os
 import re
 from pathlib import Path
-from typing import NamedTuple
 from zipfile import ZipFile
 
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
 
-class WheelName(NamedTuple):
-    """Helper class to manipulate wheel names."""
-    # Note: this implementation ignores build tags (it drops them on parsing)
-    name: str
-    version: str
-    python_tag: str
-    abi_tag: str
-    platform_tag: str
 
-    @classmethod
-    def parse(cls, wheel_name: str):
-        name, _ext = os.path.splitext(wheel_name)
-        parts = name.split('-')
-        if len(parts) == 6:
-            parts.pop(2)
-        return cls(*parts)
-
-    def __str__(self):
-        return '-'.join([
-            self.name, self.version, self.python_tag, self.abi_tag, self.platform_tag
-        ]) + '.whl'
 
 def normalize_project_name(name: str) -> str:
     # https://peps.python.org/pep-0503/#normalized-names
