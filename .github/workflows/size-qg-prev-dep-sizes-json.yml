@@ -1,6 +1,6 @@
 name: Size Delta with Master (No Dependency Resolution)
 
-on:   # only runs if dependency sizes have not changed
+on:   # only runs if there are no dependency changes
   pull_request:
     branches:
       - master
