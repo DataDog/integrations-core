@@ -303,7 +303,7 @@ tests:
           "Username" : "alice.w",
           "PrivateIP" : "10.0.5.12",
           "ZENLongitude" : 13.405,
-          "LogTimestamp" : "",
+          "LogTimestamp" : "2025-08-28T08:15:42Z",
           "SessionID" : "XyZp98KlMn56"
         }
       service: "user-status"
@@ -313,7 +313,6 @@ tests:
   -
     sample: |-
       {
-        "LogTimestamp" : "Sun Aug 28 07:02:11 2025",
         "ContentType" : "",
         "Customer" : "AlphaCorp",
         "EventType" : "app-protection",
@@ -367,11 +366,11 @@ tests:
         "Host" : "alphacorp.com",
         "InspectionPolicy" : 145254438888543731,
         "InspectionRuleProcessingTime" : 0,
-        "ConnectionID" : "a9K2s3LmTnYz84GhXvP1"
+        "ConnectionID" : "a9K2s3LmTnYz84GhXvP1",
+        "LogTimestamp" : "Sun Aug 28 07:02:11 2025"
       }
     result:
       custom:
-        LogTimestamp: "Sun Aug 28 07:02:11 2025"
         Application: 145254438888544100
         ApplicationGroup: 145254438888544120
         AssistantID: "alpha-key-001"
@@ -394,6 +393,7 @@ tests:
         InspectionRespBodyProcessingTime: 5
         InspectionRespHeadersProcessingTime: 30
         InspectionRuleProcessingTime: 0
+        LogTimestamp: "Sun Aug 28 07:02:11 2025"
         OriginDomain: ""
         ParanoiaLevel: 2
         Protocol: "1.1"
@@ -442,7 +442,6 @@ tests:
           id: "user1@alphacorp.com"
       message: |-
         {
-          "LogTimestamp" : "Sun Aug 28 07:02:11 2025",
           "ContentType" : "",
           "Customer" : "AlphaCorp",
           "EventType" : "app-protection",
@@ -496,7 +495,8 @@ tests:
           "Host" : "alphacorp.com",
           "InspectionPolicy" : 145254438888543731,
           "InspectionRuleProcessingTime" : 0,
-          "ConnectionID" : "a9K2s3LmTnYz84GhXvP1"
+          "ConnectionID" : "a9K2s3LmTnYz84GhXvP1",
+          "LogTimestamp" : "Sun Aug 28 07:02:11 2025"
         }
       service: "app-protection"
       tags:
