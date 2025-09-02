@@ -993,6 +993,28 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
+          name: remap 'ocsf.evidence.actor.session.uid' to string
+          enabled: true
+          sources:
+            - ocsf.evidence.actor.session.uid
+          sourceType: attribute
+          target: ocsf.evidence.actor.session.uid
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap 'ocsf.finding_info.uid' to string
+          enabled: true
+          sources:
+            - ocsf.finding_info.uid
+          sourceType: attribute
+          target: ocsf.finding_info.uid
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
           name: remap 'ocsf.finding_info.analytic.type_id' string to integer
           enabled: true
           sources:
