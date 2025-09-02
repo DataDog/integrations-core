@@ -176,17 +176,17 @@ def main():
     for wheel_dir in wheels_dir.iterdir():
         for wheel in wheel_dir.iterdir():
             wheel_name = WheelName.parse(wheel.name)
-            platform_tag = wheel_name.platform_tag
+            # platform_tag = wheel_name.platform_tag
             project_metadata = extract_metadata(wheel)
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
 
             # Determine the builder target once (skip wheels that are "any")
-            if target_name is None or target_name == 'any':
-                classified = classify_target(platform_tag)
-                if classified != 'any':
-                    target_name = classified
+            # if target_name is None or target_name == 'any':
+            #     classified = classify_target(platform_tag)
+            #     if classified != 'any':
+            #         target_name = classified
 
             project_sizes = calculate_wheel_sizes(wheel)
             project_sizes['version'] = project_version
