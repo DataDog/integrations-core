@@ -1,39 +1,27 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any  # noqa: F401
 from urllib.parse import urlparse, urlunparse
 
-from datadog_checks.base import (
-    AgentCheck,  # noqa: F401
-    OpenMetricsBaseCheckV2,  # noqa: F401
-)
+from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.bentoml.metrics import ENDPOINT_METRICS, METRICS
-
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
 
 
 class BentomlCheck(OpenMetricsBaseCheckV2):
-    # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = 'bentoml'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
         super(BentomlCheck, self).__init__(name, init_config, instances)
         self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
-        if self.openmetrics_endpoint:
-            parsed = urlparse(self.openmetrics_endpoint)
-            path = parsed.path.rstrip('/')
-            if '/' in path:
-                base_path = path.rsplit('/', 1)[0]
-            else:
-                base_path = ''
-            self.base_url = urlunparse(parsed._replace(path=base_path or '/'))
-        else:
-            self.base_url = None
+        self.base_url = self._extract_base_url(self.openmetrics_endpoint) if self.openmetrics_endpoint else None
         self.tags = self.instance.get('tags', [])
+
+    def _extract_base_url(self, endpoint):
+        parsed = urlparse(endpoint)
+        path = parsed.path.rstrip('/')
+        base_path = path.rsplit('/', 1)[0] if '/' in path else ''
+        return urlunparse(parsed._replace(path=base_path or '/'))
 
     def get_default_config(self):
         return {
@@ -43,16 +31,19 @@ class BentomlCheck(OpenMetricsBaseCheckV2):
 
     def check(self, instance):
         super(BentomlCheck, self).check(instance)
-        self.check_health_endpoint()
+        if self.base_url:
+            self.check_health_endpoint()
 
     def check_health_endpoint(self):
-        endpoint = self.base_url
-        for endpoint, metric in ENDPOINT_METRICS.items():
-            url = f"{endpoint}"
-            response = self.http.get(url)
-            response.raise_for_status()
-            if response.status_code == 200:
-                self.gauge(metric, 1, tags=self.tags)
-            else:
-                self.log.debug("Failed to get %s from %s", metric, url)
-                self.gauge(metric, 0, tags=self.tags)
+        """Check health endpoints and report metrics."""
+        for endpoint_path, metric_name in ENDPOINT_METRICS.items():
+            try:
+                url = f"{self.base_url}{endpoint_path}"
+                response = self.http.get(url)
+                response.raise_for_status()
+
+                self.gauge(metric_name, 1, tags=self.tags)
+                self.log.debug("Successfully checked %s at %s", metric_name, url)
+            except Exception as e:
+                self.log.debug("Failed to check %s at %s: %s", metric_name, url, str(e))
+                self.gauge(metric_name, 0, tags=self.tags)
