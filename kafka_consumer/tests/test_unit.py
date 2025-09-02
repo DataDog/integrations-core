@@ -422,7 +422,6 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     expected_debug = "Reported contexts number 1 greater than or equal to contexts limit of 1"
     assert expected_debug in caplog.text
 
-
 def test_when_empty_string_consumer_group_then_skip(kafka_instance):
     kafka_instance["monitor_unlisted_consumer_groups"] = True
     with mock.patch(
@@ -1000,6 +999,13 @@ def test_build_schema_none_handling():
     with pytest.raises((TypeError, base64.binascii.Error)):
         build_protobuf_schema(None)
 
+def test_count_consumer_contexts(check, kafka_instance):
+    kafka_consumer_check = check(kafka_instance)
+    consumer_offsets = {
+        'consumer_group1': {('topic1', 'partition0'): 1, ('topic1', 'partition1'): 2}, # 2 contexts
+        'consumer_group2': {('topic2', 'partition0'): 3}, # 1 context
+    }
+    assert kafka_consumer_check.count_consumer_contexts(consumer_offsets) == 3
 
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):
     mock_client = seed_mock_client()

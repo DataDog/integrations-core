@@ -1,0 +1,1 @@
+Fix context limit calculation to count per topic/partition, preventing premature 'Context limit reached' warnings and skipped highwater metrics.
