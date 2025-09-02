@@ -14,7 +14,7 @@ from typing import Iterator, NamedTuple
 from zipfile import ZipFile
 
 import urllib3
-from utils import WheelName, extract_metadata, normalize_project_name
+from utils import extract_metadata, normalize_project_name
 
 # Packages for which we're skipping the openssl-3 build check
 OPENSSL_PACKAGE_BYPASS = ["psycopg"]
