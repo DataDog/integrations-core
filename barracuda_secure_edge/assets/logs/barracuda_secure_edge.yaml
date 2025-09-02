@@ -189,6 +189,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*(%{data:module})?(\[%{number:id}\])?:\s*%{data:message}
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:type}:\s*%{data:message}
 
         - type: grok-parser
@@ -253,6 +254,7 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{word:module}\:%{data:message}
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
         - type: grok-parser
           name: VPN sslvpn
@@ -294,6 +296,7 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s*%{word:level}\s*%{data}%{ip:ip}:%{number:port}\):\s+%{data:message}\)
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
     - type: pipeline
       name: Admin
@@ -323,6 +326,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*(%{ip:source_ip}:%{number:source_port})?\s+%{data:message}
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+%{data:message}
         - type: grok-parser
           name: Box Config changes
@@ -342,6 +346,7 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s+\[%{data:initiator}\]\s+%{word}\(%{word:commit_action}\)\s+%{notSpace:path}\s+\(%{data:message}\)
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+\[%{data:initiator}\]\s+%{data:message}
         - type: grok-parser
           name: Box Config sync
@@ -370,6 +375,7 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss
               ZZ"):timestamp}\s+%{word:level}\s+%{word:auth_component}:\s+%{word:auth_process}:\s+%{data:event}\s+for\s+%{data:auth_type}
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s+(%{word:auth_component}:\s+%{word:auth_process}:\s+)?%{data:message}
     - type: pipeline
       name: Box Network dhcp
@@ -397,8 +403,11 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{word:process}\[%{number:process_id}\]:\s+%{data:message}
+
               autoFilledRule4 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*\[%{number:process_id}\]\s*%{data}\s*\:\s*%{word:action}\s*%{data:message}
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:module}\s:*%{data}=\s*%{ip:local_ip}\s*%{data}=%{ip:gateway_ip}
+
               autoFilledRule3 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s*%{word:level}\s*%{data:message}
     - type: pipeline
       name: System
@@ -442,6 +451,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{word:event_action}\s+\(worker:%{number:worker_id}\)\s+from\s+%{ip:source_ip},\s+User\s+\[%{data}\]\s+-\s+\(%{data::csv("type,severity,component,code,action,session_id,username,system_name","|")}\)
+
               autoFilledRule2 %{date("yyyy MM dd HH:mm:ss ZZ"):timestamp}\s+%{word:level}\s*%{word}:\s+\[%{number:event_id}\]\s+%{data:message}
     - type: status-remapper
       name: Status Remapper from Level to Status
