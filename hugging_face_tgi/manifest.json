@@ -33,7 +33,7 @@
       },
       "metrics": {
         "prefix": "hugging_face_tgi.",
-        "check": "",
+        "check": "hugging_face_tgi.queue.size",
         "metadata_path": "metadata.csv"
       }
     },
