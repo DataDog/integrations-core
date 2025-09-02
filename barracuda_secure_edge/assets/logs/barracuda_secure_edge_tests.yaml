@@ -1,7 +1,6 @@
 id: barracuda_secure_edge
 tests:
-  - sample: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ;
-      PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
+  - sample: "2025 04 02 12:20:39 +00:00 Notice       root : TTY=pts/0 ; PWD=/etc/yum.repos.d ; USER=root ; COMMAND=/bin/systemctl rsyslog status"
     service: "auth"
     result: null
   - sample: "2025 04 02 12:20:51 +00:00 Security Block:
