@@ -44,6 +44,8 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /crio/manifest.json                             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /datadog_cluster_agent/                         @DataDog/container-integrations @DataDog/agent-integrations
 /datadog_cluster_agent/*.md                     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/datadog_csi_driver/                            @DataDog/container-platform @DataDog/agent-integrations
+/datadog_csi_driver/*.md                        @DataDog/container-platform @DataDog/agent-integrations @DataDog/documentation
 /datadog_operator/                              @DataDog/container-ecosystems @DataDog/agent-integrations
 /datadog_operator/*.md                          @DataDog/container-ecosystems @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                                 @DataDog/container-integrations @DataDog/agent-integrations
