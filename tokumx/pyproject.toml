@@ -1,6 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
+    "hatch-requirements-txt>=0.4.1",
     "setuptools>=66; python_version > '3.0'",
     "setuptools; python_version < '3.0'",
 ]
