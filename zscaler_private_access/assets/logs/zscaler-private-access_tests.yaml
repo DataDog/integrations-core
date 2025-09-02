@@ -809,7 +809,7 @@ tests:
         PolicyID: "72097421269663744-45678901234567890"
         PolicyName: "web_tls_policy"
         Protocol: 6
-        ProtocolName: "tcp"
+        ProtocolName: "TCP"
         ResourceID: "72097421269663744-23456789012345678"
         ResourceName: "app01.nextgen.net"
         SourceIP: "192.168.1.101"
