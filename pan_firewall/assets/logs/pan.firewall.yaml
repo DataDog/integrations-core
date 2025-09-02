@@ -878,28 +878,37 @@ pipeline:
       enabled: true
       isOcsf: true
       processors:
-        - type: category-processor
+        - type: attribute-remapper
           name: URL extraction
           enabled: true
-          categories:
-            - filter:
-                query: "@misc:* @subtype:url"
-              name: 'URL Paths'
+          filter:
+            query: "@misc:* @subtype:url"
+          sources:
+            - misc
+          sourceType: attribute
           target: ocsf.finding_info.evidence.url.path
-        - type: category-processor
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
     - type: pipeline
       name: misc field filename extraction
       enabled: true
       isOcsf: true
+      filter:
+        query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
       processors:
-        - type: category-processor
-          name: filename extraction
+        - type: attribute-remapper
+          name: remap misc to ocsf.finding_info.evidence.file.name
           enabled: true
-          categories:
-            - filter:
-                query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
-              name: 'Filename'
+          sources:
+            - misc
+          sourceType: attribute
           target: ocsf.finding_info.evidence.file.name
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
     - type: pipeline
       name: OCSF Post Transformation
       enabled: true
