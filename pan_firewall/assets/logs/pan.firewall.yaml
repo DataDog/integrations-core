@@ -875,6 +875,33 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
     - type: pipeline
+      name: misc field URL extraction
+      enabled: true
+      isOcsf: true
+      processors:
+        - type: category-processor
+          name: URL extraction
+          enabled: true
+          categories:
+            - filter:
+                query: "@misc:* @subtype:url"
+              name: 'URL Paths'
+          target: ocsf.finding_info.evidence.url.path
+        - type: category-processor
+    - type: pipeline
+      name: misc field filename extraction
+      enabled: true
+      isOcsf: true
+      processors:
+        - type: category-processor
+          name: filename extraction
+          enabled: true
+          categories:
+            - filter:
+                query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
+              name: 'Filename'
+          target: ocsf.finding_info.evidence.file.name
+    - type: pipeline
       name: OCSF Post Transformation
       enabled: true
       ocsf:
@@ -902,6 +929,28 @@ pipeline:
           target: ocsf.connection_info.direction_id
           targetType: attribute
           targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap ocsf.finding_info.evidence.url.path to string
+          enabled: true
+          sources:
+            - ocsf.finding_info.evidence.url.path
+          sourceType: attribute
+          target: ocsf.finding_info.evidence.url.path
+          targetType: attribute
+          targetFormat: string
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: remap ocsf.finding_info.evidence.file.name to string
+          enabled: true
+          sources:
+            - ocsf.finding_info.evidence.file.name
+          sourceType: attribute
+          target: ocsf.finding_info.evidence.file.name
+          targetType: attribute
+          targetFormat: string
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
@@ -1069,22 +1118,6 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
-        - type: category-processor
-          name: URL extraction
-          enabled: true
-          categories:
-            - filter:
-                query: "@misc:* @subtype:url"
-              name: 'URL Paths'
-          target: ocsf.finding_info.evidence.url.path
-        - type: category-processor
-          name: filename extraction
-          enabled: true
-          categories:
-            - filter:
-                query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
-              name: 'Filename'
-          target: ocsf.finding_info.evidence.file.name
         - type: arithmetic-processor
           name: Type ID calculator
           enabled: true
