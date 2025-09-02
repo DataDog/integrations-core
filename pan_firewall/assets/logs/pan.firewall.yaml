@@ -247,7 +247,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              nine %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSSSS"):ocsf.time}
+              nine %{date("yyyy/MM/dd' 'HH:mm:ss"):ocsf.time}
               eight %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSSS"):ocsf.time}
               seven %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSS"):ocsf.time}
               six %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSS"):ocsf.time}
