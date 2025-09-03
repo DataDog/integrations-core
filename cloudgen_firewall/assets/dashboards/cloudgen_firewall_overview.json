@@ -6,7 +6,7 @@
             "id": 8481596997566296,
             "definition": {
                 "title": "Barracuda CloudGen Firewall",
-                "banner_img": "https://pmddatasolutions.com/wp-content/uploads/2024/05/Barracuda-CloudGen-Firewall.jpg",
+                "banner_img": "https://static.datadoghq.com/static/images/logos/cloudgen-firewall_large.svg",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
