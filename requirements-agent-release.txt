@@ -29,7 +29,7 @@ datadog-celery==2.0.1
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==6.0.1
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.17.0
+datadog-checks-base==37.18.1
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==8.0.0
 datadog-cilium==6.0.1
