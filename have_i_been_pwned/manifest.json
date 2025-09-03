@@ -22,10 +22,6 @@
       "source_type_name": "Have I Been Pwned",
       "events": {
         "creates_events": false
-      },
-      "metrics": {
-        "prefix": "have_i_been_pwned.",
-        "check": []
       }
     }
   },
