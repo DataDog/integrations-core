@@ -13,18 +13,28 @@
     "media": [
       {
         "media_type": "image",
-        "caption": "FILL IN Image 1 caption",
-        "image_url": "<FILL IN>"
+        "caption": "CrowdStrike FDR - Overview",
+        "image_url": "/images/crowdstrike_fdr_overview.png"
       },
       {
         "media_type": "image",
-        "caption": "FILL IN Image 2 caption",
-        "image_url": "<FILL IN>"
+        "caption": "CrowdStrike FDR - Network Activity",
+        "image_url": "/images/crowdstrike_network_activity.png"
       },
       {
         "media_type": "image",
-        "caption": "FILL IN Image 3 caption",
-        "image_url": "<FILL IN>"
+        "caption": "CrowdStrike FDR - Account & Privilege Changes",
+        "image_url": "/images/crowdstrike_fdr_account_and_privilege_changes.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - Authentication & Identity",
+        "image_url": "/images/crowdstrike_fdr_authentication_and_identity.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "CrowdStrike FDR - Execution Monitoring & Threat Detection",
+        "image_url": "/images/crowdstrike_fdr_execution_monitoring_and_threat_detection.png"
       }
     ],
     "classifier_tags": [
