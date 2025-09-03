@@ -143,5 +143,5 @@ sudo service datadog-agent restart
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [18]: /data-streams
 [19]: /integrations/kafka?search=kafka
-[20]: /containers/cluster_agent/clusterchecks/?tab=datadogoperator
+[20]: /containers/cluster_agent/clusterchecks/
 [21]: /data_streams/messages/
