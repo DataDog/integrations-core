@@ -257,7 +257,6 @@ pipeline:
           sourceType: attribute
           target: ocsf.time
           targetType: attribute
-          targetFormat: string
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
@@ -745,12 +744,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: string-builder-processor
-          name: add 'ocsf.evidence.file.type_id'
-          enabled: true
-          template: "0"
-          target: ocsf.evidence.file.type_id
-          replaceMissing: false
         - type: attribute-remapper
           name: remap 'rule_uuid' to 'ocsf.finding_info.analytic.uid'
           enabled: true
@@ -883,7 +876,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@type:THREAT @misc:* @subtype:url"
+        query: "@type:THREAT @subtype:url"
       processors:
         - type: attribute-remapper
           name: URL extraction
@@ -902,7 +895,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@type:THREAT @misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
+        query: "@type:THREAT @subtype:(file OR virus OR wildire-virus OR wildfire)"
       processors:
         - type: attribute-remapper
           name: remap misc to ocsf.evidence.file.name
@@ -915,6 +908,12 @@ pipeline:
           targetFormat: string
           preserveSource: true
           overrideOnConflict: false
+        - type: string-builder-processor
+          name: add 'ocsf.evidence.file.type_id'
+          enabled: true
+          template: "0"
+          target: ocsf.evidence.file.type_id
+          replaceMissing: false
     - type: pipeline
       name: OCSF Post Transformation
       enabled: true
@@ -963,17 +962,6 @@ pipeline:
             - ocsf.evidence.url.path
           sourceType: attribute
           target: ocsf.evidence.url.path
-          targetType: attribute
-          targetFormat: string
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: remap ocsf.evidence.file.name to string
-          enabled: true
-          sources:
-            - ocsf.evidence.file.name
-          sourceType: attribute
-          target: ocsf.evidence.file.name
           targetType: attribute
           targetFormat: string
           preserveSource: false
