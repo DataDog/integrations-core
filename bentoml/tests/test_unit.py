@@ -8,11 +8,11 @@ import requests
 
 from datadog_checks.base.constants import ServiceCheck
 
-# from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.bentoml import BentomlCheck
 
 from .common import (
-    HEALTH_METRICS,
+    ENDPOINT_METRICS,
     METRICS,
     OM_MOCKED_INSTANCE,
     get_fixture_path,
@@ -33,11 +33,13 @@ def test_bentoml_mock_metrics(dd_run_check, aggregator, mock_http_response):
         for metric in METRICS:
             aggregator.assert_metric(metric)
 
-        for metric in HEALTH_METRICS:
+        for metric in ENDPOINT_METRICS:
             aggregator.assert_metric(metric, value=1, tags=['test:tag', 'status_code:200'])
 
         aggregator.assert_all_metrics_covered()
         assert mock_http.get.call_count == 2
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+        aggregator.assert_all_metrics_covered()
         aggregator.assert_service_check('bentoml.openmetrics.health', ServiceCheck.OK)
 
 
@@ -65,7 +67,7 @@ def test_bentoml_mock_valid_endpoint_invalid_health(dd_run_check, aggregator, mo
         check = BentomlCheck('bentoml', {}, [OM_MOCKED_INSTANCE])
         dd_run_check(check)
 
-        for metric in HEALTH_METRICS:
+        for metric in ENDPOINT_METRICS:
             aggregator.assert_metric(metric, value=0, tags=['test:tag', 'status_code:500'])
 
         aggregator.assert_service_check('bentoml.openmetrics.health', ServiceCheck.OK)

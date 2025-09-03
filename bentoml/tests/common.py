@@ -30,7 +30,7 @@ METRICS = [
     'bentoml.service.time_since_last_request',
 ]
 
-HEALTH_METRICS = [
+ENDPOINT_METRICS = [
     'bentoml.endpoint_livez',
     'bentoml.endpoint_readyz',
 ]
