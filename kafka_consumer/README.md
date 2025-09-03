@@ -19,7 +19,7 @@ The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. 
 
 ### Configuration
 
-<!-- xxx tab xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -34,7 +34,7 @@ In Kubernetes, if a single consumers is running on many containers, you can setu
 | `<INIT_CONFIG>`      | blank or `{}`                        |
 | `<INSTANCE_CONFIG>`  | `{"kafka_connect_str": "<KAFKA_CONNECT_STR>", "consumer_groups": {"<CONSUMER_NAME>": {}}}` <br/>For example, `{"kafka_connect_str": "server:9092", "consumer_groups": {"my_consumer_group": {}}}` |
 
-<!-- xxz tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Host" xxx -->
 
 Configure this check on a host running the Kafka Consumers.
