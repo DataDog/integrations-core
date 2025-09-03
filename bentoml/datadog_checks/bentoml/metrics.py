@@ -4,7 +4,7 @@
 
 METRICS = {
     "bentoml_service_request_in_progress": "service.request.in_progress",
-    "bentoml_service_request_total": "service.request",
+    "bentoml_service_request": "service.request",
     "bentoml_service_request_duration_seconds": "service.request.duration",
     "bentoml_service_adaptive_batch_size": "service.adaptive_batch_size",
     "bentoml_service_last_request_timestamp_seconds": {

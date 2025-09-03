@@ -35,15 +35,23 @@ class BentomlCheck(OpenMetricsBaseCheckV2):
             self.check_health_endpoint()
 
     def check_health_endpoint(self):
-        """Check health endpoints and report metrics."""
         for endpoint_path, metric_name in ENDPOINT_METRICS.items():
             try:
                 url = f"{self.base_url}{endpoint_path}"
                 response = self.http.get(url)
                 response.raise_for_status()
 
-                self.gauge(metric_name, 1, tags=self.tags)
+                tags = [*self.tags, f"status_code:{response.status_code}"]
+                self.gauge(metric_name, 1, tags=tags)
                 self.log.debug("Successfully checked %s at %s", metric_name, url)
             except Exception as e:
+                status_code = None
+                if hasattr(e, 'response') and e.response is not None:
+                    status_code = getattr(e.response, 'status_code', None)
+
+                tags = [*self.tags]
+                if status_code is not None:
+                    tags.append(f"status_code:{status_code}")
+
                 self.log.debug("Failed to check %s at %s: %s", metric_name, url, str(e))
-                self.gauge(metric_name, 0, tags=self.tags)
+                self.gauge(metric_name, 0, tags=tags)
