@@ -76,6 +76,10 @@ This integration is used by [Data Streams Monitoring][18] to [retrieve messages 
 **consumer_lag**:<br>
 The Datadog Agent emits an event when the value of the `consumer_lag` metric goes below 0, tagging it with `topic`, `partition` and `consumer_group`.
 
+### Service Checks
+
+The Kafka-consumer check does not include any service checks.
+
 ## Troubleshooting
 
 - [Troubleshooting and Deep Dive for Kafka][10]
