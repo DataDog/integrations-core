@@ -15,10 +15,9 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
       "Offering::Integration",
-      "Category::Machine Learning & LLM",
-      "Queried Data Type::Metrics",
-      "Submitted Data Type::Metrics"
+      "Category::AI/ML"
     ]
   },
   "assets": {
