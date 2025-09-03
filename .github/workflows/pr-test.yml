@@ -61,6 +61,37 @@ jobs:
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
 
+  test-minimum-base-package:
+    needs:
+    - compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]' && github.event_name != 'merge_group'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: "${{ matrix.name }}"
+      target: "${{ matrix.target }}"
+      target-env: "${{ matrix.target-env }}"
+      platform: "${{ matrix.platform }}"
+      runner: "${{ toJson(matrix.runner) }}"
+      repo: "${{ inputs.repo }}"
+      minimum-base-package: true
+
+      # Options
+      # We never test Python in integrations-core, but some partners may want to keep testing it
+      # in marketplace and integrations-extras.
+      test-py2: ${{ inputs.repo != 'core' && (!matrix.python-support || contains(matrix.python-support, '2')) }}
+      test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
+
+      # For other repositories
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
+      python-version: "${{ inputs.python-version }}"
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+
   save-event:
     needs:
     - test
