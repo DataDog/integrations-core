@@ -4,10 +4,22 @@
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
 python = ["3.12"]
-version = ["24.8", "25.3", "25.5", "25.6", "25.7"]
+version = ["24.8", "25.3", "25.6", "25.7", "25.8"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "CLICKHOUSE_VERSION"
 
 [envs.latest.env-vars]
 CLICKHOUSE_VERSION = "latest"
+
+[envs.data]
+dependencies = [
+    "requests==2.32.5"
+]
+
+[envs.data.env-vars]
+# keep in sync with default version matrix
+VERSIONS = "24.8,25.3,25.6,25.7,25.8"
+
+[envs.data.scripts]
+generate = "python scripts/generate_metrics.py"

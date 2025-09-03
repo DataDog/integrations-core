@@ -15,9 +15,6 @@ from typing import Iterable
 
 import requests
 
-# should be in sync with env versions from hatch.toml
-VERSIONS = ['24.8', '25.3', '25.5', '25.6', '25.7']
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(HERE, 'templates')
 INTEGRATION_DIR = os.path.join(HERE, '..')
@@ -102,6 +99,15 @@ class Templates(Enum):
         source_path='metrics.tpl',
         target_path=os.path.join(TESTS_DIR, 'metrics.py'),
     )
+
+
+def versions() -> list[str]:
+    versions = os.getenv('VERSIONS')
+    if not versions:
+        print('VERSIONS variable is not defined')
+        exit(1)
+
+    return versions.split(',')
 
 
 def indent_line(string: str, indent: int = 4) -> str:
@@ -331,7 +337,7 @@ def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
     is_optional = False
 
     # calculate metrics for each version and the overall list
-    for version in VERSIONS:
+    for version in versions():
         match metric_kind:
             case MetricKind.METRICS:
                 metrics = fetch_current_metrics(version)
@@ -349,7 +355,7 @@ def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
 
     # calculate common metrics among all versions
     common: set[str] = set()
-    for prev_version, next_version in itertools.pairwise(VERSIONS):
+    for prev_version, next_version in itertools.pairwise(versions()):
         prev_metrics: set[str]
         next_metrics: set[str]
         prev_metrics, next_metrics = versioned_metrics[prev_version], versioned_metrics[next_version]
@@ -360,7 +366,7 @@ def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
 
     # calculate unique metrics for each version based on the common list
     diff: dict[str, set[str]] = {}
-    for version in VERSIONS:
+    for version in versions():
         diff[version] = versioned_metrics[version].difference(common)
 
     return CalculatedMetrics(all=all_metrics, common=common, unique=diff, optional=is_optional)
@@ -417,7 +423,7 @@ def generate_test_data(metrics_data: list[CalculatedMetrics]):
             versioned_base_metrics = deep_merge(versioned_base_metrics, versioned)
 
     config = {
-        'versions': ', '.join(VERSIONS),
+        'versions': ', '.join(versions()),
         'base_metrics': printable_array(base_metrics),
         'optional_metrics': printable_array(optional_metrics),
         'versioned_base_metrics': printable_versioned_array(versioned_base_metrics),
@@ -470,7 +476,7 @@ def main():
     Templates are stored in `./scripts/templates/` folder.
 
     Query modules:
-    - generated from ClickHouse source files (except AsynchronousMetrics for now)
+    - generated from ClickHouse source files
     - contain a complete intersection of all available metrics (for each supported system table)
 
     Test module:
@@ -479,11 +485,11 @@ def main():
     Metadata.csv file:
     - contains all the metrics supported by ClickHouse integration
 
-    After generating the files, you need to re-run all linters.
+    To fix linters you need to run `ddev test --lint clickhouse` in the end.
     """
     parser = argparse.ArgumentParser(
         description=main.__doc__,
-        epilog='Example: hatch run py3.12-25.3:python ./scripts/generate_metrics.py',
+        epilog='Example: hatch run data:generate',
     )
     _ = parser.parse_args()
     generate()
