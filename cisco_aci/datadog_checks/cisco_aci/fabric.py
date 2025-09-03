@@ -143,7 +143,8 @@ class Fabric:
                 tags.append('{}:{}'.format(DEVICE_TAGS_PREFIX, device_id))
                 tags.append(
                     "{}:{}:{}".format(
-                        INTERFACE_TAGS_PREFIX, interface_metadata.device_id, str(interface_metadata.index)
+                        INTERFACE_TAGS_PREFIX,
+                        ndm.get_interface_dd_id(interface_metadata.device_id, interface_metadata.raw_id),
                     ),
                 )
                 self.submit_interface_status_metric(
