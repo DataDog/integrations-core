@@ -142,7 +142,7 @@ class Fabric:
                 device_id = '{}:{}'.format(self.namespace, node.get('address', ''))
                 tags.append('{}:{}'.format(DEVICE_TAGS_PREFIX, device_id))
                 tags.append(
-                    "{}:{}:{}".format(
+                    "{}:{}".format(
                         INTERFACE_TAGS_PREFIX,
                         ndm.get_interface_dd_id(interface_metadata.device_id, interface_metadata.raw_id),
                     ),
