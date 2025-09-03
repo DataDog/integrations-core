@@ -249,16 +249,24 @@ pipeline:
       filter:
         query: "@type:(TRAFFIC OR THREAT)"
       processors:
-        - type: attribute-remapper
+        - type: grok-parser
           name: Parsing event time
           enabled: true
-          sources:
-            - timestamp
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
+          source: timestamp
+          samples:
+            - "2025/08/25 17:15:02"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              eight %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSSS"):ocsf.time}
+              seven %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSS"):ocsf.time}
+              six %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSS"):ocsf.time}
+              five %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSS"):ocsf.time}
+              four %{date("yyyy/MM/dd' 'HH:mm:ss.SSSS"):ocsf.time}
+              three %{date("yyyy/MM/dd' 'HH:mm:ss.SSS"):ocsf.time}
+              two %{date("yyyy/MM/dd' 'HH:mm:ss.SS"):ocsf.time}
+              one %{date("yyyy/MM/dd' 'HH:mm:ss.S"):ocsf.time}
+              zero %{date("yyyy/MM/dd' 'HH:mm:ss"):ocsf.time}
         - type: attribute-remapper
           name: Sequence Number
           enabled: true

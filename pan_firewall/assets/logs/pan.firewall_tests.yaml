@@ -203,8 +203,6 @@ tests:
             app_name: "ssl"
             session:
               uid: "264167"
-          file:
-            type_id: 0
           connection_info:
             direction_id: 0
             protocol_name: "tcp"
