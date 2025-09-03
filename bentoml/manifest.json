@@ -8,14 +8,13 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "BentoML is an open-source framework for building and deploying machine learning models. This integration provides metrics for BentoML services.",
+    "description": "BentoML is an open-source framework for ML model deployment. This integration collects BentoML service metrics.",
     "title": "BentoML",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::AI",
       "Queried Data Type::Metrics",
       "Submitted Data Type::Metrics"
     ]
