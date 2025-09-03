@@ -1,12 +1,12 @@
 services:
   zookeeper:
-    image: bitnami/zookeeper:3.8.0
+    image: bitnamilegacy/zookeeper:3.8.0
     ports:
       - 2181:2181
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
   kafka:
-    image: bitnami/kafka:${KAFKA_VERSION}
+    image: bitnamilegacy/kafka:${KAFKA_VERSION}
     ports:
       - 9092:9092
       - 9999:9999
