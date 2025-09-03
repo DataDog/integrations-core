@@ -204,18 +204,8 @@ pipeline:
         - "timestamp=2025/05/22 20:53:17, serial=001801010877, type=AUTHENTICATION, subtype=virus, time_generated=2025/05/22 20:53:17, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
       grok:
         matchRules: |
-          rule_panos %{data::keyvalue("="," \/:"")}
+          rule_panos %{data::keyvalue("="," \"")}
         supportRules: ''
-    - type: attribute-remapper
-      name: remap 'time_generated' to 'timestamp'
-      enabled: true
-      sources:
-        - time_generated
-      sourceType: attribute
-      target: timestamp
-      targetType: attribute
-      preserveSource: true
-      overrideOnConflict: false
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
@@ -254,6 +244,7 @@ pipeline:
           sources:
             - timestamp
           sourceType: attribute
+          targetType: attribute
           target: ocsf.time
           preserveSource: true
           overrideOnConflict: false
