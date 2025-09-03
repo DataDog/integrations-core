@@ -7,7 +7,7 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
-PORT = 80  # TGI directly on port 80 with host networking
+PORT = 8000
 
 
 def get_fixture_path(filename):
@@ -18,9 +18,6 @@ MOCKED_INSTANCE = {
     "openmetrics_endpoint": f"http://{HOST}:{PORT}/metrics",
     'tags': ['test:tag'],
 }
-
-TGI_HEALTH_ENDPOINT = f"http://{HOST}:{PORT}/health"
-TGI_GENERATE_ENDPOINT = f"http://{HOST}:{PORT}/generate"
 
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 

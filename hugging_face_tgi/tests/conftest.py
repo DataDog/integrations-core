@@ -16,12 +16,11 @@ from . import common
 def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
-        CheckDockerLogs(identifier='hugging_face_tgi', patterns=['Ready'], wait=600),
-        CheckEndpoints([common.TGI_HEALTH_ENDPOINT], wait=600),
-        CheckEndpoints([common.MOCKED_INSTANCE["openmetrics_endpoint"]], wait=120),
+        CheckDockerLogs(identifier='caddy', patterns=['server running']),
+        CheckEndpoints(common.MOCKED_INSTANCE["openmetrics_endpoint"]),
     ]
-    logging.info("Starting TGI test environment with conditions: %s", conditions)
-    with docker_run(compose_file, conditions=conditions, sleep=30):
+    logging.info(conditions)
+    with docker_run(compose_file, conditions=conditions):
         yield {
             'instances': [common.MOCKED_INSTANCE],
         }
