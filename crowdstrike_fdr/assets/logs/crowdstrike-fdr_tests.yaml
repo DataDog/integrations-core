@@ -1,0 +1,96 @@
+id: crowdstrike-fdr
+tests:
+  - sample: '{"ContextBaseFileName":"sample.exe","aip":"10.10.10.10","event_platform":"Win","EventOrigin":"1","id":"53c53746-44bd-424c-952d-953d77e2c6ce","Protocol":"6","EffectiveTransmissionClass":"3","InContext":"0","timestamp":"1755599833469","LocalAddressIP4":"20.20.20.20","event_simpleName":"NetworkConnectIP4","ContextTimeStamp":"1755599832.823","ConfigStateHash":"1148659614","ConnectionFlags":"0","ContextProcessId":"580375981794","RemotePort":"443","ConfigBuild":"1007.3.0020006.15","LocalPort":"50966","Entitlements":"15","name":"NetworkConnectIP4V13","aid":"d45b8541202f4b43bdac05234d906ff1","RemoteAddressIP4":"30.30.30.30","RemoteAddressString":"52.123.145.14:443","ConnectionDirection":"0","cid":"2cc98db1a47b4c98b913s46d43bfab70"}'
+    result: null
+  - sample: '{"UserIsAdmin": "1", "LogonTime": "1756189673.714", "ContextThreadId":
+      "237842773747", "aip": "10.10.10.10", "LogonDomain": "ZEROAD",
+      "RemoteAccount": "1", "UserSid": "S-1-6-18", "event_platform": "Win",
+      "UserFlags": "0", "ClientComputerName": "Test-Computer", "EventOrigin":
+      "1", "LogonServer": "", "id": "e48d75d4-ec11-4bbf-b628-14c82b98815f",
+      "EffectiveTransmissionClass": "2", "event_simpleName": "UserLogon",
+      "ContextTimeStamp": "1756189673.714", "UserName": "demo-user",
+      "ConfigStateHash": "1293256420", "ContextProcessId": "60249910548",
+      "LogonType": "0", "PrivilegesBitmask": "130778398648",
+      "AuthenticationPackage": "Negotiate", "AuthenticationId": "999",
+      "UserPrincipal": "381$@abc.local", "ConfigBuild": "1007.3.0020006.15",
+      "PasswordLastSet": "", "Entitlements": "15", "name": "UserLogonV9",
+      "UserLogonFlags": "8", "EnabledPrivilegesBitmask": "130471291024", "aid":
+      "3dd1ca6a3428444615ccf1070a8b37e2", "UserGroupsBitmask": "794753", "cid":
+      "2cc98db1a47b4c98b913c94d43bfab70"}'
+    result: null
+  - sample: '{"aip": "10.10.10.10", "UserRid": "461523EA", "event_platform": "Win",
+      "EventOrigin": "1", "InterfaceGuid":
+      "14521485-1234-ABCD-EF00-0123456789AC", "RpcClientProcessId":
+      "60621531269", "id": "29023678-56e0-42f8-ad6d-f719c1c38cdf",
+      "EffectiveTransmissionClass": "3", "timestamp": "1756295097838",
+      "LocalAddressIP4": "20.20.20.20", "event_simpleName":
+      "UserAccountCreated", "ContextTimeStamp": "1756295157.763", "UserName":
+      "test.user", "ConfigStateHash": "3973064497", "InterfaceVersion": "65536",
+      "RpcClientThreadId": "249100854834", "ConfigBuild": "1007.3.0020006.15",
+      "RpcOpNum": "50", "Entitlements": "15", "name": "UserAccountCreatedV1",
+      "ComputerName": "Test-Asset", "Attacks": [{"Tactic": "Persistence",
+      "Technique": "Create Account"}], "aid":
+      "3dd1ca6a3428443399ccf1070a8b37e2", "RpcNestingLevel": "0", "cid":
+      "2cc98db1a47b4c98b913c94d43bfab70"}'
+    result: null
+  - sample: '{"aip": "10.10.10.10", "UserRid": "461523EA", "event_platform": "Win",
+      "DomainSid": "S-1-5-21-367788025-4070750832-749663698", "EventOrigin":
+      "1", "InterfaceGuid": "12345778-1234-ABCD-EF00-0123456789AC",
+      "RpcClientProcessId": "60621531269", "id":
+      "4e5079f3-9e6a-47d3-b465-4539a26f5f85", "EffectiveTransmissionClass": "3",
+      "timestamp": "1756295097839", "LocalAddressIP4": "20.20.20.20",
+      "event_simpleName": "UserAccountAddedToGroup", "ContextTimeStamp":
+      "1756295157.878", "ConfigStateHash": "3973064497", "InterfaceVersion":
+      "65536", "GroupRid": "00000221", "RpcClientThreadId": "249100854834",
+      "ConfigBuild": "1007.3.0020006.15", "RpcOpNum": "31", "Entitlements":
+      "15", "name": "UserAccountAddedToGroupV2", "ComputerName": "CLW381",
+      "Attacks": [{"Tactic": "Persistence", "Technique": "Account
+      Manipulation"}], "aid": "3dd1ca6a3428443399ccf1070a8b37e2",
+      "RpcNestingLevel": "0", "cid": "2cc98db1a47b4c98b913c94d45bfab70"}'
+    result: null
+  - sample: '{"IP6Records": "2620:1ec:29:1::37;", "ContextBaseFileName":
+      "SearchHost.exe", "DnsResponseType": "2", "IP4Records": "13.107.253.37;",
+      "ContextThreadId": "239862140703", "aip": "10.10.10.10", "CNAMERecords":
+      "azurefd-t-abc.manager.net;shed.dual-low.s-part-0020.t-0009.t-msedge.net",
+      "QueryStatus": "0", "FirstIP6Record": "2620:1ec:29:1:0:0:0:37",
+      "InterfaceIndex": "0", "event_platform": "Win", "DualRequest": "1",
+      "EventOrigin": "1", "id": "3cfd46d5-297c-413f-a75e-fcf8ab3bae24",
+      "EffectiveTransmissionClass": "3", "FirstIP4Record": "11.11.11.11",
+      "timestamp": "1756295094926", "LocalAddressIP4": "20.20.20.20",
+      "event_simpleName": "DnsRequest", "ContextTimeStamp": "1756295107.850",
+      "ConfigStateHash": "3973064497", "ContextProcessId": "60324656129",
+      "DomainName": "fp-afd.azurefd.net", "RespondingDnsServer": "40.40.40.40",
+      "ConfigBuild": "1007.3.0020006.15", "DnsRequestCount": "1",
+      "Entitlements": "15", "name": "DnsRequestV5", "ComputerName": "Test-PC",
+      "aid": "3dd1ca6a3428443399ccf1070a8b37e2", "cid":
+      "2cc98db1a47b4c98b913c94d43bfab70", "RequestType": "28"}'
+    result: null
+  - sample: '{"FileOperatorSid": "S-1-4-18", "ContextBaseFileName": "abc.exe",
+      "FileCategory": "6", "Size": "10284624", "ModuleCharacteristics": "34",
+      "ContextThreadId": "248921612527", "MinorFunction": "0", "aip":
+      "49.14.164.179", "IsOnNetwork": "0", "FileIdentifier":
+      "5cf3cfb451d67f43ba2c2a51a8fb10cbf411010000000b00", "event_platform":
+      "Win", "TokenType": "1", "OriginalFilename": "mini_installer.exe",
+      "ImageCheckSum": "10306457", "EventOrigin": "1",
+      "DiskParentDeviceInstanceId": "aiuhfrf", "ImageSubsystem": "2", "id":
+      "570156ed-dc8c-46ad-8d9f-91b57a7178db", "FileObject": "0",
+      "EffectiveTransmissionClass": "3", "timestamp": "1756295116394",
+      "LocalAddressIP4": "172.23.168.94", "event_simpleName": "PeFileWritten",
+      "ContextTimeStamp": "1756295176.875", "UserName": "demo-user",
+      "ConfigStateHash": "3973064497", "IsTransactedFile": "0",
+      "ContextProcessId": "60612242429", "IrpFlags": "0", "ImageEntryPoint":
+      "17632", "SHA256HashData":
+      "b6690ed4e4304a1258d610b4b50fd6b0a085f7ee50c0e195b6ea880b8131974b",
+      "AuthenticationId": "999", "ContextImageFileName":
+      "\\Device\\HarddiskVolume3\\Program Files (x86)\\abc.exe",
+      "FileWrittenFlags": "0", "ConfigBuild": "1007.3.0020006.15",
+      "FileEcpBitmask": "0", "MajorFunction": "0", "DllCharacteristics":
+      "49504", "IsOnRemovableDisk": "0", "ImageTimeStamp": "1756060583",
+      "Entitlements": "15", "name": "PeFileWrittenV22", "ComputerName":
+      "test-pc", "OperationFlags": "0", "Attacks": [{"Tactic": "Defense
+      Evasion", "Technique": "Masquerading"}], "aid":
+      "3dd1ca6a3428443399ccf1070a8b37e2", "cid":
+      "2cc98db1a47b4c98b913c94d43bfab70", "TargetFileName":
+      "\\Device\\HarddiskVolume3\\Program Files
+      (x86)\\{uhfirhfruihfr}\\139.0.3405.119\\abc.exe"}'
+    result: null
