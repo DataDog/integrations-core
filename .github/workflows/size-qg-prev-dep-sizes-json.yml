@@ -1,4 +1,4 @@
-name: Size Delta with Master (No Dependency Resolution)
+name: Size Delta with Master (No Dependency Resolution) # this is part of the size-quality-gates workflow
 
 on:   # only runs if there are no dependency changes
   pull_request:
@@ -121,6 +121,7 @@ jobs:
       - name: Join size diffs in order
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAX_COMMENT_SIZE: ${{ env.MAX_COMMENT_SIZE }}
         run: |
           BASE_SHA="${{ needs.get-merge-base.outputs.base_sha }}"
           BASE_SHORT="${BASE_SHA:0:7}"
@@ -131,7 +132,7 @@ jobs:
             gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
             cat "size_diffs_output_${p}.txt" >> comment.txt
           done
-          if [ $(wc -c < comment.txt) -gt 65536 ]; then
+          if [ $(wc -c < comment.txt) -gt $MAX_COMMENT_SIZE ]; then
             echo "<h3>Dependency Size Changes</h3>" > comment.txt
             echo >> comment.txt
             echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt

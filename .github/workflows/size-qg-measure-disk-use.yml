@@ -1,4 +1,4 @@
-name: Measure Disk Usage
+name: Measure Disk Usage # this is part of the size-quality-gates workflow
 
 on:
   workflow_call: # this is used by the resolve-build-deps and size-qg-prev-dep-sizes-json workflows 
