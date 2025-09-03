@@ -8,7 +8,6 @@ from zipfile import ZipFile
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
 
 
-
 def normalize_project_name(name: str) -> str:
     # https://peps.python.org/pep-0503/#normalized-names
     return UNNORMALIZED_PROJECT_NAME_CHARS.sub('-', name).lower()

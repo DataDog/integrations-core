@@ -107,7 +107,7 @@ jobs:
           echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
         env:
-          THRESHOLD: "51200" # 50KB
+          THRESHOLD: "51200" # 50KB; this variable is used to check if the diffs are within the size limit
 
       - name: Upload long size diffs output as artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
