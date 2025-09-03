@@ -214,7 +214,6 @@ pipeline:
       sourceType: attribute
       target: timestamp
       targetType: attribute
-      targetFormat: string
       preserveSource: true
       overrideOnConflict: false
     - type: date-remapper
@@ -249,16 +248,15 @@ pipeline:
       filter:
         query: "@type:(TRAFFIC OR THREAT)"
       processors:
-        - type: grok-parser
-          name: Parsing event time
+        - type: attribute-remapper
+          name: remap 'timestamp' to 'ocsf.time'
           enabled: true
-          source: time_generated
-          samples:
-            - "2025/08/25 17:15:02"
-          grok:
-            supportRules: ""
-            matchRules: |-
-              %{date("yyyy/MM/dd HH:mm:ss"):ocsf.time}
+          sources:
+            - timestamp
+          sourceType: attribute
+          target: ocsf.time
+          preserveSource: true
+          overrideOnConflict: false
         - type: attribute-remapper
           name: Sequence Number
           enabled: true
