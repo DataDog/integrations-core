@@ -82,6 +82,10 @@ coverage:
         target: 75
         flags:
         - azure_iot_edge
+      BentoML:
+        target: 75
+        flags:
+        - bentoml
       Boundary:
         target: 75
         flags:
@@ -880,6 +884,11 @@ flags:
     paths:
     - azure_iot_edge/datadog_checks/azure_iot_edge
     - azure_iot_edge/tests
+  bentoml:
+    carryforward: true
+    paths:
+    - bentoml/datadog_checks/bentoml
+    - bentoml/tests
   boundary:
     carryforward: true
     paths:
