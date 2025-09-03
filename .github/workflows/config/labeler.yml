@@ -707,6 +707,8 @@ integration/vault:
 - vault/**/*
 integration/velero:
 - velero/**/*
+integration/versa:
+- versa/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:
