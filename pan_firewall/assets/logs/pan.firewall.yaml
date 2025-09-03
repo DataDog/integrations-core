@@ -305,7 +305,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: '@type:"TRAFFIC"'
+        query: "@type:TRAFFIC"
       processors:
         - type: category-processor
           name: Category UID
