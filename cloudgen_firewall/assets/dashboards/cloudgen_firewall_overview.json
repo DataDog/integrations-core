@@ -6,7 +6,7 @@
             "id": 8481596997566296,
             "definition": {
                 "title": "Barracuda CloudGen Firewall",
-                "banner_img": "/api/v2/images/72076454-0aca-4881-a73b-ff421931b5dd",
+                "banner_img": "https://pmddatasolutions.com/wp-content/uploads/2024/05/Barracuda-CloudGen-Firewall.jpg",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -38,6 +38,7 @@
                             "title": "Total Log Volume",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -56,7 +57,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 100,
+                                            "palette": "green_on_white"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -85,7 +93,7 @@
             "id": 3307262473949039,
             "definition": {
                 "title": "Barracuda CloudGen Event Logs Overview",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -179,7 +187,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs"
+                                                "query": "source:barracuda_cloudgen_logs service:auth"
                                             },
                                             "indexes": [
                                                 "*"
@@ -438,7 +446,7 @@
             "definition": {
                 "title": "AUTH Access",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -538,6 +546,7 @@
                         "id": 6163932701500751,
                         "definition": {
                             "title": "List of Total loggedIn Users of Auth Access",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -545,7 +554,7 @@
                                         {
                                             "comparator": ">",
                                             "custom_bg_color": "#bc303c",
-                                            "palette": "custom_bg",
+                                            "palette": "white_on_green",
                                             "value": 0
                                         }
                                     ],
@@ -741,6 +750,7 @@
                             "title": "Most Recent Closed Sessions by Users",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -773,6 +783,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 10,
+                                            "palette": "white_on_red",
+                                            "custom_bg_color": "#83df81"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -818,7 +836,7 @@
             "definition": {
                 "title": "Events Operative",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -982,6 +1000,7 @@
                         "id": 2397698243403440,
                         "definition": {
                             "title": "Total Event Operative Log Types",
+                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -1035,7 +1054,7 @@
                             ],
                             "type": "sunburst",
                             "legend": {
-                                "type": "automatic"
+                                "type": "table"
                             }
                         },
                         "layout": {
@@ -1049,6 +1068,7 @@
                         "id": 8865262731006435,
                         "definition": {
                             "title": "Total Event Operative Users",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1075,7 +1095,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 1,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1095,6 +1122,7 @@
                         "id": 693544580792578,
                         "definition": {
                             "title": "Total Event Operative",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1120,7 +1148,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1140,6 +1175,7 @@
                         "id": 606712654946032,
                         "definition": {
                             "title": "Total Event Operative Errors",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1165,7 +1201,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1195,7 +1238,7 @@
             "definition": {
                 "title": "Event EventS",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1292,6 +1335,7 @@
                         "id": 6006424182454386,
                         "definition": {
                             "title": "Total Event EventS",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1317,7 +1361,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1337,6 +1388,7 @@
                         "id": 6858755923621318,
                         "definition": {
                             "title": "Total Event EventS Users",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1363,7 +1415,15 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 1,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#53b3ee"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1383,6 +1443,7 @@
                         "id": 3825388230206382,
                         "definition": {
                             "title": "Total Event EventS Errors",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1408,7 +1469,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "red_on_white"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1428,6 +1496,7 @@
                         "id": 8548391904007250,
                         "definition": {
                             "title": "Total Event EventS Insertions",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1453,7 +1522,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "green_on_white"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1550,7 +1626,7 @@
             "definition": {
                 "title": "Config Admin",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1847,7 +1923,7 @@
             "definition": {
                 "title": "Config Changes",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -2145,7 +2221,7 @@
             "definition": {
                 "title": "Config Daemon Download",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -2438,7 +2514,7 @@
             "definition": {
                 "title": "Config Sync",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -2731,7 +2807,7 @@
             "definition": {
                 "title": "Control Auth Service",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -3079,7 +3155,7 @@
             "definition": {
                 "title": "Firewall",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -3175,6 +3251,7 @@
                         "id": 6298016143378185,
                         "definition": {
                             "title": "Total Firewall Events",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -3200,7 +3277,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -3489,7 +3573,7 @@
             "definition": {
                 "title": "Firewall Activity",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -3851,7 +3935,7 @@
             "definition": {
                 "title": "Firewall IPSDownload",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -3948,6 +4032,7 @@
                         "id": 8594948327401931,
                         "definition": {
                             "title": "Total Firewall IPSDownload Events",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -3973,7 +4058,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -4264,7 +4356,7 @@
             "definition": {
                 "title": "Firewall Audit",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -4360,6 +4452,7 @@
                         "id": 4866645073801356,
                         "definition": {
                             "title": "Total Firewall Audit Events",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -4385,7 +4478,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -4407,6 +4507,7 @@
                             "title": "Top Firewall Audit IPs From Terminated Connections",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -4439,6 +4540,13 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -4608,7 +4716,7 @@
             "definition": {
                 "title": "Firewall Auditop",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -4704,6 +4812,7 @@
                         "id": 1934336919821338,
                         "definition": {
                             "title": "Total Firewall Auditop Events",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -4729,7 +4838,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -4952,7 +5068,7 @@
             "definition": {
                 "title": "Firewall Threat",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -5048,6 +5164,7 @@
                         "id": 6146534596177142,
                         "definition": {
                             "title": "Total Firewall Threat Events",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -5073,7 +5190,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -5295,7 +5419,7 @@
             "definition": {
                 "title": "System Mgmaccess",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -5647,7 +5771,7 @@
             "definition": {
                 "title": "SSH Sshd",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -5927,7 +6051,7 @@
             "definition": {
                 "title": "SSH Config",
                 "title_align": "center",
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
