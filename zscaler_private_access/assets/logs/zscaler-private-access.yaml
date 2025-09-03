@@ -787,6 +787,40 @@ pipeline:
             146,Homa
             147,BIT-EMU
           type: lookup-processor
+        - type: attribute-remapper
+          name: Map `SourceIP` to `network.client.ip`
+          enabled: true
+          sources:
+            - SourceIP
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: GeoIp Parser for `network.client.ip`
+          enabled: true
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: App Connector or Private Service Edge or Private Cloud Controller Status
+      enabled: true
+      filter:
+        query: service:app-connector-status OR service:private-service-edge-status OR
+          service:private-cloud-controller-status
+      processors:
+        - type: attribute-remapper
+          name: Map `PublicIP` to `network.client.ip`
+          enabled: true
+          sources:
+            - PublicIP
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: geo-ip-parser
       name: GeoIp Parser for `network.client.ip`
       enabled: true

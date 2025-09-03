@@ -4,9 +4,21 @@
 
 The [Zscaler Private Access][4] (ZPA) service enables organizations to provide access to internal applications and services while ensuring the security of their networks. ZPA is an easier to deploy, more cost-effective, and more secure alternative to VPNs. Unlike VPNs, which require users to connect to your network to access your enterprise applications, ZPA allows you to give users policy-based secure access only to the internal apps they need to get their work done.
 
-The integration parses and ingests the following types of logs: User Activity, User Status, App Connector Metrics, App Connector Status, Private Service Edge Metrics, Private Service Edge Status, Browser Access, Audit Logs, AppProtection, Private Cloud Controller Status, Private Cloud Controller Metrics, Microsegmentation Flow.
+The integration parses and ingests the following types of logs:
+- User Activity
+- User Status
+- App Connector Metrics
+- App Connector Status
+- Private Service Edge Metrics
+- Private Service Edge Status
+- Browser Access
+- Audit Logs
+- AppProtection
+- Private Cloud Controller Status
+- Private Cloud Controller Metrics
+- Microsegmentation Flow.
 
-Visualize detailed insights into these logs with out-of-the-box dashboards. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules and Monitors for enhanced monitoring and security.
+Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Visualize detailed insights into these logs with out-of-the-box dashboards. Additionally, the integration includes ready-to-use Cloud SIEM detection rules and monitors for enhanced monitoring and security.
 
 ## Setup
 
@@ -48,21 +60,21 @@ sudo -u dd-agent -- datadog-agent integration install datadog-zscaler_private_ac
 
 3. [Restart the Agent][1].
 
-### Configure log receiver from Zscaler Private Access
+#### Configure log receiver from Zscaler Private Access
 
 1. Sign in to the Zscaler Private Access (ZPA) Admin Portal.
-2. Go to **Configuration & Control > Private Infrastructure > Log Streaming Service > Log Receivers**.
-3. Select **Add Log Receiver**.
+2. Go to **Configuration & Control > Private Infrastructure > LOG STREAMING SERVICE > Log Receivers**.
+3. Click **Add**.
 4. In the **Log Receiver** tab, configure the following:
     - **Name**: Provide a name for the log receiver.
     - **Domain or IP Address**: Enter the public IP or hostname of the Datadog Agent that will receive the logs.
     - **TCP Port**: Specify an open port on the Datadog Agent for receiving ZPA logs.
     - **TLS Encryption**: Keep it disabled.
-    - **App Connector Groups**: Choose the relevant App Connector groups.
+    - **App Connector Groups**: Choose the App Connector groups that can forward logs to the receiver.
 5. Click **Next**.
 6. In the **Log Stream** tab:
     - **Log Type**: Select from the below supported log types.
-      > Note: Create a separate log receiver for each log type you want to stream to Datadog.
+      > Note: Create a separate log receiver for each log type.
       - User Activity
       - User Status
       - App Connector Metrics
@@ -76,11 +88,11 @@ sudo -u dd-agent -- datadog-agent integration install datadog-zscaler_private_ac
       - Private Cloud Controller Metrics
       - Microsegmentation Flow
     - **Log Template**: Choose **Custom**.
-    - **Log Stream Content**: For each selected log type, paste the provided custom log format from **Log Formats**.
+    - **Log Stream Content**: For each selected log type, paste the provided custom log format from below **Log Formats** section.
 7. Click **Next**.
 8. Review your configuration on the **Review** tab and click **Save**.
 
-### Log Formats
+#### Log Formats
 For Zscaler Private Access integration, specific custom log formats must be configured for each supported log type. The required formats for each log type are outlined below.
 
    1. **User Activity Log**
@@ -156,11 +168,11 @@ The Zscaler Private Access integration collects and forwards User Activity, User
 
 ### Metrics
 
-Zscaler Private Access integration does not include any metrics.
+The Zscaler Private Access integration does not include any metrics.
 
 ### Events
 
-Zscaler Private Access integration does not include any events.
+The Zscaler Private Access integration does not include any events.
 
 ## Troubleshooting
 
@@ -216,4 +228,3 @@ For further assistance, contact [Datadog support][3].
 [4]: https://www.zscaler.com/products-and-solutions/zscaler-private-access
 [5]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
 [6]: https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/datadog_checks/zscaler_private_access/data/conf.yaml.example
-[7]: https://help.zscaler.com/zpa/configuring-log-receiver
