@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Windows Certificate Store Integration Dashboard\n\nThis is an example Windows Certificate Store dashboard demonstrating the information that the integration collects.",
+    "description": "## Windows Certificate Store Integration Dashboard\n\nThis is an example Windows Certificate Store dashboard demonstrating the information that the integration collects.\n\nFor further reading, see:\n\n- [Windows Certificate Store Integration Documentation](https://docs.datadoghq.com/integrations/windows-certificate/)",
     "layout_type": "ordered",
     "template_variables": [
         {
