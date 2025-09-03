@@ -7,9 +7,8 @@ import pytest
 import requests
 
 from datadog_checks.base.constants import ServiceCheck
-
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.bentoml import BentomlCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     ENDPOINT_METRICS,
