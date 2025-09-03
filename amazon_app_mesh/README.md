@@ -16,7 +16,7 @@ Use the instructions below to enable metric collection for the AWS App Mesh prox
 
 1. Due to limitations in App Mesh, forwarding metrics from EKS to Datadog requires the Egress filter to be set to `Allow External Traffic`.
 
-2. Create a ConfigMap in your cluster to automatically discover App Mesh’s Envoy side cars that are added to each pod:
+2. Create a ConfigMap in your cluster to automatically discover App Mesh's Envoy side cars that are added to each pod:
 
     ```yaml
       apiVersion: v1
@@ -34,7 +34,7 @@ Use the instructions below to enable metric collection for the AWS App Mesh prox
             - <TAG_KEY>:<TAG_VALUE>  # Example - cluster:eks-appmesh
     ```
 
-3. Update the `volumeMounts` object in your Datadog Agent’s DaemonSet YAML file:
+3. Update the `volumeMounts` object in your Datadog Agent's DaemonSet YAML file:
 
     ```yaml
           volumeMounts:
@@ -42,7 +42,7 @@ Use the instructions below to enable metric collection for the AWS App Mesh prox
              mountPath: /conf.d
     ```
 
-4. Update the `volumes` object in your Datadog Agent’s DaemonSet YAML file:
+4. Update the `volumes` object in your Datadog Agent's DaemonSet YAML file:
 
     ```yaml
          volumes:
