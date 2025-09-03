@@ -67,7 +67,7 @@ partial -->
 <!-- partial
 {{< site-region region="us,eu,gov" >}}
 
-To enable log collection, update the Agent’s DaemonSet with the dedicated [Kubernetes log collection instructions][1].
+To enable log collection, update the Agent's DaemonSet with the dedicated [Kubernetes log collection instructions][1].
 
 [1]: https://docs.datadoghq.com/integrations/ecs_fargate/#log-collection
 
