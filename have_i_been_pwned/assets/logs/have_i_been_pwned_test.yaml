@@ -1,0 +1,33 @@
+id: have-i-been-pwned
+tests:
+  - sample: |-
+      {
+              "Name": "OperationEndgame2",
+              "Title": "Operation Endgame 2.0",
+              "Domain": "xyz",
+              "BreachDate": "2025-05-23",
+              "AddedDate": "2025-05-23T20:47:34Z",
+              "ModifiedDate": "2025-05-25T21:41:13Z",
+              "PwnCount": 15436844,
+              "Description": "Description here...",
+              "LogoPath": "https://logos.haveibeenpwned.com/List.png",
+              "Attribution": None,
+              "DataClasses": [
+                  "Email addresses",
+                  "Passwords"
+              ],
+              "IsVerified": True,
+              "IsFabricated": False,
+              "IsSensitive": False,
+              "IsRetired": False,
+              "IsSpamList": False,
+              "IsMalware": True,
+              "IsSubscriptionFree": True,
+              "IsStealerLog": False,
+              "user_details": {
+                  "user_name": "john.munro",
+                  "email_domain": "example.com",
+                  "hash_id": "10"
+              }
+          }
+    result: null
