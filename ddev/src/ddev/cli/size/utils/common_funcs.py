@@ -118,6 +118,7 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
 
 
 def is_correct_dependency(platform: str, version: str, name: str) -> bool:
+    # The name of the dependency file is in the format of {platform}_{version} e.g. linux-aarch64_3.12.txt
     return platform in name and version in name.split('_')[-1]
 
 
