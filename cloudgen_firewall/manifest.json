@@ -8,8 +8,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "CloudGen Firewall is a NGFW that protect networks and Internet traffic",
-    "title": "cloudgen_firewall",
+    "description": "Barracuda CloudGen Firewall is a NGFW that protect networks and Internet traffic",
+    "title": "Barracuda CloudGen Firewall",
     "media": [
       {
         "media_type": "image",
