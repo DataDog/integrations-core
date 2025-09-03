@@ -238,25 +238,17 @@ pipeline:
       filter:
         query: "@type:(TRAFFIC OR THREAT)"
       processors:
-        - type: grok-parser
+        - type: attribute-remapper
           name: Parsing event time
           enabled: true
-          source: 
-            - time_generated
-          samples:
-            - "2025/08/25 17:15:02"
-          grok:
-            supportRules: ""
-            matchRules: |-
-              eight %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSSS"):ocsf.time}
-              seven %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSSS"):ocsf.time}
-              six %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSSS"):ocsf.time}
-              five %{date("yyyy/MM/dd' 'HH:mm:ss.SSSSS"):ocsf.time}
-              four %{date("yyyy/MM/dd' 'HH:mm:ss.SSSS"):ocsf.time}
-              three %{date("yyyy/MM/dd' 'HH:mm:ss.SSS"):ocsf.time}
-              two %{date("yyyy/MM/dd' 'HH:mm:ss.SS"):ocsf.time}
-              one %{date("yyyy/MM/dd' 'HH:mm:ss.S"):ocsf.time}
-              zero %{date("yyyy/MM/dd' 'HH:mm:ss"):ocsf.time}
+          sources:
+            - timestamp
+          sourceType: attribute
+          target: ocsf.time
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: false
         - type: attribute-remapper
           name: Sequence Number
           enabled: true
@@ -743,10 +735,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: add 'ocsf.finding_info.evidence.file.type_id'
+          name: add 'ocsf.evidence.file.type_id'
           enabled: true
           template: "0"
-          target: ocsf.finding_info.evidence.file.type_id
+          target: ocsf.evidence.file.type_id
           replaceMissing: false
         - type: attribute-remapper
           name: remap 'rule_uuid' to 'ocsf.finding_info.analytic.uid'
@@ -887,7 +879,7 @@ pipeline:
           sources:
             - misc
           sourceType: attribute
-          target: ocsf.finding_info.evidence.url.path
+          target: ocsf.evidence.url.path
           targetType: attribute
           targetFormat: string
           preserveSource: true
@@ -900,12 +892,12 @@ pipeline:
         query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
       processors:
         - type: attribute-remapper
-          name: remap misc to ocsf.finding_info.evidence.file.name
+          name: remap misc to ocsf.evidence.file.name
           enabled: true
           sources:
             - misc
           sourceType: attribute
-          target: ocsf.finding_info.evidence.file.name
+          target: ocsf.evidence.file.name
           targetType: attribute
           targetFormat: string
           preserveSource: true
@@ -941,23 +933,23 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.finding_info.evidence.url.path to string
+          name: remap ocsf.evidence.url.path to string
           enabled: true
           sources:
-            - ocsf.finding_info.evidence.url.path
+            - ocsf.evidence.url.path
           sourceType: attribute
-          target: ocsf.finding_info.evidence.url.path
+          target: ocsf.evidence.url.path
           targetType: attribute
           targetFormat: string
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.finding_info.evidence.file.name to string
+          name: remap ocsf.evidence.file.name to string
           enabled: true
           sources:
-            - ocsf.finding_info.evidence.file.name
+            - ocsf.evidence.file.name
           sourceType: attribute
-          target: ocsf.finding_info.evidence.file.name
+          target: ocsf.evidence.file.name
           targetType: attribute
           targetFormat: string
           preserveSource: false
