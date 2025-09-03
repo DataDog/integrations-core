@@ -762,6 +762,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      datadog_csi_driver:
+        target: 75
+        flags:
+        - datadog_csi_driver
       dcgm:
         target: 75
         flags:
@@ -1009,6 +1013,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  datadog_csi_driver:
+    carryforward: true
+    paths:
+    - datadog_csi_driver/datadog_checks/datadog_csi_driver
+    - datadog_csi_driver/tests
   dcgm:
     carryforward: true
     paths:

@@ -44,6 +44,8 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /crio/manifest.json                             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /datadog_cluster_agent/                         @DataDog/container-integrations @DataDog/agent-integrations
 /datadog_cluster_agent/*.md                     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/datadog_csi_driver/                            @DataDog/container-platform @DataDog/agent-integrations
+/datadog_csi_driver/*.md                        @DataDog/container-platform @DataDog/agent-integrations @DataDog/documentation
 /datadog_operator/                              @DataDog/container-ecosystems @DataDog/agent-integrations
 /datadog_operator/*.md                          @DataDog/container-ecosystems @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                                 @DataDog/container-integrations @DataDog/agent-integrations
@@ -542,6 +544,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /box/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
 /box/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
 /box/assets/logs/                                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/jamf_pro/                                                          @DataDog/saas-integrations
+/jamf_pro/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/jamf_pro/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/jamf_pro/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /proofpoint_tap/                                                    @DataDog/saas-integrations
 /proofpoint_tap/*.md                                                @DataDog/saas-integrations @DataDog/documentation

@@ -183,6 +183,8 @@ integration/datadog_checks_tests_helper:
 - datadog_checks_tests_helper/**/*
 integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
+integration/datadog_csi_driver:
+- datadog_csi_driver/**/*
 integration/datadog_operator:
 - datadog_operator/**/*
 integration/dcgm:
@@ -329,6 +331,8 @@ integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
 integration/ivanti_nzta:
 - ivanti_nzta/**/*
+integration/jamf_pro:
+- jamf_pro/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -565,8 +569,6 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
-integration/servicenow_performance:
-- servicenow_performance/**/*
 integration/shopify:
 - shopify/**/*
 integration/sidekiq:

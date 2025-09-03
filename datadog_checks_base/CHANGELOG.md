@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 37.18.0 / 2025-08-29
+
+***Added***:
+
+* Add database Health class for sending DBM health events ([#20739](https://github.com/DataDog/integrations-core/pull/20739))
+
+## 37.17.1 / 2025-08-26
+
+***Fixed***:
+
+* Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
+
 ## 37.17.0 / 2025-08-07
 
 ***Added***:
@@ -12,7 +24,7 @@
 
 * Fixes deprecation warnings on isSet() usage in DBMAsyncJob ([#20947](https://github.com/DataDog/integrations-core/pull/20947))
 
-## 37.16.0 / 2025-07-10
+## 37.16.0 / 2025-07-10 / Agent 7.69.0
 
 ***Added***:
 

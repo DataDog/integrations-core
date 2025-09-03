@@ -12,7 +12,7 @@
 
 * Lift `pymqi` dependency exclusion for macOS on AArch64/ARM64 ([#20815](https://github.com/DataDog/integrations-core/pull/20815))
 
-## 8.3.0 / 2025-07-10
+## 8.3.0 / 2025-07-10 / Agent 7.69.0
 
 ***Added***:
 

@@ -76,9 +76,9 @@ RUN \
 
 # libxml & libxslt for lxml
 RUN \
- DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
- VERSION="2.12.6" \
- SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.14/libxml2-{{version}}.tar.xz" \
+ VERSION="2.14.5" \
+ SHA256="03d006f3537616833c16c53addcdc32a0eb20e55443cba4038307e3fa7d8d44b" \
  RELATIVE_PATH="libxml2-{{version}}" \
  bash install-from-source.sh \
  --without-iconv \
@@ -94,8 +94,8 @@ RUN \
 
 RUN \
  DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
- VERSION="1.1.39" \
- SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
+ VERSION="1.1.43" \
+ SHA256="5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a" \
  RELATIVE_PATH="libxslt-{{version}}" \
  bash install-from-source.sh \
  --without-python \
