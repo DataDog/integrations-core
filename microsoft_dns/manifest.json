@@ -30,6 +30,16 @@
         "caption": "Microsoft DNS - Overview 4",
         "image_url": "images/microsoft_dns_overview_4.png",
         "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 5",
+        "image_url": "images/microsoft_dns_overview_5.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 6",
+        "image_url": "images/microsoft_dns_overview_6.png",
+        "media_type": "image"
       }
     ],
     "classifier_tags": [

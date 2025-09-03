@@ -52,7 +52,7 @@ class MySQLMetadata(DBMAsyncJob):
         self._databases_data_collection_interval = config.schemas_config.get(
             "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
         )
-        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
+        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
 
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)

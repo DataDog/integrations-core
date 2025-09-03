@@ -20,13 +20,7 @@ This integration collects Mac audit logs and sends them to Datadog for analysis,
 
 ### Installation
 
-To install the Mac Audit Logs integration, run the following Agent installation command and follow the steps below. For more information, see the [Integration Management][4] documentation.
-
-For Mac, run:
-  ```shell
-  sudo datadog-agent integration install datadog-mac-audit-logs==1.0.0
-  ```
-
+The Mac Audit Logs check is included in the [Datadog Agent][4] package, so you don't need to install anything else on your Mac.
 
 ### Configuration
 
@@ -102,7 +96,7 @@ Need help? Contact [Datadog support][8].
 [1]: https://www.apple.com/mac/
 [2]: https://docs.datadoghq.com/logs/explorer/
 [3]: https://www.datadoghq.com/product/cloud-siem/
-[4]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
+[4]: /account/settings/agent/latest
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/mac_audit_logs/datadog_checks/mac_audit_logs/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

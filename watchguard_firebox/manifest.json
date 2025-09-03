@@ -27,8 +27,13 @@
         "media_type": "image"
       },
       {
-        "caption": "WatchGuard Firebox - Proxy Policy",
-        "image_url": "images/watchguard_firebox_proxy_policy.png",
+        "caption": "WatchGuard Firebox - Proxy Policy 1",
+        "image_url": "images/watchguard_firebox_proxy_policy_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "WatchGuard Firebox - Proxy Policy 2",
+        "image_url": "images/watchguard_firebox_proxy_policy_2.png",
         "media_type": "image"
       },
       {

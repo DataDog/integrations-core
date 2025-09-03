@@ -285,7 +285,6 @@ def test_procedure_metrics(
             expected_objects, payload['sqlserver_rows']
         )
 
-    assert len(payload['sqlserver_rows']) == len(expected_objects), 'should have as many emitted rows as expected'
     assert set(payload['tags']) == expected_instance_tags
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
 

@@ -395,7 +395,7 @@ files:
                   Enable collection of performance_schema.global_variables. Requires `dbm: true`.
                 value:
                   type: boolean
-                  example: false
+                  example: true
               - name: collection_interval
                 description: |
                   Set the database settings collection interval (in seconds). Each collection involves a single query to
