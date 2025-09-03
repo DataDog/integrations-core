@@ -1,7 +1,7 @@
 {
 	"version": 2,
-	"created_at": "2025-09-03T19:07:31.269",
-	"last_updated_at": "2025-09-03T19:07:31.269",
+	"created_at": "2025-09-03",
+	"last_updated_at": "2025-09-03",
 	"title": "App connector low available disk space",
 	"description": "This monitor triggers an alert when the App connector's available disk space falls at or below 100 bytes, which may compromise system stability and logging, and can affect the processing of user connections in a reliable manner.",
 	"definition": {
