@@ -62,8 +62,9 @@ class KafkaCheck(AgentCheck):
         broker_timestamps = defaultdict(dict)
         cluster_id = ""
         persistent_cache_key = "broker_timestamps_"
+        consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            if len(consumer_offsets) < self._context_limit:
+            if consumer_contexts_count < self._context_limit:
                 # Fetch highwater offsets
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
@@ -80,7 +81,7 @@ class KafkaCheck(AgentCheck):
                 self.client.close_admin_client()
             raise
 
-        total_contexts = sum(len(v) for v in consumer_offsets.values()) + len(highwater_offsets)
+        total_contexts = consumer_contexts_count + len(highwater_offsets)
         self.log.debug(
             "Total contexts: %s, Consumer offsets: %s, Highwater offsets: %s",
             total_contexts,
@@ -107,6 +108,9 @@ class KafkaCheck(AgentCheck):
         self.data_streams_live_message(highwater_offsets or {}, cluster_id)
         if self.config._close_admin_client:
             self.client.close_admin_client()
+
+    def count_consumer_contexts(self, consumer_offsets):
+        return sum(len(offsets) for offsets in consumer_offsets.values())
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
