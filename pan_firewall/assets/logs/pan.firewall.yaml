@@ -869,13 +869,14 @@ pipeline:
     - type: pipeline
       name: misc field URL extraction
       enabled: true
-      isOcsf: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@type:THREAT @misc:* @subtype:url"
       processors:
         - type: attribute-remapper
           name: URL extraction
           enabled: true
-          filter:
-            query: "@misc:* @subtype:url"
           sources:
             - misc
           sourceType: attribute
@@ -887,9 +888,10 @@ pipeline:
     - type: pipeline
       name: misc field filename extraction
       enabled: true
-      isOcsf: true
+      ocsf:
+        isOcsf: true
       filter:
-        query: "@misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
+        query: "@type:THREAT @misc:* @subtype:(file OR virus OR wildire-virus OR wildfire)"
       processors:
         - type: attribute-remapper
           name: remap misc to ocsf.evidence.file.name
