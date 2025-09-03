@@ -71,6 +71,9 @@ SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_ro
 FROM information_schema.replica_host_status
 WHERE server_id = @@aurora_server_id"""
 
+SQL_TIDB_VERSION = """\
+SELECT VERSION()"""
+
 SQL_GROUP_REPLICATION_MEMBER = """\
 SELECT channel_name, member_state
 FROM performance_schema.replication_group_members
