@@ -191,7 +191,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Palo Alto Networks Firewall
+  name: "[OCSF] Palo Alto Networks Firewall"
   enabled: true
   filter:
     query: source:pan.firewall
