@@ -100,7 +100,7 @@
                     {
                         "definition": {
                             "background_color": "yellow",
-                            "content": "Included service check:\n\n* `windows_certificate.cert_expiration` - Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`, returns `WARNING` if the certificate expires in less than `days_warning`, otherwise returns `OK`.",
+                            "content": "Included service check:\n\n* `windows_certificate.cert_expiration` - Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`, returns `WARNING` if the certificate expires in less than `days_warning`. Otherwise returns `OK`.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
