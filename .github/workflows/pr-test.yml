@@ -95,6 +95,7 @@ jobs:
   save-event:
     needs:
     - test
+    - test-minimum-base-package
     if: success() || failure()
 
     uses: ./.github/workflows/save-event.yml
@@ -102,6 +103,7 @@ jobs:
   submit-traces:
     needs:
     - test
+    - test-minimum-base-package
     if: inputs.repo == 'core' && (success() || failure()) && github.event.pull_request.head.repo.full_name == github.repository
 
     uses: ./.github/workflows/submit-traces.yml
@@ -110,6 +112,7 @@ jobs:
   upload-coverage:
     needs:
     - test
+    - test-minimum-base-package
     if: >
       !github.event.repository.private &&
       (success() || failure()) &&
@@ -140,6 +143,7 @@ jobs:
   check:
     needs:
     - test
+    - test-minimum-base-package
     # In integrations-core and integrations-extras repos the tests are flaky enough that
     # it would be a pain to merge PRs with the Merge Queue enabled.
     # While we work on the tests, we skip the job if it's triggered by Merge Queue.
@@ -152,4 +156,4 @@ jobs:
       uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
       with:
         jobs: ${{ toJSON(needs) }}
-        allowed-skips: test
+        allowed-skips: test, test-minimum-base-package
