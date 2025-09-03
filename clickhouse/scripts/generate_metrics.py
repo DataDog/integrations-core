@@ -261,6 +261,7 @@ def generate_queries(template: Template, metrics: Iterable[ClickhouseMetric]):
 
 
 def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
+    MAX_LENGTH = 400
     FILE_HEADERS = [
         'metric_name',
         'metric_type',
@@ -276,11 +277,16 @@ def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
     ]
     metadata = []
 
+    def shorten_description(description: str) -> str:
+        if len(description) > MAX_LENGTH:
+            return description[: MAX_LENGTH - 3] + '...'
+        return description
+
     def add_metadata(metric: ClickhouseMetric, metric_type: str, metric_postfix: str = ''):
         meta = dict.fromkeys(FILE_HEADERS, '')
         meta['metric_name'] = metric.integration_name(postfix=metric_postfix)
         meta['metric_type'] = metric_type
-        meta['description'] = metric.description
+        meta['description'] = shorten_description(metric.description)
         meta['orientation'] = 0
         meta['integration'] = INTEGRATION_NAME
         meta['unit_name'] = metric.unit_name()
