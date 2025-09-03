@@ -1,9 +1,9 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: sleep-pipeline
+  name: bye-pipeline
 spec:
   tasks:
-    - name: sleep-task
+    - name: bye-task
       taskRef:
-        name: sleep
+        name: bye
