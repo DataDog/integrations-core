@@ -1,8 +1,35 @@
 id: "have-i-been-pwned"
 tests:
-  - sample: |-
-      {"Name":"OperationEndgame2","Title":"Operation Endgame 2.0","Domain":"xyz","BreachDate":"2025-05-23","AddedDate":"2025-05-23T20:47:34Z","ModifiedDate":"2025-05-25T21:41:13Z","PwnCount":15436844,"Description":"Description here...","LogoPath":"https://logos.haveibeenpwned.com/List.png","Attribution":null,"DataClasses":["Email addresses","Passwords"],"IsVerified":true,"IsFabricated":false,"IsSensitive":false,"IsRetired":false,"IsSpamList":false,"IsMalware":true,"IsSubscriptionFree":true,"IsStealerLog":false,"user_details":{"user_name":"john.munro","email_domain":"example.com","hash_id":"10"}}
-    result:
+ -
+  sample: |-
+    {
+      "LogoPath" : "https://logos.haveibeenpwned.com/List.png",
+      "Description" : "Description here...",
+      "IsSpamList" : false,
+      "user_details" : {
+        "user_name" : "john.munro",
+        "email_domain" : "example.com",
+        "hash_id" : "10"
+      },
+      "IsSensitive" : false,
+      "IsRetired" : false,
+      "Title" : "Operation Endgame 2.0",
+      "IsStealerLog" : false,
+      "ModifiedDate" : "2025-05-25T21:41:13Z",
+      "Name" : "OperationEndgame2",
+      "IsFabricated" : false,
+      "AddedDate" : "2025-05-23T20:47:34Z",
+      "IsMalware" : true,
+      "PwnCount" : 15436844,
+      "BreachDate" : "2025-05-23",
+      "IsVerified" : true,
+      "IsSubscriptionFree" : true,
+      "Domain" : "xyz",
+      "DataClasses" : [ "Email addresses", "Passwords" ]
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
     custom:
       AddedDate: "2025-05-23T20:47:34Z"
       BreachDate: "2025-05-23"
@@ -31,4 +58,5 @@ tests:
         name: "john.munro"
     message: "Description here..."
     tags:
+     - "source:LOGS_SOURCE"
      - "source:LOGS_SOURCE"
