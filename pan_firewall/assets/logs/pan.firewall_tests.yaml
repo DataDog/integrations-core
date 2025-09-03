@@ -1,7 +1,7 @@
 id: "pan.firewall"
 tests:
  -
-  sample: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+  sample: "timestamp=2025/08/25T17:15:02.982Z, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
   result:
     custom:
       actionflags: "0xa0000 00000000000"
@@ -32,7 +32,7 @@ tests:
       vsys: "testVM"
       vsys_id: 786
       vsys_name: "JVM"
-    message: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+    message: "timestamp=2025/08/25T17:15:02.982Z, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -424,7 +424,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1
  -
-  sample: "timestamp=2025/08/25 17:15:02, serial=023001016210, type=TRAFFIC, subtype=end, time_generated=2025/08/25 17:15:02, network.client.ip=10.160.20.45, network.destination.ip=192.168.1.1, natsrc=0.0.0.0, natdst=0.0.0.0, rule=allow vm new dc-1, usr.id=test_user, dstuser=, app=incomplete, vsys=vsys1, from=dcglobalprotect, to=dclan2lan, inbound_if=tunnel, outbound_if=ae1.190, logset=default, sessionid=136240, repeatcnt=1, network.client.port=59065, network.destination.port=8013, natsport=0, natdport=0, flags=0x19, proto=tcp, evt.name=allow, bytes=140, network.bytes_read=140, network.bytes_written=0, start=2025/08/25 17:14:58, elapsed=1, category=any, seqno=7519553924936159600, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=192.168.0.0-192.168.255.255, pkts_sent=2, pkts_received=0, session_end_reason=aged-out, device_name=test_device, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0, chunks_sent=0, chunks_received=0"
+  sample: "timestamp=2025/08/25T17:15:02.982Z, serial=023001016210, type=TRAFFIC, subtype=end, time_generated=2025/08/25 17:15:02, network.client.ip=10.160.20.45, network.destination.ip=192.168.1.1, natsrc=0.0.0.0, natdst=0.0.0.0, rule=allow vm new dc-1, usr.id=test_user, dstuser=, app=incomplete, vsys=vsys1, from=dcglobalprotect, to=dclan2lan, inbound_if=tunnel, outbound_if=ae1.190, logset=default, sessionid=136240, repeatcnt=1, network.client.port=59065, network.destination.port=8013, natsport=0, natdport=0, flags=0x19, proto=tcp, evt.name=allow, bytes=140, network.bytes_read=140, network.bytes_written=0, start=2025/08/25 17:14:58, elapsed=1, category=any, seqno=7519553924936159600, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=192.168.0.0-192.168.255.255, pkts_sent=2, pkts_received=0, session_end_reason=aged-out, device_name=test_device, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0, chunks_sent=0, chunks_received=0"
   result:
     custom:
       action_source: "from-policy"
@@ -513,7 +513,7 @@ tests:
       usr:
         id: "test_user"
       vsys: "vsys1"
-    message: "timestamp=2025/08/25 17:15:02, serial=023001016210, type=TRAFFIC, subtype=end, time_generated=2025/08/25 17:15:02, network.client.ip=10.160.20.45, network.destination.ip=192.168.1.1, natsrc=0.0.0.0, natdst=0.0.0.0, rule=allow vm new dc-1, usr.id=test_user, dstuser=, app=incomplete, vsys=vsys1, from=dcglobalprotect, to=dclan2lan, inbound_if=tunnel, outbound_if=ae1.190, logset=default, sessionid=136240, repeatcnt=1, network.client.port=59065, network.destination.port=8013, natsport=0, natdport=0, flags=0x19, proto=tcp, evt.name=allow, bytes=140, network.bytes_read=140, network.bytes_written=0, start=2025/08/25 17:14:58, elapsed=1, category=any, seqno=7519553924936159600, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=192.168.0.0-192.168.255.255, pkts_sent=2, pkts_received=0, session_end_reason=aged-out, device_name=test_device, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0, chunks_sent=0, chunks_received=0"
+    message: "timestamp=2025/08/25T17:15:02.982Z, serial=023001016210, type=TRAFFIC, subtype=end, time_generated=2025/08/25 17:15:02, network.client.ip=10.160.20.45, network.destination.ip=192.168.1.1, natsrc=0.0.0.0, natdst=0.0.0.0, rule=allow vm new dc-1, usr.id=test_user, dstuser=, app=incomplete, vsys=vsys1, from=dcglobalprotect, to=dclan2lan, inbound_if=tunnel, outbound_if=ae1.190, logset=default, sessionid=136240, repeatcnt=1, network.client.port=59065, network.destination.port=8013, natsport=0, natdport=0, flags=0x19, proto=tcp, evt.name=allow, bytes=140, network.bytes_read=140, network.bytes_written=0, start=2025/08/25 17:14:58, elapsed=1, category=any, seqno=7519553924936159600, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=192.168.0.0-192.168.255.255, pkts_sent=2, pkts_received=0, session_end_reason=aged-out, device_name=test_device, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0, chunks_sent=0, chunks_received=0"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
