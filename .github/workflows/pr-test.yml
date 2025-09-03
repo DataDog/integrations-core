@@ -72,7 +72,7 @@ jobs:
 
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: "${{ matrix.name }}"
+      job-name: "minimum-base-package-${{ matrix.name }}"
       target: "${{ matrix.target }}"
       target-env: "${{ matrix.target-env }}"
       platform: "${{ matrix.platform }}"
