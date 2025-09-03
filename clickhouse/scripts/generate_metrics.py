@@ -32,8 +32,7 @@ PREFIX_ASYNC_METRICS = 'ClickHouseAsyncMetrics'
 METRIC_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)"\)\s*\\?')
 METRIC_TYPE_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)",\s*(?P<type>[\w:]+)\)\s*\\?')
 ASYNC_METRICS_PATTERN = re.compile(
-    r'new_values\["(?P<metric>[\w.]+)"\]\s*=\s*\{.*,\s*(?P<description>"[^}]*")*?\s*(?:\w+\s*)?\}',
-    re.MULTILINE
+    r'new_values\["(?P<metric>[\w.]+)"\]\s*=\s*\{.*,\s*(?P<description>"[^}]*")*?\s*(?:\w+\s*)?\}', re.MULTILINE
 )
 
 RAW_SRC_URL = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/'
@@ -66,15 +65,18 @@ VALUE_TYPE_POSTFIX_24_8 = {
     'Nanoseconds': VALUE_TYPE_NANOSECONDS,
 }
 
+
 class MetricKind(StrEnum):
     ASYNC_METRICS = 'async_metrics'
     METRICS = 'metrics'
     EVENTS = 'events'
 
+
 @dataclass
 class Template:
     source_path: str
     target_path: str
+
 
 @dataclass
 class MetricsGenerator:
@@ -85,33 +87,36 @@ class MetricsGenerator:
 
 class Templates(Enum):
     QUERY_ASYNC_METRICS = Template(
-        source_path='system_async_metrics.py',
+        source_path='system_async_metrics.tpl',
         target_path=os.path.join(QUERIES_DIR, 'system_async_metrics.py'),
     )
     QUERY_EVENTS = Template(
-        source_path='system_events.py',
+        source_path='system_events.tpl',
         target_path=os.path.join(QUERIES_DIR, 'system_events.py'),
     )
     QUERY_METRICS = Template(
-        source_path='system_metrics.py',
+        source_path='system_metrics.tpl',
         target_path=os.path.join(QUERIES_DIR, 'system_metrics.py'),
     )
     TESTS_METRICS = Template(
-        source_path='metrics.py',
+        source_path='metrics.tpl',
         target_path=os.path.join(TESTS_DIR, 'metrics.py'),
     )
 
 
-def indent_line(string: str, indent: int=4) -> str:
+def indent_line(string: str, indent: int = 4) -> str:
     return ' ' * indent + string
+
 
 def read_file(file, encoding='utf-8'):
     with open(file, 'r', encoding=encoding) as f:
         return f.read()
 
+
 def write_file(file, contents, encoding='utf-8'):
     with open(file, 'w', encoding=encoding) as f:
         f.write(contents)
+
 
 def generate_queries_file(template: Template, config: dict):
     source_path = os.path.join(TEMPLATES_DIR, template.source_path)
@@ -241,6 +246,7 @@ def fetch_async_metrics(version: str) -> dict[str, ClickhouseMetric]:
 
     return result
 
+
 def generate_queries(template: Template, metrics: Iterable[ClickhouseMetric]):
     config = {
         'items': ',\n'.join(indent_line(metric.get_query_item(), 16) for metric in sorted(metrics)),
@@ -311,7 +317,6 @@ class CalculatedMetrics:
     def get_common_metrics(self) -> list[str]:
         return list(self.get_metrics_names(self.common))
 
-
     def get_versioned_metrics(self) -> dict[str, set[str]]:
         result = {}
         for version, metrics in self.unique.items():
@@ -362,7 +367,6 @@ def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
 
 
 def generate_test_data(metrics_data: list[CalculatedMetrics]):
-
     def printable_array(array: list, indent: int = 4) -> str:
         return pprint.pformat(sorted(array), indent=indent)
 
@@ -483,6 +487,7 @@ def main():
     )
     _ = parser.parse_args()
     generate()
+
 
 if __name__ == '__main__':
     main()

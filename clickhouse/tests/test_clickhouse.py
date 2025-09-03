@@ -20,11 +20,7 @@ def test_check(aggregator, instance, dd_run_check):
     metrics = get_metrics(CLICKHOUSE_VERSION)
 
     for metric in metrics:
-        aggregator.assert_metric_has_tags(
-            metric,
-            [port_tag, server_tag, 'db:default', 'foo:bar'],
-            at_least=1
-        )
+        aggregator.assert_metric_has_tags(metric, [port_tag, server_tag, 'db:default', 'foo:bar'], at_least=1)
 
     for metric in get_optional_metrics(CLICKHOUSE_VERSION):
         aggregator.assert_metric(metric, at_least=0)

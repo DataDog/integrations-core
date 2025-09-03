@@ -11,7 +11,8 @@
 # metrics take a while to show up and others we cannot trigger.
 # Additionally, these are metrics that are present across all versions
 # we support (24.8, 25.3, 25.5, 25.6, 25.7).
-BASE_METRICS = [   'clickhouse.ClickHouseMetrics_ActiveTimersInQueryProfiler',
+BASE_METRICS = [
+    'clickhouse.ClickHouseMetrics_ActiveTimersInQueryProfiler',
     'clickhouse.ClickHouseMetrics_AddressesActive',
     'clickhouse.ClickHouseMetrics_AddressesBanned',
     'clickhouse.ClickHouseMetrics_AggregatorThreads',
@@ -298,10 +299,12 @@ BASE_METRICS = [   'clickhouse.ClickHouseMetrics_ActiveTimersInQueryProfiler',
     'clickhouse.ClickHouseMetrics_Write',
     'clickhouse.ClickHouseMetrics_ZooKeeperRequest',
     'clickhouse.ClickHouseMetrics_ZooKeeperSession',
-    'clickhouse.ClickHouseMetrics_ZooKeeperWatch']
+    'clickhouse.ClickHouseMetrics_ZooKeeperWatch',
+]
 
 # These are the metrics that are not always available
-OPTIONAL_METRICS = [   'clickhouse.ClickHouseAsyncMetrics_AsynchronousHeavyMetricsCalculationTimeSpent',
+OPTIONAL_METRICS = [
+    'clickhouse.ClickHouseAsyncMetrics_AsynchronousHeavyMetricsCalculationTimeSpent',
     'clickhouse.ClickHouseAsyncMetrics_AsynchronousHeavyMetricsUpdateInterval',
     'clickhouse.ClickHouseAsyncMetrics_AsynchronousMetricsCalculationTimeSpent',
     'clickhouse.ClickHouseAsyncMetrics_AsynchronousMetricsUpdateInterval',
@@ -1585,9 +1588,11 @@ OPTIONAL_METRICS = [   'clickhouse.ClickHouseAsyncMetrics_AsynchronousHeavyMetri
     'clickhouse.ClickHouseProfileEvents_ZooKeeperUserExceptions.total',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperWaitMicroseconds',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperWatchResponse.count',
-    'clickhouse.ClickHouseProfileEvents_ZooKeeperWatchResponse.total']
+    'clickhouse.ClickHouseProfileEvents_ZooKeeperWatchResponse.total',
+]
 
-V_24_8_METRICS = [   'clickhouse.ClickHouseMetrics_DWARFReaderThreads',
+V_24_8_METRICS = [
+    'clickhouse.ClickHouseMetrics_DWARFReaderThreads',
     'clickhouse.ClickHouseMetrics_DWARFReaderThreadsActive',
     'clickhouse.ClickHouseMetrics_DWARFReaderThreadsScheduled',
     'clickhouse.ClickHouseMetrics_DiskPlainRewritableAzureUniqueFileNamesCount',
@@ -1598,9 +1603,11 @@ V_24_8_METRICS = [   'clickhouse.ClickHouseMetrics_DWARFReaderThreads',
     'clickhouse.ClickHouseMetrics_ParallelParsingInputFormatThreadsScheduled',
     'clickhouse.ClickHouseMetrics_ParquetDecoderThreads',
     'clickhouse.ClickHouseMetrics_ParquetDecoderThreadsActive',
-    'clickhouse.ClickHouseMetrics_ParquetDecoderThreadsScheduled']
+    'clickhouse.ClickHouseMetrics_ParquetDecoderThreadsScheduled',
+]
 
-V_25_3_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
+V_25_3_METRICS = [
+    'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_BuildVectorSimilarityIndexThreads',
     'clickhouse.ClickHouseMetrics_BuildVectorSimilarityIndexThreadsActive',
     'clickhouse.ClickHouseMetrics_BuildVectorSimilarityIndexThreadsScheduled',
@@ -1670,9 +1677,11 @@ V_25_3_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_SharedCatalogStateApplicationThreadsScheduled',
     'clickhouse.ClickHouseMetrics_SharedDatabaseCatalogTablesInLocalDropDetachQueue',
     'clickhouse.ClickHouseMetrics_StartupScriptsExecutionState',
-    'clickhouse.ClickHouseMetrics_TemporaryFilesForMerge']
+    'clickhouse.ClickHouseMetrics_TemporaryFilesForMerge',
+]
 
-V_25_5_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
+V_25_5_METRICS = [
+    'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_BuildVectorSimilarityIndexThreads',
     'clickhouse.ClickHouseMetrics_BuildVectorSimilarityIndexThreadsActive',
     'clickhouse.ClickHouseMetrics_BuildVectorSimilarityIndexThreadsScheduled',
@@ -1754,9 +1763,11 @@ V_25_5_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_StatelessWorkerThreadsScheduled',
     'clickhouse.ClickHouseMetrics_TemporaryFilesForMerge',
     'clickhouse.ClickHouseMetrics_TotalMergeFailures',
-    'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheSize']
+    'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheSize',
+]
 
-V_25_6_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
+V_25_6_METRICS = [
+    'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_AvroSchemaCacheBytes',
     'clickhouse.ClickHouseMetrics_AvroSchemaCacheCells',
     'clickhouse.ClickHouseMetrics_AvroSchemaRegistryCacheBytes',
@@ -1877,9 +1888,11 @@ V_25_6_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_UncompressedCacheBytes',
     'clickhouse.ClickHouseMetrics_UncompressedCacheCells',
     'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheBytes',
-    'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheCells']
+    'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheCells',
+]
 
-V_25_7_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
+V_25_7_METRICS = [
+    'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_AvroSchemaCacheBytes',
     'clickhouse.ClickHouseMetrics_AvroSchemaCacheCells',
     'clickhouse.ClickHouseMetrics_AvroSchemaRegistryCacheBytes',
@@ -1998,9 +2011,11 @@ V_25_7_METRICS = [   'clickhouse.ClickHouseMetrics_AttachedReplicatedTable',
     'clickhouse.ClickHouseMetrics_UncompressedCacheBytes',
     'clickhouse.ClickHouseMetrics_UncompressedCacheCells',
     'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheBytes',
-    'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheCells']
+    'clickhouse.ClickHouseMetrics_VectorSimilarityIndexCacheCells',
+]
 
-V_24_8_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheBytes',
+V_24_8_OPTIONAL = [
+    'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheBytes',
     'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheCount',
     'clickhouse.ClickHouseAsyncMetrics_IndexMarkCacheBytes',
     'clickhouse.ClickHouseAsyncMetrics_IndexMarkCacheFiles',
@@ -2028,9 +2043,11 @@ V_24_8_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCache
     'clickhouse.ClickHouseProfileEvents_PageCacheChunkDataPartialHits',
     'clickhouse.ClickHouseProfileEvents_PageCacheChunkMisses',
     'clickhouse.ClickHouseProfileEvents_PageCacheChunkShared',
-    'clickhouse.ClickHouseProfileEvents_PartsWithAppliedMutationsOnFly']
+    'clickhouse.ClickHouseProfileEvents_PartsWithAppliedMutationsOnFly',
+]
 
-V_25_3_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheBytes',
+V_25_3_OPTIONAL = [
+    'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheBytes',
     'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheCount',
     'clickhouse.ClickHouseAsyncMetrics_IndexMarkCacheBytes',
     'clickhouse.ClickHouseAsyncMetrics_IndexMarkCacheFiles',
@@ -2356,9 +2373,11 @@ V_25_3_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCache
     'clickhouse.ClickHouseProfileEvents_SharedMergeTreeVirtualPartsUpdatesPeerNotFound.count',
     'clickhouse.ClickHouseProfileEvents_SharedMergeTreeVirtualPartsUpdatesPeerNotFound.total',
     'clickhouse.ClickHouseProfileEvents_SystemLogErrorOnFlush.count',
-    'clickhouse.ClickHouseProfileEvents_SystemLogErrorOnFlush.total']
+    'clickhouse.ClickHouseProfileEvents_SystemLogErrorOnFlush.total',
+]
 
-V_25_5_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheBytes',
+V_25_5_OPTIONAL = [
+    'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheBytes',
     'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCacheCount',
     'clickhouse.ClickHouseAsyncMetrics_FilesystemCacheCapacity',
     'clickhouse.ClickHouseAsyncMetrics_IndexMarkCacheBytes',
@@ -2761,9 +2780,11 @@ V_25_5_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_CompiledExpressionCache
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiRead.count',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiRead.total',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.count',
-    'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.total']
+    'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.total',
+]
 
-V_25_6_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_DictionaryTotalFailedUpdates',
+V_25_6_OPTIONAL = [
+    'clickhouse.ClickHouseAsyncMetrics_DictionaryTotalFailedUpdates',
     'clickhouse.ClickHouseAsyncMetrics_FilesystemCacheCapacity',
     'clickhouse.ClickHouseAsyncMetrics_NetworkTCPReceiveQueue',
     'clickhouse.ClickHouseAsyncMetrics_NetworkTCPSocketRemoteAddresses',
@@ -3188,9 +3209,11 @@ V_25_6_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_DictionaryTotalFailedUp
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiRead.count',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiRead.total',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.count',
-    'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.total']
+    'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.total',
+]
 
-V_25_7_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_DictionaryTotalFailedUpdates',
+V_25_7_OPTIONAL = [
+    'clickhouse.ClickHouseAsyncMetrics_DictionaryTotalFailedUpdates',
     'clickhouse.ClickHouseAsyncMetrics_FilesystemCacheCapacity',
     'clickhouse.ClickHouseAsyncMetrics_NetworkTCPReceiveQueue',
     'clickhouse.ClickHouseAsyncMetrics_NetworkTCPSocketRemoteAddresses',
@@ -3658,14 +3681,15 @@ V_25_7_OPTIONAL = [   'clickhouse.ClickHouseAsyncMetrics_DictionaryTotalFailedUp
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiRead.count',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiRead.total',
     'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.count',
-    'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.total']
+    'clickhouse.ClickHouseProfileEvents_ZooKeeperMultiWrite.total',
+]
 
 BASE_VERSION_MAPPER = {
     '24.8': V_24_8_METRICS,
     '25.3': V_25_3_METRICS,
     '25.5': V_25_5_METRICS,
     '25.6': V_25_6_METRICS,
-    '25.7': V_25_7_METRICS
+    '25.7': V_25_7_METRICS,
 }
 
 OPTIONAL_VERSION_MAPPER = {
@@ -3673,11 +3697,13 @@ OPTIONAL_VERSION_MAPPER = {
     '25.3': V_25_3_OPTIONAL,
     '25.5': V_25_5_OPTIONAL,
     '25.6': V_25_6_OPTIONAL,
-    '25.7': V_25_7_OPTIONAL
+    '25.7': V_25_7_OPTIONAL,
 }
+
 
 def get_metrics(version: str) -> list[str]:
     return BASE_METRICS + BASE_VERSION_MAPPER.get(version, [])
+
 
 def get_optional_metrics(version: str) -> list[str]:
     return OPTIONAL_METRICS + OPTIONAL_VERSION_MAPPER.get(version, [])
