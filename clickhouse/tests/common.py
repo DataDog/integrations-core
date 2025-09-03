@@ -10,7 +10,7 @@ HOST = get_docker_hostname()
 
 CLICKHOUSE_VERSION = os.environ['CLICKHOUSE_VERSION']
 
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+COMPOSE_FILE = os.path.join(HERE, 'docker', 'compose.yaml')
 
 CLICKHOUSE_NODE_NUM = 2
 HTTP_START_PORT = 8123

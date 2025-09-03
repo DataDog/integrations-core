@@ -1,9 +1,5 @@
 [env.collectors.datadog-checks]
 
-[envs.default.env-vars]
-CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
-CLICKHOUSE_KEEPER_REPOSITORY = "clickhouse/clickhouse-keeper"
-
 # https://clickhouse.com/docs/faq/operations/production#how-to-choose-between-clickhouse-releases
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
@@ -15,5 +11,3 @@ matrix.version.env-vars = "CLICKHOUSE_VERSION"
 
 [envs.latest.env-vars]
 CLICKHOUSE_VERSION = "latest"
-CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
-CLICKHOUSE_KEEPER_REPOSITORY = "clickhouse/clickhouse-keeper"

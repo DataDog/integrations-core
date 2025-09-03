@@ -1,8 +1,9 @@
 # https://github.com/ClickHouse/examples/tree/main/docker-compose-recipes
+
 services:
 
   clickhouse-01: &clickhouse-node
-    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
     user: '101:101'
     container_name: clickhouse-01
     hostname: clickhouse-01
@@ -12,6 +13,8 @@ services:
       - ./volumes/clickhouse-01.xml:/etc/clickhouse-server/config.d/config.xml
       - ./volumes/users.xml:/etc/clickhouse-server/users.d/users.xml
       - ./volumes/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${DD_LOG_1}:/var/log/clickhouse-server/clickhouse-server.log
+      - ${DD_LOG_2}:/var/log/clickhouse-server/clickhouse-server.err.log
     ports:
       - '8123:8123'
       - '9000:9000'
@@ -31,12 +34,14 @@ services:
       - ./volumes/clickhouse-02.xml:/etc/clickhouse-server/config.d/config.xml
       - ./volumes/users.xml:/etc/clickhouse-server/users.d/users.xml
       - ./volumes/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${DD_LOG_3}:/var/log/clickhouse-server/clickhouse-server.log
+      - ${DD_LOG_4}:/var/log/clickhouse-server/clickhouse-server.err.log
     ports:
       - '8124:8123'
       - '9001:9000'
 
   clickhouse-keeper-01: &keeper-node
-    image: ${CLICKHOUSE_KEEPER_REPOSITORY}:${CLICKHOUSE_VERSION}
+    image: clickhouse/clickhouse-keeper:${CLICKHOUSE_VERSION}
     user: '101:101'
     container_name: clickhouse-keeper-01
     hostname: clickhouse-keeper-01

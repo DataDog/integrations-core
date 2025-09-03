@@ -5,6 +5,9 @@
         <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
         <size>100M</size>
         <count>3</count>
+        <formatting>
+            <type>json</type>
+        </formatting>
     </logger>
     <display_name>clickhouse-02</display_name>
     <listen_host>0.0.0.0</listen_host>
