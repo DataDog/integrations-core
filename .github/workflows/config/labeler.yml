@@ -185,6 +185,8 @@ integration/datadog_checks_tests_helper:
 - datadog_checks_tests_helper/**/*
 integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
+integration/datadog_csi_driver:
+- datadog_csi_driver/**/*
 integration/datadog_operator:
 - datadog_operator/**/*
 integration/dcgm:
@@ -707,6 +709,8 @@ integration/vault:
 - vault/**/*
 integration/velero:
 - velero/**/*
+integration/versa:
+- versa/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:
