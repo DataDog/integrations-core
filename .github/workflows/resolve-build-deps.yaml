@@ -297,6 +297,7 @@ jobs:
       - name: Join size diffs in order
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAX_COMMENT_SIZE: 65536
         run: |
           BASE_SHA="${{ steps.merge_base.outputs.sha }}"
           BASE_SHORT="${BASE_SHA:0:7}"
@@ -307,7 +308,7 @@ jobs:
             gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
             cat "size_diffs_output_${p}.txt" >> comment.txt
           done
-          if [ $(wc -c < comment.txt) -gt 65536 ]; then
+          if [ $(wc -c < comment.txt) -gt $MAX_COMMENT_SIZE ]; then
             echo "<h3>Dependency Size Changes</h3>" > comment.txt
             echo >> comment.txt
             echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
