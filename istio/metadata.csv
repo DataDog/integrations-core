@@ -251,6 +251,8 @@ istio.citadel.process.virtual_memory_bytes,gauge,,byte,,[OpenMetrics V1 and V2] 
 istio.galley.validation.config_update_error,count,,error,,[OpenMetrics V1 and V2] K8s webhook configuration update error,0,istio,,
 istio.citadel.server.cert_chain_expiry_timestamp,gauge,,second,,[OpenMetrics V1 and V2] The unix timestamp (in seconds) when Citadel cert chain will expire. Negative in case of internal error,0,istio,,
 istio.citadel.server.root_cert_expiry_timestamp,gauge,,second,,[OpenMetrics V1 and V2] The unix timestamp (in seconds) when Citadel root cert will expire. Negative in case of internal error,0,istio,,
+istio.server.cert_chain_expiry_seconds,,[OpenMetrics V1 and V2] The time remaining, in seconds, before the Istio Generated cert chain will expire,0,istio,,
+istio.server.root_cert_expiry_seconds,,[OpenMetrics V1 and V2] The time remaining, in seconds, before the root cert will expire,0,istio,,
 istio.galley.validation.failed,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of resource validation failed,0,istio,,
 istio.pilot.conflict.outbound_listener.http_over_https,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Number of conflicting HTTP listeners with well known HTTPS ports,0,istio,,
 istio.pilot.inbound_updates,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of updates received by pilot,0,istio,,
