@@ -812,9 +812,11 @@ tests:
         ProtocolName: "TCP"
         ResourceID: "72097421269663744-23456789012345678"
         ResourceName: "app01.nextgen.net"
-        SourceIP: "192.168.1.101"
         SourcePorts: 54521
         network:
+          client:
+            geoip: {}
+            ip: "192.168.1.101"
           destination:
             geoip: {}
             ip: "10.45.23.89"
