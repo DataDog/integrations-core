@@ -82,6 +82,8 @@ tests:
             app_name: "ssl"
             session:
               uid: 264167
+          file:
+            type_id: "0"
           connection_info:
             direction_id: 0
             protocol_name: "tcp"
@@ -103,9 +105,6 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "c7ee18cf-77b2-4503-9c8e-bfc799dh4c43"
-          evidence:
-            file:
-              type_id: "0"
           product:
             name: "Firewall"
             vendor_name: "Palo Alto"
