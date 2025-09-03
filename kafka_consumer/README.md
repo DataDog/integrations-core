@@ -69,7 +69,7 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Kafka messages
 
-This integration is used by [Data Streams Monitoring][21] to [retrieve messages from Kafka on demand][22].
+This integration is used by [Data Streams Monitoring][18] to [retrieve messages from Kafka on demand][21].
 
 ### Events
 
@@ -143,6 +143,5 @@ sudo service datadog-agent restart
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [18]: /data-streams
 [19]: /integrations/kafka?search=kafka
-[20]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=datadogoperator
-[21]: https://www.datadoghq.com/product/data-streams-monitoring/
-[22]: /data_streams/messages/
+[20]: /containers/cluster_agent/clusterchecks/?tab=datadogoperator
+[21]: /data_streams/messages/
