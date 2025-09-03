@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import email
-import os
 import re
 from pathlib import Path
 from zipfile import ZipFile
