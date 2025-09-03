@@ -12,7 +12,10 @@
     "title": "Have I Been Pwned",
     "media": [],
     "classifier_tags": [
-      "Category::Metrics"
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
