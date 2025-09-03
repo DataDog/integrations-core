@@ -31,21 +31,22 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional - default: localhost
     ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
     ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
     #
-  - host: localhost
+    # host: localhost
 
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
     # port: 5432
 
-    ## @param username - string - required
+    ## @param username - string - optional - default: datadog
     ## The Datadog username created to connect to PostgreSQL.
     #
-    username: datadog
+    # username: datadog
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.
@@ -111,7 +112,7 @@ instances:
 
     ## @param ignore_schemas_owned_by - list of strings - optional
     ## A list of database users which own schemas to ignore.
-    ## No metrics or statement samples will be collected for these schemas.
+    ## No metrics will be collected for these schemas.
     ## Each value can be a plain string or a Postgres pattern.
     #
     # ignore_schemas_owned_by:
@@ -268,17 +269,17 @@ instances:
     #
     collect_bloat_metrics: false
 
-    ## @param collect_wal_metrics - boolean - optional - default: false
+    ## @param collect_wal_metrics - boolean - optional - default: true
     ## Collect metrics about WAL file age.
     ## NOTE:
     ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
     ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
     #
-    # collect_wal_metrics: false
+    # collect_wal_metrics: true
 
     ## @param data_directory - string - optional - default: /usr/local/pgsql/data
     ## The data directory of your postgres installation
-    ## Required when collecting WAL metrics.
+    ## Required when collecting WAL metrics on Postgres 9.6.
     #
     # data_directory: /usr/local/pgsql/data
 
@@ -362,6 +363,11 @@ instances:
     #     - test:postgresql
     #     metric_prefix: postgresql
 
+    ## @param custom_metrics - list of mappings - optional
+    ## This option is deprecated. Use `custom_queries` instead.
+    #
+    # custom_metrics: []
+
     ## Define the configuration for database autodiscovery.
     ## Complete this section if you want to auto-discover databases on this host
     ## instead of specifying each using dbname.
@@ -433,7 +439,7 @@ instances:
     #
     # pg_stat_statements_view: show_pg_stat_statements()
 
-    ## @param query_encodings - list of strings - optional
+    ## @param query_encodings - list of strings - optional - default: ['utf8']
     ## Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
     ## When attempting to decode stored query text for query metrics, samples and activity, the agent will use these
     ## values in order and return the first successful decoding. Only supported for Postgres 10 and above.
@@ -741,32 +747,6 @@ instances:
         ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
         #
         # managed_authentication: {}
-
-    ## DEPRECATED: Please use `azure.managed_authentication` instead.
-    ##
-    ## Configuration section used for Azure AD Authentication.
-    ##
-    ## This supports using System or User assigned managed identities.
-    ## If this section is set, then the `username` and `password` fields will be ignored.
-    ##
-    ## For more information on Managed Identities, see the Azure docs
-    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
-    #
-    # managed_identity:
-
-        ## @param client_id - string - optional
-        ## Client ID of the Managed Identity.
-        #
-        # client_id: <CLIENT_ID>
-
-        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
-        ## The permission scope from where to access the identity token. This value is optional if using the default
-        ## identity scope for Azure managed databases.
-        ##
-        ## For more information on scopes, see the Azure docs
-        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
-        #
-        # identity_scope: https://ossrdbms-aad.database.windows.net/.default
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
