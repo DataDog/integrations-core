@@ -37,7 +37,7 @@ In Kubernetes, if a single consumers is running on many containers, you can setu
 <!-- xxz tab xxx -->
 <!-- xxx tab "Host" xxx -->
 
-Configure this check on a host running the Kafka Consumers.
+Configure this check on a host running the Kafka Consumer.
 Avoid having multiple agents running with the same check configuration, to avoid putting additional pressure on your Kafka cluster.
 
 1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options. A minimal setup is:
