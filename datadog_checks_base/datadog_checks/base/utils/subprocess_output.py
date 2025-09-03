@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-from .. import ensure_unicode
+from datadog_checks.base import ensure_unicode
 
 try:
     from _util import SubprocessOutputEmptyError  # noqa
@@ -11,7 +11,7 @@ try:
 except ImportError:
     # No agent
     from ..stubs._util import SubprocessOutputEmptyError  # noqa
-    from ..stubs._util import subprocess_output
+    from datadog_checks.base.stubs._util import subprocess_output
 
 
 log = logging.getLogger(__name__)

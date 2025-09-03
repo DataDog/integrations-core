@@ -8,6 +8,9 @@ from .common import MINIMAL_INSTANCE
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    yield MINIMAL_INSTANCE, {
-        'docker_platform': 'windows',
-    }
+    yield (
+        MINIMAL_INSTANCE,
+        {
+            'docker_platform': 'windows',
+        },
+    )

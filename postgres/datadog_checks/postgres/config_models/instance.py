@@ -277,6 +277,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int] = None
     propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
+    query_encodings: Optional[tuple[str, ...]] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     query_timeout: Optional[int] = None

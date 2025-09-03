@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Optional, overload
 
 import click
-import matplotlib.pyplot as plt
 import requests
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
@@ -26,10 +25,10 @@ from .utils.common_funcs import (
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
-    get_gitignore_files,
     get_valid_platforms,
+    get_valid_versions,
     is_correct_dependency,
-    is_valid_integration,
+    is_valid_integration_file,
     print_table,
     save_csv,
     save_json,
@@ -128,13 +127,14 @@ def timeline(
                 elif commits != []:
                     gitRepo.checkout_commit(commits[-1])
                 if type == "dependency":
-                    valid_platforms = get_valid_platforms(gitRepo.repo_dir)
+                    valid_versions = get_valid_versions(gitRepo.repo_dir)
+                    valid_platforms = get_valid_platforms(gitRepo.repo_dir, valid_versions)
                     if platform and platform not in valid_platforms:
                         raise ValueError(f"Invalid platform: {platform}")
                 if commits == [""] and type == "integration" and module_exists(gitRepo.repo_dir, module):
                     progress.remove_task(task)
                     progress.stop()
-                    app.display_error(f"No changes found for {type}: {module}")
+                    app.display(f"No changes found for {type}: {module}")
                     return
                 elif commits == [""] and type == "integration" and not module_exists(gitRepo.repo_dir, module):
                     raise ValueError(f"Integration {module} not found in latest commit, is the name correct?")
@@ -156,7 +156,7 @@ def timeline(
                 elif type == "dependency" and commits == [""]:
                     progress.remove_task(task)
                     progress.stop()
-                    app.display_error(f"No changes found for {type}: {module}")
+                    app.display(f"No changes found for {type}: {module}")
                     return
                 if type == "dependency":
                     modules_plat: list[CommitEntryPlatformWithDelta] = []
@@ -282,14 +282,22 @@ def timeline_mode(
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
         print_table(params["app"], "Status", formatted_modules)
 
-    timeline_path = (
-        f"timeline_{params['module']}_{params['platform']}.png"
-        if params["platform"] and params["format"] and "png" in params["format"]
-        else f"timeline_{params['module']}.png" if params["format"] and "png" in params["format"] else None
-    )
+    timeline_path = None
+    if params["format"] and "png" in params["format"]:
+        filename = f"timeline_{params['module']}"
+        if params["platform"]:
+            filename = f"{filename}_{params['platform']}"
+        timeline_path = os.path.join("size_timeline_visualizations", f"{filename}.png")
 
     if params["show_gui"] or timeline_path:
-        plot_linegraph(formatted_modules, params["module"], params["platform"], params["show_gui"], timeline_path)
+        plot_linegraph(
+            params["app"],
+            formatted_modules,
+            params["module"],
+            params["platform"],
+            params["show_gui"],
+            timeline_path,
+        )
 
     return formatted_modules
 
@@ -445,10 +453,6 @@ def get_files(
         )
         return file_data
 
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
-
     total_size = 0
     version = ""
 
@@ -457,7 +461,7 @@ def get_files(
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
 
-            if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
+            if not is_valid_integration_file(relative_path, repo_path):
                 continue
 
             if file == "__about__.py" and "datadog_checks" in relative_path:
@@ -788,6 +792,7 @@ def export_format(
 
 
 def plot_linegraph(
+    app: Application,
     modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     module: str,
     platform: Optional[str],
@@ -804,6 +809,8 @@ def plot_linegraph(
         show: If True, displays the plot interactively.
         path: If provided, saves the plot to this file path.
     """
+    import matplotlib.pyplot as plt
+
     if modules == []:
         return
 
@@ -821,7 +828,9 @@ def plot_linegraph(
     plt.tight_layout()
 
     if path:
-        plt.savefig(path)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        plt.savefig(path, bbox_inches="tight", format="png")
+        app.display(f"Linegraph saved to {path}")
     if show:
         plt.show()
     plt.close()

@@ -28,7 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.7.0",
+    "datadog-checks-base>=37.13.0",
 ]
 dynamic = [
     "version",
@@ -39,7 +39,7 @@ license = "BSD-3-Clause"
 deps = [
     "azure-identity==1.23.0",
     "lxml==5.1.1",
-    "pyodbc==5.2.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pyodbc==5.2.0",
     "pywin32==310; sys_platform == 'win32'",
 ]
 

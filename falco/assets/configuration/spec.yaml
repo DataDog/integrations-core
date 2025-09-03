@@ -1,0 +1,10 @@
+name: Falco
+files:
+- name: falco.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics

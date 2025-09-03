@@ -180,7 +180,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -207,7 +207,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_recurring_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -234,7 +234,7 @@
                                             "name": "query3",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_investment_transactions"
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
                                             },
                                             "indexes": [
                                                 "*"
@@ -273,7 +273,7 @@
                             "x": 0,
                             "y": 3,
                             "width": 6,
-                            "height": 4
+                            "height": 5
                         }
                     },
                     {
@@ -337,9 +337,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 7,
+                            "y": 8,
                             "width": 6,
-                            "height": 4
+                            "height": 5
                         }
                     }
                 ]
@@ -348,7 +348,7 @@
                 "x": 6,
                 "y": 0,
                 "width": 6,
-                "height": 12
+                "height": 14
             }
         },
         {
@@ -483,7 +483,7 @@
                 "x": 0,
                 "y": 10,
                 "width": 2,
-                "height": 2
+                "height": 4
             }
         },
         {
@@ -558,7 +558,7 @@
                 "x": 2,
                 "y": 10,
                 "width": 4,
-                "height": 2
+                "height": 4
             }
         },
         {
@@ -611,7 +611,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_investment_transactions"
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
                                             },
                                             "indexes": [
                                                 "*"
@@ -649,7 +649,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_investment_transactions"
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
                                             },
                                             "indexes": [
                                                 "*"
@@ -716,7 +716,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:plaid_logs @label:plaid_investment_transactions",
+                                        "query_string": "source:plaid_logs @log_name:plaid_investment_transactions",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -750,7 +750,7 @@
                             "x": 0,
                             "y": 2,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -782,7 +782,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_investment_transactions"
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
                                             },
                                             "indexes": [
                                                 "*"
@@ -816,7 +816,7 @@
                             "x": 6,
                             "y": 4,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -833,7 +833,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_investment_transactions"
+                                                "query": "source:plaid_logs @log_name:plaid_investment_transactions"
                                             },
                                             "indexes": [
                                                 "*"
@@ -883,7 +883,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 6,
+                            "y": 5,
                             "width": 6,
                             "height": 2
                         }
@@ -892,9 +892,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 14,
                 "width": 12,
-                "height": 9
+                "height": 8
             }
         },
         {
@@ -947,7 +947,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -991,7 +991,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer @refunds.id:*"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @refunds.id:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1041,7 +1041,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer @status:failed"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @status:failed"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1091,7 +1091,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer @status:failed"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @status:failed"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1106,7 +1106,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1145,7 +1145,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1263,7 +1263,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer !@status:failed"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer !@status:failed"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1317,7 +1317,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer @refunds.id:*"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer @refunds.id:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1368,7 +1368,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1436,7 +1436,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1507,7 +1507,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1590,7 +1590,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1651,7 +1651,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1734,7 +1734,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1809,7 +1809,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1869,7 +1869,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1929,7 +1929,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 21,
+                "y": 22,
                 "width": 12,
                 "height": 14,
                 "is_column_break": true
@@ -1985,7 +1985,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_recurring_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2023,7 +2023,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_recurring_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2090,7 +2090,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:plaid_logs @label:plaid_recurring_transfer",
+                                        "query_string": "source:plaid_logs @log_name:plaid_recurring_transfer",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2156,7 +2156,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_recurring_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2207,7 +2207,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:plaid_logs @label:plaid_recurring_transfer"
+                                                "query": "source:plaid_logs @log_name:plaid_recurring_transfer"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2266,7 +2266,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 35,
+                "y": 36,
                 "width": 12,
                 "height": 8
             }

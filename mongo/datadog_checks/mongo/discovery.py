@@ -17,7 +17,7 @@ class MongoDBDatabaseAutodiscovery(Discovery):
 
         super(MongoDBDatabaseAutodiscovery, self).__init__(
             self._list_databases,
-            include={db: 0 for db in self._autodiscovery_config.get("include", [".*"])},
+            include=dict.fromkeys(self._autodiscovery_config.get("include", [".*"]), 0),
             exclude=self._autodiscovery_config.get("exclude"),
             interval=self._autodiscovery_config.get('refresh_interval', DEFAULT_REFRESH_INTERVAL),
         )

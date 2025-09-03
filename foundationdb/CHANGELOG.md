@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.3.0 / 2025-05-15
+## 3.3.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Respect `tls_ca_file` and `tls_password` config options ([#19865](https://github.com/DataDog/integrations-core/pull/19865))
+
+## 3.3.0 / 2025-05-15 / Agent 7.67.0
 
 ***Added***:
 

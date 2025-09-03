@@ -1,0 +1,12 @@
+snapshot_time             1749630552.994884593 secs.nsecs
+start_time                1749563992.192278692 secs.nsecs
+elapsed_time              66560.802605901 secs.nsecs
+read_bytes                1 samples [bytes] 4096 4096 4096 16777216
+write_bytes               6 samples [bytes] 37 12288 32854 335548090
+read                      1 samples [usecs] 660 660 660 435600
+write                     6 samples [usecs] 24 36 181 5551
+setattr                   7 samples [usecs] 9 1888 2006 3567434
+punch                     2 samples [usecs] 22 27 49 1213
+sync                      4 samples [usecs] 1806 2104 7975 15953529
+destroy                   7 samples [usecs] 1433 1742 11042 17513378
+statfs                    13000 samples [usecs] 2 10 48539 185145

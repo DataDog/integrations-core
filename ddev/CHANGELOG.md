@@ -2,6 +2,69 @@
 
 <!-- towncrier release notes start -->
 
+## 13.0.0 / 2025-08-25
+
+***Removed***:
+
+* Remove `ddev size create-dashboard` ([#20766](https://github.com/DataDog/integrations-core/pull/20766))
+
+***Added***:
+
+* Add support for Vagrant VMs in testing ([#20353](https://github.com/DataDog/integrations-core/pull/20353))
+* Adds logic to ensure `ddev size` filters integrations by the specified Python version. ([#20742](https://github.com/DataDog/integrations-core/pull/20742))
+* Updated the set of allowed Metric Metadata units with the latest additions ([#21048](https://github.com/DataDog/integrations-core/pull/21048))
+* Bump Datadog Checks Dev requirement in DDEV ([#21124](https://github.com/DataDog/integrations-core/pull/21124))
+* Add a utils.hatch module to centralize hatch operations ([#21135](https://github.com/DataDog/integrations-core/pull/21135))
+* Use ddev to target Agent branch in build_agent.yaml ([#21136](https://github.com/DataDog/integrations-core/pull/21136))
+
+***Fixed***:
+
+* Modify the CI matrix generation by spliting jobs in 2 groups: windows and linux tests. This is done to reduce the number of jobs each workflow runs. ([#20963](https://github.com/DataDog/integrations-core/pull/20963))
+* Skip E2E test execution for packages that do not define them. ([#20967](https://github.com/DataDog/integrations-core/pull/20967))
+* Add is:pull-request to pull request search to avoid 422s on private repos ([#21021](https://github.com/DataDog/integrations-core/pull/21021))
+* Fix ddev env test to respect e2e-env config flag even when an environment is specified ([#21119](https://github.com/DataDog/integrations-core/pull/21119))
+
+## 12.2.0 / 2025-07-31
+
+***Added***:
+
+* Run integration tests in parallel for single integrations ([#20816](https://github.com/DataDog/integrations-core/pull/20816))
+
+## 12.1.0 / 2025-07-15
+
+***Added***:
+
+* Add back F401 rule to the linter ([#20661](https://github.com/DataDog/integrations-core/pull/20661))
+* Update ci validation command to account for the new ddev test skip params ([#20705](https://github.com/DataDog/integrations-core/pull/20705))
+* Add the skip-ddev option to ci validation script ([#20708](https://github.com/DataDog/integrations-core/pull/20708))
+
+***Fixed***:
+
+* Add rule to lint for relative imports from non parent packages ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* [MINPROC-2319] remove the integration exception mapper ([#20697](https://github.com/DataDog/integrations-core/pull/20697))
+
+## 12.0.0 / 2025-07-01
+
+***Changed***:
+
+* Replaced multiple format flags with a single `--format` option in the `ddev size` command. ([#20330](https://github.com/DataDog/integrations-core/pull/20330))
+* Remove Black dependency from the hatch environment collector in favor of Ruff ([#20451](https://github.com/DataDog/integrations-core/pull/20451))
+
+***Added***:
+
+* Update style dependencies. ([#20312](https://github.com/DataDog/integrations-core/pull/20312))
+* - Added `ddev size create-dashboard` to visualize size metrics on the Datadog platform
+  - Added `--to-dd-org` option to `ddev size status` to send metrics to Datadog ([#20330](https://github.com/DataDog/integrations-core/pull/20330))
+* Add nanodollar as valid metric units ([#20341](https://github.com/DataDog/integrations-core/pull/20341))
+* - Adds the required logic to upload historical size metrics to a specified Datadog organization.
+  - Updates the CI pipeline to send metrics to Datadog on pushes to the master branch. Note that the metrics may not be fully accurate yet, as dependency sizes could be outdated since the lockfile updates are handled in a separate PR. ([#20431](https://github.com/DataDog/integrations-core/pull/20431))
+* Add --fmt-unsafe and --lint-unsafe options to ddev test ([#20451](https://github.com/DataDog/integrations-core/pull/20451))
+
+***Fixed***:
+
+* Update ddev metadata validator to only error on required headers ([#20419](https://github.com/DataDog/integrations-core/pull/20419))
+* Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors ([#20435](https://github.com/DataDog/integrations-core/pull/20435))
+
 ## 11.4.0 / 2025-05-27
 
 ***Added***:

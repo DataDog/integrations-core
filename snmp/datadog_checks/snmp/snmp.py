@@ -50,7 +50,6 @@ def reply_invalid(oid):
 
 
 class SnmpCheck(AgentCheck):
-
     SC_STATUS = 'snmp.can_check'
     _running = True
     _thread = None
@@ -193,7 +192,8 @@ class SnmpCheck(AgentCheck):
             return None
 
     def fetch_results(
-        self, config  # type: InstanceConfig
+        self,
+        config,  # type: InstanceConfig
     ):
         # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], List[OID], Optional[str]]
         """
@@ -603,7 +603,7 @@ class SnmpCheck(AgentCheck):
         try:
             if_high_speed_val = results['ifHighSpeed'][index]
         except KeyError:
-            self.log.debug('[SNMP Bandwidth usage] missing `ifHighSpeed` metric, skipping this row. ' 'index=%s', index)
+            self.log.debug('[SNMP Bandwidth usage] missing `ifHighSpeed` metric, skipping this row. index=%s', index)
             return
 
         if_high_speed = try_varbind_value_to_float(if_high_speed_val)

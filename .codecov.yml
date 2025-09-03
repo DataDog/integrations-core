@@ -218,6 +218,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Falco:
+        target: 75
+        flags:
+        - falco
       Fluentd:
         target: 75
         flags:
@@ -330,6 +334,10 @@ coverage:
         target: 75
         flags:
         - kong
+      KrakenD:
+        target: 75
+        flags:
+        - krakend
       KubeVirt_API:
         target: 75
         flags:
@@ -382,6 +390,10 @@ coverage:
         target: 75
         flags:
         - kubernetes_state
+      Kuma:
+        target: 75
+        flags:
+        - kuma
       Kyoto_Tycoon:
         target: 75
         flags:
@@ -398,6 +410,18 @@ coverage:
         target: 75
         flags:
         - linux_proc_extras
+      LiteLLM:
+        target: 75
+        flags:
+        - litellm
+      Lustre:
+        target: 75
+        flags:
+        - lustre
+      Mac_Audit_Logs:
+        target: 75
+        flags:
+        - mac_audit_logs
       MapR:
         target: 75
         flags:
@@ -514,6 +538,10 @@ coverage:
         target: 75
         flags:
         - prometheus
+      Proxmox:
+        target: 75
+        flags:
+        - proxmox
       ProxySQL:
         target: 75
         flags:
@@ -594,10 +622,6 @@ coverage:
         target: 75
         flags:
         - sonarqube
-      sonatype_nexus:
-        target: 75
-        flags:
-        - sonatype_nexus
       Spark:
         target: 75
         flags:
@@ -734,6 +758,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      datadog_csi_driver:
+        target: 75
+        flags:
+        - datadog_csi_driver
       dcgm:
         target: 75
         flags:
@@ -758,6 +786,10 @@ coverage:
         target: 75
         flags:
         - nvidia_nim
+      sonatype_nexus:
+        target: 75
+        flags:
+        - sonatype_nexus
       tibco_ems:
         target: 75
         flags:
@@ -972,6 +1004,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  datadog_csi_driver:
+    carryforward: true
+    paths:
+    - datadog_csi_driver/datadog_checks/datadog_csi_driver
+    - datadog_csi_driver/tests
   dcgm:
     carryforward: true
     paths:
@@ -1052,6 +1089,11 @@ flags:
     paths:
     - external_dns/datadog_checks/external_dns
     - external_dns/tests
+  falco:
+    carryforward: true
+    paths:
+    - falco/datadog_checks/falco
+    - falco/tests
   fluentd:
     carryforward: true
     paths:
@@ -1197,6 +1239,11 @@ flags:
     paths:
     - kong/datadog_checks/kong
     - kong/tests
+  krakend:
+    carryforward: true
+    paths:
+    - krakend/datadog_checks/krakend
+    - krakend/tests
   kube_apiserver_metrics:
     carryforward: true
     paths:
@@ -1262,6 +1309,11 @@ flags:
     paths:
     - kubevirt_handler/datadog_checks/kubevirt_handler
     - kubevirt_handler/tests
+  kuma:
+    carryforward: true
+    paths:
+    - kuma/datadog_checks/kuma
+    - kuma/tests
   kyototycoon:
     carryforward: true
     paths:
@@ -1287,6 +1339,21 @@ flags:
     paths:
     - linux_proc_extras/datadog_checks/linux_proc_extras
     - linux_proc_extras/tests
+  litellm:
+    carryforward: true
+    paths:
+    - litellm/datadog_checks/litellm
+    - litellm/tests
+  lustre:
+    carryforward: true
+    paths:
+    - lustre/datadog_checks/lustre
+    - lustre/tests
+  mac_audit_logs:
+    carryforward: true
+    paths:
+    - mac_audit_logs/datadog_checks/mac_audit_logs
+    - mac_audit_logs/tests
   mapr:
     carryforward: true
     paths:
@@ -1437,6 +1504,11 @@ flags:
     paths:
     - prometheus/datadog_checks/prometheus
     - prometheus/tests
+  proxmox:
+    carryforward: true
+    paths:
+    - proxmox/datadog_checks/proxmox
+    - proxmox/tests
   proxysql:
     carryforward: true
     paths:

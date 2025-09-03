@@ -26,7 +26,9 @@ def dd_environment(instance):
         schema = f.read()
 
     conditions = [
-        CheckDockerLogs(compose_file, patterns=['Server completed initialization']),
+        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb0'),
+        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb1'),
+        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb2'),
         CreateSchema(compose_file, schema, container_name='voltdb0'),
         EnsureExpectedMetricsShowUp(instance),
     ]

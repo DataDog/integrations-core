@@ -13,8 +13,13 @@ ORDER BY `percentile` ASC
 LIMIT 1"""
 
 SQL_QUERY_TABLE_ROWS_STATS = """\
-SELECT table_schema, table_name, rows_read, rows_changed
-FROM information_schema.table_statistics"""
+SELECT
+    OBJECT_SCHEMA as table_schema,
+    OBJECT_NAME as table_name,
+    COUNT_READ as rows_read,
+    COUNT_WRITE as rows_changed
+FROM performance_schema.table_io_waits_summary_by_table
+WHERE OBJECT_SCHEMA NOT IN ('mysql', 'performance_schema', 'information_schema')"""
 
 SQL_QUERY_SCHEMA_SIZE = """\
 SELECT table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
@@ -51,6 +56,12 @@ SQL_INNODB_ENGINES = """\
 SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
+
+SQL_BINLOG_ENABLED = """\
+SELECT @@log_bin AS binlog_enabled"""
+
+SQL_SERVER_UUID = """\
+SELECT @@server_uuid"""
 
 SQL_SERVER_ID_AWS_AURORA = """\
 SHOW VARIABLES LIKE 'aurora_server_id'"""
@@ -115,14 +126,6 @@ SELECT table_name as `table_name`,
        extra as `extra`
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
-"""
-
-SQL_INDEXES_EXPRESSION_COLUMN_CHECK = """
-    SELECT COUNT(*) as column_count
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = 'information_schema'
-      AND TABLE_NAME = 'STATISTICS'
-      AND COLUMN_NAME = 'EXPRESSION';
 """
 
 SQL_INDEXES = """\
@@ -258,3 +261,15 @@ def show_replica_status_query(version, is_mariadb, channel=''):
         return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
     else:
         return "{0};".format(base_query)
+
+
+def get_indexes_query(version, is_mariadb, table_names):
+    """
+    Get the appropriate indexes query based on MySQL version and flavor.
+    The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
+    MariaDB doesn't support functional indexes.
+    """
+    if not is_mariadb and version.version_compatible((8, 0, 13)):
+        return SQL_INDEXES_8_0_13.format(table_names)
+    else:
+        return SQL_INDEXES.format(table_names)

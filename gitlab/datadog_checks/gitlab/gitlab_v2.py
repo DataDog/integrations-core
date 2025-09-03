@@ -7,9 +7,9 @@ from collections import ChainMap
 import requests
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from datadog_checks.gitlab.config_models import ConfigMixin
 
-from ..base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from .common import get_gitlab_version, get_tags
 from .metrics import GITALY_METRICS_MAP, METRICS_MAP, construct_metrics_config
 

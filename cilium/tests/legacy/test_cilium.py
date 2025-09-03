@@ -39,16 +39,16 @@ def test_operator_check(aggregator, operator_instance_use_openmetrics, mock_oper
 
 def test_version_metadata(datadog_agent, agent_instance_use_openmetrics, mock_agent_data, check, dd_run_check):
     check = check(agent_instance_use_openmetrics(False))
-    check.check_id = 'test:123'
+    check.check_id = "test:123"
     dd_run_check(check)
 
-    major, minor, patch = common.CILIUM_VERSION.split('.')
+    major, minor, patch = common.CILIUM_VERSION.split(".")
     version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': common.CILIUM_VERSION,
+        "version.scheme": "semver",
+        "version.major": major,
+        "version.minor": minor,
+        "version.patch": patch,
+        "version.raw": common.CILIUM_VERSION,
     }
 
-    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata("test:123", version_metadata)

@@ -144,7 +144,7 @@ def test_get_check_files(get_root):
         '': [
             (
                 'dns_check',
-                ['datadog_checks', 'datadog_dns_check.egg-info', 'tests', '.junit', 'assets'],
+                ['datadog_checks', 'datadog_dns_check.egg-info', 'tests', 'junit', 'assets'],
                 [
                     'CHANGELOG.md',
                     'MANIFEST.in',
@@ -170,7 +170,7 @@ def test_get_check_files(get_root):
             (join('dns_check', 'datadog_dns_check.egg-info'), [], ['PKG-INFO', 'SOURCES.txt'])
         ],
         'tests': [(join('dns_check', 'tests'), [], ['test_dns_check.py', '__init__.py', 'common.py'])],
-        '.junit': [(join('dns_check', '.junit'), [], ['test-e2e-py37.xml', 'test-e2e-py27.xml'])],
+        'junit': [(join('dns_check', 'junit'), [], ['test-e2e-py37.xml', 'test-e2e-py27.xml'])],
         'assets': [(join('dns_check', 'assets'), [], ['service_checks.json'])],
     }
 

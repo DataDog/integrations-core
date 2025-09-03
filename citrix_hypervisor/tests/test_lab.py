@@ -50,8 +50,7 @@ def test_lab(aggregator, dd_run_check):
     """
     if not is_affirmative(os.environ.get('TEST_CITRIX_RUN_LAB')):
         pytest.skip(
-            "Skipped! Set TEST_CITRIX_RUN_LAB to run this test. "
-            "TEST_CITRIX_USER and TEST_CITRIX_PASS must also be set."
+            "Skipped! Set TEST_CITRIX_RUN_LAB to run this test. TEST_CITRIX_USER and TEST_CITRIX_PASS must also be set."
         )
 
     username = os.environ['TEST_CITRIX_USER']

@@ -104,7 +104,7 @@ def dd_environment():
 @pytest.fixture()
 def mock_data():
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         side_effect=mocked_requests_get,
     ):
         yield
