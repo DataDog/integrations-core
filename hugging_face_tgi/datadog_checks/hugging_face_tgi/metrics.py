@@ -31,5 +31,4 @@ METRIC_MAP = {
 
 RENAME_LABELS_MAP = {
     'err': 'error_type',
-    'le': 'upper_bound',
 }
