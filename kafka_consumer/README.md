@@ -19,48 +19,47 @@ The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. 
 
 ### Configuration
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
-#### Host
-
-To configure this check for an Agent running on a host running your Kafka consumers:
-
-##### Metric collection
-
-1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options.
-
-2. [Restart the Agent][5].
-
-##### Log collection
-
-This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
-
-<!-- xxz tab xxx -->
+<!-- xxx tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][17] for guidance on applying the parameters below.
-
-##### Metric collection
+Configure this check on a container running the Kafka Consumer.
+See the [Autodiscovery Integration Templates][17] for guidance on applying the parameters below.
+In Kubernetes, if a single consumers is running on many containers, you can setup this check as a [Cluster Check][20] to avoid having multiple checks collecting the same metrics.
 
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `kafka_consumer`                     |
 | `<INIT_CONFIG>`      | blank or `{}`                        |
-| `<INSTANCE_CONFIG>`  | `{"kafka_connect_str": <KAFKA_CONNECT_STR>}` <br/>For example, `{"kafka_connect_str": "server:9092"}` |
+| `<INSTANCE_CONFIG>`  | `{"kafka_connect_str": "<KAFKA_CONNECT_STR>", "consumer_groups": {"<CONSUMER_NAME>": {}}}` <br/>For example, `{"kafka_connect_str": "server:9092", "consumer_groups": {"my_consumer_group": {}}}` |
 
-##### Log collection
+<!-- xxz tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
+Configure this check on a host running the Kafka Consumers.
+Avoid having multiple agents running with the same check configuration, to avoid putting additional pressure on your Kafka cluster.
+
+1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options. A minimal setup is:
+
+```
+instances:
+  - kafka_connect_str: <KAFKA_CONNECT_STR>
+    consumer_groups:
+      # Monitor all topics for consumer <CONSUMER_NAME>
+      <CONSUMER_NAME>: {}
+```
+
+2. [Restart the Agent][5].
+
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
+1. [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
+2. Ensure the metric `kafka.consumer_lag` is generated for the appropriate `consumer_group`.
 
 ## Data Collected
 
@@ -68,14 +67,14 @@ This check does not collect additional logs. To collect logs from Kafka brokers,
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
+### Kafka messages
+
+This integration is used by [Data Streams Monitoring][21] to [retrieve messages from Kafka on demand][22].
+
 ### Events
 
 **consumer_lag**:<br>
 The Datadog Agent emits an event when the value of the `consumer_lag` metric goes below 0, tagging it with `topic`, `partition` and `consumer_group`.
-
-### Service Checks
-
-The Kafka-consumer check does not include any service checks.
 
 ## Troubleshooting
 
@@ -144,3 +143,6 @@ sudo service datadog-agent restart
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [18]: /data-streams
 [19]: /integrations/kafka?search=kafka
+[20]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=datadogoperator
+[21]: https://www.datadoghq.com/product/data-streams-monitoring/
+[22]: https://docs.datadoghq.com/data_streams/messages/
