@@ -82,6 +82,10 @@ coverage:
         target: 75
         flags:
         - azure_iot_edge
+      BentoML:
+        target: 75
+        flags:
+        - bentoml
       Boundary:
         target: 75
         flags:
@@ -758,6 +762,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      datadog_csi_driver:
+        target: 75
+        flags:
+        - datadog_csi_driver
       dcgm:
         target: 75
         flags:
@@ -880,6 +888,11 @@ flags:
     paths:
     - azure_iot_edge/datadog_checks/azure_iot_edge
     - azure_iot_edge/tests
+  bentoml:
+    carryforward: true
+    paths:
+    - bentoml/datadog_checks/bentoml
+    - bentoml/tests
   boundary:
     carryforward: true
     paths:
@@ -1000,6 +1013,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  datadog_csi_driver:
+    carryforward: true
+    paths:
+    - datadog_csi_driver/datadog_checks/datadog_csi_driver
+    - datadog_csi_driver/tests
   dcgm:
     carryforward: true
     paths:
