@@ -1,0 +1,1 @@
+Improve check efficiency with many topics or partitions per consumer group when `collect_consumer_group_state` is enabled.
