@@ -31,7 +31,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 
 def _check_analyze_progress(check, pg_instance, table):
-    thread = run_vacuum_thread(pg_instance, f'VACUUM ANALYZE {table}')
+    thread = run_vacuum_thread(pg_instance, f'ANALYZE {table}')
 
     # Wait for vacuum to be reported
     _wait_for_value(
