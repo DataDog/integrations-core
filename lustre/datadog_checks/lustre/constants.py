@@ -47,6 +47,27 @@ JOBSTATS_PARAMS = [
     ),
 ]
 
+JOBID_TAG_PARAMS = [
+    LustreParam(
+        regex=r'jobid_var',
+        node_types=(
+            'client',
+            'mds',
+            'oss',
+        ),
+        fixture='disable',
+    ),
+    LustreParam(
+        regex=r'jobid_name',
+        node_types=(
+            'client',
+            'mds',
+            'oss',
+        ),
+        fixture='%e.%u',
+    ),
+]
+
 CURATED_PARAMS = [
     LustreParam(
         regex=r'osd-*.*.blocksize',

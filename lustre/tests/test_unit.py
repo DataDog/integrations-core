@@ -9,7 +9,14 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
-from datadog_checks.lustre.constants import CURATED_PARAMS, DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS, LustreParam
+from datadog_checks.lustre.constants import (
+    CURATED_PARAMS,
+    DEFAULT_STATS,
+    EXTRA_STATS,
+    JOBID_TAG_PARAMS,
+    JOBSTATS_PARAMS,
+    LustreParam,
+)
 
 from .metrics import (
     CLIENT_METRICS,
@@ -61,7 +68,7 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
         'lnetctl net show': 'all_lnet_net.txt',
         'lnetctl peer show': 'all_lnet_peer.txt',
     }
-    for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + CURATED_PARAMS:
+    for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + JOBID_TAG_PARAMS + CURATED_PARAMS:
         mapping[f'lctl list_param {param.regex}'] = param.regex
         mapping[f'lctl get_param -ny {param.regex}'] = param.fixture
 

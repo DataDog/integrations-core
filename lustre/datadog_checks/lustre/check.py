@@ -18,6 +18,7 @@ from .constants import (
     FILESYSTEM_DISCOVERY_PARAM_MAPPING,
     IGNORED_LNET_GROUPS,
     IGNORED_STATS,
+    JOBID_TAG_PARAMS,
     JOBSTATS_PARAMS,
     LustreParam,
 )
@@ -225,6 +226,10 @@ class LustreCheck(AgentCheck):
         For more information, see: https://doc.lustre.org/lustre_manual.xhtml#jobstats
         '''
         jobstats_params = self._get_jobstats_params_list()
+        jobid_config_tags = [
+            f'{param.regex}:{self._run_command("lctl", "get_param", "-ny", param.regex, sudo=True).strip()}'
+            for param in JOBID_TAG_PARAMS
+        ]
         for jobstats_param in jobstats_params:
             device_name = jobstats_param.split('.')[1]  # For example: lustre-MDT0000
             if not any(device_name.startswith(fs) for fs in filesystems):
@@ -235,7 +240,14 @@ class LustreCheck(AgentCheck):
                 continue
             for job in jobstats_metrics:
                 job_id = job.get('job_id', "unknown")
-                tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
+                tags = (
+                    self.tags
+                    + [
+                        f'device_name:{device_name}',
+                        f'job_id:{job_id}',
+                    ]
+                    + jobid_config_tags
+                )
                 for metric_name, metric_values in job.items():
                     if not isinstance(metric_values, dict):
                         continue
