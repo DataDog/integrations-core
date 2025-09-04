@@ -799,7 +799,6 @@ tests:
         AppZoneName: "prod-zone"
         ConnectionStartTime: 1661675251000100
         Customer: "NextGenHealth"
-        DestinationPort: 43321
         Direction: "OUTBOUND"
         EnforcementAction: "BLOCK"
         EnforcementDisposition: "REJECTED"
@@ -812,14 +811,15 @@ tests:
         ProtocolName: "TCP"
         ResourceID: "72097421269663744-23456789012345678"
         ResourceName: "app01.nextgen.net"
-        SourcePorts: 54521
         network:
           client:
             geoip: {}
             ip: "192.168.1.101"
+            port: 54521
           destination:
             geoip: {}
             ip: "10.45.23.89"
+            port: 43321
         timestamp: 1756446042000
       message: |-
         {
