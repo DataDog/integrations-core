@@ -1001,6 +1001,15 @@ def test_build_schema_none_handling():
         build_protobuf_schema(None)
 
 
+def test_count_consumer_contexts(check, kafka_instance):
+    kafka_consumer_check = check(kafka_instance)
+    consumer_offsets = {
+        'consumer_group1': {('topic1', 'partition0'): 1, ('topic1', 'partition1'): 2},  # 2 contexts
+        'consumer_group2': {('topic2', 'partition0'): 3},  # 1 context
+    }
+    assert kafka_consumer_check.count_consumer_contexts(consumer_offsets) == 3
+
+
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):
     mock_client = seed_mock_client()
     # Set up two partitions for same topic to check multiple contexts in same consumer group
