@@ -87,6 +87,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/bentoml:
+- bentoml/**/*
 integration/beyondtrust_identity_security_insights:
 - beyondtrust_identity_security_insights/**/*
 integration/beyondtrust_password_safe:
@@ -297,6 +299,8 @@ integration/hubspot_content_hub:
 - hubspot_content_hub/**/*
 integration/hudi:
 - hudi/**/*
+integration/hugging_face_tgi:
+- hugging_face_tgi/**/*
 integration/hyperv:
 - hyperv/**/*
 integration/iam_access_analyzer:
