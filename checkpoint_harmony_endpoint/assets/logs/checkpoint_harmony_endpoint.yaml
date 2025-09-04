@@ -153,8 +153,8 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: autoFilledRule1 <%{number:syslog.priority}>%{number:syslog.version}
-          %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname}
-          %{data:appname}\s+%{number:pid} - \[%{data::keyvalue(":")}\]
+          %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{notSpace:hostname}
+          %{notSpace:appname}\s+%{number:pid} - \[%{data::keyvalue(":")}\]
     - type: attribute-remapper
       name: " Map `timestamp` to `syslog.timestamp`"
       enabled: true
