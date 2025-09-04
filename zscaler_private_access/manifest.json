@@ -12,6 +12,11 @@
     "title": "Zscaler Private Access",
     "media": [
       {
+        "caption": "Zscaler Private Access - Overview",
+        "image_url": "images/zscaler_private_access_overview_light_1.png",
+        "media_type": "image"
+      },
+      {
         "caption": "Zscaler Private Access - App Protection",
         "image_url": "images/zscaler_private_access_app_protection_light_1.png",
         "media_type": "image"
@@ -23,32 +28,27 @@
       },
       {
         "caption": "Zscaler Private Access - Audit",
-        "image_url": "images/zscaler_private_access_audit_light_1.png",
+        "image_url": "images/zscaler_private_access_audit_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Zscaler Private Access - Browser Access",
-        "image_url": "images/zscaler_private_access_browser_access_light_1.png",
+        "caption": "Zscaler Private Access - Private Cloud Controller",
+        "image_url": "images/zscaler_private_access_private_cloud_controller_light_1.png",
         "media_type": "image"
       },
       {
-        "caption": "Zscaler Private Access - Browser Access",
-        "image_url": "images/zscaler_private_access_browser_access_light_2.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Zscaler Private Access - Microsegmentation",
-        "image_url": "images/zscaler_private_access_microsegmentation_light_1.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Zscaler Private Access - Overview",
-        "image_url": "images/zscaler_private_access_overview_light_1.png",
+        "caption": "Zscaler Private Access - Private Service Edge",
+        "image_url": "images/zscaler_private_access_private_service_edge_light_1.png",
         "media_type": "image"
       },
       {
         "caption": "Zscaler Private Access - User Status",
         "image_url": "images/zscaler_private_access_user_status_light_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zscaler Private Access - Microsegmentation",
+        "image_url": "images/zscaler_private_access_microsegmentation_light.png",
         "media_type": "image"
       }
     ],

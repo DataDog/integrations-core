@@ -109,7 +109,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:* $service $user_name $client_ip"
+                                                "query": "source:zscaler-private-access service:* $service $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -176,7 +176,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:* $service $user_name $client_ip"
+                                                "query": "source:zscaler-private-access service:* $service $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -221,7 +221,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access $service $user_name $client_ip"
+                                                "query": "source:zscaler-private-access $service $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -290,7 +290,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:* $service $user_name $client_ip"
+                                                "query": "source:zscaler-private-access service:* $service $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -359,7 +359,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:* $service $user_name $client_ip"
+                                                "query": "source:zscaler-private-access service:* $service $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -430,7 +430,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:* $service $user_name $client_ip"
+                                                "query": "source:zscaler-private-access service:* $service $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -488,7 +488,7 @@
                     {
                         "id": 8890627102191583,
                         "definition": {
-                            "title": "Events Details",
+                            "title": "Event Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -496,7 +496,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zscaler-private-access service:* $service $user_name $client_ip",
+                                        "query_string": "source:zscaler-private-access service:* $service $user $client_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1001,7 +1001,7 @@
             "default": "*"
         },
         {
-            "name": "user_name",
+            "name": "user",
             "prefix": "@usr.name",
             "available_values": [],
             "default": "*"

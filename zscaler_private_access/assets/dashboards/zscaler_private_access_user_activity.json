@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -133,7 +133,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -175,7 +175,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user",
+                                        "query_string": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -237,7 +237,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity @ConnectionStatus:open $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity @ConnectionStatus:open $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -307,7 +307,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -364,7 +364,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity @ConnectionStatus:close $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity @ConnectionStatus:close $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -413,7 +413,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@Policy:0 $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@Policy:0 $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -483,7 +483,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -553,7 +553,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -633,7 +633,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -707,7 +707,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -723,7 +723,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -780,7 +780,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -823,7 +823,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@ConnectorZEN:0 $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@ConnectorZEN:0 $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -892,7 +892,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@ConnectorZEN:0 $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@ConnectorZEN:0 $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -979,7 +979,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1049,7 +1049,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1119,7 +1119,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@Hostname:\"\" $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@Hostname:\"\" $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1189,7 +1189,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@Platform:\"\" $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@Platform:\"\" $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1259,7 +1259,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1329,7 +1329,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1398,7 +1398,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@Idp:0 $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@Idp:0 $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1489,7 +1489,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity @DoubleEncryption:0 $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity @DoubleEncryption:0 $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1504,7 +1504,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity @DoubleEncryption:1 $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity @DoubleEncryption:1 $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1567,7 +1567,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1636,7 +1636,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@PRAConsoleType:\"\" $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@PRAConsoleType:\"\" $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1722,7 +1722,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1776,7 +1776,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@PRASharedMode:\"\" $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@PRASharedMode:\"\" $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1845,7 +1845,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity -@PRACredentialLoginType:\"\" $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity -@PRACredentialLoginType:\"\" $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1914,7 +1914,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user"
+                                                "query": "source:zscaler-private-access service:user-activity $connection_status $client_zen $idp $platform $user $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1981,7 +1981,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zscaler-private-access service:user-activity @PRAErrorStatus:* $connection_status $client_zen $idp $platform $user",
+                                        "query_string": "source:zscaler-private-access service:user-activity @PRAErrorStatus:* $connection_status $client_zen $idp $platform $user $client_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2021,7 +2021,7 @@
                     {
                         "id": 7276505236361556,
                         "definition": {
-                            "title": "PRA Events Details",
+                            "title": "PRA Event Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -2029,7 +2029,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zscaler-private-access service:user-activity @PRAConnectionID:* $connection_status $client_zen $idp $platform $user",
+                                        "query_string": "source:zscaler-private-access service:user-activity @PRAConnectionID:* $connection_status $client_zen $idp $platform $user $client_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2085,6 +2085,12 @@
         }
     ],
     "template_variables": [
+        {
+            "name": "client_ip",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
         {
             "name": "client_zen",
             "prefix": "@ClientZEN",

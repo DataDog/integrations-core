@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -133,7 +133,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -167,7 +167,7 @@
                     {
                         "id": 3916373607149624,
                         "definition": {
-                            "title": "Audit Events Details",
+                            "title": "Audit Event Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -175,7 +175,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user_email",
+                                        "query_string": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -237,7 +237,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In\" $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In\" $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -292,7 +292,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In Failure\" $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In Failure\" $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -346,7 +346,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In Failure\" $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In Failure\" $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -416,7 +416,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign Out\" $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign Out\" $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -486,7 +486,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In Failure\" $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:\"Sign In Failure\" $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -549,7 +549,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -618,7 +618,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -687,7 +687,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -756,7 +756,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -826,7 +826,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:Create $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:Create $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -896,7 +896,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:Update $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:Update $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -966,7 +966,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:Delete $operation_type $component_type $user_email"
+                                                "query": "source:zscaler-private-access service:audit-logs @AuditOperationType:Delete $operation_type $component_type $user"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1047,7 +1047,7 @@
             "default": "*"
         },
         {
-            "name": "user_email",
+            "name": "user",
             "prefix": "@usr.email",
             "available_values": [],
             "default": "*"

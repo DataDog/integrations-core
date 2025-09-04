@@ -448,7 +448,7 @@
                     {
                         "id": 8031651602412847,
                         "definition": {
-                            "title": "Session Status Trends over Time",
+                            "title": "Session Status Trends",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1762,6 +1762,12 @@
     ],
     "template_variables": [
         {
+            "name": "client_ip",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
             "name": "client_type",
             "prefix": "@ClientType",
             "available_values": [],
@@ -1770,12 +1776,6 @@
         {
             "name": "hostname",
             "prefix": "@Hostname",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "client_ip",
-            "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"
         },

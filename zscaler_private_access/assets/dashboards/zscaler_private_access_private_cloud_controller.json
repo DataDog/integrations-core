@@ -332,7 +332,7 @@
                     {
                         "id": 8759380268764007,
                         "definition": {
-                            "title": "Session Status Trends over Time",
+                            "title": "Session Status Trends",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -403,7 +403,7 @@
                     {
                         "id": 6207501621010372,
                         "definition": {
-                            "title": "Geo Location by Private Service Edges",
+                            "title": "Geo Location by Private Cloud Controller",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "geomap",
@@ -473,7 +473,7 @@
                     {
                         "id": 6090377110968438,
                         "definition": {
-                            "title": "Private Cloud Controller Events Details",
+                            "title": "Private Cloud Controller Event Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -654,7 +654,6 @@
                             "title": "Top Private Cloud Controllers by Average CPU Utilization (%)",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -727,7 +726,6 @@
                             "title": "Top Private Cloud Controllers by Average Memory Utilization (%)",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -827,7 +825,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -989,7 +986,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1172,7 +1168,6 @@
                             "title": "Platform Distribution",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -1241,7 +1236,6 @@
                             "title": "Most Used Primary DNS Resolvers",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -1552,7 +1546,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {

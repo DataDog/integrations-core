@@ -66,7 +66,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -133,7 +133,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -178,14 +178,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@network.destination.ip",
+                                                    "facet": "@network.client.ip",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -249,7 +249,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -310,6 +310,7 @@
                             "title": "Geo Location by Microsegmentation Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "geomap",
                             "requests": [
                                 {
@@ -319,14 +320,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@network.destination.geoip.country.iso_code",
+                                                    "facet": "@network.client.geoip.country.iso_code",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -377,7 +378,7 @@
                     {
                         "id": 8129183516975238,
                         "definition": {
-                            "title": "Microsegmentation Connection Events Details",
+                            "title": "Microsegmentation Connection Event Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -385,7 +386,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip",
+                                        "query_string": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -447,7 +448,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @Direction:INBOUND $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @Direction:INBOUND $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -462,6 +463,14 @@
                                     "formulas": [
                                         {
                                             "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#a2c2e8"
                                         }
                                     ]
                                 }
@@ -506,7 +515,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -562,7 +571,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @Direction:OUTBOUND $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @Direction:OUTBOUND $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -577,6 +586,14 @@
                                     "formulas": [
                                         {
                                             "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#a2c2e8"
                                         }
                                     ]
                                 }
@@ -605,7 +622,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -675,7 +692,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -746,7 +763,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -837,7 +854,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementAction:ALLOW $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementAction:ALLOW $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -891,7 +908,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -961,7 +978,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementAction:SIMBLOCK $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementAction:SIMBLOCK $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1016,7 +1033,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementAction:BLOCK $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementAction:BLOCK $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1071,7 +1088,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementDisposition:CONNECTED $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementDisposition:CONNECTED $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1126,7 +1143,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementDisposition:DROPPED $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementDisposition:DROPPED $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1181,7 +1198,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementDisposition:REJECTED $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation @EnforcementDisposition:REJECTED $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1249,7 +1266,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1318,7 +1335,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $source_ip"
+                                                "query": "source:zscaler-private-access service:microsegmentation $direction $enforcement_action $enforcement_disposition $enforcement_reason $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1394,8 +1411,8 @@
             "default": "*"
         },
         {
-            "name": "source_ip",
-            "prefix": "@SourceIP",
+            "name": "client_ip",
+            "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"
         }

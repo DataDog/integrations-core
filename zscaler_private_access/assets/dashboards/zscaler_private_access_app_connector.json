@@ -320,7 +320,7 @@
                     {
                         "id": 8193814113506325,
                         "definition": {
-                            "title": "Session Status Trends over Time",
+                            "title": "Session Status Trends",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -458,7 +458,7 @@
                     {
                         "id": 1879732464864201,
                         "definition": {
-                            "title": "App Connectors Events Details",
+                            "title": "App Connectors Event Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [

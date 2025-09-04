@@ -197,23 +197,6 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: pipeline
-      name: App Connector or Private Service Edge or Private Cloud Controller Status
-      enabled: true
-      filter:
-        query: service:app-connector-status OR service:private-service-edge-status OR
-          service:private-cloud-controller-status
-      processors:
-        - type: attribute-remapper
-          name: Map `PublicIP` to `network.client.ip`
-          enabled: true
-          sources:
-            - PublicIP
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-    - type: pipeline
       name: User Status
       enabled: true
       filter:
@@ -797,13 +780,26 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
-        - type: geo-ip-parser
-          name: GeoIp Parser for `network.client.ip`
+        - type: attribute-remapper
+          name: Map `SourcePorts` to `network.client.port`
           enabled: true
           sources:
-            - network.client.ip
-          target: network.client.geoip
-          ip_processing_behavior: do-nothing
+            - SourcePorts
+          sourceType: attribute
+          target: network.client.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `DestinationPort` to `network.destination.port`
+          enabled: true
+          sources:
+            - DestinationPort
+          sourceType: attribute
+          target: network.destination.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: App Connector or Private Service Edge or Private Cloud Controller Status
       enabled: true
