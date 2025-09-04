@@ -155,16 +155,7 @@ pipeline:
         matchRules: autoFilledRule1 <%{number:syslog.priority}>%{number:syslog.version}
           %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{notSpace:hostname}
           %{notSpace:appname}\s+%{number:pid} - \[%{data::keyvalue(":")}\]
-    - type: attribute-remapper
-      name: " Map `timestamp` to `syslog.timestamp`"
-      enabled: true
-      sources:
-        - timestamp
-      sourceType: attribute
-      target: syslog.timestamp
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
+    
     - type: attribute-remapper
       name: Map hostname to syslog.hostname
       enabled: true
@@ -176,7 +167,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: date-remapper
-      name: "Define `timestamp` as the official date of the log "
+      name: Define `timestamp` as the official date of the log
       enabled: true
       sources:
         - timestamp
