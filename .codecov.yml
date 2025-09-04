@@ -82,6 +82,10 @@ coverage:
         target: 75
         flags:
         - azure_iot_edge
+      BentoML:
+        target: 75
+        flags:
+        - bentoml
       Boundary:
         target: 75
         flags:
@@ -282,6 +286,10 @@ coverage:
         target: 75
         flags:
         - hazelcast
+      Hugging_Face_TGI:
+        target: 75
+        flags:
+        - hugging_face_tgi
       IBM_ACE:
         target: 75
         flags:
@@ -884,6 +892,11 @@ flags:
     paths:
     - azure_iot_edge/datadog_checks/azure_iot_edge
     - azure_iot_edge/tests
+  bentoml:
+    carryforward: true
+    paths:
+    - bentoml/datadog_checks/bentoml
+    - bentoml/tests
   boundary:
     carryforward: true
     paths:
@@ -1174,6 +1187,11 @@ flags:
     paths:
     - http_check/datadog_checks/http_check
     - http_check/tests
+  hugging_face_tgi:
+    carryforward: true
+    paths:
+    - hugging_face_tgi/datadog_checks/hugging_face_tgi
+    - hugging_face_tgi/tests
   ibm_ace:
     carryforward: true
     paths:
