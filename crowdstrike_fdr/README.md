@@ -2,16 +2,16 @@
 
 ## Overview
 
-[CrowdStrike Falcon Data Replicator (FDR)][1] is a high-fidelity data export solution that enables organizations to securely stream raw endpoint telemetry in near real time. FDR delivers detailed event data through a data feed in JSON format using S3 (Amazon Web Services Simple Storage Service) and SQS (Amazon Simple Queue Service).
+[CrowdStrike Falcon Data Replicator (FDR)][1] is a high-fidelity data export solution that enables organizations to securely stream raw endpoint telemetry in near real time. FDR delivers detailed event data through a data feed in JSON format using Amazon Web Services Simple Storage Service (Amazon S3) and Amazon Simple Queue Service (Amazon SQS).
 
-Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity and Network Behavior events using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity and Network Behavior events using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search, and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
 ### Set up data replication from CrowdStrike FDR to a customer-owned S3 bucket
 
 #### Configure CrowdStrike FDR Feed
-1. Login to **CrowdStrike Falcon** platform.
+1. Log in to the **CrowdStrike Falcon** platform.
 2. Go to **Support and resources** > **Resources and tools** > **Falcon data replicator**.
 3. In the **FDR feeds** tab, click **Create feed**.
 4. Provide a feed name.
@@ -28,7 +28,7 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
    - **Bucket name**: Enter a Bucket name (must be globally unique and begins with the prefix `crowdstrike-fdr` to comply with integration naming requirements).
    - **AWS Region**: Choose a region.
       - You can only use your S3 bucket if you're using the US-1, US-2, or EU-1 CrowdStrike clouds.
-      - Ensure that your bucket resides in the same AWS region as your Falcon CID where the FDR feed is  provisioned.
+      - Ensure that your bucket resides in the same AWS region as your Falcon CID where the FDR feed is provisioned.
         CrowdStrike terminology for cloud regions differs slightly from AWS, as shown in this table.
         | CrowdStrike region | AWS region   |
         |--------------------|--------------|
@@ -82,7 +82,7 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 6. In the **Description** section of the support case, be sure to include the following details:
     - The Falcon Customer ID (CID) where your FDR feed is provisioned
     - FDR feed name created in `Configure CrowdStrike FDR Feed` section
-    - The ARN of the custom S3 bucket copied in **Step-8** from `Setup Custom AWS S3 Bucket`.
+    - The ARN of the custom S3 bucket copied in **Step-8** from `Setup Custom AWS S3 Bucket`
     - Confirmation that the bucket has been set up according to the specifications outlined
 7. **Customer ID (CID)**: Provide Falcon Customer ID
 8. **Preferred Working Time Zone**: Select any preferred timezone
@@ -93,7 +93,7 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 
 ## Configure Datadog Forwarder
 
-- Please refer to the [Datadog Forwarder][2].
+- See the [Datadog Forwarder][2] page for configuration steps.
 
 ## Data Collected
 
