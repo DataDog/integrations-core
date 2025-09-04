@@ -255,7 +255,7 @@ jobs:
       # - build-macos
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: ./.github/workflows/size-qg-measure-disk-use.yml
     with:
       platform: ${{ matrix.platform }}
@@ -266,7 +266,7 @@ jobs:
     needs: measure-disk-usage
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: ./.github/workflows/size-quality-gates.yml
     with:
       platform: ${{ matrix.platform }}

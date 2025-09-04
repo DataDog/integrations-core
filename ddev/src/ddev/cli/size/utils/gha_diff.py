@@ -1,4 +1,5 @@
 import argparse
+import csv
 import json
 
 from datadog import api, initialize
@@ -455,11 +456,11 @@ def main():
     args = parser.parse_args()
 
     with open(args.compressed_prev_sizes, "r") as f:
-        prev_compressed_sizes = json.load(f)
+        prev_compressed_sizes = csv.DictReader(f)
     with open(args.compressed_curr_sizes, "r") as f:
         curr_compressed_sizes = json.load(f)
     with open(args.uncompressed_prev_sizes, "r") as f:
-        prev_uncompressed_sizes = json.load(f)
+        prev_uncompressed_sizes = csv.DictReader(f)
     with open(args.uncompressed_curr_sizes, "r") as f:
         curr_uncompressed_sizes = json.load(f)
 
