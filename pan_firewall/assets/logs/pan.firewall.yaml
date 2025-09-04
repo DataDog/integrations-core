@@ -201,10 +201,10 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - "timestamp=2025/05/22 20:53:17, serial=001801010877, type=AUTHENTICATION, subtype=virus, time_generated=2025/05/22 20:53:17, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+        - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end, time_generated=2025/09/03 19:40:32, network.client.ip=172.16.28.190, network.destination.ip=17.253.2.43, natsrc=72.138.81.50, natdst=17.253.2.43, rule=L3_Orca to L3_Untrust, usr.id=, dstuser=, app=ntp-base, vsys=vsys1, from=L3_Orca, to=L3_Untrust, inbound_if=ethernet1/6.115, outbound_if=ethernet1/7, logset=datadog-forwarder, sessionid=393714, repeatcnt=1, network.client.port=123, network.destination.port=123, natsport=29153 natdport=123, flags=0x40407a, proto=udp, evt.name=allow, bytes=372, network.bytes_read=282, network.bytes_written=90, start=2025/09/03 19:39:53, elapsed=36, category=any, seqno=7489817491394537148, actionflags=0x0, network.client.geoip.country.name=172.16.0.0-172.31.255.255, dstloc=United States, pkts_sent=3, pkts_received=1, session_end_reason=aged-out, device_name=PA-3220, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi= 0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0 chunks_sent=0 chunks_received=0"
       grok:
         matchRules: |
-          rule_panos %{data::keyvalue("="," \"")}
+          rule_panos %{data::keyvalue("=","/: \"")}
         supportRules: ''
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
@@ -242,14 +242,13 @@ pipeline:
           name: Parsing event time
           enabled: true
           source: 
-            - timestamp
+            - time_generated
           samples:
             - "2025/08/25T17:15:02.982Z"
           grok:
             supportRules: ""
             matchRules: |-
-              three %{date("yyyy/MM/dd'T'HH:mm:ss.SSS'Z'")}:ocsf.time}
-              zero %{date("yyyy/MM/dd'T'HH:mm:ss'Z'")}:ocsf.time}
+              zero %{date("yyyy/MM/dd HH:mm:ss")}:ocsf.time}
         - type: attribute-remapper
           name: Sequence Number
           enabled: true
