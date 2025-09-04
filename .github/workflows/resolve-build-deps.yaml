@@ -252,7 +252,7 @@ jobs:
   measure-disk-usage:
     needs:
       - build
-      - build-macos
+      # - build-macos
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
@@ -275,11 +275,14 @@ jobs:
     needs:
       - calculate-size-diffs
     if: >
-      contains(github.event.pull_request.labels.*.name, 'show-size-delta') &&
+      contains(github.event.pull_request.labels.*.name, 'show-size-delta') && 
       needs.calculate-size-diffs.outputs.passes_qg == false
     env:
-      PYTHON_VERSION: "3.12"
-      PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
+      PLATFORMS: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
+      GITHUB_RUN_ID: ${{ github.run_id }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -287,45 +290,49 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Get merge base commit
-        id: merge_base
-        run: |
-          git fetch origin master:refs/remotes/origin/master
-          base=$(git merge-base HEAD origin/master)
-          echo "sha=$base" >> $GITHUB_OUTPUT
+      - name: Output size diffs
+        uses: ./.github/workflows/scripts/output_size_diffs.sh
+      # - name: Get merge base commit
+      #   id: merge_base
+      #   run: |
+      #     git fetch origin master:refs/remotes/origin/master
+      #     base=$(git merge-base HEAD origin/master)
+      #     echo "sha=$base" >> $GITHUB_OUTPUT
 
-      - name: Join size diffs in order
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAX_COMMENT_SIZE: 65536
-        run: |
-          BASE_SHA="${{ steps.merge_base.outputs.sha }}"
-          BASE_SHORT="${BASE_SHA:0:7}"
-          echo "<h3>Dependency Size Changes</h3>" > comment.txt
-          echo >> comment.txt
-          echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
-          for p in $PLATFORMS; do
-            gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
-            cat "size_diffs_output_${p}.txt" >> comment.txt
-          done
-          if [ $(wc -c < comment.txt) -gt $MAX_COMMENT_SIZE ]; then
-            echo "<h3>Dependency Size Changes</h3>" > comment.txt
-            echo >> comment.txt
-            echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
-            for p in $PLATFORMS; do
-              gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
-              cat "size_diffs_output_short_${p}.txt" >> comment.txt
-            done
-            GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> comment.txt
-          fi
+      # - name: Join size diffs in order
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_RUN_ID: ${{ github.run_id }}
+      #     GITHUB_REPOSITORY: ${{ github.repository }}
+      #     PR_NUMBER: ${{ github.event.pull_request.number }}
+      #   run: |
+      #     BASE_SHA="${{ steps.merge_base.outputs.sha }}"
+      #     BASE_SHORT="${BASE_SHA:0:7}"
+      #     echo "<h3>Dependency Size Changes</h3>" > comment.txt
+      #     echo >> comment.txt
+      #     echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
+      #     for p in $PLATFORMS; do
+      #       gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
+      #       cat "size_diffs_output_${p}.txt" >> comment.txt
+      #     done
+      #     if [ $(wc -c < comment.txt) -gt $MAX_COMMENT_SIZE ]; then
+      #       echo "<h3>Dependency Size Changes</h3>" > comment.txt
+      #       echo >> comment.txt
+      #       echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
+      #       for p in $PLATFORMS; do
+      #         gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
+      #         cat "size_diffs_output_short_${p}.txt" >> comment.txt
+      #       done
+      #       GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      #       echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> comment.txt
+      #     fi
 
-      - name: Output results
-        run: |
-          gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
-          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
-        env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Output results
+      #   run: |
+      #     gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+      #     gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+      #   env:
+      #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 

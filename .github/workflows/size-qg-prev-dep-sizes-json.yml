@@ -33,31 +33,36 @@ jobs:
       run_id: ${{ steps.find_run.outputs.run_id }}
       base_sha: ${{ steps.merge_base.outputs.base_sha }}
     steps:
-
-      - name: Get merge base commit
-        id: merge_base
+      - name: Get merge base run id
+        uses: ./.github/workflows/scripts/get_merge_base_artifacts.sh "Measure Disk Usage"
+      - name: export run_id and base_sha
         run: |
-          git fetch origin master:refs/remotes/origin/master
-          base=$(git merge-base HEAD origin/master)
-          echo "base_sha=$base" >> $GITHUB_OUTPUT
-      - name: Find workflow run at exact merge-base SHA 
-        id: find_run
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          MERGE_BASE=${{ steps.merge_base.outputs.base_sha }}
+          echo "run_id=${{ steps.get-merge-base-run-id.outputs.run_id }}" >> $GITHUB_OUTPUT
+          echo "base_sha=${{ steps.get-merge-base-run-id.outputs.base_sha }}" >> $GITHUB_OUTPUT
+      # - name: Get merge base commit
+      #   id: merge_base
+      #   run: |
+      #     git fetch origin master:refs/remotes/origin/master
+      #     base=$(git merge-base HEAD origin/master)
+      #     echo "base_sha=$base" >> $GITHUB_OUTPUT
+      # - name: Find workflow run at exact merge-base SHA 
+      #   id: find_run
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     MERGE_BASE=${{ steps.merge_base.outputs.base_sha }}
 
-          count=$(git rev-list --count ${{ steps.merge_base.outputs.base_sha }}..origin/master)
-          count_plus_one=$((count + 1))
-          run_id=$(
-            (
-              gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-            ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
-          )
-          if [ -z "$run_id" ]; then
-            echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
+      #     count=$(git rev-list --count ${{ steps.merge_base.outputs.base_sha }}..origin/master)
+      #     count_plus_one=$((count + 1))
+      #     run_id=$(
+      #       (
+      #         gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
+      #       ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
+      #     )
+      #     if [ -z "$run_id" ]; then
+      #       echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
+      #       exit 1
+      #     fi
 
   download-artifacts:
     needs: get-merge-base
