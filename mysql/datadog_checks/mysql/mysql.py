@@ -242,6 +242,8 @@ class MySql(AgentCheck):
         """
         self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
+        if self.agent_hostname:
+            self.tag_manager.set_tag("ddagenthostname", self.agent_hostname, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -585,7 +587,7 @@ class MySql(AgentCheck):
             else:
                 with tracked_query(self, operation="innodb_metrics"):
                     results.update(self.innodb_stats.get_stats_from_innodb_status(db))
-                self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
+            self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):

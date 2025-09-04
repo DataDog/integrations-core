@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bye-pipeline
+spec:
+  tasks:
+    - name: bye-task
+      taskRef:
+        name: bye
