@@ -148,19 +148,47 @@ class KafkaConfig:
             ):
                 self.log.debug('Data Streams live messages configuration missing required kafka parameters.', kafka)
                 continue
-            # Only json format is supported for Data Streams live messages
+
+            # Validate value format
             if kafka.get('value_format', '') == '':
                 kafka['value_format'] = 'json'
-            if kafka['value_format'] != 'json':
+            value_format = kafka['value_format']
+            if value_format not in ['json', 'avro', 'protobuf']:
                 self.log.debug(
-                    'Only json format is supported for Data Streams live messages, got %s', kafka['value_format']
+                    'Unsupported value format for Data Streams live messages, got %s. '
+                    'Supported formats: json, avro, protobuf',
+                    value_format,
                 )
+                continue
+
+            # Validate key format
             if kafka.get('key_format', '') == '':
                 kafka['key_format'] = 'json'
-            if kafka['key_format'] != 'json':
+            key_format = kafka['key_format']
+            if key_format not in ['json', 'avro', 'protobuf']:
                 self.log.debug(
-                    'Only json format is supported for Data Streams live messages, got %s', kafka['key_format']
+                    'Unsupported key format for Data Streams live messages, got %s. '
+                    'Supported formats: json, avro, protobuf',
+                    key_format,
                 )
+                continue
+
+            # Validate schemas for non-JSON formats
+            if value_format in ['avro', 'protobuf']:
+                if 'value_schema' not in kafka or not kafka['value_schema']:
+                    self.log.debug(
+                        'Value schema is required for %s format in Data Streams live messages configuration',
+                        value_format,
+                    )
+                    continue
+
+            if key_format in ['avro', 'protobuf']:
+                if 'key_schema' not in kafka or not kafka['key_schema']:
+                    self.log.debug(
+                        'Key schema is required for %s format in Data Streams live messages configuration', key_format
+                    )
+                    continue
+
             live_messages_configs.append(config)
         self.live_messages_configs = live_messages_configs
 

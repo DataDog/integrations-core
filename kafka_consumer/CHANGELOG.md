@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 6.7.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Add support for Avro and Protobuf formats for Data Streams messages feature. ([#20862](https://github.com/DataDog/integrations-core/pull/20862))
+
+***Fixed***:
+
+* data streams: Don't retrieve messages for untracked topics and cleanup consumer groups used for Data Streams messages feature. ([#20948](https://github.com/DataDog/integrations-core/pull/20948))
+
+## 6.6.1 / 2025-07-25 / Agent 7.69.0
+
+***Fixed***:
+
+* Lowercase Kafka cluster in data streams messages feature. ([#20842](https://github.com/DataDog/integrations-core/pull/20842))
+
 ## 6.6.0 / 2025-07-10
 
 ***Added***:

@@ -13,9 +13,15 @@
     "media": [
       {
         "caption": "ExtraHop - Detections",
-        "image_url": "images/extrahop_detections.png",
+        "image_url": "images/extrahop_dashboard_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "ExtraHop - Detections",
+        "image_url": "images/extrahop_dashboard_2.png",
         "media_type": "image"
       }
+      
     ],
     "classifier_tags": [
       "Category::Log Collection",

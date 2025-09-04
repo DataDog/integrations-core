@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 1.3.0 / 2025-09-04
+
+***Added***:
+
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+
+## 1.2.0 / 2025-07-29 / Agent 7.69.0
+
+***Added***:
+
+* Revert upgrade to psycopg3 ([#20881](https://github.com/DataDog/integrations-core/pull/20881))
+
 ## 1.1.0 / 2025-07-10
 
 ***Added***:

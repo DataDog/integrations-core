@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Real-Time Digital Experience Analytics",
+    "title": "iboss - Real-Time Digital Experience Log Analytics",
     "description": "This dashboard provides insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets using logs.",
     "widgets": [
         {
@@ -45,6 +45,27 @@
             }
         },
         {
+            "id": 5218912866242654,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 7161133483529427,
             "definition": {
                 "title": "Average Application Peer Connection Time",
@@ -59,7 +80,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -101,7 +122,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 4,
                 "height": 3
             }
@@ -141,7 +162,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -167,7 +188,7 @@
             },
             "layout": {
                 "x": 4,
-                "y": 3,
+                "y": 5,
                 "width": 8,
                 "height": 3
             }
@@ -187,7 +208,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -229,7 +250,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
+                "y": 8,
                 "width": 4,
                 "height": 3
             }
@@ -269,7 +290,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -295,7 +316,7 @@
             },
             "layout": {
                 "x": 4,
-                "y": 6,
+                "y": 8,
                 "width": 8,
                 "height": 3
             }
@@ -315,7 +336,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -357,7 +378,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 11,
                 "width": 4,
                 "height": 3
             }
@@ -397,7 +418,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -423,7 +444,7 @@
             },
             "layout": {
                 "x": 4,
-                "y": 9,
+                "y": 11,
                 "width": 8,
                 "height": 3
             }
@@ -443,7 +464,7 @@
                                 "name": "events_query_1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -471,7 +492,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -499,7 +520,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -582,7 +603,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 14,
                 "width": 6,
                 "height": 4
             }
@@ -601,7 +622,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -628,7 +649,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -655,7 +676,7 @@
                                 "name": "query3",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -844,7 +865,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 12,
+                "y": 14,
                 "width": 6,
                 "height": 4
             }
@@ -864,7 +885,7 @@
                                 "name": "events_query_1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss -@resourceName:\"-\""
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -892,7 +913,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss -@resourceName:\"-\""
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -920,7 +941,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss -@resourceName:\"-\""
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1003,7 +1024,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 18,
                 "width": 6,
                 "height": 4
             }
@@ -1022,7 +1043,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss -@resourceName:\"-\""
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1049,7 +1070,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss -@resourceName:\"-\""
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1076,7 +1097,7 @@
                                 "name": "query3",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss -@resourceName:\"-\""
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1265,7 +1286,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 16,
+                "y": 18,
                 "width": 6,
                 "height": 4
             }
@@ -1285,7 +1306,7 @@
                                 "name": "events_query_1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1323,7 +1344,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1361,7 +1382,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1454,7 +1475,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 22,
                 "width": 6,
                 "height": 4
             }
@@ -1473,7 +1494,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1500,7 +1521,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1527,7 +1548,7 @@
                                 "name": "query3",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1716,7 +1737,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 20,
+                "y": 22,
                 "width": 6,
                 "height": 4
             }
@@ -1736,7 +1757,7 @@
                                 "name": "events_query_1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1764,7 +1785,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1792,7 +1813,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1876,7 +1897,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 24,
+                "y": 26,
                 "width": 6,
                 "height": 4
             }
@@ -1895,7 +1916,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1922,7 +1943,7 @@
                                 "name": "query2",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -1949,7 +1970,7 @@
                                 "name": "query3",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:iboss"
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
                                 },
                                 "indexes": [
                                     "*"
@@ -2138,13 +2159,56 @@
             },
             "layout": {
                 "x": 6,
-                "y": 24,
+                "y": 26,
                 "width": 6,
                 "height": 4
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "name": "host",
+            "prefix": "@hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "resource_name",
+            "prefix": "@resourceName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "asset_id",
+            "prefix": "@assetId",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "computer_name",
+            "prefix": "@computerName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "location",
+            "prefix": "@location",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "country",
+            "prefix": "@network.client.geoip.country.name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
     "layout_type": "ordered",
     "notify_list": [],
     "reflow_type": "fixed"

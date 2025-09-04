@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Audit Events",
+    "title": "iboss - Audit Logs",
     "description": "This dashboard provides insights into audit and agent registration events in iboss, offering visibility into admin actions, policy changes, and device onboarding for improved security and compliance.",
     "widgets": [
         {
@@ -44,6 +44,27 @@
             }
         },
         {
+            "id": 6328597602141615,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 4320737967390294,
             "definition": {
                 "title": "Audit Activity Insights",
@@ -71,7 +92,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -137,7 +158,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -191,7 +212,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT -@usr.name:\"-\" $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT -@usr.name:\"-\" $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -243,7 +264,7 @@
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 3,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -260,7 +281,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -310,7 +331,7 @@
                             }
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 3,
                             "width": 3,
                             "height": 4
@@ -330,7 +351,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -380,9 +401,9 @@
                             }
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 7,
                             "y": 3,
-                            "width": 6,
+                            "width": 5,
                             "height": 4
                         }
                     },
@@ -400,7 +421,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -503,7 +524,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:iboss service:iboss @evt.name:AUDIT $user_name",
+                                        "query_string": "source:iboss service:iboss @evt.name:AUDIT $user $location $host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -548,7 +569,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 12,
                 "height": 16
             }
@@ -581,7 +602,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -646,7 +667,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -695,7 +716,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -742,7 +763,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -811,7 +832,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user $location $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -878,7 +899,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user_name",
+                                        "query_string": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $user $location $host",
                                         "indexes": [
                                             "*"
                                         ],
@@ -921,7 +942,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 21,
                 "width": 12,
                 "height": 13,
                 "is_column_break": true
@@ -930,8 +951,20 @@
     ],
     "template_variables": [
         {
-            "name": "user_name",
+            "name": "host",
+            "prefix": "@hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user",
             "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "location",
+            "prefix": "@location",
             "available_values": [],
             "default": "*"
         }

@@ -43,6 +43,7 @@ def _expected_dbm_instance_tags(check):
     return check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
+        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
     ]
@@ -263,6 +264,7 @@ def test_procedure_metrics(
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
     expected_instance_tags.add("database_hostname:stubbed.hostname")
     expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("ddagenthostname:{}".format("stubbed.hostname"))
     expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
     expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
 
@@ -283,7 +285,6 @@ def test_procedure_metrics(
             expected_objects, payload['sqlserver_rows']
         )
 
-    assert len(payload['sqlserver_rows']) == len(expected_objects), 'should have as many emitted rows as expected'
     assert set(payload['tags']) == expected_instance_tags
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
 

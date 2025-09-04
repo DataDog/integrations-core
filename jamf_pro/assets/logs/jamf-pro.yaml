@@ -1,0 +1,256 @@
+id: jamf-pro
+metric_id: jamf-pro
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Web Access
+    name: Method
+    path: http.method
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Jamf Pro
+  enabled: true
+  filter:
+    query: source:jamf-pro
+  processors:
+    - type: service-remapper
+      name: Define `webhook.webhookEvent` as the official service of the log
+      enabled: true
+      sources:
+        - webhook.webhookEvent
+    - type: date-remapper
+      name: Define `webhook.eventTimestamp` as the official date of the log
+      enabled: true
+      sources:
+        - webhook.eventTimestamp
+    - type: attribute-remapper
+      name: Map `webhook.webhookEvent` to `evt.name`
+      enabled: true
+      sources:
+        - webhook.webhookEvent
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: pipeline
+      name: Attribute remapping for `ComputerAdded`, `ComputerInventoryCompleted` and
+        `ComputerPushCapabilityChanged` Events
+      enabled: true
+      filter:
+        query: service:(ComputerAdded OR ComputerInventoryCompleted OR
+          ComputerPushCapabilityChanged)
+      processors:
+        - type: attribute-remapper
+          name: Map `event` to `event.computer`
+          enabled: true
+          sources:
+            - event
+          sourceType: attribute
+          target: event.computer
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Attribute Remapping for `SCEPChallenge` Events
+      enabled: true
+      filter:
+        query: service:SCEPChallenge
+      processors:
+        - type: attribute-remapper
+          name: Map `event.targetUser.uid` to `usr.id`
+          enabled: true
+          sources:
+            - event.targetUser.uid
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.targetUser.username` to `usr.name`
+          enabled: true
+          sources:
+            - event.targetUser.username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.targetUser.email` to `usr.email`
+          enabled: true
+          sources:
+            - event.targetUser.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Attribute Remapping for `RestAPIOperations` Events
+      enabled: true
+      filter:
+        query: service:RestAPIOperation
+      processors:
+        - type: attribute-remapper
+          name: Map `event.restAPIOperationType` to `http.method`
+          enabled: true
+          sources:
+            - event.restAPIOperationType
+          sourceType: attribute
+          target: http.method
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.authorizedUsername` to `usr.name`
+          enabled: true
+          sources:
+            - event.authorizedUsername
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Computer Events
+      enabled: true
+      filter:
+        query: service:(ComputerAdded OR ComputerCheckIn OR ComputerInventoryCompleted
+          OR ComputerPatchPolicyCompleted OR ComputerPolicyFinished OR
+          ComputerPushCapabilityChanged)
+      processors:
+        - type: attribute-remapper
+          name: Map `event.computer.username` to `usr.name`
+          enabled: true
+          sources:
+            - event.computer.username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.computer.emailAddress` to `usr.email`
+          enabled: true
+          sources:
+            - event.computer.emailAddress
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.computer.ipAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - event.computer.ipAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: Extract geolocation information
+          enabled: true
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Parse Mobile Events
+      enabled: true
+      filter:
+        query: service:(MobileDeviceCheckIn OR MobileDeviceCommandCompleted OR
+          MobileDeviceEnrolled OR MobileDeviceInventoryCompleted OR
+          MobileDevicePushSent OR MobileDeviceUnEnrolled)
+      processors:
+        - type: attribute-remapper
+          name: Map `event.username` to `usr.name`
+          enabled: true
+          sources:
+            - event.username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.ipAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - event.ipAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: Extract geolocation information
+          enabled: true
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
