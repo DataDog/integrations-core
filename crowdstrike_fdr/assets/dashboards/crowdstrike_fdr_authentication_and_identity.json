@@ -1,6 +1,6 @@
 {
     "title": "CrowdStrike FDR - Authentication & Identity",
-    "description": "This dashboard provides insights into authentication activities and identity-related events, highlighting successful and failed logons, SSO attempts, and suspicious token usage to enhance visibility into account access and potential compromise.",
+    "description": "This dashboard provides insights into authentication activities and identity-related events, highlighting successful and failed logons, and suspicious token usage to enhance visibility into account access and potential compromise.",
     "widgets": [
         {
             "id": 80178177366926,
@@ -25,7 +25,7 @@
             "id": 8149798550171738,
             "definition": {
                 "type": "note",
-                "content": "**[Crowdstrike FDR](https://www.crowdstrike.com/en-us/resources/data-sheets/falcon-data-replicator/)** enables continuous export of raw Falcon security telemetry to AWS S3 storage. It provides scalable access to endpoint, network, and identity events for integration with SIEM.\n\nThis dashboard provides insights into authentication activities and identity-related events, highlighting successful and failed logons, SSO attempts, and suspicious token usage to enhance visibility into account access and potential compromise.\n\nFor more information, see the [Crowdstrike FDR Integration Documentation](https://docs.datadoghq.com/integrations/crowdstrike_fdr/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**[Crowdstrike FDR](https://www.crowdstrike.com/en-us/resources/data-sheets/falcon-data-replicator/)** enables continuous export of raw Falcon security telemetry to AWS S3 storage. It provides scalable access to endpoint, network, and identity events for integration with SIEM.\n\nThis dashboard provides insights into authentication activities and identity-related events, highlighting successful and failed logons, and suspicious token usage to enhance visibility into account access and potential compromise.\n\nFor more information, see the [Crowdstrike FDR Integration Documentation](https://docs.datadoghq.com/integrations/crowdstrike_fdr/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

@@ -271,13 +271,6 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
-    - type: geo-ip-parser
-      name: Extract geolocation information form client ip
-      enabled: true
-      sources:
-        - network.client.ip
-      target: network.client.geoip
-      ip_processing_behavior: do-nothing
     - name: Lookup on `ConnectionDirection` Field
       enabled: true
       source: ConnectionDirection
