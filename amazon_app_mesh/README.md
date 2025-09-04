@@ -97,7 +97,6 @@ Alternatively, the appmesh injector can be deployed by following the [App Mesh w
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "ECS Fargate" xxx -->
-{{% tab "ECS Fargate" %}}
 
 #### Metric collection
 
