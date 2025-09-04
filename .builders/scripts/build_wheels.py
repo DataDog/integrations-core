@@ -106,7 +106,7 @@ def main():
 
         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
-
+        print("Starting to fetch wheels")
         # Fetch or build wheels
         command_args = [
             str(python_path), '-m', 'pip', 'wheel',
@@ -118,7 +118,7 @@ def main():
             command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
 
         check_process(command_args, env=env_vars)
-
+        print("Finished fetching wheels")
         # Repair wheels
         check_process([
             sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
