@@ -112,10 +112,10 @@ def main():
             str(python_path), '-m', 'pip', 'wheel',
             '-r', str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir', str(staged_wheel_dir),
-            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+            # '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
         ]
-        if args.use_built_index:
-            command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
+        # if args.use_built_index:
+        #     command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
 
         check_process(command_args, env=env_vars)
         print("Finished fetching wheels")
@@ -126,6 +126,15 @@ def main():
             '--built-dir', str(built_wheels_dir),
             '--external-dir', str(external_wheels_dir),
         ])
+
+    # Print the contents of the built and external wheels directories
+    print("Contents of built wheels directory:")
+    for wheel_file in sorted(built_wheels_dir.iterdir()):
+        print(f"  {wheel_file.name}")
+
+    print("Contents of external wheels directory:")
+    for wheel_file in sorted(external_wheels_dir.iterdir()):
+        print(f"  {wheel_file.name}")
 
     dependencies: dict[str, tuple[str, str]] = {}
     for wheel_dir in wheels_dir.iterdir():
