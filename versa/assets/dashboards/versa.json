@@ -1901,19 +1901,19 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.path_qos.volume_tx{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
+                      "query": "avg:versa.qos.volume_tx{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:versa.path_qos.total_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
+                      "query": "avg:versa.qos.total_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:versa.path_qos.percent_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
+                      "query": "avg:versa.qos.percent_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1976,7 +1976,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.path_qos.volume_tx{$device_namespace,$device_hostname, $site}"
+                      "query": "avg:versa.qos.volume_tx{$device_namespace,$device_hostname, $site}"
                     }
                   ],
                   "formulas": [
@@ -2024,7 +2024,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.path_qos.percent_drop{$device_namespace,$device_hostname, $site}"
+                      "query": "avg:versa.qos.percent_drop{$device_namespace,$device_hostname, $site}"
                     }
                   ],
                   "formulas": [
