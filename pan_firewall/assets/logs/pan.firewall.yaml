@@ -244,7 +244,7 @@ pipeline:
           source: 
             - time_generated
           samples:
-            - "2025/08/25T17:15:02.982Z"
+            - "2025/08/25 17:15:02"
           grok:
             supportRules: ""
             matchRules: |-
