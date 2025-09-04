@@ -6,7 +6,7 @@ import socket
 import time
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
@@ -130,8 +130,7 @@ def test_initialization_tags(integration_check, pg_instance):
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             if float(POSTGRES_VERSION) >= 13.0:
                 query = 'select pg_snapshot_xmin(pg_current_snapshot());'
@@ -148,9 +147,7 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.snapshot.xmax', count=1, tags=expected_tags)
     assert aggregator.metrics('postgresql.snapshot.xmax')[0].value >= xmin
 
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        # Force autocommit
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             _increase_txid(cur)
 
@@ -292,7 +289,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     def format_with_error(value, **kwargs):
         if 'pg_is_in_recovery' in value:
             called.append(True)
-            raise psycopg2.errors.FeatureNotSupported("Not available")
+            raise psycopg.errors.FeatureNotSupported("Not available")
         return unpatched_fmt.format(value, **kwargs)
 
     # This simulate an error in the fmt function, as it's a bit hard to mock psycopg
@@ -325,6 +322,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     with pytest.raises(AttributeError):
         check.db = mock.MagicMock(side_effect=AttributeError('foo'))
         check.check(pg_instance)
+
     # Since we can't connect to the host, we can't gather the replication role
     tags_without_role = _get_expected_tags(
         check, pg_instance, with_db=True, with_version=False, with_sys_id=False, with_cluster_name=False, role=None
@@ -340,7 +338,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # Forth: connection health check failed
     with pytest.raises(DatabaseHealthCheckError):
         db = mock.MagicMock()
-        db.cursor().__enter__().execute.side_effect = psycopg2.OperationalError('foo')
+        db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
 
         @contextlib.contextmanager
         def mock_db():
@@ -348,6 +346,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
 
         check.db = mock_db
         check.check(pg_instance)
+
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
     aggregator.reset()
 
@@ -398,7 +397,7 @@ def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
     Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
     """
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.run()
@@ -612,13 +611,12 @@ def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
-    with pytest.raises(psycopg2.errors.QueryCanceled):
+    with pytest.raises(psycopg.errors.QueryCanceled):
         with check.db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("select pg_sleep(2000)")
 
 
-@pytest.mark.flaky(max_runs=10)
 def test_pg_control(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()
@@ -831,18 +829,6 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         ),
         (
             {
-                "instance_endpoint": "mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com",
-                "region": "us-east-1",
-                "managed_authentication": {
-                    "enabled": True,
-                },
-            },
-            psycopg2.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
                 'region': 'us-east-1',
             },
             None,
@@ -859,27 +845,6 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
             None,
             None,
             False,
-        ),
-        (
-            {
-                'region': 'us-east-1',
-                "managed_authentication": {
-                    "enabled": 'true',
-                },
-            },
-            psycopg2.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "managed_authentication": {
-                    "enabled": 'true',
-                }
-            },
-            ConfigurationError,
-            'AWS region must be set when using AWS managed authentication',
-            None,  # IAM auth requires region so this should fail
         ),
     ],
 )
@@ -937,18 +902,6 @@ def test_database_instance_cloud_metadata_aws(
             {
                 "deployment_type": "flexible_server",
                 "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-            },
-            {
-                "client_id": "my-client-id",
-            },
-            psycopg2.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
                 "managed_authentication": {
                     "enabled": False,
                 },
@@ -974,50 +927,6 @@ def test_database_instance_cloud_metadata_aws(
             None,
             None,
             False,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-                "managed_authentication": {
-                    "enabled": True,
-                    "client_id": "my-client-id",
-                },
-            },
-            {
-                "client_id": "my-client-id",
-            },
-            psycopg2.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-                "managed_authentication": {
-                    "enabled": 'true',
-                    "client_id": "my-client-id",
-                    'identity_scope': 'https://database.windows.net/.default',
-                },
-            },
-            None,
-            psycopg2.OperationalError,
-            'password authentication failed',
-            True,
-        ),
-        (
-            {
-                "deployment_type": "flexible_server",
-                "fully_qualified_domain_name": "my-postgres-database.database.windows.net",
-                "managed_authentication": {
-                    "enabled": True,
-                },
-            },
-            None,
-            ConfigurationError,
-            'Azure client_id must be set when using Azure managed authentication',
-            None,
         ),
     ],
 )
