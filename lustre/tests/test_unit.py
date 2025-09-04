@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from typing import ChainMap
 
 import mock
 import pytest
@@ -91,17 +92,23 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
 )
 def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, expected_metrics):
     instance = {'node_type': node_type}
-    mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
-        'lctl dl': f'{node_type}_dl_yaml.txt',
-        'lctl list_param': "all_list_param.txt",
-        'lctl get_param': fixture_file,
-    }
+
+    jobid_tag_commands = {f'lctl get_param -ny {param.regex}': f'{param.fixture}' for param in JOBID_TAG_PARAMS}
+    mapping = ChainMap(
+        {
+            'lctl get_param -ny version': 'all_version.txt',
+            'lctl dl': f'{node_type}_dl_yaml.txt',
+            'lctl list_param': "all_list_param.txt",
+            'lctl get_param': fixture_file,
+        },
+        jobid_tag_commands,
+    )
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
         check.submit_jobstats_metrics(['lustre'])
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tags(metric, tags=['jobid_var:disable', 'jobid_name:%e.%u'])
 
 
 @pytest.mark.parametrize(
