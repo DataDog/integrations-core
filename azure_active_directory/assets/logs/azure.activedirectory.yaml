@@ -1079,10 +1079,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `properties.location.countryOrRegion.latitude` to `ocsf.src_endpoint.location.lat`
+          name: Map `properties.location.geoCoordinates.latitude` to `ocsf.src_endpoint.location.lat`
           enabled: true
           sources:
-            - properties.location.countryOrRegion.latitude
+            - properties.location.geoCoordinates.latitude
           sourceType: attribute
           target: ocsf.src_endpoint.location.lat
           targetType: attribute
@@ -1862,7 +1862,7 @@ pipeline:
           target: ocsf.status_id
           targetType: attribute
           targetFormat: integer
-          preserveSource: true
+          preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
