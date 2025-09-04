@@ -198,7 +198,7 @@ pipeline:
       sources:
         - category
       target: evt.category
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
@@ -208,7 +208,7 @@ pipeline:
       sources:
         - operationName
       target: evt.name
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
@@ -218,7 +218,7 @@ pipeline:
       sources:
         - callerIpAddress
       target: network.client.ip
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
@@ -252,7 +252,7 @@ pipeline:
         - properties.initiatedBy.user.userPrincipalName
         - properties.userDisplayName
       target: usr.name
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
@@ -272,7 +272,7 @@ pipeline:
       sources:
         - properties.userAgent
       target: http.useragent
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
@@ -307,7 +307,7 @@ pipeline:
         - properties.result
       target: evt.outcome
       targetFormat: string
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
@@ -335,7 +335,7 @@ pipeline:
         - type: string-builder-processor
           name: Add product name
           enabled: true
-          template: Azure Active Directory
+          template: Entra ID
           target: ocsf.metadata.product.name
           replaceMissing: false
         - type: string-builder-processor
@@ -345,10 +345,10 @@ pipeline:
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `evt.category` to `ocsf.metadata.log_name`
+          name: Map `category` to `ocsf.metadata.log_name`
           enabled: true
           sources:
-            - evt.category
+            - category
           sourceType: attribute
           target: ocsf.metadata.log_name
           targetType: attribute
@@ -369,25 +369,43 @@ pipeline:
           enabled: true
           source: ocsf.time
           samples:
-            - "2025-08-06T22:02:39.2294950+00:00"
+            - "2025-05-01T12:15:39.043474332+00:00"
+            - "2025-05-01T12:15:39.04347433+00:00"
+            - "2025-05-01T12:15:39.0434743+00:00"
+            - "2025-04-30T14:27:57.714605+00:00"
+            - "2025-05-01T12:15:39.0434+00:00"
+            - "2025-05-01T12:15:39.044+00:00"
+            - "2025-05-01T12:15:39.04+00:00"
+            - "2025-05-01T12:15:39.4+00:00"
+            - "2023-03-15T16:33:50+00:00"
           grok:
             supportRules: ""
-            matchRules: parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'+00:00'"):ocsf.time}
+            matchRules: |
+              parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'+00:00'"):ocsf.time}
+              parsing_time_1 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS'+00:00'"):ocsf.time}
+              parsing_time_2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'+00:00'"):ocsf.time}
+              parsing_time_3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'+00:00'"):ocsf.time}
+              parsing_time_4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSS'+00:00'"):ocsf.time}
+              parsing_time_5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSS'+00:00'"):ocsf.time}
+              parsing_time_6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'+00:00'"):ocsf.time}
+              parsing_time_7 %{date("yyyy-MM-dd'T'HH:mm:ss.SS'+00:00'"):ocsf.time}
+              parsing_time_8 %{date("yyyy-MM-dd'T'HH:mm:ss.S'+00:00'"):ocsf.time}
+              parsing_time_9 %{date("yyyy-MM-dd'T'HH:mm:ss'+00:00'"):ocsf.time}
         - type: attribute-remapper
-          name: Map `evt.name` to `ocsf.metadata.event_code`
+          name: Map `operationName` to `ocsf.metadata.event_code`
           enabled: true
           sources:
-            - evt.name
+            - operationName
           sourceType: attribute
           target: ocsf.metadata.event_code
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `properties.Id` to `ocsf.metadata.uid`
+          name: Map `properties.id` to `ocsf.metadata.uid`
           enabled: true
           sources:
-            - properties.Id
+            - properties.id
           sourceType: attribute
           target: ocsf.metadata.uid
           targetType: attribute
@@ -411,13 +429,13 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.category:AuditLogs"
+        query: "@ocsf.metadata.log_name:AuditLogs"
       processors:
         - type: attribute-remapper
-          name: Map `usr.name`, `properties.initiatedBy.app.displayName`, `identity` to `ocsf.actor.user.name`
+          name: Map `properties.initiatedBy.user.userPrincipalName`, `properties.initiatedBy.app.displayName`, `identity` to `ocsf.actor.user.name`
           enabled: true
           sources:
-            - usr.name
+            - properties.initiatedBy.user.userPrincipalName
             - properties.initiatedBy.app.displayName
             - identity
           sourceType: attribute
@@ -437,10 +455,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `usr.id` to `ocsf.actor.user.email_addr`
+          name: Map `properties.initiatedBy.user.userPrincipalName` to `ocsf.actor.user.email_addr`
           enabled: true
           sources:
-            - usr.id
+            - properties.initiatedBy.user.userPrincipalName
           sourceType: attribute
           target: ocsf.actor.user.email_addr
           targetType: attribute
@@ -451,7 +469,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@properties.initiatedBy.user.id:* OR @usr.name:*"
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
               name: User
             - filter:
                 query: "@properties.initiatedBy.app.servicePrincipalId:*"
@@ -468,7 +486,7 @@ pipeline:
                 query: "@properties.initiatedBy.app.servicePrincipalId:*"
               name: "3"
             - filter:
-                query: "@evt.category:*"
+                query: "@ocsf.metadata.log_name:*"
               name: "99"
           target: ocsf.actor.user.type_id
         - type: attribute-remapper
@@ -496,10 +514,27 @@ pipeline:
           enabled: true
           source: ocsf.time
           samples:
-            - "2025-08-06T22:02:39.2294950Z"
+            - "2025-05-01T12:15:39.043474332Z"
+            - "2025-05-01T12:15:39.04347433Z"
+            - "2025-05-01T12:15:39.0434743Z"
+            - "2025-04-30T14:27:57.714605Z"
+            - "2025-05-01T12:15:39.0434Z"
+            - "2025-05-01T12:15:39.044Z"
+            - "2025-05-01T12:15:39.04Z"
+            - "2025-05-01T12:15:39.4Z"
           grok:
             supportRules: ""
-            matchRules: parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'"):ocsf.time}
+            matchRules: |
+              parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ"):ocsf.time}
+              parsing_time_1 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSZ"):ocsf.time}
+              parsing_time_2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ"):ocsf.time}
+              parsing_time_3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              parsing_time_4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              parsing_time_5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              parsing_time_6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              parsing_time_7 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              parsing_time_8 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              parsing_time_9 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
         - type: array-processor
           name: Extract `key` from `additionalDetails` array
           enabled: true
@@ -527,10 +562,10 @@ pipeline:
             preserveSource: false
             type: append
         - type: attribute-remapper
-          name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
+          name: Map `callerIpAddress` to `ocsf.src_endpoint.ip`
           enabled: true
           sources:
-            - network.client.ip
+            - callerIpAddress
           sourceType: attribute
           target: ocsf.src_endpoint.ip
           targetType: attribute
@@ -547,29 +582,29 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: category-processor
-          name: OCSF - ocsf.status mapping
+          name: OCSF - ocsf.status_id mapping
           enabled: true
           categories:
             - filter:
-                query: "@evt.outcome:success"
+                query: "@properties.result:success"
               name: "1"
             - filter:
-                query: "@evt.outcome:failure"
+                query: "@properties.result:failure"
               name: "2"
-          target: ocsf.status
+            - filter:
+                query: "*"
+              name: "99"
+          target: ocsf.status_id
         - type: category-processor
           name: OCSF - ocsf.status mapping
           enabled: true
           categories:
             - filter:
-                query: "@evt.outcome:success"
+                query: "@properties.result:success"
               name: "Success"
             - filter:
-                query: "@evt.outcome:failure"
+                query: "@properties.result:failure"
               name: "Failure"
-            - filter:
-                query: "*"
-              name: "99"
           target: ocsf.status
     - type: pipeline
       name: OCSF sub pipeline for class Account Change [3001]
@@ -577,8 +612,69 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.category:AuditLogs (@properties.category:(UserManagement OR ApplicationManagement) OR (@properties.category:RoleManagement AND @properties.targetResources.type:(ServicePrincipal OR User)))"
+        query: "@ocsf.metadata.log_name:AuditLogs (@properties.category:(UserManagement OR ApplicationManagement) OR (@properties.category:RoleManagement AND @properties.targetResources.type:(ServicePrincipal OR User)))"
       processors:
+        - type: category-processor
+          name: OCSF - activity_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:("Add User" OR "Add service principal")'
+              name: "1"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Enable Account"'
+              name: "2"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Change user password"'
+              name: "3"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Reset password"'
+              name: "4"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Disable account"'
+              name: "5"
+            - filter:
+                query: '@ocsf.metadata.event_code:(*Delete\ user OR "Hard delete service principal" OR "Remove service principal")'
+              name: "6"
+            - filter:
+                query: '@ocsf.metadata.event_code:Add\ *member\ to\ role*'
+              name: "7"
+            - filter:
+                query: '@ocsf.metadata.event_code:Remove\ *member\ from\ role'
+              name: "8"
+            - filter:
+                query: "*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: category-processor
+          name: OCSF - activity_name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:"Add User"'
+              name: "Create"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Enable Account"'
+              name: "Enable"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Change user password"'
+              name: "Password Change"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Reset password"'
+              name: "Password Reset"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Disable account"'
+              name: "Disable"
+            - filter:
+                query: '@ocsf.metadata.event_code:(*Delete\ user OR "Hard delete service principal" OR "Remove service principal")'
+              name: "Delete"
+            - filter:
+                query: '@ocsf.metadata.event_code:Add\ *member\ to\ role'
+              name: "Attach Policy"
+            - filter:
+                query: '@ocsf.metadata.event_code:Remove\ *member\ from\ role'
+              name: "Detach Policy"
+          target: ocsf.activity_name
         - type: string-builder-processor
           name: Add category uid
           enabled: true
@@ -604,76 +700,15 @@ pipeline:
           target: ocsf.class_name
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `evt.name` to `ocsf.activity_name`
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
           enabled: true
           sources:
-            - evt.name
+            - ocsf.metadata.event_code
           sourceType: attribute
           target: ocsf.activity_name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: category-processor
-          name: OCSF - activity_id mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@evt.name:("Add User" OR "Add service principal")'
-              name: "1"
-            - filter:
-                query: '@evt.name:"Enable Account"'
-              name: "2"
-            - filter:
-                query: '@evt.name:"Change user password"' #Todo: should this include self-service password resets?
-              name: "3"
-            - filter:
-                query: '@evt.name:"Reset password"'
-              name: "4"
-            - filter:
-                query: '@evt.name:"Disable account"'
-              name: "5"
-            - filter:
-                query: '@evt.name:(*Delete\ user OR "Hard delete service principal" OR "Remove service principal")'
-              name: "6"
-            - filter:
-                query: '@evt.name:Add\ *member\ to\ role*'
-              name: "7"
-            - filter:
-                query: '@evt.name:Remove\ *member\ from\ role'
-              name: "8"
-            - filter:
-                query: "*"
-              name: "99"
-          target: ocsf.activity_id
-        - type: category-processor
-          name: OCSF - activity_name mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@evt.name:"Add User"'
-              name: "Create"
-            - filter:
-                query: '@evt.name:"Enable Account"'
-              name: "Enable"
-            - filter:
-                query: '@evt.name:"Change user password"'
-              name: "Password Change"
-            - filter:
-                query: '@evt.name:"Reset password"'
-              name: "Password Reset"
-            - filter:
-                query: '@evt.name:"Disable account"'
-              name: "Disable"
-            - filter:
-                query: '@evt.name:"*Delete user"'
-              name: "Delete"
-            - filter:
-                query: '@evt.name:Add\ *member\ to\ role'
-              name: "Attach Policy"
-            - filter:
-                query: '@evt.name:Remove\ *member\ from\ role'
-              name: "Detach Policy"
-          target: ocsf.activity_name
         - type: array-processor
           name: Extract Role ID from `properties.targetResources` array
           enabled: true
@@ -756,8 +791,24 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: 'source:azure.activedirectory @evt.name:"Sign-in activity"'
+        query: '@ocsf.metadata.event_code:"Sign-in activity"'
       processors:
+        - type: category-processor
+          name: OCSF - activity_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:"Sign-in activity"'
+              name: "1"
+          target: ocsf.activity_id
+        - type: category-processor
+          name: OCSF - activity_name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.activity_id:("1")'
+              name: Logon
+          target: ocsf.activity_name
         - type: string-builder-processor
           name: Add category uid
           enabled: true
@@ -789,10 +840,10 @@ pipeline:
           target: ocsf.type_name
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `usr.name`, `properties.servicePrincipalName` to `ocsf.actor.user.name`
+          name: Map `properties.userDisplayName`, `properties.servicePrincipalName` to `ocsf.actor.user.name`
           enabled: true
           sources:
-            - usr.name
+            - properties.userDisplayName
             - properties.servicePrincipalName
           sourceType: attribute
           target: ocsf.actor.user.name
@@ -800,10 +851,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `properties.userId`, `properties.servicePrincipalId` to `ocsf.actor.user.uid`
+          name: Map `properties.userPrincipalName`, `properties.servicePrincipalId` to `ocsf.actor.user.uid`
           enabled: true
           sources:
-            - properties.userId
+            - properties.userPrincipalName
             - properties.servicePrincipalId
           sourceType: attribute
           target: ocsf.actor.user.uid
@@ -811,10 +862,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `usr.email` to `ocsf.actor.user.email_addr`
+          name: Map `properties.userPrincipalName` to `ocsf.actor.user.email_addr`
           enabled: true
           sources:
-            - usr.email
+            - properties.userPrincipalName
           sourceType: attribute
           target: ocsf.actor.user.email_addr
           targetType: attribute
@@ -825,10 +876,10 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@evt.category:(SignInLogs OR NonInteractiveUserSignInLogs)"
+                query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: User
             - filter:
-                query: "@evt.category:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
               name: System
           target: ocsf.actor.user.type
         - type: category-processor
@@ -836,13 +887,13 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@evt.category:(SignInLogs OR NonInteractiveUserSignInLogs)"
+                query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: "1"
             - filter:
-                query: "@evt.category:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
               name: "3"
             - filter:
-                query: "@evt.category:*"
+                query: "@ocsf.metadata.log_name:*"
               name: "99"
           target: ocsf.actor.user.type_id
         - type: attribute-remapper
@@ -856,10 +907,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `usr.name`, `properties.servicePrincipalName` to `ocsf.user.name`
+          name: Map `properties.userDisplayName`, `properties.servicePrincipalName` to `ocsf.user.name`
           enabled: true
           sources:
-            - usr.name
+            - properties.userDisplayName
             - properties.servicePrincipalName
           sourceType: attribute
           target: ocsf.user.name
@@ -867,10 +918,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `properties.userId`, `properties.servicePrincipalId` to `ocsf.user.uid`
+          name: Map `properties.userPrincipalName`, `properties.servicePrincipalId` to `ocsf.user.uid`
           enabled: true
           sources:
-            - properties.userId
+            - properties.userPrincipalName
             - properties.servicePrincipalId
           sourceType: attribute
           target: ocsf.user.uid
@@ -878,10 +929,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `usr.email` to `ocsf.user.email_addr`
+          name: Map `properties.userPrincipalName` to `ocsf.user.email_addr`
           enabled: true
           sources:
-            - usr.email
+            - properties.userPrincipalName
           sourceType: attribute
           target: ocsf.user.email_addr
           targetType: attribute
@@ -892,10 +943,10 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@evt.category:(SignInLogs OR NonInteractiveUserSignInLogs)"
+                query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: User
             - filter:
-                query: "@evt.category:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
               name: System
           target: ocsf.user.type
         - type: category-processor
@@ -903,13 +954,13 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@evt.category:(SignInLogs OR NonInteractiveUserSignInLogs)"
+                query: "@ocsf.metadata.log_name:(SignInLogs OR NonInteractiveUserSignInLogs)"
               name: "1"
             - filter:
-                query: "@evt.category:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
+                query: "@ocsf.metadata.log_name:(ManagedIdentitySignInLogs OR ServicePrincipalSignInLogs)"
               name: "3"
             - filter:
-                query: "@evt.category:*"
+                query: "@ocsf.metadata.log_name:*"
               name: "99"
           target: ocsf.user.type_id
         - type: attribute-remapper
@@ -1003,7 +1054,6 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
-
         - type: attribute-remapper
           name: Map `properties.location.city` to `ocsf.src_endpoint.location.city`
           enabled: true
@@ -1030,7 +1080,7 @@ pipeline:
           sources:
             - properties.location.geoCoordinates.longitude
           sourceType: attribute
-          target: ocsf.src_endpoint.location.lat
+          target: ocsf.src_endpoint.location.long
           targetType: attribute
           targetFormat: double
           preserveSource: true
@@ -1041,7 +1091,18 @@ pipeline:
           sources:
             - properties.location.countryOrRegion.latitude
           sourceType: attribute
-          target: ocsf.src_endpoint.location.long
+          target: ocsf.src_endpoint.location.lat
+          targetType: attribute
+          targetFormat: double
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `resultSignature` to `ocsf.status`
+          enabled: true
+          sources:
+            - resultSignature
+          sourceType: attribute
+          target: ocsf.status
           targetType: attribute
           targetFormat: double
           preserveSource: true
@@ -1056,6 +1117,9 @@ pipeline:
             - filter:
                 query: "@resultSignature:(FAILURE)"
               name: "2"
+            - filter:
+                query: "@resultSignature:(FAILURE)"
+              name: "99"
           target: ocsf.status_id
         - type: category-processor
           name: OCSF - status mapping
@@ -1079,16 +1143,6 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `properties.authenticationRequirement` to `ocsf.is_mfa`
-          enabled: true
-          sources:
-            - properties.authenticationRequirement
-          sourceType: attribute
-          target: ocsf.is_mfa
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
           name: Map `properties.sessionId` to `ocsf.session.uid`
           enabled: true
           sources:
@@ -1098,7 +1152,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-
         - type: category-processor
           name: OCSF - severity mapping
           enabled: true
@@ -1133,6 +1186,16 @@ pipeline:
                 query: "@properties.riskLevelDuringSignIn:hidden"
               name: "0"
           target: ocsf.severity_id
+        - type: attribute-remapper
+          name: Map `properties.authenticationRequirement` to `ocsf.is_mfa`
+          enabled: true
+          sources:
+            - properties.authenticationRequirement
+          sourceType: attribute
+          target: ocsf.is_mfa
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
         - type: grok-parser
           name: Convert `ocsf.is_mfa` to boolean type
           enabled: true
@@ -1144,30 +1207,63 @@ pipeline:
             supportRules: ""
             matchRules: |
               convert_to_boolean %{boolean("multiFactorAuthentication", "singleFactorAuthentication"):ocsf.is_mfa}
-        - type: category-processor
-          name: OCSF - activity_id mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@evt.name:"Sign-in activity"'
-              name: "1"
-          target: ocsf.activity_id
-        - type: category-processor
-          name: OCSF - activity_name mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@ocsf.activity_id:("1")'
-              name: Logon
-          target: ocsf.activity_name
     - type: pipeline
       name: OCSF sub pipeline for class Group Management [3006]
       enabled: true
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.category:AuditLogs (@properties.category:GroupManagement OR (@properties.category:RoleManagement AND @properties.targetResources.type:Group))"
+        query: "@ocsf.metadata.log_name:AuditLogs (@properties.category:GroupManagement OR (@properties.category:RoleManagement AND @properties.targetResources.type:Group))"
       processors:
+        - type: category-processor
+          name: OCSF - activity_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:Add\ *member\ to\ role*'
+              name: "1"
+            - filter:
+                query: '@ocsf.metadata.event_code:Remove\ *member\ from\ role'
+              name: "2"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Add member to group"'
+              name: "3"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Remove member from group"'
+              name: "4"
+            - filter:
+                query: '@ocsf.metadata.event_code:*Delete\ group'
+              name: "5"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Add group"'
+              name: "6"
+            - filter:
+                query: "*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: category-processor
+          name: OCSF - activity_name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.metadata.event_code:Add\ *member\ to\ role*'
+              name: "Assign Privileges"
+            - filter:
+                query: '@ocsf.metadata.event_code:Remove\ *member\ from\ role'
+              name: "Revoke Privileges"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Add member to group"'
+              name: "Add User"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Remove member from group"'
+              name: "Remove User"
+            - filter:
+                query: '@ocsf.metadata.event_code:*Delete\ group'
+              name: "Delete"
+            - filter:
+                query: '@ocsf.metadata.event_code:"Add group"'
+              name: "Create"
+          target: ocsf.activity_name
         - type: string-builder-processor
           name: Add category uid
           enabled: true
@@ -1193,64 +1289,15 @@ pipeline:
           target: ocsf.class_name
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `evt.name` to `ocsf.activity_name`
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
           enabled: true
           sources:
-            - evt.name
+            - ocsf.metadata.event_code
           sourceType: attribute
           target: ocsf.activity_name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: category-processor
-          name: OCSF - activity_id mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@evt.name:Add\ *member\ to\ role*'
-              name: "1"
-            - filter:
-                query: '@evt.name:Remove\ *member\ from\ role'
-              name: "2"
-            - filter:
-                query: '@evt.name:"Add member to group"'
-              name: "3"
-            - filter:
-                query: '@evt.name:"Remove member from group"'
-              name: "4"
-            - filter:
-                query: '@evt.name:*Delete\ group'
-              name: "5"
-            - filter:
-                query: '@evt.name:"Add group"'
-              name: "6"
-            - filter:
-                query: "*"
-              name: "99"
-          target: ocsf.activity_id
-        - type: category-processor
-          name: OCSF - activity_name mapping
-          enabled: true
-          categories:
-            - filter:
-                query: '@evt.name:Add\ *member\ to\ role*'
-              name: "Assign Privileges"
-            - filter:
-                query: '@evt.name:Remove\ *member\ from\ role'
-              name: "Revoke Privileges"
-            - filter:
-                query: '@evt.name:"Add member to group"'
-              name: "Add User"
-            - filter:
-                query: '@evt.name:"Remove member from group"'
-              name: "Remove User"
-            - filter:
-                query: '@evt.name:*Delete\ group'
-              name: "Delete"
-            - filter:
-                query: '@evt.name:"Add group"'
-              name: "Create"
-          target: ocsf.activity_name
         - type: array-processor
           name: Extract User/SP Id from `properties.targetResources` array
           enabled: true
@@ -1325,8 +1372,45 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.category:MicrosoftGraphActivityLogs"
+        query: "@ocsf.metadata.log_name:MicrosoftGraphActivityLogs"
       processors:
+        - type: category-processor
+          name: OCSF - activity_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.requestMethod:POST"
+              name: "1"
+            - filter:
+                query: "@properties.requestMethod:GET"
+              name: "2"
+            - filter:
+                query: "@properties.requestMethod:PATCH"
+              name: "3"
+            - filter:
+                query: "@properties.requestMethod:DELETE"
+              name: "4"
+            - filter:
+                query: "@properties.requestMethod:*"
+              name: "99"
+          target: ocsf.activity_id
+        - type: category-processor
+          name: OCSF - activity_name mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.requestMethod:POST"
+              name: "Create"
+            - filter:
+                query: "@properties.requestMethod:GET"
+              name: "Read"
+            - filter:
+                query: "@properties.requestMethod:PATCH"
+              name: "Update"
+            - filter:
+                query: "@properties.requestMethod:DELETE"
+              name: "Delete"
+          target: ocsf.activity_name
         - type: string-builder-processor
           name: Add category uid
           enabled: true
@@ -1361,43 +1445,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: category-processor
-          name: OCSF - activity_id mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@properties.requestMethod:POST"
-              name: "1"
-            - filter:
-                query: "@properties.requestMethod:GET"
-              name: "2"
-            - filter:
-                query: "@properties.requestMethod:PATCH"
-              name: "3"
-            - filter:
-                query: "@properties.requestMethod:DELETE"
-              name: "4"
-            - filter:
-                query: "@properties.requestMethod:*"
-              name: "99"
-          target: ocsf.activity_id
-        - type: category-processor
-          name: OCSF - activity_name mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@properties.requestMethod:POST"
-              name: "Assign Privileges"
-            - filter:
-                query: "@properties.requestMethod:GET"
-              name: "Revoke Privileges"
-            - filter:
-                query: "@properties.requestMethod:PATCH"
-              name: "Add User"
-            - filter:
-                query: "@properties.requestMethod:DELETE"
-              name: "Remove User"
-          target: ocsf.activity_name
         - type: attribute-remapper
           name: Map `properties.signInActivityId` to `ocsf.actor.session.uid`
           enabled: true
@@ -1423,22 +1470,22 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@properties.servicePrincipalId:*"
-              name: System
-            - filter:
-                query: "@properties.UserPrincipalObjectIDL*"
+                query: "@properties.C_Idtyp:user"
               name: User
+            - filter:
+                query: "@properties.C_Idtyp:app"
+              name: System
           target: ocsf.actor.user.type
         - type: category-processor
           name: OCSF - ocsf.actor.user.type_id mapping
           enabled: true
           categories:
             - filter:
-                query: "@properties.servicePrincipalId:*"
-              name: "3"
-            - filter:
-                query: "@properties.UserPrincipalObjectID:*"
+                query: "@properties.C_Idtyp:user"
               name: "1"
+            - filter:
+                query: "@properties.C_Idtyp:app"
+              name: "3"
           target: ocsf.actor.user.type_id
         - type: attribute-remapper
           name: Map `properties.requestMethod` to `ocsf.api.operation`
@@ -1470,7 +1517,6 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-
         - type: string-builder-processor
           name: Add dst_endpoint.hostname
           enabled: true
@@ -1498,10 +1544,28 @@ pipeline:
           enabled: true
           source: ocsf.time
           samples:
-            - "2025-08-06T22:02:39.2294950Z"
+            - "2025-05-01T12:15:39.043474332Z"
+            - "2025-05-01T12:15:39.04347433Z"
+            - "2025-05-01T12:15:39.0434743Z"
+            - "2025-04-30T14:27:57.714605Z"
+            - "2025-05-01T12:15:39.0434Z"
+            - "2025-05-01T12:15:39.044Z"
+            - "2025-05-01T12:15:39.04Z"
+            - "2025-05-01T12:15:39.4Z"
           grok:
             supportRules: ""
-            matchRules: parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'"):ocsf.time}
+            matchRules: |
+              parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ"):ocsf.time}
+              parsing_time_1 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSZ"):ocsf.time}
+              parsing_time_2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ"):ocsf.time}
+              parsing_time_3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              parsing_time_4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              parsing_time_5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              parsing_time_6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              parsing_time_7 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              parsing_time_8 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              parsing_time_9 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+
         - type: attribute-remapper
           name: Map `properties.durationMs` to `ocsf.duration`
           enabled: true
@@ -1597,10 +1661,10 @@ pipeline:
           target: ocsf.http_header.name
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `http.useragent` to `ocsf.http_header.value`
+          name: Map `properties.userAgent` to `ocsf.http_header.value`
           enabled: true
           sources:
-            - http.useragent
+            - properties.userAgent
           sourceType: attribute
           target: ocsf.http_header.value
           targetType: attribute
@@ -1615,13 +1679,28 @@ pipeline:
             preserveSource: false
             type: append
     - type: pipeline
-      name: OCSF sub pipeline for class Base Event
+      name: OCSF sub pipeline for class Base Event [0]
       enabled: true
       ocsf:
         isOcsf: true
       filter:
-        query: "@evt.name:* -@ocsf.category_uid:*"
+        query: "@ocsf.metadata.event_code:* -@ocsf.category_uid:*"
       processors:
+        - type: string-builder-processor
+          name: Add OCSF profiles
+          enabled: true
+          template: "[host]"
+          target: ocsf.metadata.profiles
+          replaceMissing: false
+        - type: grok-parser
+          name: Profiles string to array
+          enabled: true
+          source: ocsf.metadata.profiles
+          samples:
+            - "[date,time]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.metadata.profiles:array("[]",",")}
         - type: string-builder-processor
           name: Add category uid
           enabled: true
@@ -1647,10 +1726,10 @@ pipeline:
           target: ocsf.class_name
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `evt.name` to `ocsf.activity_name`
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
           enabled: true
           sources:
-            - evt.name
+            - ocsf.metadata.event_code
           sourceType: attribute
           target: ocsf.activity_name
           targetType: attribute
@@ -1677,19 +1756,47 @@ pipeline:
           enabled: true
           source: ocsf.time
           samples:
-            - "2025-08-06T22:02:39.2294950Z"
+            - "2025-05-01T12:15:39.043474332Z"
+            - "2025-05-01T12:15:39.04347433Z"
+            - "2025-05-01T12:15:39.0434743Z"
+            - "2025-04-30T14:27:57.714605-04:00"
+            - "2025-05-01T12:15:39.0434Z"
+            - "2025-05-01T12:15:39.044Z"
+            - "2025-05-01T12:15:39.04Z"
+            - "2025-05-01T12:15:39.4Z"
+            - "2023-03-15T16:33:50-03:00"
           grok:
             supportRules: ""
-            matchRules: parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'"):ocsf.time}
+            matchRules: |
+              parsing_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ"):ocsf.time}
+              parsing_time_1 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSZ"):ocsf.time}
+              parsing_time_2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ"):ocsf.time}
+              parsing_time_3 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):ocsf.time}
+              parsing_time_4 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZ"):ocsf.time}
+              parsing_time_5 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZ"):ocsf.time}
+              parsing_time_6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              parsing_time_7 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+              parsing_time_8 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
+              parsing_time_9 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
         - type: attribute-remapper
-          name: Map `evt.outcome` to `ocsf.status_code`
+          name: Map `properties.result` to `ocsf.status_code`
           enabled: true
           sources:
-            - evt.outcome
+            - properties.result
           sourceType: attribute
           target: ocsf.status_code
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Delete ocsf.src_endpoint.ip
+          enabled: true
+          sources:
+            - ocsf.src_endpoint.ip
+          sourceType: attribute
+          target: callerIpAddress
+          targetType: attribute
+          preserveSource: false
           overrideOnConflict: false
     - type: pipeline
       name: OCSF post transformations
@@ -1769,7 +1876,7 @@ pipeline:
           target: ocsf.status_id
           targetType: attribute
           targetFormat: integer
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `ocsf.actor.user.type_id` to `ocsf.actor.user.type_id`
