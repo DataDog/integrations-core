@@ -1153,19 +1153,19 @@ pipeline:
               name: 'Network Activity: Refuse'
             - filter:
                 query: "@ocsf.type_uid:200400"
-                name: 'Detection Finding: Unknown'
+              name: 'Detection Finding: Unknown'
             - filter:
                 query: "@ocsf.type_uid:200401"
-                name: 'Detection Finding: Create'
+              name: 'Detection Finding: Create'
             - filter:
                 query: "@ocsf.type_uid:200402"
-                name: 'Detection Finding: Update'
+              name: 'Detection Finding: Update'
             - filter:
                 query: "@ocsf.type_uid:200403"
-                name: 'Detection Finding: Close'
+              name: 'Detection Finding: Close'
             - filter:
                 query: "@ocsf.type_uid:200499"
-                name: 'Detection Finding: Unknown'
+              name: 'Detection Finding: Unknown'
           target: ocsf.type_name
         - type: grok-parser
           name: Convert `ocsf.is_alert` to boolean type
