@@ -27,18 +27,20 @@ The Fly.io check is included in the [Datadog Agent][2] package. We recommend dep
 
 2. Set a [secret][17] for your Datadog API key called `DD_API_KEY`, and optionally your [site][14] as `DD_SITE`.
 
-3. In your app's directory, create a `conf.yaml` file for the Fly.io integration, [configure](#Configuration) the integration, and mount it in the Agent's `conf.d/fly_io.d/` directory as `conf.yaml`:
+3. Create a [read-only][23] authentication token.
+
+4. In your app's directory, create a `conf.yaml` file for the Fly.io integration, [configure](#Configuration) the integration, and mount it in the Agent's `conf.d/fly_io.d/` directory as `conf.yaml`:
 
     ```
     instances:
     - empty_default_hostname: true
       headers:
-          Authorization: Bearer <YOUR_FLY_TOKEN>
+          Authorization: FlyV1 <YOUR_FLY_TOKEN>
       machines_api_endpoint: http://_api.internal:4280
       org_slug: <YOUR_ORG_SLUG>
     ```
 
-4. [Deploy][16] your app.
+5. [Deploy][16] your app.
 
 **Note**: To collect traces and custom metrics from your applications, see [Application traces](#Application-traces).
 
@@ -166,3 +168,4 @@ Need help? Contact [Datadog support][9].
 [20]: https://fly.io/docs/machines/api/
 [21]: https://docs.datadoghq.com/logs/log_configuration/pipelines/?tab=source#integration-pipeline-library
 [22]: https://vector.dev/docs/reference/configuration/transforms/lua/
+[23]: https://fly.io/docs/flyctl/tokens-create-readonly/
