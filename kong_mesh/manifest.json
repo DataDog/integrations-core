@@ -27,6 +27,7 @@
     "integration": {
       "auto_install": true,
       "source_type_name": "Kong Mesh",
+      "source_type_id": 57086036,
       "events": {
         "creates_events": false
       },
