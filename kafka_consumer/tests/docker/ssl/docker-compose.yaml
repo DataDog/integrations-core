@@ -28,10 +28,10 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:29092,SSL://localhost:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.truststore.jks
-      KAFKA_SSL_TRUSTSTORE_PASSWORD: secret
       KAFKA_SSL_KEYSTORE_FILENAME: kafka1.server.keystore.jks
-      KAFKA_SSL_KEYSTORE_PASSWORD: secret
-      KAFKA_SSL_KEY_PASSWORD: secret
+      KAFKA_SSL_KEY_CREDENTIALS: kafka_ssl_key_credentials
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_ssl_keystore_credentials
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka_ssl_truststore_credentials
       KAFKA_SSL_CLIENT_AUTH: required
       KAFKA_SSL_PRINCIPAL_MAPPING_RULES: 'RULE:^CN=(.*?),OU=ServiceUsers.*$/$1/,RULE:^CN=(.*?),OU=(.*?),O=(.*?),L=(.*?),ST=(.*?),C=(.*?)$/$1@$2/L,RULE:^.*[Cc][Nn]=([a-zA-Z0-9.]*).*$/$1/L,DEFAULT'
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
@@ -40,6 +40,9 @@ services:
     volumes:
       - ./truststore/kafka.truststore.jks:/etc/kafka/secrets/kafka.truststore.jks
       - ./keystore/kafka1.server.keystore.jks:/etc/kafka/secrets/kafka1.server.keystore.jks
+      - ./secrets/kafka_ssl_key_credentials:/etc/kafka/secrets/kafka_ssl_key_credentials
+      - ./secrets/kafka_ssl_keystore_credentials:/etc/kafka/secrets/kafka_ssl_keystore_credentials
+      - ./secrets/kafka_ssl_truststore_credentials:/etc/kafka/secrets/kafka_ssl_truststore_credentials
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -58,10 +61,10 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:29093,SSL://localhost:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.truststore.jks
-      KAFKA_SSL_TRUSTSTORE_PASSWORD: secret
       KAFKA_SSL_KEYSTORE_FILENAME: kafka2.server.keystore.jks
-      KAFKA_SSL_KEYSTORE_PASSWORD: secret
-      KAFKA_SSL_KEY_PASSWORD: secret
+      KAFKA_SSL_KEY_CREDENTIALS: kafka_ssl_key_credentials
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_ssl_keystore_credentials
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka_ssl_truststore_credentials
       KAFKA_SSL_CLIENT_AUTH: required
       KAFKA_SSL_PRINCIPAL_MAPPING_RULES: 'RULE:^CN=(.*?),OU=ServiceUsers.*$/$1/,RULE:^CN=(.*?),OU=(.*?),O=(.*?),L=(.*?),ST=(.*?),C=(.*?)$/$1@$2/L,RULE:^.*[Cc][Nn]=([a-zA-Z0-9.]*).*$/$1/L,DEFAULT'
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
@@ -70,6 +73,9 @@ services:
     volumes:
       - ./truststore/kafka.truststore.jks:/etc/kafka/secrets/kafka.truststore.jks
       - ./keystore/kafka2.server.keystore.jks:/etc/kafka/secrets/kafka2.server.keystore.jks
+      - ./secrets/kafka_ssl_key_credentials:/etc/kafka/secrets/kafka_ssl_key_credentials
+      - ./secrets/kafka_ssl_keystore_credentials:/etc/kafka/secrets/kafka_ssl_keystore_credentials
+      - ./secrets/kafka_ssl_truststore_credentials:/etc/kafka/secrets/kafka_ssl_truststore_credentials
     depends_on:
       zookeeper:
         condition: service_healthy
