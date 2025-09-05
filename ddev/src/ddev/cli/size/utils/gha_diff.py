@@ -52,7 +52,7 @@ def calculate_diffs(
                 }
             )
             total_diff += int(curr_entry.get("Size_Bytes", 0))
-        else:
+        else:  # The entry is not new, so check if it has changed
             prev_entry = prev_compressed_map[curr_key]
             prev_size = int(prev_entry.get("Size_Bytes", 0))
             curr_size = int(curr_entry.get("Size_Bytes", 0))
