@@ -189,6 +189,151 @@ facets:
     name: Security Rule
     path: rule
     source: log
+  - groups:
+      - OCSF
+    name: Time
+    path: ocsf.time
+    source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
+    name: Type ID
+    path: ocsf.type_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Type Name
+    path: ocsf.type_name
+    source: log
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Product Name
+    path: ocsf.metadata.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Product Vendor
+    path: ocsf.metadata.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Product Version
+    path: ocsf.metadata.version
+    source: log
+  - groups:
+      - OCSF
+    name: Sequence
+    path: ocsf.metadata.sequence
+    source: log
+  - groups:
+      - OCSF
+    name: Is Alert
+    path: ocsf.is_alert
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Source Port
+    path: ocsf.src_endpoint.port
+    source: log
+  - groups:
+      - OCSF
+    name: Destination IP Address
+    path: ocsf.dst_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Port
+    path: ocsf.dst_endpoint.port
+    source: log
+  - groups:
+      - OCSF
+    name: Evidence Device Name
+    path: ocsf.evidence.device.name
+    source: log
+  - groups:
+      - OCSF
+    name: Evidence Device Type ID
+    path: ocsf.evidence.device.type_id
+    source: log
+  - groups:
+      - OCSF
+    name: Evidence URL Path
+    path: ocsf.evidence.url.path
+    source: log
+  - groups:
+      - OCSF
+    name: Evidence File Name
+    path: ocsf.evidence.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: Evidence File Type ID
+    path: ocsf.evidence.file.type_id
+    source: log
+  - groups:
+      - OCSF
+    name: Finding UID
+    path: ocsf.finding_info.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Analytic UID
+    path: ocsf.finding_info.analytic.uid
+    source: log
 pipeline:
   type: pipeline
   name: "[OCSF] Palo Alto Networks Firewall"
