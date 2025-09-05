@@ -29,7 +29,7 @@
             "id": 2807283505732892,
             "definition": {
               "type": "note",
-              "content": "## Kuma Service Mesh Control Plane\n\nThis dashboard provides comprehensive monitoring for your Kuma service mesh infrastructure. Track the health and performance of control plane components to ensure reliable service-to-service communication.\n\n Use the template variables to filter by control plane instance, mesh zone, or cluster.\n\n**Further reading:**\n- [Datadog Kuma Integration Documentation](https://docs.datadoghq.com/integrations/kuma/)\n- [Kuma Documentation](https://kuma.io/docs/latest/)\n- [Kuma Production Guide](https://kuma.io/docs/latest/production/)\n- [Kuma Metrics Reference](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Performance Tuning Guide](https://kuma.io/docs/latest/production/upgrades-tuning/fine-tuning/)",
+              "content": "## Kong Mesh Control Plane\n\nThis dashboard provides comprehensive monitoring for your Kong service mesh infrastructure. Track the health and performance of control plane components to ensure reliable service-to-service communication.\n\n Use the template variables to filter by control plane instance, mesh zone, or cluster.\n\nKong Mesh is the enterprise version of [Kuma](https://kuma.io/). \n\n**Further reading:**\n- [Datadog Kong Mesh Integration Documentation](https://docs.datadoghq.com/integrations/kong-mesh/)\n- [Kong Mesh Documentation](https://developer.konghq.com/mesh/)\n- [Kong Mesh Quickstart](https://developer.konghq.com/mesh/#install-kong-mesh)\n- [Kong Mesh Metrics Policy Reference](https://developer.konghq.com/mesh/policies/meshmetric/)\n- [Kuma Documentation](https://kuma.io/docs/latest/)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -341,7 +341,7 @@
             "id": 7474291901161303,
             "definition": {
               "type": "note",
-              "content": "The Store component provides persistent storage for all Kuma resources including meshes, policies, and data plane configurations.",
+              "content": "The Store component provides persistent storage for all Kong Mesh resources including meshes, policies, and data plane configurations.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
@@ -543,7 +543,7 @@
     {
       "id": 511652203180117,
       "definition": {
-        "title": "Kuma Overview",
+        "title": "Kong Mesh Overview",
         "background_color": "vivid_purple",
         "show_title": true,
         "type": "group",
@@ -553,7 +553,7 @@
             "id": 7014562644700263,
             "definition": {
               "type": "note",
-              "content": "Monitor the overall health and scale of your Kuma deployment. This section tracks key infrastructure metrics including the number of meshes, zones, control planes, and data plane proxies. Use these metrics to understand your service mesh topology and identify potential capacity issues.",
+              "content": "Monitor the overall health and scale of your Kong Mesh deployment. This section tracks key infrastructure metrics including the number of meshes, zones, control planes, and data plane proxies. Use these metrics to understand your service mesh topology and identify potential capacity issues.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
@@ -1187,7 +1187,7 @@
             "id": 3741078862595649,
             "definition": {
               "type": "note",
-              "content": "Each Kuma zone must have exactly one leader instance for proper operation.",
+              "content": "Each Kong Mesh zone must have exactly one leader instance for proper operation.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
@@ -1336,7 +1336,7 @@
             "id": 5710359456796066,
             "definition": {
               "type": "note",
-              "content": "Go runtime metrics provide insights into the resource utilization and performance characteristics of Kuma control plane components.",
+              "content": "Go runtime metrics provide insights into the resource utilization and performance characteristics of Kong Mesh control plane components.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
@@ -1517,7 +1517,7 @@
             "id": 5895555829538668,
             "definition": {
               "type": "note",
-              "content": "Kuma control plane logs provide detailed insights into system operations and error conditions. Log are aggregated by patterns.",
+              "content": "Kong Mesh control plane logs provide detailed insights into system operations and error conditions. Log are aggregated by patterns.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
