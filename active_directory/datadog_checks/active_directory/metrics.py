@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRICS_CONFIG = {
@@ -50,6 +50,57 @@ METRICS_CONFIG = {
                 'LDAP Bind Time': {'metric_name': 'ldap.bind_time'},
                 'LDAP Successful Binds/sec': {'metric_name': 'ldap.successful_binds_persec'},
                 'LDAP Searches/sec': {'metric_name': 'ldap.searches_persec'},
+                'LDAP Writes/sec': {'metric_name': 'ldap.writes_persec', 'type': 'rate'},
+                'LDAP Active Threads': {'metric_name': 'ldap.active_threads'},
+                'DS Client Binds/sec': {'metric_name': 'ds.client_binds_persec', 'type': 'rate'},
+            }
+        ],
+    },
+    'Netlogon': {
+        'name': 'netlogon',
+        'counters': [
+            {
+                'Semaphore Waiters': 'semaphore_waiters',
+                'Semaphore Holders': 'semaphore_holders',
+                'Semaphore Acquires': {'name': 'semaphore_acquires', 'type': 'count'},
+                'Semaphore Timeouts': {'name': 'semaphore_timeouts', 'type': 'count'},
+                'Average Semaphore Hold Time': 'semaphore_hold_time',
+                'Last Authentication Time': {'name': 'last_authentication_time', 'type': 'time_elapsed'},
+            }
+        ],
+    },
+    'Security System-Wide Statistics': {
+        'name': 'security',
+        'counters': [
+            {
+                'NTLM Authentications': {'name': 'ntlm_authentications', 'type': 'rate'},
+                'Kerberos Authentications': {'name': 'kerberos_authentications', 'type': 'rate'},
+            }
+        ],
+    },
+    'DHCP Server': {
+        'name': 'dhcp',
+        'counters': [
+            {
+                'Failover: BndUpd Dropped.': {'name': 'failover.binding_updates_dropped', 'type': 'count'},
+                'Failover: BndUpd pending in outbound queue.': 'failover.binding_updates_pending',
+                'Failover: BndUpd received/sec': {'name': 'failover.binding_updates_received', 'type': 'rate'},
+                'Failover: BndAck received/sec': {'name': 'failover.binding_acks_received', 'type': 'rate'},
+                'Failover: BndUpd sent/sec': {'name': 'failover.binding_updates_sent', 'type': 'rate'},
+                'Failover: BndAck sent/sec': {'name': 'failover.binding_acks_sent', 'type': 'rate'},
+            }
+        ],
+    },
+    'DFS Replicated Folders': {
+        'name': 'dfsr',
+        'counters': [
+            {
+                'Deleted Space In Use': {'name': 'deleted_space_in_use', 'unit': 'byte'},
+                'Deleted Bytes Generated': {'name': 'deleted_bytes_generated', 'unit': 'byte'},
+                'Staging Space In Use': {'name': 'staging_space_in_use', 'unit': 'byte'},
+                'File Installs Retried': {'name': 'file_installs_retried', 'type': 'count'},
+                'Conflict Space In Use': {'name': 'conflict_space_in_use', 'unit': 'byte'},
+                'Conflict Bytes Generated': {'name': 'conflict_bytes_generated', 'unit': 'byte'},
             }
         ],
     },
