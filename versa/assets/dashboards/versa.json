@@ -110,6 +110,7 @@
               "title": "Site table (Volume, Bandwidth, Availability)",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -117,31 +118,31 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:versa.site.volume_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.volume_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:versa.site.volume_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.volume_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:versa.site.bandwidth_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.bandwidth_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:versa.site.bandwidth_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.bandwidth_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:versa.site.availability{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.availability{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     }
                   ],
