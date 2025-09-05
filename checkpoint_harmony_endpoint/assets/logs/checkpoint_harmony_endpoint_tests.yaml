@@ -158,4 +158,4 @@ tests:
       message: "<134>1 2025-06-26T12:21:47Z gw-30c1b9 CheckPoint 23656 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x685d3b5c,0x0,0xad100a0a,0x2e37dc68}\"; origin:\"10.10.16.173\"; sequencenum:\"1\"; time:\"1750940507\"; version:\"5\"; additional_info:\"Authentication method: Unix Password\"; administrator:\"admin\"; client_ip:\"10.10.17.131\"; machine:\"10.10.17.131\"; operation:\"Log In\"; operation_number:\"10\"; product:\"SmartConsole\"; subject:\"Administrator Login\"]  message repeated 291 times: []"
       tags:
       - "source:LOGS_SOURCE"
-      timestamp: 17509405070001
+      timestamp: 1750940507000
