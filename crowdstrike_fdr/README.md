@@ -4,25 +4,25 @@
 
 [CrowdStrike Falcon Data Replicator (FDR)][1] is a high-fidelity data export solution that enables organizations to securely stream raw endpoint telemetry in near real time. FDR delivers detailed event data through a data feed in JSON format using Amazon Web Services Simple Storage Service (Amazon S3) and Amazon Simple Queue Service (Amazon SQS).
 
-Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity and Network Behavior events using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search, and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity and Network Behavior events using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search, and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
 ### Set up data replication from CrowdStrike FDR to a customer-owned S3 bucket
 
-#### Configure CrowdStrike FDR Feed
+#### Configure the CrowdStrike FDR feed
 1. Log in to the **CrowdStrike Falcon** platform.
 2. Go to **Support and resources** > **Resources and tools** > **Falcon data replicator**.
 3. In the **FDR feeds** tab, click **Create feed**.
 4. Provide a feed name.
 5. Set the feed **status** to on.
-6. Select **Customize your FDR feed** in **How do you want to create this feed?** option.
+6. Select **Customize your FDR feed** in the **How do you want to create this feed?** option.
 7. Click **Next**.
-8. Include only required **Event name** from the **Primary events** tab.
+8. Include only the required **Event name** from the **Primary events** tab.
 9. Click **Next**.
 10. Click **Create feed**.
 
-#### Setup Custom AWS S3 Bucket
+#### Setup a custom AWS S3 bucket
 1. Sign in to the AWS Management Console and navigate to Amazon S3.
 2. Provide the details as mentioned below:
    - **Bucket name**: Enter a Bucket name (must be globally unique and begins with the prefix `crowdstrike-fdr` to comply with integration naming requirements).
@@ -73,7 +73,7 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 8. Copy the **Bucket ARN** of your S3 bucket.
 9. Click **Save changes**.
 
-#### Raise Support Ticket in CrowdStrike
+#### Raise a support ticket in CrowdStrike
 1. Log in to the **CrowdStrike Falcon** console with an account that has **Administrator** privileges.
 2. Navigate to **Support and resources** > **Support portal**.
 3. Select **Support** > **Cases**.
