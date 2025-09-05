@@ -14,7 +14,7 @@ datadog-arangodb==4.0.1
 datadog-argo-rollouts==3.0.1
 datadog-argo-workflows==3.0.1
 datadog-argocd==4.0.1
-datadog-aspdotnet==4.2.0; sys_platform == 'win32'
+datadog-aspdotnet==4.3.0; sys_platform == 'win32'
 datadog-avi-vantage==6.0.1
 datadog-aws-neuron==3.0.1
 datadog-azure-iot-edge==6.1.1
