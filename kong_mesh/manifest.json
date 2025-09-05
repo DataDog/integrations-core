@@ -25,7 +25,8 @@
   },
   "assets": {
     "dashboards": {
-      "Kong Mesh Control Plane": "assets/dashboards/kong_mesh_control_plane.json"
+      "Kong Mesh Control Plane": "assets/dashboards/kong_mesh_control_plane.json",
+      "Kong Mesh Service Communication": "assets/dashboards/kong_mesh_service_communication.json"
     }
   },
   "author": {
