@@ -6,7 +6,7 @@ WORKFLOW_NAME=$1
 
 # Get merge base commit
 echo "Getting merge base commit..."
-echo "Current branch: $(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_STEP_SUMMARY
+echo "Current branch: $(git branch --show-current)" >> $GITHUB_STEP_SUMMARY
 
 git fetch origin master:refs/remotes/origin/master
 BASE_SHA=$(git merge-base HEAD origin/master)
