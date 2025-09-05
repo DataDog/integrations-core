@@ -2,6 +2,10 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.1-beta.3 / 2025-09-05
+
+No significant changes.
+
 ## 3.2.0 / 2024-10-23 / Agent 7.60.0
 
 ***Added***:
