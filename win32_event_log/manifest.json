@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8a0f4809-8470-4f7c-a7e8-350ba64123aa",
   "app_id": "event-viewer",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
