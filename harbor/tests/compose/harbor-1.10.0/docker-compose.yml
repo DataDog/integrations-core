@@ -11,7 +11,7 @@ services:
       - SETUID
     volumes:
       - ./config/registry/config.yml:/etc/registry/config.yml
-      - ../common/root.crt:/etc/registry/root.crt
+      - ../common/cert/root.crt:/etc/registry/root.crt
     networks:
       - harbor-110
     dns_search: .

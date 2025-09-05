@@ -12,7 +12,7 @@ defaults:
     shell: bash
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
   CHECK_SCRIPT: "ddev/src/ddev/utils/scripts/check_pr.py"
   WARN_MAJOR_UPDATE_MESSAGE: "⚠️ **Major version bump**\nThe changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead."
 
