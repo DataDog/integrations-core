@@ -8,7 +8,7 @@ WORKFLOW_NAME=$1
 echo "Getting merge base commit..."
 git fetch origin master:refs/remotes/origin/master
 BASE_SHA=$(git merge-base HEAD origin/master)
-echo "Base SHA: $base_sha"
+echo "Base SHA: $BASE_SHA"
 
 # Find workflow run at exact merge-base SHA
 echo "Finding workflow run at merge-base SHA..."
@@ -36,6 +36,11 @@ fi
 
 echo "Found workflow run ID: $RUN_ID"
 
-# Output results
-echo "run_id=$RUN_ID"
-echo "base_sha=$BASE_SHA"
+# Output results for GitHub Actions
+if [ -n "$GITHUB_OUTPUT" ]; then
+    echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+    echo "base_sha=$BASE_SHA" >> $GITHUB_OUTPUT
+else
+    echo "run_id=$RUN_ID"
+    echo "base_sha=$BASE_SHA"
+fi

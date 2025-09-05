@@ -291,7 +291,7 @@ jobs:
           fetch-depth: 0
       
       - name: Output size diffs
-        uses: ./.github/workflows/scripts/output_size_diffs.sh
+        run: ./.github/workflows/scripts/output_size_diffs.sh
       # - name: Get merge base commit
       #   id: merge_base
       #   run: |
