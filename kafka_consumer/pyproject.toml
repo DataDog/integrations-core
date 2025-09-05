@@ -4,6 +4,7 @@ requires = [
 ]
 build-backend = "hatchling.build"
 
+
 [project]
 name = "datadog-kafka-consumer"
 description = "The Kafka Consumer check"
