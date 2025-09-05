@@ -29,7 +29,7 @@ The Fly.io check is included in the [Datadog Agent][2] package. We recommend dep
 
 3. Create a [read-only][23] authentication token.
 
-4. In your app's directory, create a `conf.yaml` file for the Fly.io integration, [configure](#Configuration) the integration, and mount it in the Agent's `conf.d/fly_io.d/` directory as `conf.yaml`:
+4. In your app's directory, create a `conf.yaml` file for the Fly.io integration, [configure](#configuration) the integration, and mount it in the Agent's `conf.d/fly_io.d/` directory as `conf.yaml`:
 
     ```
     instances:
