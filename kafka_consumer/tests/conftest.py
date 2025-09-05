@@ -33,16 +33,16 @@ def dd_environment():
             conditions.append(WaitFor(wait_for_cp_kafka_topics, attempts=10, wait=10))
             common.E2E_METADATA["docker_volumes"].append(f"{secret_dir}:/var/lib/secret")
 
+        if common.AUTHENTICATION == "ssl":
+            conditions.append(WaitFor(wait_for_ssl_ready, attempts=30, wait=5))
+
         conditions.extend(
             [
-                WaitFor(wait_for_ssl_ready, attempts=30, wait=5) if common.AUTHENTICATION == "ssl" else None,
                 WaitFor(create_topics, attempts=60, wait=3),
                 WaitFor(initialize_topics),
                 WaitFor(is_cluster_id_available),
             ]
         )
-        # Remove None values from conditions
-        conditions = [c for c in conditions if c is not None]
 
         with docker_run(
             common.DOCKER_IMAGE_PATH,
@@ -132,10 +132,5 @@ def _create_admin_client():
     }
     auth_config = common.get_authentication_configuration(common.INSTANCE)
     config.update(auth_config)
-
-    # Debug: Print SSL configuration (excluding sensitive data)
-    if common.AUTHENTICATION == "ssl":
-        debug_config = {k: v for k, v in config.items() if 'password' not in k.lower()}
-        print(f"SSL AdminClient config: {debug_config}")
 
     return AdminClient(config)
