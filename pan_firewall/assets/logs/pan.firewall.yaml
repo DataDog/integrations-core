@@ -207,10 +207,10 @@ pipeline:
           rule_panos %{data::keyvalue("=","/: \"")}
         supportRules: ''
     - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+      name: Define `time_generated` as the official date of the log
       enabled: true
       sources:
-        - timestamp
+        - time_generated
     - type: geo-ip-parser
       name: Fetching GeoIp data for client ip
       enabled: true
@@ -239,10 +239,10 @@ pipeline:
         query: "@type:(TRAFFIC OR THREAT)"
       processors:
         - type: attribute-remapper
-          name: remap 'timestamp' to 'ocsf.time'
+          name: remap 'time_generated' to 'ocsf.time'
           enabled: true
           sources:
-            - timestamp
+            - time_generated
           sourceType: attribute
           target: ocsf.time
           targetType: attribute
