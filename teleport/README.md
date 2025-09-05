@@ -74,7 +74,8 @@ The Teleport integration does not include any events.
 
 ### Service Checks
 
-The Teleport integration does not include any service checks.
+The Teleport integration does not include any service checks. 
+This parameter 'enable_health_service_check' enabled by default will send a service check named `<NAMESPACE>.openmetrics.health` which reports the health of the `openmetrics_endpoint`
 
 ## Further reading
 
