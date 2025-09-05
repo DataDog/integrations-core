@@ -7,7 +7,8 @@ WORKFLOW_NAME=$1
 # Get merge base commit
 echo "Getting merge base commit..."
 git fetch origin $DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH
-BASE_SHA=$(git merge-base HEAD origin/$DEFAULT_BRANCH)
+git fetch origin ${{ github.head_ref }}:refs/remotes/origin/temp-${{ github.head_ref }}
+BASE_SHA=$(git merge-base origin/temp-${{ github.head_ref }} origin/$DEFAULT_BRANCH )
 echo "Base SHA: $BASE_SHA"
 
 # Find workflow run at exact merge-base SHA
