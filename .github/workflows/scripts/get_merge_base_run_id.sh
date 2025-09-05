@@ -6,7 +6,7 @@ WORKFLOW_NAME=$1
 
 # Get merge base commit
 echo "Getting merge base commit..."
-git fetch origin master:refs/remotes/origin/master
+
 BASE_SHA=$(git merge-base HEAD origin/master)
 echo "Base SHA: $BASE_SHA"
 
@@ -17,6 +17,7 @@ if [ -z "$GH_TOKEN" ]; then
     echo "Error: GH_TOKEN environment variable is required"
     exit 1
 fi
+
 
 count=$(git rev-list --count $BASE_SHA..origin/master)
 count_plus_one=$((count + 1))

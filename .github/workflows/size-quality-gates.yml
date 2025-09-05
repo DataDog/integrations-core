@@ -23,7 +23,7 @@ jobs:
     outputs:
       run_id_base: ${{ steps.get-merge-base-run-id.outputs.run_id }}
       base_sha: ${{ steps.get-merge-base-run-id.outputs.base_sha }}
-      passes: ${{ steps.calculate_diffs.outputs.passes_qg }}
+      passes: ${{ steps.calculate-diffs.outputs.passes_qg }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
