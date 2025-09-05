@@ -42,59 +42,35 @@ tests:
   sample: "timestamp=2025/08/22 13:53:17, time_generated=2025/08/22 13:53:17, serial=023001016134, type=THREAT, subtype=url, filetype=, referer=, reason=, tunnel_id=N/A_id, filedigest=, logset=default, subject=, dst_edl=, hostid=, natsport=53411, sessionid=264167, url_idx=0, parent_start_time=, cloud=, http_method=, usr.id=, from=wifigrupolm, parent_session_id=0, vsys_name=, thr_category=N/A, xff_ip=, high_res_timestamp=2025-08-22T13:53:18.014-03:00, repeatcnt=1, app=ssl, vsys=vsys1, serialnumber=, dynusergroup_name=, src_osversion=, src_host=, dst_dag=, pcap_id=0, ppid=4294967295, pod_name=, dst_uuid=, http_headers=, sender=, proto=tcp, src_uuid=, http.useragent=, xff=, src_dag=, container_id=, natdport=443, assoc_id=0, reportid=0, natdst=52.1.12.13, http2_connection=0, src_edl=, flags=0x42b400, rule=Regra wifi grupolm para internet, url_category_list=computer-and-internet-info,low-risk, imsi=0, network.destination.port=443, network.destination.ip=52.1.12.13, network.client.geoip.country.name=10.0.0.0-10.255.255.255, network.client.port=51342, network.client.ip=10.70.73.88, contentver=AppThreat-0-0, rule_uuid=c7ee18cf-77b2-4503-9c8e-bfc799dh4c43, inbound_if=ae1.4000, device_name=test_device2, domain_edl=, dstuser=, src_osfamily=, justification=, dst_osversion=, dst_host=, misc=excel-telemetry.officeapps.live.com/, direction=client-to-server, threatid=(9999), severity=informational, natsrc=188.8.8.88, src_mac=, evt.name=alert, seqno=7506906696836281042, monitortag=, partial_hash=0, outbound_if=ae1.53, dst_mac=, contenttype=, pod_namespace=, dstloc=Mexico, dst_osfamily=, recipient=, imei=, to=external, category=computer-and-internet-info, tunnel=N/A"
   result:
     custom:
-      actionflags: "0x0"
       app: "ssl"
-      assoc_id: "0"
+      assoc_id: 0
       category: "computer-and-internet-info"
-      cloud: ""
-      container_id: ""
-      contenttype: ""
       contentver: "AppThreat-0-0"
       device_name: "test_device2"
       direction: "client-to-server"
-      domain_edl: ""
-      dst_dag: ""
-      dst_edl: ""
-      dst_host: ""
-      dst_mac: ""
-      dst_osfamily: ""
-      dst_osversion: ""
-      dst_uuid: ""
       dstloc: "Mexico"
-      dstuser: ""
-      dynusergroup_name: ""
       evt:
         name: "alert"
-      filedigest: ""
-      filetype: ""
       flags: "0x42b400"
       from: "wifigrupolm"
       high_res_timestamp: "2025-08-22T13:53:18.014-03:00"
-      hostid: ""
-      http:
-        useragent: ""
-      http2_connection: "0"
-      http_headers: ""
-      http_method: ""
-      imei: ""
-      imsi: "0"
+      http2_connection: 0
+      imsi: 0
       inbound_if: "ae1.4000"
-      justification: ""
       logset: "default"
       misc: "excel-telemetry.officeapps.live.com/"
-      monitortag: ""
-      natdport: "443"
+      natdport: 443
       natdst: "52.1.12.13"
-      natsport: "53411"
+      natsport: 53411
       natsrc: "188.8.8.88"
       network:
         client:
           geoip: {}
           ip: "10.70.73.88"
-          port: "51342"
+          port: 51342
         destination:
           ip: "52.1.12.13"
-          port: "443"
+          port: 443
       ocsf:
         activity_id: 1
         activity_name: "Create"
@@ -140,7 +116,7 @@ tests:
         metadata:
           product:
             name: "Firewall"
-            uid: "023001016134"
+            uid: "23001016134"
             vendor_name: "Palo Alto"
           sequence: 7506906696836281042
           version: "1.5.0"
@@ -152,165 +128,31 @@ tests:
         type_name: "Detection Finding: Create"
         type_uid: 200401
       outbound_if: "ae1.53"
-      parent_session_id: "0"
-      parent_start_time: ""
-      partial_hash: "0"
-      pcap_id: "0"
-      pod_name: ""
-      pod_namespace: ""
-      ppid: "4294967295"
+      parent_session_id: 0
+      partial_hash: 0
+      pcap_id: 0
+      ppid: 4294967295
       proto: "tcp"
-      reason: ""
-      recipient: ""
-      referer: ""
-      repeatcnt: "1"
-      reportid: "0"
+      repeatcnt: 1
+      reportid: 0
       rule: "Regra wifi grupolm para internet"
       rule_uuid: "c7ee18cf-77b2-4503-9c8e-bfc799dh4c43"
-      sender: ""
-      seqno: "7506906696836281042"
-      serial: "023001016134"
-      serialnumber: ""
-      sessionid: "264167"
+      seqno: 7506906696836281042
+      serial: 23001016134
+      sessionid: 264167
       severity: "informational"
-      src_dag: ""
-      src_edl: ""
-      src_host: ""
-      src_mac: ""
-      src_osfamily: ""
-      src_osversion: ""
-      src_uuid: ""
-      subject: ""
       subtype: "url"
       thr_category: "N/A"
-      threatid: "(9999)"
       time_generated: 1755870797000
       timestamp: "2025/08/22 13:53:17"
       to: "external"
       tunnel: "N/A"
       tunnel_id: "N/A_id"
       type: "THREAT"
-      url_category_list: "computer-and-internet-info,low-risk"
-      url_idx: "0"
-      usr:
-        id: ""
+      url_category_list: "computer-and-internet-info"
+      url_idx: 0
       vsys: "vsys1"
-      vsys_name: ""
-      xff: ""
-      xff_ip: ""
-    message: |-
-      {
-        "filetype" : "",
-        "referer" : "",
-        "reason" : "",
-        "tunnel_id" : "N/A_id",
-        "filedigest" : "",
-        "logset" : "default",
-        "subject" : "",
-        "dst_edl" : "",
-        "hostid" : "",
-        "natsport" : "53411",
-        "sessionid" : "264167",
-        "type" : "THREAT",
-        "url_idx" : "0",
-        "parent_start_time" : "",
-        "cloud" : "",
-        "http_method" : "",
-        "usr" : {
-          "id" : ""
-        },
-        "from" : "wifigrupolm",
-        "parent_session_id" : "0",
-        "vsys_name" : "",
-        "thr_category" : "N/A",
-        "xff_ip" : "",
-        "high_res_timestamp" : "2025-08-22T13:53:18.014-03:00",
-        "repeatcnt" : "1",
-        "app" : "ssl",
-        "vsys" : "vsys1",
-        "serialnumber" : "",
-        "dynusergroup_name" : "",
-        "src_osversion" : "",
-        "src_host" : "",
-        "dst_dag" : "",
-        "pcap_id" : "0",
-        "ppid" : "4294967295",
-        "pod_name" : "",
-        "dst_uuid" : "",
-        "http_headers" : "",
-        "sender" : "",
-        "proto" : "tcp",
-        "src_uuid" : "",
-        "http" : {
-          "useragent" : ""
-        },
-        "xff" : "",
-        "src_dag" : "",
-        "container_id" : "",
-        "natdport" : "443",
-        "assoc_id" : "0",
-        "reportid" : "0",
-        "natdst" : "52.1.12.13",
-        "http2_connection" : "0",
-        "src_edl" : "",
-        "flags" : "0x42b400",
-        "rule" : "Regra wifi grupolm para internet",
-        "url_category_list" : "computer-and-internet-info,low-risk",
-        "imsi" : "0",
-        "network" : {
-          "destination" : {
-            "port" : "443",
-            "ip" : "52.1.12.13"
-          },
-          "client" : {
-            "geoip" : {
-              "country" : {
-                "name" : "10.0.0.0-10.255.255.255"
-              }
-            },
-            "port" : "51342",
-            "ip" : "10.70.73.88"
-          }
-        },
-        "contentver" : "AppThreat-0-0",
-        "rule_uuid" : "c7ee18cf-77b2-4503-9c8e-bfc799dh4c43",
-        "inbound_if" : "ae1.4000",
-        "device_name" : "test_device2",
-        "domain_edl" : "",
-        "subtype" : "url",
-        "actionflags" : "0x0",
-        "dstuser" : "",
-        "src_osfamily" : "",
-        "justification" : "",
-        "dst_osversion" : "",
-        "dst_host" : "",
-        "timestamp" : "2025/08/22 13:53:17",
-        "misc" : "excel-telemetry.officeapps.live.com/",
-        "direction" : "client-to-server",
-        "threatid" : "(9999)",
-        "severity" : "informational",
-        "natsrc" : "188.8.8.88",
-        "src_mac" : "",
-        "evt" : {
-          "name" : "alert"
-        },
-        "seqno" : "7506906696836281042",
-        "monitortag" : "",
-        "partial_hash" : "0",
-        "time_generated" : "2025/08/22 13:53:17",
-        "outbound_if" : "ae1.53",
-        "dst_mac" : "",
-        "contenttype" : "",
-        "pod_namespace" : "",
-        "dstloc" : "Mexico",
-        "serial" : "023001016134",
-        "dst_osfamily" : "",
-        "recipient" : "",
-        "imei" : "",
-        "to" : "external",
-        "category" : "computer-and-internet-info",
-        "tunnel" : "N/A"
-      }
+    message: "timestamp=2025/08/22 13:53:17, time_generated=2025/08/22 13:53:17, serial=023001016134, type=THREAT, subtype=url, filetype=, referer=, reason=, tunnel_id=N/A_id, filedigest=, logset=default, subject=, dst_edl=, hostid=, natsport=53411, sessionid=264167, url_idx=0, parent_start_time=, cloud=, http_method=, usr.id=, from=wifigrupolm, parent_session_id=0, vsys_name=, thr_category=N/A, xff_ip=, high_res_timestamp=2025-08-22T13:53:18.014-03:00, repeatcnt=1, app=ssl, vsys=vsys1, serialnumber=, dynusergroup_name=, src_osversion=, src_host=, dst_dag=, pcap_id=0, ppid=4294967295, pod_name=, dst_uuid=, http_headers=, sender=, proto=tcp, src_uuid=, http.useragent=, xff=, src_dag=, container_id=, natdport=443, assoc_id=0, reportid=0, natdst=52.1.12.13, http2_connection=0, src_edl=, flags=0x42b400, rule=Regra wifi grupolm para internet, url_category_list=computer-and-internet-info,low-risk, imsi=0, network.destination.port=443, network.destination.ip=52.1.12.13, network.client.geoip.country.name=10.0.0.0-10.255.255.255, network.client.port=51342, network.client.ip=10.70.73.88, contentver=AppThreat-0-0, rule_uuid=c7ee18cf-77b2-4503-9c8e-bfc799dh4c43, inbound_if=ae1.4000, device_name=test_device2, domain_edl=, dstuser=, src_osfamily=, justification=, dst_osversion=, dst_host=, misc=excel-telemetry.officeapps.live.com/, direction=client-to-server, threatid=(9999), severity=informational, natsrc=188.8.8.88, src_mac=, evt.name=alert, seqno=7506906696836281042, monitortag=, partial_hash=0, outbound_if=ae1.53, dst_mac=, contenttype=, pod_namespace=, dstloc=Mexico, dst_osfamily=, recipient=, imei=, to=external, category=computer-and-internet-info, tunnel=N/A"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1755870797000
@@ -401,12 +243,13 @@ tests:
       start: "2025/09/03 19:39:53"
       subtype: "end"
       time_generated: 1756928432000
+      timestamp: "2025/09/03 19:40:32"
       to: "L3_Untrust"
       tunnel: "N/A"
       tunnelid: 0
       type: "TRAFFIC"
       vsys: "vsys1"
-    message: "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end, time_generated=2025/09/03 19:40:32, network.client.ip=172.16.28.190, network.destination.ip=17.253.2.43, natsrc=72.138.81.50, natdst=17.253.2.43, rule=L3_Orca to L3_Untrust, usr.id=, dstuser=, app=ntp-base, vsys=vsys1, from=L3_Orca, to=L3_Untrust, inbound_if=ethernet1/6.115, outbound_if=ethernet1/7, logset=datadog-forwarder, sessionid=393714, repeatcnt=1, network.client.port=123, network.destination.port=123, natsport=29153 natdport=123, flags=0x40407a, proto=udp, evt.name=allow, bytes=372, network.bytes_read=282, network.bytes_written=90, start=2025/09/03 19:39:53, elapsed=36, category=any, seqno=7489817491394537148, actionflags=0x0, network.client.geoip.country.name=172.16.0.0-172.31.255.255, dstloc=United States, pkts_sent=3, pkts_received=1, session_end_reason=aged-out, device_name=PA-3220, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi= 0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0 chunks_sent=0 chunks_received=0"
+    message: "timestamp=2025/09/03 19:40:32, time_generated=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end, syslog.header=<14>Sep  3 19:40:32 PA-3220, network.client.ip=172.16.28.190, network.destination.ip=17.253.2.43, natsrc=72.138.81.50, natdst=17.253.2.43, rule=L3_Orca to L3_Untrust, usr.id=, dstuser=, app=ntp-base, vsys=vsys1, from=L3_Orca, to=L3_Untrust, inbound_if=ethernet1/6.115, outbound_if=ethernet1/7, logset=datadog-forwarder, sessionid=393714, repeatcnt=1, network.client.port=123, network.destination.port=123, natsport=29153, natdport=123, flags=0x40407a, proto=udp, evt.name=allow, bytes=372, network.bytes_read=282, network.bytes_written=90, start=2025/09/03 19:39:53, elapsed=36, category=any, seqno=7489817491394537148, actionflags=0x0, network.client.geoip.country.name=172.16.0.0-172.31.255.255, dstloc=United States, pkts_sent=3, pkts_received=1, session_end_reason=aged-out, device_name=PA-3220, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0, chunks_sent=0, chunks_received=0"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1756928432000
