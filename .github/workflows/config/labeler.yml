@@ -45,6 +45,8 @@ integration/airbyte:
 - airbyte/**/*
 integration/airflow:
 - airflow/**/*
+integration/amazon_app_mesh:
+- amazon_app_mesh/**/*
 integration/amazon_eks:
 - amazon_eks/**/*
 integration/amazon_eks_blueprints:
