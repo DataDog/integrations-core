@@ -10,7 +10,23 @@
     "changelog": "CHANGELOG.md",
     "description": "Collect metrics and logs from Kong Mesh, an enterprise service mesh for Kubernetes and VMs.",
     "title": "Kong Mesh",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Kong Mesh Control Plane",
+        "image_url": "images/control_plane.png"
+      },
+      {
+        "media_type": "image", 
+        "caption": "Kong Mesh Control Plane Overview",
+        "image_url": "images/control_plane_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Kong Mesh Service Communication",
+        "image_url": "images/service_communication.png"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
