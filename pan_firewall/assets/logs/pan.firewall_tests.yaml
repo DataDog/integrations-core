@@ -1,7 +1,7 @@
 id: "pan.firewall"
 tests:
  -
-  sample: "timestamp=2025/08/25T17:15:02.982Z, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+  sample: "timestamp=2025/08/25T17:15:02.982Z, time_generated=2025/08/25 17:15:02, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
   result:
     custom:
       actionflags: "0xa0000 00000000000"
@@ -25,6 +25,7 @@ tests:
       serial: "001801010877"
       serverprofile: "serverprofile"
       subtype: "virus"
+      time_generated: "2025/08/25 17:15:02"
       type: "AUTHENTICATION"
       usr:
         id: "Jaydeep"
@@ -258,7 +259,8 @@ tests:
         severity_id: 1
         status: "New"
         status_id: 1
-        time: 1755870797000
+        time: "2025/08/22 13:53:17"
+        type_name: "Detection Finding: Create"
         type_uid: 200401
       outbound_if: "ae1.53"
       parent_session_id: "0"
@@ -429,37 +431,37 @@ tests:
     custom:
       action_source: "from-policy"
       actionflags: "0x0"
-      app: "incomplete"
+      app: "ntp-base"
       assoc_id: 0
-      bytes: 140
+      bytes: 372
       category: "any"
       chunks: 0
       chunks_received: 0
       chunks_sent: 0
-      device_name: "test_device"
-      dstloc: "192.168.0.0-192.168.255.255"
-      elapsed: 1
+      device_name: "PA-3220"
+      dstloc: "United States"
+      elapsed: 36
       evt:
         name: "allow"
-      flags: "0x19"
-      from: "dcglobalprotect"
+      flags: "0x40407a"
+      from: "L3_Orca"
       imsi: 0
-      inbound_if: "tunnel"
-      logset: "default"
-      natdport: 0
-      natdst: "0.0.0.0"
-      natsport: 0
-      natsrc: "0.0.0.0"
+      inbound_if: "ethernet1/6.115"
+      logset: "datadog-forwarder"
+      natdport: 123
+      natdst: "17.253.2.43"
+      natsport: 29153
+      natsrc: "72.138.81.50"
       network:
-        bytes_read: 140
-        bytes_written: 0
+        bytes_read: 282
+        bytes_written: 90
         client:
           geoip: {}
-          ip: "10.160.20.45"
-          port: 59065
+          ip: "172.16.28.190"
+          port: 123
         destination:
-          ip: "192.168.1.1"
-          port: 8013
+          ip: "17.253.2.43"
+          port: 123
       ocsf:
         activity_id: 2
         activity_name: "end"
@@ -468,53 +470,54 @@ tests:
         class_uid: 4001
         connection_info:
           direction_id: 0
-          protocol_name: "tcp"
+          protocol_name: "udp"
           session:
-            uid: "136240"
+            uid: "393714"
         dst_endpoint:
-          ip: "192.168.1.1"
-          port: 8013
+          ip: "17.253.2.43"
+          port: 123
         metadata:
           product:
             name: "Firewall"
-            uid: "23001016210"
+            uid: "16201026426"
             vendor_name: "Palo Alto"
-          sequence: 7519553924936159600
+          sequence: 7489817491394537148
           version: "1.5.0"
         severity: "informational"
         severity_id: 1
         src_endpoint:
-          ip: "10.160.20.45"
-          port: 59065
-        time: 1725324032000
+          ip: "172.16.28.190"
+          port: 123
+        time: "2025/09/03 19:40:32"
         traffic:
-          bytes: 140
+          bytes: 372
           chunks: 0
           chunks_in: 0
           chunks_out: 0
-          packets_in: 0
-          packets_out: 2
+          packets_in: 1
+          packets_out: 3
         type_name: "Network Activity: Close"
         type_uid: 400102
-      outbound_if: "ae1.190"
+      outbound_if: "ethernet1/7"
       parent_session_id: 0
-      pkts_received: 0
-      pkts_sent: 2
-      proto: "tcp"
+      pkts_received: 1
+      pkts_sent: 3
+      proto: "udp"
       repeatcnt: 1
-      rule: "allow vm new dc-1"
-      seqno: 7519553924936159600
-      serial: 23001016210
+      rule: "L3_Orca to L3_Untrust"
+      seqno: 7489817491394537148
+      serial: 16201026426
       session_end_reason: "aged-out"
-      sessionid: 136240
+      sessionid: 393714
+      start: "2025/09/03 19:39:53"
       subtype: "end"
-      to: "dclan2lan"
+      time_generated: "2025/09/03 19:40:32"
+      to: "L3_Untrust"
+      tunnel: "N/A"
       tunnelid: 0
       type: "TRAFFIC"
-      usr:
-        id: "test_user"
       vsys: "vsys1"
-    message: "timestamp=2025/08/25T17:15:02.982Z, serial=023001016210, type=TRAFFIC, subtype=end, time_generated=2025/08/25 17:15:02, network.client.ip=10.160.20.45, network.destination.ip=192.168.1.1, natsrc=0.0.0.0, natdst=0.0.0.0, rule=allow vm new dc-1, usr.id=test_user, dstuser=, app=incomplete, vsys=vsys1, from=dcglobalprotect, to=dclan2lan, inbound_if=tunnel, outbound_if=ae1.190, logset=default, sessionid=136240, repeatcnt=1, network.client.port=59065, network.destination.port=8013, natsport=0, natdport=0, flags=0x19, proto=tcp, evt.name=allow, bytes=140, network.bytes_read=140, network.bytes_written=0, start=2025/08/25 17:14:58, elapsed=1, category=any, seqno=7519553924936159600, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=192.168.0.0-192.168.255.255, pkts_sent=2, pkts_received=0, session_end_reason=aged-out, device_name=test_device, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0, chunks_sent=0, chunks_received=0"
+    message: "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end, time_generated=2025/09/03 19:40:32, network.client.ip=172.16.28.190, network.destination.ip=17.253.2.43, natsrc=72.138.81.50, natdst=17.253.2.43, rule=L3_Orca to L3_Untrust, usr.id=, dstuser=, app=ntp-base, vsys=vsys1, from=L3_Orca, to=L3_Untrust, inbound_if=ethernet1/6.115, outbound_if=ethernet1/7, logset=datadog-forwarder, sessionid=393714, repeatcnt=1, network.client.port=123, network.destination.port=123, natsport=29153 natdport=123, flags=0x40407a, proto=udp, evt.name=allow, bytes=372, network.bytes_read=282, network.bytes_written=90, start=2025/09/03 19:39:53, elapsed=36, category=any, seqno=7489817491394537148, actionflags=0x0, network.client.geoip.country.name=172.16.0.0-172.31.255.255, dstloc=United States, pkts_sent=3, pkts_received=1, session_end_reason=aged-out, device_name=PA-3220, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi= 0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0 chunks_sent=0 chunks_received=0"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1

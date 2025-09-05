@@ -206,11 +206,32 @@ pipeline:
         matchRules: |
           rule_panos %{data::keyvalue("=","/: \"")}
         supportRules: ''
-    - type: date-remapper
-      name: Define `time_generated` as the official date of the log
+    - type: grok-parser
+      name: Parsing event time
+      enabled: true
+      source: time_generated
+      samples:
+        - "2025/08/25 17:15:02"
+      grok:
+        matchRules: |
+          zero %{date("yyyy/MM/dd HH:mm:ss"):time_generated_unix}
+        supportRules: ''
+      preserveSource: true\
+    - type: attribute-remapper
+      name: remap 'time_generated_unix' to 'time_generated'
       enabled: true
       sources:
-        - time_generated
+        - time_generated_unix
+      sourceType: attribute
+      target: time_generated
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: date-remapper
+      name: Define `time_generated_unix` as the official date of the log
+      enabled: true
+      sources:
+        - time_generated_unix
     - type: geo-ip-parser
       name: Fetching GeoIp data for client ip
       enabled: true
@@ -239,10 +260,10 @@ pipeline:
         query: "@type:(TRAFFIC OR THREAT)"
       processors:
         - type: attribute-remapper
-          name: remap 'time_generated' to 'ocsf.time'
+          name: remap 'time_generated_unix' to 'ocsf.time'
           enabled: true
           sources:
-            - time_generated
+            - time_generated_unix
           sourceType: attribute
           target: ocsf.time
           targetType: attribute
