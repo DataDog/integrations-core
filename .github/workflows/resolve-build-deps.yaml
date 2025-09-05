@@ -301,9 +301,12 @@ jobs:
           body-includes: "Dependency Size Changes"
 
       - name: Delete last comment
+        if: steps.find_comment.outputs.comment-id != ''
         run: |
-          gh issue delete-comment ${{ steps.find_comment.outputs.comment-id }}
-      
+          curl -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
+
       - name: Create comment
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
