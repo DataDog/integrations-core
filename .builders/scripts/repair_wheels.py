@@ -99,7 +99,6 @@ class WheelName(NamedTuple):
             self.name, self.version, self.python_tag, self.abi_tag, self.platform_tag
         ]) + '.whl'
 
-
 def check_unacceptable_files(
     wheel: Path,
     bypass_prefixes: list[str],
