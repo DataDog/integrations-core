@@ -89,6 +89,8 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/bentoml:
+- bentoml/**/*
 integration/beyondtrust_identity_security_insights:
 - beyondtrust_identity_security_insights/**/*
 integration/beyondtrust_password_safe:
@@ -185,6 +187,8 @@ integration/datadog_checks_tests_helper:
 - datadog_checks_tests_helper/**/*
 integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
+integration/datadog_csi_driver:
+- datadog_csi_driver/**/*
 integration/datadog_operator:
 - datadog_operator/**/*
 integration/dcgm:
@@ -297,6 +301,8 @@ integration/hubspot_content_hub:
 - hubspot_content_hub/**/*
 integration/hudi:
 - hudi/**/*
+integration/hugging_face_tgi:
+- hugging_face_tgi/**/*
 integration/hyperv:
 - hyperv/**/*
 integration/iam_access_analyzer:
@@ -707,6 +713,8 @@ integration/vault:
 - vault/**/*
 integration/velero:
 - velero/**/*
+integration/versa:
+- versa/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:
