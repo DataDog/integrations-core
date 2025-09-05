@@ -205,7 +205,7 @@ datadog-ssh-check==4.3.0
 datadog-statsd==3.0.0
 datadog-strimzi==4.0.1
 datadog-supabase==2.0.1
-datadog-supervisord==4.0.0
+datadog-supervisord==4.1.0
 datadog-suricata==2.0.0
 datadog-symantec-endpoint-protection==1.0.0
 datadog-system-core==4.0.0
