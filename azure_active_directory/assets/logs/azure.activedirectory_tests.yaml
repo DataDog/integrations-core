@@ -26,6 +26,8 @@ tests:
       }
     result:
       custom:
+        callerIpAddress: "52.163.50.84"
+        category: "AuditLogs"
         correlationId: "d38a4a5b-dea6-4fb4-aa82-7d42c51d0d60"
         duration: 1.23E8
         durationMs: 123
@@ -41,10 +43,6 @@ tests:
         ocsf:
           activity_id: 99
           activity_name: "Add owner to service principal"
-          actor:
-            user:
-              name: "Microsoft.Intune"
-              type_id: 99
           category_name: "Uncategorized"
           category_uid: 0
           class_name: "Base Event"
@@ -53,23 +51,25 @@ tests:
             event_code: "Add owner to service principal"
             log_name: "AuditLogs"
             product:
-              name: "Azure Active Directory"
+              name: "Entra ID"
               vendor_name: "Microsoft"
+            uid: "Directory_d38a4a5b-dea6-4fb4-aa82-7d42c51d0d60_8X8M4_47251981"
             version: "1.5.0"
           severity: "Informational"
           severity_id: 1
-          src_endpoint:
-            ip: "52.163.50.84"
           status: "Success"
           status_code: "success"
+          status_id: 1
           time: 1586331653169
           type_uid: 99
+        operationName: "Add owner to service principal"
         operationVersion: "1.0"
         properties:
           id: "Directory_d38a4a5b-dea6-4fb4-aa82-7d42c51d0d60_8X8M4_47251981"
           initiatedBy:
             app:
               displayName: "Microsoft.Intune"
+          result: "success"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
         resultSignature: "None"
         tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
@@ -78,7 +78,7 @@ tests:
       message: "User registered Authenticator App with Code"
       status: "info"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
   - sample: |-
       {
@@ -159,6 +159,8 @@ tests:
     result:
       custom:
         Level: 4
+        callerIpAddress: "192.182.149.21"
+        category: "SignInLogs"
         correlationId: "d47198c3-f726-47b8-b683-3f6244c9ceb5"
         duration: 0.0
         durationMs: 0
@@ -192,11 +194,10 @@ tests:
           activity_name: "Logon"
           actor:
             user:
-              email_addr: "testtest@datadoghq.com"
               name: "Test Test"
               type: "User"
               type_id: 1
-              uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
+              uid: ""
           category_name: "Identity & Access Management"
           category_uid: 3
           class_name: "Authentication"
@@ -208,8 +209,9 @@ tests:
             event_code: "Sign-in activity"
             log_name: "SignInLogs"
             product:
-              name: "Azure Active Directory"
+              name: "Entra ID"
               vendor_name: "Microsoft"
+            uid: "b95c8eca-487b-4631-b6e5-0469cb7c0800"
             version: "1.5.0"
           service:
             name: "Windows Azure Active Directory"
@@ -221,37 +223,41 @@ tests:
             location:
               city: "Kirkland"
               country: "US"
-              lat: -122.19957733154297
+              lat: 47.654361724853516
+              long: -122.19957733154297
             os:
               name: "Windows 10"
               type_id: 100
+          status: "None"
           status_code: "0"
           time: 1589373319636
           type_name: "Authentication: Logon"
           type_uid: 300201
           user:
-            email_addr: "testtest@datadoghq.com"
             name: "Test Test"
             type: "User"
             type_id: 1
-            uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
+            uid: ""
+        operationName: "Sign-in activity"
         operationVersion: "1.0"
         properties:
           appDisplayName: "ACOM Azure Website"
           appId: "23523755-3a2b-41ca-9315-f81f3f566a95"
           appliedConditionalAccessPolicies:
-            - result: "success"
-              conditionsNotSatisfied: 0
-              conditionsSatisfied: 3
-              enforcedGrantControls:
-                - "Mfa"
-              displayName: "Require MFA"
-              id: "ccb90f89-cdaf-4ae6-9dd1-a9ee6ea86a90"
+          -
+            result: "success"
+            conditionsNotSatisfied: 0
+            conditionsSatisfied: 3
+            enforcedGrantControls:
+            - "Mfa"
+            displayName: "Require MFA"
+            id: "ccb90f89-cdaf-4ae6-9dd1-a9ee6ea86a90"
           authenticationDetails:
-            - authenticationStepDateTime: "2020-05-13T12:35:19.6363979+00:00"
-              authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
-              authenticationStepRequirement: "MultiConditionalAccess"
-              succeeded: false
+          -
+            authenticationStepDateTime: "2020-05-13T12:35:19.6363979+00:00"
+            authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
+            authenticationStepRequirement: "MultiConditionalAccess"
+            succeeded: false
           clientAppUsed: "Browser"
           conditionalAccessStatus: "success"
           correlationId: "d47198c3-f726-47b8-b683-3f6244c9ceb5"
@@ -283,6 +289,8 @@ tests:
             errorCode: 0
           tokenIssuerName: ""
           tokenIssuerType: "AzureAD"
+          userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
+          userDisplayName: "Test Test"
           userId: "0abb8889-005c-4307-85c2-97a5d3cd0964"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
         resultSignature: "None"
@@ -296,7 +304,7 @@ tests:
           name: "Test Test"
       message: "MFA requirement satisfied by claim in the token"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1589373319636
   - sample: |-
       {
@@ -364,6 +372,8 @@ tests:
     result:
       custom:
         Level: 4
+        callerIpAddress: "192.182.149.21"
+        category: "AuditLogs"
         correlationId: "a13bd0fa-70d0-4e60-ae23-b687377b4695"
         duration: 0.0
         durationMs: 0
@@ -377,7 +387,7 @@ tests:
             ip: "192.182.149.21"
         ocsf:
           activity_id: 6
-          activity_name: "Delete user"
+          activity_name: "Delete"
           actor:
             session:
               uid: "a13bd0fa-70d0-4e60-ae23-b687377b4695"
@@ -393,14 +403,16 @@ tests:
           class_uid: 3001
           http_request:
             http_headers:
-              - name: "User-Agent"
-                value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:141.0) Gecko/20100101 Firefox/141.0"
+            -
+              name: "User-Agent"
+              value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:141.0) Gecko/20100101 Firefox/141.0"
           metadata:
             event_code: "Delete user"
             log_name: "AuditLogs"
             product:
-              name: "Azure Active Directory"
+              name: "Entra ID"
               vendor_name: "Microsoft"
+            uid: "Directory_a13bd0fa-70d0-4e60-ae23-b687377b4695_VTP26_161277857"
             version: "1.5.0"
           severity: "Informational"
           severity_id: 1
@@ -408,6 +420,7 @@ tests:
             ip: "192.182.149.21"
           status: "Success"
           status_code: ""
+          status_id: 1
           time: 1586331653169
           type_uid: 300106
           user:
@@ -416,13 +429,15 @@ tests:
             type: "User"
             type_id: 1
             uid: "1606d62c-71bc-42ff-a03c-87809c6b0e68"
+        operationName: "Delete user"
         operationVersion: "1.0"
         properties:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
           activityDisplayName: "Delete user"
           additionalDetails:
-            - value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:141.0) Gecko/20100101 Firefox/141.0"
-              key: "User-Agent"
+          -
+            value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:141.0) Gecko/20100101 Firefox/141.0"
+            key: "User-Agent"
           category: "UserManagement"
           correlationId: "a13bd0fa-70d0-4e60-ae23-b687377b4695"
           id: "Directory_a13bd0fa-70d0-4e60-ae23-b687377b4695_VTP26_161277857"
@@ -431,19 +446,23 @@ tests:
             user:
               id: "018af091-5465-4aed-9d6f-8c40981b2375"
               ipAddress: "192.182.149.21"
+              userPrincipalName: "test.test@datadoghq.com"
           loggedByService: "Core Directory"
           operationName: "Delete user"
           operationType: "Delete"
+          result: "success"
           resultDescription: ""
           resultReason: ""
           resultType: ""
           targetResources:
-            - modifiedProperties:
-                - newValue: '"False"'
-                  displayName: "Is Hard Deleted"
-              id: "1606d62c-71bc-42ff-a03c-87809c6b0e68"
-              type: "User"
-              userPrincipalName: "deleted_user@datadoghq.com"
+          -
+            modifiedProperties:
+            -
+              newValue: "\"False\""
+              displayName: "Is Hard Deleted"
+            id: "1606d62c-71bc-42ff-a03c-87809c6b0e68"
+            type: "User"
+            userPrincipalName: "deleted_user@datadoghq.com"
           tenantGeo: "NA"
           tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
@@ -506,7 +525,7 @@ tests:
           "resultSignature" : "None"
         }
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
   - sample: |-
       {
@@ -597,6 +616,8 @@ tests:
     result:
       custom:
         Level: 4
+        callerIpAddress: "192.182.149.21"
+        category: "AuditLogs"
         correlationId: "5d3c3340-5c5e-419c-9ae9-193b1669f84e"
         duration: 0.0
         durationMs: 0
@@ -609,49 +630,44 @@ tests:
             geoip: {}
             ip: "192.182.149.21"
         ocsf:
-          activity_id: 7
-          activity_name: "Attach Policy"
-          actor:
-            session:
-              uid: "5d3c3340-5c5e-419c-9ae9-193b1669f84e"
-            user:
-              email_addr: "test.user@datadoghq.com"
-              name: "test.user@datadoghq.com"
-              type: "User"
-              type_id: 1
-              uid: "9ff6ab06-49d6-49e8-9974-e979522283c1"
+          activity_id: 1
+          activity_name: "Assign Privileges"
           category_name: "Identity & Access Management"
           category_uid: 3
-          class_name: "Account Change"
-          class_uid: 3001
+          class_name: "User Access Management"
+          class_uid: 3005
           metadata:
             event_code: "Add member to role"
             log_name: "AuditLogs"
             product:
-              name: "Azure Active Directory"
+              name: "Entra ID"
               vendor_name: "Microsoft"
+            uid: "Directory_5d3c3340-5c5e-419c-9ae9-193b1669f84e_D4P59_168172641"
             version: "1.5.0"
-          policies:
-            - uid: "260a316b-1246-41c7-bc20-16569a1bd28d"
+          privileges:
+          - "\"Security Administrator\""
           severity: "Informational"
           severity_id: 1
           src_endpoint:
             ip: "192.182.149.21"
           status: "Success"
           status_code: ""
+          status_id: 1
           time: 1586331653169
-          type_uid: 300107
+          type_uid: 300501
           user:
             name: "Test Service Principal"
             type: "System"
             type_id: 3
+        operationName: "Add member to role"
         operationVersion: "1.0"
         properties:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
           activityDisplayName: "Add member to role"
           additionalDetails:
-            - value: "9205c433-2781-42be-a046-c21ef6b5e608"
-              key: "AppId"
+          -
+            value: "9205c433-2781-42be-a046-c21ef6b5e608"
+            key: "AppId"
           category: "RoleManagement"
           correlationId: "5d3c3340-5c5e-419c-9ae9-193b1669f84e"
           id: "Directory_5d3c3340-5c5e-419c-9ae9-193b1669f84e_D4P59_168172641"
@@ -660,29 +676,38 @@ tests:
             user:
               id: "9ff6ab06-49d6-49e8-9974-e979522283c1"
               ipAddress: "192.182.149.21"
+              userPrincipalName: "test.user@datadoghq.com"
           loggedByService: "Core Directory"
           operationName: "Add member to role"
           operationType: "Assign"
+          result: "success"
           resultDescription: ""
           resultReason: ""
           resultType: ""
           targetResources:
-            - displayName: "Test Service Principal"
-              modifiedProperties:
-                - newValue: '"260a316b-1246-41c7-bc20-16569a1bd28d"'
-                  displayName: "Role.ObjectID"
-                - newValue: '"Security Administrator"'
-                  displayName: "Role.DisplayName"
-                - newValue: '"194ae4cb-b126-40b2-bd5b-6091b380977d"'
-                  displayName: "Role.TemplateId"
-                - newValue: '"SecurityAdmins"'
-                  displayName: "Role.WellKnownObjectName"
-                - newValue: '"9205c433-2781-42be-a046-c21ef6b5e608"'
-                  displayName: "TargetId.ServicePrincipalNames"
-              id: "febf6383-8bed-4efb-8244-c9a456a1f172"
-              type: "ServicePrincipal"
-            - id: "260a316b-1246-41c7-bc20-16569a1bd28d"
-              type: "Role"
+          -
+            displayName: "Test Service Principal"
+            modifiedProperties:
+            -
+              newValue: "\"260a316b-1246-41c7-bc20-16569a1bd28d\""
+              displayName: "Role.ObjectID"
+            -
+              newValue: "\"Security Administrator\""
+              displayName: "Role.DisplayName"
+            -
+              newValue: "\"194ae4cb-b126-40b2-bd5b-6091b380977d\""
+              displayName: "Role.TemplateId"
+            -
+              newValue: "\"SecurityAdmins\""
+              displayName: "Role.WellKnownObjectName"
+            -
+              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
+              displayName: "TargetId.ServicePrincipalNames"
+            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
+            type: "ServicePrincipal"
+          -
+            id: "260a316b-1246-41c7-bc20-16569a1bd28d"
+            type: "Role"
           tenantGeo: "NA"
           tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
@@ -760,7 +785,7 @@ tests:
           "resultSignature" : "None"
         }
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
   - sample: |-
       {
@@ -846,6 +871,8 @@ tests:
     result:
       custom:
         Level: 4
+        callerIpAddress: "192.182.149.21"
+        category: "AuditLogs"
         correlationId: "67c2eef3-4b38-4017-82dd-ecc064c38151"
         duration: 0.0
         durationMs: 0
@@ -860,15 +887,6 @@ tests:
         ocsf:
           activity_id: 3
           activity_name: "Add User"
-          actor:
-            session:
-              uid: "67c2eef3-4b38-4017-82dd-ecc064c38151"
-            user:
-              email_addr: "test.user@datadoghq.com"
-              name: "test.user@datadoghq.com"
-              type: "User"
-              type_id: 1
-              uid: "9ff6ab06-49d6-49e8-9974-e979522283c1"
           category_name: "Identity & Access Management"
           category_uid: 3
           class_name: "Group Management"
@@ -877,14 +895,16 @@ tests:
             uid: "3b3bf2cd-049a-4f35-9e63-dc2a0a830807"
           http_request:
             http_headers:
-              - name: "User-Agent"
-                value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+            -
+              name: "User-Agent"
+              value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
           metadata:
             event_code: "Add member to group"
             log_name: "AuditLogs"
             product:
-              name: "Azure Active Directory"
+              name: "Entra ID"
               vendor_name: "Microsoft"
+            uid: "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951"
             version: "1.5.0"
           severity: "Informational"
           severity_id: 1
@@ -892,20 +912,24 @@ tests:
             ip: "192.182.149.21"
           status: "Success"
           status_code: ""
+          status_id: 1
           time: 1586331653169
           type_uid: 300603
           user:
             name: "Test Application"
             uid: "febf6383-8bed-4efb-8244-c9a456a1f172"
+        operationName: "Add member to group"
         operationVersion: "1.0"
         properties:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
           activityDisplayName: "Add member to group"
           additionalDetails:
-            - value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-              key: "User-Agent"
-            - value: "9205c433-2781-42be-a046-c21ef6b5e608"
-              key: "AppId"
+          -
+            value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+            key: "User-Agent"
+          -
+            value: "9205c433-2781-42be-a046-c21ef6b5e608"
+            key: "AppId"
           category: "GroupManagement"
           correlationId: "67c2eef3-4b38-4017-82dd-ecc064c38151"
           id: "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951"
@@ -914,26 +938,33 @@ tests:
             user:
               id: "9ff6ab06-49d6-49e8-9974-e979522283c1"
               ipAddress: "192.182.149.21"
+              userPrincipalName: "test.user@datadoghq.com"
           loggedByService: "Core Directory"
           operationName: "Add member to group"
           operationType: "Assign"
+          result: "success"
           resultDescription: ""
           resultReason: ""
           resultType: ""
           targetResources:
-            - displayName: "Test Application"
-              modifiedProperties:
-                - newValue: '"3b3bf2cd-049a-4f35-9e63-dc2a0a830807"'
-                  displayName: "Group.ObjectID"
-                - newValue: '"Security-Research-Admins"'
-                  displayName: "Group.DisplayName"
-                - newValue: '"9205c433-2781-42be-a046-c21ef6b5e608"'
-                  displayName: "TargetId.ServicePrincipalNames"
-              id: "febf6383-8bed-4efb-8244-c9a456a1f172"
-              type: "ServicePrincipal"
-            - groupType: "unknownFutureValue"
-              id: "3b3bf2cd-049a-4f35-9e63-dc2a0a830807"
-              type: "Group"
+          -
+            displayName: "Test Application"
+            modifiedProperties:
+            -
+              newValue: "\"3b3bf2cd-049a-4f35-9e63-dc2a0a830807\""
+              displayName: "Group.ObjectID"
+            -
+              newValue: "\"Security-Research-Admins\""
+              displayName: "Group.DisplayName"
+            -
+              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
+              displayName: "TargetId.ServicePrincipalNames"
+            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
+            type: "ServicePrincipal"
+          -
+            groupType: "unknownFutureValue"
+            id: "3b3bf2cd-049a-4f35-9e63-dc2a0a830807"
+            type: "Group"
           tenantGeo: "NA"
           tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
@@ -1009,7 +1040,7 @@ tests:
           "resultSignature" : "None"
         }
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
   - sample: |-
       {
@@ -1075,6 +1106,8 @@ tests:
     result:
       custom:
         Level: 4
+        callerIpAddress: "192.182.149.21"
+        category: "AuditLogs"
         correlationId: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
         duration: 0.0
         durationMs: 0
@@ -1090,15 +1123,6 @@ tests:
         ocsf:
           activity_id: 99
           activity_name: "Validate user authentication"
-          actor:
-            session:
-              uid: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
-            user:
-              email_addr: "test.user@datadoghq.com"
-              name: "test.user@datadoghq.com"
-              type: "User"
-              type_id: 1
-              uid: "9ff6ab06-49d6-49e8-9974-e979522283c1"
           category_name: "Uncategorized"
           category_uid: 0
           class_name: "Base Event"
@@ -1107,30 +1131,35 @@ tests:
             event_code: "Validate user authentication"
             log_name: "AuditLogs"
             product:
-              name: "Azure Active Directory"
+              name: "Entra ID"
               vendor_name: "Microsoft"
+            uid: "B2C_f32c392f-d8a3-4846-b89d-8c4cb9a404d8_4d3bac44-0230-4732-9e70-cc00736f0a97_134000182275995730"
             version: "1.5.0"
           severity: "Informational"
           severity_id: 1
-          src_endpoint:
-            ip: "192.182.149.21"
           status: "Success"
           status_code: "Token is valid"
+          status_id: 1
           time: 1586331653169
           type_uid: 99
+        operationName: "Validate user authentication"
         operationVersion: "1.0"
         properties:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
           activityDisplayName: "Validate user authentication"
           additionalDetails:
-            - value: "00000000-0000-0000-0000-000000000000"
-              key: "targetTenant"
-            - value: "None"
-              key: "targetEntityType"
-            - value: "UPN"
-              key: "actorIdentityType"
-            - value: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
-              key: "RequestId"
+          -
+            value: "00000000-0000-0000-0000-000000000000"
+            key: "targetTenant"
+          -
+            value: "None"
+            key: "targetEntityType"
+          -
+            value: "UPN"
+            key: "actorIdentityType"
+          -
+            value: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
+            key: "RequestId"
           category: "Authentication"
           correlationId: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
           id: "B2C_f32c392f-d8a3-4846-b89d-8c4cb9a404d8_4d3bac44-0230-4732-9e70-cc00736f0a97_134000182275995730"
@@ -1140,15 +1169,18 @@ tests:
               displayName: "test.user@datadoghq.com"
               id: "9ff6ab06-49d6-49e8-9974-e979522283c1"
               ipAddress: "192.182.149.21"
+              userPrincipalName: "test.user@datadoghq.com"
           loggedByService: "B2C"
           operationName: "Validate user authentication"
           operationType: "Read"
+          result: "success"
           resultDescription: "Token is valid"
           resultReason: "Token is valid"
           resultType: ""
           targetResources:
-            - displayName: "00000000-0000-0000-0000-000000000000"
-              type: "Other"
+          -
+            displayName: "00000000-0000-0000-0000-000000000000"
+            type: "Other"
           tenantGeo: "NA"
           tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
@@ -1161,7 +1193,7 @@ tests:
           name: "test.user@datadoghq.com"
       message: "Token is valid"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
   - sample: |-
       {
@@ -1217,6 +1249,8 @@ tests:
       }
     result:
       custom:
+        callerIpAddress: "192.182.149.21"
+        category: "MicrosoftGraphActivityLogs"
         correlationId: "89c623b7-6451-4af8-b9f1-e56656de8dd9"
         duration: 6.53489E11
         durationMs: "653489"
@@ -1241,7 +1275,7 @@ tests:
             ip: "192.182.149.21"
         ocsf:
           activity_id: 2
-          activity_name: "Revoke Privileges"
+          activity_name: "Read"
           actor:
             session:
               uid: "JzbLMNpZQU29nt7s3hYlAA"
@@ -1262,13 +1296,14 @@ tests:
           duration: 653489
           http_request:
             http_headers:
-              - name: "User-Agent"
-                value: "Datadog"
+            -
+              name: "User-Agent"
+              value: "Datadog"
           metadata:
             event_code: "Microsoft Graph Activity"
             log_name: "MicrosoftGraphActivityLogs"
             product:
-              name: "Azure Active Directory"
+              name: "Entra ID"
               vendor_name: "Microsoft"
             version: "1.5.0"
           severity: "Informational"
@@ -1280,6 +1315,7 @@ tests:
           status_id: 2
           time: 1586331653169
           type_uid: 600302
+        operationName: "Microsoft Graph Activity"
         operationVersion: "v1.0"
         properties:
           C_DeviceId: ""
@@ -1314,6 +1350,7 @@ tests:
           tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
           timeGenerated: "2020-04-08T07:40:53.1695436Z"
           tokenIssuedAt: "2025-08-12T23:23:58.0000000Z"
+          userAgent: "Datadog"
           wids: "0997a1d0-0d1d-4acb-b408-d5ca73121e90"
         resourceId: "/TENANTS/4d3bac44-0230-4732-9e70-cc00736f0a97/PROVIDERS/MICROSOFT.AADIAM"
         resultSignature: "403"
@@ -1373,5 +1410,5 @@ tests:
         }
       status: "info"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
