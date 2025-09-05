@@ -24,6 +24,26 @@
     ]
   },
   "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_name": "Kong Mesh",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "saved_views": {
+      "Kong Mesh Access Logs Overview": "assets/saved_views/logs_overview.json"
+    },
+    "monitors": {
+      "Kong Mesh No Leader Detected": "assets/monitors/no_leader_detected.json",
+      "Kong Mesh Multiple Leaders Detected": "assets/monitors/multiple_leaders_detected.json",
+      "Kong Mesh API Server High Error Rate": "assets/monitors/api_server_error_rate.json",
+      "Kong Mesh xDS Configuration Generation Errors": "assets/monitors/xds_generation_errors.json",
+      "Kong Mesh xDS High Configuration Delivery Latency": "assets/monitors/xds_delivery_latency.json"
+    },
     "dashboards": {
       "Kong Mesh Control Plane": "assets/dashboards/kong_mesh_control_plane.json",
       "Kong Mesh Service Communication": "assets/dashboards/kong_mesh_service_communication.json"
