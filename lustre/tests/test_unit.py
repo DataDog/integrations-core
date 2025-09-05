@@ -79,6 +79,8 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
 
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+        if not metric.startswith("lustre.ldlm") and not metric.startswith("lustre.net") and not metric.startswith("lustre.device"):
+            aggregator.assert_metric_has_tags(metric, tags=["filesystem:*"])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -276,13 +278,13 @@ def test_extract_tags_from_param(mock_lustre_commands):
         tags = check._extract_tags_from_param(
             'mdc.*.stats', 'mdc.lustre-MDT0000-mdc-ffff8803f0d41000.stats', ('device_uuid',)
         )
-        assert tags == ['device_uuid:lustre-MDT0000-mdc-ffff8803f0d41000']
+        assert tags == ['device_uuid:lustre-MDT0000-mdc-ffff8803f0d41000', 'filesystem:lustre']
 
         # Test with multiple wildcards
         tags = check._extract_tags_from_param(
             'mdt.*.exports.*.stats', 'mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats', ('device_name', 'nid')
         )
-        assert tags == ['device_name:lustre-MDT0000', 'nid:172.31.16.218@tcp']
+        assert tags == ['device_name:lustre-MDT0000', 'filesystem:lustre', 'nid:172.31.16.218@tcp']
 
         # Test with malformed IP
         tags = check._extract_tags_from_param('mdt.*.stats', 'mdt.172.malformed.16.218@tcp.stats', ('nid',))

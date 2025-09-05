@@ -20,6 +20,11 @@ IGNORED_LNET_GROUPS = {
     'interfaces',
 }
 
+TAGS_WITH_FILESYSTEM = {
+        'device_name',
+        'device_uuid',
+        'device_nid',
+        }
 
 @dataclass(frozen=True)
 class LustreParam:
