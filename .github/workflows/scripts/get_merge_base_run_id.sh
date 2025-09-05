@@ -6,9 +6,8 @@ WORKFLOW_NAME=$1
 
 # Get merge base commit
 echo "Getting merge base commit..."
-DEFAULT_BRANCH=$(git symbolic-ref 
-git fetch origin master:refs/remotes/origin/master
-BASE_SHA=$(git merge-base HEAD origin/master)
+git fetch origin $DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH
+BASE_SHA=$(git merge-base HEAD origin/$DEFAULT_BRANCH)
 echo "Base SHA: $BASE_SHA"
 
 # Find workflow run at exact merge-base SHA
@@ -20,7 +19,7 @@ if [ -z "$GH_TOKEN" ]; then
 fi
 
 
-count=$(git rev-list --count $BASE_SHA..origin/master)
+count=$(git rev-list --count $BASE_SHA..origin/$DEFAULT_BRANCH)
 count_plus_one=$((count + 1))
 
 echo "Searching through $count_plus_one workflow runs..."
