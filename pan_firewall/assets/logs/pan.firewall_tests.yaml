@@ -486,6 +486,7 @@ tests:
         src_endpoint:
           ip: "10.160.20.45"
           port: 59065
+        time: 1725324032000
         traffic:
           bytes: 140
           chunks: 0

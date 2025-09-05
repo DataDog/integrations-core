@@ -245,7 +245,8 @@ pipeline:
           samples: "2025/08/25 17:15:02"
           grok:
             supportRules: ""
-            matchRules: zero %{date("yyyy/MM/dd HH:mm:ss")}:ocsf.time}
+            matchRules: |
+              zero %{date("yyyy/MM/dd HH:mm:ss")}:ocsf.time}
         - type: attribute-remapper
           name: Sequence Number
           enabled: true
