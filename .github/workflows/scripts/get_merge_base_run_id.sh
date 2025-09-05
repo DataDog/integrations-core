@@ -25,7 +25,7 @@ echo "Searching through $count_plus_one workflow runs..."
 
 RUN_ID=$(
     (
-        gh run list --workflow $WORKFLOW_NAME --limit $count_plus_one --branch "master" --json databaseId,headSha,event
+        gh run list --workflow "$WORKFLOW_NAME" --limit "$count_plus_one" --branch "master" --json databaseId,headSha,event
     ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$BASE_SHA"'") | .databaseId' | head -n 1
 )
 
