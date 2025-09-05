@@ -240,7 +240,7 @@ datadog-weblogic==3.0.0
 datadog-win32-event-log==5.3.0; sys_platform == 'win32'
 datadog-windows-performance-counters==3.1.0; sys_platform == 'win32'
 datadog-windows-service==6.3.0; sys_platform == 'win32'
-datadog-wmi-check==3.2.0; sys_platform == 'win32'
+datadog-wmi-check==3.3.0; sys_platform == 'win32'
 datadog-yarn==8.0.1
 datadog-zeek==1.0.0; sys_platform != 'win32'
 datadog-zk==6.1.1; sys_platform != 'win32'
