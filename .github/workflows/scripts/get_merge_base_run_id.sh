@@ -35,7 +35,7 @@ if [ -z "$RUN_ID" ]; then
 fi
 
 echo "Found workflow run ID: $RUN_ID"
-
+echo "Found workflow run SHA: $BASE_SHA" >> $GITHUB_STEP_SUMMARY
 # Output results for GitHub Actions
 if [ -n "$GITHUB_OUTPUT" ]; then
     echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
