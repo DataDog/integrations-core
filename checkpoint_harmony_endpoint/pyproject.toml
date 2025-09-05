@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-checkpoint-harmony-endpoint"
-description = "The checkpoint_harmony_endpoint check"
+description = "The Checkpoint Harmony Endpoint check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.12"

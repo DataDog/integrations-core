@@ -1,4 +1,4 @@
-name: checkpoint_harmony_endpoint
+name: Checkpoint Harmony Endpoint
 files:
 - name: checkpoint_harmony_endpoint.yaml
   options:

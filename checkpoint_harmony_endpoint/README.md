@@ -1,4 +1,4 @@
-# Agent Check: checkpoint_harmony_endpoint
+# Agent Check: Checkpoint Harmony Endpoint
 
 ## Overview
 
