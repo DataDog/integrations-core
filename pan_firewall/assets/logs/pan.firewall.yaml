@@ -225,7 +225,7 @@ pipeline:
       sourceType: attribute
       target: time_generated
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: date-remapper
       name: Define `time_generated_unix` as the official date of the log
