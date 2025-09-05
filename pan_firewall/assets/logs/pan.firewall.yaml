@@ -218,7 +218,7 @@ pipeline:
         supportRules: ''
       preserveSource: true
     - type: date-remapper
-      name: Define `date` as the official date of the log
+      name: Define `time_generated` as the official date of the log
       enabled: true
       sources:
         - time_generated
@@ -250,7 +250,7 @@ pipeline:
         query: "@type:(TRAFFIC OR THREAT)"
       processors:
         - type: attribute-remapper
-          name: remap 'date' to 'ocsf.time'
+          name: remap 'time_generated' to 'ocsf.time'
           enabled: true
           sources:
             - time_generated
