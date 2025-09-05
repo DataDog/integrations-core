@@ -214,14 +214,14 @@ pipeline:
         - "2025/08/25 17:15:02"
       grok:
         matchRules: |
-          zero %{date("yyyy/MM/dd HH:mm:ss"):date}
+          zero %{date("yyyy/MM/dd HH:mm:ss"):time_generated}
         supportRules: ''
       preserveSource: true
     - type: date-remapper
       name: Define `date` as the official date of the log
       enabled: true
       sources:
-        - date
+        - time_generated
     - type: geo-ip-parser
       name: Fetching GeoIp data for client ip
       enabled: true
@@ -253,7 +253,7 @@ pipeline:
           name: remap 'date' to 'ocsf.time'
           enabled: true
           sources:
-            - date
+            - time_generated
           sourceType: attribute
           target: ocsf.time
           targetType: attribute
