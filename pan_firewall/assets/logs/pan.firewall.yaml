@@ -216,7 +216,7 @@ pipeline:
         matchRules: |
           zero %{date("yyyy/MM/dd HH:mm:ss"):time_generated_unix}
         supportRules: ''
-      preserveSource: true\
+      preserveSource: true
     - type: attribute-remapper
       name: remap 'time_generated_unix' to 'time_generated'
       enabled: true
