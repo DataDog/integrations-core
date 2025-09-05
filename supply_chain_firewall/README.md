@@ -28,6 +28,7 @@ Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualization
             [?] Select the desired log level for Datadog logging:
             > Log allowed and blocked commands
             ```
+            This will automatically create the `scfw.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][5], using the provided port for TCP log forwarding.  
 
         - Log collection is disabled by default in the Datadog Agent. Enable it by editing the `datadog.yaml` file:
 
@@ -94,3 +95,4 @@ Need help? Contact [Datadog support][4].
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [3]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [4]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
