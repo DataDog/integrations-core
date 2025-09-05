@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.1.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Fix leak of tags across check runs. ([#20859](https://github.com/DataDog/integrations-core/pull/20859))
+
 ## 2.1.0 / 2024-10-18 / Agent 7.59.0
 
 ***Added***:

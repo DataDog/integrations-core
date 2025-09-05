@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Add config option for the max number filegauges to collect ([#20946](https://github.com/DataDog/integrations-core/pull/20946))
+
 ## 4.0.1 / 2025-01-25 / Agent 7.63.0
 
 ***Fixed***:

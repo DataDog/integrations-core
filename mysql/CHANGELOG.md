@@ -2,6 +2,43 @@
 
 <!-- towncrier release notes start -->
 
+## 15.7.3 / 2025-08-25 / Agent 7.70.0
+
+***Fixed***:
+
+* Change statement_rows to TTL cache to fix mysql memory leaks ([#21097](https://github.com/DataDog/integrations-core/pull/21097))
+
+## 15.7.2 / 2025-08-07
+
+***Fixed***:
+
+* Fixed an issue where reading cardinality from `BTREE` indexes on `MEMORY` tables could raise an error. These indexes may not report cardinality due to a known MySQL bug ([#58520](https://bugs.mysql.com/bug.php?id=58520)). The value will now default to 0. ([#20759](https://github.com/DataDog/integrations-core/pull/20759))
+* Moved logger instantiation in MySQL version compatibility check to the except block to only perform the costly call to `get_check_logger()` when outputting the warning log. ([#20833](https://github.com/DataDog/integrations-core/pull/20833))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 15.7.1 / 2025-07-21 / Agent 7.69.0
+
+***Fixed***:
+
+* Add deprecated `collect_schemas` option to `config.yaml.example`. This config option is deprecated in Agent 7.69.0 and will be removed in a future release. ([#20783](https://github.com/DataDog/integrations-core/pull/20783))
+
+## 15.7.0 / 2025-07-10
+
+***Added***:
+
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add new `collect_schemas` configuration options to replace deprecated `schemas_collection` options while maintaining backward compatibility. ([#20602](https://github.com/DataDog/integrations-core/pull/20602))
+
+***Fixed***:
+
+* Avoid querying `INFORMATION_SCHEMA.COLUMNS` in favor of a static version check ([#20514](https://github.com/DataDog/integrations-core/pull/20514))
+* Fixes incorrect tag values when monitoring Percona Server. Previous tags on the database instance resource and metrics indicated dbms_flavor:mysql, but now indicate dbms_flavor:percona. This change issues a new query `SELECT @@version_comment` on startup. ([#20529](https://github.com/DataDog/integrations-core/pull/20529))
+* Fixes missing mysql variables from database instances configured with templated names ([#20620](https://github.com/DataDog/integrations-core/pull/20620))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* Changes the binlog enabled check to a lightweight lockless query ([#20650](https://github.com/DataDog/integrations-core/pull/20650))
+* Skip innodb stats check on Aurora reader instances ([#20696](https://github.com/DataDog/integrations-core/pull/20696))
+* Switch table rows stats query from information_schema to performance_schema ([#20702](https://github.com/DataDog/integrations-core/pull/20702))
+
 ## 15.6.0 / 2025-06-12 / Agent 7.68.0
 
 ***Added***:

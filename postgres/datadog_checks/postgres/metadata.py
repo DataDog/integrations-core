@@ -224,7 +224,7 @@ class PostgresMetadata(DBMAsyncJob):
         2. collection of pg_settings
     """
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
             "ignored_settings_patterns", DEFAULT_SETTINGS_IGNORED_PATTERNS
         )
@@ -258,13 +258,12 @@ class PostgresMetadata(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="database-metadata",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config
         self.db_pool = self._check.db_pool
-        self._collect_extensions_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
-        self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
+        self._collect_extensions_enabled = is_affirmative(config.settings_metadata_config.get("enabled", True))
+        self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", True))
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
@@ -293,7 +292,6 @@ class PostgresMetadata(DBMAsyncJob):
         self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
         self.report_postgres_metadata()
         self.report_postgres_extensions()
-        self._check.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
@@ -301,23 +299,25 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_extension_query
         if elapsed_s >= self.pg_extensions_collection_interval and self._collect_extensions_enabled:
             self._extensions_cached = self._collect_postgres_extensions()
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_extension",
-            "collection_interval": self.collection_interval,
-            "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._check.cloud_metadata,
-            "metadata": self._extensions_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_extension",
+                "collection_interval": self.pg_extensions_collection_interval,
+                "dbms_version": payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._check.cloud_metadata,
+                "metadata": self._extensions_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._time_since_last_extension_query = time.time()
@@ -336,20 +336,20 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_settings",
-            "collection_interval": self.collection_interval,
-            "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._check.cloud_metadata,
-            "metadata": self._pg_settings_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            event = {
+                "host": self._check.reported_hostname,
+                "database_instance": self._check.database_identifier,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_settings",
+                "collection_interval": self.pg_settings_collection_interval,
+                "dbms_version": payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._check.cloud_metadata,
+                "metadata": self._pg_settings_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
         if not self._collect_schemas_enabled:
             self._log.debug("Skipping schema collection because it is disabled")
@@ -393,7 +393,7 @@ class PostgresMetadata(DBMAsyncJob):
                 if not self._should_collect_metadata(dbname, "database"):
                     continue
 
-                with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                with self.db_pool.get_connection(dbname) as conn:
                     with conn.cursor(row_factory=dict_row) as cursor:
                         for schema in database["schemas"]:
                             if not self._should_collect_metadata(schema["name"], "schema"):
@@ -413,7 +413,7 @@ class PostgresMetadata(DBMAsyncJob):
                             tables_buffer = []
 
                             for tables in table_chunks:
-                                table_info = self._query_table_information(cursor, schema['name'], tables)
+                                table_info = self._query_table_information(cursor, dbname, tables)
 
                                 tables_buffer = [*tables_buffer, *table_info]
                                 for t in table_info:
@@ -519,6 +519,8 @@ class PostgresMetadata(DBMAsyncJob):
             encoding: str
             owner: str
         """
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
         row = cursor.fetchone()
         return row
@@ -540,6 +542,8 @@ class PostgresMetadata(DBMAsyncJob):
         else:
             schema_query_ = schema_query_.format("")
 
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         cursor.execute(schema_query_)
         rows = cursor.fetchall()
         schemas = []
@@ -549,7 +553,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._log.debug("Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows))
         return schemas
 
-    def _get_table_info(self, cursor, dbname, schema_id):
+    def _get_table_info(self, cursor: psycopg.Cursor, dbname, schema_id):
         """
         Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
         the max_tables limit.
@@ -561,6 +565,7 @@ class PostgresMetadata(DBMAsyncJob):
             cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
         else:
             cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+
         rows = cursor.fetchall()
         table_info = [dict(row) for row in rows]
 
@@ -611,7 +616,7 @@ class PostgresMetadata(DBMAsyncJob):
         return sql
 
     def _sort_and_limit_table_info(
-        self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
+        self, cursor: psycopg.Cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
     ) -> List[Dict[str, Union[str, bool]]]:
         def sort_tables(info):
             cache = self._check.metrics_cache.table_activity_metrics
@@ -630,6 +635,8 @@ class PostgresMetadata(DBMAsyncJob):
                 return table_data.get("index_scans", 0) + table_data.get("seq_scans", 0)
             else:
                 # get activity
+                if self._cancel_event.is_set():
+                    raise Exception("Job loop cancelled. Aborting query.")
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row is not None else 0
@@ -670,7 +677,7 @@ class PostgresMetadata(DBMAsyncJob):
         return table_payloads
 
     def _query_table_information(
-        self, cursor: psycopg.Cursor, schema_name: str, table_info: List[Dict[str, Union[str, bool]]]
+        self, cursor: psycopg.Cursor, dbname: str, table_info: List[Dict[str, Union[str, bool]]]
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information . Returns a dictionary
@@ -708,7 +715,10 @@ class PostgresMetadata(DBMAsyncJob):
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
 
         # Get indexes
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         cursor.execute(PG_INDEXES_QUERY.format(table_ids=table_ids))
+
         rows = cursor.fetchall()
         for row in rows:
             # Partition indexes in some versions of Postgres have appended digits for each partition
@@ -749,7 +759,7 @@ class PostgresMetadata(DBMAsyncJob):
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
-        with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+        with self.db_pool.get_connection(dbname) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 database_info = self._query_database_information(cursor, dbname)
                 metadata.update(
@@ -770,6 +780,8 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 # Get loaded extensions
@@ -783,7 +795,9 @@ class PostgresMetadata(DBMAsyncJob):
                             query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
                         else:
                             self._log.warning(
-                                "unable to collect settings for extension %s in schema %s", extension, row['schemaname']
+                                "unable to collect settings for extension %s in schema %s",
+                                extension,
+                                row['schemaname'],
                             )
                     else:
                         self._log.warning("unable to collect settings for unknown extension %s", extension)

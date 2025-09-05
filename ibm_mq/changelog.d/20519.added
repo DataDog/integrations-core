@@ -1,1 +1,0 @@
-Add ibm_mq.channel.conn_status and ibm_mq.channel.connections_active metrics with channel and connection metric tests
