@@ -135,7 +135,7 @@ datadog-linux-audit-logs==1.0.0; sys_platform == 'linux2'
 datadog-linux-proc-extras==4.0.0; sys_platform == 'linux2'
 datadog-litellm==2.0.1
 datadog-lustre==1.0.1
-datadog-mac-audit-logs==1.0.0; sys_platform == 'darwin'
+datadog-mac-audit-logs==1.0.1; sys_platform == 'darwin'
 datadog-mapr==3.0.0; sys_platform == 'linux2'
 datadog-mapreduce==7.0.1
 datadog-marathon==5.0.1; sys_platform != 'win32'
