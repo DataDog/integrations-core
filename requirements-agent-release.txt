@@ -98,7 +98,7 @@ datadog-ibm-mq==8.4.0
 datadog-ibm-was==5.1.1
 datadog-iboss==1.0.0
 datadog-ignite==3.1.0
-datadog-iis==5.2.0; sys_platform == 'win32'
+datadog-iis==5.3.0; sys_platform == 'win32'
 datadog-impala==4.0.1
 datadog-infiniband==1.1.0; sys_platform == 'linux2'
 datadog-istio==9.0.1
@@ -106,7 +106,7 @@ datadog-ivanti-connect-secure==1.0.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
 datadog-juniper-srx-firewall==1.0.0
-datadog-kafka-consumer==6.7.0
+datadog-kafka-consumer==6.8.0
 datadog-kafka==4.0.0
 datadog-karpenter==3.0.1
 datadog-keda==2.0.1
