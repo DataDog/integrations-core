@@ -54,9 +54,5 @@ def __check_prepand_sql_comment(pg_instance, ignore):
         comment = '/* service=\'datadog-agent\' */'
         if ignore:
             comment = '{} {}'.format('/* DDIGNORE */', comment)
-        assert result[0][0].startswith(comment), (
-            "Expected to filter by application_name {} for comment {} but got {}".format(
-                pg_instance['application_name'], comment, result[0][0]
-            )
-        )
+        assert result[0][0].startswith(comment)
     super_conn.close()
