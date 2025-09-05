@@ -46,6 +46,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_REF: ${{ github.head_ref }}
       # - name: Get merge base commit
       #   id: merge_base
       #   run: |
