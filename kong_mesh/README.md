@@ -18,7 +18,7 @@ For monitoring Kong Mesh (control plane and Envoy data planes):
 
 ## Setup
 
-The `Kuma` Agent check — which the Kong Mesh integration relies on — is included in the [Datadog Agent][4] package. No additional installation is needed on your server.
+The `Kuma` Agent check - which the Kong Mesh integration relies on - is included in the [Datadog Agent][4] package. No additional installation is needed on your server.
 
 ### Configuration
 
