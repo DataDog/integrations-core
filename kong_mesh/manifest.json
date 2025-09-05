@@ -1,0 +1,75 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "46d3df79-b309-43ed-b49c-3f29a4983235",
+  "app_id": "kong-mesh",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics and logs from Kong Mesh, an enterprise service mesh for Kubernetes and VMs.",
+    "title": "Kong Mesh",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Kong Mesh Control Plane",
+        "image_url": "images/control_plane.png"
+      },
+      {
+        "media_type": "image", 
+        "caption": "Kong Mesh Control Plane Overview",
+        "image_url": "images/control_plane_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Kong Mesh Service Communication",
+        "image_url": "images/service_communication.png"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Network",
+      "Category::Kubernetes",
+      "Category::Containers",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_name": "Kong Mesh",
+      "source_type_id": 57086036,
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "saved_views": {
+      "Kong Mesh Access Logs Overview": "assets/saved_views/logs_overview.json"
+    },
+    "monitors": {
+      "Kong Mesh No Leader Detected": "assets/monitors/no_leader_detected.json",
+      "Kong Mesh Multiple Leaders Detected": "assets/monitors/multiple_leaders_detected.json",
+      "Kong Mesh API Server High Error Rate": "assets/monitors/api_server_error_rate.json",
+      "Kong Mesh xDS Configuration Generation Errors": "assets/monitors/xds_generation_errors.json",
+      "Kong Mesh xDS High Configuration Delivery Latency": "assets/monitors/xds_delivery_latency.json"
+    },
+    "dashboards": {
+      "Kong Mesh Control Plane": "assets/dashboards/kong_mesh_control_plane.json",
+      "Kong Mesh Service Communication": "assets/dashboards/kong_mesh_service_communication.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
