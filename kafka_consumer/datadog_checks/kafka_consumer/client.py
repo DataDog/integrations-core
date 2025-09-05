@@ -7,7 +7,6 @@ from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaExcepti
 from confluent_kafka.admin import AdminClient
 
 
-
 class KafkaClient:
     def __init__(self, config, log) -> None:
         self.config = config
