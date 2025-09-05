@@ -134,6 +134,7 @@ def get_authentication_configuration(instance):
                     "ssl.certificate.location": instance.get("tls_cert"),
                     "ssl.key.location": instance.get("tls_private_key"),
                     "ssl.key.password": instance.get("tls_private_key_password"),
+                    "ssl.endpoint.identification.algorithm": "https",
                 }
             )
 
