@@ -18,6 +18,7 @@ datadog-aspdotnet==4.2.0; sys_platform == 'win32'
 datadog-avi-vantage==6.0.1
 datadog-aws-neuron==3.0.1
 datadog-azure-iot-edge==6.1.1
+datadog-bentoml==1.0.0
 datadog-beyondtrust-password-safe==1.0.0
 datadog-boundary==4.0.1
 datadog-btrfs==4.0.0; sys_platform != 'win32'
@@ -48,6 +49,7 @@ datadog-couch==9.0.1
 datadog-couchbase==6.0.1
 datadog-crio==5.0.1
 datadog-datadog-cluster-agent==6.0.1
+datadog-datadog-csi-driver==1.0.0; sys_platform != 'win32'
 datadog-dcgm==4.0.1
 datadog-delinea-privilege-manager==1.0.0
 datadog-delinea-secret-server==1.0.0
@@ -87,6 +89,7 @@ datadog-hive==2.1.0
 datadog-hivemq==2.1.0
 datadog-http-check==12.0.1
 datadog-hudi==4.0.0
+datadog-hugging-face-tgi==1.0.0
 datadog-hyperv==3.0.0; sys_platform == 'win32'
 datadog-ibm-ace==4.1.1
 datadog-ibm-db2==4.0.1
