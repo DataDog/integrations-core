@@ -49,6 +49,7 @@ datadog-couch==9.0.1
 datadog-couchbase==6.0.1
 datadog-crio==5.0.1
 datadog-datadog-cluster-agent==6.0.1
+datadog-datadog-csi-driver==1.0.0; sys_platform != 'win32'
 datadog-dcgm==4.0.1
 datadog-delinea-privilege-manager==1.0.0
 datadog-delinea-secret-server==1.0.0
