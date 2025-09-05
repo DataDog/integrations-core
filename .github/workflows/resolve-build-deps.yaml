@@ -298,11 +298,12 @@ jobs:
         id: find_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-includes: "Dependency Size Changes"
+          body-includes: "<h3>Dependency Size Changes</h3>"
 
       - name: Delete last comment
         if: steps.find_comment.outputs.comment-id != ''
         run: |
+          echo "Deleting comment: ${{ steps.find_comment.outputs.comment-id }}"
           curl -X DELETE \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
