@@ -299,10 +299,10 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: "Dependency Size Changes"
-          
+
       - name: Delete last comment
         run: |
-          gh pr issue delete-comment ${{ steps.find_comment.outputs.comment-id }}
+          gh issue delete-comment ${{ steps.find_comment.outputs.comment-id }}
       
       - name: Create comment
         run: |
