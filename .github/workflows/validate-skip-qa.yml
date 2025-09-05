@@ -100,11 +100,12 @@ jobs:
         id: find_comment_remove_label
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-includes: ${{ steps.construct_remove_label_comment.outputs.body }}
+          body-includes: "⚠️ **The `qa/skip-qa` label has been added with shippable changes**"
 
       - name: Post comment - Remove skip qa label
-        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa') && steps.find_comment_remove_label.outputs.comment-id == ''
+        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.construct_remove_label_comment.outputs.body }}
+          comment-id: ${{ steps.find_comment_remove_label.outputs.comment-id }}
