@@ -18,7 +18,9 @@ from .constants import (
     FILESYSTEM_DISCOVERY_PARAM_MAPPING,
     IGNORED_LNET_GROUPS,
     IGNORED_STATS,
+    JOBID_TAG_PARAMS,
     JOBSTATS_PARAMS,
+    TAGS_WITH_FILESYSTEM,
     LustreParam,
 )
 
@@ -225,6 +227,10 @@ class LustreCheck(AgentCheck):
         For more information, see: https://doc.lustre.org/lustre_manual.xhtml#jobstats
         '''
         jobstats_params = self._get_jobstats_params_list()
+        jobid_config_tags = [
+            f'{param.regex}:{self._run_command("lctl", "get_param", "-ny", param.regex, sudo=True).strip()}'
+            for param in JOBID_TAG_PARAMS
+        ]
         for jobstats_param in jobstats_params:
             device_name = jobstats_param.split('.')[1]  # For example: lustre-MDT0000
             if not any(device_name.startswith(fs) for fs in filesystems):
@@ -235,7 +241,14 @@ class LustreCheck(AgentCheck):
                 continue
             for job in jobstats_metrics:
                 job_id = job.get('job_id', "unknown")
-                tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
+                tags = (
+                    self.tags
+                    + [
+                        f'device_name:{device_name}',
+                        f'job_id:{job_id}',
+                    ]
+                    + jobid_config_tags
+                )
                 for metric_name, metric_values in job.items():
                     if not isinstance(metric_values, dict):
                         continue
@@ -432,7 +445,8 @@ class LustreCheck(AgentCheck):
         tags = []
         regex_parts = param_regex.split('.')
         param_parts = param_name.split('.')
-        wildcard_number = 0
+        wildcard_generator = (wildcard for wildcard in wildcards)
+        filesystem = None
         if not len(regex_parts) == len(param_parts):
             # Edge case: mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats
             if len(regex_parts) + 3 == len(param_parts):
@@ -446,13 +460,21 @@ class LustreCheck(AgentCheck):
                 return tags
         for part_number, part in enumerate(regex_parts):
             if part == '*':
-                if wildcard_number >= len(wildcards):
+                try:
+                    current_wildcard = next(wildcard_generator)
+                    current_part = param_parts[part_number]
+                    tags.append(f'{current_wildcard}:{current_part}')
+                    if current_wildcard in TAGS_WITH_FILESYSTEM and filesystem is None:
+                        filesystem = current_part.split('-')[0]
+                        tags.append(f'filesystem:{filesystem}')
+                        self.log.debug(
+                            'Determined filesystem as %s from parameter %s', filesystem, param_name
+                        )
+                except StopIteration:
                     self.log.debug(
-                        'Found %s wildcards, which exceeds available wildcard tags %s', wildcard_number, wildcards
+                        'Number of found wildcards exceeds available wildcard tags %s', wildcards
                     )
                     return tags
-                tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
-                wildcard_number += 1
         return tags
 
     def _parse_stats(self, raw_stats: str) -> Dict[str, Dict[str, Union[int, str]]]:

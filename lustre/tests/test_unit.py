@@ -3,13 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from typing import ChainMap
 
 import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
-from datadog_checks.lustre.constants import CURATED_PARAMS, DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS, LustreParam
+from datadog_checks.lustre.constants import (
+    CURATED_PARAMS,
+    DEFAULT_STATS,
+    EXTRA_STATS,
+    JOBID_TAG_PARAMS,
+    JOBSTATS_PARAMS,
+    LustreParam,
+)
 
 from .metrics import (
     CLIENT_METRICS,
@@ -61,7 +69,7 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
         'lnetctl net show': 'all_lnet_net.txt',
         'lnetctl peer show': 'all_lnet_peer.txt',
     }
-    for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + CURATED_PARAMS:
+    for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + JOBID_TAG_PARAMS + CURATED_PARAMS:
         mapping[f'lctl list_param {param.regex}'] = param.regex
         mapping[f'lctl get_param -ny {param.regex}'] = param.fixture
 
@@ -71,6 +79,8 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
 
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+        if not metric.startswith("lustre.ldlm") and not metric.startswith("lustre.net") and not metric.startswith("lustre.device"):
+            aggregator.assert_metric_has_tags(metric, tags=["filesystem:*"])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -84,17 +94,23 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
 )
 def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, expected_metrics):
     instance = {'node_type': node_type}
-    mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
-        'lctl dl': f'{node_type}_dl_yaml.txt',
-        'lctl list_param': "all_list_param.txt",
-        'lctl get_param': fixture_file,
-    }
+
+    jobid_tag_commands = {f'lctl get_param -ny {param.regex}': f'{param.fixture}' for param in JOBID_TAG_PARAMS}
+    mapping = ChainMap(
+        {
+            'lctl get_param -ny version': 'all_version.txt',
+            'lctl dl': f'{node_type}_dl_yaml.txt',
+            'lctl list_param': "all_list_param.txt",
+            'lctl get_param': fixture_file,
+        },
+        jobid_tag_commands,
+    )
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
         check.submit_jobstats_metrics(['lustre'])
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tags(metric, tags=['jobid_var:disable', 'jobid_name:%e.%u'])
 
 
 @pytest.mark.parametrize(
@@ -262,13 +278,13 @@ def test_extract_tags_from_param(mock_lustre_commands):
         tags = check._extract_tags_from_param(
             'mdc.*.stats', 'mdc.lustre-MDT0000-mdc-ffff8803f0d41000.stats', ('device_uuid',)
         )
-        assert tags == ['device_uuid:lustre-MDT0000-mdc-ffff8803f0d41000']
+        assert tags == ['device_uuid:lustre-MDT0000-mdc-ffff8803f0d41000', 'filesystem:lustre']
 
         # Test with multiple wildcards
         tags = check._extract_tags_from_param(
             'mdt.*.exports.*.stats', 'mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats', ('device_name', 'nid')
         )
-        assert tags == ['device_name:lustre-MDT0000', 'nid:172.31.16.218@tcp']
+        assert tags == ['device_name:lustre-MDT0000', 'filesystem:lustre', 'nid:172.31.16.218@tcp']
 
         # Test with malformed IP
         tags = check._extract_tags_from_param('mdt.*.stats', 'mdt.172.malformed.16.218@tcp.stats', ('nid',))

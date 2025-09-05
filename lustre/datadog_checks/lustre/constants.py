@@ -20,6 +20,11 @@ IGNORED_LNET_GROUPS = {
     'interfaces',
 }
 
+TAGS_WITH_FILESYSTEM = {
+        'device_name',
+        'device_uuid',
+        'device_nid',
+        }
 
 @dataclass(frozen=True)
 class LustreParam:
@@ -44,6 +49,27 @@ JOBSTATS_PARAMS = [
         wildcards=('device_name',),
         prefix='job_stats',
         fixture='mds_jobstats.txt',
+    ),
+]
+
+JOBID_TAG_PARAMS = [
+    LustreParam(
+        regex=r'jobid_var',
+        node_types=(
+            'client',
+            'mds',
+            'oss',
+        ),
+        fixture='disable',
+    ),
+    LustreParam(
+        regex=r'jobid_name',
+        node_types=(
+            'client',
+            'mds',
+            'oss',
+        ),
+        fixture='%e.%u',
     ),
 ]
 
