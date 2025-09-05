@@ -19,7 +19,7 @@ clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhou
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6dbcee870c60d9835e5dce1456ab6b9d807e6669246357f4b321ef747b90fa43
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250218143942-py3-none-manylinux2014_x86_64.whl#sha256=72f55306e2e3df9291ee55e3a6b2f6698fe3999db9570a14da0ea56bbf51e5a9
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250818110708-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=a9c6a710617a52e0d5b799c0877a3b2734ab0a32f8009a6d97075e7ab39cdf13
-cryptography @ https://agent-int-packages.datadoghq.com/built/cryptography/cryptography-45.0.6-20250904173630-cp312-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=458e63a90da52da721fea20268e5014038b3b2619f17d25e983716955cde8b3a
+cryptography @ https://agent-int-packages.datadoghq.com/built/cryptography/cryptography-45.0.6-20250904230008-cp312-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=ba86bf382272d754b3db8a382da33088a5fea2c6285a0e0bed8be9af4c9dc5ac
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.12.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=9432c6c3f60c6b566b40c2b679e1e23d0dceb18a2a012982855243bdcf5bbd1a
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
 dnspython @ https://agent-int-packages.datadoghq.com/external/dnspython/dnspython-2.7.0-py3-none-any.whl#sha256=b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86
@@ -35,7 +35,6 @@ hazelcast-python-client @ https://agent-int-packages.datadoghq.com/external/haze
 idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.10-py3-none-any.whl#sha256=946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3
 importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.7.0-py3-none-any.whl#sha256=e5dd1551894c77868a30651cef00984d50e1002d06942a7101d34870c5f02afd
 in-toto @ https://agent-int-packages.datadoghq.com/external/in-toto/in_toto-2.0.0-py3-none-any.whl#sha256=eaf71733cdd5b2309b58b24169c13c24701da72baa43b7432d1dffc308e7bf32
-invoke @ https://agent-int-packages.datadoghq.com/external/invoke/invoke-2.2.0-py3-none-any.whl#sha256=6ea924cc53d4f78e3d98bc436b08069a03077e6f85ad1ddaa8a116d7dad15820
 iso8601 @ https://agent-int-packages.datadoghq.com/external/iso8601/iso8601-2.1.0-py3-none-any.whl#sha256=aac4145c4dcb66ad8b648a02830f5e2ff6c24af20f4f482689be402db2429242
 jellyfish @ https://agent-int-packages.datadoghq.com/external/jellyfish/jellyfish-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=019542af342973c537275b289c1e891fb2b62b011bfdb68c816da4527477b74d
 jmespath @ https://agent-int-packages.datadoghq.com/external/jmespath/jmespath-1.0.1-py3-none-any.whl#sha256=02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980
@@ -58,7 +57,7 @@ opentelemetry-api @ https://agent-int-packages.datadoghq.com/external/openteleme
 orjson @ https://agent-int-packages.datadoghq.com/external/orjson/orjson-3.11.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=524b765ad888dc5518bbce12c77c2e83dee1ed6b0992c1790cc5fb49bb4b6667
 os-service-types @ https://agent-int-packages.datadoghq.com/external/os-service-types/os_service_types-1.8.0-py3-none-any.whl#sha256=bc0418bf826de1639c7f54b2c752827ea9aa91cbde560d0b0bf6339d97270b3b
 packaging @ https://agent-int-packages.datadoghq.com/external/packaging/packaging-25.0-py3-none-any.whl#sha256=29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484
-paramiko @ https://agent-int-packages.datadoghq.com/external/paramiko/paramiko-4.0.0-py3-none-any.whl#sha256=0e20e00ac666503bf0b4eda3b6d833465a2b7aff2e2b3d79a8bba5ef144ee3b9
+paramiko @ https://agent-int-packages.datadoghq.com/external/paramiko/paramiko-3.5.1-py3-none-any.whl#sha256=43b9a0501fc2b5e70680388d9346cf252cfb7d00b0667c39e80eb43a408b8f61
 pathspec @ https://agent-int-packages.datadoghq.com/external/pathspec/pathspec-0.12.1-py3-none-any.whl#sha256=a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08
 pbr @ https://agent-int-packages.datadoghq.com/external/pbr/pbr-7.0.1-py2.py3-none-any.whl#sha256=32df5156fbeccb6f8a858d1ebc4e465dcf47d6cc7a4895d5df9aa951c712fc35
 platformdirs @ https://agent-int-packages.datadoghq.com/external/platformdirs/platformdirs-4.4.0-py3-none-any.whl#sha256=abd01743f24e5287cd7a5db3752faf1a2d65353f38ec26d98e25a6db65958c85
