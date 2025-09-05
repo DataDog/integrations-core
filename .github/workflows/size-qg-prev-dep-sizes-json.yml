@@ -81,13 +81,11 @@ jobs:
           if-no-files-found: error
 
   measure-disk-usage:
-    needs: download-artifacts
-    runs-on: ubuntu-22.04
+    needs: 
+      - download-artifacts
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
-    env:
-      PYTHON_VERSION: "3.12"
     uses: ./.github/workflows/size-qg-measure-disk-use.yml
     with:
       platform: ${{ matrix.platform }}
@@ -96,7 +94,6 @@ jobs:
 
   calculate-size-diffs:
     needs: measure-disk-usage
-    runs-on: ubuntu-22.04
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]

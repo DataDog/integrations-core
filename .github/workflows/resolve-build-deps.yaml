@@ -290,8 +290,25 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Output size diffs
+      - name: Create output size diffs
         run: ./.github/workflows/scripts/output_size_diffs.sh
+
+      - name: Find last comment
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "Dependency Size Changes"
+          
+      - name: Delete last comment
+        run: |
+          gh pr issue delete-comment ${{ steps.find_comment.outputs.comment-id }}
+      
+      - name: Create comment
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
+      
+
       # - name: Get merge base commit
       #   id: merge_base
       #   run: |

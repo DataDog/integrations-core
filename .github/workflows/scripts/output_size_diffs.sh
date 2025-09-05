@@ -72,8 +72,4 @@ if [ $comment_size -gt $MAX_COMMENT_SIZE ]; then
     echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> comment.txt
 fi
 
-# Output results
-echo "Posting comment to PR #$PR_NUMBER"
-gh pr comment "$PR_NUMBER" --delete-last --yes --repo "$GITHUB_REPOSITORY"
-gh pr comment "$PR_NUMBER" --body-file comment.txt --repo "$GITHUB_REPOSITORY"
 
