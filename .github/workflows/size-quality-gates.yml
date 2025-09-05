@@ -41,6 +41,7 @@ jobs:
           ddev config set repos.core .
           ddev config set repo core
       - name: Get merge base run id
+        id: get-merge-base-run-id
         run: ./.github/workflows/scripts/get_merge_base_run_id.sh "Measure Disk Usage"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,6 +95,7 @@ jobs:
           mv status_uncompressed_${{ inputs.platform }}.json status_uncompressed_${{ inputs.platform }}_curr.json
           
       - name: Calculate diffs 
+        id: calculate-diffs
         run: |
           set +e
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
