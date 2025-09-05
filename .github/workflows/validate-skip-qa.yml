@@ -1,0 +1,112 @@
+name: 'Validate skip QA label'
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+    branches:
+      - master
+
+env:
+  COMMENT_BODY_ADD_LABEL: |
+    ⚠️ **Recommendation: Add `qa/skip-qa` Label**
+
+    This PR does not modify any files shipped with the agent.
+
+    To help streamline the release process, please consider adding the `qa/skip-qa` label if these changes do not require QA testing.
+
+jobs:
+  validate-skip-qa:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Get files changed
+        id: changed_files
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        with:
+          files: |
+            **/datadog_checks/**
+            **/changelog.d/**
+            **/pyproject.toml
+            **/hatch.toml
+          files_ignore: |
+            ddev/**
+            datadog_checks_dev/**
+            datadog_checks_tests_helper/**
+
+      - name: Find comment - Add skip qa label
+        if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        id: find_comment_add_label
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: ${{ env.COMMENT_BODY_ADD_LABEL }}
+
+      - name: Post message - Add skip qa label
+        if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa') && steps.find_comment_add_label.outputs.comment-id == ''
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ⚠️ **Recommendation: Add `qa/skip-qa` Label**
+
+            This PR does not modify any files shipped with the agent.
+
+            To help streamline the release process, please consider adding the `qa/skip-qa` label if these changes do not require QA testing.
+
+      - name: Format file list for comment
+        id: format_files
+        if: steps.changed_files.outputs.any_changed == 'true'
+        run: |
+            formatted_list=$(echo "${{ steps.changed_files.outputs.all_changed_files }}" | tr ' ' '\n')
+            echo "file_list<<EOF" >> $GITHUB_OUTPUT
+            echo "$formatted_list" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Construct "Remove skip qa label" comment body
+        id: construct_remove_label_comment
+        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        run: |
+          comment_body=$(cat <<EOF
+          ⚠️ **The \`qa/skip-qa\` label has been added with shippable changes**
+
+          The following files, which will be shipped with the agent, were modified in this PR and
+          the \`qa/skip-qa\` label has been added.
+
+          You can ignore this if you are sure the changes in this PR do not require QA. Otherwise, consider removing the label.
+
+          <details>
+          <summary>List of modified files that will be shipped with the agent</summary>
+
+          \`\`\`
+          ${{ steps.format_files.outputs.file_list }}
+          \`\`\`
+
+          </details>
+          EOF
+          )
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$comment_body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Find comment - Remove skip qa label
+        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        id: find_comment_remove_label
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "⚠️ **The `qa/skip-qa` label has been added with shippable changes**"
+
+      - name: Post comment - Remove skip qa label
+        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.construct_remove_label_comment.outputs.body }}
+          comment-id: ${{ steps.find_comment_remove_label.outputs.comment-id }}
+          edit-mode: "replace"

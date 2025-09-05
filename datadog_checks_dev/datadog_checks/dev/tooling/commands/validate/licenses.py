@@ -164,6 +164,7 @@ PACKAGE_REPO_OVERRIDES = {
     'packaging': 'https://github.com/pypa/packaging',
     'paramiko': 'https://github.com/paramiko/paramiko',
     'protobuf': 'https://github.com/protocolbuffers/protobuf',
+    'psycopg2-binary': 'https://github.com/psycopg/psycopg2',
     'psycopg': 'https://github.com/psycopg/psycopg',
     'pycryptodomex': 'https://github.com/Legrandin/pycryptodome',
     'redis': 'https://github.com/redis/redis-py',

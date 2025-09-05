@@ -3,9 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+# Configure logging level from DDEV_LOG_LEVEL environment variable
+import logging
+import os
 from typing import TYPE_CHECKING
 
 import click
+from datadog_checks.dev.ci import running_on_ci
+
+log_level_str = os.environ.get('DDEV_LOG_LEVEL', 'INFO').upper()
+log_level = getattr(logging, log_level_str, logging.INFO)
+logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -136,7 +144,11 @@ def start(
     env_data.write_config(config)
 
     agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-    agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
+
+    if agent_type == "vagrant" and running_on_ci():
+        app.abort(text="Vagrant is not supported on CI", code=0)
+
+    agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
 
     if not agent_build:
         agent_build = (
