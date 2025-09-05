@@ -65,7 +65,7 @@ pipeline:
   name: Kuma
   enabled: true
   filter:
-    query: source:kuma
+    query: source:(kuma OR kong_mesh)
   processors:
     - type: grok-parser
       name: Kuma Log Parser
