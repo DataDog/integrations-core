@@ -7,10 +7,10 @@ from .utils import _get_superconn
 
 
 @pytest.mark.integration
-@pytest.mark.flaky
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('ignore', [True, False])
 def test_integration_connection_with_commenter_cursor(integration_check, pg_instance, ignore):
+    pg_instance['application_name'] = 'test_integration_connection_with_commenter_cursor_{}'.format(ignore)
     check = integration_check(pg_instance)
 
     with check.db() as conn:
@@ -44,14 +44,19 @@ def __check_prepand_sql_comment(pg_instance, ignore):
     with super_conn.cursor() as cursor:
         cursor.execute(
             (
-                "SELECT query FROM pg_stat_activity where query like '%generate_series%' "
+                "SELECT query FROM pg_stat_activity where application_name = %s and query like '%%generate_series%%' "
                 "and query not like '%%pg_stat_activity%%'"
-            )
+            ),
+            (pg_instance['application_name'],),
         )
         result = cursor.fetchall()
         assert len(result) > 0
         comment = '/* service=\'datadog-agent\' */'
         if ignore:
             comment = '{} {}'.format('/* DDIGNORE */', comment)
-        assert result[0][0].startswith(comment)
+        assert result[0][0].startswith(comment), (
+            "Expected to filter by application_name {} for comment {} but got {}".format(
+                pg_instance['application_name'], comment, result[0][0]
+            )
+        )
     super_conn.close()
