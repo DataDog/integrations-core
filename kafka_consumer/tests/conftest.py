@@ -35,11 +35,14 @@ def dd_environment():
 
         conditions.extend(
             [
+                WaitFor(wait_for_ssl_ready, attempts=30, wait=5) if common.AUTHENTICATION == "ssl" else None,
                 WaitFor(create_topics, attempts=60, wait=3),
                 WaitFor(initialize_topics),
                 WaitFor(is_cluster_id_available),
             ]
         )
+        # Remove None values from conditions
+        conditions = [c for c in conditions if c is not None]
 
         with docker_run(
             common.DOCKER_IMAGE_PATH,
@@ -111,12 +114,28 @@ def initialize_topics():
             time.sleep(5)
 
 
+def wait_for_ssl_ready():
+    try:
+        client = _create_admin_client()
+        metadata = client.list_topics(timeout=5)
+        return metadata.cluster_id is not None
+    except Exception as e:
+        print(f"SSL not ready yet: {e}")
+        return False
+
+
 def _create_admin_client():
     config = {
         "bootstrap.servers": common.INSTANCE['kafka_connect_str'],
-        "socket.timeout.ms": 1000,
+        "socket.timeout.ms": 5000,  # Increased for SSL handshake
         "topic.metadata.refresh.interval.ms": 2000,
     }
-    config.update(common.get_authentication_configuration(common.INSTANCE))
+    auth_config = common.get_authentication_configuration(common.INSTANCE)
+    config.update(auth_config)
+
+    # Debug: Print SSL configuration (excluding sensitive data)
+    if common.AUTHENTICATION == "ssl":
+        debug_config = {k: v for k, v in config.items() if 'password' not in k.lower()}
+        print(f"SSL AdminClient config: {debug_config}")
 
     return AdminClient(config)

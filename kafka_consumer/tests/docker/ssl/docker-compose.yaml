@@ -43,6 +43,13 @@ services:
       - ./secrets/kafka_ssl_key_credentials:/etc/kafka/secrets/kafka_ssl_key_credentials
       - ./secrets/kafka_ssl_keystore_credentials:/etc/kafka/secrets/kafka_ssl_keystore_credentials
       - ./secrets/kafka_ssl_truststore_credentials:/etc/kafka/secrets/kafka_ssl_truststore_credentials
+      - ./ssl-client-kafka1.properties:/etc/kafka/ssl-client.properties
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 --command-config /etc/kafka/ssl-client.properties || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -76,6 +83,13 @@ services:
       - ./secrets/kafka_ssl_key_credentials:/etc/kafka/secrets/kafka_ssl_key_credentials
       - ./secrets/kafka_ssl_keystore_credentials:/etc/kafka/secrets/kafka_ssl_keystore_credentials
       - ./secrets/kafka_ssl_truststore_credentials:/etc/kafka/secrets/kafka_ssl_truststore_credentials
+      - ./ssl-client-kafka2.properties:/etc/kafka/ssl-client.properties
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9093 --command-config /etc/kafka/ssl-client.properties || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
     depends_on:
       zookeeper:
         condition: service_healthy
