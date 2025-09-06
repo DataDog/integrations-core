@@ -19,7 +19,7 @@ CUSTOM_TAGS = ['optional:tag1']
 CHECK_TAGS = CUSTOM_TAGS + ['instance:http://{}:{}'.format(HOST, PORT)]
 BUCKET_NAME = 'cb_bucket'
 INDEX_STATS_TAGS = CHECK_TAGS + [
-    'bucket:cb_bucket',
+    'bucket:gamesim-sample',
     'collection:default',
     'index_name:gamesim_primary',
     'scope:default',
@@ -34,6 +34,7 @@ USER = 'Administrator'
 PASSWORD = 'password'
 
 COUCHBASE_MAJOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[0])
+COUCHBASE_MINOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[1])
 
 DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 1, 'tags': CUSTOM_TAGS}
 
