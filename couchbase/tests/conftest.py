@@ -72,10 +72,15 @@ def dd_environment():
         WaitFor(node_stats),
         WaitFor(bucket_stats),
         WaitFor(load_sample_bucket),
+        WaitFor(create_syncgw_database),
     ]
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
+        env_vars={
+            'CB_CONTAINER_NAME': CB_CONTAINER_NAME,
+            'CB_USERNAME': USER,
+            'CB_PASSWORD': PASSWORD,
+        },
         conditions=conditions,
         sleep=15,
     ):
@@ -229,6 +234,27 @@ def load_sample_bucket():
         time.sleep(1)
 
     return True
+
+
+def create_syncgw_database():
+    """
+    Create sample database
+    """
+
+    # Resources used:
+    # https://docs.couchbase.com/sync-gateway/current/configuration/configuration-schema-database.html
+
+    r = requests.put(
+        '{}/sync_gateway/'.format(SG_URL),
+        auth=(USER, PASSWORD),
+        json={
+            "bucket": "gamesim-sample",
+            "index": {
+                "num_replicas": 0,
+            },
+        },
+    )
+    r.raise_for_status()
 
 
 def node_stats():
