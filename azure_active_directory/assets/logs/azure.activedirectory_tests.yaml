@@ -618,36 +618,34 @@ tests:
         Level: 4
         callerIpAddress: "192.182.149.21"
         category: "AuditLogs"
-        correlationId: "67c2eef3-4b38-4017-82dd-ecc064c38151"
+        correlationId: "5d3c3340-5c5e-419c-9ae9-193b1669f84e"
         duration: 0.0
         durationMs: 0
         evt:
           category: "AuditLogs"
-          name: "Add member to group"
+          name: "Add member to role"
           outcome: "success"
         network:
           client:
             geoip: {}
             ip: "192.182.149.21"
         ocsf:
-          activity_id: 3
-          activity_name: "Add User"
+          activity_id: 1
+          activity_name: "Assign Privileges"
           category_name: "Identity & Access Management"
           category_uid: 3
-          class_name: "Group Management"
-          class_uid: 3006
-          group:
-            uid: "3b3bf2cd-049a-4f35-9e63-dc2a0a830807"
-          http_request:
-            user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+          class_name: "User Access Management"
+          class_uid: 3005
           metadata:
-            event_code: "Add member to group"
+            event_code: "Add member to role"
             log_name: "AuditLogs"
             product:
               name: "Entra ID"
               vendor_name: "Microsoft"
-            uid: "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951"
+            uid: "Directory_5d3c3340-5c5e-419c-9ae9-193b1669f84e_D4P59_168172641"
             version: "1.5.0"
+          privileges:
+          - "\"Security Administrator\""
           severity: "Informational"
           severity_id: 1
           src_endpoint:
@@ -656,23 +654,23 @@ tests:
           status_code: ""
           status_id: 1
           time: 1586331653169
-          type_uid: 300603
+          type_uid: 300501
           user:
-            name: "Test Application"
-            uid: "febf6383-8bed-4efb-8244-c9a456a1f172"
-        operationName: "Add member to group"
+            name: "Test Service Principal"
+            type: "System"
+            type_id: 3
+        operationName: "Add member to role"
         operationVersion: "1.0"
         properties:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
-          activityDisplayName: "Add member to group"
+          activityDisplayName: "Add member to role"
           additionalDetails:
-            - value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-              key: "User-Agent"
-            - value: "9205c433-2781-42be-a046-c21ef6b5e608"
-              key: "AppId"
-          category: "GroupManagement"
-          correlationId: "67c2eef3-4b38-4017-82dd-ecc064c38151"
-          id: "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951"
+          -
+            value: "9205c433-2781-42be-a046-c21ef6b5e608"
+            key: "AppId"
+          category: "RoleManagement"
+          correlationId: "5d3c3340-5c5e-419c-9ae9-193b1669f84e"
+          id: "Directory_5d3c3340-5c5e-419c-9ae9-193b1669f84e_D4P59_168172641"
           identity: ""
           initiatedBy:
             user:
@@ -680,33 +678,43 @@ tests:
               ipAddress: "192.182.149.21"
               userPrincipalName: "test.user@datadoghq.com"
           loggedByService: "Core Directory"
-          operationName: "Add member to group"
+          operationName: "Add member to role"
           operationType: "Assign"
           result: "success"
           resultDescription: ""
           resultReason: ""
           resultType: ""
           targetResources:
-            - displayName: "Test Application"
-              modifiedProperties:
-                - newValue: '"3b3bf2cd-049a-4f35-9e63-dc2a0a830807"'
-                  displayName: "Group.ObjectID"
-                - newValue: '"Security-Research-Admins"'
-                  displayName: "Group.DisplayName"
-                - newValue: '"9205c433-2781-42be-a046-c21ef6b5e608"'
-                  displayName: "TargetId.ServicePrincipalNames"
-              id: "febf6383-8bed-4efb-8244-c9a456a1f172"
-              type: "ServicePrincipal"
-            - groupType: "unknownFutureValue"
-              id: "3b3bf2cd-049a-4f35-9e63-dc2a0a830807"
-              type: "Group"
+          -
+            displayName: "Test Service Principal"
+            modifiedProperties:
+            -
+              newValue: "\"260a316b-1246-41c7-bc20-16569a1bd28d\""
+              displayName: "Role.ObjectID"
+            -
+              newValue: "\"Security Administrator\""
+              displayName: "Role.DisplayName"
+            -
+              newValue: "\"194ae4cb-b126-40b2-bd5b-6091b380977d\""
+              displayName: "Role.TemplateId"
+            -
+              newValue: "\"SecurityAdmins\""
+              displayName: "Role.WellKnownObjectName"
+            -
+              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
+              displayName: "TargetId.ServicePrincipalNames"
+            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
+            type: "ServicePrincipal"
+          -
+            id: "260a316b-1246-41c7-bc20-16569a1bd28d"
+            type: "Role"
           tenantGeo: "NA"
           tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
         resourceId: "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam"
         resultSignature: "None"
         tenantId: "4d3bac44-0230-4732-9e70-cc00736f0a97"
         time: "2020-04-08T07:40:53.1695436Z"
-        title: "'Add member to group' resulted in success initiated by test.user@datadoghq.com "
+        title: "'Add member to role' resulted in success initiated by test.user@datadoghq.com "
         usr:
           id: "test.user@datadoghq.com"
           name: "test.user@datadoghq.com"
@@ -716,42 +724,45 @@ tests:
           "resourceId" : "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam",
           "operationVersion" : "1.0",
           "tenantId" : "4d3bac44-0230-4732-9e70-cc00736f0a97",
-          "operationName" : "Add member to group",
-          "correlationId" : "67c2eef3-4b38-4017-82dd-ecc064c38151",
+          "operationName" : "Add member to role",
+          "correlationId" : "5d3c3340-5c5e-419c-9ae9-193b1669f84e",
           "Level" : 4,
           "time" : "2020-04-08T07:40:53.1695436Z",
           "category" : "AuditLogs",
           "durationMs" : 0,
           "properties" : {
-            "operationName" : "Add member to group",
+            "operationName" : "Add member to role",
             "activityDateTime" : "2020-04-08T07:40:53.1695436+00:00",
             "additionalDetails" : [ {
-              "value" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
-              "key" : "User-Agent"
-            }, {
               "value" : "9205c433-2781-42be-a046-c21ef6b5e608",
               "key" : "AppId"
             } ],
             "result" : "success",
-            "activityDisplayName" : "Add member to group",
+            "activityDisplayName" : "Add member to role",
             "identity" : "",
             "tenantGeo" : "NA",
             "resultReason" : "",
             "tenantId" : "4d3bac44-0230-4732-9e70-cc00736f0a97",
-            "correlationId" : "67c2eef3-4b38-4017-82dd-ecc064c38151",
+            "correlationId" : "5d3c3340-5c5e-419c-9ae9-193b1669f84e",
             "loggedByService" : "Core Directory",
             "operationType" : "Assign",
             "resultDescription" : "",
-            "id" : "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951",
-            "category" : "GroupManagement",
+            "id" : "Directory_5d3c3340-5c5e-419c-9ae9-193b1669f84e_D4P59_168172641",
+            "category" : "RoleManagement",
             "targetResources" : [ {
-              "displayName" : "Test Application",
+              "displayName" : "Test Service Principal",
               "modifiedProperties" : [ {
-                "newValue" : "\"3b3bf2cd-049a-4f35-9e63-dc2a0a830807\"",
-                "displayName" : "Group.ObjectID"
+                "newValue" : "\"260a316b-1246-41c7-bc20-16569a1bd28d\"",
+                "displayName" : "Role.ObjectID"
               }, {
-                "newValue" : "\"Security-Research-Admins\"",
-                "displayName" : "Group.DisplayName"
+                "newValue" : "\"Security Administrator\"",
+                "displayName" : "Role.DisplayName"
+              }, {
+                "newValue" : "\"194ae4cb-b126-40b2-bd5b-6091b380977d\"",
+                "displayName" : "Role.TemplateId"
+              }, {
+                "newValue" : "\"SecurityAdmins\"",
+                "displayName" : "Role.WellKnownObjectName"
               }, {
                 "newValue" : "\"9205c433-2781-42be-a046-c21ef6b5e608\"",
                 "displayName" : "TargetId.ServicePrincipalNames"
@@ -759,9 +770,8 @@ tests:
               "id" : "febf6383-8bed-4efb-8244-c9a456a1f172",
               "type" : "ServicePrincipal"
             }, {
-              "groupType" : "unknownFutureValue",
-              "id" : "3b3bf2cd-049a-4f35-9e63-dc2a0a830807",
-              "type" : "Group"
+              "id" : "260a316b-1246-41c7-bc20-16569a1bd28d",
+              "type" : "Role"
             } ],
             "resultType" : "",
             "initiatedBy" : {
@@ -775,7 +785,7 @@ tests:
           "resultSignature" : "None"
         }
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1586331653169
   - sample: |-
       {
