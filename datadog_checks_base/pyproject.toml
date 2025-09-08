@@ -36,8 +36,8 @@ db = [
 deps = [
     "binary==1.0.2",
     "cachetools==6.2.0",
-    "cryptography==45.0.6",
-    "ddtrace==3.12.3",
+    "cryptography==45.0.7",
+    "ddtrace==3.13.0",
     "jellyfish==1.2.0",
     "lazy-loader==0.4",
     "prometheus-client==0.22.1",
@@ -47,7 +47,7 @@ deps = [
     "pywin32==311; sys_platform == 'win32'",
     "pyyaml==6.0.2",
     "requests-toolbelt==1.0.0",
-    "requests-unixsocket2==1.0.0",
+    "requests-unixsocket2==1.0.1",
     "requests==2.32.5",
     "simplejson==3.20.1",
     "urllib3==2.5.0",
@@ -55,7 +55,7 @@ deps = [
 ]
 http = [
     "aws-requests-auth==0.4.3",
-    "botocore==1.40.21",
+    "botocore==1.40.25",
     "oauthlib==3.3.1",
     "pyjwt==2.10.1",
     "pyopenssl==25.1.0",
