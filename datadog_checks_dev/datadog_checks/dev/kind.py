@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from dataclasses import dataclass
 from shutil import which
-from typing import TYPE_CHECKING
+from typing import Any, Callable, ContextManager, Protocol, runtime_checkable
 
 import pytest
 
@@ -15,59 +16,49 @@ from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
 
-if TYPE_CHECKING:
-    from contextlib import AbstractContextManager
-    from typing import Self
 
-
-def _setup_wrappers(wrappers: list[AbstractContextManager] | None, cluster_name: str):
-    """Set up wrappers with cluster-specific configuration.
-
-    :param wrappers: List of wrapper instances to configure
-    :param cluster_name: The name of the Kind cluster
-    """
-    if not wrappers:
+def _setup_conditions(conditions: list[Callable[[], Any]] | None, cluster_config: ClusterConfig):
+    if not conditions:
         return
 
-    for wrapper in wrappers:
-        match wrapper:
-            case KindLoad():
-                wrapper.cluster_name = cluster_name
-            case _:
-                # No special setup needed for other wrapper types
-                pass
+    for condition in conditions:
+        if isinstance(condition, ClusterCondition):
+            condition.add_cluster_info(cluster_config)
+
+
+@dataclass
+class ClusterConfig:
+    cluster_name: str
+
+
+@runtime_checkable
+class ClusterCondition(Protocol):
+    def add_cluster_info(self, cluster_config: ClusterConfig): ...
 
 
 @contextmanager
 def kind_run(
-    sleep=None,
-    endpoints=None,
-    conditions=None,
-    env_vars=None,
-    wrappers=None,
-    kind_config=None,
-    attempts=None,
-    attempts_wait=1,
+    sleep: float | None = None,
+    endpoints: str | list[str] | None = None,
+    conditions: list[Callable[[], Any]] | None = None,
+    env_vars: dict[str, str] | None = None,
+    wrappers: list[ContextManager] | None = None,
+    kind_config: str | None = None,
+    attempts: int | None = None,
+    attempts_wait: int = 1,
 ):
     """
     This utility provides a convenient way to safely set up and tear down Kind environments.
 
     :param sleep: Number of seconds to wait before yielding.
-    :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
                       ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
-    :type endpoints: ``list`` of ``str``, or a single ``str``
     :param conditions: A list of callable objects that will be executed before yielding to check for errors.
-    :type conditions: ``callable``
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
-    :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
     :param kind_config: A path to a yaml file that contains the configuration for creating the kind cluster.
-    :type kind_config: ``str``
     :param attempts: Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI.
-    :type attempts: ``int``
     :param attempts_wait: Time to wait between attempts.
-    :type attempts_wait: ``int``
     """
     if not which('kind'):
         pytest.skip('Kind not available')
@@ -88,8 +79,7 @@ def kind_run(
             set_up = KindUp(cluster_name, kind_config)
             tear_down = KindDown(cluster_name)
 
-            # Set up wrappers with cluster-specific configuration
-            _setup_wrappers(wrappers, cluster_name)
+            _setup_conditions(conditions, ClusterConfig(cluster_name))
 
             with environment_run(
                 up=set_up,
@@ -135,14 +125,14 @@ class KindDown(LazyFunction):
         run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)
 
 
-class KindLoad:
-    """Context manager for loading Docker images into a Kind cluster.
+class KindLoad(LazyFunction):
+    """Condition for loading Docker images into a Kind cluster.
 
-    This context manager should be passed to the wrappers argument in environment_run
+    This condition should be passed to the conditions argument in environment_run
     to load images into the Kind cluster after it's created.
 
     Example:
-        with kind_run(wrappers=[KindLoad("my-image:latest")]):
+        with kind_run(conditions=[KindLoad("my-image:latest")]):
             # The image is now loaded in the kind cluster
             pass
     """
@@ -151,14 +141,12 @@ class KindLoad:
         self.image = image
         self.cluster_name: str | None = None
 
-    def __enter__(self) -> Self:
+    def __call__(self):
         if self.cluster_name is None:
-            raise RuntimeError("cluster_name must be set before entering KindLoad context")
+            raise RuntimeError("cluster_name must be set before calling KindLoad")
 
         load_cmd = ['kind', 'load', 'docker-image', self.image, '--name', self.cluster_name]
         run_command(load_cmd, check=True)
-        return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Exit the context manager (no cleanup needed for image loading)."""
-        pass
+    def add_cluster_info(self, cluster_config: ClusterConfig):
+        self.cluster_name = cluster_config.cluster_name

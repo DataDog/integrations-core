@@ -61,23 +61,20 @@ class TestKindRun:
 
 
 class TestKindLoad:
-    def test_kind_load_context_manager_without_cluster_name(self):
+    def test_kind_load_without_cluster_name(self):
         kind_load = KindLoad("test-image:latest")
 
-        with pytest.raises(RuntimeError, match="cluster_name must be set before entering KindLoad context"):
-            with kind_load:
-                pass
+        with pytest.raises(RuntimeError, match="cluster_name must be set before calling KindLoad"):
+            kind_load()
 
     @patch('datadog_checks.dev.kind.run_command')
-    def test_kind_load_context_manager_with_cluster_name(self, mock_run_command):
-        """Test that KindLoad calls the correct kind load command when cluster_name is set."""
+    def test_kind_load_with_cluster_name(self, mock_run_command):
         image = "test-image:latest"
         cluster_name = "test-cluster"
         kind_load = KindLoad(image)
         kind_load.cluster_name = cluster_name
 
-        with kind_load as ctx:
-            assert ctx is kind_load
+        kind_load()
 
         mock_run_command.assert_called_once_with(
             ['kind', 'load', 'docker-image', image, '--name', cluster_name], check=True
@@ -86,7 +83,6 @@ class TestKindLoad:
     @not_windows_ci
     @patch('datadog_checks.dev.kind.run_command')
     def test_kind_load_integration_with_kind_run(self, mock_run_command):
-        """Test that KindLoad integrates correctly with kind_run."""
         image = "test-image:latest"
         kind_load = KindLoad(image)
 
@@ -100,7 +96,7 @@ class TestKindLoad:
             mock_down_instance = MagicMock()
             mock_kind_down.return_value = mock_down_instance
 
-            with kind_run(wrappers=[kind_load]):
+            with kind_run(conditions=[kind_load]):
                 # Verify that cluster_name was set on the KindLoad instance
                 assert kind_load.cluster_name is not None
                 assert kind_load.cluster_name.startswith('cluster-')
