@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from contextlib import contextmanager
 from shutil import which
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -12,8 +15,11 @@ from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
 
+if TYPE_CHECKING:
+    from typing import ContextManager, Self
 
-def _setup_wrappers(wrappers, cluster_name):
+
+def _setup_wrappers(wrappers: list[ContextManager] | None, cluster_name: str):
     """Set up wrappers with cluster-specific configuration.
 
     :param wrappers: List of wrapper instances to configure
@@ -103,7 +109,7 @@ class KindUp(LazyFunction):
     `kind create cluster --name <integration>-cluster`
     """
 
-    def __init__(self, cluster_name, kind_config):
+    def __init__(self, cluster_name: str, kind_config: str | None):
         self.cluster_name = cluster_name
         self.kind_config = kind_config
 
@@ -121,7 +127,7 @@ class KindUp(LazyFunction):
 class KindDown(LazyFunction):
     """Delete the kind cluster, calling `delete cluster`."""
 
-    def __init__(self, cluster_name):
+    def __init__(self, cluster_name: str):
         self.cluster_name = cluster_name
 
     def __call__(self):
@@ -140,17 +146,11 @@ class KindLoad:
             pass
     """
 
-    def __init__(self, image):
-        """Initialize the KindLoad context manager.
-
-        :param image: The Docker image to load into the Kind cluster.
-        :type image: str
-        """
+    def __init__(self, image: str):
         self.image = image
-        self.cluster_name = None
+        self.cluster_name: str | None = None
 
-    def __enter__(self):
-        """Load the image into the Kind cluster."""
+    def __enter__(self) -> Self:
         if self.cluster_name is None:
             raise RuntimeError("cluster_name must be set before entering KindLoad context")
 
