@@ -159,7 +159,7 @@ facets:
     type: string
 pipeline:
   type: pipeline
-  name: Azure Active Directory - OCSF
+  name: Azure Active Directory
   enabled: true
   filter:
     query: source:azure.activedirectory
