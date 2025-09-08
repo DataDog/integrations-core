@@ -14,27 +14,26 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    conditions = []
     config = get_instance_config()
 
+    conditions = []
     for i in range(common.CLICKHOUSE_NODE_NUM):
-        conditions.append(CheckEndpoints(['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i)]))
         conditions.append(
             CheckDockerLogs(
-                'clickhouse-0{}'.format(i + 1), 'Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log'
+                identifier='clickhouse-0{}'.format(i + 1),
+                patterns='Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log',
+                wait=5,
             )
         )
-
-    conditions.append(
-        WaitFor(
-            ping_clickhouse(
-                config['server'],
-                config['port'],
-                config['username'],
-                config['password'],
+        conditions.append(
+            CheckEndpoints(endpoints=['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i)], wait=5),
+        )
+        conditions.append(
+            WaitFor(
+                func=ping_clickhouse(common.HOST, common.TCP_START_PORT + i, config['username'], config['password']),
+                wait=5,
             )
         )
-    )
 
     with docker_run(common.COMPOSE_FILE, conditions=conditions, sleep=10, attempts=2, mount_logs=True):
         yield config
