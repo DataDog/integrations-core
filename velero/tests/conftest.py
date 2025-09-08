@@ -28,7 +28,7 @@ def setup_velero():
     # Add Velero Helm repo
     run_command(['helm', 'repo', 'add', 'vmware-tanzu', 'https://vmware-tanzu.github.io/helm-charts'], check=True)
 
-    # Install Velero using Helm with extended timeout for CI
+    # Install Velero using Helm
     run_command(
         [
             'helm',
@@ -40,8 +40,6 @@ def setup_velero():
             '--values',
             os.path.join(KIND_DIR, 'velero-values.yaml'),
             '--wait',
-            '--timeout',
-            '30m',  # Very generous timeout for slow CI environments
         ],
         check=True,
     )
