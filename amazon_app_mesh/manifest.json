@@ -36,12 +36,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "source_type_id": 221,
-      "metrics": {
-        "prefix": "envoy.",
-        "check": "envoy.server.uptime",
-        "metadata_path": "metadata.csv"
-      }
+      "source_type_id": 221
     }
   },
   "author": {
