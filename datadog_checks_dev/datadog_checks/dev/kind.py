@@ -16,10 +16,11 @@ from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
 
 if TYPE_CHECKING:
-    from typing import ContextManager, Self
+    from contextlib import AbstractContextManager
+    from typing import Self
 
 
-def _setup_wrappers(wrappers: list[ContextManager] | None, cluster_name: str):
+def _setup_wrappers(wrappers: list[AbstractContextManager] | None, cluster_name: str):
     """Set up wrappers with cluster-specific configuration.
 
     :param wrappers: List of wrapper instances to configure
