@@ -48,6 +48,7 @@ class ClickhouseCheck(AgentCheck):
                 queries.SystemMetrics,
                 queries.SystemEvents,
                 queries.SystemAsynchronousMetrics,
+                queries.SystemErrors,
             ],
             tags=self._tags,
             error_handler=self._error_sanitizer.clean,

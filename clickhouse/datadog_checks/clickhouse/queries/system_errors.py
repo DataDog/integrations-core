@@ -7,8 +7,8 @@
 #     hatch run data:generate
 
 # https://clickhouse.com/docs/operations/system-tables/errors
-SystemMetrics = {
-    'name': 'system.metrics',
+SystemErrors = {
+    'name': 'system.errors',
     'query': 'SELECT name, value FROM system.errors',
     'columns': [
         {'name': 'value', 'type': 'source'},
