@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f8348717-0ba8-4d42-b856-983e0cde0314",
   "app_id": "rethinkdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

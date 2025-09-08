@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f6177896-da1e-4bc4-ab19-fd32e8868647",
   "app_id": "mysql",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

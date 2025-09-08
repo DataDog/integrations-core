@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8aabdf7d-2d07-4d77-a76e-0ade64d8e70f",
   "app_id": "pgbouncer",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
