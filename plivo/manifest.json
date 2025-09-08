@@ -13,22 +13,22 @@
     "media": [
       {
         "caption": "Plivo Messages",
-        "image_url": "images/plivo_messages_1.png",
+        "image_url": "images/plivo_messages_1_light.png",
         "media_type": "image"
       },
       {
         "caption": "Plivo Messages",
-        "image_url": "images/plivo_messages_2.png",
+        "image_url": "images/plivo_messages_2_light.png",
         "media_type": "image"
       },
       {
         "caption": "Plivo Voice Calls",
-        "image_url": "images/plivo_voice_calls_1.png",
+        "image_url": "images/plivo_voice_calls_1_light.png",
         "media_type": "image"
       },
       {
         "caption": "Plivo Voice Calls",
-        "image_url": "images/plivo_voice_calls_2.png",
+        "image_url": "images/plivo_voice_calls_2_light.png",
         "media_type": "image"
       }
     ],
