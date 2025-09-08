@@ -40,7 +40,9 @@ deployNodeAgent: true
 # https://github.com/vmware-tanzu/helm-charts/issues/698
 kubectl:
   image:
-    repository: docker.io/bitnamilegacy/kubectl
+    repository: custom-kubectl
+    tag: "latest"
+  pullPolicy: Never
 
 # Default resource requests/limits
 resources:
