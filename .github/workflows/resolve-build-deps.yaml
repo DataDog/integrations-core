@@ -305,7 +305,6 @@ jobs:
         if: steps.find_comment.outputs.comment-id != ''
         run: |
           echo "Deleting comment: ${{ steps.find_comment.outputs.comment-id }}"
-          gh api repos/DataDog/integrations-core/issues/comments/3265338643 -i
           gh api \
           --method DELETE \
           /repos/Datadog/integrations-core/issues/comments/${{ steps.find_comment.outputs.comment-id }}
