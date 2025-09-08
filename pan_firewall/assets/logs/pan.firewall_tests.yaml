@@ -39,12 +39,11 @@ tests:
           ip: "35.184.126.116"
           port: 443
       ocsf:
-        activity_id: 99
+        activity_id: 2
         activity_name: "Close"
-        category_name: "Uncategorized"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
         connection_info:
           direction_id: 0
           protocol_name: "tcp"
@@ -73,7 +72,8 @@ tests:
           chunks_out: 0
           packets_in: 3644
           packets_out: 11911
-        type_uid: 99
+        type_name: "Network Activity: Close"
+        type_uid: 400102
       outbound_if: "ethernet1/1.1101"
       parent_session_id: 0
       pkts_received: 3644
@@ -123,6 +123,14 @@ tests:
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
+        metadata:
+          product:
+            name: "Firewall"
+            uid: "001801010877"
+            vendor_name: "Palo Alto"
+          sequence: 486021038
+          version: "1.5.0"
+        time: 1756142102000
         type_uid: 99
       repeatcnt: 1
       seqno: 486021038
@@ -298,12 +306,11 @@ tests:
           ip: "17.253.2.43"
           port: 123
       ocsf:
-        activity_id: 99
+        activity_id: 2
         activity_name: "Close"
-        category_name: "Uncategorized"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
         connection_info:
           direction_id: 0
           protocol_name: "udp"
@@ -332,7 +339,8 @@ tests:
           chunks_out: 0
           packets_in: 1
           packets_out: 3
-        type_uid: 99
+        type_name: "Network Activity: Close"
+        type_uid: 400102
       outbound_if: "ethernet1/7"
       parent_session_id: 0
       pkts_received: 1
