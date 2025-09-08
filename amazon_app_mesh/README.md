@@ -220,8 +220,9 @@ Need help? Contact [Datadog support][3].
 
 ## Further Reading
 
-{{< partial name="whats-next/whats-next.html" >}}
+- [Envoy integration][4]
 
 [1]: https://aws.amazon.com/app-mesh
 [2]: https://docs.datadoghq.com/integrations/envoy/#metrics
 [3]: https://docs.datadoghq.com/help/
+[4]: https://docs.datadoghq.com/integrations/envoy/
