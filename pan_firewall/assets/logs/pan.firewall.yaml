@@ -391,7 +391,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@type:(TRAFFIC OR THREAT)"
+        query: "*"
       processors:
         - type: attribute-remapper
           name: remap 'time_generated' to 'ocsf.time'
