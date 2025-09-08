@@ -159,7 +159,7 @@ facets:
     type: string
 pipeline:
   type: pipeline
-  name: Azure Active Directory
+  name: Azure Active Directory - OCSF
   enabled: true
   filter:
     query: source:azure.activedirectory
@@ -471,31 +471,14 @@ pipeline:
               parsing_time_8 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
               parsing_time_9 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
         - type: array-processor
-          name: Extract `key` from `additionalDetails` array
-          enabled: true
-          operation:
-            source: properties.additionalDetails
-            target: ocsf.http_header.name
-            filter: 'key:"User-Agent"'
-            valueToExtract: key
-            type: select
-        - type: array-processor
           name: Extract `value` from `additionalDetails` array
           enabled: true
           operation:
             source: properties.additionalDetails
-            target: ocsf.http_header.value
+            target: ocsf.http_request.user_agent
             filter: 'key:"User-Agent"'
             valueToExtract: value
             type: select
-        - type: array-processor
-          name: Move attributes into http_headers array
-          enabled: true
-          operation:
-            source: ocsf.http_header
-            target: ocsf.http_request.http_headers
-            preserveSource: false
-            type: append
         - type: attribute-remapper
           name: Map `callerIpAddress` to `ocsf.src_endpoint.ip`
           enabled: true
@@ -671,7 +654,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@properties.initiatedBy.user.id:*"
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
               name: "1"
             - filter:
                 query: "@properties.initiatedBy.app.servicePrincipalId:*"
@@ -992,20 +975,20 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@properties.deviceDetail.operatingSystem:(*MacOs* OR *OSX*)"
-              name: "300"
-            - filter:
                 query: "@properties.deviceDetail.operatingSystem:(*Windows*)"
               name: "100"
+            - filter:
+                query: "@properties.deviceDetail.operatingSystem:(*Linux*)"
+              name: "200"
             - filter:
                 query: "@properties.deviceDetail.operatingSystem:(*Android*)"
               name: "201"
             - filter:
+                query: "@properties.deviceDetail.operatingSystem:(*MacOs* OR *OSX*)"
+              name: "300"
+            - filter:
                 query: "@properties.deviceDetail.operatingSystem:(*Ios*)"
               name: "301"
-            - filter:
-                query: "@properties.deviceDetail.operatingSystem:(*Linux*)"
-              name: "200"
           target: ocsf.src_endpoint.os.type_id
         - type: attribute-remapper
           name: Map `ocsf.src_endpoint.os.type_id` to `ocsf.src_endpoint.os.type_id`
@@ -1018,6 +1001,26 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.src_endpoint.os.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.deviceDetail.operatingSystem:(*Windows*)"
+              name: "Windows"
+            - filter:
+                query: "@properties.deviceDetail.operatingSystem:(*Linux*)"
+              name: "LInux"
+            - filter:
+                query: "@properties.deviceDetail.operatingSystem:(*Android*)"
+              name: "Android"
+            - filter:
+                query: "@properties.deviceDetail.operatingSystem:(*MacOs* OR *OSX*)"
+              name: "macOS"
+            - filter:
+                query: "@properties.deviceDetail.operatingSystem:(*Ios*)"
+              name: "iOS"
+          target: ocsf.src_endpoint.os.type
         - type: attribute-remapper
           name: Map `properties.location.city` to `ocsf.src_endpoint.location.city`
           enabled: true
@@ -1068,7 +1071,6 @@ pipeline:
           sourceType: attribute
           target: ocsf.status
           targetType: attribute
-          targetFormat: double
           preserveSource: true
           overrideOnConflict: false
         - type: category-processor
@@ -1082,7 +1084,7 @@ pipeline:
                 query: "@resultSignature:(FAILURE)"
               name: "2"
             - filter:
-                query: "@resultSignature:(FAILURE)"
+                query: "@resultSignature:*"
               name: "99"
           target: ocsf.status_id
         - type: category-processor
@@ -1121,6 +1123,9 @@ pipeline:
           enabled: true
           categories:
             - filter:
+                query: "@properties.riskLevelDuringSignIn:hidden"
+              name: "Unknown"
+            - filter:
                 query: "@properties.riskLevelDuringSignIn:low"
               name: "Low"
             - filter:
@@ -1129,14 +1134,14 @@ pipeline:
             - filter:
                 query: "@properties.riskLevelDuringSignIn:high"
               name: "High"
-            - filter:
-                query: "@properties.riskLevelDuringSignIn:hidden"
-              name: "Unknown"
           target: ocsf.severity
         - type: category-processor
           name: OCSF - severity_id mapping
           enabled: true
           categories:
+            - filter:
+                query: "@properties.riskLevelDuringSignIn:hidden"
+              name: "0"
             - filter:
                 query: "@properties.riskLevelDuringSignIn:low"
               name: "2"
@@ -1146,9 +1151,6 @@ pipeline:
             - filter:
                 query: "@properties.riskLevelDuringSignIn:high"
               name: "4"
-            - filter:
-                query: "@properties.riskLevelDuringSignIn:hidden"
-              name: "0"
           target: ocsf.severity_id
         - type: attribute-remapper
           name: Map `properties.authenticationRequirement` to `ocsf.is_mfa`
@@ -1453,7 +1455,7 @@ pipeline:
           target: ocsf.class_name
           replaceMissing: false
         - type: array-processor
-          name: Extract User/SP Id from `properties.targetResources` array
+          name: Extract User or ServicePrincipal Id from `properties.targetResources` array
           enabled: true
           operation:
             source: properties.targetResources
@@ -1525,7 +1527,7 @@ pipeline:
           enabled: true
           operation:
             source: properties.targetResources
-            target: ocsf.group.uid
+            target: ocsf.group.name
             filter: "type:Group"
             valueToExtract: displayName
             type: select
@@ -1813,30 +1815,16 @@ pipeline:
                 query: "@properties.responseStatusCode:*"
               name: "99"
           target: ocsf.status
-        - type: string-builder-processor
-          name: Add User-Agent header
-          enabled: true
-          template: "User-Agent"
-          target: ocsf.http_header.name
-          replaceMissing: false
         - type: attribute-remapper
-          name: Map `properties.userAgent` to `ocsf.http_header.value`
+          name: Map `properties.userAgent` to `ocsf.http_request.user_agent`
           enabled: true
           sources:
             - properties.userAgent
           sourceType: attribute
-          target: ocsf.http_header.value
+          target: ocsf.http_request.user_agent
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: array-processor
-          name: Move attributes into http_headers array
-          enabled: true
-          operation:
-            source: ocsf.http_header
-            target: ocsf.http_request.http_headers
-            preserveSource: false
-            type: append
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
@@ -1908,6 +1896,89 @@ pipeline:
               parsing_time_7 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
               parsing_time_8 %{date("yyyy-MM-dd'T'HH:mm:ss.SZ"):ocsf.time}
               parsing_time_9 %{date("yyyy-MM-dd'T'HH:mm:ssZ"):ocsf.time}
+        - type: string-builder-processor
+          name: Add OCSF profiles
+          enabled: true
+          template: "[host]"
+          target: ocsf.metadata.profiles
+          replaceMissing: false
+        - type: grok-parser
+          name: Profiles string to array
+          enabled: true
+          source: ocsf.metadata.profiles
+          samples:
+            - "[date,time]"
+          grok:
+            supportRules: ""
+            matchRules: ProfileStrToArray %{data:ocsf.metadata.profiles:array("[]",",")}
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.userPrincipalName`, `properties.initiatedBy.app.displayName`, `identity` to `ocsf.actor.user.name`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.userPrincipalName
+            - properties.initiatedBy.app.displayName
+            - identity
+          sourceType: attribute
+          target: ocsf.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.id`, `properties.initiatedBy.app.servicePrincipalId` to `ocsf.actor.user.uid`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.id
+            - properties.initiatedBy.app.servicePrincipalId
+          sourceType: attribute
+          target: ocsf.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `properties.initiatedBy.user.userPrincipalName` to `ocsf.actor.user.email_addr`
+          enabled: true
+          sources:
+            - properties.initiatedBy.user.userPrincipalName
+          sourceType: attribute
+          target: ocsf.actor.user.email_addr
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
+              name: User
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId:*"
+              name: System
+          target: ocsf.actor.user.type
+        - type: category-processor
+          name: OCSF - ocsf.actor.user.type_id mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@properties.initiatedBy.user.id:* OR @properties.initiatedBy.user.userPrincipalName:*"
+              name: "1"
+            - filter:
+                query: "@properties.initiatedBy.app.servicePrincipalId:*"
+              name: "3"
+            - filter:
+                query: "@ocsf.metadata.log_name:*"
+              name: "99"
+          target: ocsf.actor.user.type_id
+        - type: attribute-remapper
+          name: Map `properties.correlationId` to `ocsf.actor.session.uid`
+          enabled: true
+          sources:
+            - properties.correlationId
+          sourceType: attribute
+          target: ocsf.actor.session.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `properties.result` to `ocsf.status_code`
           enabled: true
@@ -1919,7 +1990,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Delete ocsf.src_endpoint.ip
+          name: Map `ocsf.src_endpoint.ip` to `callerIpAddress`
           enabled: true
           sources:
             - ocsf.src_endpoint.ip
