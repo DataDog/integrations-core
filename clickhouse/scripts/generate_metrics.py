@@ -25,17 +25,20 @@ METADATAFILE_PATH = os.path.join(INTEGRATION_DIR, 'metadata.csv')
 PREFIX_CURRENT_METRICS = 'ClickHouseMetrics'
 PREFIX_PROFILE_EVENTS = 'ClickHouseProfileEvents'
 PREFIX_ASYNC_METRICS = 'ClickHouseAsyncMetrics'
+PREFIX_ERRORS = 'ClickHouseErrors'
 
 METRIC_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)"\)\s*\\?')
 METRIC_TYPE_PATTERN = re.compile(r'\s+M\((?P<metric>\w+),\s*"(?P<description>[^"]+)",\s*(?P<type>[\w:]+)\)\s*\\?')
 ASYNC_METRICS_PATTERN = re.compile(
     r'new_values\["(?P<metric>[\w.]+)"\]\s*=\s*\{.*,\s*(?P<description>"[^}]*")*?\s*(?:\w+\s*)?\}', re.MULTILINE
 )
+ERRORS_PATTERN = re.compile(r'M\(\d+,\s+(?P<metric>\w+)\)')
 
 RAW_SRC_URL = 'https://raw.githubusercontent.com/ClickHouse/ClickHouse/{branch}/src/'
 SOURCE_URL_CURRENT_METRICS = RAW_SRC_URL + 'Common/CurrentMetrics.cpp'
 SOURCE_URL_PROFILE_EVENTS = RAW_SRC_URL + 'Common/ProfileEvents.cpp'
 SOURCE_URL_ASYNC_METRICS = RAW_SRC_URL + 'Common/AsynchronousMetrics.cpp'
+SOURCE_URL_ERRORS = RAW_SRC_URL + 'Common/ErrorCodes.cpp'
 SOURCE_URL_SERVER_ASYNC_METRICS = RAW_SRC_URL + 'Interpreters/ServerAsynchronousMetrics.cpp'
 
 INTEGRATION_NAME = 'clickhouse'
@@ -67,6 +70,7 @@ class MetricKind(StrEnum):
     ASYNC_METRICS = 'async_metrics'
     METRICS = 'metrics'
     EVENTS = 'events'
+    ERRORS = 'errors'
 
 
 @dataclass
@@ -94,6 +98,10 @@ class Templates(Enum):
     QUERY_METRICS = Template(
         source_path='system_metrics.tpl',
         target_path=os.path.join(QUERIES_DIR, 'system_metrics.py'),
+    )
+    QUERY_ERRORS = Template(
+        source_path='system_errors.tpl',
+        target_path=os.path.join(QUERIES_DIR, 'system_errors.py'),
     )
     TESTS_METRICS = Template(
         source_path='metrics.tpl',
@@ -253,6 +261,20 @@ def fetch_async_metrics(version: str) -> dict[str, ClickhouseMetric]:
     return result
 
 
+def fetch_errors(version: str) -> dict[str, ClickhouseMetric]:
+    raw_metrics = requests.get(SOURCE_URL_ERRORS.format(branch=version), timeout=10).text
+
+    result = {}
+    for match in ERRORS_PATTERN.finditer(raw_metrics):
+        name = match.group('metric')
+        m = ClickhouseMetric(
+            name=name, description=f'The number of {name} errors since last server restart.', prefix=PREFIX_ERRORS
+        )
+        result[m.metric_name()] = m
+
+    return result
+
+
 def generate_queries(template: Template, metrics: Iterable[ClickhouseMetric]):
     config = {
         'items': ',\n'.join(indent_line(metric.get_query_item(), 16) for metric in sorted(metrics)),
@@ -337,24 +359,23 @@ class CalculatedMetrics:
         return result
 
 
-def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
+def calculate_metrics(generator: MetricsGenerator) -> CalculatedMetrics:
     all_metrics: dict[str, ClickhouseMetric] = {}
     versioned_metrics: dict[str, set[str]] = {}
-    is_optional = False
 
     # calculate metrics for each version and the overall list
     for version in versions():
-        match metric_kind:
+        match generator.kind:
             case MetricKind.METRICS:
                 metrics = fetch_current_metrics(version)
             case MetricKind.EVENTS:
                 metrics = fetch_profile_events(version)
-                is_optional = True
             case MetricKind.ASYNC_METRICS:
                 metrics = fetch_async_metrics(version)
-                is_optional = True
+            case MetricKind.ERRORS:
+                metrics = fetch_errors(version)
             case _:
-                print(f'Unknown metric kind: {metric_kind}')
+                print(f'Unknown metric kind: {generator.kind}')
                 exit(1)
         all_metrics.update(metrics)
         versioned_metrics[version] = set(metrics.keys())
@@ -375,7 +396,7 @@ def calculate_metrics(metric_kind: str) -> CalculatedMetrics:
     for version in versions():
         diff[version] = versioned_metrics[version].difference(common)
 
-    return CalculatedMetrics(all=all_metrics, common=common, unique=diff, optional=is_optional)
+    return CalculatedMetrics(all=all_metrics, common=common, unique=diff, optional=generator.is_optional)
 
 
 def generate_test_data(metrics_data: list[CalculatedMetrics]):
@@ -457,6 +478,11 @@ def generate():
             template=Templates.QUERY_METRICS.value,
             is_optional=False,
         ),
+        MetricsGenerator(
+            kind=MetricKind.ERRORS,
+            template=Templates.QUERY_ERRORS.value,
+            is_optional=True,
+        ),
     ]
 
     all: dict[str, ClickhouseMetric] = {}
@@ -464,7 +490,7 @@ def generate():
 
     # generate query modules
     for generator in METRIC_GENERATORS:
-        metrics = calculate_metrics(generator.kind)
+        metrics = calculate_metrics(generator)
         generate_queries(generator.template, metrics.all.values())
         all.update(metrics.all)
         calculated.append(metrics)
@@ -491,7 +517,7 @@ def main():
     Metadata.csv file:
     - contains all the metrics supported by ClickHouse integration
 
-    To fix linters you need to run `ddev test --lint clickhouse` in the end.
+    To fix linters you need to run `ddev test --fmt clickhouse` in the end.
     """
     parser = argparse.ArgumentParser(
         description=main.__doc__,
