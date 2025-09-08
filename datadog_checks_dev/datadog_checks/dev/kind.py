@@ -13,6 +13,24 @@ from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
 
 
+def _setup_wrappers(wrappers, cluster_name):
+    """Set up wrappers with cluster-specific configuration.
+
+    :param wrappers: List of wrapper instances to configure
+    :param cluster_name: The name of the Kind cluster
+    """
+    if not wrappers:
+        return
+
+    for wrapper in wrappers:
+        match wrapper:
+            case KindLoad():
+                wrapper.cluster_name = cluster_name
+            case _:
+                # No special setup needed for other wrapper types
+                pass
+
+
 @contextmanager
 def kind_run(
     sleep=None,
@@ -63,11 +81,8 @@ def kind_run(
             set_up = KindUp(cluster_name, kind_config)
             tear_down = KindDown(cluster_name)
 
-            # Set cluster_name on any KindLoad wrappers
-            if wrappers:
-                for wrapper in wrappers:
-                    if isinstance(wrapper, KindLoad):
-                        wrapper.cluster_name = cluster_name
+            # Set up wrappers with cluster-specific configuration
+            _setup_wrappers(wrappers, cluster_name)
 
             with environment_run(
                 up=set_up,
