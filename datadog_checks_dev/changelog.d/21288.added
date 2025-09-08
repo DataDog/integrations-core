@@ -1,1 +1,1 @@
-Add KindLoad wrapper utility for kind_run test method
+Add KindLoad wrapper utility that allows to load Docker images into kind for testing
