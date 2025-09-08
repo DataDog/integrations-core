@@ -1072,7 +1072,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "-@subtype:(TRAFFIC OR THREAT)"
+        query: "-@type:(TRAFFIC OR THREAT)"
       processors:
         - type: string-builder-processor
           name: Add activity_id
