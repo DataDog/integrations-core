@@ -305,6 +305,7 @@ jobs:
       - name: Delete last comment
         if: steps.find_comment.outputs.comment-id != ''
         run: |
+          echo "PASSES_QG: ${{ needs.calculate-size-diffs.outputs.passes_qg }}"
           echo "Deleting comment: ${{ steps.find_comment.outputs.comment-id }}"
           gh api \
           --method DELETE \

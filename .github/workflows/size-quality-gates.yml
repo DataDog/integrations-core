@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       run_id_base: ${{ steps.get-merge-base-run-id.outputs.run_id }}
-      passes: ${{ steps.calculate-diffs.outputs.passes_qg }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
