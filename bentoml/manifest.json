@@ -35,7 +35,7 @@
         "prefix": "bentoml.",
         "check": "bentoml.service.request.count",
         "metadata_path": "metadata.csv"
-      }
+      },
       "process_signatures": [
         "bentoml"
       ]      
