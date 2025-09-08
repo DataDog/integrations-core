@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from contextlib import contextmanager
 from shutil import which
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -11,6 +14,28 @@ from .fs import create_file, file_exists, path_join
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
+
+if TYPE_CHECKING:
+    from contextlib import AbstractContextManager
+    from typing import Self
+
+
+def _setup_wrappers(wrappers: list[AbstractContextManager] | None, cluster_name: str):
+    """Set up wrappers with cluster-specific configuration.
+
+    :param wrappers: List of wrapper instances to configure
+    :param cluster_name: The name of the Kind cluster
+    """
+    if not wrappers:
+        return
+
+    for wrapper in wrappers:
+        match wrapper:
+            case KindLoad():
+                wrapper.cluster_name = cluster_name
+            case _:
+                # No special setup needed for other wrapper types
+                pass
 
 
 @contextmanager
@@ -63,6 +88,9 @@ def kind_run(
             set_up = KindUp(cluster_name, kind_config)
             tear_down = KindDown(cluster_name)
 
+            # Set up wrappers with cluster-specific configuration
+            _setup_wrappers(wrappers, cluster_name)
+
             with environment_run(
                 up=set_up,
                 down=tear_down,
@@ -82,7 +110,7 @@ class KindUp(LazyFunction):
     `kind create cluster --name <integration>-cluster`
     """
 
-    def __init__(self, cluster_name, kind_config):
+    def __init__(self, cluster_name: str, kind_config: str | None):
         self.cluster_name = cluster_name
         self.kind_config = kind_config
 
@@ -100,8 +128,37 @@ class KindUp(LazyFunction):
 class KindDown(LazyFunction):
     """Delete the kind cluster, calling `delete cluster`."""
 
-    def __init__(self, cluster_name):
+    def __init__(self, cluster_name: str):
         self.cluster_name = cluster_name
 
     def __call__(self):
         run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)
+
+
+class KindLoad:
+    """Context manager for loading Docker images into a Kind cluster.
+
+    This context manager should be passed to the wrappers argument in environment_run
+    to load images into the Kind cluster after it's created.
+
+    Example:
+        with kind_run(wrappers=[KindLoad("my-image:latest")]):
+            # The image is now loaded in the kind cluster
+            pass
+    """
+
+    def __init__(self, image: str):
+        self.image = image
+        self.cluster_name: str | None = None
+
+    def __enter__(self) -> Self:
+        if self.cluster_name is None:
+            raise RuntimeError("cluster_name must be set before entering KindLoad context")
+
+        load_cmd = ['kind', 'load', 'docker-image', self.image, '--name', self.cluster_name]
+        run_command(load_cmd, check=True)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context manager (no cleanup needed for image loading)."""
+        pass
