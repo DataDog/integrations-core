@@ -975,11 +975,13 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
     result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
+    if "BRANCH_NAME" in os.environ:
+        print(f"BRANCH_NAME: {os.environ['BRANCH_NAME']}")
+        tickets = re.findall(ticket_pattern, os.environ["BRANCH_NAME"])
 
     message = result.stdout.strip()
-    tickets = re.findall(ticket_pattern, message)
+    tickets = re.findall(ticket_pattern, message) if not tickets else tickets
     prs = re.findall(pr_pattern, message)
-
     if not tickets:
         tickets = [""]
     if not prs:
