@@ -254,192 +254,55 @@ def display_diffs_to_html_short(diffs: dict, platform: str, python_version: str)
 
 def send_to_datadog(diffs: dict, platform: str, python_version: str, compression: str, api_key: str):
     api_info = {"api_key": api_key, "site": "datadoghq.com"}
-    message, tickets, prs = get_last_commit_data()
-    timestamp = get_last_commit_timestamp()
     metrics: list[dict] = []
 
     for entry in diffs["unchanged"]:
-        metrics.extend(
-            [
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Compressed_Diff"))],
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:compressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:unchanged",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Uncompressed_Diff"))],
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:uncompressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:unchanged",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-            ],
-        )
+        metrics.append(define_metrics(entry, "compressed", "unchanged", platform, python_version))
+        metrics.append(define_metrics(entry, "uncompressed", "unchanged", platform, python_version))
+
     for entry in diffs["changed"]:
-        metrics.extend(
-            [
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Compressed_Diff"))],
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:compressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:changed",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Uncompressed_Diff"))],
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:uncompressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:changed",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-            ]
-        )
-    for entry in diffs["added"]:
-        metrics.extend(
-            [
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Compressed_Size_Bytes"))],
-                    "size": entry.get("Compressed_Size_Bytes"),
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:compressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:added",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Uncompressed_Size_Bytes"))],
-                    "size": entry.get("Uncompressed_Size_Bytes"),
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:uncompressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:added",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-            ]
-        )
+        metrics.append(define_metrics(entry, "compressed", "changed", platform, python_version))
+        metrics.append(define_metrics(entry, "uncompressed", "changed", platform, python_version))
+
     for entry in diffs["removed"]:
-        metrics.extend(
-            [
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Compressed_Size_Bytes"))],
-                    "size": entry.get("Compressed_Size_Bytes"),
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:compressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:removed",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-                {
-                    "metric": f"{METRIC_NAME}.size_diff",
-                    "type": "gauge",
-                    "points": [(timestamp, entry.get("Uncompressed_Size_Bytes"))],
-                    "size": entry.get("Uncompressed_Size_Bytes"),
-                    "tags": [
-                        f"name:{entry.get('Name')}",
-                        f"type:{entry.get('Type')}",
-                        f"name_type:{entry.get('Type')}({entry.get('Name')})",
-                        f"python_version:{python_version}",
-                        f"module_version:{entry.get('Version')}",
-                        f"platform:{platform}",
-                        "team:agent-integrations",
-                        "compression:uncompressed",
-                        f"metrics_version:{METRIC_VERSION}",
-                        "diff_type:removed",
-                        f"jira_ticket:{tickets[0]}",
-                        f"pr_number:{prs[-1]}",
-                    ],
-                },
-            ]
-        )
+        metrics.append(define_metrics(entry, "compressed", "removed", platform, python_version))
+        metrics.append(define_metrics(entry, "uncompressed", "removed", platform, python_version))
+
+    for entry in diffs["added"]:
+        metrics.append(define_metrics(entry, "compressed", "added", platform, python_version))
+        metrics.append(define_metrics(entry, "uncompressed", "added", platform, python_version))
+
     initialize(
         api_key=api_info["api_key"],
         api_host=f"https://api.{api_info['site']}",
     )
 
     api.Metric.send(metrics=metrics)
+
+
+def define_metrics(entry: dict, compression: str, diff_type: str, platform: str, python_version: str) -> dict:
+    timestamp = get_last_commit_timestamp()
+    message, tickets, prs = get_last_commit_data()
+
+    return {
+        "metric": f"{METRIC_NAME}.size_diff",
+        "type": "gauge",
+        "points": [(timestamp, entry.get(f"{compression.title()}_Diff"))],
+        "tags": [
+            f"name:{entry.get('Name')}",
+            f"type:{entry.get('Type')}",
+            f"name_type:{entry.get('Type')}({entry.get('Name')})",
+            f"python_version:{python_version}",
+            f"module_version:{entry.get('Version')}",
+            f"platform:{platform}",
+            "team:agent-integrations",
+            f"compression:{compression}",
+            f"metrics_version:{METRIC_VERSION}",
+            f"diff_type:{diff_type}",
+            f"jira_ticket:{tickets[0]}",
+            f"pr_number:{prs[-1]}",
+        ],
+    }
 
 
 def main():
