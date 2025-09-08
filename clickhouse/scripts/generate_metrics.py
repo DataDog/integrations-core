@@ -4,6 +4,7 @@
 
 
 import argparse
+import collections
 import csv
 import itertools
 import os
@@ -14,6 +15,8 @@ from enum import Enum, StrEnum
 from typing import Iterable
 
 import requests
+
+stats = collections.Counter()
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(HERE, 'templates')
@@ -491,6 +494,7 @@ def generate():
     # generate query modules
     for generator in METRIC_GENERATORS:
         metrics = calculate_metrics(generator)
+        stats[generator.kind] = len(metrics.all)
         generate_queries(generator.template, metrics.all.values())
         all.update(metrics.all)
         calculated.append(metrics)
@@ -500,6 +504,13 @@ def generate():
 
     # generate unit test metrics
     generate_test_data(calculated)
+
+
+def print_stats() -> None:
+    print('The number of metrics:')
+    for kind, count in stats.items():
+        print(f'- {kind}: ', count)
+    print(f'Total: {stats.total()}')
 
 
 def main():
@@ -525,6 +536,7 @@ def main():
     )
     _ = parser.parse_args()
     generate()
+    print_stats()
 
 
 if __name__ == '__main__':
