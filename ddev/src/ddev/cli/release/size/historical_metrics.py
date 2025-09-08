@@ -5,7 +5,8 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from utils.common_funcs import GitRepo
+
+from ddev.cli.release.size.utils.common_funcs import GitRepo
 
 console = Console()
 
