@@ -8,17 +8,17 @@
 
 # https://clickhouse.com/docs/operations/system-tables/events
 SystemEvents = {{
-    'name': 'system.events',
+    'name': 'system_events',
     'query': 'SELECT value, event FROM system.events',
     'columns': [
         {{
-            'name': 'value',
+            'name': 'metric_value',
             'type': 'source'
         }},
         {{
-            'name': 'metric',
+            'name': 'metric_name',
             'type': 'match',
-            'source': 'value',
+            'source': 'metric_value',
             'items': {{
 {items}
             }},

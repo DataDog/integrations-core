@@ -24,3 +24,15 @@ def test_check(dd_agent_check, instance):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+def test_system_errors(dd_agent_check, instance, clickhouse_client):
+    aggregator = dd_agent_check(instance, rate=True)
+
+    aggregator.assert_metric('clickhouse.ClickHouseErrors_UNKNOWN_IDENTIFIER', at_least=0)
+
+    with pytest.raises(Exception):
+        clickhouse_client.execute('SELECT unknown')
+
+    aggregator.assert_metric('clickhouse.ClickHouseErrors_UNKNOWN_IDENTIFIER', at_least=1)

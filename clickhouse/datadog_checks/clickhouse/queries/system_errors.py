@@ -8,14 +8,14 @@
 
 # https://clickhouse.com/docs/operations/system-tables/errors
 SystemErrors = {
-    'name': 'system.errors',
-    'query': 'SELECT name, value FROM system.errors',
+    'name': 'system_errors',
+    'query': 'SELECT value, name FROM system.errors',
     'columns': [
-        {'name': 'value', 'type': 'source'},
+        {'name': 'metric_value', 'type': 'source'},
         {
-            'name': 'metric',
+            'name': 'metric_name',
             'type': 'match',
-            'source': 'value',
+            'source': 'metric_value',
             'items': {
                 'ABORTED': {'name': 'ClickHouseErrors_ABORTED', 'type': 'gauge'},
                 'ACCESS_DENIED': {'name': 'ClickHouseErrors_ACCESS_DENIED', 'type': 'gauge'},

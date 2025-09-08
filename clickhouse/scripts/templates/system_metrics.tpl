@@ -8,17 +8,17 @@
 
 # https://clickhouse.com/docs/operations/system-tables/metrics
 SystemMetrics = {{
-    'name': 'system.metrics',
+    'name': 'system_metrics',
     'query': 'SELECT value, metric FROM system.metrics',
     'columns': [
         {{
-            'name': 'value',
+            'name': 'metric_value',
             'type': 'source'
         }},
         {{
-            'name': 'metric',
+            'name': 'metric_name',
             'type': 'match',
-            'source': 'value',
+            'source': 'metric_value',
             'items': {{
 {items}
             }},

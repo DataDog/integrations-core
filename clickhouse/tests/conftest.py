@@ -62,3 +62,13 @@ def ping_clickhouse(host, port, username, password):
 
 def get_instance_config() -> dict:
     return deepcopy(common.CONFIG)
+
+
+@pytest.fixture
+def clickhouse_client(instance):
+    return clickhouse_driver.Client(
+        host=instance['server'],
+        port=instance['port'],
+        user=instance['username'],
+        password=instance['password'],
+    )

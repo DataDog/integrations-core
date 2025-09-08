@@ -8,17 +8,17 @@
 
 # https://clickhouse.com/docs/operations/system-tables/errors
 SystemErrors = {{
-    'name': 'system.errors',
-    'query': 'SELECT name, value FROM system.errors',
+    'name': 'system_errors',
+    'query': 'SELECT value, name FROM system.errors',
     'columns': [
         {{
-            'name': 'value',
+            'name': 'metric_value',
             'type': 'source'
         }},
         {{
-            'name': 'metric',
+            'name': 'metric_name',
             'type': 'match',
-            'source': 'value',
+            'source': 'metric_value',
             'items': {{
 {items}
             }},

@@ -8,14 +8,14 @@
 
 # https://clickhouse.com/docs/operations/system-tables/events
 SystemEvents = {
-    'name': 'system.events',
+    'name': 'system_events',
     'query': 'SELECT value, event FROM system.events',
     'columns': [
-        {'name': 'value', 'type': 'source'},
+        {'name': 'metric_value', 'type': 'source'},
         {
-            'name': 'metric',
+            'name': 'metric_name',
             'type': 'match',
-            'source': 'value',
+            'source': 'metric_value',
             'items': {
                 'AIORead': {'name': 'ClickHouseProfileEvents_AIORead', 'type': 'monotonic_gauge'},
                 'AIOReadBytes': {'name': 'ClickHouseProfileEvents_AIOReadBytes', 'type': 'monotonic_gauge'},

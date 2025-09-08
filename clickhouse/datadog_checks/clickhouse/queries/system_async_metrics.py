@@ -8,14 +8,14 @@
 
 # https://clickhouse.com/docs/operations/system-tables/asynchronous_metrics
 SystemAsynchronousMetrics = {
-    'name': 'system.asynchronous_metrics',
+    'name': 'system_asynchronous_metrics',
     'query': 'SELECT value, metric FROM system.asynchronous_metrics',
     'columns': [
-        {'name': 'value', 'type': 'source'},
+        {'name': 'metric_value', 'type': 'source'},
         {
-            'name': 'metric',
+            'name': 'metric_name',
             'type': 'match',
-            'source': 'value',
+            'source': 'metric_value',
             'items': {
                 'AsynchronousHeavyMetricsCalculationTimeSpent': {
                     'name': 'ClickHouseAsyncMetrics_AsynchronousHeavyMetricsCalculationTimeSpent',
