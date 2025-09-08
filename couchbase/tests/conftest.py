@@ -20,6 +20,8 @@ from .common import (
     CB_CONTAINER_NAME,
     COUCHBASE_MAJOR_VERSION,
     COUCHBASE_MINOR_VERSION,
+    COUCHBASE_SYNCGW_MAJOR_VERSION,
+    COUCHBASE_SYNCGW_MINOR_VERSION,
     DEFAULT_INSTANCE,
     HERE,
     INDEX_STATS_URL,
@@ -244,15 +246,22 @@ def create_syncgw_database():
     # Resources used:
     # https://docs.couchbase.com/sync-gateway/current/configuration/configuration-schema-database.html
 
+    payload = {
+        "bucket": "gamesim-sample",
+        "num_index_replicas": 0,
+    }
+
+    # The payload format is different between Sync Gateway versions: The
+    # num_index_replicas field was deprecated in favor of index.num_replicas in
+    # version 3.3.0.
+    if COUCHBASE_SYNCGW_MAJOR_VERSION == 3 and COUCHBASE_SYNCGW_MINOR_VERSION >= 3:
+        payload["index"] = {"num_replicas": payload["num_index_replicas"]}
+        del payload["num_index_replicas"]
+
     r = requests.put(
         '{}/sync_gateway/'.format(SG_URL),
         auth=(USER, PASSWORD),
-        json={
-            "bucket": "gamesim-sample",
-            "index": {
-                "num_replicas": 0,
-            },
-        },
+        json=payload,
     )
     r.raise_for_status()
 
