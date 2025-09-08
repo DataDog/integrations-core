@@ -6,6 +6,9 @@ on:
       platform:
         required: true
         type: string
+      send_metrics:
+        required: true
+        type: boolean
     outputs:
       passes_qg:
         description: Whether the quality gates passed
@@ -19,6 +22,7 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       run_id_base: ${{ steps.get-merge-base-run-id.outputs.run_id }}
+      passes_qg: ${{ steps.calculate-diffs.outputs.passes_qg }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -73,36 +77,26 @@ jobs:
       - name: Calculate diffs 
         id: calculate-diffs
         run: |
-          set +e
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
-            # send metrics to datadog if this is a push to master
-            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py \
-              --send-to-datadog ${{secrets.DD_API_KEY}} \
-              --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv \
-              --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json \
-              --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv \
-              --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json \
-              --output diffs_${{ inputs.platform }}.json \
-              --html-long-out size_diffs_output_${{ inputs.platform }}.txt \
-              --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt \
-              --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
-          else
-            PASSES_QG=$(python ddev/src/ddev/cli/size/utils/gha_diff.py \
-              --compressed-prev-sizes status_compressed_${{ inputs.platform }}_prev.csv \
-              --compressed-curr-sizes status_compressed_${{ inputs.platform }}_curr.json \
-              --uncompressed-prev-sizes status_uncompressed_${{ inputs.platform }}_prev.csv \
-              --uncompressed-curr-sizes status_uncompressed_${{ inputs.platform }}_curr.json \
-              --output diffs_${{ inputs.platform }}.json \
-              --html-long-out size_diffs_output_${{ inputs.platform }}.txt \
-              --html-short-out size_diffs_output_short_${{ inputs.platform }}.txt \
-              --threshold $THRESHOLD) >> $GITHUB_STEP_SUMMARY
-          fi
-             status=$?      # 0 = passes, 1 = fails
-          set -e
+            set -o pipefail
+            CMD=(python ddev/src/ddev/cli/size/utils/gha_diff.py
+              --compressed-prev-sizes "status_compressed_${{ inputs.platform }}_prev.csv"
+              --compressed-curr-sizes "status_compressed_${{ inputs.platform }}_curr.json"
+              --uncompressed-prev-sizes "status_uncompressed_${{ inputs.platform }}_prev.csv"
+              --uncompressed-curr-sizes "status_uncompressed_${{ inputs.platform }}_curr.json"
+              --output "diffs_${{ inputs.platform }}.json"
+              --html-long-out "size_diffs_output_${{ inputs.platform }}.txt"
+              --html-short-out "size_diffs_output_short_${{ inputs.platform }}.txt"
+              --threshold "$THRESHOLD"
+            )
 
-          if [ "$status" -eq 0 ]; then PASSES_QG=true; else PASSES_QG=false; fi
-          echo "passes_qg=$PASSES_QG" >> $GITHUB_OUTPUT
-          cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
+            if [ "${{ inputs.send_metrics }}" = "true" ]; then
+              CMD+=("--send-to-datadog" "${{ secrets.DD_API_KEY }}")
+            fi
+
+            "${CMD[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+
+            echo "passes_qg=true" >> "$GITHUB_OUTPUT"
+            cat "size_diffs_output_${{ inputs.platform }}.txt" >> "$GITHUB_STEP_SUMMARY"
         env:
           THRESHOLD: "-100000000000000000000000000" # "51200" # 50KB; this variable is used to check if the diffs are within the size limit
 
