@@ -11,6 +11,8 @@ on:   # only runs if there are no dependency changes
 jobs:
   check-file-changes:
     runs-on: ubuntu-22.04
+    outputs:
+      builders_changed: ${{ steps.filter.outputs.builders_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -19,7 +21,7 @@ jobs:
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
         id: filter
         with:
-          filters: 
+          filters: |
             builders:
               - '.builders/**'
               - '.github/workflows/resolve-build-deps.yml'
@@ -34,33 +36,12 @@ jobs:
       base_sha: ${{ steps.get-merge-base-run-id.outputs.base_sha }}
     steps:
       - name: Get merge base run id
+        id: get-merge-base-run-id
         run: ./.github/workflows/scripts/get_merge_base_run_id.sh "Measure Disk Usage"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Get merge base commit
-      #   id: merge_base
-      #   run: |
-      #     git fetch origin master:refs/remotes/origin/master
-      #     base=$(git merge-base HEAD origin/master)
-      #     echo "base_sha=$base" >> $GITHUB_OUTPUT
-      # - name: Find workflow run at exact merge-base SHA 
-      #   id: find_run
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     MERGE_BASE=${{ steps.merge_base.outputs.base_sha }}
-
-      #     count=$(git rev-list --count ${{ steps.merge_base.outputs.base_sha }}..origin/master)
-      #     count_plus_one=$((count + 1))
-      #     run_id=$(
-      #       (
-      #         gh run list --workflow "Measure Disk Usage" --limit $count_plus_one --branch "master" --json databaseId,headSha,event
-      #       ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$MERGE_BASE"'") | .databaseId' | head -n 1
-      #     )
-      #     if [ -z "$run_id" ]; then
-      #       echo "No workflow run found for that SHA" >> $GITHUB_STEP_SUMMARY
-      #       exit 1
-      #     fi
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_REF: ${{ github.head_ref }}
 
   download-artifacts:
     needs: get-merge-base
