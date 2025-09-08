@@ -60,8 +60,6 @@ jobs:
         run: |
           mv compressed_status.csv status_compressed_${{ inputs.platform }}_prev.csv # $status_compressed_${{ inputs.platform }}.json
           mv uncompressed_status.csv status_uncompressed_${{ inputs.platform }}_prev.csv # $status_uncompressed_${{ inputs.platform }}.json
-          cat status_compressed_${{ inputs.platform }}_prev.csv >> $GITHUB_STEP_SUMMARY
-          cat status_uncompressed_${{ inputs.platform }}_prev.csv >> $GITHUB_STEP_SUMMARY
       - name: Download current sizes artifact
         run: |
           gh run download ${{ github.run_id }} --name status_compressed_${{ inputs.platform }}.json
