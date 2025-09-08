@@ -29,10 +29,16 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install dependencies
+      - name: Install ddev
         run: |
-          pip install -r .size-quality-gates/requirements.txt
+          pip install -e ./datadog_checks_dev[cli]
+          pip install -e ./ddev
           
+      - name: Configure ddev
+        run: |
+          ddev config set repos.core .
+          ddev config set repo core
+
       - name: Get merge base run id
         id: get-merge-base-run-id
         run: ./.size-quality-gates/get_merge_base_run_id.sh "Measure Disk Usage"
