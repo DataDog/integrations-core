@@ -162,6 +162,8 @@ class ClickhouseMetric:
         return f'{self.prefix}_{self.name}'
 
     def integration_name(self, postfix: str = '') -> str:
+        if len(postfix) > 0:
+            postfix = f'.{postfix}'
         return f'{INTEGRATION_NAME}.{self.metric_name()}{postfix}'
 
     def unit_name(self) -> str:
@@ -271,7 +273,10 @@ def fetch_errors(version: str) -> dict[str, ClickhouseMetric]:
     for match in ERRORS_PATTERN.finditer(raw_metrics):
         name = match.group('metric')
         m = ClickhouseMetric(
-            name=name, description=f'The number of {name} errors since last server restart.', prefix=PREFIX_ERRORS
+            name=name,
+            description=f'The number of {name} errors since last server restart.',
+            prefix=PREFIX_ERRORS,
+            value_type=VALUE_TYPE_NUMBER,
         )
         result[m.metric_name()] = m
 
@@ -302,16 +307,20 @@ def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
     ]
     metadata = []
 
-    def shorten_description(description: str) -> str:
+    def shorten_description(description: str, postfix: str = '') -> str:
+        ending = ''
+        if len(postfix) > 0:
+            ending = f' ({postfix})'
+        description = description + ending
         if len(description) > MAX_LENGTH:
-            return description[: MAX_LENGTH - 3] + '...'
+            return description[: MAX_LENGTH - 3 - len(ending)] + '...' + ending
         return description
 
     def add_metadata(metric: ClickhouseMetric, metric_type: str, metric_postfix: str = ''):
         meta = dict.fromkeys(FILE_HEADERS, '')
         meta['metric_name'] = metric.integration_name(postfix=metric_postfix)
         meta['metric_type'] = metric_type
-        meta['description'] = shorten_description(metric.description)
+        meta['description'] = shorten_description(metric.description, metric_postfix)
         meta['orientation'] = 0
         meta['integration'] = INTEGRATION_NAME
         meta['unit_name'] = metric.unit_name()
@@ -320,8 +329,8 @@ def generate_metadata_file(metrics: Iterable[ClickhouseMetric]):
     for metric in metrics:
         match metric.type():
             case 'monotonic_gauge':
-                add_metadata(metric, metric_postfix='.count', metric_type='count')
-                add_metadata(metric, metric_postfix='.total', metric_type='gauge')
+                add_metadata(metric, metric_postfix='count', metric_type='count')
+                add_metadata(metric, metric_postfix='total', metric_type='gauge')
             case _:
                 add_metadata(metric, metric_type='gauge')
 
@@ -344,8 +353,8 @@ class CalculatedMetrics:
             metric = self.all[name]
             match metric.type():
                 case 'monotonic_gauge':
-                    result.add(metric.integration_name(postfix='.count'))
-                    result.add(metric.integration_name(postfix='.total'))
+                    result.add(metric.integration_name(postfix='count'))
+                    result.add(metric.integration_name(postfix='total'))
                 case _:
                     result.add(metric.integration_name())
 
