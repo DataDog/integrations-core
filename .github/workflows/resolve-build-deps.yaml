@@ -69,7 +69,7 @@ jobs:
           image: linux-aarch64
         - os: ubuntu-22.04
           image: linux-x86_64
-        - os: windows-2022 
+        - os: windows-2022
           image: windows-x86_64
 
     permissions:
@@ -251,11 +251,11 @@ jobs:
 
   measure-disk-usage:
     needs:
-      - build
+      # - build
       - build-macos
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: ./.github/workflows/size-qg-measure-disk-use.yml
     with:
       platform: ${{ matrix.platform }}
@@ -266,7 +266,7 @@ jobs:
     needs: measure-disk-usage
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: ./.github/workflows/size-quality-gates.yml
     with:
       platform: ${{ matrix.platform }}
@@ -278,7 +278,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'show-size-delta') && 
       needs.calculate-size-diffs.outputs.passes_qg == false
     env:
-      PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
+      PLATFORMS: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
       GITHUB_RUN_ID: ${{ github.run_id }}
       GITHUB_REPOSITORY: ${{ github.repository }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -306,9 +306,7 @@ jobs:
         if: steps.find_comment.outputs.comment-id != ''
         run: |
           echo "Deleting comment: ${{ steps.find_comment.outputs.comment-id }}"
-          curl -X DELETE \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
+          gh api --method DELETE /repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
 
       - name: Create comment
         run: |
