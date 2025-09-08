@@ -21,10 +21,10 @@ IGNORED_LNET_GROUPS = {
 }
 
 TAGS_WITH_FILESYSTEM = {
-        'device_name',
-        'device_uuid',
-        'device_nid',
-        }
+    'device_name',
+    'device_uuid',
+}
+
 
 @dataclass(frozen=True)
 class LustreParam:
@@ -306,7 +306,12 @@ DEFAULT_STATS = [
 
 EXTRA_STATS = [
     # MDS (Metadata Server) params
-    LustreParam(regex='mds.MDS.mdt.stats', node_types=('mds',), prefix='mds.mdt', fixture='mds_mdt_stats.txt'),
+    LustreParam(
+        regex='mds.MDS.mdt.stats',
+        node_types=('mds',),
+        prefix='mds.mdt',
+        fixture='mds_mdt_stats.txt',
+    ),
     LustreParam(
         regex='mdt.*.exports.*.stats',
         node_types=('mds',),
@@ -333,7 +338,7 @@ EXTRA_STATS = [
     LustreParam(
         regex='ldlm.namespaces.*.pool.stats',
         node_types=('client', 'mds', 'oss'),
-        wildcards=('device_nid',),
+        wildcards=('nid',),
         prefix='ldlm.namespaces.pool',
         fixture='all_ldlm_namespace_stats.txt',
     ),
@@ -341,12 +346,17 @@ EXTRA_STATS = [
     LustreParam(
         regex='mgs.MGS.exports.*.stats',
         node_types=('mds',),
-        wildcards=('device_name', 'nid'),
+        wildcards=('nid',),
         prefix='mgs.exports',
         fixture='mds_mgs_export_stats.txt',
     ),
     # OSS (Object Storage Server) params
-    LustreParam(regex='ost.OSS.ost.stats', node_types=('oss',), prefix='oss', fixture='oss_ost_stats.txt'),
+    LustreParam(
+        regex='ost.OSS.ost.stats',
+        node_types=('oss',),
+        prefix='oss',
+        fixture='oss_ost_stats.txt',
+    ),
     LustreParam(
         regex='osc.*.stats',
         node_types=('client',),

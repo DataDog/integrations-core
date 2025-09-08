@@ -16,6 +16,7 @@ from datadog_checks.lustre.constants import (
     EXTRA_STATS,
     JOBID_TAG_PARAMS,
     JOBSTATS_PARAMS,
+    TAGS_WITH_FILESYSTEM,
     LustreParam,
 )
 
@@ -60,8 +61,9 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
         'node_type': node_type,
         'enable_extra_params': 'true',
         'enable_lnetctl_detailed': 'true',
-        'filesystems': [''],
+        'filesystems': ['*'],
     }
+    filesystem_tag_metric_prefixes = set()
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': dl_fixture,
@@ -72,6 +74,8 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
     for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + JOBID_TAG_PARAMS + CURATED_PARAMS:
         mapping[f'lctl list_param {param.regex}'] = param.regex
         mapping[f'lctl get_param -ny {param.regex}'] = param.fixture
+        if any(wildcard in TAGS_WITH_FILESYSTEM for wildcard in param.wildcards):
+            filesystem_tag_metric_prefixes.add(f"lustre.{param.prefix}")
 
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
@@ -79,7 +83,7 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
 
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
-        if not metric.startswith("lustre.ldlm") and not metric.startswith("lustre.net") and not metric.startswith("lustre.device"):
+        if any(metric.startswith(prefix) for prefix in filesystem_tag_metric_prefixes):
             aggregator.assert_metric_has_tags(metric, tags=["filesystem:*"])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -93,7 +97,7 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
     ],
 )
 def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, expected_metrics):
-    instance = {'node_type': node_type}
+    instance = {'node_type': node_type, 'filesystems': ['lustre']}
 
     jobid_tag_commands = {f'lctl get_param -ny {param.regex}': f'{param.fixture}' for param in JOBID_TAG_PARAMS}
     mapping = ChainMap(
@@ -107,7 +111,7 @@ def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, exp
     )
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_jobstats_metrics(['lustre'])
+        check.submit_jobstats_metrics()
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tags(metric, tags=['jobid_var:disable', 'jobid_name:%e.%u'])
@@ -253,7 +257,7 @@ def test_submit_param_data(aggregator, instance, mock_lustre_commands):
     }
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_param_data(DEFAULT_STATS, ['lustre'])
+        check.submit_param_data(DEFAULT_STATS)
 
     # Verify some general stats metrics are submitted
     expected_metrics = [
@@ -272,7 +276,7 @@ def test_extract_tags_from_param(mock_lustre_commands):
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
-        check = LustreCheck('lustre', {}, [{}])
+        check = LustreCheck('lustre', {}, [{"filesystems": ["lustre"]}])
 
         # Test with wildcards
         tags = check._extract_tags_from_param(
@@ -574,7 +578,7 @@ def test_parameter_filtering_logging(caplog, mock_lustre_commands):
 
     with mock_lustre_commands(mapping):
         with caplog.at_level(logging.DEBUG):
-            check = LustreCheck('lustre', {}, [{'node_type': 'mds'}])
+            check = LustreCheck('lustre', {}, [{'node_type': 'mds', 'filesystems': ['lustre']}])
             params = {
                 LustreParam(
                     regex="some.*.param.client",
@@ -591,7 +595,7 @@ def test_parameter_filtering_logging(caplog, mock_lustre_commands):
                     fixture="",
                 ),
             }
-            check.submit_param_data(params, ['lustre'])
+            check.submit_param_data(params)
 
         log_text = caplog.text
         assert 'Skipping param some.*.param.client for node type mds' in log_text
