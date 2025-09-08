@@ -29,7 +29,7 @@ RUN_ID=$(
     (
         gh run list --workflow "$WORKFLOW_NAME" --limit "$count_plus_one" --branch "master" --json databaseId,headSha,event
     ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$BASE_SHA"'") | .databaseId' | head -n 1
-)
+) # jq flattens the nested array of objects into a single array
 
 if [ -z "$RUN_ID" ]; then
     echo "No workflow run found for SHA: $BASE_SHA"

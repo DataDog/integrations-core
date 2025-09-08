@@ -50,8 +50,6 @@ def status(
     Show the current size of all integrations and dependencies.
     """
     try:
-        if "BRANCH_NAME" in os.environ:
-            print(f"BRANCH_NAME: {os.environ['BRANCH_NAME']}")
         repo_path = app.repo.path
         valid_versions = get_valid_versions(repo_path)
         valid_platforms = get_valid_platforms(repo_path, valid_versions)

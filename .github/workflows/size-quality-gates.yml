@@ -104,7 +104,6 @@ jobs:
 
           if [ "$status" -eq 0 ]; then PASSES_QG=true; else PASSES_QG=false; fi
           echo "passes_qg=$PASSES_QG" >> $GITHUB_OUTPUT
-          echo "passes_qg=$PASSES_QG" >> $GITHUB_STEP_SUMMARY
           cat size_diffs_output_${{ inputs.platform }}.txt >> $GITHUB_STEP_SUMMARY
         env:
           THRESHOLD: "-100000000000000000000000000" # "51200" # 50KB; this variable is used to check if the diffs are within the size limit
