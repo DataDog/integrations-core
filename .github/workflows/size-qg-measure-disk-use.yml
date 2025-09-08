@@ -85,6 +85,7 @@ jobs:
     - name: Measure disk usage (Not sending metrics to Datadog)
       if: github.event_name != 'push' || github.ref_name != github.event.repository.default_branch
       run: |
+        echo "Current branch: $(git branch --show-current)" >> $GITHUB_STEP_SUMMARY # REMOVE
         ddev size status \
           --platform ${{ inputs.platform }} \
           --dependency-sizes dependency_sizes_${{ inputs.platform }}.json \
