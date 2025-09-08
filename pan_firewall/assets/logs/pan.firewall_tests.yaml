@@ -195,7 +195,7 @@ tests:
           port: 123
       ocsf:
         activity_id: 2
-        activity_name: "end"
+        activity_name: "Close"
         category_uid: 4
         class_name: "Network Activity"
         class_uid: 4001
@@ -214,7 +214,7 @@ tests:
             vendor_name: "Palo Alto"
           sequence: 7489817491394537148
           version: "1.5.0"
-        severity: "informational"
+        severity: "Informational"
         severity_id: 1
         src_endpoint:
           ip: "172.16.28.190"
