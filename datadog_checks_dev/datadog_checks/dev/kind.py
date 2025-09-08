@@ -63,6 +63,12 @@ def kind_run(
             set_up = KindUp(cluster_name, kind_config)
             tear_down = KindDown(cluster_name)
 
+            # Set cluster_name on any KindLoad wrappers
+            if wrappers:
+                for wrapper in wrappers:
+                    if isinstance(wrapper, KindLoad):
+                        wrapper.cluster_name = cluster_name
+
             with environment_run(
                 up=set_up,
                 down=tear_down,
@@ -105,3 +111,38 @@ class KindDown(LazyFunction):
 
     def __call__(self):
         run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)
+
+
+class KindLoad:
+    """Context manager for loading Docker images into a Kind cluster.
+
+    This context manager should be passed to the wrappers argument in environment_run
+    to load images into the Kind cluster after it's created.
+
+    Example:
+        with kind_run(wrappers=[KindLoad("my-image:latest")]):
+            # The image is now loaded in the kind cluster
+            pass
+    """
+
+    def __init__(self, image):
+        """Initialize the KindLoad context manager.
+
+        :param image: The Docker image to load into the Kind cluster.
+        :type image: str
+        """
+        self.image = image
+        self.cluster_name = None
+
+    def __enter__(self):
+        """Load the image into the Kind cluster."""
+        if self.cluster_name is None:
+            raise RuntimeError("cluster_name must be set before entering KindLoad context")
+
+        load_cmd = ['kind', 'load', 'docker-image', self.image, '--name', self.cluster_name]
+        run_command(load_cmd, check=True)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context manager (no cleanup needed for image loading)."""
+        pass
