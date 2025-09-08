@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 7.0.0 / 2025-07-10
+## 7.1.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Adds remaining BETA flowcontrol metrics to kube_apiserver_metrics check ([#20757](https://github.com/DataDog/integrations-core/pull/20757))
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 7.0.0 / 2025-07-10 / Agent 7.69.0
 
 ***Changed***:
 

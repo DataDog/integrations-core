@@ -52,7 +52,7 @@ class MySQLMetadata(DBMAsyncJob):
         self._databases_data_collection_interval = config.schemas_config.get(
             "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
         )
-        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
+        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
 
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
@@ -145,7 +145,7 @@ class MySQLMetadata(DBMAsyncJob):
         if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
             self._last_databases_collection_time = time.time()
             try:
-                self._databases_data._collect_databases_data(self._tags)
+                self._databases_data.collect_databases_data(self._tags)
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.
