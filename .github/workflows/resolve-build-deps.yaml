@@ -306,7 +306,11 @@ jobs:
         if: steps.find_comment.outputs.comment-id != ''
         run: |
           echo "Deleting comment: ${{ steps.find_comment.outputs.comment-id }}"
-          gh api --method DELETE /repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
+          gh api \
+          --method DELETE \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \ 
+          /repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
 
       - name: Create comment
         run: |
