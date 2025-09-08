@@ -7,7 +7,10 @@ WORKFLOW_NAME=$1
 
 # Find workflow run at exact merge-base SHA
 echo "Finding workflow run at merge-base SHA..."
-
+if [ -z "$DEFAULT_BRANCH" ]; then
+    echo "Error: DEFAULT_BRANCH environment variable is required"
+    exit 1
+fi
 if [ -z "$GH_TOKEN" ]; then
     echo "Error: GH_TOKEN environment variable is required"
     exit 1
@@ -18,6 +21,8 @@ if [ -z "$BASE_SHA" ]; then
     exit 1
 fi
 
+
+git fetch origin $DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH
 count=$(git rev-list --count $BASE_SHA..origin/$DEFAULT_BRANCH)
 count_plus_one=$((count + 1))
 
