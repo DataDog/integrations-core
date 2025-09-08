@@ -1067,6 +1067,65 @@ pipeline:
           target: ocsf.evidence.file.type_id
           replaceMissing: false
     - type: pipeline
+      name: OCSF sub pipeline for class Base Event [0]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "-@subtype:(TRAFFIC OR THREAT)"
+      processors:
+        - type: string-builder-processor
+          name: Add activity_id
+          enabled: true
+          template: "99"
+          target: ocsf.activity_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.metadata.event_code` to `ocsf.activity_name`
+          enabled: true
+          sources:
+            - ocsf.metadata.event_code
+          sourceType: attribute
+          target: ocsf.activity_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
+          enabled: true
+          sources:
+            - ocsf.activity_id
+          sourceType: attribute
+          target: ocsf.activity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Add category uid
+          enabled: true
+          template: "0"
+          target: ocsf.category_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add category name
+          enabled: true
+          template: "Uncategorized"
+          target: ocsf.category_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class uid
+          enabled: true
+          template: "0"
+          target: ocsf.class_uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add class name
+          enabled: true
+          template: "Base Event"
+          target: ocsf.class_name
+          replaceMissing: false
+    - type: pipeline
       name: OCSF Post Transformation
       enabled: true
       ocsf:
