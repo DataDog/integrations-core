@@ -1,4 +1,4 @@
-# CHANGELOG - checkpoint_harmony_endpoint
+# CHANGELOG - Checkpoint Harmony Endpoint
 
 <!-- towncrier release notes start -->
 

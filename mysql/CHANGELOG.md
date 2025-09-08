@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.7.3 / 2025-08-25 / Agent 7.70.0
+
+***Fixed***:
+
+* Change statement_rows to TTL cache to fix mysql memory leaks ([#21097](https://github.com/DataDog/integrations-core/pull/21097))
+
 ## 15.7.2 / 2025-08-07
 
 ***Fixed***:
