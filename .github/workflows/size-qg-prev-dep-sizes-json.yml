@@ -74,20 +74,24 @@ jobs:
 
   calculate-size-diffs:
     needs: measure-disk-usage
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
-    uses: ./.github/workflows/size-quality-gates.yml
-    with:
-      platform: ${{ matrix.platform }}
-      
+    steps:
+    - name: Size quality gates
+      uses: ./.github/workflows/size-quality-gates.yml
+      with:
+        platform: ${{ matrix.platform }}
+        send_metrics: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch }}
+          
 
   comment-size-diffs-on-pr:
     needs:
       - calculate-size-diffs
     if: >
       contains(github.event.pull_request.labels.*.name, 'show-size-delta') && 
-      needs.calculate-size-diffs.outputs.passes_qg == false
+      needs.calculate-size-diffs.result == 'failure'
     env:
       PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
       GITHUB_RUN_ID: ${{ github.run_id }}
