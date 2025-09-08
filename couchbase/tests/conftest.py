@@ -215,7 +215,7 @@ def load_sample_bucket():
 
     while True:
         # Loop until the task ID is gone, meaning the task is done.
-        task_is_done = True
+        task_is_done = False
 
         r = requests.get(
             '{}/pools/default/tasks'.format(URL),
