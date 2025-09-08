@@ -81,54 +81,45 @@ jobs:
     uses: ./.github/workflows/size-quality-gates.yml
     with:
       platform: ${{ matrix.platform }}
+      
 
   comment-size-diffs-on-pr:
     needs:
       - calculate-size-diffs
-      - get-merge-base
     if: >
-      contains(github.event.pull_request.labels.*.name, 'show-size-delta')
-      && needs.calculate-size-diffs.outputs.passes_qg == 'false'
+      contains(github.event.pull_request.labels.*.name, 'show-size-delta') && 
+      needs.calculate-size-diffs.outputs.passes_qg == false
     env:
-      PYTHON_VERSION: "3.12"
       PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
+      GITHUB_RUN_ID: ${{ github.run_id }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
+      
+      - name: Create output size diffs
+        run: ./.github/workflows/scripts/output_size_diffs.sh
 
-      - name: Join size diffs in order
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAX_COMMENT_SIZE: ${{ env.MAX_COMMENT_SIZE }}
-        run: |
-          BASE_SHA="${{ needs.get-merge-base.outputs.base_sha }}"
-          BASE_SHORT="${BASE_SHA:0:7}"
-          echo "<h3>Dependency Size Changes</h3>" > comment.txt
-          echo >> comment.txt
-          echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
-          for p in $PLATFORMS; do
-            gh run download "${{ github.run_id }}" --name "size_diffs_output_${p}.txt"
-            cat "size_diffs_output_${p}.txt" >> comment.txt
-          done
-          if [ $(wc -c < comment.txt) -gt $MAX_COMMENT_SIZE ]; then
-            echo "<h3>Dependency Size Changes</h3>" > comment.txt
-            echo >> comment.txt
-            echo "Comparing with base [($BASE_SHORT)](https://github.com/${{ github.repository }}/commit/$BASE_SHA)" >> comment.txt
-            for p in $PLATFORMS; do
-              gh run download "${{ github.run_id }}" --name "size_diffs_output_short_${p}.txt"
-              cat "size_diffs_output_short_${p}.txt" >> comment.txt
-            done
-            GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> comment.txt
-          fi
+      - name: Find last comment
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<h3>Dependency Size Changes</h3>"
 
-      - name: Output results
+      - name: Delete last comment
+        if: steps.find_comment.outputs.comment-id != ''
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} --delete-last --yes
+          echo "Deleting comment: ${{ steps.find_comment.outputs.comment-id }}"
+          curl -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
+
+      - name: Create comment
+        run: |
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
-        env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

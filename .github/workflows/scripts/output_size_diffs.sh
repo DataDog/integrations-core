@@ -29,8 +29,7 @@ fi
 # Configuration
 MAX_COMMENT_SIZE=${MAX_COMMENT_SIZE:-65536}
 
-git fetch origin master:refs/remotes/origin/master
-BASE_SHA=$(git merge-base HEAD origin/master)
+
 
 # Create short base SHA
 BASE_SHORT="${BASE_SHA:0:7}"
