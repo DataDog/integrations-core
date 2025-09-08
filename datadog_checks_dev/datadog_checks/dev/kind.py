@@ -6,7 +6,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import dataclass
 from shutil import which
-from typing import Protocol, runtime_checkable
+from typing import Any, Callable, ContextManager, Protocol, runtime_checkable
 
 import pytest
 
@@ -17,7 +17,7 @@ from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
 
 
-def _setup_conditions(conditions: list[LazyFunction] | None, cluster_config: ClusterConfig):
+def _setup_conditions(conditions: list[Callable[[], Any]] | None, cluster_config: ClusterConfig):
     if not conditions:
         return
 
@@ -38,34 +38,27 @@ class ClusterCondition(Protocol):
 
 @contextmanager
 def kind_run(
-    sleep=None,
-    endpoints=None,
-    conditions=None,
-    env_vars=None,
-    wrappers=None,
-    kind_config=None,
-    attempts=None,
-    attempts_wait=1,
+    sleep: float | None = None,
+    endpoints: str | list[str] | None = None,
+    conditions: list[Callable[[], Any]] | None = None,
+    env_vars: dict[str, str] | None = None,
+    wrappers: list[ContextManager] | None = None,
+    kind_config: str | None = None,
+    attempts: int | None = None,
+    attempts_wait: int = 1,
 ):
     """
     This utility provides a convenient way to safely set up and tear down Kind environments.
 
     :param sleep: Number of seconds to wait before yielding.
-    :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
                       ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
-    :type endpoints: ``list`` of ``str``, or a single ``str``
     :param conditions: A list of callable objects that will be executed before yielding to check for errors.
-    :type conditions: ``callable``
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
-    :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
     :param kind_config: A path to a yaml file that contains the configuration for creating the kind cluster.
-    :type kind_config: ``str``
     :param attempts: Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI.
-    :type attempts: ``int``
     :param attempts_wait: Time to wait between attempts.
-    :type attempts_wait: ``int``
     """
     if not which('kind'):
         pytest.skip('Kind not available')
