@@ -83,7 +83,9 @@ def test_vacuum_progress(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     # Start vacuum
-    thread = run_vacuum_thread(pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING) test_part1', pg_instance['application_name'])
+    thread = run_vacuum_thread(
+        pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING) test_part1', pg_instance['application_name']
+    )
 
     # Wait for vacuum to be reported
     _wait_for_value(
@@ -115,7 +117,9 @@ def test_vacuum_progress_lt_17(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     # Start vacuum
-    thread = run_vacuum_thread(pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING) test_part1', pg_instance['application_name'])
+    thread = run_vacuum_thread(
+        pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING) test_part1', pg_instance['application_name']
+    )
 
     # Wait for vacuum to be reported
     _wait_for_value(
@@ -149,7 +153,11 @@ def test_index_progress(aggregator, integration_check, pg_instance):
     conn = lock_table(pg_instance, 'test_part1', 'ROW EXCLUSIVE')
 
     # Start vacuum in a thread
-    thread = run_query_thread(pg_instance, 'CREATE INDEX CONCURRENTLY test_progress_index ON test_part1 (id);', pg_instance['application_name'])
+    thread = run_query_thread(
+        pg_instance,
+        'CREATE INDEX CONCURRENTLY test_progress_index ON test_part1 (id);',
+        pg_instance['application_name'],
+    )
 
     # Wait for blocked created index to appear
     _wait_for_value(
@@ -191,7 +199,12 @@ def test_cluster_vacuum_progress(aggregator, integration_check, pg_instance):
     # Start vacuum in a thread
     thread = run_vacuum_thread(pg_instance, 'VACUUM FULL personsdup1', pg_instance['application_name'])
 
-    _wait_for_value(pg_instance, lower_threshold=0, query="select count(*) FROM pg_stat_progress_cluster;", application_name=pg_instance['application_name'])
+    _wait_for_value(
+        pg_instance,
+        lower_threshold=0,
+        query="select count(*) FROM pg_stat_progress_cluster;",
+        application_name=pg_instance['application_name'],
+    )
     check.check(pg_instance)
 
     # Cleanup connection and thread
