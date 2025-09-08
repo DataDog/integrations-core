@@ -38,7 +38,7 @@
       }
       "process_signatures": [
         "bentoml"
-      ],      
+      ]      
     },
     "dashboards": {
       "BentoML Placeholder": "assets/dashboards/placeholder.json"
