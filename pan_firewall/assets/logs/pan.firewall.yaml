@@ -336,7 +336,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: "[OCSF] Palo Alto Networks Firewall"
+  name: "Palo Alto Networks Firewall"
   enabled: true
   filter:
     query: source:pan.firewall
@@ -361,7 +361,6 @@ pipeline:
         matchRules: |
           zero %{date("yyyy/MM/dd HH:mm:ss"):time_generated}
         supportRules: ''
-      preserveSource: true
     - type: date-remapper
       name: Define `time_generated` as the official date of the log
       enabled: true
@@ -469,7 +468,7 @@ pipeline:
         - type: string-builder-processor
           name: Info - in attribute ocsf.severity
           enabled: true
-          template: informational
+          template: Informational
           target: ocsf.severity
           replaceMissing: false
         - type: string-builder-processor
@@ -483,7 +482,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@ocsf.severity:informational"
+                query: "@ocsf.severity:Informational"
               name: "1"
           target: ocsf.severity_id
         - type: category-processor
