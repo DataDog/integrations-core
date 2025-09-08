@@ -309,7 +309,7 @@ jobs:
           gh api repos/DataDog/integrations-core/issues/comments/3265338643 -i
           gh api \
           --method DELETE \
-          /repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
+          /repos/Datadog/integrations-core/issues/comments/${{ steps.find_comment.outputs.comment-id }}
 
       - name: Create comment
         run: |
