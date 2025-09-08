@@ -33,15 +33,13 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       run_id: ${{ steps.get-merge-base-run-id.outputs.run_id }}
-      base_sha: ${{ steps.get-merge-base-run-id.outputs.base_sha }}
     steps:
       - name: Get merge base run id
         id: get-merge-base-run-id
         run: ./.github/workflows/scripts/get_merge_base_run_id.sh "Measure Disk Usage"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          HEAD_REF: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
   download-artifacts:
     needs: get-merge-base
@@ -95,6 +93,7 @@ jobs:
       GITHUB_REPOSITORY: ${{ github.repository }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -116,9 +115,11 @@ jobs:
         if: steps.find_comment.outputs.comment-id != ''
         run: |
           echo "Deleting comment: ${{ steps.find_comment.outputs.comment-id }}"
-          curl -X DELETE \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
+          gh api \
+          --method DELETE \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \ 
+          /repos/Datadog/integrations-core/pulls/comments/${{ steps.find_comment.outputs.comment-id }}
 
       - name: Create comment
         run: |

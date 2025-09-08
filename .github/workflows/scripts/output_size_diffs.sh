@@ -25,6 +25,10 @@ if [ -z "$PR_NUMBER" ]; then
     exit 1
 fi
 
+if [ -z "$BASE_SHA" ]; then
+    echo "Error: BASE_SHA environment variable is required"
+    exit 1
+fi
 
 # Configuration
 MAX_COMMENT_SIZE=${MAX_COMMENT_SIZE:-65536}
