@@ -502,12 +502,20 @@ pipeline:
                 query: "@subtype:deny"
               name: "5"
           target: ocsf.activity_id
-        - type: attribute-remapper
-          name: remap 'subtype' to 'ocsf.activity_name'
+        - type: category-processor
+          name: map activity name
           enabled: true
-          sources:
-            - subtype
-          sourceType: attribute
+          categories:
+            - filter:
+                query: "@subtype:start"
+              name: "Open"
+            - filter:
+                query: "@subtype:end"
+              name: "Close"
+            - filter: "@subtype:drop"
+              name: "Reset"
+            - filter: "@subtype:deny"
+              name: "Refuse"
           target: ocsf.activity_name
           targetType: attribute
           preserveSource: true
