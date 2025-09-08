@@ -41,6 +41,9 @@
       "BentoML Placeholder": "assets/dashboards/placeholder.json"
     },
     "monitors": {},
+    "process_signatures": [
+      "bentoml"
+    ],
     "saved_views": {}
   },
   "author": {
