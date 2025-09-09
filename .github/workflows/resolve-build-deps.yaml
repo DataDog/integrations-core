@@ -277,7 +277,7 @@ jobs:
     steps:
       - name: Gate per platform
         run: echo "PASSES_QG_${{ matrix.platform }}=${{ fromJSON(needs.calculate-size-diffs.outputs.passes_qg) }}" /
-          echo "PASSES_QG_${{ matrix.platform }}=${{ needs.calculate-size-diffs.outputs.macos-x86_64.passes_qg) }}"
+          echo "PASSES_QG_${{ matrix.platform }}=${{ needs.calculate-size-diffs.outputs.${{ matrix.platform }}.passes_qg }}"
 
   comment-size-diffs-on-pr:
     needs:
