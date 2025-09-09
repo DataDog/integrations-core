@@ -130,7 +130,6 @@ def main():
             '--external-dir', str(external_wheels_dir),
         ])
 
-
     dependencies: dict[str, tuple[str, str]] = {}
     for wheel_dir in wheels_dir.iterdir():
         for entry in wheel_dir.iterdir():
