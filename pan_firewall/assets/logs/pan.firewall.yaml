@@ -448,7 +448,7 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@severity:informational or @type:TRAFFIC"
+                query: "@severity:informational OR @type:TRAFFIC"
               name: "1"
             - filter:
                 query: "@severity:low"
@@ -484,12 +484,6 @@ pipeline:
           template: Network Activity
           target: ocsf.class_name
           replaceMissing: true
-        - type: string-builder-processor
-          name: Add severity
-          enabled: true
-          template: Informational
-          target: ocsf.severity
-          replaceMissing: false
         - type: string-builder-processor
           name: Add class uid
           enabled: true
