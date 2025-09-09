@@ -273,53 +273,10 @@ jobs:
     if: >
       contains(github.event.pull_request.labels.*.name, 'show-size-delta') && 
       ! fromJSON(needs.calculate-size-diffs.outputs.passes_qg)
-    permissions:
-      contents: read
-      pull-requests: write
-      issues: write
-    env:
-      PLATFORMS: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
-      GITHUB_RUN_ID: ${{ github.run_id }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      BASE_SHA: ${{github.event.pull_request.base.sha}}
-       
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-      
-      - name: Create output size diffs
-        run: ./.size-quality-gates/output_size_diffs.sh
-
-      - name: Find last comment
-        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
-        id: find_comment
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body-includes: "<h3>Dependency Size Changes</h3>"
-          direction: last
-
-      - name: Delete last comment
-        if: steps.find_comment.outputs.comment-id != ''
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        with:
-            script: |
-              const commentId = ${{ steps.find_comment.outputs.comment-id }};            
-              await github.rest.issues.deleteComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: commentId,
-                });
-      
-      - name: Create comment
-        run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
-
-
+    uses: ./.github/workflows/size-qg-comment-on-pr.yml
+    with:
+      platforms: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
+  
 
   publish:
     name: Publish artifacts and update lockfiles via PR
