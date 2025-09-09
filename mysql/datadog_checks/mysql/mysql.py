@@ -84,7 +84,7 @@ from .queries import (
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
 from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
-from .version_utils import get_version
+from .version_utils import parse_version
 
 try:
     import psutil
@@ -277,15 +277,12 @@ class MySql(AgentCheck):
             ),
         )
 
-    def set_version(self, db):
-        version_comment = (self.global_variables.version_comment,)
-        version = self.global_variables.version
-
-        self.version = get_version(db, version_comment, version)
+    def set_version(self):
+        self.version = parse_version(self.global_variables.version, self.global_variables.version_comment)
         self.is_mariadb = self.version.flavor == "MariaDB"
         self.tag_manager.set_tag("dbms_flavor", self.version.flavor.lower(), replace=True)
 
-    def set_server_uuid(self, db):
+    def set_server_uuid(self):
         # MariaDB does not support server_uuid
         if self.is_mariadb:
             return
@@ -358,11 +355,11 @@ class MySql(AgentCheck):
                 self.global_variables.collect(db)
 
                 # version collection
-                self.set_version(db)
+                self.set_version()
                 self._send_metadata()
                 self._check_database_configuration(db)
 
-                self.set_server_uuid(db)
+                self.set_server_uuid()
                 self.set_cluster_tags(db)
 
                 # Update tag set with relevant information
