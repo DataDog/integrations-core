@@ -1123,7 +1123,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: category-processor
-          name: add connectiondirection
+          name: add connection direction
           enabled: true
           categories:
             - filter:
@@ -1141,6 +1141,7 @@ pipeline:
             - filter:
                 query: "@ocsf.connection_info.direction_id:99"
               name: "Other"
+          target: ocsf.connection_info.direction
         - type: attribute-remapper
           name: Map `ocsf.evidence.file.type_id` to `ocsf.evidence.file.type_id`
           enabled: true
