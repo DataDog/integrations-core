@@ -37,8 +37,8 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-	"text-generation-launcher",
-	"text-generation-router"
+	    "text-generation-launcher",
+	    "text-generation-router"
       ]
     },
     "monitors": {},
