@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "34835d2b-a812-4aac-8cc2-d298db851b80",
   "app_id": "oracle",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
