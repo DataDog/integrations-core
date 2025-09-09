@@ -1,6 +1,6 @@
 {
     "title": "Zscaler Private Access - Overview",
-    "description": "This dashboard provides a high level summary of User Activity, User Status, App Connector Metrics, App Connector Status, Private Service Edge Metrics, Private Service Edge Status, Browser Access, Audit Logs, AppProtection, Private Cloud Controller Status, Private Cloud Controller Metrics, Microsegmentation Flow Events.",
+    "description": "This dashboard provides a high level summary of User Activity, User Status, App Connector Metrics, App Connector Status, Private Service Edge Metrics, Private Service Edge Status, Browser Access, Audit Logs, AppProtection, Private Cloud Controller Status, Private Cloud Controller Metrics, and Microsegmentation Flow Events.",
     "widgets": [
         {
             "id": 7125643406844386,
@@ -68,7 +68,7 @@
             "id": 4745891787092245,
             "definition": {
                 "type": "note",
-                "content": "[Zscaler Private Access](https://www.zscaler.com/products-and-solutions/zscaler-private-access) securely enables user access to internal applications without the need for traditional VPNs.\n\nThis dashboard provides a high level summary of User Activity, User Status, App Connector Metrics, App Connector Status, Private Service Edge Metrics, Private Service Edge Status, Browser Access, Audit Logs, AppProtection, Private Cloud Controller Status, Private Cloud Controller Metrics, Microsegmentation Flow Events.\n\nFor more information, see the [Zscaler Private Access Integration Documentation](https://docs.datadoghq.com/integrations/zscaler_private_access/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "[Zscaler Private Access](https://www.zscaler.com/products-and-solutions/zscaler-private-access) securely enables user access to internal applications without the need for traditional VPNs.\n\nThis dashboard provides a high level summary of User Activity, User Status, App Connector Metrics, App Connector Status, Private Service Edge Metrics, Private Service Edge Status, Browser Access, Audit Logs, AppProtection, Private Cloud Controller Status, Private Cloud Controller Metrics, and Microsegmentation Flow Events.\n\nFor more information, see the [Zscaler Private Access Integration Documentation](https://docs.datadoghq.com/integrations/zscaler_private_access/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",

@@ -24,7 +24,7 @@ Datadog uses its built-in log pipelines to parse and enrich these logs, facilita
 
 ### Installation
 
-To install the Zscaler Private Access integration, run the following Agent installation command in your terminal, then complete the configuration steps. For more information, see the [Integration Management][5] documentation.
+To install the Zscaler Private Access integration, run the following Agent installation command in your terminal. Then, complete the configuration steps. For more information, see the [Integration Management][5] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.71.0.
 
@@ -210,7 +210,7 @@ Ensure firewall settings allow traffic through the configured port.
 
 On systems running Syslog, the Agent may fail to bind to port 514 and display the following error: 
    
-    Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use
+    `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`
 
 This error occurs because Syslog uses port 514 by default. 
 
