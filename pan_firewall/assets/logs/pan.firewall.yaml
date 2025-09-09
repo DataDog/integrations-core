@@ -1,4 +1,3 @@
-# bypass-global-facets-path-checks
 id: pan.firewall
 metric_id: pan-firewall
 backend_only: false
@@ -336,7 +335,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: (crash) Palo Alto Networks Firewall
+  name: Palo Alto Networks Firewall
   enabled: true
   filter:
     query: source:pan.firewall
