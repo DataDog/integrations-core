@@ -457,7 +457,6 @@ pipeline:
           template: "4"
           target: ocsf.category_uid
           replaceMissing: false
-              name: "4"
           target: ocsf.category_uid
         - type: string-builder-processor
           name: Add class name
