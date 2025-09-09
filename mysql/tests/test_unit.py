@@ -198,7 +198,7 @@ def test_replication_check_status(
 ):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.service_check_tags = ['foo:bar']
-    mysql_check._binlog_enabled = True  # Set binlog enabled to True for the test
+    mysql_check.global_variables._variables = {'log_bin': 'ON'}  # Set binlog enabled to True for the test
     mocked_results = {
         'Slaves_connected': slaves_connected,
     }
@@ -237,65 +237,6 @@ def test_replication_check_status(
         expected_service_check_len += 1
 
     assert len(aggregator.service_checks('mysql.replication.slave_running')) == expected_service_check_len
-
-
-def test__get_is_aurora():
-    def new_check():
-        return MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-
-    class MockCursor:
-        def __init__(self, rows, side_effect=None):
-            self.rows = rows
-            self.side_effect = side_effect
-
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def execute(self, command):
-            if self.side_effect:
-                raise self.side_effect
-
-        def close(self):
-            return MockCursor([])
-
-        def fetchall(self):
-            return self.rows
-
-    class MockDatabase:
-        def __init__(self, cursor):
-            self.cursor = cursor
-
-        def cursor(self):
-            return self.cursor
-
-    check = new_check()
-    assert True is check._get_is_aurora(MockDatabase(MockCursor(rows=[('1.72.1',)])))
-    assert True is check._get_is_aurora(None)
-    assert True is check._is_aurora
-
-    check = new_check()
-    assert True is check._get_is_aurora(
-        MockDatabase(
-            MockCursor(
-                rows=[
-                    ('1.72.1',),
-                    ('1.72.1',),
-                ]
-            )
-        )
-    )
-    assert True is check._get_is_aurora(None)
-    assert True is check._is_aurora
-
-    check = new_check()
-    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=[])))
-    assert False is check._get_is_aurora(None)
-    assert False is check._is_aurora
-
-    check = new_check()
-    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=None, side_effect=ValueError())))
-    assert None is check._is_aurora
-    assert False is check._get_is_aurora(None)
 
 
 @pytest.mark.parametrize(
@@ -587,7 +528,7 @@ def test_set_cluster_tags(
     mysql_check._config.replication_enabled = replication_enabled
     mysql_check.is_mariadb = is_mariadb
     mysql_check._group_replication_active = group_replication_active
-    mysql_check._binlog_enabled = binlog_enabled
+    mysql_check.global_variables._variables = {'log_bin': 'ON' if binlog_enabled else 'OFF'}
     mysql_check.server_uuid = server_uuid
 
     # Mock the _get_replica_replication_status method

@@ -57,6 +57,7 @@ from .const import (
     TABLE_VARS,
     VARIABLES_VARS,
 )
+from .global_variables import GlobalVariables
 from .index_metrics import MySqlIndexMetrics
 from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
@@ -65,7 +66,6 @@ from .queries import (
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
-    SQL_BINLOG_ENABLED,
     SQL_GROUP_REPLICATION_MEMBER,
     SQL_GROUP_REPLICATION_MEMBER_8_0_2,
     SQL_GROUP_REPLICATION_METRICS,
@@ -79,8 +79,6 @@ from .queries import (
     SQL_REPLICA_PROCESS_LIST,
     SQL_REPLICA_WORKER_THREADS,
     SQL_REPLICATION_ROLE_AWS_AURORA,
-    SQL_SERVER_ID_AWS_AURORA,
-    SQL_SERVER_UUID,
     show_replica_status_query,
 )
 from .statement_samples import MySQLStatementSamples
@@ -120,11 +118,8 @@ class MySql(AgentCheck):
         self._database_identifier = None
         self._agent_hostname = None
         self._database_hostname = None
-        self._is_aurora = None
-        self._performance_schema_enabled = None
         self._events_wait_current_enabled = None
         self._group_replication_active = None
-        self._binlog_enabled = None
         self._replication_role = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
@@ -135,14 +130,13 @@ class MySql(AgentCheck):
         # Create a new connection on every check run
         self._conn = None
 
-        # Cache for global variables collected early in the check
-        self._global_variables = None
+        # Global variables manager
+        self.global_variables = GlobalVariables()
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
-        self.userstat_enabled = None
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
@@ -226,13 +220,6 @@ class MySql(AgentCheck):
         return self._database_hostname
 
     @property
-    def performance_schema_enabled(self):
-        # type: () -> bool
-        if self._performance_schema_enabled is None:
-            self._check_performance_schema_enabled(self._conn)
-        return self._performance_schema_enabled
-
-    @property
     def events_wait_current_enabled(self):
         # type: () -> bool
         if self._events_wait_current_enabled is None:
@@ -291,11 +278,8 @@ class MySql(AgentCheck):
         )
 
     def set_version(self, db):
-        version_comment = None
-        version = None
-        if self._global_variables is not None:
-            version_comment = (self._get_global_variable('version_comment'),)
-            version = self._get_global_variable('version')
+        version_comment = (self.global_variables.version_comment,)
+        version = self.global_variables.version
 
         self.version = get_version(db, version_comment, version)
         self.is_mariadb = self.version.flavor == "MariaDB"
@@ -305,32 +289,19 @@ class MySql(AgentCheck):
         # MariaDB does not support server_uuid
         if self.is_mariadb:
             return
-        self.server_uuid = self._get_server_uuid(db)
+        self.server_uuid = self.global_variables.server_uuid
         if self.server_uuid:
             self.tag_manager.set_tag("server_uuid", self.server_uuid, replace=True)
 
-    def _get_server_uuid(self, db):
-        return self._get_global_variable('server_uuid')
-
     def _check_database_configuration(self, db):
-        self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
-        self._check_binlog_enabled(db)
         self._is_group_replication_active(db)
-
-    def _check_performance_schema_enabled(self, db):
-        self._performance_schema_enabled = self._get_global_variable_enabled('performance_schema')
-        return self._performance_schema_enabled
-
-    def check_userstat_enabled(self, db):
-        self.userstat_enabled = self._get_global_variable_enabled('userstat')
-        return self.userstat_enabled
 
     def _check_events_wait_current_enabled(self, db):
         if not self._config.dbm_enabled or not self._config.activity_config.get("enabled", True):
             self.log.debug("skipping _check_events_wait_current_enabled because dbm activity collection is not enabled")
             return
-        if not self.performance_schema_enabled:
+        if not self.global_variables.performance_schema_enabled:
             # set events_wait_current_enabled to False if performance_schema is not enabled
             self.log.debug('`performance_schema` is required to enable `events_waits_current`')
             self._events_wait_current_enabled = False
@@ -384,7 +355,7 @@ class MySql(AgentCheck):
                 self._conn = db
 
                 # Collect global variables early for use throughout the check
-                self._collect_global_variables(db)
+                self.global_variables.collect(db)
 
                 # version collection
                 self.set_version(db)
@@ -395,15 +366,12 @@ class MySql(AgentCheck):
                 self.set_cluster_tags(db)
 
                 # Update tag set with relevant information
-                if self._get_is_aurora(db):
+                if self.global_variables.is_aurora:
                     role = self._get_aurora_replication_role(db)
                     self._update_aurora_replication_role(role)
 
                 # All data collection starts here
                 self._send_database_instance_metadata()
-
-                if self._config.table_rows_stats_enabled:
-                    self.check_userstat_enabled(db)
 
                 # Metric collection
                 tags = self.tag_manager.get_tags()
@@ -460,7 +428,7 @@ class MySql(AgentCheck):
         if self._check_innodb_engine_enabled(db):
             queries.extend([QUERY_DEADLOCKS])
 
-        if self.performance_schema_enabled:
+        if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)
@@ -575,13 +543,13 @@ class MySql(AgentCheck):
             results = self._get_stats_from_status(db)
         with tracked_query(self, operation="variables_metrics"):
             # Use cached global variables instead of making a separate query
-            results.update(self._global_variables)
+            results.update(self.global_variables.all_variables)
 
         if not is_affirmative(
             self._config.options.get('disable_innodb_metrics', False)
         ) and self._check_innodb_engine_enabled(db):
             # Innodb metrics are not available for Aurora reader instances
-            if self._is_aurora and self._replication_role == "reader":
+            if self.global_variables.is_aurora and self._replication_role == "reader":
                 self.log.debug("Skipping innodb metrics collection for reader instance")
             else:
                 with tracked_query(self, operation="innodb_metrics"):
@@ -589,14 +557,14 @@ class MySql(AgentCheck):
                 self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
-        if self._get_variable_enabled(results, 'log_bin'):
+        if self.global_variables.log_bin_enabled:
             with tracked_query(self, operation="binary_log_metrics"):
                 results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
         # Compute key cache utilization metric
         key_blocks_unused = collect_scalar('Key_blocks_unused', results)
-        key_cache_block_size = collect_scalar('key_cache_block_size', results)
-        key_buffer_size = collect_scalar('key_buffer_size', results)
+        key_cache_block_size = self.global_variables.key_cache_block_size
+        key_buffer_size = self.global_variables.key_buffer_size
         results['Key_buffer_size'] = key_buffer_size
 
         try:
@@ -632,7 +600,7 @@ class MySql(AgentCheck):
         if (
             is_affirmative(self._config.options.get('extra_performance_metrics', False))
             and above_560
-            and self.performance_schema_enabled
+            and self.global_variables.performance_schema_enabled
         ):
             self.warning(
                 "[Deprecated] The `extra_performance_metrics` option will be removed in a future release. "
@@ -650,7 +618,7 @@ class MySql(AgentCheck):
                 results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if self._config.table_rows_stats_enabled and self.userstat_enabled:
+        if self._config.table_rows_stats_enabled and self.global_variables.userstat_enabled:
             # report size of tables in MiB to Datadog
             self.log.debug("Collecting Table Row Stats Metrics.")
             with tracked_query(self, operation="table_rows_stats_metrics"):
@@ -682,7 +650,7 @@ class MySql(AgentCheck):
             metrics.update(TABLE_VARS)
 
         if self._config.replication_enabled:
-            if self.performance_schema_enabled and self._group_replication_active:
+            if self.global_variables.performance_schema_enabled and self._group_replication_active:
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
@@ -856,7 +824,7 @@ class MySql(AgentCheck):
         # If the host act as a source
         source_repl_running_status = AgentCheck.UNKNOWN
         if self._is_source_host(replicas, results):
-            if replicas > 0 and self._binlog_enabled:
+            if replicas > 0 and self.global_variables.log_bin_enabled:
                 self.log.debug("Host is master, there are replicas and binlog is running")
                 source_repl_running_status = AgentCheck.OK
             else:
@@ -1058,17 +1026,11 @@ class MySql(AgentCheck):
             except Exception:
                 self.warning("Error while reading mysql (pid: %s) procfs data\n%s", pid, traceback.format_exc())
 
-    def _get_pid_file_variable(self, db):
-        """
-        Get the `pid_file` variable
-        """
-        return self._get_global_variable('pid_file')
-
     def _get_server_pid(self, db):
         pid = None
 
         # Try to get pid from pid file, it can fail for permission reason
-        pid_file = self._get_pid_file_variable(db)
+        pid_file = self.global_variables.pid_file
         if pid_file is not None:
             self.log.debug("pid file: %s", str(pid_file))
             try:
@@ -1094,18 +1056,6 @@ class MySql(AgentCheck):
 
         return pid
 
-    def _get_is_aurora(self, db):
-        """
-        Tests if the instance is an AWS Aurora database and caches the result.
-        """
-        if self._is_aurora is not None:
-            return self._is_aurora
-
-        aurora_server_id = self._get_global_variable('aurora_server_id')
-        self._is_aurora = aurora_server_id is not None
-
-        return self._is_aurora
-
     @classmethod
     def _get_stats_from_status(cls, db):
         with closing(db.cursor(CommenterCursor)) as cursor:
@@ -1113,44 +1063,6 @@ class MySql(AgentCheck):
             results = dict(cursor.fetchall())
 
             return results
-
-    def _collect_global_variables(self, db):
-        """
-        Collect global variables early in the check and cache them for use throughout the check.
-        This consolidates multiple individual variable queries into a single query.
-        """
-        if self._global_variables is None:
-            with closing(db.cursor(CommenterCursor)) as cursor:
-                cursor.execute("SHOW GLOBAL VARIABLES;")
-                self._global_variables = dict(cursor.fetchall())
-                self.log.debug("Collected %d global variables", len(self._global_variables))
-        return self._global_variables
-
-    def _get_global_variable(self, variable_name, default=None):
-        """
-        Get a specific global variable value from the cached results.
-
-        Args:
-            variable_name (str): The name of the variable to retrieve
-            default: Default value if variable is not found
-
-        Returns:
-            The variable value or default if not found
-        """
-        return self._global_variables.get(variable_name, default)
-
-    def _get_global_variable_enabled(self, variable_name):
-        """
-        Check if a global variable is enabled (ON/YES/1).
-
-        Args:
-            variable_name (str): The name of the variable to check
-
-        Returns:
-            bool: True if variable is enabled, False otherwise
-        """
-        value = self._get_global_variable(variable_name)
-        return value and is_affirmative(value.lower().strip())
 
     def _get_binary_log_stats(self, db):
         try:
@@ -1224,24 +1136,6 @@ class MySql(AgentCheck):
 
         return result
 
-    def _check_binlog_enabled(self, db):
-        if not self._config.replication_enabled:
-            self._binlog_enabled = False
-            return self._binlog_enabled
-
-        try:
-            with closing(db.cursor(CommenterDictCursor)) as cursor:
-                cursor.execute(SQL_BINLOG_ENABLED)
-
-                result = cursor.fetchone()
-
-                self._binlog_enabled = self._get_variable_enabled(result, 'binlog_enabled')
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Error while checking if binlog is enabled. Defaulting to False: %s", e)
-            self._binlog_enabled = False
-
-        return self._binlog_enabled
-
     def _get_replicas_connected_count(self, db, above_560):
         """
         Retrieve the count of connected replicas using:
@@ -1250,7 +1144,7 @@ class MySql(AgentCheck):
         """
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
-                if above_560 and self.performance_schema_enabled:
+                if above_560 and self.global_variables.performance_schema_enabled:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
                     cursor.execute(SQL_REPLICA_WORKER_THREADS)
@@ -1490,7 +1384,7 @@ class MySql(AgentCheck):
                 self.tag_manager.set_tag('replication_role', "replica", replace=True)
                 self._replication_role = "replica"
         else:
-            if self._binlog_enabled:
+            if self.global_variables.log_bin_enabled:
                 self.cluster_uuid = self.server_uuid
                 self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
                 self.tag_manager.set_tag('replication_role', "primary", replace=True)
