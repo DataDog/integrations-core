@@ -380,7 +380,7 @@ pipeline:
       target: http.useragent_details
       encoded: false
     - type: string-builder-processor
-      name: Setting title attribute using usr.id, evt.name and country.name
+      name: Add title
       enabled: true
       target: title
       template: '%{usr.id} performed event %{evt.name} from %{network.client.geoip.country.name}'
@@ -415,7 +415,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: Product Name
+          name: Add name
           enabled: true
           template: Firewall
           target: ocsf.metadata.product.name
@@ -432,13 +432,13 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: Vendor Name
+          name: Add vendor name
           enabled: true
           template: Palo Alto
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: string-builder-processor
-          name: 'Add version'
+          name: Add version
           enabled: true
           template: '1.5.0'
           target: ocsf.metadata.version
@@ -560,7 +560,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: 0 - in attribute ocsf.connection_info.direction_id
+          name: Add direction id
           enabled: true
           template: "0"
           target: ocsf.connection_info.direction_id
@@ -675,7 +675,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'chunks_received' to 'ocsf.traffic.chunks_in'
+          name: Map `chunks_received` to `ocsf.traffic.chunks_in`
           enabled: true
           sources:
             - chunks_received
@@ -758,43 +758,43 @@ pipeline:
           target: ocsf.category_name
           replaceMissing: false
         - type: string-builder-processor
-          name: 2004 - in attribute ocsf.class_uid
+          name: Add class uid
           enabled: true
           template: "2004"
           target: ocsf.class_uid
           replaceMissing: false
         - type: string-builder-processor
-          name: Detection Finding - in attribute ocsf.class_name
+          name: Add class name
           enabled: true
           template: Detection Finding
           target: ocsf.class_name
           replaceMissing: false
         - type: string-builder-processor
-          name: Firewall - in attribute ocsf.finding_info.product.name
+          name: Add name
           enabled: true
           template: Firewall
           target: ocsf.finding_info.product.name
           replaceMissing: false
         - type: string-builder-processor
-          name: Palo Alto - in attribute ocsf.finding_info.product.vendor_name
+          name: Add vendor name
           enabled: true
           template: Palo Alto
           target: ocsf.finding_info.product.vendor_name
           replaceMissing: false
         - type: string-builder-processor
-          name: 0 - in attribute ocsf.confidence_id
+          name: Add confidence id
           enabled: true
           template: "0"
           target: ocsf.confidence_id
           replaceMissing: false
         - type: string-builder-processor
-          name: Add `ocsf.evidence.device.type_id`
+          name: Add type id
           enabled: true
           template: "1"
           target: ocsf.evidence.device.type_id
           replaceMissing: false
         - type: attribute-remapper
-          name: remap 'device_name' to 'ocsf.evidence.device.name'
+          name: Map `device_name` to `ocsf.evidence.device.name`
           enabled: true
           sources:
             - device_name
@@ -804,7 +804,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: True - in attribute ocsf.is_alert
+          name: Add is alert
           enabled: true
           template: "true"
           target: ocsf.is_alert
@@ -816,13 +816,13 @@ pipeline:
           target: ocsf.status_id
           replaceMissing: false
         - type: string-builder-processor
-          name: New - in attribute ocsf.status
+          name: Add status
           enabled: true
           template: New
           target: ocsf.status
           replaceMissing: false
         - type: attribute-remapper
-          name: remap 'action' to 'ocsf.status_detail'
+          name: Map `action` to `ocsf.status_detail`
           enabled: true
           sources:
             - action
@@ -832,19 +832,19 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: 1 - in attribute ocsf.finding_info.analytic.type_id
+          name: Add type id
           enabled: true
           template: "1"
           target: ocsf.finding_info.analytic.type_id
           replaceMissing: false
         - type: string-builder-processor
-          name: rule - in attribute ocsf.finding_info.analytic.type
+          name: Add type
           enabled: true
           template: Rule
           target: ocsf.finding_info.analytic.type
           replaceMissing: false
         - type: attribute-remapper
-          name: remap 'rule' to 'ocsf.finding_info.analytic.name'
+          name: Map `rule` to `ocsf.finding_info.analytic.name`
           enabled: true
           sources:
             - rule
@@ -854,7 +854,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'subtype' to 'ocsf.finding_info.analytic.category'
+          name: Map `subtype` to `ocsf.finding_info.analytic.category`
           enabled: true
           sources:
             - subtype
@@ -864,7 +864,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'rule_uuid' to 'ocsf.finding_info.analytic.uid'
+          name: Map `rule_uuid` to `ocsf.finding_info.analytic.uid`
           enabled: true
           sources:
             - rule_uuid
@@ -874,7 +874,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'seqno' to 'ocsf.finding_info.uid'
+          name: Map `seqno` to `ocsf.finding_info.uid`
           enabled: true
           sources:
             - seqno
@@ -884,7 +884,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'srcuser' to 'ocsf.evidence.actor.user'
+          name: Map `srcuser` to `ocsf.evidence.actor.user`
           enabled: true
           sources:
             - srcuser
@@ -894,7 +894,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'sessionid' to 'ocsf.evidence.actor.session.uid'
+          name: Map `sessionid` to `ocsf.evidence.actor.session.uid`
           enabled: true
           sources:
             - sessionid
@@ -904,7 +904,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'app' to 'ocsf.evidence.actor.app_name'
+          name: Map `app` to `ocsf.evidence.actor.app_name`
           enabled: true
           sources:
             - app
@@ -914,13 +914,13 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: set 'ocsf.evidence.connection_info.direction_id'
+          name: Add direction id
           enabled: true
           template: "0"
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
         - type: attribute-remapper
-          name: remap 'proto' to 'ocsf.evidence.connection_info.protocol_name'
+          name: Map `proto` to `ocsf.evidence.connection_info.protocol_name`
           enabled: true
           sources:
             - proto
@@ -930,7 +930,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.destination.ip' to 'ocsf.evidence.dst_endpoint.ip'
+          name: Map `network.destination.ip` to `ocsf.evidence.dst_endpoint.ip`
           enabled: true
           sources:
             - network.destination.ip
@@ -940,7 +940,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.destination.port' to 'ocsf.evidence.dst_endpoint.port'
+          name: Map `network.destination.port` to `ocsf.evidence.dst_endpoint.port`
           enabled: true
           sources:
             - network.destination.port
@@ -950,7 +950,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'to' to 'ocsf.evidence.dst_endpoint.zone'
+          name: Map `to` to `ocsf.evidence.dst_endpoint.zone`
           enabled: true
           sources:
             - to
@@ -960,7 +960,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.client.ip' to 'ocsf.evidence.src_endpoint.ip'
+          name: Map `network.client.ip` to `ocsf.evidence.src_endpoint.ip`
           enabled: true
           sources:
             - network.client.ip
@@ -970,7 +970,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.client.port' to 'ocsf.evidence.src_endpoint.port'
+          name: Map `network.client.port` to `ocsf.evidence.src_endpoint.port`
           enabled: true
           sources:
             - network.client.port
@@ -980,7 +980,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'from' to 'ocsf.evidence.src_endpoint.zone'
+          name: Map `from` to `ocsf.evidence.src_endpoint.zone`
           enabled: true
           sources:
             - from
@@ -1017,7 +1017,7 @@ pipeline:
         query: "@type:THREAT @subtype:(file OR virus OR wildire-virus OR wildfire)"
       processors:
         - type: attribute-remapper
-          name: remap misc to ocsf.evidence.file.name
+          name: Map `misc` to `ocsf.evidence.file.name`
           enabled: true
           sources:
             - misc
@@ -1028,7 +1028,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: add 'ocsf.evidence.file.type_id'
+          name: Add type id
           enabled: true
           template: "0"
           target: ocsf.evidence.file.type_id
@@ -1042,7 +1042,7 @@ pipeline:
         query: "-@type:(TRAFFIC OR THREAT)"
       processors:
         - type: string-builder-processor
-          name: Add activity_id
+          name: Add activity id
           enabled: true
           template: "99"
           target: ocsf.activity_id
@@ -1101,7 +1101,7 @@ pipeline:
         query: "*"
       processors:
         - type: attribute-remapper
-          name: remap `ocsf.severity_id` from string to integer
+          name: Map `ocsf.severity_id` to `ocsf.severity_id`
           enabled: true
           sources:
             - ocsf.severity_id
@@ -1112,7 +1112,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.connection_info.direction_id string to integer
+          name: Map `ocsf.connection_info.direction_id` to `ocsf.connection_info.direction_id`
           enabled: true
           sources:
             - ocsf.connection_info.direction_id
@@ -1142,7 +1142,7 @@ pipeline:
                 query: "@ocsf.connection_info.direction_id:99"
               name: "Other"
         - type: attribute-remapper
-          name: remap ocsf.evidence.file.type_id string to integer
+          name: Map `ocsf.evidence.file.type_id` to `ocsf.evidence.file.type_id`
           enabled: true
           sources:
             - ocsf.evidence.file.type_id
@@ -1153,7 +1153,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.evidence.url.path to string
+          name: Map `ocsf.evidence.url.path` to `ocsf.evidence.url.path`
           enabled: true
           sources:
             - ocsf.evidence.url.path
@@ -1164,7 +1164,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.evidence.connection_info.direction_id string to integer
+          name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
           enabled: true
           sources:
             - ocsf.evidence.connection_info.direction_id
@@ -1175,7 +1175,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.activity_id string to integer
+          name: Map `ocsf.activity_id` to `ocsf.activity_id`
           enabled: true
           sources:
             - ocsf.activity_id
@@ -1186,7 +1186,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.category_uid string to integer
+          name: Map `ocsf.category_uid` to `ocsf.category_uid`
           enabled: true
           sources:
             - ocsf.category_uid
@@ -1197,7 +1197,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap ocsf.status_id string to integer
+          name: Map `ocsf.status_id` to `ocsf.status_id`
           enabled: true
           sources:
             - ocsf.status_id
@@ -1232,8 +1232,9 @@ pipeline:
             - filter:
                 query: "@ocsf.status_id:99"
               name: "Other"
+          target: ocsf.connection_info.direction
         - type: attribute-remapper
-          name: remap 'ocsf.class_uid' string to integer
+          name: Map `ocsf.class_uid` to `ocsf.class_uid`
           enabled: true
           sources:
             - ocsf.class_uid
@@ -1244,7 +1245,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'ocsf.confidence_id' string to integer
+          name: Map `ocsf.confidence_id` to `ocsf.confidence_id`
           enabled: true
           sources:
             - ocsf.confidence_id
@@ -1273,6 +1274,7 @@ pipeline:
             - filter:
                 query: "@ocsf.confidence_id:99"
               name: "Other"
+          target: ocsf.confidence
         - type: attribute-remapper
           name: remap 'ocsf.evidence.device.type_id' string to integer
           enabled: true
