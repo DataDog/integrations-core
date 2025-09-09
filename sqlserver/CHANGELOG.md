@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 22.9.0 / 2025-09-05
+
+***Added***:
+
+* Update core tags with agent host name for DB integrations(postgres, mysql, sqlserver) ([#20991](https://github.com/DataDog/integrations-core/pull/20991))
+* Enable collect_settings by default for DBM enabled integrations ([#21172](https://github.com/DataDog/integrations-core/pull/21172))
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
 ## 22.8.0 / 2025-08-07 / Agent 7.70.0
 
 ***Added***:
