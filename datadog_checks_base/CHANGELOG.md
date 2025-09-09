@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 37.19.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 37.18.1 / 2025-09-03
+
+***Fixed***:
+
+* Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
+
+*Note: This release is bundled with Agent version `7.70.1` and does not include changes from the `37.18.0` release.*
+
 ## 37.18.0 / 2025-08-29
 
 ***Added***:
