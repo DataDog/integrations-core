@@ -72,7 +72,7 @@ class ClickhouseCheck(AgentCheck):
         self.set_metadata('version', version, scheme='parts', final_scheme='calver', part_map=version_parts)
 
     def execute_query_raw(self, query):
-        return self._client.execute_iter(query)
+        return self._client.query(query)
 
     def validate_config(self):
         if not self._server:
