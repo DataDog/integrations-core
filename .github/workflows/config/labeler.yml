@@ -443,6 +443,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_copilot:
+- microsoft_copilot/**/*
 integration/microsoft_dns:
 - microsoft_dns/**/*
 integration/microsoft_sysmon:
