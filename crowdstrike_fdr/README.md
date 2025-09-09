@@ -10,25 +10,13 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 
 ### Set up data replication from CrowdStrike FDR to a customer-owned S3 bucket
 
-#### Configure the CrowdStrike FDR feed
-1. Log in to the **CrowdStrike Falcon** platform.
-2. Go to **Support and resources** > **Resources and tools** > **Falcon data replicator**.
-3. In the **FDR feeds** tab, click **Create feed**.
-4. Provide a feed name.
-5. Set the feed **status** to on.
-6. Select **Customize your FDR feed** in the **How do you want to create this feed?** option.
-7. Click **Next**.
-8. Include only the required **Event name** from the **Primary events** tab.
-9. Click **Next**.
-10. Click **Create feed**.
-
 #### Setup a custom AWS S3 bucket
 1. Sign in to the AWS Management Console and navigate to Amazon S3.
 2. Provide the details as mentioned below:
    - **Bucket name**: Enter a Bucket name (must be globally unique and begins with the prefix `crowdstrike-fdr` to comply with integration naming requirements).
    - **AWS Region**: Choose a region.
       - You can only use your S3 bucket if you're using the US-1, US-2, or EU-1 CrowdStrike clouds.
-      - Ensure that your bucket resides in the same AWS region as your Falcon CID where the FDR feed is provisioned.
+      - Ensure that your bucket resides in the same AWS region as your Falcon CID.
         CrowdStrike terminology for cloud regions differs slightly from AWS, as shown in this table.
         | CrowdStrike region | AWS region   |
         |--------------------|--------------|
@@ -80,8 +68,9 @@ Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Id
 4. Click **Create Case**.
 5. Provide `FDR to send data to a customer-owned S3 bucket` as a **Case Title**.
 6. In the **Description** section of the support case, be sure to include the following details:
-    - The Falcon Customer ID (CID) where your FDR feed is provisioned
-    - FDR feed name created in `Configure CrowdStrike FDR Feed` section
+    - The Falcon Customer ID (CID)
+    - Indicate the below type of events you wish to have provided in this new FDR feed.
+      - primary events (All events found within the Events Data Dictionary)
     - The ARN of the custom S3 bucket copied in **Step-8** from `Setup Custom AWS S3 Bucket`
     - Confirmation that the bucket has been set up according to the specifications outlined
 7. **Customer ID (CID)**: Provide Falcon Customer ID
