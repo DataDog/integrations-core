@@ -336,7 +336,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: "Palo Alto Networks Firewall"
+  name: Palo Alto Networks Firewall
   enabled: true
   filter:
     query: source:pan.firewall
@@ -443,6 +443,26 @@ pipeline:
           template: '1.5.0'
           target: ocsf.metadata.version
           replaceMissing: false
+        - type: category-processor
+          name: Severity ID Mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@severity:informational or @type:TRAFFIC"
+              name: "1"
+            - filter:
+                query: "@severity:low"
+              name: "2"
+            - filter:
+                query: "@severity:medium"
+              name: "3"
+            - filter:
+                query: "@severity:high"
+              name: "4"
+            - filter:
+                query: "@severity:critical"
+              name: "5"
+          target: ocsf.severity_id
     - type: pipeline
       name: OCSF sub pipeline for class Network Activity [4001]
       enabled: true
@@ -476,14 +496,6 @@ pipeline:
           template: "4001"
           target: ocsf.class_uid
           replaceMissing: false
-        - type: category-processor
-          name: Map Severity Info
-          enabled: true
-          categories:
-            - filter:
-                query: "@ocsf.severity:Informational"
-              name: "1"
-          target: ocsf.severity_id
         - type: category-processor
           name: Activity ID Category
           enabled: true
@@ -692,26 +704,6 @@ pipeline:
       filter:
         query: "@type:THREAT"
       processors:
-        - type: category-processor
-          name: Severity ID Mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@severity:informational"
-              name: "1"
-            - filter:
-                query: "@severity:low"
-              name: "2"
-            - filter:
-                query: "@severity:medium"
-              name: "3"
-            - filter:
-                query: "@severity:high"
-              name: "4"
-            - filter:
-                query: "@severity:critical"
-              name: "5"
-          target: ocsf.severity_id
         - type: category-processor
           name: Severity Name Mapping
           enabled: true
