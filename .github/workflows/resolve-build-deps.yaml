@@ -307,7 +307,7 @@ jobs:
         if: steps.find_comment.outputs.comment-id != ''
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          script: |
+            script: |
               const commentId = ${{ steps.find_comment.outputs.comment-id }};
               core.info(`Attempting to delete comment: ${commentId}`);
               try {
@@ -316,11 +316,12 @@ jobs:
                   repo: context.repo.repo,
                   comment_id: commentId,
                 });
+                core.info(`Successfully deleted comment: ${commentId}`);
               } catch (error) {
                 if (error.status === 404) {
-                  core.info('Comment not found or already deleted, continuing.');
+                  core.info('Comment not found or was already deleted, continuing.');
                 } else {
-                  core.setFailed(`Failed to delete comment: ${error.message}`);
+                  core.setFailed(`Failed to delete comment ${commentId}. Error: ${error.message}`);
                 }
               }
       - name: Create comment
