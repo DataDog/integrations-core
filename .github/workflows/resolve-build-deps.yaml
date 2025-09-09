@@ -273,6 +273,10 @@ jobs:
     if: >
       contains(github.event.pull_request.labels.*.name, 'show-size-delta') && 
       ! fromJSON(needs.calculate-size-diffs.outputs.passes_qg)
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     uses: ./.github/workflows/size-qg-comment-on-pr.yml
     with:
       platforms: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"

@@ -9,10 +9,6 @@ on:
 
 jobs:
   comment-on-pr:
-    permissions:
-      contents: read
-      pull-requests: write
-      issues: write
     env:
       PLATFORMS: ${{ inputs.platforms }}
       GITHUB_RUN_ID: ${{ github.run_id }}
