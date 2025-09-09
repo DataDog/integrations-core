@@ -55,7 +55,7 @@ def connect_to_pg():
         psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA_LOGICAL, password=PASSWORD)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
