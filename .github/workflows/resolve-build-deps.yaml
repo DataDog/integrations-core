@@ -302,6 +302,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: "<h3>Dependency Size Changes</h3>"
+          direction: last
 
       - name: Delete last comment
         if: steps.find_comment.outputs.comment-id != ''
