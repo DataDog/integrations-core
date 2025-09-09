@@ -139,9 +139,9 @@ SELECT
     ID as processlist_id,
     USER as processlist_user,
     HOST as processlist_host,
-    DB as processlist_db,
+    COALESCE(DB, '') as processlist_db,
     COMMAND as processlist_command,
-    STATE as processlist_state,
+    COALESCE(STATE, '') as processlist_state,
     INFO as sql_text,
     TIME as query_time,
     MEM as memory_usage,
@@ -290,6 +290,10 @@ class MySQLActivity(DBMAsyncJob):
         estimated_size = 0
 
         for row in rows:
+            # Log the actual keys in the first row for debugging
+            if not normalized_rows and row:
+                self._log.debug("TiDB activity row keys: %s", list(row.keys()))
+            
             # Generate unique identifiers for TiDB
             thread_id = row.get('processlist_id', 0)
 
@@ -345,17 +349,17 @@ class MySQLActivity(DBMAsyncJob):
             event_start_ms = max(0, current_time_ms - query_time_ms)
 
             # Generate event IDs based on thread_id and timestamp
-            event_id = hash(str(row['thread_id']) + str(current_time_ms)) % (2**31)  # Keep it positive and reasonable
+            event_id = hash(str(row.get('thread_id', 0)) + str(current_time_ms)) % (2**31)  # Keep it positive and reasonable
 
             activity = {
                 # Essential identifiers
-                'thread_id': row['thread_id'],
-                'processlist_id': row['processlist_id'],
-                'processlist_user': row['processlist_user'],
-                'processlist_host': row['processlist_host'],
-                'processlist_db': row['processlist_db'],
-                'processlist_command': row['processlist_command'],
-                'processlist_state': row['processlist_state'],
+                'thread_id': row.get('thread_id'),
+                'processlist_id': row.get('processlist_id'),
+                'processlist_user': row.get('processlist_user'),
+                'processlist_host': row.get('processlist_host'),
+                'processlist_db': row.get('processlist_db'),
+                'processlist_command': row.get('processlist_command'),
+                'processlist_state': row.get('processlist_state'),
                 'sql_text': row.get('sql_text'),
                 'current_schema': row.get('processlist_db'),
                 'query_signature': row.get('query_signature'),
