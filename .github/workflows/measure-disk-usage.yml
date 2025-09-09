@@ -25,7 +25,8 @@ jobs:
         PR_BODY: ${{ github.event.pull_request.body }}
       run: |
         # The new section to add. You can use \n for new lines.
-        new_section="### New Dependency Justification
+        section_title="New Dependency Motivation"
+        new_section="### $section_title
         
         <!-- Please explain why this new dependency is necessary and why similar existing libraries are not suitable. -->
         
@@ -35,7 +36,7 @@ jobs:
         landmark_text="### Review checklist"
 
         # Only add the section if it doesn't already exist
-        if [[ "$PR_BODY" != *"Dependency Justification"* ]]; then
+        if [[ "$PR_BODY" != *"$section_title"* ]]; then
           echo "Dependency file changed and justification section not found. Adding it now."
           
           # Split the body at the landmark text and insert the new section
@@ -46,7 +47,7 @@ jobs:
 
           gh pr edit $PR_NUMBER --body "$new_body"
         else
-          echo "Justification section already exists. No changes made."
+          echo "$section_title section already exists. No changes made."
         fi
     # - name: Set up Python ${{ env.PYTHON_VERSION }}
     #   uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
