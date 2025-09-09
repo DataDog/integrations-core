@@ -256,7 +256,7 @@ tests:
       seqno: 7506906696836281042
       serial: 23001016134
       sessionid: 264167
-      severity: "informational"
+      severity: "high"
       subtype: "url"
       thr_category: "N/A"
       time_generated: 1755870797000
