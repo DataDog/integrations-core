@@ -336,7 +336,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Palo Alto Networks Firewall
+  name: (crash) Palo Alto Networks Firewall
   enabled: true
   filter:
     query: source:pan.firewall
@@ -463,6 +463,26 @@ pipeline:
                 query: "@severity:critical"
               name: "5"
           target: ocsf.severity_id
+        - type: category-processor
+          name: Severity Name Mapping
+          enabled: true
+          categories:
+            - filter:
+                query: "@severity_id:1"
+              name: Informational
+            - filter:
+                query: "@severity_id:2"
+              name: Low
+            - filter:
+                query: "@severity_id:3"
+              name: Medium
+            - filter:
+                query: "@severity_id:4"
+              name: High
+            - filter:
+                query: "@severity_id:5"
+              name: Critical
+          target: ocsf.severity
     - type: pipeline
       name: OCSF sub pipeline for class Network Activity [4001]
       enabled: true
@@ -698,26 +718,6 @@ pipeline:
       filter:
         query: "@type:THREAT"
       processors:
-        - type: category-processor
-          name: Severity Name Mapping
-          enabled: true
-          categories:
-            - filter:
-                query: "@severity:informational"
-              name: Informational
-            - filter:
-                query: "@severity:low"
-              name: Low
-            - filter:
-                query: "@severity:medium"
-              name: Medium
-            - filter:
-                query: "@severity:high"
-              name: High
-            - filter:
-                query: "@severity:critical"
-              name: Critical
-          target: ocsf.severity
         - type: string-builder-processor
           name: Add activity id
           enabled: true
