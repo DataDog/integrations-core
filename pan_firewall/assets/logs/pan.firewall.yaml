@@ -1232,7 +1232,6 @@ pipeline:
             - filter:
                 query: "@ocsf.status_id:99"
               name: "Other"
-            - filter:
         - type: attribute-remapper
           name: remap 'ocsf.class_uid' string to integer
           enabled: true
