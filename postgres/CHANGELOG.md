@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 23.0.0 / 2025-09-05
+
+***Changed***:
+
+* Bump minimum datadog_checks_base to 37.18.0 ([#21238](https://github.com/DataDog/integrations-core/pull/21238))
+
+***Added***:
+
+* Update core tags with agent host name for DB integrations(postgres, mysql, sqlserver) ([#20991](https://github.com/DataDog/integrations-core/pull/20991))
+* Enable collect_settings by default for DBM enabled integrations ([#21172](https://github.com/DataDog/integrations-core/pull/21172))
+* Add Postgres Health class for submitting Postgres health events ([#21193](https://github.com/DataDog/integrations-core/pull/21193))
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 22.18.0 / 2025-09-04
+
+***Added***:
+
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+
 ## 22.17.0 / 2025-08-07 / Agent 7.70.0
 
 ***Added***:

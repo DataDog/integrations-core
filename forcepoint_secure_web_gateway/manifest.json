@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "183f1ae8-8bc0-4135-8b17-e6ff2b449f9c",
   "app_id": "forcepoint-secure-web-gateway",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
