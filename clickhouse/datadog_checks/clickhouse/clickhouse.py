@@ -101,19 +101,22 @@ class ClickhouseCheck(AgentCheck):
 
         try:
             client = clickhouse_connect.get_client(
+                # https://clickhouse.com/docs/integrations/python#connection-arguments
                 host=self._server,
                 port=self._port,
                 username=self._user,
                 password=self._password,
                 database=self._db,
+                secure=self._tls_verify,
                 connect_timeout=self._connect_timeout,
                 send_receive_timeout=self._read_timeout,
-                secure=self._tls_verify,  # True/False for TLS
-                ca_cert=self._tls_ca_cert,  # Path to CA cert
-                verify=self._verify,  # Whether to verify cert
-                client_name=f'datadog-{self.check_id}',  # Custom client name
-                compression=self._compression,  # 'lz4', 'zstd', or None
-                settings={},  # Any session-level settings
+                client_name=f'datadog-{self.check_id}',
+                compression=self._compression, # TODO Look into this one
+                # https://clickhouse.com/docs/integrations/python#httpstls-arguments
+                ca_cert=self._tls_ca_cert,
+                verify=self._verify,
+                # https://clickhouse.com/docs/integrations/python#settings-argument
+                settings={},
             )
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
