@@ -15,7 +15,7 @@ CLICKHOUSE_VERSION = os.environ['CLICKHOUSE_VERSION']
 
 CONFIG = {
     'server': HOST,
-    'port': TCP_START_PORT,
+    'port': HTTP_START_PORT,
     'username': 'datadog',
     'password': 'Datadog123!',
     'tags': ['foo:bar'],

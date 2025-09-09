@@ -3,7 +3,7 @@ check-types = false
 
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 
 [envs.default]
 features = ["db", "deps", "http", "json", "kube"]
