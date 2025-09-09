@@ -314,7 +314,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               comment_id: commentId,
-            });
+            }); 
       - name: Create comment
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
