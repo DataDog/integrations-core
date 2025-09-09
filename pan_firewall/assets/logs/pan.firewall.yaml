@@ -462,6 +462,17 @@ pipeline:
                 query: "@severity:critical"
               name: "5"
           target: ocsf.severity_id
+        - type: attribute-remapper
+          name: Map `ocsf.severity_id` to `ocsf.severity_id`
+          enabled: true
+          sources:
+            - ocsf.severity_id
+          sourceType: attribute
+          target: ocsf.severity_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
         - type: category-processor
           name: Severity Name Mapping
           enabled: true
@@ -1084,17 +1095,6 @@ pipeline:
       filter:
         query: "*"
       processors:
-        - type: attribute-remapper
-          name: Map `ocsf.severity_id` to `ocsf.severity_id`
-          enabled: true
-          sources:
-            - ocsf.severity_id
-          sourceType: attribute
-          target: ocsf.severity_id
-          targetType: attribute
-          targetFormat: integer
-          preserveSource: false
-          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `ocsf.connection_info.direction_id` to `ocsf.connection_info.direction_id`
           enabled: true
