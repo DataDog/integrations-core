@@ -25,12 +25,12 @@ jobs:
         PR_BODY: ${{ github.event.pull_request.body }}
       run: |
         # The new section to add. You can use \n for new lines.
-        new_section="### 📦 Dependency Justification
+        new_section="### New Dependency Justification
         
-        *Please explain why this new dependency is necessary and why you chose it.*
+        <!-- Please explain why this new dependency is necessary and why similar existing libraries are not suitable. -->
         
         "
-        
+          
         # The text to insert the section before.
         landmark_text="### Review checklist"
 
