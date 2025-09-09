@@ -335,7 +335,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Palo Alto Networks Firewall
+  name: (crash)Palo Alto Networks Firewall
   enabled: true
   filter:
     query: source:pan.firewall
@@ -478,19 +478,19 @@ pipeline:
           enabled: true
           categories:
             - filter:
-                query: "@severity_id:1"
+                query: "@ocsf.severity_id:1"
               name: Informational
             - filter:
-                query: "@severity_id:2"
+                query: "@ocsf.severity_id:2"
               name: Low
             - filter:
-                query: "@severity_id:3"
+                query: "@ocsf.severity_id:3"
               name: Medium
             - filter:
-                query: "@severity_id:4"
+                query: "@ocsf.severity_id:4"
               name: High
             - filter:
-                query: "@severity_id:5"
+                query: "@ocsf.severity_id:5"
               name: Critical
           target: ocsf.severity
     - type: pipeline
