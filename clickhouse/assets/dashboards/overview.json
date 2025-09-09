@@ -733,7 +733,8 @@
                                     }
                                 }
                             ],
-                            "show_legend": true,
+                            "show_legend": false,
+                            "time": {},
                             "title": "CPU Cores Used by Queries/Merges",
                             "title_align": "left",
                             "title_size": "16",
@@ -762,25 +763,8 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "formula": "query2",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "formula": "query1 + query2",
+                                            "alias": "Normalized CPU",
+                                            "formula": "(query1 + query2) * 100",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -793,12 +777,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSUserTimeNormalized{*}"
+                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSUserTimeNormalized{$host}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSSystemTimeNormalized{*}"
+                                            "query": "avg:clickhouse.ClickHouseAsyncMetrics_OSSystemTimeNormalized{$host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -810,7 +794,8 @@
                                     }
                                 }
                             ],
-                            "show_legend": true,
+                            "show_legend": false,
+                            "time": {},
                             "title": "Normalized CPU usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -864,7 +849,8 @@
                                     }
                                 }
                             ],
-                            "show_legend": true,
+                            "show_legend": false,
+                            "time": {},
                             "title": "Memory Usage (RSS)",
                             "title_align": "left",
                             "title_size": "16",
@@ -912,7 +898,8 @@
                                     }
                                 }
                             ],
-                            "show_legend": true,
+                            "show_legend": false,
+                            "time": {},
                             "title": "Server Connections (TCP)",
                             "title_align": "left",
                             "title_size": "16",
@@ -992,7 +979,8 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "",
+                            "time": {},
+                            "title": "Network Usage",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
