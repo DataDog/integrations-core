@@ -77,7 +77,6 @@ jobs:
       - name: Calculate diffs 
         id: calculate-diffs
         run: |
-            set +e
             CMD=(python ddev/src/ddev/cli/size/utils/gha_diff.py
               --compressed-prev-sizes "status_compressed_${{ inputs.platform }}_prev.csv"
               --compressed-curr-sizes "status_compressed_${{ inputs.platform }}_curr.json"
@@ -94,13 +93,7 @@ jobs:
             fi
 
             "${CMD[@]}"
-            status=$? # 0 = passes, 1 = fails
-            set -e
-            if [ "$status" -eq 0 ]; then
-              echo "passes_qg=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "passes_qg=false" >> "$GITHUB_OUTPUT"
-            fi
+  
             cat "size_diffs_output_${{ inputs.platform }}.txt" >> "$GITHUB_STEP_SUMMARY"
         env:
           THRESHOLD: "-100000000000000000000000000" # "51200" # 50KB; this variable is used to check if the diffs are within the size limit
