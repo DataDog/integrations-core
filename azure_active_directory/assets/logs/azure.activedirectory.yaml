@@ -1065,7 +1065,7 @@ pipeline:
               name: "Windows"
             - filter:
                 query: "@properties.deviceDetail.operatingSystem:(*Linux*)"
-              name: "LInux"
+              name: "Linux"
             - filter:
                 query: "@properties.deviceDetail.operatingSystem:(*Android*)"
               name: "Android"
