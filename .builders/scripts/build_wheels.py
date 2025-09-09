@@ -106,7 +106,7 @@ def main():
 
         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
-        print("Starting to fetch wheels")
+
         # Fetch or build wheels
         command_args = [
             str(python_path), '-m', 'pip', 'wheel',
@@ -118,12 +118,10 @@ def main():
         # Temporarily disable extra index urls. There are broken wheels in the gcloud bucket
         # while working on removing tests from them. Adding extra indices causes undefined behavior
         # and can pull a broken image, preventing the building from running.
-
         # if args.use_built_index:
         #     command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
 
         check_process(command_args, env=env_vars)
-        print("Finished fetching wheels")
         # Repair wheels
         check_process([
             sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
@@ -132,14 +130,6 @@ def main():
             '--external-dir', str(external_wheels_dir),
         ])
 
-    # Print the contents of the built and external wheels directories
-    print("Contents of built wheels directory:")
-    for wheel_file in sorted(built_wheels_dir.iterdir()):
-        print(f"  {wheel_file.name}")
-
-    print("Contents of external wheels directory:")
-    for wheel_file in sorted(external_wheels_dir.iterdir()):
-        print(f"  {wheel_file.name}")
 
     dependencies: dict[str, tuple[str, str]] = {}
     for wheel_dir in wheels_dir.iterdir():
