@@ -35,7 +35,8 @@ def dd_environment():
             )
         )
 
-    with docker_run(common.COMPOSE_FILE, conditions=conditions, sleep=10, attempts=2, mount_logs=True):
+    compose_file, mount_logs = common.get_compose_file()
+    with docker_run(compose_file, conditions=conditions, sleep=10, attempts=2, mount_logs=mount_logs):
         yield config
 
 

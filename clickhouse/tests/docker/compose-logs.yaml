@@ -1,0 +1,22 @@
+# https://datadoghq.dev/integrations-core/ddev/test/#logs
+
+include:
+  - compose-keepers.yaml
+
+services:
+
+  clickhouse-01:
+    extends:
+      file: compose.yaml
+      service: clickhouse-01
+    volumes:
+      - ${DD_LOG_1}:/var/log/clickhouse-server/clickhouse-server.log
+      - ${DD_LOG_2}:/var/log/clickhouse-server/clickhouse-server.err.log
+
+  clickhouse-02:
+    extends:
+      file: compose.yaml
+      service: clickhouse-02
+    volumes:
+      - ${DD_LOG_3}:/var/log/clickhouse-server/clickhouse-server.log
+      - ${DD_LOG_4}:/var/log/clickhouse-server/clickhouse-server.err.log
