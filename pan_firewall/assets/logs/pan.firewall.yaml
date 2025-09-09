@@ -565,12 +565,6 @@ pipeline:
           template: "0"
           target: ocsf.connection_info.direction_id
           replaceMissing: false
-         -type: string-builder-processor
-           name: add direction name
-           enabled: true
-           template: "Unknown"
-           target: ocsf.connection_info.direction
-           replaceMissing: false
         - type: attribute-remapper
           name: Map `sessionid` to `ocsf.connection_info.session.uid`
           enabled: true
@@ -583,7 +577,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `app` to `ocsf.connection_info.protocol_name`
+          name: Map `proto` to `ocsf.connection_info.protocol_name`
           enabled: true
           sources:
             - proto
@@ -691,26 +685,6 @@ pipeline:
           targetFormat: integer
           preserveSource: true
           overrideOnConflict: false
-        - type: attribute-remapper
-          name: remap 'network.destination.port' to 'ocsf.dst_endpoint.port'
-          enabled: true
-          sources:
-            - network.destination.port
-          sourceType: attribute
-          target: ocsf.dst_endpoint.port
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: remap 'network.client.port' to 'ocsf.src_endpoint.port'
-          enabled: true
-          sources:
-            - network.client.port
-          sourceType: attribute
-          target: ocsf.src_endpoint.port
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
     - type: pipeline
       name: OCSF sub pipeline for class Detection Finding [2004]
       enabled: true
@@ -784,12 +758,6 @@ pipeline:
           target: ocsf.category_name
           replaceMissing: false
         - type: string-builder-processor
-          name: 2 - in attribute ocsf.status_id
-          enabled: true
-          template: "2"
-          target: ocsf.status_id
-          replaceMissing: false
-        - type: string-builder-processor
           name: 2004 - in attribute ocsf.class_uid
           enabled: true
           template: "2004"
@@ -842,7 +810,7 @@ pipeline:
           target: ocsf.is_alert
           replaceMissing: false
         - type: string-builder-processor
-          name: 1 - in attribute ocsf.status_id
+          name: Add status id
           enabled: true
           template: "1"
           target: ocsf.status_id
@@ -1154,6 +1122,25 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
+        - type: category-processor
+          name: add connectiondirection
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.connection_info.direction_id:0"
+              name: "Unknown"
+            - filter:
+                query: "@ocsf.connection_info.direction_id:1"
+              name: "Inbound"
+            - filter:
+                query: "@ocsf.connection_info.direction_id:2"
+              name: "Outbound"
+            - filter:
+                query: "@ocsf.connection_info.direction_id:3"
+              name: "Lateral"
+            - filter:
+                query: "@ocsf.connection_info.direction_id:99"
+              name: "Other"
         - type: attribute-remapper
           name: remap ocsf.evidence.file.type_id string to integer
           enabled: true
@@ -1220,6 +1207,32 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
+        - type: category-processor
+          name: map status id
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status_id:0"
+              name: "Unknown"
+            - filter:
+                query: "@ocsf.status_id:1"
+              name: "New"
+            - filter:
+                query: "@ocsf.status_id:2"
+              name: "In Progress"
+            - filter:
+                query: "@ocsf.status_id:3"
+              name: "Suppressed"
+            - filter:
+                query: "@ocsf.status_id:4"
+              name: "Resolved"
+            - filter:
+                query: "@ocsf.status_id:5"
+              name: "Archived"
+            - filter:
+                query: "@ocsf.status_id:99"
+              name: "Other"
+            - filter:
         - type: attribute-remapper
           name: remap 'ocsf.class_uid' string to integer
           enabled: true
@@ -1242,6 +1255,25 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
+        - type: category-processor
+          name: add confidence
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.confidence_id:0"
+              name: "Unknown"
+            - filter:
+                query: "@ocsf.confidence_id:1"
+              name: "Low"
+            - filter:
+                query: "@ocsf.confidence_id:2"
+              name: "Medium"
+            - filter:
+                query: "@ocsf.confidence_id:3"
+              name: "High"
+            - filter:
+                query: "@ocsf.confidence_id:99"
+              name: "Other"
         - type: attribute-remapper
           name: remap 'ocsf.evidence.device.type_id' string to integer
           enabled: true
