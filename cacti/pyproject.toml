@@ -36,7 +36,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "pymysql==1.1.1",
+    "pymysql==1.1.2",
 ]
 
 [project.urls]
