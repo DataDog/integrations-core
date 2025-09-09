@@ -16,7 +16,6 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 
-
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
