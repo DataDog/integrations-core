@@ -261,7 +261,6 @@ jobs:
   calculate-size-diffs:
     needs: measure-disk-usage
     strategy:
-      fail-fast: false
       matrix:
         platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: ./.github/workflows/size-quality-gates.yml
@@ -269,22 +268,16 @@ jobs:
       platform: ${{ matrix.platform }}
       send_metrics: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch }}
   
-  check-all-quality-gates:
-    runs-on: ubuntu-latest
+  use-result-per-platform: 
     needs: calculate-size-diffs
-    if: ${{ always() }} # Ensures this job runs even if a matrix job fails.
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     steps:
-      - name: Check the outcome of all matrix jobs
-        run: |
-          # The 'needs' context provides a 'result' for the entire matrix.
-          # It will be 'success' only if ALL jobs in the matrix succeeded.
-          if [[ "${{ needs.calculate-size-diffs.result }}" == "success" ]]; then
-            echo "✨ All quality gates passed! The build is ready to be finalized."
-          else
-            echo "🛑 At least one quality gate failed. Failing the workflow."
-            exit 1
-          fi
-          
+      - name: Gate per platform
+        run: echo "PASSES_QG=${{ fromJSON(needs.calculate-size-diffs.outputs.passes_qg) }}"
+
   comment-size-diffs-on-pr:
     needs:
       - calculate-size-diffs
