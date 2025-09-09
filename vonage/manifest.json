@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "af03738b-a2a3-4d90-bbc8-5c6bdccfa0a5",
   "app_id": "vonage",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
