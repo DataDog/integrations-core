@@ -1,0 +1,42 @@
+id: supply-chain-firewall
+tests:
+ -
+  sample: |-
+    {
+      "msg" : "Command 'pip install urllib3==2.0.2' was allowed",
+      "ecosystem" : "PyPI",
+      "created" : 1755017456.590666,
+      "source" : "scfw",
+      "env" : "dev",
+      "version" : "2.1.0",
+      "targets" : [ "urllib3-2.0.2" ],
+      "executable" : "/home/devuser/.venv/bin/python",
+      "hostname" : "test10-10-1-10",
+      "package_manager" : "pip",
+      "service" : "scfw",
+      "warned" : true,
+      "action" : "ALLOW",
+      "username" : "root"
+    }
+  result:
+    custom:
+      created: 1.755017456590666E12
+      ecosystem: "PyPI"
+      env: "dev"
+      evt:
+        outcome: "ALLOW"
+      executable: "/home/devuser/.venv/bin/python"
+      hostname: "test10-10-1-10"
+      package_manager: "pip"
+      service: "scfw"
+      source: "scfw"
+      targets:
+       - "urllib3-2.0.2"
+      usr:
+        name: "root"
+      version: "2.1.0"
+      warned: true
+    message: "Command 'pip install urllib3==2.0.2' was allowed"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1755017456590

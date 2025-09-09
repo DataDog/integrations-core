@@ -2,19 +2,32 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 
 import pytest
 
 from datadog_checks.dev import TempDir, run_command
 from datadog_checks.dev.fs import path_join
-from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kind import KindLoad, kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
 from .common import MOCKED_INSTANCE, PORT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KIND_DIR = os.path.join(HERE, 'kind')
+
+
+@contextmanager
+def build_and_load_kubectl_image(image_tag: str):
+    print("Building custom kubectl image...")
+    dockerfile_path = os.path.join(KIND_DIR, 'kubectl.Dockerfile')
+
+    # Build the custom kubectl image
+    run_command(
+        ['docker', 'build', '-t', image_tag, '-f', dockerfile_path, '.'],
+        check=True,
+    )
+    yield
 
 
 def setup_velero():
@@ -63,10 +76,12 @@ def get_instances(velero_host, velero_port, node_agent_host, node_agent_port):
 @pytest.fixture(scope='session')
 def dd_environment():
     kind_config = os.path.join(KIND_DIR, 'kind-config.yaml')
+    custom_kubectl_image_tag = "custom-kubectl:latest"
 
     with TempDir('helm_dir') as helm_dir:
         with kind_run(
-            conditions=[setup_velero],
+            wrappers=[build_and_load_kubectl_image(custom_kubectl_image_tag)],
+            conditions=[KindLoad(custom_kubectl_image_tag), setup_velero],
             kind_config=kind_config,
             env_vars={
                 "HELM_CACHE_HOME": path_join(helm_dir, 'Caches'),

@@ -31,12 +31,12 @@ device_hn1 = 'apic1'
 
 namespace = 'default'
 
-node101_port1 = 'dd.internal.resource:ndm_interface:default:10.0.200.0:1'
-node101_port2 = 'dd.internal.resource:ndm_interface:default:10.0.200.0:2'
-node102_port1 = 'dd.internal.resource:ndm_interface:default:10.0.200.1:1'
-node102_port2 = 'dd.internal.resource:ndm_interface:default:10.0.200.1:2'
-node201_port1 = 'dd.internal.resource:ndm_interface:default:10.0.200.5:1'
-node201_port2 = 'dd.internal.resource:ndm_interface:default:10.0.200.5:2'
+node101_port1 = 'dd.internal.resource:ndm_interface:default:10.0.200.0:cisco-aci-eth1/1'
+node101_port2 = 'dd.internal.resource:ndm_interface:default:10.0.200.0:cisco-aci-eth1/2'
+node102_port1 = 'dd.internal.resource:ndm_interface:default:10.0.200.1:cisco-aci-eth1/1'
+node102_port2 = 'dd.internal.resource:ndm_interface:default:10.0.200.1:cisco-aci-eth1/2'
+node201_port1 = 'dd.internal.resource:ndm_interface:default:10.0.200.5:cisco-aci-eth5/1'
+node201_port2 = 'dd.internal.resource:ndm_interface:default:10.0.200.5:cisco-aci-eth5/2'
 
 device_tags_101 = [
     'device_hostname:{}'.format(device_hn101),
@@ -130,7 +130,9 @@ def test_fabric_mocked(aggregator):
                 'device_id:{}'.format(interface.device_id),
                 'status:{}'.format(interface.status),
                 'dd.internal.resource:ndm_device:{}'.format(interface.device_id),
-                'dd.internal.resource:ndm_interface:{}:{}'.format(interface.device_id, interface.index),
+                'dd.internal.resource:ndm_interface:{}:{}-{}'.format(
+                    interface.device_id, interface.raw_id_type, interface.raw_id
+                ),
             ]
             aggregator.assert_metric('cisco_aci.fabric.port.status', value=1.0, tags=interface_tags, hostname=device_hn)
 
