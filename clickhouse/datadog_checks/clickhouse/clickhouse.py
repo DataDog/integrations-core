@@ -111,7 +111,7 @@ class ClickhouseCheck(AgentCheck):
                 connect_timeout=self._connect_timeout,
                 send_receive_timeout=self._read_timeout,
                 client_name=f'datadog-{self.check_id}',
-                compression=self._compression, # TODO Look into this one
+                compression=self._compression,  # TODO Look into this one
                 # https://clickhouse.com/docs/integrations/python#httpstls-arguments
                 ca_cert=self._tls_ca_cert,
                 verify=self._verify,
