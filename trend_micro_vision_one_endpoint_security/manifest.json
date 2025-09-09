@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "107091d5-4e2d-4592-b197-af848e5abf67",
   "app_id": "trend-micro-vision-one-endpoint-security",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
