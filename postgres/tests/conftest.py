@@ -125,7 +125,7 @@ def metrics_cache_replica(pg_replica_instance):
     return PostgresMetricsCache(config)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def e2e_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['dbm'] = True
