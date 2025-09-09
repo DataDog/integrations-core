@@ -276,9 +276,8 @@ jobs:
         platform: [macos-x86_64, macos-aarch64]
     steps:
       - name: Gate per platform
-        if: ${{ fromJSON(needs.calculate-size-diffs.outputs.passes_qg) }}
-        run: echo "Gates passed for ${{ matrix.platform }}"
-        
+        run: echo "PASSES_QG_${{ matrix.platform }}=${{ fromJSON(needs.calculate-size-diffs.outputs.passes_qg) }}"
+
   comment-size-diffs-on-pr:
     needs:
       - calculate-size-diffs
