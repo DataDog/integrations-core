@@ -394,7 +394,7 @@ pipeline:
         query: "*"
       processors:
         - type: attribute-remapper
-          name: remap 'time_generated' to 'ocsf.time'
+          name: Map `time_generated` to `ocsf.time`
           enabled: true
           sources:
             - time_generated
@@ -404,7 +404,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Sequence Number
+          name: Map `seqno` to `ocsf.metadata.sequence`
           enabled: true
           sources:
             - seqno
@@ -421,7 +421,7 @@ pipeline:
           target: ocsf.metadata.product.name
           replaceMissing: false
         - type: attribute-remapper
-          name: Product UID
+          name: Map `serial` to `ocsf.metadata.product.uid`
           enabled: true
           sources:
             - serial
@@ -438,41 +438,41 @@ pipeline:
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: string-builder-processor
-          name: '"1.5.0" - in attribute ocsf.metadata.version'
+          name: 'Add version'
           enabled: true
           template: '1.5.0'
           target: ocsf.metadata.version
           replaceMissing: false
     - type: pipeline
-      name: Traffic Activity [4001] Class
+      name: OCSF sub pipeline for class Network Activity [4001]
       enabled: true
       ocsf:
         isOcsf: true
       filter:
         query: "@type:TRAFFIC"
       processors:
-        - type: category-processor
-          name: Category UID
+        - type: string-builder-processor
+          name: Add category uid
           enabled: true
-          categories:
-            - filter:
-                query: "@type:TRAFFIC"
+          template: "4"
+          target: ocsf.category_uid
+          replaceMissing: false
               name: "4"
           target: ocsf.category_uid
         - type: string-builder-processor
-          name: Network Activity - in attribute ocsf.class_name
+          name: Add class name
           enabled: true
           template: Network Activity
           target: ocsf.class_name
           replaceMissing: true
         - type: string-builder-processor
-          name: Info - in attribute ocsf.severity
+          name: Add severity
           enabled: true
           template: Informational
           target: ocsf.severity
           replaceMissing: false
         - type: string-builder-processor
-          name: 4001 - in attribute ocsf.class_uid
+          name: Add class uid
           enabled: true
           template: "4001"
           target: ocsf.class_uid
@@ -503,7 +503,7 @@ pipeline:
               name: "5"
           target: ocsf.activity_id
         - type: category-processor
-          name: map activity name
+          name: Map activity name
           enabled: true
           categories:
             - filter:
@@ -512,16 +512,15 @@ pipeline:
             - filter:
                 query: "@subtype:end"
               name: "Close"
-            - filter: "@subtype:drop"
+            - filter:
+                query: "@subtype:drop"
               name: "Reset"
-            - filter: "@subtype:deny"
+            - filter:
+                query: "@subtype:deny"            
               name: "Refuse"
           target: ocsf.activity_name
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.destination.ip' to 'ocsf.dst_endpoint.ip'
+          name: Map `network.destination.ip` to `ocsf.dst_endpoint.ip`
           enabled: true
           sources:
             - network.destination.ip
@@ -531,7 +530,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.client.ip' to 'ocsf.src_endpoint.ip'
+          name: Map `network.client.ip' to `ocsf.src_endpoint.ip`
           enabled: true
           sources:
             - network.client.ip
@@ -541,7 +540,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.destination.port' to 'ocsf.dst_endpoint.port'
+          name: Map `network.destination.port` to `ocsf.dst_endpoint.port`
           enabled: true
           sources:
             - network.destination.port
@@ -551,7 +550,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'network.client.port' to 'ocsf.src_endpoint.port'
+          name: Map `network.client.port` to `ocsf.src_endpoint.port`
           enabled: true
           sources:
             - network.client.port
@@ -561,19 +560,19 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: 99 - in attribute ocsf.connection_info.direction_id
-          enabled: true
-          template: "99"
-          target: ocsf.connection_info.direction_id
-          replaceMissing: false
-        - type: string-builder-processor
           name: 0 - in attribute ocsf.connection_info.direction_id
           enabled: true
           template: "0"
           target: ocsf.connection_info.direction_id
           replaceMissing: false
+         -type: string-builder-processor
+           name: add direction name
+           enabled: true
+           template: "Unknown"
+           target: ocsf.connection_info.direction
+           replaceMissing: false
         - type: attribute-remapper
-          name: Remap `sessionid` to `ocsf.connection_info.session.uid`
+          name: Map `sessionid` to `ocsf.connection_info.session.uid`
           enabled: true
           sources:
             - sessionid
@@ -584,7 +583,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'app' to 'ocsf.connection_info.protocol_name'
+          name: Map `app` to `ocsf.connection_info.protocol_name`
           enabled: true
           sources:
             - proto
@@ -594,7 +593,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'bytes' to 'ocsf.traffic.bytes'
+          name: Map `bytes` to `ocsf.traffic.bytes`
           enabled: true
           sources:
             - bytes
@@ -605,7 +604,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'bytes_out' to 'ocsf.traffic.bytes_out'
+          name: Map `bytes_out` to `ocsf.traffic.bytes_out`
           enabled: true
           sources:
             - bytes_out
@@ -616,7 +615,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'bytes_in' to 'ocsf.traffic.bytes_in'
+          name: Map `bytes_in` to `ocsf.traffic.bytes_in`
           enabled: true
           sources:
             - bytes_in
@@ -627,7 +626,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'pkts' to 'ocsf.traffic.packets'
+          name: Map `pkts` to `ocsf.traffic.packets`
           enabled: true
           sources:
             - pkts
@@ -638,7 +637,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'pkts_sent' to 'ocsf.traffic.packets_out'
+          name: Map `pkts_sent` to `ocsf.traffic.packets_out`
           enabled: true
           sources:
             - pkts_sent
@@ -649,7 +648,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'pkts_received' to 'ocsf.traffic.packets_in'
+          name: Map `pkts_received` to `ocsf.traffic.packets_in`
           enabled: true
           sources:
             - pkts_received
@@ -660,7 +659,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'chunks' to 'ocsf.traffic.chunks'
+          name: Map `chunks` to `ocsf.traffic.chunks`
           enabled: true
           sources:
             - chunks
@@ -671,7 +670,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'chunks_sent' to 'ocsf.traffic.chunks_out'
+          name: Map `chunks_sent` to `ocsf.traffic.chunks_out`
           enabled: true
           sources:
             - chunks_sent
@@ -713,7 +712,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
     - type: pipeline
-      name: Detection Finding [2004] Class
+      name: OCSF sub pipeline for class Detection Finding [2004]
       enabled: true
       ocsf:
         isOcsf: true
@@ -761,25 +760,25 @@ pipeline:
               name: Critical
           target: ocsf.severity
         - type: string-builder-processor
-          name: 1 - in attribute ocsf.activity_id
+          name: Add activity id
           enabled: true
           template: "1"
           target: ocsf.activity_id
           replaceMissing: false
         - type: string-builder-processor
-          name: Create - in attribute ocsf.activity_name
+          name: Add activity name
           enabled: true
           template: Create
           target: ocsf.activity_name
           replaceMissing: false
         - type: string-builder-processor
-          name: 2 - in attribute ocsf.category_uid
+          name: Add category uid
           enabled: true
           template: "2"
           target: ocsf.category_uid
           replaceMissing: false
         - type: string-builder-processor
-          name: Findings - in attribute ocsf.category_name
+          name: Add category name
           enabled: true
           template: Findings
           target: ocsf.category_name
@@ -821,7 +820,7 @@ pipeline:
           target: ocsf.confidence_id
           replaceMissing: false
         - type: string-builder-processor
-          name: add 'ocsf.evidence.device.type_id'
+          name: Add `ocsf.evidence.device.type_id`
           enabled: true
           template: "1"
           target: ocsf.evidence.device.type_id
