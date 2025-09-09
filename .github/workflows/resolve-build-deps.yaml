@@ -308,13 +308,21 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            const commentId = ${{ steps.find_comment.outputs.comment-id }};
-            core.info(`Deleting comment: ${commentId}`);
-            await github.rest.issues.deleteComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: commentId,
-            }); 
+              const commentId = ${{ steps.find_comment.outputs.comment-id }};
+              core.info(`Attempting to delete comment: ${commentId}`);
+              try {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: commentId,
+                });
+              } catch (error) {
+                if (error.status === 404) {
+                  core.info('Comment not found or already deleted, continuing.');
+                } else {
+                  core.setFailed(`Failed to delete comment: ${error.message}`);
+                }
+              }
       - name: Create comment
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body-file comment.txt
