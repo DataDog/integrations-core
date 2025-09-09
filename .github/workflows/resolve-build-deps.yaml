@@ -264,12 +264,21 @@ jobs:
       matrix:
         platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: ./.github/workflows/size-quality-gates.yml
-        continue-on-error: true
-
     with:
       platform: ${{ matrix.platform }}
       send_metrics: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch }}
-
+  
+  use-result-per-platform: 
+    needs: calculate-size-diffs
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        platform: [macos-x86_64, macos-aarch64]
+    steps:
+      - name: Gate per platform
+        if: ${{ fromJSON(needs.calculate-size-diffs.outputs.passes_qg) }}
+        run: echo "Gates passed for ${{ matrix.platform }}"
+        
   comment-size-diffs-on-pr:
     needs:
       - calculate-size-diffs
