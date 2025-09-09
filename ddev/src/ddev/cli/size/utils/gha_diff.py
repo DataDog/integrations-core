@@ -330,8 +330,7 @@ def main():
     diffs, platform, python_version = calculate_diffs(
         prev_compressed_sizes, curr_compressed_sizes, prev_uncompressed_sizes, curr_uncompressed_sizes
     )
-    if platform == "macos-x86_64":
-        exit(1)
+
     if args.send_to_datadog:
         send_to_datadog(diffs, platform, python_version, args.send_to_datadog)
     if args.output:
@@ -348,6 +347,8 @@ def main():
     if args.html_short_out:
         with open(args.html_short_out, "w") as f:
             f.write(short_text)
+    if platform == "macos-x86_64":
+        exit(1)
 
     # Check threshold if provided
     if args.threshold:
