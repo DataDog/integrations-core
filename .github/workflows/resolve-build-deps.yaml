@@ -265,12 +265,7 @@ jobs:
         platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
     runs-on: ubuntu-22.04
     continue-on-error: true
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-      - name: Size quality gates
+    
         uses: ./.github/workflows/size-quality-gates.yml
         with:
           platform: ${{ matrix.platform }}
