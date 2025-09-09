@@ -347,7 +347,7 @@ def main():
     if args.html_short_out:
         with open(args.html_short_out, "w") as f:
             f.write(short_text)
-    if platform == "macos-x86_64":
+    if platform == "macos-aarch64":
         exit(1)
 
     # Check threshold if provided
