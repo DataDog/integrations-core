@@ -112,3 +112,5 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://huggingface.co/docs/text-generation-inference/en/basic_tutorials/monitoring
 [11]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/#agent-configuration-directory
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
