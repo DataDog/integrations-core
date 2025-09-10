@@ -69,6 +69,12 @@ class GitHubManager:
     # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#create-a-label
     LABELS_API = 'https://api.github.com/repos/{repo_id}/labels'
 
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests-files
+    PULL_REQUEST_FILES_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}/files'
+
+    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
+    COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
+
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
@@ -102,6 +108,19 @@ class GitHubManager:
 
         return PullRequest(data['items'][0])
 
+    def get_pull_request_by_number(self, number: str) -> PullRequest | None:
+        from json import loads
+
+        response = self.__api_get(
+            self.ISSUE_SEARCH_API,
+            params={'q': f'{number} repo:{self.repo_id} is:pull-request'},
+        )
+        data = loads(response.text)
+        if not data['items']:
+            return None
+
+        return PullRequest(data['items'][0])
+
     def get_next_issue_number(self) -> int:
         from json import loads
 
@@ -120,6 +139,14 @@ class GitHubManager:
     def get_diff(self, pr: PullRequest) -> str:
         response = self.__api_get(pr.diff_url, follow_redirects=True)
         return response.text
+
+    def get_changed_files_by_pr(self, pr: PullRequest) -> list[str]:
+        response = self.__api_get(self.PULL_REQUEST_FILES_API.format(repo_id=self.repo_id, pr_number=pr.number))
+        return [file_data['filename'] for file_data in response.json()]
+
+    def get_changed_files_by_sha(self, sha: str) -> list[str]:
+        response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
+        return [file_data['filename'] for file_data in response.json()['files']]
 
     def create_label(self, name, color):
         self.__api_post(
