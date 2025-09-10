@@ -10,7 +10,6 @@ import logging
 import os
 import re
 from collections import deque
-from enum import Enum, auto
 from os.path import basename
 from typing import (
     TYPE_CHECKING,
@@ -75,12 +74,6 @@ unicodedata: _module_unicodedata = lazy_loader.load('unicodedata')
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
-
-
-class PersistentCacheKeyType(Enum):
-    """Enum used to identify the type of persistent cache key."""
-
-    LOG_CURSOR = auto()
 
 
 @traced_class
