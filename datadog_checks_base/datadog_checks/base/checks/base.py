@@ -1026,12 +1026,11 @@ class AgentCheck(object):
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
-        if not self.cache_key_manager.has_cache_key(CacheKeyType.LOG_CURSOR):
-            # The cache key manager does not have a key for the log cursor. Do not create one on retrieval.
-            return None
+        self.cache_key_manager.add(cache_key_type=CacheKeyType.LOG_CURSOR, key_factory=self.logs_persistent_cache_key)
 
         cache_key = self.cache_key_manager.get(cache_key_type=CacheKeyType.LOG_CURSOR)
         data = self.read_persistent_cache(cache_key.key_for(f'log_cursor_{stream}'))
+
         return json.decode(data) if data else None
 
     def _log_deprecation(self, deprecation_key, *args):
