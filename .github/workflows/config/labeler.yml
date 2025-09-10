@@ -45,6 +45,8 @@ integration/airbyte:
 - airbyte/**/*
 integration/airflow:
 - airflow/**/*
+integration/amazon_app_mesh:
+- amazon_app_mesh/**/*
 integration/amazon_eks:
 - amazon_eks/**/*
 integration/amazon_eks_blueprints:
@@ -125,6 +127,8 @@ integration/cert_manager:
 - cert_manager/**/*
 integration/checkpoint_harmony_email_and_collaboration:
 - checkpoint_harmony_email_and_collaboration/**/*
+integration/checkpoint_harmony_endpoint:
+- checkpoint_harmony_endpoint/**/*
 integration/checkpoint_quantum_firewall:
 - checkpoint_quantum_firewall/**/*
 integration/cilium:
@@ -643,6 +647,8 @@ integration/supabase:
 - supabase/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/supply_chain_firewall:
+- supply_chain_firewall/**/*
 integration/suricata:
 - suricata/**/*
 integration/symantec_endpoint_protection:

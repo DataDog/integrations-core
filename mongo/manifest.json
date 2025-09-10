@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "54cca53a-3c87-4b53-beb4-fce95d1fcfb5",
   "app_id": "mongodb",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
