@@ -293,7 +293,7 @@ class MySQLActivity(DBMAsyncJob):
             # Log the actual keys in the first row for debugging
             if not normalized_rows and row:
                 self._log.debug("TiDB activity row keys: %s", list(row.keys()))
-            
+
             # Generate unique identifiers for TiDB
             thread_id = row.get('processlist_id', 0)
 
@@ -349,7 +349,9 @@ class MySQLActivity(DBMAsyncJob):
             event_start_ms = max(0, current_time_ms - query_time_ms)
 
             # Generate event IDs based on thread_id and timestamp
-            event_id = hash(str(row.get('thread_id', 0)) + str(current_time_ms)) % (2**31)  # Keep it positive and reasonable
+            event_id = hash(str(row.get('thread_id', 0)) + str(current_time_ms)) % (
+                2**31
+            )  # Keep it positive and reasonable
 
             activity = {
                 # Essential identifiers
