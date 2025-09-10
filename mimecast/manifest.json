@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "537f740f-1612-4ced-bddd-1bc666a56ed3",
   "app_id": "mimecast",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
