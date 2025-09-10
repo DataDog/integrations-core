@@ -30,7 +30,11 @@ def codeowners(app: Application, pr: str, sha: str, files: str, per_file: bool):
         file_list = github.get_changed_files_by_pr(pr_obj)
     elif sha:
         github = app.github
-        file_list = github.get_changed_files_by_sha(sha)
+        files_by_sha = github.get_changed_files_by_sha(sha)
+        if files_by_sha is None:
+            app.display_error(f'Commit {sha} not found')
+            return
+        file_list = files_by_sha
     else:
         app.display_error('No files provided')
         return

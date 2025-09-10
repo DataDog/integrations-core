@@ -144,9 +144,14 @@ class GitHubManager:
         response = self.__api_get(self.PULL_REQUEST_FILES_API.format(repo_id=self.repo_id, pr_number=pr.number))
         return [file_data['filename'] for file_data in response.json()]
 
-    def get_changed_files_by_sha(self, sha: str) -> list[str]:
-        response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
-        return [file_data['filename'] for file_data in response.json()['files']]
+    def get_changed_files_by_sha(self, sha: str) -> list[str] | None:
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
+        except HTTPStatusError:
+            return None
+        return [file_data['filename'] for file_data in response.json().get('files', [])]
 
     def create_label(self, name, color):
         self.__api_post(

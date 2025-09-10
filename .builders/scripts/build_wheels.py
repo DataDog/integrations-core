@@ -122,6 +122,7 @@ def main():
         #     command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
 
         check_process(command_args, env=env_vars)
+        
         # Repair wheels
         check_process([
             sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
