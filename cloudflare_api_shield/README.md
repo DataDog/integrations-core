@@ -34,7 +34,7 @@ This integration collects HTTP request and API Shield Audit Logs, channeling the
 
 ### Connect your Cloudflare account to Datadog
 
-1. Add your API Token and Account ID.
+1. Add your API Token, Account ID and Zones.
 
     | Parameters                            | Description                                                  |
     | ------------------------------------- | ------------------------------------------------------------ |

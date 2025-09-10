@@ -39,7 +39,7 @@
       }
     },
     "dashboards": {
-      "Cloudflare API Shield - Overview": "assets/dashboards/cloudflare_api_shield_overview.json",
+      "Cloudflare API Shield - Security": "assets/dashboards/cloudflare_api_shield_security.json",
       "Cloudflare API Shield - Audit": "assets/dashboards/cloudflare_api_shield_audit.json"
     },
     "logs": {
