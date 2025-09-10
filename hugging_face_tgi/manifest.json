@@ -35,7 +35,11 @@
         "prefix": "hugging_face_tgi.",
         "check": "hugging_face_tgi.queue.size",
         "metadata_path": "metadata.csv"
-      }
+      },
+      "process_signatures": [
+	    "text-generation-launcher",
+	    "text-generation-router"
+      ]
     },
     "monitors": {},
     "saved_views": {}
