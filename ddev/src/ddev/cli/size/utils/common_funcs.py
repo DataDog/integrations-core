@@ -95,7 +95,7 @@ def get_valid_platforms(repo_path: Path | str, versions: set[str]) -> set[str]:
     """
     Extracts the platforms we support from the .deps/resolved file names.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
     platforms = []
     for file in os.listdir(resolved_path):
         if any(version in file for version in versions):
@@ -107,7 +107,7 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
     """
     Extracts the Python versions we support from the .deps/resolved file names.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
     versions = []
     pattern = re.compile(r"\d+\.\d+")
     for file in os.listdir(resolved_path):
@@ -288,7 +288,7 @@ def get_dependencies(repo_path: str | Path, platform: str, version: str, compres
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
     Name, Version, Size_Bytes, Size, and Type.
     """
-    resolved_path = os.path.join(repo_path, os.path.join(repo_path, ".deps", "resolved"))
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
 
     for filename in os.listdir(resolved_path):
         file_path = os.path.join(resolved_path, filename)

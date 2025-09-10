@@ -1,1 +1,0 @@
-Run `auditreduce` subprocess with `TZ=UTC` in the environment to ensure the timestamps queried match within the window of the audit file.
