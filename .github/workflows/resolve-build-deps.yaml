@@ -33,6 +33,7 @@ env:
   DIRECT_DEPENDENCY_FILE: agent_requirements.in
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
+  PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
 
 jobs:
   test:
@@ -246,11 +247,11 @@ jobs:
 
   measure-disk-usage:
     needs:
-      # - build
+      - build
       - build-macos
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: ${{ fromJSON(env.PLATFORMS) }}
     uses: ./.github/workflows/size-qg-measure-disk-use.yml
     with:
       platform: ${{ matrix.platform }}
@@ -261,7 +262,7 @@ jobs:
     needs: measure-disk-usage
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64] #, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
     uses: ./.github/workflows/size-quality-gates.yml
     with:
       platform: ${{ matrix.platform }}
@@ -279,7 +280,7 @@ jobs:
       issues: write
     uses: ./.github/workflows/size-qg-comment-on-pr.yml
     with:
-      platforms: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
+      platforms: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
   
 
   publish:

@@ -7,7 +7,8 @@ on:   # only runs if there are no dependency changes
   push:
     branches:
       - master
-
+env: 
+  PLATFORMS: "macos-x86_64 macos-aarch64 linux-x86_64 linux-aarch64 windows-x86_64"
 jobs:
   check-file-changes:
     runs-on: ubuntu-22.04
@@ -47,7 +48,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: ${{ fromJSON(env.PLATFORMS) }}
     steps:
       - name: Download artifact from merge-base run
         run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name dependency_sizes_${{ matrix.platform }}.json
@@ -65,7 +66,7 @@ jobs:
       - download-artifacts
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: ${{ fromJSON(env.PLATFORMS) }}
     uses: ./.github/workflows/size-qg-measure-disk-use.yml
     with:
       platform: ${{ matrix.platform }}
@@ -77,7 +78,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        platform: [macos-x86_64, macos-aarch64, linux-x86_64, linux-aarch64, windows-x86_64]
+        platform: ${{ fromJSON(env.PLATFORMS) }}
     steps:
     - name: Size quality gates
       uses: ./.github/workflows/size-quality-gates.yml
@@ -94,5 +95,4 @@ jobs:
       ! fromJSON(needs.calculate-size-diffs.outputs.passes_qg)
     uses: ./.github/workflows/size-qg-comment-on-pr.yml
     with:
-      platforms: "macos-x86_64 macos-aarch64" # linux-x86_64 linux-aarch64 windows-x86_64"
-        
+      platforms: ${{ env.PLATFORMS }}
