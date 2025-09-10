@@ -36,6 +36,38 @@ No additional installation is needed on your server.
 
 3. [Restart the Agent][5].
 
+#### Logs
+
+The Hugging Face TGI integration can collect logs from the server container and forward them to Datadog.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `hugging_face_tgi.d/conf.yaml` file. Here's an example:
+
+   ```yaml
+   logs:
+     - type: docker
+       source: hugging_face_tgi
+       service: hugging_face_tgi
+   ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
+
+Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `hugging_face_tgi` under the Checks section.
