@@ -1,0 +1,81 @@
+id: cloudflare-api-shield
+tests:
+  - sample: |-
+      {
+          "__typename": "ZoneHttpRequestsAdaptive",
+          "apiGatewayMatchedEndpoint": "",
+          "apiGatewayMatchedHost": "",
+          "attackSignatureRefs": [],
+          "cacheStatus": "dynamic",
+          "clientASNDescription": "Dummy",
+          "clientAsn": "14618",
+          "clientCountryName": "US",
+          "clientDeviceType": "unknown",
+          "clientIP": "10.10.10.10",
+          "clientRequestHTTPHost": "test.org",
+          "clientRequestHTTPMethodName": "POST",
+          "clientRequestHTTPProtocol": "HTTP/1.1",
+          "clientRequestPath": "/wp-cron.php",
+          "clientRequestQuery": "?doing_wp_cron=123",
+          "clientRequestScheme": "https",
+          "clientSSLProtocol": "TLSv1.3",
+          "date": "2025-08-22",
+          "datetime": "2025-08-22T09:07:44Z",
+          "datetimeFifteenMinutes": "2025-08-22T09:00:00Z",
+          "datetimeFiveMinutes": "2025-08-22T09:05:00Z",
+          "datetimeHour": "2025-08-22T09:00:00Z",
+          "datetimeMinute": "2025-08-22T09:07:00Z",
+          "edgeResponseStatus": 200,
+          "firewallForAiAnyPiiCategory": 0,
+          "firewallForAiInjectionScore": 0,
+          "firewallForAiPiiCategories": [],
+          "firewallForAiUnsafeTopicCategories": [],
+          "leakedCredentialCheckResult": "none",
+          "originResponseDurationMs": 97,
+          "requestSource": "eyeball",
+          "securityAction": "unknown",
+          "securitySource": "unknown",
+          "userAgent": "WordPress/6.8.2; https://test.org",
+          "userAgentBrowser": "Unknown",
+          "userAgentOS": "Unknown",
+          "zoneVersion": 0
+      }
+    result: null
+  - sample: >-
+      {
+          "account": {
+              "id": "1234",
+              "name": "test@test.com's Account"
+          },
+          "action": {
+              "description": "Retrieve information about all operations on a zone",
+              "result": "success",
+              "time": "2025-08-22T09:53:53.186Z",
+              "type": "view"
+          },
+          "actor": {
+              "context": "dash",
+              "email": "test@test.com",
+              "id": "1234",
+              "ip_address": "10.10.10.10",
+              "type": "user"
+          },
+          "id": "1234",
+          "raw": {
+              "cf_ray_id": "97317c5339700ac9",
+              "method": "GET",
+              "status_code": 200,
+              "uri": "/zones/12343/api_gateway/operations?feature=schema_info&page=1&per_page=10&order=endpoint&direction=desc",
+              "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+          },
+          "resource": {
+              "product": "api_gateway",
+              "scope": "zones",
+              "type": "operations"
+          },
+          "zone": {
+              "id": "1234",
+              "name": "test.org"
+          }
+      }
+    result: null

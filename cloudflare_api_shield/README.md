@@ -1,43 +1,66 @@
-# Agent Check: Cloudflare API Shield
+# Cloudflare API Shield
 
 ## Overview
 
-This check monitors [Cloudflare API Shield][1].
+[Cloudflare API Shield][1] is a comprehensive solution designed to protect, manage, and monitor Application Programming Interfaces (APIs) against various security threats and operational challenges.
+
+This integration collects HTTP request and API Shield Audit Logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling search and analysis. The integration provides insight into HTTP request logs through out-of-the-box dashboards and includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
 
 ## Setup
 
-### Installation
+### Generate API credentials in Cloudflare API Shield
 
-The Cloudflare API Shield check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Login into cloudflare dashboard using administrator account.
+2. Go to **Manage Account** > **Account API Tokens**
+3. Click **Create Token**.
+4. In API Token templates, click on **Use template** for **Read all resources** option.
+5. In the Zone Resources section, Select **All zones from an account** and select **account**.
+6. Click on **Continue to summary**.
+7. Click on **Create Token**.
+8. Collect the **API token**.
 
-### Configuration
+### Collect Account ID in Cloudflare API Shield
 
-!!! Add list of steps to set up this integration !!!
+1. Log in to the Cloudflare dashboard, and select your account.
+2. The URL in your browser's address bar should show https://dash.cloudflare.com/ followed by a hex string. The hex string is your Cloudflare Account ID.
 
-### Validation
+### Get Zone ID in Cloudflare API Shield
+1. Login into cloudflare dashboard using administrator account.
+2. Go to **Account home > Domains**.
+3. Locate the domain (zone) for which you want to send the data.
+4. Click the three-dot (ellipsis) menu next to the domain name to open its settings.
+4. Copy the **Zone ID** for that domain.
 
-!!! Add steps to validate integration is functioning as expected !!!
+
+### Connect your Cloudflare account to Datadog
+
+1. Add your API Token and Account ID.
+
+    | Parameters                            | Description                                                  |
+    | ------------------------------------- | ------------------------------------------------------------ |
+    | API Token                               | The API Token of Cloudflare account                          |
+    | Account ID                            | Account ID of Cloudflare account                             |
+    | Zones                                 | Select which zones to crawl (defaults to all zones). Enter a comma-separated list of zone IDs.                                                                      |
+
+2. Click the **Save** button to save your settings.
 
 ## Data Collected
 
+### Logs
+
+The Cloudflare API Shield integration collects and forwards HTTP request and API Shield audit logs to Datadog.
+
 ### Metrics
 
-Cloudflare API Shield does not include any metrics.
-
-### Service Checks
-
-Cloudflare API Shield does not include any service checks.
+The Cloudflare API Shield integration does not include any metrics.
 
 ### Events
 
-Cloudflare API Shield does not include any events.
+The Cloudflare API Shield integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://www.cloudflare.com/en-in/application-services/products/api-shield/
+[2]: https://docs.datadoghq.com/help/

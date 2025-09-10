@@ -10,11 +10,19 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Cloudflare API Shield logs",
     "title": "Cloudflare API Shield",
-    "media": [],
+    "media": [
+      {
+        "caption": "Cloudflare API Shield - Security",
+        "image_url": "images/cloudflare_api_shield_security.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cloudflare API Shield - Audit",
+        "image_url": "images/cloudflare_api_shield_audit.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
       "Category::Log Collection",
       "Category::Security",
       "Submitted Data Type::Logs",
@@ -29,6 +37,13 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "Cloudflare API Shield - Overview": "assets/dashboards/cloudflare_api_shield_overview.json",
+      "Cloudflare API Shield - Audit": "assets/dashboards/cloudflare_api_shield_audit.json"
+    },
+    "logs": {
+      "source": "cloudflare-api-shield"
     }
   },
   "author": {
