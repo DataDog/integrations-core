@@ -508,6 +508,59 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "custom_query, assert_metrics",
+    [
+        (
+            {
+                'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b')) AS t (num,letter)",
+                'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
+                'tags': ['query:custom'],
+            },
+            [
+                ("sqlserver.num", {"value": 97, "tags": ["customtag:a", "query:custom"]}),
+                ("sqlserver.num", {"value": 98, "tags": ["customtag:b", "query:custom"]}),
+            ],
+        ),
+        (
+            {
+                'query': "EXEC exampleProcWithoutNocount",
+                'columns': [{'name': 'value', 'type': 'gauge'}],
+                'tags': ['hello:there'],
+            },
+            [
+                ("sqlserver.value", {"value": 1, "tags": ["hello:there"]}),
+            ],
+        ),
+    ],
+)
+def test_custom_queries_only(aggregator, dd_run_check, instance_docker, custom_query, assert_metrics):
+    instance = copy(instance_docker)
+    instance['custom_queries'] = [custom_query]
+    instance['only_custom_queries'] = True
+    instance['procedure_metrics'] = {'enabled': False}
+
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    for metric_name, kwargs in assert_metrics:
+        kwargs = copy(kwargs)
+        kwargs['tags'] = (
+            check._config.tags
+            + [
+                "database_hostname:{}".format("stubbed.hostname"),
+                "database_instance:{}".format("stubbed.hostname"),
+                "ddagenthostname:{}".format("stubbed.hostname"),
+                "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+                "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+            ]
+            + kwargs.get('tags', [])
+        )
+        aggregator.assert_metric(metric_name, **kwargs)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_load_static_information(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     check = SQLServer(CHECK_NAME, {}, [instance])

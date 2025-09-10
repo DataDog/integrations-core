@@ -40,6 +40,7 @@ class SQLServerConfig:
 
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
+        self.only_custom_queries: bool = is_affirmative(instance.get('only_custom_queries', False))
         self.ignore_missing_database = is_affirmative(instance.get("ignore_missing_database", False))
         if self.ignore_missing_database:
             self.log.warning(
