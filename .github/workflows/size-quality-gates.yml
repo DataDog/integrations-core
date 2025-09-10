@@ -52,15 +52,15 @@ jobs:
   
       - name: Download artifact from merge-base run
         run: |
-          gh run download ${{ steps.get-merge-base-run-id.outputs.run_id}} --name compressed_status.csv # status_compressed_${{ inputs.platform }}.json
-          gh run download ${{ steps.get-merge-base-run-id.outputs.run_id}} --name uncompressed_status.csv # status_uncompressed_${{ inputs.platform }}.json
+          gh run download ${{ steps.get-merge-base-run-id.outputs.run_id}} --name status_compressed_${{ inputs.platform }}.json
+          gh run download ${{ steps.get-merge-base-run-id.outputs.run_id}} --name status_uncompressed_${{ inputs.platform }}.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename previous sizes artifact
         run: |
-          mv compressed_status.csv status_compressed_${{ inputs.platform }}_prev.csv # $status_compressed_${{ inputs.platform }}.json
-          mv uncompressed_status.csv status_uncompressed_${{ inputs.platform }}_prev.csv # $status_uncompressed_${{ inputs.platform }}.json
+          mv status_compressed_${{ inputs.platform }}.json status_compressed_${{ inputs.platform }}_prev.json
+          mv status_uncompressed_${{ inputs.platform }}.json status_uncompressed_${{ inputs.platform }}_prev.json
 
       - name: Download current sizes artifact
         run: |
@@ -79,9 +79,9 @@ jobs:
         run: |
             set +e
             CMD=(python ddev/src/ddev/cli/size/utils/gha_diff.py
-              --compressed-prev-sizes "status_compressed_${{ inputs.platform }}_prev.csv"
+              --compressed-prev-sizes "status_compressed_${{ inputs.platform }}_prev.json"
               --compressed-curr-sizes "status_compressed_${{ inputs.platform }}_curr.json"
-              --uncompressed-prev-sizes "status_uncompressed_${{ inputs.platform }}_prev.csv"
+              --uncompressed-prev-sizes "status_uncompressed_${{ inputs.platform }}_prev.json"
               --uncompressed-curr-sizes "status_uncompressed_${{ inputs.platform }}_curr.json"
               --output "diffs_${{ inputs.platform }}.json"
               --html-long-out "size_diffs_output_${{ inputs.platform }}.txt"
