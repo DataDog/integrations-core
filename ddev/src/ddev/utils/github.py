@@ -95,42 +95,36 @@ class GitHubManager:
         return client
 
     def get_pull_request(self, sha: str) -> PullRequest | None:
-        from json import loads
-
         response = self.__api_get(
             self.ISSUE_SEARCH_API,
             # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
             params={'q': f'sha:{sha} repo:{self.repo_id} is:pull-request'},
         )
-        data = loads(response.text)
+        data = json.loads(response.text)
         if not data['items']:
             return None
 
         return PullRequest(data['items'][0])
 
     def get_pull_request_by_number(self, number: str) -> PullRequest | None:
-        from json import loads
-
         response = self.__api_get(
             self.ISSUE_SEARCH_API,
             params={'q': f'{number} repo:{self.repo_id} is:pull-request'},
         )
-        data = loads(response.text)
+        data = json.loads(response.text)
         if not data['items']:
             return None
 
         return PullRequest(data['items'][0])
 
     def get_next_issue_number(self) -> int:
-        from json import loads
-
         number = 1
 
         response = self.__api_get(
             self.ISSUE_LIST_API.format(repo_id=self.repo_id),
             params={'state': 'all', 'sort': 'created', 'direction': 'desc', 'per_page': 1},
         )
-        data = loads(response.text)
+        data = json.loads(response.text)
         if data:
             number += data[0]['number']
 
