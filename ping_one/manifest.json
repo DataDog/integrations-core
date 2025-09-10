@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5fce4e84-ab6e-4ba6-b996-ac85e134642e",
   "app_id": "ping-one",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
