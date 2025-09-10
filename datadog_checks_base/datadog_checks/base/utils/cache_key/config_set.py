@@ -18,7 +18,7 @@ class ConfigSetCacheKey(CacheKey):
     """
     Cache key that is derived from a subset of the check's config options.
 
-    When the subset of config options changes, the cached log cursor will be invalidated.
+    When the subset of config options changes, the cache is invalidated.
     """
 
     def __init__(

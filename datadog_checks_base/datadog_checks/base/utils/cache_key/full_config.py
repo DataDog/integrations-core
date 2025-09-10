@@ -10,7 +10,7 @@ class FullConfigCacheKey(CacheKey):
     """
     Cache key based on the check_id of the check where it is being used.
 
-    The check_id includes a digest of the full configuration of the check. The cache are invalidated
+    The check_id includes a digest of the full configuration of the check. The cache is invalidated
     whenever the configuration of the check changes.
     """
 
