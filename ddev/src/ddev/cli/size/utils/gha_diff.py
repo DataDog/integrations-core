@@ -36,11 +36,11 @@ def calculate_diffs(
 
     added = []
     removed = []
-    changed = []
-    unchanged = []
+    modified = []
+    unmodified = []
 
     total_diff = 0
-    # Find added and changed
+    # Find added and modified
     for curr_key, curr_entry in curr_compressed_map.items():
         if curr_key not in prev_compressed_map:
             # Add both compressed and uncompressed size info for added entries
@@ -52,7 +52,7 @@ def calculate_diffs(
                 }
             )
             total_diff += int(curr_entry.get("Size_Bytes", 0))
-        else:  # The entry is not new, so check if it has changed
+        else:  # The entry is not new, so check if it was modified
             prev_entry = prev_compressed_map[curr_key]
             prev_size = int(prev_entry.get("Size_Bytes", 0))
             curr_size = int(curr_entry.get("Size_Bytes", 0))
@@ -65,7 +65,7 @@ def calculate_diffs(
                     if uncompressed_prev_size != 0
                     else 0
                 )
-                changed.append(
+                modified.append(
                     {
                         "Name": curr_entry.get("Name"),
                         "Version": curr_entry.get("Version"),
@@ -82,7 +82,7 @@ def calculate_diffs(
                     }
                 )
             else:  # The entry is not new and the size remains the same
-                unchanged.append(
+                unmodified.append(
                     {
                         "Name": curr_entry.get("Name"),
                         "Version": curr_entry.get("Version"),
@@ -112,7 +112,7 @@ def calculate_diffs(
         {
             "added": order_by(added, "Compressed_Size_Bytes"),
             "removed": order_by(removed, "Compressed_Size_Bytes"),
-            "changed": order_by(changed, "Compressed_Percentage"),
+            "modified": order_by(modified, "Compressed_Percentage"),
             "total_diff": total_diff,
         },
         platform,
@@ -127,7 +127,7 @@ def order_by(diffs: list[dict], key: str) -> list[dict]:
 def display_diffs_to_html(diffs: dict, platform: str, python_version: str) -> str:
     sign = "+" if diffs['total_diff'] > 0 else ""
     text = f"<details><summary><h4>Size Delta for {platform} and Python {python_version}:\n"
-    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h4></summary>\n\n"
+    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])} (Compressed)</h4></summary>\n\n"
 
     if diffs["added"]:
         text += "<details><summary>Added</summary>\n"
@@ -166,13 +166,13 @@ def display_diffs_to_html(diffs: dict, platform: str, python_version: str) -> st
     else:
         text += "No removed dependencies/integrations\n\n"
 
-    if diffs["changed"]:
+    if diffs["modified"]:
         text += "<details><summary>Changed</summary>\n"
         text += "<table>\n"
         text += "<tr><th>Type</th><th>Name</th><th>Version</th>"
         text += "<th>Compressed Size Delta</th><th>Uncompressed Size Delta</th><th>Compressed Percentage</th>"
         text += "<th>Uncompressed Percentage</th></tr>\n"
-        for entry in diffs["changed"]:
+        for entry in diffs["modified"]:
             name = entry.get("Name", "")
             version = entry.get("Version", "")
             typ = entry.get("Type", "")
@@ -196,7 +196,7 @@ def display_diffs_to_html(diffs: dict, platform: str, python_version: str) -> st
         text += "</table>\n"
         text += "</details>\n\n"
     else:
-        text += "No changed dependencies/integrations\n\n"
+        text += "No modified dependencies/integrations\n\n"
     text += "</details>\n"
     return text
 
@@ -204,14 +204,14 @@ def display_diffs_to_html(diffs: dict, platform: str, python_version: str) -> st
 def display_diffs_to_html_short(diffs: dict, platform: str, python_version: str) -> str:
     sign = "+" if diffs['total_diff'] > 0 else ""
     text = f"<details><summary><h4>Size Delta for {platform} and Python {python_version}:\n"
-    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])}</h4></summary>\n\n"
+    text += f"{sign}{convert_to_human_readable_size(diffs['total_diff'])} (Compressed)</h4></summary>\n\n"
     total_added_compressed = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["added"])
     total_removed_compressed = sum(int(entry.get("Compressed_Size_Bytes", 0)) for entry in diffs["removed"])
-    total_changed_compressed = sum(entry.get("Compressed_Diff", 0) for entry in diffs["changed"])
+    total_modified_compressed = sum(entry.get("Compressed_Diff", 0) for entry in diffs["modified"])
     total_added_uncompressed = sum(int(entry.get("Uncompressed_Size_Bytes", 0)) for entry in diffs["added"])
     total_removed_uncompressed = sum(int(entry.get("Uncompressed_Size_Bytes", 0)) for entry in diffs["removed"])
-    total_changed_uncompressed = sum(entry.get("Uncompressed_Diff", 0) for entry in diffs["changed"])
-    total_changed_sign = "+" if total_changed_compressed > 0 else "-"
+    total_modified_uncompressed = sum(entry.get("Uncompressed_Diff", 0) for entry in diffs["modified"])
+    total_modified_sign = "+" if total_modified_compressed > 0 else "-"
     text += (
         f"<b>Total added:</b>\n\t +{convert_to_human_readable_size(total_added_compressed)} (Compressed) "
         if total_added_compressed != 0
@@ -233,18 +233,18 @@ def display_diffs_to_html_short(diffs: dict, platform: str, python_version: str)
         else ""
     )
     text += (
-        f"<b>Total changed:</b>\n\t {total_changed_sign}"
-        if total_changed_compressed != 0 or total_changed_uncompressed != 0
+        f"<b>Total modified:</b>\n\t {total_modified_sign}"
+        if total_modified_compressed != 0 or total_modified_uncompressed != 0
         else ""
     )
     text += (
-        f"{convert_to_human_readable_size(abs(total_changed_compressed))} (Compressed) \n\t {total_changed_sign}"
-        if total_changed_compressed != 0
+        f"{convert_to_human_readable_size(abs(total_modified_compressed))} (Compressed) \n\t {total_modified_sign}"
+        if total_modified_compressed != 0
         else ""
     )
     text += (
-        f"{convert_to_human_readable_size(abs(total_changed_uncompressed))} (Uncompressed)\n"
-        if total_changed_uncompressed != 0
+        f"{convert_to_human_readable_size(abs(total_modified_uncompressed))} (Uncompressed)\n"
+        if total_modified_uncompressed != 0
         else ""
     )
     text += "</details>\n"
@@ -256,13 +256,13 @@ def send_to_datadog(diffs: dict, platform: str, python_version: str, compression
     api_info = {"api_key": api_key, "site": "datadoghq.com"}
     metrics: list[dict] = []
 
-    for entry in diffs["unchanged"]:
-        metrics.append(define_metrics(entry, "compressed", "unchanged", platform, python_version))
-        metrics.append(define_metrics(entry, "uncompressed", "unchanged", platform, python_version))
+    for entry in diffs["unmodified"]:
+        metrics.append(define_metrics(entry, "compressed", "unmodified", platform, python_version))
+        metrics.append(define_metrics(entry, "uncompressed", "unmodified", platform, python_version))
 
-    for entry in diffs["changed"]:
-        metrics.append(define_metrics(entry, "compressed", "changed", platform, python_version))
-        metrics.append(define_metrics(entry, "uncompressed", "changed", platform, python_version))
+    for entry in diffs["modified"]:
+        metrics.append(define_metrics(entry, "compressed", "modified", platform, python_version))
+        metrics.append(define_metrics(entry, "uncompressed", "modified", platform, python_version))
 
     for entry in diffs["removed"]:
         metrics.append(define_metrics(entry, "compressed", "removed", platform, python_version))

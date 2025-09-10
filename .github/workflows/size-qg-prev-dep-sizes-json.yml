@@ -27,6 +27,20 @@ jobs:
               - '.builders/**'
               - '.github/workflows/resolve-build-deps.yml'
               - 'agent_requirements.in'
+  setup-platform-names:
+    runs-on: ubuntu-22.04
+    outputs:
+      platforms_json: ${{ steps.set_vars.outputs.platforms_json }}
+      platforms_string: ${{ steps.set_vars.outputs.platforms_string }}
+    steps:
+      - name: Define Platform Variables
+        id: set_vars
+        run: |
+          PLATFORMS_JSON='["macos-x86_64", "macos-aarch64", "linux-x86_64", "linux-aarch64", "windows-x86_64"]'
+          echo "platforms_json=$PLATFORMS_JSON" >> $GITHUB_OUTPUT
+          
+          PLATFORMS_STRING=$(echo $PLATFORMS_JSON | jq -r '. | join(" ")')
+          echo "platforms_string=$PLATFORMS_STRING" >> $GITHUB_OUTPUT
 
   get-merge-base:
     needs: check-file-changes
@@ -44,11 +58,13 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
 
   download-artifacts:
-    needs: get-merge-base
+    needs:
+      - setup-platform-names
+      - get-merge-base
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        platform: ${{ fromJSON(env.PLATFORMS) }}
+        platform: ${{ fromJSON(needs.setup-platform-names.outputs.platforms_json) }}
     steps:
       - name: Download artifact from merge-base run
         run: gh run download ${{ needs.get-merge-base.outputs.run_id }} --name dependency_sizes_${{ matrix.platform }}.json
@@ -63,10 +79,11 @@ jobs:
 
   measure-disk-usage:
     needs: 
+      - setup-platform-names
       - download-artifacts
     strategy:
       matrix:
-        platform: ${{ fromJSON(env.PLATFORMS) }}
+        platform: ${{ fromJSON(needs.setup-platform-names.outputs.platforms_json) }}
     uses: ./.github/workflows/size-qg-measure-disk-use.yml
     with:
       platform: ${{ matrix.platform }}
@@ -74,11 +91,13 @@ jobs:
       resolved-deps: false
 
   calculate-size-diffs:
-    needs: measure-disk-usage
+    needs:
+      - setup-platform-names
+      - measure-disk-usage
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        platform: ${{ fromJSON(env.PLATFORMS) }}
+        platform: ${{ fromJSON(needs.setup-platform-names.outputs.platforms_json) }}
     steps:
     - name: Size quality gates
       uses: ./.github/workflows/size-quality-gates.yml
@@ -89,10 +108,11 @@ jobs:
 
   comment-size-diffs-on-pr:
     needs:
+      - setup-platform-names
       - calculate-size-diffs
     if: >
       contains(github.event.pull_request.labels.*.name, 'show-size-delta') && 
       ! fromJSON(needs.calculate-size-diffs.outputs.passes_qg)
     uses: ./.github/workflows/size-qg-comment-on-pr.yml
     with:
-      platforms: ${{ env.PLATFORMS }}
+      platforms: ${{ needs.setup-platform-names.outputs.platforms_string }}
