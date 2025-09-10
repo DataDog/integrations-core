@@ -1281,6 +1281,11 @@ class MySql(AgentCheck):
             self._binlog_enabled = False
             return self._binlog_enabled
 
+        # TiDB doesn't support binlog in the same way as MySQL
+        if self._get_is_tidb(db):
+            self._binlog_enabled = False
+            return self._binlog_enabled
+
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
                 cursor.execute(SQL_BINLOG_ENABLED)
