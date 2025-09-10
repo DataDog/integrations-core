@@ -5,8 +5,8 @@
 set -e
 
 # Check required environment variables
-if [ -z "$GH_TOKEN" ]; then
-    echo "Error: GH_TOKEN environment variable is required"
+if [ -z "$PLATFORMS" ]; then
+    echo "Error: PLATFORMS environment variable is required"
     exit 1
 fi
 
@@ -20,10 +20,6 @@ if [ -z "$GITHUB_REPOSITORY" ]; then
     exit 1
 fi
 
-if [ -z "$PR_NUMBER" ]; then
-    echo "Error: PR_NUMBER environment variable is required"
-    exit 1
-fi
 
 if [ -z "$BASE_SHA" ]; then
     echo "Error: BASE_SHA environment variable is required"

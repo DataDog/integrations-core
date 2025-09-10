@@ -1,4 +1,4 @@
-name: Comment Quality Gates on PR
+name: Comment Quality Gates on PR 
 
 on: 
   workflow_call:
@@ -13,8 +13,6 @@ jobs:
       PLATFORMS: ${{ inputs.platforms }}
       GITHUB_RUN_ID: ${{ github.run_id }}
       GITHUB_REPOSITORY: ${{ github.repository }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       BASE_SHA: ${{github.event.pull_request.base.sha}}
        
     runs-on: ubuntu-22.04
