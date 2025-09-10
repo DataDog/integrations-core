@@ -47,7 +47,7 @@ def test_persistent_cache(datadog_agent):
 
     check.write_persistent_cache('foo', 'bar')
 
-    assert datadog_agent.read_persistent_cache('test_foo') == 'bar'
+    assert datadog_agent.read_persistent_cache('foo') == 'bar'
     assert check.read_persistent_cache('foo') == 'bar'
 
 

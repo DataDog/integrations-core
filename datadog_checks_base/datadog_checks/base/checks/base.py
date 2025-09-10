@@ -10,20 +10,12 @@ import logging
 import os
 import re
 from collections import deque
+from enum import Enum, auto
 from os.path import basename
-from typing import (  # noqa: F401
+from typing import (
     TYPE_CHECKING,
     Any,
-    AnyStr,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
+    Deque,  # noqa: F401
 )
 
 import lazy_loader
@@ -33,6 +25,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.agent.utils import should_profile_memory
+from datadog_checks.base.utils.cache_key import CacheKey, CacheKeyManager, CacheKeyType, FullConfigCacheKey
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
@@ -82,6 +75,12 @@ unicodedata: _module_unicodedata = lazy_loader.load('unicodedata')
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
+
+
+class PersistentCacheKeyType(Enum):
+    """Enum used to identify the type of persistent cache key."""
+
+    LOG_CURSOR = auto()
 
 
 @traced_class
@@ -291,6 +290,10 @@ class AgentCheck(object):
         self._config_model_instance = None  # type: Any
         self._config_model_shared = None  # type: Any
 
+        # The cache key used for persistent caching is managed through teh cache manager. Each cache key has a deferred
+        # initialization since all properties might not be available during the check initialization time.
+        self.cache_key_manager = CacheKeyManager(self)
+
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
@@ -490,6 +493,14 @@ class AgentCheck(object):
         # type: () -> bool
         self._log_deprecation('in_developer_mode')
         return False
+
+    def logs_persistent_cache_key(self) -> CacheKey:
+        """
+        Returns the cache key for the logs persistent cache.
+
+        Override this method to modify how the log cursor is persisted between agent restarts.
+        """
+        return FullConfigCacheKey(self)
 
     def log_typos_in_options(self, user_config, models_config, level):
         # See Performance Optimizations in this package's README.md.
@@ -1009,13 +1020,25 @@ class AgentCheck(object):
             attributes['timestamp'] = int(timestamp * 1000)
 
         datadog_agent.send_log(json.encode(attributes), self.check_id)
+
         if cursor is not None:
-            self.write_persistent_cache('log_cursor_{}'.format(stream), json.encode(cursor))
+            self.store_log_cursor(cursor, stream)
+
+    def store_log_cursor(self, cursor: dict[str, Any], stream: str = 'default'):
+        """Stores the log cursor in the persistent cache."""
+        self.cache_key_manager.add(cache_key_type=CacheKeyType.LOG_CURSOR, key_factory=self.logs_persistent_cache_key)
+        cache_key = self.cache_key_manager.get(cache_key_type=CacheKeyType.LOG_CURSOR)
+        self.write_persistent_cache(cache_key.key_for(context=f'log_cursor_{stream}'), json.encode(cursor))
 
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
-        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        if not self.cache_key_manager.has_cache_key(CacheKeyType.LOG_CURSOR):
+            # The cache key manager does not have a key for the log cursor. Do not create one on retrieval.
+            return None
+
+        cache_key = self.cache_key_manager.get(cache_key_type=CacheKeyType.LOG_CURSOR)
+        data = self.read_persistent_cache(cache_key.key_for(f'log_cursor_{stream}'))
         return json.decode(data) if data else None
 
     def _log_deprecation(self, deprecation_key, *args):
@@ -1082,10 +1105,6 @@ class AgentCheck(object):
 
         return entrypoint
 
-    def _persistent_cache_id(self, key):
-        # type: (str) -> str
-        return '{}_{}'.format(self.check_id, key)
-
     def read_persistent_cache(self, key):
         # type: (str) -> str
         """Returns the value previously stored with `write_persistent_cache` for the same `key`.
@@ -1094,7 +1113,7 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+        return datadog_agent.read_persistent_cache(key)
 
     def write_persistent_cache(self, key, value):
         # type: (str, str) -> None
@@ -1110,7 +1129,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
+        datadog_agent.write_persistent_cache(key, value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
