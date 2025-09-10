@@ -267,6 +267,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
+        self._compiled_patterns_cache = {}
         self._extensions_cached = None
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
@@ -285,6 +286,14 @@ class PostgresMetadata(DBMAsyncJob):
         if self._tags_no_db:
             t.extend(self._tags_no_db)
         return t
+
+    def _get_compiled_pattern(self, pattern_str):
+        """
+        Get a compiled regex pattern from cache, compiling it if not already cached.
+        """
+        if pattern_str not in self._compiled_patterns_cache:
+            self._compiled_patterns_cache[pattern_str] = re.compile(pattern_str)
+        return self._compiled_patterns_cache[pattern_str]
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -455,7 +464,7 @@ class PostgresMetadata(DBMAsyncJob):
         for re_str in self._config.schemas_metadata_config.get(
             "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
         ):
-            regex = re.compile(re_str)
+            regex = self._get_compiled_pattern(re_str)
             if regex.search(name):
                 self._log.debug(
                     "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
@@ -470,7 +479,7 @@ class PostgresMetadata(DBMAsyncJob):
         if len(includes) == 0:
             return True
         for re_str in includes:
-            regex = re.compile(re_str)
+            regex = self._get_compiled_pattern(re_str)
             if regex.search(name):
                 self._log.debug(
                     "Including {metadata_type} {name} in metadata collection because of {re_str}".format(
