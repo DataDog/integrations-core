@@ -5,7 +5,6 @@ set -e
 WORKFLOW_NAME=$1
 
 
-# Find workflow run at exact merge-base SHA
 echo "Finding workflow run at merge-base SHA..."
 if [ -z "$DEFAULT_BRANCH" ]; then
     echo "Error: DEFAULT_BRANCH environment variable is required"
