@@ -154,7 +154,7 @@ def test_calculate_diffs():
             "Uncompressed_Size_Bytes": 6144,
         }
     ]
-    assert diffs['changed'] == [
+    assert diffs['modified'] == [
         {
             "Name": "packageA",
             "Version": "1.0.1",
