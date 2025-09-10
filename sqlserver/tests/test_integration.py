@@ -508,55 +508,37 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "custom_query, assert_metrics",
-    [
-        (
-            {
-                'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b')) AS t (num,letter)",
-                'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
-                'tags': ['query:custom'],
-            },
-            [
-                ("sqlserver.num", {"value": 97, "tags": ["customtag:a", "query:custom"]}),
-                ("sqlserver.num", {"value": 98, "tags": ["customtag:b", "query:custom"]}),
-            ],
-        ),
-        (
-            {
-                'query': "EXEC exampleProcWithoutNocount",
-                'columns': [{'name': 'value', 'type': 'gauge'}],
-                'tags': ['hello:there'],
-            },
-            [
-                ("sqlserver.value", {"value": 1, "tags": ["hello:there"]}),
-            ],
-        ),
-    ],
-)
-def test_custom_queries_only(aggregator, dd_run_check, instance_docker, custom_query, assert_metrics):
+def test_only_custom_queries(aggregator, dd_run_check, instance_docker):
+    """Test that only_custom_queries=True skips regular metrics but executes custom queries."""
     instance = copy(instance_docker)
-    instance['custom_queries'] = [custom_query]
     instance['only_custom_queries'] = True
+    instance['custom_queries'] = [
+        {
+            'query': "SELECT 42 as custom_value",
+            'columns': [{'name': 'custom_value', 'type': 'gauge'}],
+            'tags': ['test:only_custom'],
+        }
+    ]
     instance['procedure_metrics'] = {'enabled': False}
 
     check = SQLServer(CHECK_NAME, {}, [instance])
     dd_run_check(check)
 
-    for metric_name, kwargs in assert_metrics:
-        kwargs = copy(kwargs)
-        kwargs['tags'] = (
-            check._config.tags
-            + [
-                "database_hostname:{}".format("stubbed.hostname"),
-                "database_instance:{}".format("stubbed.hostname"),
-                "ddagenthostname:{}".format("stubbed.hostname"),
-                "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-                "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
-            ]
-            + kwargs.get('tags', [])
-        )
-        aggregator.assert_metric(metric_name, **kwargs)
+    # Verify that regular integration metrics are NOT collected
+    # (These would normally be collected by default)
+    aggregator.assert_metric('sqlserver.cache.hit_ratio', count=0)
+    aggregator.assert_metric('sqlserver.broker_activation.tasks_running', count=0)
+
+    # Verify that custom query metrics ARE collected
+    instance_tags = check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "ddagenthostname:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
+
+    aggregator.assert_metric('sqlserver.custom_value', value=42, tags=instance_tags + ['test:only_custom'], count=1)
 
 
 @pytest.mark.integration
