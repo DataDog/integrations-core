@@ -1106,7 +1106,7 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(key)
+        return datadog_agent.read_persistent_cache(f"{self.name}_{key}")
 
     def write_persistent_cache(self, key, value):
         # type: (str, str) -> None
@@ -1122,7 +1122,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(key, value)
+        datadog_agent.write_persistent_cache(f"{self.name}_{key}", value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None

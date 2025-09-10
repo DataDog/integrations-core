@@ -42,12 +42,11 @@ def test_check_version():
 
 
 def test_persistent_cache(datadog_agent):
-    check = AgentCheck()
-    check.check_id = 'test'
+    check = AgentCheck(name="test")
 
     check.write_persistent_cache('foo', 'bar')
 
-    assert datadog_agent.read_persistent_cache('foo') == 'bar'
+    assert datadog_agent.read_persistent_cache('test_foo') == 'bar'
     assert check.read_persistent_cache('foo') == 'bar'
 
 
