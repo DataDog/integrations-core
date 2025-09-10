@@ -1,0 +1,154 @@
+id: push-security
+tests:
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757326162, "object":
+      "LOGIN", "category": "ACTIVITY", "description": "test.user@example.com
+      logged into https://example.com/authorize using a password",
+      "friendlyName": "Login", "new": { "os": "MACOS", "loginType":
+      "PASSWORD_LOGIN", "weakPasswordReasons": null, "sourceIpAddress":
+      "10.10.10.10", "employeeId": "emp1", "userAgent": "Mozilla/5.0 (Macintosh;
+      Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)
+      Version/17.6 Safari/605.1.15", "identityProvider": null,
+      "passwordManuallyTyped": true, "accountId": "acc1", "weakPassword": false,
+      "passwordId": "pass1", "appType": "EXAMPLE_APP", "loginUrl":
+      "https://example.com/authorize", "appId": "app1", "browser": "SAFARI",
+      "workApp": true, "passwordManager": null, "loginTimestamp": 1757326157,
+      "email": "test.user@example.com", "leakedPassword": false } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757404789, "object":
+      "PHISHING_TOOL_DETECTED", "category": "CONTROL", "description":
+      "test.user@example.com was blocked from visiting https://example.dev/",
+      "friendlyName": "Phishing tool detected", "new": { "indicator":
+      "TEST_IND", "mode": "WARN", "os": "WINDOWS", "browser": "CHROME",
+      "sourceIpAddress": "10.10.10.10", "action": "DISPLAYED", "userAgent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
+      Gecko) Chrome/140.0.0.0 Safari/537.36", "employee": { "firstName": "test",
+      "lastName": "user", "licensed": true, "creationTimestamp": 1754473323,
+      "location": null, "id": "emp1", "department": "/", "email":
+      "test.user@example.com", "chatopsEnabled": false }, "url":
+      "https://example.dev/", "referrerUrl": null } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757404789, "object":
+      "PHISHING", "category": "DETECTION", "type": "CREATE", "description":
+      "test.user@example.com triggered a new phishing detection",
+      "friendlyName": "Phishing attack", "new": { "severity": "MEDIUM",
+      "lastActivityTimestamp": 1757404789, "archived": false, "browserId":
+      "browser1", "detectionType": "PHISHING", "detectionLink":
+      "https://pushsecurity.com/app/detections?id=test_id1", "response":
+      "EMPLOYEE_WARNED", "creationTimestamp": 1757404789, "employeeId": "emp1",
+      "id": "abc", "employee": { "firstName": "test", "lastName": "user",
+      "licensed": true, "creationTimestamp": 1754473323, "location": null, "id":
+      "emp1", "department": "/", "email": "test.user@example.com",
+      "chatopsEnabled": false }, "classification": null } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757334485, "object":
+      "PHISHING", "category": "DETECTION", "type": "UPDATE", "description":
+      "Phishing detection for test.user@example.com updated", "friendlyName":
+      "Phishing attack", "new": { "severity": "HIGH", "lastActivityTimestamp":
+      1757334485, "archived": false, "browserId": "browser_1", "detectionType":
+      "PHISHING", "detectionLink":
+      "https://pushsecurity.com/app/detections?id=test_id1", "response":
+      "EMPLOYEE_IGNORED_WARNING", "creationTimestamp": 1757334476, "employeeId":
+      "emp1", "id": "test_id1", "employee": { "firstName": "test", "lastName":
+      "user", "licensed": true, "creationTimestamp": 1752659761, "location":
+      null, "id": "emp1", "department": null, "email": "test.user@example.com",
+      "chatopsEnabled": false }, "classification": null }, "old": { "severity":
+      "MEDIUM", "lastActivityTimestamp": 1757334476, "archived": false,
+      "browserId": "browser_1", "detectionType": "PHISHING", "detectionLink":
+      "https://pushsecurity.com/app/detections?id=test_id1", "response":
+      "EMPLOYEE_WARNED", "creationTimestamp": 1757334476, "employeeId": "emp1",
+      "id": "test_id1", "employee": { "firstName": "test", "lastName": "user",
+      "licensed": true, "creationTimestamp": 1752659761, "location": null, "id":
+      "emp1", "department": null, "email": "test.user@example.com",
+      "chatopsEnabled": false }, "classification": null } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757488503, "object":
+      "ADMIN_LOADED_DATA", "category": "AUDIT", "description":
+      "test.user@example.com listed events from event log", "friendlyName":
+      "Admin loaded data", "actor": { "role": "FULL_ACCESS", "sourceIpAddress":
+      "103.108.207.58", "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+      AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "source": "UI", "email": "test.user@example.com" }, "new": { "query":
+      "events", "arguments": { "sortDirection": "DESC",
+      "creationTimestampGreaterThan": null, "after": null,
+      "creationTimestampLessThan": null, "category": "AUDIT", "first": 50,
+      "object": null } } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757488503, "object":
+      "ADMIN_LOADED_DATA", "category": "AUDIT", "description":
+      "test.user@example.com listed events from event log", "friendlyName":
+      "Admin loaded data", "actor": { "source": "API", "apiKeyName": "key-1",
+      "apiKeyCreatedBy": "adm1", "sourceIpAddress": "10.10.10.10", "userAgent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
+      Gecko) Chrome/140.0.0.0 Safari/537.36", }, "new": { "query": "events",
+      "arguments": { "sortDirection": "DESC", "creationTimestampGreaterThan":
+      null, "after": null, "creationTimestampLessThan": null, "category":
+      "AUDIT", "first": 50, "object": null } } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757404720, "object":
+      "BROWSER", "category": "ENTITY", "type": "UPDATE", "description": "Browser
+      for test.user@example.com updated", "friendlyName": "Browser", "new": {
+      "lastOnlineTimestamp": 1757404720, "os": "WINDOWS", "profileSyncEnabled":
+      true, "employeeId": "emp_1", "language": "en-GB", "isActive": true,
+      "version": "140.0.0.0", "profileEmail": "test.user@example.com",
+      "browser": "CHROME", "creationTimestamp": 1757337192, "extensionVersion":
+      "2.0.0", "id": "abc", "tokenType": "INDIVIDUAL", "email":
+      "test.user@example.com" }, "old": { "lastOnlineTimestamp": 1757404720,
+      "os": "WINDOWS", "profileSyncEnabled": true, "employeeId": "emp_1",
+      "language": "en-GB", "isActive": true, "version": "140.0.0.0",
+      "profileEmail": "test.user@example.com", "browser": "CHROME",
+      "creationTimestamp": 1757337192, "extensionVersion": "1.96.19", "id":
+      "abc", "tokenType": "INDIVIDUAL", "email": "test.user@example.com" } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757390436, "object":
+      "APP_OTHER", "category": "ENTITY", "type": "DELETE", "description":
+      "www.example.com removed", "friendlyName": "App (Other)", "old": {
+      "requestSupportStatus": "DISCOVERED", "hidden": false, "appId": null,
+      "domain": "www.example.com", "name": null, "creationTimestamp":
+      1754559431, "id": "abc" } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757333626, "object":
+      "FINDING", "category": "ENTITY", "type": "CREATE", "description": "Shared
+      account finding observed for test.user@example.com on Push Security",
+      "friendlyName": "Finding", "new": { "accountId": "acc_1", "passwordId":
+      null, "appType": "PUSH_SECURITY", "appId": "app_1", "creationTimestamp":
+      1757333626, "employeeId": "emp_1", "id": "abc", "state": "OPEN", "type":
+      "SHARED_ACCOUNT", "employee": { "firstName": "test", "lastName": "user",
+      "licensed": true, "creationTimestamp": 1754480521, "location": null, "id":
+      "emp_1", "department": "/", "email": "test.user@example.com",
+      "chatopsEnabled": false } } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757327806, "object":
+      "EMPLOYEE", "category": "ENTITY", "type": "UPDATE", "description":
+      "test.user@example.com updated", "friendlyName": "Employee", "new": {
+      "firstName": "test", "lastName": "user", "licensed": true,
+      "creationTimestamp": 1754480521, "location": null, "id": "abc",
+      "department": "/", "email": "test.user@example.com", "chatopsEnabled":
+      false }, "old": { "firstName": "test", "lastName": "user", "licensed":
+      false, "creationTimestamp": 1754480521, "location": null, "id": "abc",
+      "department": "/", "email": "test.user@example.com", "chatopsEnabled":
+      false } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757333626, "object":
+      "FINDING", "category": "ENTITY", "type": "CREATE", "description": "Shared
+      account finding observed for test.user@example.com on Push Security",
+      "friendlyName": "Finding", "old": { "id": "abc", "type": "SHARED_ACCOUNT",
+      "state": "OPEN", "employeeId": "emp_1", "accountId": "acc_1",
+      "passwordId": null, "appType": "PUSH_SECURITY", "appId": "app_1",
+      "creationTimestamp": 1757333626, "employee": { "firstName": "test",
+      "lastName": "user", "licensed": true, "creationTimestamp": 1754480521,
+      "location": null, "id": "emp_1", "department": "/", "email":
+      "test.user@example.com", "chatopsEnabled": false } } }'
+    result: null
+  - sample: '{ "version": "1", "id": "123", "timestamp": 1757327806, "object":
+      "EMPLOYEE", "category": "ENTITY", "type": "DELETE", "description":
+      "test.user@example.com updated", "friendlyName": "Employee", "old": {
+      "firstName": "test", "lastName": "user", "licensed": false,
+      "creationTimestamp": 1754480521, "location": null, "id": "abc",
+      "department": "/", "email": "test.user@example.com", "chatopsEnabled":
+      false } }'
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
