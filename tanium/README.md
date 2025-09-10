@@ -12,6 +12,10 @@ This integration collects logs from the sources listed above and transmits them 
 
 ## Setup
 
+### Prerequisites
+
+- The `Threat Response` module must be included in your Tanium license to collect `Threat Response Alerts` and `Threat Response Audit` logs.
+
 ### Retrieve Datadog CIDR range
 
 1. Use an API platform (such as Postman) or `curl` to make a `GET` request to the [Datadog API endpoint][5].
@@ -33,6 +37,7 @@ This integration collects logs from the sources listed above and transmits them 
    - `Special`: Token Use
    - `Execute`: Threat Response API
    - `Read`: Audit, Threat Response Alerts, and Threat Response Audit
+   - `Unrestricted Management Rights`: Computer Groups
 2. From the main menu, navigate to **Administration** > **Permissions** > **API Tokens**.
 3. Click **New API Token** and configure the token settings:
    - **Expiration**: Set the expiration interval to `365` days. Ensure you rotate the token before it expires. Refer to the "Rotate API Token in Tanium" section for instructions.
@@ -42,6 +47,8 @@ This integration collects logs from the sources listed above and transmits them 
 6. This integration supports both **cloud-based** and **self-hosted** Tanium instances:
    - **Cloud-based**: Use the host format `\<customer\>.cloud.tanium.com`. Replace `\<customer\>` with your organization's subdomain.
    - **Self-hosted**: Use the domain of your self-hosted Tanium instance. The instance must be publicly accessible over HTTPS. Examples: `tk-example.titankube.com`, `123.123.123.123:8443`.
+
+   **Note:** Ensure that you do not include `-api` in the `Host` value when configuring the integration, as it is automatically handled internally.
 
 ### Rotate API token in Tanium
 
