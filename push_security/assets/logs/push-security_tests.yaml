@@ -421,34 +421,73 @@ tests:
  -
   sample: |-
     {
-      "version": "1",
-      "id": "123",
-      "timestamp": 1757488503,
-      "object": "ADMIN_LOADED_DATA",
-      "category": "AUDIT",
-      "description": "test.user@example.com listed events from event log",
-      "friendlyName": "Admin loaded data",
-      "actor": {
-        "source": "API",
-        "apiKeyName": "key-1",
-        "apiKeyCreatedBy": "adm1",
-        "sourceIpAddress": "10.10.10.10",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      "actor" : {
+        "apiKeyCreatedBy" : "adm1",
+        "sourceIpAddress" : "10.10.10.10",
+        "apiKeyName" : "key-1",
+        "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "source" : "API"
       },
-      "new": {
-        "query": "events",
-        "arguments": {
-          "sortDirection": "DESC",
-          "creationTimestampGreaterThan": null,
-          "after": null,
-          "creationTimestampLessThan": null,
-          "category": "AUDIT",
-          "first": 50,
-          "object": null
+      "new" : {
+        "query" : "events",
+        "arguments" : {
+          "sortDirection" : "DESC",
+          "category" : "AUDIT",
+          "first" : 50
         }
-      }
+      },
+      "description" : "test.user@example.com listed events from event log",
+      "id" : "123",
+      "category" : "AUDIT",
+      "version" : "1",
+      "friendlyName" : "Admin loaded data",
+      "timestamp" : 1757488503,
+      "object" : "ADMIN_LOADED_DATA"
     }
-  result: null
+  result:
+    custom:
+      actor:
+        apiKeyName: "key-1"
+        source: "API"
+      category: "AUDIT"
+      evt:
+        name: "Admin loaded data"
+      http:
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "140"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      id: "123"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      new:
+        arguments:
+          category: "AUDIT"
+          first: 50
+          sortDirection: "DESC"
+        query: "events"
+      object: "ADMIN_LOADED_DATA"
+      timestamp: 1.757488503E12
+      usr:
+        email: "adm1"
+      version: "1"
+    message: "test.user@example.com listed events from event log"
+    service: "AUDIT"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757488503000
  -
   sample: |-
     {
