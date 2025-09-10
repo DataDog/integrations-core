@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4620121f-b5ca-4b9c-aca2-c69bf18bc362",
   "app_id": "iis",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
