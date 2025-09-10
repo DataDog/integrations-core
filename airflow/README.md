@@ -72,7 +72,7 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
    statsd_port = 8125
    statsd_prefix = airflow
    ```
-   Do not set `statsd_datadog_enabled` without first [installing the datadog package](#datadog-dogstatsd-package-and-origin-detection).
+   Do not set `statsd_datadog_enabled` without first [installing the Datadog DogStatsD package](#datadog-dogstatsd-package-and-origin-detection).
 
 3. Update the [Datadog Agent main configuration file][9] `datadog.yaml` by adding the following configuration to remap the Airflow notation to Datadog notation:
 
@@ -317,7 +317,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 Ensure that `url` matches your Airflow [webserver `base_url`][19], the URL used to connect to your Airflow instance. Replace `localhost` with the template variable `%%host%%`.
 
-If you are using the [official Airflow Helm chart][24], this should be applied on the `webserver` pod and its `webserver` container. For example, with the [`webserver.podAnnotations`][22] your Autodiscovery Annotations may look like the following:
+If you are using the [official Airflow Helm chart][24], this should be applied on the `webserver` pod and its `webserver` container. For example, with the [`webserver.podAnnotations`][22], your Autodiscovery Annotations may look like the following:
 
 ```yaml
 webserver:
@@ -362,11 +362,11 @@ extraEnv: |
         fieldPath: status.hostIP
 ```
 
-**Note:** The [Airflow Helm Chart][24] requires the `valueFrom` based environment variables to be set with `extraEnv`. Do not set `AIRFLOW__METRICS__STATSD_DATADOG_ENABLED` without first [installing the datadog package](#datadog-dogstatsd-package-and-origin-detection).
+**Note**: The [Airflow Helm Chart][24] requires the `valueFrom` based environment variables to be set with `extraEnv`. Do not set `AIRFLOW__METRICS__STATSD_DATADOG_ENABLED` without first [installing the Datadog package](#datadog-dogstatsd-package-and-origin-detection).
 
 The environment variable for the metrics endpoint `AIRFLOW__METRICS__STATSD_HOST` is supplied with the node's host IP address to route the StatsD data to the Datadog Agent pod on the same node as the Airflow pod. This setup also requires the Agent to have a `hostPort` open for this port `8125` and accepting non-local StatsD traffic. For more information, see [DogStatsD on Kubernetes Setup][12]. This should direct the StatsD traffic from the Airflow container to a Datadog Agent ready to accept the incoming data.
 
-The last portion is to update the Datadog Agent with the corresponding `dogstatsd_mapper_profiles` . This can be done by copying the `dogstatsd_mapper_profiles` provided in the [Host installation][13] into your `datadog.yaml` file. Or by deploying your Datadog Agent with the equivalent JSON configuration in the environment variable `DD_DOGSTATSD_MAPPER_PROFILES`. With respect to Kubernetes the equivalent environment variable notation is:
+You must also update the Datadog Agent with the corresponding `dogstatsd_mapper_profiles`. To do this, copy the `dogstatsd_mapper_profiles` provided in the [Host installation][13] into your `datadog.yaml` file. Alternatively, you can also deploy your Datadog Agent with the equivalent JSON configuration in the environment variable `DD_DOGSTATSD_MAPPER_PROFILES`. For Kubernetes, the equivalent environment variable notation is:
 
 ```yaml
 env:
@@ -428,27 +428,27 @@ You may need to configure parameters for the Datadog Agent to make authenticated
 
 ### Datadog DogStatsD package and origin detection
 
-Airflow can use its own StatsD library, as well the Datadog Python DogStatsD logger. Using this can provide extra tagging options, including [Origin Detection][27] in Kubernetes.
+Airflow can use its own StatsD library, as well the Datadog Python DogStatsD logger. Using the Datadog Python DogStatsD can provide extra tagging options, including [Origin Detection][27] in Kubernetes.
 
-However, this does **not** come installed by default in Airflow. You need to install the [Datadog provider package][25]. For host installations you can install it directly with `pip install apache-airflow-providers-datadog`.
+However, this does **not** come installed by default in Airflow. You need to install the [Datadog provider package][25]. For host installations, you can install it directly with `pip install apache-airflow-providers-datadog`.
 
-For containerized environments [Airflow recommends][26] to build a custom image with this package installed. For example the following `Dockerfile` can be used relative to your desired version tag (ex: `2.8.4` or `3.0.2`):
+For containerized environments, [Airflow recommends][26] to build a custom image with this package installed. For example, the following `Dockerfile` can be used relative to your desired version tag (ex: `2.8.4` or `3.0.2`):
 
 ```
 FROM apache/airflow:<VERSION>
 RUN pip install apache-airflow-providers-datadog
 ```
 
-Once that is running provide the environment variable to your Airflow containers to enable this:
+After that is running, provide the environment variable to your Airflow containers to enable this:
 
 ```yaml
 - name: AIRFLOW__METRICS__STATSD_DATADOG_ENABLED
   value: "true"
 ```
 
-Since this option switches it from the Airflow StatsD library, to the Datadog DogStatsD library, this supports Datadog tagging options. Including Origin Detection out-of-box on the Airflow side. You need to enable [Origin Detection on the Datadog Agent][27] side to match.
+Because this option switches Airflow from using the Airflow StatsD library to the Datadog DogStatsD library, this option supports Datadog tagging options, including Origin Detection out-of-the-box on the Airflow side. You need to enable [Origin Detection on the Datadog Agent][27] side to match.
 
-If you try to enable the DogStatsD plugin without this package installed - you will get an error like the follwing with Airflow and no metrics will be sent.
+If you try to enable the DogStatsD plugin without this package installed, no metrics are sent, and an error like the following occurs:
 
 > {stats.py:42} ERROR - Could not configure StatsClient: No module named 'datadog', using NoStatsLogger instead.
 
