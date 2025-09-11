@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.0.1 / 2025-08-07
+## 8.1.0 / 2025-09-05
+
+***Added***:
+
+* Add rabbitmq_user and rabbitmq_pass to rabbitmq conf.yaml.example ([#21120](https://github.com/DataDog/integrations-core/pull/21120))
+
+## 8.0.1 / 2025-08-07 / Agent 7.70.0
 
 ***Fixed***:
 

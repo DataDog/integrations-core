@@ -432,7 +432,7 @@
                             {
                                 "name": "query1",
                                 "data_source": "metrics",
-                                "query": "top(avg:kubernetes_state.replicaset.replicas{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')",
+                                "query": "avg:kubernetes_state.replicaset.replicas{$scope,$kube_namespace,$kube_cluster_name,$kube_replica_set} by {kube_cluster_name,kube_namespace,kube_replica_set}",
                                 "aggregator": "avg"
                             }
                         ]
