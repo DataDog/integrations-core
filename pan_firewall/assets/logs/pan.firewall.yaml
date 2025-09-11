@@ -462,6 +462,9 @@ pipeline:
             - filter:
                 query: "@severity:critical"
               name: "5"
+            - filter:
+                query: "-@severity:*"
+              name: "99"
           target: ocsf.severity_id
         - type: attribute-remapper
           name: Map `ocsf.severity_id` to `ocsf.severity_id`
@@ -493,6 +496,9 @@ pipeline:
             - filter:
                 query: "@ocsf.severity_id:5"
               name: Critical
+            - filter:
+                query: "@ocsf.severity_id:99"
+              name: Other
           target: ocsf.severity
     - type: pipeline
       name: OCSF sub pipeline for class Network Activity [4001]
@@ -502,6 +508,23 @@ pipeline:
       filter:
         query: "@type:TRAFFIC"
       processors:
+        - type: category-processor
+          name: Map activity name
+          enabled: true
+          categories:
+            - filter:
+                query: "@subtype:start"
+              name: "Open"
+            - filter:
+                query: "@subtype:end"
+              name: "Close"
+            - filter:
+                query: "@subtype:drop"
+              name: "Reset"
+            - filter:
+                query: "@subtype:deny"
+              name: "Refuse"
+          target: ocsf.activity_name
         - type: string-builder-processor
           name: Add category uid
           enabled: true
@@ -537,23 +560,6 @@ pipeline:
                 query: "@subtype:deny"
               name: "5"
           target: ocsf.activity_id
-        - type: category-processor
-          name: Map activity name
-          enabled: true
-          categories:
-            - filter:
-                query: "@subtype:start"
-              name: "Open"
-            - filter:
-                query: "@subtype:end"
-              name: "Close"
-            - filter:
-                query: "@subtype:drop"
-              name: "Reset"
-            - filter:
-                query: "@subtype:deny"
-              name: "Refuse"
-          target: ocsf.activity_name
         - type: attribute-remapper
           name: Map `network.destination.ip` to `ocsf.dst_endpoint.ip`
           enabled: true
@@ -1217,7 +1223,7 @@ pipeline:
             - filter:
                 query: "@ocsf.status_id:99"
               name: "Other"
-          target: ocsf.connection_info.direction
+          target: ocsf.status
         - type: attribute-remapper
           name: Map `ocsf.class_uid` to `ocsf.class_uid`
           enabled: true
@@ -1256,9 +1262,6 @@ pipeline:
             - filter:
                 query: "@ocsf.confidence_id:3"
               name: "High"
-            - filter:
-                query: "@ocsf.confidence_id:99"
-              name: "Other"
           target: ocsf.confidence
         - type: attribute-remapper
           name: remap 'ocsf.evidence.device.type_id' string to integer
