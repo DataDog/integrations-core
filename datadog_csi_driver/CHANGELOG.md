@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.1.0 / 2025-09-11
+
+***Added***:
+
+* Bump minimum Base check requirement ([#21305](https://github.com/DataDog/integrations-core/pull/21305))
+
 ## 1.0.0 / 2025-09-05
 
 ***Added***:
