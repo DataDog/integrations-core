@@ -34,74 +34,103 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          set -euo pipefail
+            set -euo pipefail
 
-          # Correctly uses single quotes to pass the string literally
-          PR_JSON="$(gh pr view "$PR_NUMBER" --json 'reviewRequests{login,members{nodes{login}}}')"
+            # === Step 1: Get All Requested Reviewers (Users and Teams) ===
+            echo "Fetching requested reviewers..."
+            REQUESTED_REVIEWERS_JSON="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/requested_reviewers")"
 
-          # Requested user reviewers (teams ignored)
-          REQUESTED_USERS="$(
-            jq -r '.reviewRequests | .. | .login? // empty' <<<"$PR_JSON" | sort -u
-          )"
+            # Extract users who were requested directly
+            DIRECT_USERS="$(jq -r '.users[].login' <<< "$REQUESTED_REVIEWERS_JSON")"
 
-          # Users whose LATEST review is APPROVED
-          APPROVED_USERS="$(
+            # Extract the slugs of all requested teams
+            REQUESTED_TEAMS="$(jq -r '.teams[].slug' <<< "$REQUESTED_REVIEWERS_JSON")"
+
+
+            # === Step 2: Expand Teams to Get a List of All Members ===
+            TEAM_MEMBERS=""
+            if [[ -n "$REQUESTED_TEAMS" ]]; then
+            echo "Expanding teams: $REQUESTED_TEAMS"
+            ORG_NAME="${GITHUB_REPOSITORY%/*}" # Extracts 'owner' from 'owner/repo'
+            while IFS= read -r team_slug; do
+                # Append members from each team to the list using the API
+                TEAM_MEMBERS+=$'\n' # Add a newline to separate member lists
+                TEAM_MEMBERS+=$(gh api "orgs/$ORG_NAME/teams/$team_slug/members" --jq '.[].login')
+            done <<< "$REQUESTED_TEAMS"
+            fi
+
+
+            # === Step 3: Combine and Finalize the List of Requested Users ===
+            REQUESTED_USERS="$(
+            (echo "${DIRECT_USERS}"; echo "${TEAM_MEMBERS}") | grep -v '^$' | sort -u
+            )"
+
+
+            # === Step 4: Get All Users Who Have Approved ===
+            echo "Fetching submitted reviews to find approvals..."
+            REVIEWS_JSON="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews")"
+
+            # Use jq to find the latest review for each user and filter for "APPROVED"
+            APPROVED_USERS="$(
             jq -r '
-              .reviews
-              | group_by(.author.login)
-              | map(sort_by(.submittedAt) | last)
-              | map(select(.state == "APPROVED"))
-              | .[].author.login
-            ' <<<"$PR_JSON" | sort -u
-          )"
+                group_by(.user.login)
+                | map(sort_by(.submitted_at) | last)
+                | map(select(.state == "APPROVED"))
+                | .[].user.login
+            ' <<<"$REVIEWS_JSON" | sort -u
+            )"
 
-          # Nice summary in the job summary pane
-          {
+
+            # === Step 5: Generate Summary and Check for Missing Approvals ===
+            # This part of the logic remains the same as your original script.
+
+            # Nice summary in the job summary pane
+            {
             echo "### All-Approvals Gate"
             echo ""
-            echo "**Requested reviewers (users):**"
+            echo "**Requested reviewers (users & team members):**"
             if [[ -z "${REQUESTED_USERS}" ]]; then
-              echo "- <none>"
+                echo "- <none>"
             else
-              echo "${REQUESTED_USERS}" | sed 's/^/- /'
+                echo "${REQUESTED_USERS}" | sed 's/^/- /'
             fi
             echo ""
             echo "**Approving reviewers (latest state = APPROVED):**"
             if [[ -z "${APPROVED_USERS}" ]]; then
-              echo "- <none>"
+                echo "- <none>"
             else
-              echo "${APPROVED_USERS}" | sed 's/^/- /'
+                echo "${APPROVED_USERS}" | sed 's/^/- /'
             fi
             echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
+            } >> "$GITHUB_STEP_SUMMARY"
 
-          # If no user reviewers were requested, pass
-          if [[ -z "${REQUESTED_USERS}" ]]; then
+            # If no user reviewers were requested, pass
+            if [[ -z "${REQUESTED_USERS}" ]]; then
             echo "No user reviewers requested; passing."
             exit 0
-          fi
+            fi
 
-          # Compare sets and collect missing
-          MISSING=()
-          while IFS= read -r reviewer; do
+            # Compare sets and collect missing
+            MISSING=()
+            while IFS= read -r reviewer; do
             [[ -z "$reviewer" ]] && continue
             if ! grep -qx "$reviewer" <<<"$APPROVED_USERS"; then
-              echo "❌ MISSING APPROVAL: $reviewer"
-              MISSING+=("$reviewer")
+                echo "❌ MISSING APPROVAL: $reviewer"
+                MISSING+=("$reviewer")
             fi
-          done <<<"$REQUESTED_USERS"
+            done <<<"$REQUESTED_USERS"
 
-          # Add missing list to job summary and fail if any
-          if (( ${#MISSING[@]} > 0 )); then
+            # Add missing list to job summary and fail if any
+            if (( ${#MISSING[@]} > 0 )); then
             {
-              echo "**Missing approvals:**"
-              for r in "${MISSING[@]}"; do
+                echo "**Missing approvals:**"
+                for r in "${MISSING[@]}"; do
                 echo "- $r"
-              done
+                done
             } >> "$GITHUB_STEP_SUMMARY"
             echo "Still waiting for ${#MISSING[@]} reviewer(s) to approve."
             exit 1
-          else
+            else
             echo "✅ All requested reviewers have approved."
             echo "✅ All requested reviewers have approved." >> "$GITHUB_STEP_SUMMARY"
-          fi
+            fi
