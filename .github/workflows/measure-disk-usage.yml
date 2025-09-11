@@ -54,7 +54,15 @@ jobs:
     runs-on: ubuntu-22.04
     environment: quality-gates
     steps:
-      - name: Awaiting Manager Approval
+      - name: Request review from manager
+        env:
+          # Use the GitHub CLI, which is pre-installed on the runner
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The PR number is available in the event payload
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          # IMPORTANT: Change this to your manager's GitHub username or a team name
+          # For a team, use your-org/team-slug (e.g., my-company/engineering-managers)
+          REVIEWER: "lucia-sb"
         run: |
-          echo "This step runs only after a manager approves the deployment to the 'quality-gates' environment."
-          echo "The PR will remain blocked until approval is granted."
+          echo "Requesting review from ${{ env.REVIEWER }} on PR #${{ env.PR_NUMBER }}"
+          gh pr edit ${{ env.PR_NUMBER }} --add-reviewer ${{ env.REVIEWER }}
