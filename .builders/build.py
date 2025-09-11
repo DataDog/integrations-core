@@ -246,7 +246,7 @@ def build_image():
             # Move the final requirements file to the output directory
             shutil.move(final_requirements, output_dir)
 
-   
+
 def main():
     if sys.platform == 'darwin':
         build_macos()
