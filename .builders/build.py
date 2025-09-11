@@ -226,7 +226,7 @@ def build_image():
             # we're fine with reusing wheels we've built previously
             if args.digest:
                 script_args.append('--use-built-index')
-
+ 
             check_process([
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
