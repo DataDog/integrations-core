@@ -1,6 +1,6 @@
-# .github/workflows/check-all-approvals.yml
+# .github/workflows/check-approvals.yml
 
-name: Check All Approvals
+name: Check Team Approvals
 
 on:
   # Triggers when a PR is opened, updated, a reviewer is added, or a review is submitted.
@@ -20,7 +20,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  approvals-gate:
+  team-approvals-gate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -36,37 +36,15 @@ jobs:
         run: |
             set -euo pipefail
 
-            # === Step 1: Get All Requested Reviewers (Users and Teams) ===
-            echo "Fetching requested reviewers..."
+            # === Step 1: Get All Requested Teams (No Individual Users) ===
+            echo "Fetching requested team reviewers..."
             REQUESTED_REVIEWERS_JSON="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/requested_reviewers")"
 
-            # Extract users who were requested directly
-            DIRECT_USERS="$(jq -r '.users[].login' <<< "$REQUESTED_REVIEWERS_JSON")"
-
-            # Extract the slugs of all requested teams
+            # Extract the slugs of all requested teams (ignore individual users)
             REQUESTED_TEAMS="$(jq -r '.teams[].slug' <<< "$REQUESTED_REVIEWERS_JSON")"
 
 
-            # === Step 2: Expand Teams to Get a List of All Members ===
-            TEAM_MEMBERS=""
-            if [[ -n "$REQUESTED_TEAMS" ]]; then
-            echo "Expanding teams: $REQUESTED_TEAMS"
-            ORG_NAME="${GITHUB_REPOSITORY%/*}" # Extracts 'owner' from 'owner/repo'
-            while IFS= read -r team_slug; do
-                # Append members from each team to the list using the API
-                TEAM_MEMBERS+=$'\n' # Add a newline to separate member lists
-                TEAM_MEMBERS+=$(gh api "orgs/$ORG_NAME/teams/$team_slug/members" --jq '.[].login')
-            done <<< "$REQUESTED_TEAMS"
-            fi
-
-
-            # === Step 3: Combine and Finalize the List of Requested Users ===
-            REQUESTED_USERS="$(
-            (echo "${DIRECT_USERS}"; echo "${TEAM_MEMBERS}") | grep -v '^$' | sort -u
-            )"
-
-
-            # === Step 4: Get All Users Who Have Approved ===
+            # === Step 2: Get All Users Who Have Approved ===
             echo "Fetching submitted reviews to find approvals..."
             REVIEWS_JSON="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews")"
 
@@ -81,18 +59,17 @@ jobs:
             )"
 
 
-            # === Step 5: Generate Summary and Check for Missing Approvals ===
-            # This part of the logic remains the same as your original script.
-
+            # === Step 3: Check Team Approvals ===
+            
             # Nice summary in the job summary pane
             {
-            echo "### All-Approvals Gate"
+            echo "### Team-Approvals Gate"
             echo ""
-            echo "**Requested reviewers (users & team members):**"
-            if [[ -z "${REQUESTED_USERS}" ]]; then
+            echo "**Requested teams:**"
+            if [[ -z "${REQUESTED_TEAMS}" ]]; then
                 echo "- <none>"
             else
-                echo "${REQUESTED_USERS}" | sed 's/^/- /'
+                echo "${REQUESTED_TEAMS}" | sed 's/^/- /'
             fi
             echo ""
             echo "**Approving reviewers (latest state = APPROVED):**"
@@ -104,33 +81,63 @@ jobs:
             echo ""
             } >> "$GITHUB_STEP_SUMMARY"
 
-            # If no user reviewers were requested, pass
-            if [[ -z "${REQUESTED_USERS}" ]]; then
-            echo "No user reviewers requested; passing."
+            # If no team reviewers were requested, pass
+            if [[ -z "$REQUESTED_TEAMS" ]]; then
+            echo "No team reviewers requested; passing."
             exit 0
             fi
 
-            # Compare sets and collect missing
-            MISSING=()
-            while IFS= read -r reviewer; do
-            [[ -z "$reviewer" ]] && continue
-            if ! grep -qx "$reviewer" <<<"$APPROVED_USERS"; then
-                echo "❌ MISSING APPROVAL: $reviewer"
-                MISSING+=("$reviewer")
-            fi
-            done <<<"$REQUESTED_USERS"
-
-            # Add missing list to job summary and fail if any
-            if (( ${#MISSING[@]} > 0 )); then
+            # Check if any requested teams have approvals
+            echo "Checking if any requested teams have approvals..."
+            ORG_NAME="${GITHUB_REPOSITORY%/*}" # Extracts 'owner' from 'owner/repo'
+            
+            TEAMS_WITH_APPROVALS=()
+            TEAMS_WITHOUT_APPROVALS=()
+            
+            while IFS= read -r team_slug; do
+                [[ -z "$team_slug" ]] && continue
+                echo "Checking if team '$team_slug' has any approving members..."
+                
+                TEAM_HAS_APPROVAL=false
+                while IFS= read -r approver; do
+                [[ -z "$approver" ]] && continue
+                # Check if this approver is a member of this team
+                if gh api "orgs/$ORG_NAME/teams/$team_slug/memberships/$approver" >/dev/null 2>&1; then
+                    echo "✅ $approver (team member) has approved"
+                    TEAM_HAS_APPROVAL=true
+                    break
+                fi
+                done <<<"$APPROVED_USERS"
+                
+                if [[ "$TEAM_HAS_APPROVAL" == true ]]; then
+                TEAMS_WITH_APPROVALS+=("$team_slug")
+                else
+                TEAMS_WITHOUT_APPROVALS+=("$team_slug")
+                fi
+            done <<< "$REQUESTED_TEAMS"
+            
+            # Report results
             {
-                echo "**Missing approvals:**"
-                for r in "${MISSING[@]}"; do
-                echo "- $r"
+                if (( ${#TEAMS_WITH_APPROVALS[@]} > 0 )); then
+                echo "**Teams with approvals:**"
+                for team in "${TEAMS_WITH_APPROVALS[@]}"; do
+                    echo "- $team"
                 done
+                echo ""
+                fi
+                
+                if (( ${#TEAMS_WITHOUT_APPROVALS[@]} > 0 )); then
+                echo "**Teams still needing approvals:**"
+                for team in "${TEAMS_WITHOUT_APPROVALS[@]}"; do
+                    echo "- $team"
+                done
+                fi
             } >> "$GITHUB_STEP_SUMMARY"
-            echo "Still waiting for ${#MISSING[@]} reviewer(s) to approve."
-            exit 1
+            
+            if (( ${#TEAMS_WITHOUT_APPROVALS[@]} > 0 )); then
+                echo "❌ Still waiting for approval from ${#TEAMS_WITHOUT_APPROVALS[@]} team(s)."
+                exit 1
             else
-            echo "✅ All requested reviewers have approved."
-            echo "✅ All requested reviewers have approved." >> "$GITHUB_STEP_SUMMARY"
+                echo "✅ All requested teams have at least one approval."
+                echo "✅ All requested teams have at least one approval." >> "$GITHUB_STEP_SUMMARY"
             fi
