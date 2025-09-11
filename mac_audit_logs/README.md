@@ -82,14 +82,16 @@ The Mac Audit Logs integration does not include any metrics.
      - Do not change the `service` and `source` values, as they are essential for proper log pipeline processing.
      - Default value for `AUDIT_LOGS_DIR_PATH` is `/var/audit`. In case of different BSM audit logging directory, please check `dir` value in `/etc/security/audit_control` file.
 
-3. Give the user running `datadog-agent` access to the `/var/audit` directory, as well as the ability to run the following commands as `sudo`:
+3. Give the user running `datadog-agent` access to the `/var/audit` directory.
+
+4. Edit your `/etc/sudoers` file to give the user the ability to run these commands as `sudo`:
 
   ```shell
      <USER> ALL=(ALL) NOPASSWD:/usr/sbin/auditreduce
      <USER> ALL=(ALL) NOPASSWD:/usr/sbin/praudit
   ```
 
-4. [Restart the Agent][7].
+5. [Restart the Agent][7].
 
 ### Events
 
