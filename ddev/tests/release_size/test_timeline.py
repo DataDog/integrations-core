@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
-from ddev.cli.size.timeline import (
+from ddev.cli.release.size.timeline import (
     format_commit_data,
     get_dependencies,
     get_dependency_data,
@@ -17,15 +17,18 @@ from ddev.cli.size.timeline import (
 def test_get_compressed_files():
     with (
         patch(
-            "ddev.cli.size.timeline.os.walk",
+            "ddev.cli.release.size.timeline.os.walk",
             return_value=[(os.path.join("fake_repo", "datadog_checks"), [], ["__about__.py"])],
         ),
-        patch("ddev.cli.size.timeline.os.path.relpath", return_value=os.path.join("datadog_checks", "__about__.py")),
-        patch("ddev.cli.size.timeline.os.path.exists", return_value=True),
-        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.timeline.is_valid_integration_file", return_value=True),
-        patch("ddev.cli.size.timeline.compress", return_value=1234),
-        patch("ddev.cli.size.timeline.extract_version_from_about_py", return_value='1.1.1'),
+        patch(
+            "ddev.cli.release.size.timeline.os.path.relpath",
+            return_value=os.path.join("datadog_checks", "__about__.py"),
+        ),
+        patch("ddev.cli.release.size.timeline.os.path.exists", return_value=True),
+        patch("ddev.cli.release.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.release.size.timeline.is_valid_integration_file", return_value=True),
+        patch("ddev.cli.release.size.timeline.compress", return_value=1234),
+        patch("ddev.cli.release.size.timeline.extract_version_from_about_py", return_value='1.1.1'),
     ):
         result = get_files("fake_repo", "int1", "abc1234", datetime(2025, 4, 4).date(), "auth", "Added int1", [], True)
         print(result)
@@ -50,13 +53,13 @@ def test_get_compressed_files_deleted_only():
     message = "deleted module"
 
     with (
-        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.size.timeline.os.walk", return_value=[]),
+        patch("ddev.cli.release.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.release.size.timeline.os.walk", return_value=[]),
         patch(
-            "ddev.cli.size.timeline.os.path.relpath",
+            "ddev.cli.release.size.timeline.os.path.relpath",
             side_effect=lambda path, _: path.replace(f"{repo_path}{os.sep}", ""),
         ),
-        patch("ddev.cli.size.timeline.os.path.exists", return_value=False),
+        patch("ddev.cli.release.size.timeline.os.path.exists", return_value=False),
     ):
         file_data = get_files(repo_path, module, commit, date, author, message, [], True)
 
@@ -107,7 +110,7 @@ def test_trim_modules_keep_some_remove_some():
 def test_get_dependency():
     content = """dep1 @ https://example.com/dep1/dep1-1.1.1-.whl
 dep2 @ https://example.com/dep2/dep2-1.1.2-.whl"""
-    with patch("ddev.cli.size.timeline.open", mock_open(read_data=content)):
+    with patch("ddev.cli.release.size.timeline.open", mock_open(read_data=content)):
         url, version = get_dependency_data(Path("some") / "path" / "file.txt", "dep2")
         assert (url, version) == ("https://example.com/dep2/dep2-1.1.2-.whl", "1.1.2")
 
@@ -122,7 +125,7 @@ def make_mock_response(size):
 
 def test_get_dependency_size():
     mock_response = make_mock_response("45678")
-    with patch("ddev.cli.size.timeline.requests.head", return_value=mock_response):
+    with patch("ddev.cli.release.size.timeline.requests.head", return_value=mock_response):
         info = get_dependency_size(
             "https://example.com/dep1/dep1-1.1.1-.whl",
             "1.1.1",
@@ -144,15 +147,15 @@ def test_get_dependency_size():
 
 def test_get_compressed_dependencies():
     with (
-        patch("ddev.cli.size.timeline.os.path.exists", return_value=True),
-        patch("ddev.cli.size.timeline.os.path.isdir", return_value=True),
-        patch("ddev.cli.size.timeline.os.path.isfile", return_value=True),
-        patch("ddev.cli.size.timeline.os.listdir", return_value=["linux-x86_64_3.12.txt"]),
+        patch("ddev.cli.release.size.timeline.os.path.exists", return_value=True),
+        patch("ddev.cli.release.size.timeline.os.path.isdir", return_value=True),
+        patch("ddev.cli.release.size.timeline.os.path.isfile", return_value=True),
+        patch("ddev.cli.release.size.timeline.os.listdir", return_value=["linux-x86_64_3.12.txt"]),
         patch(
-            "ddev.cli.size.timeline.get_dependency_data",
+            "ddev.cli.release.size.timeline.get_dependency_data",
             return_value=("https://example.com/dep1/dep1-1.1.1-.whl", '1.1.1'),
         ),
-        patch("ddev.cli.size.timeline.requests.head", return_value=make_mock_response("12345")),
+        patch("ddev.cli.release.size.timeline.requests.head", return_value=make_mock_response("12345")),
     ):
         result = get_dependencies(
             "fake_repo", "dep1", "linux-x86_64", "abc1234", datetime(2025, 4, 4).date(), "auth", "Added dep1", True
