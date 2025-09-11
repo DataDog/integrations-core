@@ -25,7 +25,6 @@ permissions:
 jobs:
   approvals-gate:
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.draft == false }} # skip for drafts
     steps:
       - name: Check approvals
         env:
