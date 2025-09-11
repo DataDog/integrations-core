@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2025-present
+# (C) Datadog, Inc. 2013-present
 # All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
+# Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.base import PDHBaseCheck, is_affirmative
 
 from .check import ActiveDirectoryCheckV2
