@@ -50,10 +50,39 @@ jobs:
         else
           echo "$section_title section already exists. No changes made."
         fi
-  require-approval:
-    runs-on: ubuntu-22.04
-    environment: quality-gates
-    steps:
-      - name: Request review from manager
-        run: |
-          echo "Requesting review from manager"
+  # require-approval:
+  #   runs-on: ubuntu-22.04
+  #   environment: quality-gates
+  #   steps:
+  #     - name: Request review from manager
+  #       run: |
+  #         echo "Requesting review from manager"
+
+  # Step 2: Extract the old and new commit hashes from the diff
+    # - name: Extract Commit Hashes from File Content
+    #   id: extract
+    #   run: |
+    #     # IMPORTANT: Replace this path with the actual path to your file
+    #     FILE_PATH="path/to/your/file.json"
+
+    #     # Get the full diff for the specific file between the base and head of the PR
+    #     FULL_DIFF=$(git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- $FILE_PATH)
+
+    #     # Extract the line that was removed (starts with '-') and contains the key
+    #     OLD_LINE=$(echo "$FULL_DIFF" | grep '^-.*"INTEGRATIONS_CORE_VERSION"')
+
+    #     # Extract the line that was added (starts with '+') and contains the key
+    #     NEW_LINE=$(echo "$FULL_DIFF" | grep '^+.*"INTEGRATIONS_CORE_VERSION"')
+
+    #     # From each line, parse out just the commit hash value
+    #     # The 'sed' command captures the alphanumeric string inside the second set of quotes
+    #     OLD_COMMIT_HASH=$(echo "$OLD_LINE" | sed -n 's/.*: "\(.*\)".*/\1/p')
+    #     NEW_COMMIT_HASH=$(echo "$NEW_LINE" | sed -n 's/.*: "\(.*\)".*/\1/p')
+
+    #     echo "Old Commit Hash (from file): $OLD_COMMIT_HASH"
+    #     echo "New Commit Hash (from file): $NEW_COMMIT_HASH"
+
+    #     # Set the hashes as outputs for other steps to use
+    #     echo "old_hash=$OLD_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+    #     echo "new_hash=$NEW_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
