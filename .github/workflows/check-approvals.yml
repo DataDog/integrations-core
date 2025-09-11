@@ -3,6 +3,9 @@
 name: Check All Approvals
 
 on:
+  pull_request:
+    branches:
+      - master
   # Triggers when a PR is opened, updated, a reviewer is added, or a review is submitted.
   pull_request_target:
     types:
