@@ -1,7 +1,7 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.cache_key import FullConfigCacheKey
+from datadog_checks.base.utils.cache_key.full_config import FullConfigCacheKey
 
 
 @pytest.fixture

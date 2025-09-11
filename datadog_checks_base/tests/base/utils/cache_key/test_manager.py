@@ -3,7 +3,9 @@ from collections.abc import Callable
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.cache_key import CacheKey, CacheKeyManager, CacheKeyType, FullConfigCacheKey
+from datadog_checks.base.utils.cache_key.base import CacheKey
+from datadog_checks.base.utils.cache_key.full_config import FullConfigCacheKey
+from datadog_checks.base.utils.cache_key.manager import CacheKeyManager, CacheKeyType
 
 
 class TestCacheKey(CacheKey):

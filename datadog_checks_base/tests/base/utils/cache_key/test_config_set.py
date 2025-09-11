@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 
 from datadog_checks.base.checks.base import AgentCheck
-from datadog_checks.base.utils.cache_key import ConfigSetCacheKey
+from datadog_checks.base.utils.cache_key.config_set import ConfigSetCacheKey
 
 
 @pytest.fixture
