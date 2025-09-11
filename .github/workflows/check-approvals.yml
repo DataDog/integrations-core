@@ -36,8 +36,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Pull all needed PR data in a single call (no REST API)
-          PR_JSON="$(gh pr view "$PR_NUMBER" --json "reviewRequests{login,members{nodes{login}}}")"
+          # Correctly uses single quotes to pass the string literally
+          PR_JSON="$(gh pr view "$PR_NUMBER" --json 'reviewRequests{login,members{nodes{login}}}')"
 
           # Requested user reviewers (teams ignored)
           REQUESTED_USERS="$(
