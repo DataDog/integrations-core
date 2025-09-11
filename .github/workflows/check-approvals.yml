@@ -14,7 +14,7 @@ on:
   pull_request_review:
     types:
       - submitted
-
+ 
 jobs:
   check-approvals:
     name: "Verify All Approvals"
