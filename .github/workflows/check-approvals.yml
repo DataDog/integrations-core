@@ -40,7 +40,7 @@ jobs:
           set -euo pipefail
 
           # Pull all needed PR data in a single call (no REST API)
-          PR_JSON="$(gh pr view "$PR_NUMBER" --json reviewRequests,reviews,headRef,number,repository)"
+          PR_JSON="$(gh pr view "$PR_NUMBER" --json reviewRequests,reviews,number,repository)"
 
           # Requested user reviewers (teams ignored)
           REQUESTED_USERS="$(
