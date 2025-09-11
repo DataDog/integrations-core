@@ -27,7 +27,7 @@ class CacheKeyManager:
         Manager of cache keys for the persistent cache.
 
         This class defined the different kinds of persistent cache keys to be used when adding and retrieving
-        from the agent persistent cache. The AentCheck can use this manager to to ensure that the correct cache key is
+        from the agent persistent cache. The AgentCheck can use this manager to to ensure that the correct cache key is
         used in each consistently through the different check invocations.
         """
         self.keys: dict[CacheKeyType, CacheKey] = {}
@@ -41,13 +41,6 @@ class CacheKeyManager:
     ) -> CacheKey:
         if (key := self.keys.get(key_type)) is not None:
             return key
-
-        if default_factory is None:
-            self.check.log.warning(
-                "{key_type} cache key requested wihtout a default factory supplied. "
-                "Using default full config cache key.",
-                extra={"key_type": key_type.name},
-            )
 
         self.keys[key_type] = default_factory() if default_factory is not None else self.default_cache_key
         return self.keys[key_type]

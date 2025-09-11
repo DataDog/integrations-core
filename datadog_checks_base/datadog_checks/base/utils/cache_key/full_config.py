@@ -14,6 +14,9 @@ class FullConfigCacheKey(CacheKey):
     whenever the configuration of the check changes.
     """
 
-    def base_key(self) -> str:
+    def key(self) -> str:
         # The check_id is injected by the agent containing the config digest
+        return self.base_key()
+
+    def base_key(self) -> str:
         return str(self.check.check_id)

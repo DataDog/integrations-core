@@ -24,7 +24,9 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.agent.utils import should_profile_memory
-from datadog_checks.base.utils.cache_key import CacheKey, CacheKeyManager, CacheKeyType, FullConfigCacheKey
+from datadog_checks.base.utils.cache_key.base import CacheKey
+from datadog_checks.base.utils.cache_key.full_config import FullConfigCacheKey
+from datadog_checks.base.utils.cache_key.manager import CacheKeyManager, CacheKeyType
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
@@ -283,10 +285,6 @@ class AgentCheck(object):
         self._config_model_instance = None  # type: Any
         self._config_model_shared = None  # type: Any
 
-        # The cache key used for persistent caching is managed through teh cache manager. Each cache key has a deferred
-        # initialization since all properties might not be available during the check initialization time.
-        self.cache_key_manager = CacheKeyManager(self)
-
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
@@ -294,6 +292,10 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+
+        # The cache key used for persistent caching is managed through the cache manager. Each cache key has a deferred
+        # initialization since all properties might not be available during the check initialization time.
+        self.__cache_key_manager = CacheKeyManager(self)
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
@@ -1019,16 +1021,16 @@ class AgentCheck(object):
 
     def store_log_cursor(self, cursor: dict[str, Any], stream: str = 'default'):
         """Stores the log cursor in the persistent cache."""
-        self.cache_key_manager.add(cache_key_type=CacheKeyType.LOG_CURSOR, key_factory=self.logs_persistent_cache_key)
-        cache_key = self.cache_key_manager.get(cache_key_type=CacheKeyType.LOG_CURSOR)
+        self.__cache_key_manager.add(cache_key_type=CacheKeyType.LOG_CURSOR, key_factory=self.logs_persistent_cache_key)
+        cache_key = self.__cache_key_manager.get(cache_key_type=CacheKeyType.LOG_CURSOR)
         self.write_persistent_cache(cache_key.key_for(context=f'log_cursor_{stream}'), json.encode(cursor))
 
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
-        self.cache_key_manager.add(cache_key_type=CacheKeyType.LOG_CURSOR, key_factory=self.logs_persistent_cache_key)
+        self.__cache_key_manager.add(cache_key_type=CacheKeyType.LOG_CURSOR, key_factory=self.logs_persistent_cache_key)
 
-        cache_key = self.cache_key_manager.get(cache_key_type=CacheKeyType.LOG_CURSOR)
+        cache_key = self.__cache_key_manager.get(cache_key_type=CacheKeyType.LOG_CURSOR)
         data = self.read_persistent_cache(cache_key.key_for(f'log_cursor_{stream}'))
 
         return json.decode(data) if data else None
@@ -1105,7 +1107,7 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(f"{self.name}_{key}")
+        return datadog_agent.read_persistent_cache(key)
 
     def write_persistent_cache(self, key, value):
         # type: (str, str) -> None
@@ -1121,7 +1123,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(f"{self.name}_{key}", value)
+        datadog_agent.write_persistent_cache(key, value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None

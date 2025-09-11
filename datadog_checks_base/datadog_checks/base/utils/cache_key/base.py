@@ -18,6 +18,19 @@ class CacheKey(ABC):
         cache.
         """
         self.check = check
+        self.__prefix: str | None = None
+
+    def key(self) -> str:
+        """
+        Returns the cache key for the particular implementation.
+        """
+        if self.__prefix is not None:
+            return f"{self.__prefix}{self.base_key()}"
+
+        check_id_prefix = ":".join(self.check.check_id.split(":")[:-1])
+        self.__prefix = f"{check_id_prefix}:"
+
+        return f"{self.__prefix}{self.base_key()}"
 
     @abstractmethod
     def base_key(self) -> str:
@@ -31,4 +44,4 @@ class CacheKey(ABC):
         """
         Returns a key that is a combination of the base key and the provided context.
         """
-        return f"{self.base_key()}_{context}"
+        return f"{self.key()}_{context}"
