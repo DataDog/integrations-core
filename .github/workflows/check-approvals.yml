@@ -1,0 +1,85 @@
+# .github/workflows/check-all-approvals.yml
+
+name: Check All Approvals
+
+on:
+  # Triggers when a PR is opened, updated, a reviewer is added, or a review is submitted.
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - review_requested
+      - review_request_removed
+  pull_request_review:
+    types:
+      - submitted
+
+jobs:
+  check-approvals:
+    name: "Verify All Approvals"
+    runs-on: ubuntu-latest
+    
+    # Permission is needed to read the status of PRs.
+    permissions:
+      pull-requests: read
+      # Permission is needed to post the commit status.
+      statuses: write
+
+    steps:
+      - name: "Check if all requested reviewers have approved"
+        env:
+          # The token is required to make GitHub API calls.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The PR number is obtained from the event that triggered the workflow.
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Get the lists of reviewers and process them.
+          # jq is a JSON processor that comes pre-installed on the runners.
+          REQUESTED_REVIEWERS=$(gh pr view $PR_NUMBER --json reviewRequests --jq '(.reviewRequests.[].login, .reviewRequests.[].name)')
+          APPROVED_REVIEWERS=$(gh pr view $PR_NUMBER --json reviews --jq '.reviews.[] | select(.state=="APPROVED") | .author.login' | sort -u)
+
+          # Convert the lists to a comparable format.
+          REQUESTED_SET=$(echo "$REQUESTED_REVIEWERS" | sort -u)
+          APPROVED_SET=$(echo "$APPROVED_REVIEWERS" | sort -u)
+
+          echo "Requested reviewers:"
+          echo "$REQUESTED_SET"
+          echo "---"
+          echo "Approving reviewers:"
+          echo "$APPROVED_SET"
+          echo "---"
+
+          # Check if all requested reviewers are in the list of approvers.
+          MISSING_REVIEWERS=0
+          while read -r reviewer; do
+            if ! echo "$APPROVED_SET" | grep -q "^$reviewer$"; then
+              echo "❌ MISSING APPROVAL: $reviewer"
+              MISSING_REVIEWERS=$((MISSING_REVIEWERS + 1))
+            fi
+          done <<< "$REQUESTED_SET"
+
+          # Get the last commit SHA to post the status check.
+          COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRef --jq '.headRef.target.oid')
+
+          # If reviewers are missing, the workflow fails. Otherwise, it succeeds.
+          if [ "$MISSING_REVIEWERS" -gt 0 ]; then
+            echo "Still waiting for $MISSING_REVIEWERS reviewer(s) to approve."
+            gh api \
+              --method POST \
+              /repos/${{ github.repository }}/statuses/$COMMIT_SHA \
+              -f state='failure' \
+              -f target_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}/checks" \
+              -f description="Waiting for $MISSING_REVIEWERS approval(s)" \
+              -f context='All Approvals'
+            exit 1
+          else
+            echo "✅ All requested reviewers have approved."
+            gh api \
+              --method POST \
+              /repos/${{ github.repository }}/statuses/$COMMIT_SHA \
+              -f state='success' \
+              -f target_url="${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}/checks" \
+              -f description="All reviewers have approved" \
+              -f context='All Approvals'
+          fi
