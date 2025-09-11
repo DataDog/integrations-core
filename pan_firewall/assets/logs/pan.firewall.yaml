@@ -336,7 +336,7 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: (crash)Palo Alto Networks Firewall
+  name: Palo Alto Networks Firewall
   enabled: true
   filter:
     query: source:pan.firewall
@@ -415,7 +415,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: string-builder-processor
-          name: Add name
+          name: Add product name
           enabled: true
           template: Firewall
           target: ocsf.metadata.product.name
