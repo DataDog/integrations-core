@@ -464,7 +464,7 @@ pipeline:
               name: "5"
             - filter:
                 query: "-@severity:*"
-              name: "99"
+              name: "1"
           target: ocsf.severity_id
         - type: attribute-remapper
           name: Map `ocsf.severity_id` to `ocsf.severity_id`
@@ -482,6 +482,9 @@ pipeline:
           enabled: true
           categories:
             - filter:
+                query: "@ocsf.severity_id:0"
+              name: Unknown
+            - filter:
                 query: "@ocsf.severity_id:1"
               name: Informational
             - filter:
@@ -496,9 +499,6 @@ pipeline:
             - filter:
                 query: "@ocsf.severity_id:5"
               name: Critical
-            - filter:
-                query: "@ocsf.severity_id:99"
-              name: Other
           target: ocsf.severity
     - type: pipeline
       name: OCSF sub pipeline for class Network Activity [4001]
