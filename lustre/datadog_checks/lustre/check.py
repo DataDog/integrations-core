@@ -18,11 +18,17 @@ from .constants import (
     FILESYSTEM_DISCOVERY_PARAM_MAPPING,
     IGNORED_LNET_GROUPS,
     IGNORED_STATS,
+    JOBID_TAG_PARAMS,
     JOBSTATS_PARAMS,
+    TAGS_WITH_FILESYSTEM,
     LustreParam,
 )
 
 RATE_UNITS: Set[str] = {'locks/s'}
+
+
+class IgnoredFilesystemName(Exception):
+    pass
 
 
 def _get_stat_type(suffix: str, unit: str) -> str:
@@ -115,13 +121,13 @@ class LustreCheck(AgentCheck):
             self.submit_changelogs(self.changelog_lines_per_check)
 
         self.submit_device_health(self.devices)
-        self.submit_param_data(self.params, self.filesystems)
+        self.submit_param_data(self.params)
         self.submit_lnet_stats_metrics()
         self.submit_lnet_local_ni_metrics()
         self.submit_lnet_peer_ni_metrics()
 
         if self.node_type in ('mds', 'oss'):
-            self.submit_jobstats_metrics(self.filesystems)
+            self.submit_jobstats_metrics()
 
     def update(self) -> None:
         '''
@@ -173,7 +179,7 @@ class LustreCheck(AgentCheck):
 
     def _update_changelog_targets(self, devices: List[Dict[str, Any]], filesystems: List[str]) -> None:
         self.log.debug('Determining changelog targets...')
-        target_regex = [filesystem + r'-MDT\d\d\d\d' for filesystem in filesystems]
+        target_regex = [re.escape(filesystem) + r'-MDT\d\d\d\d' for filesystem in filesystems]
         targets = []
         for device in devices:
             for regex in target_regex:
@@ -218,24 +224,41 @@ class LustreCheck(AgentCheck):
             self.log.error('Failed to run command %s: %s', cmd, e)
             return ''
 
-    def submit_jobstats_metrics(self, filesystems: List[str]) -> None:
+    def submit_jobstats_metrics(self) -> None:
         '''
         Submit the jobstats metrics to Datadog.
 
         For more information, see: https://doc.lustre.org/lustre_manual.xhtml#jobstats
         '''
-        jobstats_params = self._get_jobstats_params_list()
-        for jobstats_param in jobstats_params:
-            device_name = jobstats_param.split('.')[1]  # For example: lustre-MDT0000
-            if not any(device_name.startswith(fs) for fs in filesystems):
+        jobstats_param: LustreParam | None = None
+        for param in JOBSTATS_PARAMS:
+            if self.node_type in param.node_types:
+                jobstats_param = param
+                break
+        if jobstats_param is None:
+            self.log.debug('Invalid jobstats device_type: %s', self.node_type)
+            return
+        param_names = self._get_jobstats_params_list(jobstats_param)
+        jobid_config_tags = [
+            f'{param.regex}:{self._run_command("lctl", "get_param", "-ny", param.regex, sudo=True).strip()}'
+            for param in JOBID_TAG_PARAMS
+        ]
+        for param_name in param_names:
+            try:
+                tags = (
+                    self.tags
+                    + self._extract_tags_from_param(jobstats_param.regex, param_name, jobstats_param.wildcards)
+                    + jobid_config_tags
+                )
+            except IgnoredFilesystemName:
                 continue
-            jobstats_metrics = self._get_jobstats_metrics(jobstats_param).get('job_stats')
+            jobstats_metrics = self._get_jobstats_metrics(param_name).get('job_stats')
             if jobstats_metrics is None:
-                self.log.debug('No jobstats metrics found for %s', jobstats_param)
+                self.log.debug('No jobstats metrics found for %s', param_name)
                 continue
             for job in jobstats_metrics:
                 job_id = job.get('job_id', "unknown")
-                tags = self.tags + [f'device_name:{device_name}', f'job_id:{job_id}']
+                tags.append(f'job_id:{job_id}')
                 for metric_name, metric_values in job.items():
                     if not isinstance(metric_values, dict):
                         continue
@@ -254,18 +277,10 @@ class LustreCheck(AgentCheck):
             metric_type = _get_stat_type(suffix, values['unit'])
             self._submit(f'job_stats.{name}.{suffix}', value, metric_type, tags=tags)
 
-    def _get_jobstats_params_list(self) -> List[str]:
+    def _get_jobstats_params_list(self, param) -> List[str]:
         '''
         Get the jobstats params from the command line.
         '''
-        param = None
-        for jobstat_param in JOBSTATS_PARAMS:
-            if self.node_type in jobstat_param.node_types:
-                param = jobstat_param
-                break
-        if param is None:
-            self.log.debug('Invalid jobstats device_type: %s', self.node_type)
-            return []
         raw_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
         return [line.strip() for line in raw_params.splitlines() if line.strip()]
 
@@ -374,7 +389,7 @@ class LustreCheck(AgentCheck):
             self.log.debug('Could not get lnet %s, caught exception: %s', stats_type, e)
             return {}
 
-    def submit_param_data(self, params: Set[LustreParam], filesystems: List[str]) -> None:
+    def submit_param_data(self, params: Set[LustreParam]) -> None:
         '''
         Submit general stats and metrics from Lustre parameters.
         '''
@@ -384,11 +399,10 @@ class LustreCheck(AgentCheck):
                 continue
             matched_params = self._run_command('lctl', 'list_param', param.regex, sudo=True)
             for param_name in matched_params.splitlines():
-                tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
-                if any(fs_tag in param.wildcards for fs_tag in ('device_name', 'device_uuid')):
-                    if not any(fs in param_name for fs in filesystems):
-                        self.log.debug('Skipping param %s as it did not match any filesystem', param_name)
-                        continue
+                try:
+                    tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
+                except IgnoredFilesystemName:
+                    continue
                 raw_stats = self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True)
                 if not param.regex.endswith('.stats'):
                     self._submit_param(param.prefix, param_name, tags)
@@ -432,7 +446,8 @@ class LustreCheck(AgentCheck):
         tags = []
         regex_parts = param_regex.split('.')
         param_parts = param_name.split('.')
-        wildcard_number = 0
+        wildcard_generator = (wildcard for wildcard in wildcards)
+        filesystem = None
         if not len(regex_parts) == len(param_parts):
             # Edge case: mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats
             if len(regex_parts) + 3 == len(param_parts):
@@ -446,13 +461,20 @@ class LustreCheck(AgentCheck):
                 return tags
         for part_number, part in enumerate(regex_parts):
             if part == '*':
-                if wildcard_number >= len(wildcards):
-                    self.log.debug(
-                        'Found %s wildcards, which exceeds available wildcard tags %s', wildcard_number, wildcards
-                    )
+                try:
+                    current_wildcard = next(wildcard_generator)
+                    current_part = param_parts[part_number]
+                    tags.append(f'{current_wildcard}:{current_part}')
+                    if current_wildcard in TAGS_WITH_FILESYSTEM and filesystem is None:
+                        filesystem = current_part.split('-')[0]
+                        tags.append(f'filesystem:{filesystem}')
+                        self.log.debug('Determined filesystem as %s from parameter %s', filesystem, param_name)
+                        if filesystem not in self.filesystems:
+                            self.log.debug('Skipping param %s as it did not match any filesystem', param_name)
+                            raise IgnoredFilesystemName
+                except StopIteration:
+                    self.log.debug('Number of found wildcards exceeds available wildcard tags %s', wildcards)
                     return tags
-                tags.append(f'{wildcards[wildcard_number]}:{param_parts[part_number]}')
-                wildcard_number += 1
         return tags
 
     def _parse_stats(self, raw_stats: str) -> Dict[str, Dict[str, Union[int, str]]]:

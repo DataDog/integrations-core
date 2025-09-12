@@ -36,7 +36,7 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {'node_type': 'client'}
+    return {'node_type': 'client', "filesystems": ["lustre", "*"]}
 
 
 @pytest.fixture
