@@ -14,6 +14,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
+from datadog_checks.base.utils.cache_key.base import CacheKey
 
 from .utils import BaseModelTest
 
@@ -557,6 +558,44 @@ class TestLogSubmission:
             ],
         )
         assert check.get_log_cursor() == {'data': '2'}
+
+    def test_cursor_with_custom_cache_key_after_restart(self):
+        class ConstantCacheKey(CacheKey):
+            def base_key(self) -> str:
+                return "always_the_same"
+
+        class TestCheck(AgentCheck):
+            def persistent_cache_key(self) -> CacheKey:
+                return ConstantCacheKey(self)
+
+        check = TestCheck(name="test", init_config={}, instances=[{}])
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = TestCheck(name="test", init_config={}, instances=[{}])
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
+
+    def test_cursor_invalidated_for_different_persistent_check_id_part(self):
+        class ConstantCacheKey(CacheKey):
+            def base_key(self) -> str:
+                return "always_the_same"
+
+        class TestCheck(AgentCheck):
+            def persistent_cache_key(self) -> CacheKey:
+                return ConstantCacheKey(self)
+
+        check = TestCheck(name="test", init_config={}, instances=[{}])
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = TestCheck(name="another_test", init_config={}, instances=[{}])
+        new_check.check_id = 'test2:bar:456'
+        assert new_check.get_log_cursor() is None
 
     def test_no_cursor(self, datadog_agent):
         check = AgentCheck('check_name', {}, [{}])

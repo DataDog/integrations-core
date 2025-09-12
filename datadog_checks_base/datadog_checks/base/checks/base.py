@@ -11,19 +11,10 @@ import os
 import re
 from collections import deque
 from os.path import basename
-from typing import (  # noqa: F401
+from typing import (
     TYPE_CHECKING,
     Any,
-    AnyStr,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
+    Deque,  # noqa: F401
 )
 
 import lazy_loader
@@ -71,6 +62,7 @@ if TYPE_CHECKING:
     import traceback as _module_traceback
     import unicodedata as _module_unicodedata
 
+    from datadog_checks.base.utils.cache_key.base import CacheKey
     from datadog_checks.base.utils.diagnose import Diagnosis
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
@@ -298,6 +290,7 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__persistent_cache_key: CacheKey | None = None
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
@@ -490,6 +483,16 @@ class AgentCheck(object):
         # type: () -> bool
         self._log_deprecation('in_developer_mode')
         return False
+
+    def persistent_cache_key(self) -> CacheKey:
+        """
+        Returns the cache key for the logs persistent cache.
+
+        Override this method to modify how the log cursor is persisted between agent restarts.
+        """
+        from datadog_checks.base.utils.cache_key.full_config import FullConfigCacheKey
+
+        return FullConfigCacheKey(self)
 
     def log_typos_in_options(self, user_config, models_config, level):
         # See Performance Optimizations in this package's README.md.
@@ -1009,13 +1012,15 @@ class AgentCheck(object):
             attributes['timestamp'] = int(timestamp * 1000)
 
         datadog_agent.send_log(json.encode(attributes), self.check_id)
+
         if cursor is not None:
-            self.write_persistent_cache('log_cursor_{}'.format(stream), json.encode(cursor))
+            self.write_persistent_cache(f'log_cursor_{stream}', json.encode(cursor))
 
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
-        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        data = self.read_persistent_cache(f'log_cursor_{stream}')
+
         return json.decode(data) if data else None
 
     def _log_deprecation(self, deprecation_key, *args):
@@ -1082,9 +1087,10 @@ class AgentCheck(object):
 
         return entrypoint
 
-    def _persistent_cache_id(self, key):
-        # type: (str) -> str
-        return '{}_{}'.format(self.check_id, key)
+    def __initialize_persistent_cache_key(self) -> CacheKey:
+        if self.__persistent_cache_key is None:
+            self._persistent_cache_key = self.persistent_cache_key()
+        return self._persistent_cache_key
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
@@ -1094,9 +1100,10 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+        cache_key = self.__persistent_cache_key or self.__initialize_persistent_cache_key()
+        return datadog_agent.read_persistent_cache(cache_key.key_for(key))
 
-    def write_persistent_cache(self, key, value):
+    def write_persistent_cache(self, key: str, value: str, cache_key: CacheKey | None = None):
         # type: (str, str) -> None
         """Stores `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
@@ -1110,7 +1117,8 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
+        cache_key = self.__persistent_cache_key or self.__initialize_persistent_cache_key()
+        datadog_agent.write_persistent_cache(cache_key.key_for(key), value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
