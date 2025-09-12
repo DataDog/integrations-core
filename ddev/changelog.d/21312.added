@@ -1,0 +1,8 @@
+Adds the new command `ddev ci codeowners` to check repository CODEOWNERS for pull requests, commits, or specific files.
+
+Options:
+
+- `--pr <number>`: Show codeowners for files changed in a pull request.
+- `--sha <commit>`: Show codeowners for files changed in a commit.
+- `--files <list>`: Show codeowners for a comma-separated list of files.
+- `--per-file`: Output owners per file instead of a combined list.
