@@ -14,34 +14,35 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    conditions = []
+    config = get_instance_config()
 
-    for i in range(6):
-        conditions.append(CheckEndpoints(['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i)]))
+    conditions = []
+    for i in range(common.CLICKHOUSE_NODE_NUM):
         conditions.append(
             CheckDockerLogs(
-                'clickhouse-0{}'.format(i + 1), 'Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log'
+                identifier='clickhouse-0{}'.format(i + 1),
+                patterns='Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log',
+                wait=5,
+            )
+        )
+        conditions.append(
+            CheckEndpoints(endpoints=['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i)], wait=5),
+        )
+        conditions.append(
+            WaitFor(
+                func=ping_clickhouse(common.HOST, common.TCP_START_PORT + i, config['username'], config['password']),
+                wait=5,
             )
         )
 
-    conditions.append(
-        WaitFor(
-            ping_clickhouse(
-                common.CONFIG['server'],
-                common.CONFIG['port'],
-                common.CONFIG['username'],
-                common.CONFIG['password'],
-            )
-        )
-    )
-
-    with docker_run(common.COMPOSE_FILE, conditions=conditions, sleep=10, attempts=2):
-        yield common.CONFIG
+    compose_file, mount_logs = common.get_compose_file()
+    with docker_run(compose_file, conditions=conditions, sleep=10, attempts=2, mount_logs=mount_logs):
+        yield config
 
 
 @pytest.fixture
 def instance():
-    return deepcopy(common.CONFIG)
+    return get_instance_config()
 
 
 def ping_clickhouse(host, port, username, password):
@@ -57,3 +58,17 @@ def ping_clickhouse(host, port, username, password):
         return True
 
     return _ping_clickhouse
+
+
+def get_instance_config() -> dict:
+    return deepcopy(common.CONFIG)
+
+
+@pytest.fixture
+def clickhouse_client(instance):
+    return clickhouse_driver.Client(
+        host=instance['server'],
+        port=instance['port'],
+        user=instance['username'],
+        password=instance['password'],
+    )
