@@ -44,10 +44,11 @@ def test_check_version():
 
 def test_persistent_cache(datadog_agent):
     check = AgentCheck()
+    check.check_id = 'test'
 
     check.write_persistent_cache('foo', 'bar')
 
-    assert datadog_agent.read_persistent_cache('foo') == 'bar'
+    assert datadog_agent.read_persistent_cache('test_foo') == 'bar'
     assert check.read_persistent_cache('foo') == 'bar'
 
 
@@ -564,7 +565,7 @@ class TestLogSubmission:
                 return "always_the_same"
 
         class TestCheck(AgentCheck):
-            def logs_persistent_cache_key(self) -> CacheKey:
+            def persistent_cache_key(self) -> CacheKey:
                 return ConstantCacheKey(self)
 
         check = TestCheck(name="test", init_config={}, instances=[{}])
@@ -583,7 +584,7 @@ class TestLogSubmission:
                 return "always_the_same"
 
         class TestCheck(AgentCheck):
-            def logs_persistent_cache_key(self) -> CacheKey:
+            def persistent_cache_key(self) -> CacheKey:
                 return ConstantCacheKey(self)
 
         check = TestCheck(name="test", init_config={}, instances=[{}])

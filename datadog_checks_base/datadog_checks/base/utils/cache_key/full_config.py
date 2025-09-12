@@ -15,8 +15,7 @@ class FullConfigCacheKey(CacheKey):
     """
 
     def key(self) -> str:
-        # The check_id is injected by the agent containing the config digest
-        return self.base_key()
+        return self.check.check_id
 
     def base_key(self) -> str:
-        return str(self.check.check_id)
+        return self.check.check_id
