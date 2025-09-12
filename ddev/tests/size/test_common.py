@@ -11,6 +11,7 @@ from ddev.cli.size.utils.common_funcs import (
     convert_to_human_readable_size,
     extract_version_from_about_py,
     format_modules,
+    get_dependencies_from_json,
     get_dependencies_list,
     get_dependencies_sizes,
     get_files,
@@ -88,9 +89,9 @@ def test_is_correct_dependency():
 
 def test_convert_to_human_readable_size():
     assert convert_to_human_readable_size(500) == "500 B"
-    assert convert_to_human_readable_size(1024) == "1.0 KB"
-    assert convert_to_human_readable_size(1048576) == "1.0 MB"
-    assert convert_to_human_readable_size(1073741824) == "1.0 GB"
+    assert convert_to_human_readable_size(1024) == "1.0 KiB"
+    assert convert_to_human_readable_size(1048576) == "1.0 MiB"
+    assert convert_to_human_readable_size(1073741824) == "1.0 GiB"
 
 
 def test_is_valid_integration_file():
@@ -225,6 +226,25 @@ def test_get_files_grouped_and_with_versions():
         },
     ]
 
+    assert result == expected
+
+
+def test_get_dependencies_from_json():
+    dep_size_dict = (
+        '{"dep1": {"compressed": 1, "uncompressed": 2, "version": "1.1.1"},\n'
+        '"dep2": {"compressed": 10, "uncompressed": 20, "version": "1.1.1"}}'
+    )
+    expected = [
+        {"Name": "dep1", "Version": "1.1.1", "Size_Bytes": 1, "Size": "1 B", "Type": "Dependency"},
+        {"Name": "dep2", "Version": "1.1.1", "Size_Bytes": 10, "Size": "10 B", "Type": "Dependency"},
+    ]
+
+    mock_file = mock_open(read_data=str(dep_size_dict))
+    with (
+        patch("ddev.cli.size.utils.common_funcs.open", mock_file),
+        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64_3.txt"]),
+    ):
+        result = get_dependencies_from_json("fake_path", "linux-x86_64", "3.12", True)
     assert result == expected
 
 
