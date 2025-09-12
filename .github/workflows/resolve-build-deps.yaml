@@ -48,15 +48,15 @@ jobs:
       - name: Get changed files list
         id: get-changed-files
         run: |
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+            changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
             echo 'files<<EOF' >> $GITHUB_OUTPUT
-            echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
             echo 'EOF' >> $GITHUB_OUTPUT
-            echo "Changed files: "$CHANGED_FILES""
+            echo "Changed files: "$changed_files""
       - name: Check for dependency changes
         id: dependency-check
         run: |
-          if git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"; then
+          if ${{ steps.get-changed-files.outputs.changed_files }} | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "Dependency files changed."
           else
