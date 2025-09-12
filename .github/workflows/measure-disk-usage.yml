@@ -8,7 +8,6 @@ on:
     workflows: ['Resolve Dependencies and Build Wheels']
     types:
       - completed
-      -
 env:
   PYTHON_VERSION: "3.12"
 
