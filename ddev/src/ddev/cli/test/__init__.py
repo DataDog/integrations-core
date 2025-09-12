@@ -130,8 +130,8 @@ def test(
     import sys
 
     from ddev.testing.constants import EndToEndEnvVars, TestEnvVars
-    from ddev.testing.hatch import get_hatch_env_vars
     from ddev.utils.ci import running_in_ci
+    from ddev.utils.hatch import get_hatch_env_vars
 
     if target_spec is None:
         target_spec = 'changed'
