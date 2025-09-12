@@ -16,18 +16,23 @@ if TYPE_CHECKING:
 
 class ConfigSetCacheKey(CacheKey):
     """
-    Cache key that is derived from a subset of the check's config options.
+    Cache key that invalidates the cache when a subset of the check's config options changes.
 
-    When the subset of config options changes, the cache is invalidated.
+    Parameters:
+        check: the check instance the key is going to be used for.
+        init_config_options: the subset of init_config options to use to generate the cache key.
+        instance_config_options: the subset of config options to use to generate the cache key.
     """
 
     def __init__(
         self,
         check: AgentCheck,
-        config_options: Collection[str],
+        init_config_options: Collection[str],
+        instance_config_options: Collection[str],
     ):
         super().__init__(check)
-        self.config_options = set(config_options)
+        self.init_config_options = set(init_config_options)
+        self.instance_config_options = set(instance_config_options)
         # Config cannot change on the fly, so we can cache the key
         self.__key: str | None = None
 
@@ -35,7 +40,13 @@ class ConfigSetCacheKey(CacheKey):
         if self.__key is not None:
             return self.__key
 
-        merged_config = self.check.init_config | self.check.instance
-        selected_values = tuple(values for key, values in merged_config.items() if key in self.config_options)
+        init_config_values = tuple(
+            value for key, value in self.check.init_config.items() if key in self.init_config_options
+        )
+        instance_config_values = tuple(
+            value for key, value in self.check.instance.items() if key in self.instance_config_options
+        )
+
+        selected_values = init_config_values + instance_config_values
         self.__key = str(hash_mutable(selected_values)).replace("-", "")
         return self.__key

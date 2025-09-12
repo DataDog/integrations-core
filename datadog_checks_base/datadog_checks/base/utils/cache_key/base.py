@@ -11,12 +11,14 @@ if TYPE_CHECKING:
 
 
 class CacheKey(ABC):
-    def __init__(self, check: AgentCheck):
-        """Abstract base class for cache keys management.
+    """
+    Abstract base class for cache keys management.
 
-        Any implementation of this class provides the logic to generate cache keys to be used in the Agent persistent
-        cache.
-        """
+    Any implementation of this class provides the logic to generate cache keys to be used in the Agent persistent
+    cache.
+    """
+
+    def __init__(self, check: AgentCheck):
         self.check = check
         self.__cache_key: str | None = None
 
