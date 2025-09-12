@@ -51,10 +51,11 @@ jobs:
             echo 'files<<EOF' >> $GITHUB_OUTPUT
             git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} >> $GITHUB_OUTPUT
             echo 'EOF' >> $GITHUB_OUTPUT
+            echo "Changed files: $files"
       - name: Check if dependency changes
         id: check-if-dependency-changes
         run: |
-          echo "$files" | grep -E -q "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)" && \
+          echo "${{ steps.get-changed-files.outputs.files }}" | grep -E -q "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)" && \
             echo "changed=true" >> $GITHUB_OUTPUT || \
             echo "changed=false" >> $GITHUB_OUTPUT
           echo "Dependency changes: $changed"
