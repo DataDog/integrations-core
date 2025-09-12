@@ -48,17 +48,19 @@ jobs:
       - name: Get changed files list
         id: get-changed-files
         run: |
-            echo 'files<<EOF' >> $GITHUB_OUTPUT
-            git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} >> $GITHUB_OUTPUT
-            echo 'EOF' >> $GITHUB_OUTPUT
-            echo "Changed files: $files"
-      - name: Check if dependency changes
-        id: check-if-dependency-changes
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+            echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "Changed files: "$CHANGED_FILES""
+      - name: Check for dependency changes
+        id: dependency-check
         run: |
-          echo "${{ steps.get-changed-files.outputs.files }}" | grep -E -q "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)" && \
-            echo "changed=true" >> $GITHUB_OUTPUT || \
+          if git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Dependency files changed."
+          else
             echo "changed=false" >> $GITHUB_OUTPUT
-          echo "Dependency changes: $changed"
+            echo "No dependency files changed."
+          fi
       # - name: Cancel workflow if no dependency changes
       #   if: steps.check-if-dependency-changes.outputs.changed == 'false'
       #   uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
