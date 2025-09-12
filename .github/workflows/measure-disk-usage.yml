@@ -1,13 +1,14 @@
 name: Measure Disk Usage
 
 on:
-  pull_request:
-    branches:
-      - master
+  # pull_request:
+  #   branches:
+  #     - master
   workflow_run:
     workflows: ['Resolve Dependencies and Build Wheels']
     types:
       - completed
+      -
 env:
   PYTHON_VERSION: "3.12"
 
