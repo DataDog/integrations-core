@@ -303,7 +303,7 @@ def main():
 
     parser = argparse.ArgumentParser(prog=__name__, allow_abbrev=False)
     parser.add_argument('--ref', default='origin/master')
-    parser.add_argument('--exact', description='Whether ref refers to the merge base')
+    parser.add_argument('--exact', action='store_true', help='Whether ref refers to the merge base')
     parser.add_argument('-a', '--all', action='store_true')
     parser.add_argument('-p', '--pretty', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')
