@@ -7,20 +7,36 @@ from datadog_checks.base.utils.cache_key.config_set import ConfigSetCacheKey
 from datadog_checks.base.utils.containers import hash_mutable
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def config() -> dict[str, str]:
     return {
-        'option1': 'value1',
-        'option2': 'value2',
+        'init_option1': 'init_value1',
+        'init_option2': 'init_value2',
+        'global': 'init_global_value',
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def instance() -> dict[str, str]:
     return {
-        'option1': 'value1',
-        'option2': 'value2',
+        'instance_option1': 'instance_value1',
+        'instance_option2': 'instance_value2',
+        'global': 'instance_global_value',
     }
+
+
+def build_check(init_config: dict[str, Any], instance: dict[str, Any]) -> AgentCheck:
+    return TestCheck('test', init_config, [instance])
+
+
+@pytest.fixture(scope='module')
+def check(config: dict[str, Any], instance: dict[str, Any]) -> AgentCheck:
+    return build_check(config, instance)
+
+
+@pytest.fixture(scope='module')
+def cache_key(check: AgentCheck) -> ConfigSetCacheKey:
+    return ConfigSetCacheKey(check, init_config_options=['init_option1'])
 
 
 class TestCheck(AgentCheck):
@@ -32,32 +48,29 @@ def normalized_hash(value: object) -> str:
     return str(hash_mutable(value)).replace("-", "")
 
 
-def build_check(init_config: dict[str, Any], instance: dict[str, Any]) -> AgentCheck:
-    return TestCheck('test', init_config, [instance])
-
-
-def test_config_set_caches_key(config: dict[str, Any], instance: dict[str, Any]):
-    check = build_check(config, instance)
-    cache_key = ConfigSetCacheKey(check, ['option1'])
+def test_config_set_caches_key(cache_key: ConfigSetCacheKey):
     assert cache_key._ConfigSetCacheKey__key is None  # type: ignore
-    assert cache_key.base_key() == normalized_hash(('value1',))
+    assert cache_key.base_key() == normalized_hash(('init_value1',))
     assert cache_key._ConfigSetCacheKey__key is not None  # type: ignore
 
 
-def test_config_set_respect_cached_key(config: dict[str, Any], instance: dict[str, Any]):
-    check = build_check(config, instance)
-    cache_key = ConfigSetCacheKey(check, ['option1'])
+def test_config_set_respect_cached_key(cache_key: ConfigSetCacheKey):
     cache_key._ConfigSetCacheKey__key = "123"  # type: ignore
     assert cache_key.base_key() == "123"
 
 
-def test_same_key_on_changes_in_other_options(config: dict[str, Any], instance: dict[str, Any]):
-    cache_key = ConfigSetCacheKey(build_check(config, instance), ['option2'])
-    expected_key = normalized_hash(('value2',))
+def test_initialization_failes_without_any_options(check: AgentCheck):
+    with pytest.raises(ValueError):
+        ConfigSetCacheKey(check)
+
+
+def test_same_key_on_changes_in_unlesected_other_options(config: dict[str, Any], check: AgentCheck):
+    cache_key = ConfigSetCacheKey(check, init_config_options=['init_option1'])
+    expected_key = normalized_hash(('init_value1',))
     assert cache_key.base_key() == expected_key
 
-    config['option1'] = 'something elese'
-    cache_key = ConfigSetCacheKey(build_check(config, instance), ['option2'])
+    config['init_option2'] = 'something elese'
+    cache_key = ConfigSetCacheKey(check, init_config_options=['init_option1'])
     assert cache_key.base_key() == expected_key
 
 
@@ -72,13 +85,12 @@ def test_same_key_on_changes_in_other_options(config: dict[str, Any], instance: 
     ids=["list", "tuple", "dict", "nested_dict"],
 )
 def test_support_for_complex_option_values(
-    config: dict[str, Any],
+    check: AgentCheck,
     instance: dict[str, Any],
     extra_option: list[str] | tuple[str, str] | dict[str, str] | dict[str, dict[str, str]],
 ):
     instance['extra_option'] = extra_option
-    check = build_check(config, instance)
-    cache_key = ConfigSetCacheKey(check, ['extra_option'])
+    cache_key = ConfigSetCacheKey(check, instance_config_options=['extra_option'])
     expected_key = normalized_hash((extra_option,))
     assert cache_key.base_key() == expected_key
 
@@ -106,14 +118,24 @@ def deep_reverse(obj: Any) -> Any:
     ids=["list", "tuple", "dict", "nested_dict"],
 )
 def test_order_does_not_affect_key(
-    config: dict[str, Any],
+    check: AgentCheck,
     instance: dict[str, Any],
     extra_option: list[str] | tuple[str, str] | dict[str, str] | dict[str, dict[str, str]],
 ):
     instance['extra_option'] = extra_option
-    cache_key = ConfigSetCacheKey(build_check(config, instance), ["extra_option"])
+    cache_key = ConfigSetCacheKey(check, instance_config_options=['extra_option'])
     expected_key = normalized_hash((extra_option,))
 
     instance['extra_option'] = deep_reverse(extra_option)
-    cache_key = ConfigSetCacheKey(build_check(config, instance), ["extra_option"])
+    cache_key = ConfigSetCacheKey(check, instance_config_options=['extra_option'])
+    assert cache_key.base_key() == expected_key
+
+
+def test_same_option_names_in_init_config_and_instance_config(check: AgentCheck, instance: dict[str, Any]):
+    cache_key = ConfigSetCacheKey(check, init_config_options=['global'])
+    expected_key = normalized_hash(('init_global_value',))
+
+    # Modifying the same option name in instance has no effect on key
+    instance['global'] = 'something'
+
     assert cache_key.base_key() == expected_key

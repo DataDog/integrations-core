@@ -27,12 +27,17 @@ class ConfigSetCacheKey(CacheKey):
     def __init__(
         self,
         check: AgentCheck,
-        init_config_options: Collection[str],
-        instance_config_options: Collection[str],
+        *,
+        init_config_options: Collection[str] | None = None,
+        instance_config_options: Collection[str] | None = None,
     ):
         super().__init__(check)
-        self.init_config_options = set(init_config_options)
-        self.instance_config_options = set(instance_config_options)
+        self.init_config_options = set(init_config_options) if init_config_options else set()
+        self.instance_config_options = set(instance_config_options) if instance_config_options else set()
+
+        if not self.init_config_options and not self.instance_config_options:
+            raise ValueError("At least one of init_config_options or instance_config_options must be provided")
+
         # Config cannot change on the fly, so we can cache the key
         self.__key: str | None = None
 
