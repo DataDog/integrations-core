@@ -36,7 +36,7 @@ This integration collects logs from the sources listed above and transmits them 
 1. Sign in to the Tanium Console as a user with the following permissions:
    - `Special`: Token Use
    - `Execute`: Threat Response API
-   - `Read`: Audit, Threat Response Alerts, and Threat Response Audit
+   - `Read`: Audit, Threat Response Alerts, Threat Response Audit, and Threat Response Visibility Bypass
    - `Unrestricted Management Rights`: Computer Groups
 2. From the main menu, navigate to **Administration** > **Permissions** > **API Tokens**.
 3. Click **New API Token** and configure the token settings:
