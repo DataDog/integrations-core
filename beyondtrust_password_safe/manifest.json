@@ -3,7 +3,7 @@
   "app_uuid": "7cb71cbd-4dae-4544-895f-f960a49512bc",
   "app_id": "beyondtrust-password-safe",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
