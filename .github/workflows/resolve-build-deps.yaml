@@ -252,7 +252,7 @@ jobs:
     with:
       platforms: linux-aarch64 linux-x86_64 windows-x86_64 macos-x86_64 macos-aarch64
       resolved-deps: true
-      python-version: ${{ env.PYTHON_VERSION }}
+      python-version: "3.12" # change to ${{ env.PYTHON_VERSION }}
 
    
 
