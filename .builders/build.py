@@ -224,7 +224,7 @@ def build_image():
             external_wheels_dir.mkdir()
             final_requirements = mount_dir / 'frozen.txt'
             final_requirements.touch()
-            # dependency_sizes = mount_dir / 'sizes.json'
+            dependency_sizes = mount_dir / 'sizes.json'
             # if not dependency_sizes.exists():
             #     dependency_sizes.write_text(json.dumps({}, indent=2))
 

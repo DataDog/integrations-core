@@ -7,6 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TypedDict
 from zipfile import ZipFile
 
 from dotenv import dotenv_values
@@ -15,6 +16,10 @@ from utils import extract_metadata, normalize_project_name
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
+
+class WheelSizes(TypedDict):
+    compressed: int
+    uncompressed: int
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -57,8 +62,8 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
     return process
 
 
-def calculate_wheel_sizes(wheel_path: Path) -> dict[str, int]:
-    compressed_size = wheel_path.stat().st_size
+def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
+    compressed_size = wheel_path.stat(follow_symlinks=True).st_size
     with ZipFile(wheel_path) as zf:
         uncompressed_size = sum(zinfo.file_size for zinfo in zf.infolist())
     return {'compressed': compressed_size, 'uncompressed': uncompressed_size}
@@ -153,7 +158,7 @@ def main():
         )
 
     dependencies: dict[str, tuple[str, str]] = {}
-    sizes: dict[str, dict[str, int]] = {}
+    sizes: dict[str, WheelSizes] = {}
 
     for wheel_dir in wheels_dir.iterdir():
         for wheel in wheel_dir.iterdir():
@@ -164,8 +169,7 @@ def main():
 
 
             project_sizes = calculate_wheel_sizes(wheel)
-            project_sizes['version'] = project_version
-            sizes[project_name] = project_sizes
+            sizes[project_name] = {'version': project_version, **project_sizes}
 
     output_path = MOUNT_DIR / 'sizes.json'
     with output_path.open('w', encoding='utf-8') as fp:
