@@ -131,8 +131,8 @@ tests:
             vendor_name: "Palo Alto"
           sequence: 486021038
           version: "1.5.0"
-        severity: "Other"
-        severity_id: 99
+        severity: "Unknown"
+        severity_id: 0
         time: 1756142102000
         type_uid: 99
       repeatcnt: 1
