@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Set Python version
-        run: echo "PYTHON_VERSION=3.12" >> $GITHUB_ENV
+        run: echo "PYTHON_VERSION='3.12'" >> $GITHUB_ENV
         
   test:
     name: Run tests
