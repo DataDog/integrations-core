@@ -119,7 +119,7 @@ def get_changed_files(*, ref: str, exact: bool, local: bool) -> list[str]:
     # A   relative/path/to/file.added
     # M   relative/path/to/file.modified
     strategy = '..' if exact else '...'
-    for line in git('diff', '--name-status', f'{ref}{exact}').splitlines():
+    for line in git('diff', '--name-status', f'{ref}{strategy}').splitlines():
         if not is_git_warning_line(line):
             _, relative_path = line.split(maxsplit=1)
             changed_files.add(relative_path)
