@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.1-beta.1 / 2025-09-12
+
+***Fixed***:
+
+* Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo. ([#21206](https://github.com/DataDog/integrations-core/pull/21206))
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
