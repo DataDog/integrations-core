@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
-
 import pytest
 from datadog_checks.active_directory.check import ActiveDirectoryCheckV2
 from datadog_checks.base.constants import ServiceCheck
@@ -29,17 +27,21 @@ def mock_expand_counter_path(wildcard_path):
 @pytest.fixture
 def mock_service_states(mocker):
     """
-    Mocks the check's _is_service_running method directly.
+    Mocks the _get_windows_service_state function.
     """
+    import win32service
+
     created_mocks = {}
 
     def _mock_services(service_states):
-        def is_running_mock(service_name):
-            return service_states.get(service_name, True)
+        def service_state_mock(service_name):
+            # Return SERVICE_RUNNING (4) if service should be running, SERVICE_STOPPED (1) otherwise
+            is_running = service_states.get(service_name, True)
+            return win32service.SERVICE_RUNNING if is_running else win32service.SERVICE_STOPPED
 
         service_mock = mocker.patch(
-            'datadog_checks.active_directory.check.ActiveDirectoryCheckV2._is_service_running',
-            side_effect=is_running_mock,
+            'datadog_checks.active_directory.check._get_windows_service_state',
+            side_effect=service_state_mock,
         )
         created_mocks['service_mock'] = service_mock
         return created_mocks
@@ -47,16 +49,17 @@ def mock_service_states(mocker):
     return _mock_services
 
 
-def test_all_services_running(aggregator, dd_run_check, mock_performance_objects, mock_service_states, mocker):
+def test_all_services_running(
+    aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname
+):
     """Test metric collection when all services are running."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    # apply_pdh_patch(mocker)
     mock_service_states({'NTDS': True, 'Netlogon': True, 'DHCPServer': True, 'DFSR': True})
 
-    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
     dd_run_check(check)
 
-    global_tags = ['server:laptop-e5eb8phe']
+    global_tags = ['server:{}'.format(dd_default_hostname)]
     aggregator.assert_service_check('active_directory.windows.perf.health', ServiceCheck.OK, count=1)
 
     # Assert all metrics are collected with correct values and instance tags
@@ -113,59 +116,55 @@ def test_mixed_service_states(aggregator, dd_run_check, mock_performance_objects
     aggregator.assert_metric('active_directory.dhcp.packets_received_sec', count=0)
 
 
-def test_service_check_disabled(aggregator, dd_run_check, mock_performance_objects, mocker):
-    """Test all metrics are collected when service_check_enabled=False."""
+def test_no_running_services(aggregator, dd_run_check, mock_performance_objects, mock_service_states, mocker):
+    """Test that no metrics are collected when no services are running."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    # apply_pdh_patch(mocker)
+    mock_service_states({'NTDS': False, 'Netlogon': False, 'DHCPServer': False, 'DFSR': False})
 
-    instance = {'host': 'laptop-e5eb8phe', 'service_check_enabled': False}
-    check = ActiveDirectoryCheckV2("active_directory", {}, [instance])
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
     dd_run_check(check)
 
-    # Assert ALL metrics are collected, regardless of mocked service state
-    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', at_least=1)
-    aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', at_least=1)
-    aggregator.assert_metric('active_directory.dfsr.deleted_files_size', at_least=1)
+    # Assert no AD metrics are collected when services are stopped
+    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', count=0)
+    aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', count=0)
+    aggregator.assert_metric('active_directory.dfsr.deleted_files_size', count=0)
 
 
-def test_force_all_metrics(aggregator, dd_run_check, mock_performance_objects, mocker):
-    """Test all metrics are collected when force_all_metrics=True."""
+def test_service_exception_handling(aggregator, dd_run_check, mock_performance_objects, mocker):
+    """Test behavior when service state checking fails."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    # apply_pdh_patch(mocker)
 
-    instance = {'host': 'laptop-e5eb8phe', 'force_all_metrics': True}
-    check = ActiveDirectoryCheckV2("active_directory", {}, [instance])
+    # Mock the service state function to raise an exception
+    mocker.patch(
+        'datadog_checks.active_directory.check._get_windows_service_state',
+        side_effect=Exception("Service query failed"),
+    )
+
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
+
+    # Should not crash, but will collect no metrics due to exception
     dd_run_check(check)
 
-    # Assert ALL metrics are collected, regardless of mocked service state
-    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', at_least=1)
-    aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', at_least=1)
-    aggregator.assert_metric('active_directory.dfsr.deleted_files_size', at_least=1)
+    # Should have no metrics due to service query failure
+    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', count=0)
 
 
-def test_service_state_caching(dd_run_check, mock_performance_objects, mock_service_states, mocker):
-    """Test that service states are cached and reused."""
+def test_service_state_querying(dd_run_check, mock_performance_objects, mock_service_states, mocker):
+    """Test that service states are queried on each run."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    # apply_pdh_patch(mocker)
     mocks = mock_service_states({'NTDS': True})
-    is_running_mock = mocks['service_mock']
+    service_state_mock = mocks['service_mock']
 
-    instance = {'host': 'laptop-e5eb8phe', 'service_cache_duration': 300}
-    check = ActiveDirectoryCheckV2("active_directory", {}, [instance])
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
 
     # First run
     dd_run_check(check)
-    first_call_count = is_running_mock.call_count
+    first_call_count = service_state_mock.call_count
     assert first_call_count > 0
 
-    # Second run from cache
+    # Second run should query services again (no caching)
     dd_run_check(check)
-    assert is_running_mock.call_count == first_call_count
-
-    # Third run after cache expiration
-    check._last_service_check = time.time() - 301
-    dd_run_check(check)
-    assert is_running_mock.call_count > first_call_count
+    assert service_state_mock.call_count > first_call_count
 
 
 def test_metadata_metrics(aggregator, dd_run_check, mock_performance_objects, mock_service_states, mocker):
