@@ -45,10 +45,12 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-      - name: Get changed files
+      - name: Get changed files list
+        id: get-changed-files
         run: |
-          echo "files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})" >> $GITHUB_OUTPUT
-          echo "Changed files: $files"
+            echo 'files<<EOF' >> $GITHUB_OUTPUT
+            git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} >> $GITHUB_OUTPUT
+            echo 'EOF' >> $GITHUB_OUTPUT
       - name: Check if dependency changes
         id: check-if-dependency-changes
         run: |
