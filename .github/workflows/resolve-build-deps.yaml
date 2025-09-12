@@ -45,14 +45,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-      - name: Get changed files list
-        id: get-changed-files
-        run: |
-            changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
-            echo 'files<<EOF' >> $GITHUB_OUTPUT
-            echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
-            echo 'EOF' >> $GITHUB_OUTPUT
-            echo "Changed files: "$changed_files""
       - name: Check for dependency changes
         id: dependency-check
         run: |
@@ -63,16 +55,16 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No dependency files changed."
           fi
-      # - name: Cancel workflow if no dependency changes
-      #   if: steps.check-if-dependency-changes.outputs.changed == 'false'
-      #   uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-      #   with:
-      #     script: |
-      #       await github.rest.actions.cancelWorkflowRun({
-      #           owner: context.repo.owner,
-      #           repo: context.repo.repo,
-      #           run_id: context.runId
-      #         });
+      - name: Cancel workflow if no dependency changes
+        if: true # steps.dependency-check.outputs.changed == 'false'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            await github.rest.actions.cancelWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId
+              });
 
   test:
     name: Run tests
