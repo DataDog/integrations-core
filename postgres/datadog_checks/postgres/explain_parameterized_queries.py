@@ -12,7 +12,6 @@ from datadog_checks.base.utils.tracking import tracked_method
 from .util import DBExplainError
 from .version_utils import V12
 
-# Pre-compiled regex patterns for performance optimization
 PARAMETERIZED_QUERY_PATTERN = re.compile(r"(?<!')\$(?!'\$')[\d]+(?!')")
 
 logger = logging.getLogger(__name__)
