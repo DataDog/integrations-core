@@ -54,7 +54,7 @@ jobs:
     - name: Compute
       id: compute
       run: |-
-        python ${{ env.MATRIX_SCRIPT }} -v --ref "$MERGE_BASE" >> /tmp/matrix.json
+        python ${{ env.MATRIX_SCRIPT }} -v --ref "$MERGE_BASE" --exact >> /tmp/matrix.json
         echo "data=$(cat /tmp/matrix.json)" >> "$GITHUB_OUTPUT"
 
     - name: Show matrix
