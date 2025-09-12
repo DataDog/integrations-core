@@ -256,14 +256,14 @@ jobs:
         name: target-macos-${{ matrix.job.arch }}
         path: output
 
-  measure-disk-usage:
-    needs:
-    - build
-    - build-macos
-    uses: ./.github/workflows/measure-disk-usage.yml
-    with:
-      platforms: linux-aarch64 linux-x86_64 windows-x86_64 macos-x86_64 macos-aarch64
-      resolved-deps: true
+  # measure-disk-usage:
+  #   needs:
+  #   - build
+  #   - build-macos
+  #   uses: ./.github/workflows/measure-disk-usage.yml
+  #   with:
+  #     platforms: linux-aarch64 linux-x86_64 windows-x86_64 macos-x86_64 macos-aarch64
+  #     resolved-deps: true
 
    
 
