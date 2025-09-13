@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import clickhouse_driver
+import clickhouse_connect
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
@@ -58,6 +58,7 @@ class ClickhouseCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
+        # breakpoint()
         self.connect()
         self._query_manager.execute()
         self.collect_version()
@@ -72,14 +73,14 @@ class ClickhouseCheck(AgentCheck):
         self.set_metadata('version', version, scheme='parts', final_scheme='calver', part_map=version_parts)
 
     def execute_query_raw(self, query):
-        return self._client.execute_iter(query)
+        return self._client.query(query).result_rows
 
     def validate_config(self):
         if not self._server:
             raise ConfigurationError('the `server` setting is required')
 
     def ping_clickhouse(self):
-        return self._client.connection.ping()
+        return self._client.ping()
 
     def connect(self):
         if self.instance.get('user'):
@@ -99,24 +100,24 @@ class ClickhouseCheck(AgentCheck):
                 self._client = None
 
         try:
-            client = clickhouse_driver.Client(
+            client = clickhouse_connect.get_client(
+                # https://clickhouse.com/docs/integrations/python#connection-arguments
                 host=self._server,
                 port=self._port,
-                user=self._user,
+                username=self._user,
                 password=self._password,
                 database=self._db,
+                secure=self._tls_verify,
                 connect_timeout=self._connect_timeout,
                 send_receive_timeout=self._read_timeout,
-                sync_request_timeout=self._connect_timeout,
-                compression=self._compression,
-                secure=self._tls_verify,
-                ca_certs=self._tls_ca_cert,
+                client_name=f'datadog-{self.check_id}',
+                compression=self._compression,  # TODO Look into this one
+                # https://clickhouse.com/docs/integrations/python#httpstls-arguments
+                ca_cert=self._tls_ca_cert,
                 verify=self._verify,
+                # https://clickhouse.com/docs/integrations/python#settings-argument
                 settings={},
-                # Make every client unique for server logs
-                client_name='datadog-{}'.format(self.check_id),
             )
-            client.connection.connect()
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
