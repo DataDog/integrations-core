@@ -536,7 +536,6 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_docker):
     aggregator.assert_all_metrics_covered()
 
 
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_load_static_information(aggregator, dd_run_check, instance_docker):

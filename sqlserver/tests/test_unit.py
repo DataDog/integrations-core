@@ -982,9 +982,7 @@ def test_only_custom_queries_validation_warnings(caplog):
     config._validate_only_custom_queries(instance_with_proc)
 
     # Check for stored procedure warning
-    proc_warning_found = any(
-        "`stored_procedure` is deprecated" in record.message for record in caplog.records
-    )
+    proc_warning_found = any("`stored_procedure` is deprecated" in record.message for record in caplog.records)
     assert proc_warning_found, "Expected warning about only_custom_queries with stored_procedure not found"
 
     # Test case 3: only_custom_queries with no custom queries defined
@@ -1024,9 +1022,7 @@ def test_only_custom_queries_validation_warnings(caplog):
 
     # Check that all three warnings are emitted
     dbm_warning_found = any("only_custom_queries is enabled with DBM" in record.message for record in caplog.records)
-    proc_warning_found = any(
-        "only_custom_queries is enabled with stored_procedure" in record.message for record in caplog.records
-    )
+    proc_warning_found = any("`stored_procedure` is deprecated" in record.message for record in caplog.records)
     no_queries_warning_found = any(
         "only_custom_queries is enabled but no custom queries are defined" in record.message
         for record in caplog.records
