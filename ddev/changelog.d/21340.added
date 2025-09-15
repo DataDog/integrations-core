@@ -1,1 +1,1 @@
-Adds a new helper method `get_merge_base` in the `GitRepository` class. It returns the commit hash of the common ancestor between HEAD and the given reference.
+Adds a new helper method `get_merge_base` in the `GitRepository` class. 
