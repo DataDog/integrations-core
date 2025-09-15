@@ -38,7 +38,7 @@ No additional installation is needed on your server.
 
 #### Logs
 
-The Hugging Face TGI integration can collect logs from the server container and forward them to Datadog.
+The Hugging Face TGI integration can collect logs from the server container and forward them to Datadog. The TGI server container needs to be started with the environment variable `NO_COLOR=1` and the option `--json-output` for the logs output to be correctly parsed by Datadog. If launching the server in this manner is not possible, the logs ingested by Datadog will likely be malformed, please refer to the troubleshooting section.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -55,7 +55,8 @@ The Hugging Face TGI integration can collect logs from the server container and 
    logs:
      - type: docker
        source: hugging_face_tgi
-       service: hugging_face_tgi
+       service: text-generation-inference
+       auto_multi_line_detection: true
    ```
 
 <!-- xxz tab xxx -->
@@ -97,6 +98,22 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 ## Troubleshooting
 
 In containerized environments, ensure that the Agent has network access to the TGI metrics endpoint specified in the `hugging_face_tgi.d/conf.yaml` file.
+
+If you wish to ingest non JSON TGI logs, use the following logs configuration:
+
+```yaml
+   logs:
+     - type: docker
+       source: hugging_face_tgi
+       service: text-generation-inference
+       auto_multi_line_detection: true
+       log_processing_rules:
+         - type: mask_sequences
+           name: strip_ansi
+           pattern: "\\x1B\\[[0-9;]*m"
+           replace_placeholder: ""
+
+```
 
 Need help? Contact [Datadog support][9].
 
