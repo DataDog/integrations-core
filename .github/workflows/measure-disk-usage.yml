@@ -46,13 +46,24 @@ jobs:
       run: |
             ddev config override
 
+    - name: Determine commit SHAs
+      id: commits
+      run: |
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "current_sha=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+              echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+            elif [ "${{ github.event_name }}" = "push" ]; then
+              echo "current_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+              echo "base_sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+            fi
+
     - name: Measure disk usage
       run: |
         cmd="python .github/workflows/scripts/measure-disk-usage.py \
-          --current-commit ${{ github.event.pull_request.head.sha }} \
-          --base-commit ${{ github.event.pull_request.base.sha }} \
+          --current-commit ${{ steps.commits.outputs.current_sha }} \
+          --base-commit ${{ steps.commits.outputs.base_sha }} \
           --platform ${{ matrix.platform }} "
-        
+          --run-id ${{ github.run_id }}
         # Send metrics to Datadog only on push to default branch
         if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"

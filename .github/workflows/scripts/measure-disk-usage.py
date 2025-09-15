@@ -38,9 +38,9 @@ def get_run_id(commit, workflow):
     return run_id
 
 
-def get_dep_sizes_json(current_commit, platform):
+def get_dep_sizes_json(current_commit, platform, run_id):
     print(f"Getting dependency sizes json for commit: {current_commit}, platform: {platform}")
-    run_id = get_run_id(current_commit, '.github/workflows/resolve-build-deps.yaml')
+    # run_id = get_run_id(current_commit, '.github/workflows/resolve-build-deps.yaml')
     if run_id and check_artifact_exists(run_id, f'target-{platform}'):
         dep_sizes_json = get_current_sizes_json(run_id, platform)
         print(f"Dependency sizes json path: {dep_sizes_json}")
@@ -176,9 +176,10 @@ def main():
     parser.add_argument('--base-commit', required=True, help='Base commit hash')
     parser.add_argument('--platform', required=True, help='Platform to compare')
     parser.add_argument('--to-dd-key', required=False, help='Send to Datadog')
+    parser.add_argument('--run-id', required=False, help='Run id')
     args = parser.parse_args()
 
-    dep_sizes_json = get_dep_sizes_json(args.current_commit, args.platform)
+    dep_sizes_json = get_dep_sizes_json(args.current_commit, args.platform, args.run_id)
     if not dep_sizes_json:
         dep_sizes_json = get_previous_dep_sizes_json(args.base_commit, args.platform)
 
