@@ -1113,7 +1113,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: category-processor
-          name: add connection direction
+          name: Add connection direction
           enabled: true
           categories:
             - filter:
@@ -1199,7 +1199,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: category-processor
-          name: map status id
+          name: Map status id
           enabled: true
           categories:
             - filter:
@@ -1264,7 +1264,7 @@ pipeline:
               name: "High"
           target: ocsf.confidence
         - type: attribute-remapper
-          name: remap 'ocsf.evidence.device.type_id' string to integer
+          name: Map 'ocsf.evidence.device.type_id' to `ocsf.evidence.device.type_id`
           enabled: true
           sources:
             - ocsf.evidence.device.type_id
@@ -1275,7 +1275,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'ocsf.status_id' string to integer
+          name: Map `ocsf.status_id` to `ocsf.status_id`
           enabled: true
           sources:
             - ocsf.status_id
@@ -1286,7 +1286,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'ocsf.evidence.actor.session.uid' to string
+          name: Map `ocsf.evidence.actor.session.uid` to `ocsf.evidence.actor.session.uid`
           enabled: true
           sources:
             - ocsf.evidence.actor.session.uid
@@ -1297,7 +1297,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'ocsf.finding_info.uid' to string
+          name: Map `ocsf.finding_info.uid` to `ocsf.finding_info.uid`
           enabled: true
           sources:
             - ocsf.finding_info.uid
@@ -1308,7 +1308,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'ocsf.finding_info.analytic.type_id' string to integer
+          name: Map `ocsf.finding_info.analytic.type_id` to `ocsf.finding_info.analytic.type_id`
           enabled: true
           sources:
             - ocsf.finding_info.analytic.type_id
@@ -1319,7 +1319,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'ocsf.src_endpoint.port' string to integer
+          name: Map `ocsf.src_endpoint.port` to `ocsf.src_endpoint.port`
           enabled: true
           sources:
             - ocsf.src_endpoint.port
@@ -1330,7 +1330,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: remap 'ocsf.dst_endpoint.port' string to integer
+            name: Map `ocsf.dst_endpoint.port` to `ocsf.dst_endpoint.port` 
           enabled: true
           sources:
             - ocsf.dst_endpoint.port
@@ -1341,7 +1341,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Convert 'ocsf.evidence.src_endpoint.port' string to integer
+          name: Map `ocsf.evidence.src_endpoint.port` to `ocsf.evidence.src_endpoint.port`
           enabled: true
           sources:
             - ocsf.evidence.src_endpoint.port
@@ -1352,7 +1352,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Convert 'ocsf.evidence.dst_endpoint.port' string to integer
+          name: Map `ocsf.evidence.dst_endpoint.port` to `ocsf.evidence.dst_endpoint.port`
           enabled: true
           sources:
             - ocsf.evidence.dst_endpoint.port
