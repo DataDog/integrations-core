@@ -983,7 +983,7 @@ def test_only_custom_queries_validation_warnings(caplog):
 
     # Check for stored procedure warning
     proc_warning_found = any(
-        "only_custom_queries is enabled with stored_procedure" in record.message for record in caplog.records
+        "`stored_procedure` is deprecated" in record.message for record in caplog.records
     )
     assert proc_warning_found, "Expected warning about only_custom_queries with stored_procedure not found"
 

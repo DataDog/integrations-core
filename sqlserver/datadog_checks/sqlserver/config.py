@@ -280,14 +280,12 @@ class SQLServerConfig:
         if self.only_custom_queries:
             if self.dbm_enabled:
                 self.log.warning(
-                    "only_custom_queries is enabled with DBM if you don't want to collect DBM metrics, set dbm: false"
+                    "only_custom_queries is enabled with DBM. if you don't want to collect DBM metrics, set dbm: false"
                 )
 
             if self.proc:
                 self.log.warning(
-                    "only_custom_queries is enabled with stored_procedure "
-                    "stored_procedure is deprecated. if you don't want to collect "
-                    "stored_procedure metrics, remove that config option"
+                    "`stored_procedure` is deprecated. to run custom queries, add to the `custom_queries` configuration"
                 )
 
             if instance.get('custom_queries', []) == []:
