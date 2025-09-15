@@ -1023,6 +1023,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_resources'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1151,6 +1152,7 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    dbm_instance['collect_resources'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
