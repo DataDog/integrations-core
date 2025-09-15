@@ -1026,11 +1026,10 @@ def test_activity_snapshot_collection(
     check._connect()
 
     blocking_conn = psycopg.connect(host=HOST, dbname=dbname, user="blocking_bob", password=password, autocommit=False)
+    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=False)
     wg = WaitGroup()
 
-    conn = None
     def execute_in_thread(q):
-        conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=False)
         with conn.cursor() as cursor:
             cursor.execute(q)
             wg.done()
