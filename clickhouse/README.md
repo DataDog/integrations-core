@@ -25,7 +25,7 @@ To configure this check for an Agent running on a host:
 
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
-*Note*: The Clickhouse integration now connects via HTTP using the official `clickhouse-connect` client.
+*Note*: This integration uses the official `clickhouse-connect` client to connect over HTTP.
 
 2. [Restart the Agent][5].
 
