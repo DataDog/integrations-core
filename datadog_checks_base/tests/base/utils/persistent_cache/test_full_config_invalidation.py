@@ -14,4 +14,4 @@ def check():
 def test_full_config_invalidation_strategy(check: AgentCheck):
     cache_key = FullConfigInvalidationStrategy(check)
     assert cache_key.invalidation_token() == check.check_id
-    assert cache_key.key_preffix() == check.check_id
+    assert cache_key.key_prefix() == check.check_id

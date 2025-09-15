@@ -289,13 +289,13 @@ class AgentCheck(object):
         self.check_initializations.extend(
             [
                 self.load_configuration_models,
-                self.__initialize_persistent_cache_key_preffix,
+                self.__initialize_persistent_cache_key_prefix,
             ]
         )
 
         self.__formatted_tags = None
         self.__logs_enabled = None
-        self.__persistent_cache_key_preffix: str = ""
+        self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
@@ -1090,8 +1090,8 @@ class AgentCheck(object):
 
         return entrypoint
 
-    def __initialize_persistent_cache_key_preffix(self):
-        self.__persistent_cache_key_preffix = self.cache_invalidation_strategy().key_preffix()
+    def __initialize_persistent_cache_key_prefix(self):
+        self.__persistent_cache_key_prefix = self.cache_invalidation_strategy().key_prefix()
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
@@ -1101,7 +1101,7 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_preffix}_{key}")
+        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_prefix}_{key}")
 
     def write_persistent_cache(self, key: str, value: str):
         # type: (str, str) -> None
@@ -1117,7 +1117,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_preffix}_{key}", value)
+        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_prefix}_{key}", value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
@@ -1289,7 +1289,7 @@ class AgentCheck(object):
 
                 run_with_isolation(self, aggregator, datadog_agent)
             else:
-                self.run_initializations()
+                self.run_check_initializations()
 
                 instance = copy.deepcopy(self.instances[0])
 
@@ -1329,7 +1329,7 @@ class AgentCheck(object):
 
         return error_report
 
-    def run_initializations(self):
+    def run_check_initializations(self):
         while self.check_initializations:
             initialization = self.check_initializations.popleft()
             try:

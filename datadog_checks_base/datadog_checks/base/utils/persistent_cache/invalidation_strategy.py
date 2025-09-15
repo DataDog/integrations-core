@@ -21,7 +21,7 @@ class CacheInvalidationStrategy(ABC):
         self.check = check
         self.__cache_key: str | None = None
 
-    def key_preffix(self) -> str:
+    def key_prefix(self) -> str:
         """
         Returns the cache key preffix for the particular implementation.
         """
@@ -29,7 +29,7 @@ class CacheInvalidationStrategy(ABC):
             return self.__cache_key
 
         check_id_prefix = ":".join(self.check.check_id.split(":")[:-1])
-        self.__cache_key = f"{check_id_prefix}:{self.invalidation_token()}"
+        self.__cache_key = f"{check_id_prefix}_{self.invalidation_token()}"
 
         return self.__cache_key
 

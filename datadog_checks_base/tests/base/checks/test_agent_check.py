@@ -45,7 +45,7 @@ def test_check_version():
 def test_persistent_cache(datadog_agent):
     check = AgentCheck(init_config={}, instances=[{}])
     check.check_id = 'test'
-    check.run_initializations()
+    check.run_check_initializations()
 
     check.write_persistent_cache('foo', 'bar')
 

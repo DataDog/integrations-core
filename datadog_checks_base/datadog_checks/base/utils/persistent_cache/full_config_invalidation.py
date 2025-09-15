@@ -14,7 +14,7 @@ class FullConfigInvalidationStrategy(CacheInvalidationStrategy):
     whenever the configuration of the check changes.
     """
 
-    def key_preffix(self) -> str:
+    def key_prefix(self) -> str:
         return self.invalidation_token()
 
     def invalidation_token(self) -> str:
