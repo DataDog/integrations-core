@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from datadog_checks.base.utils.serialization import json
 
 if TYPE_CHECKING:
-    from datadog_checks.base import DBCheck
+    from datadog_checks.base import DatabaseCheck
 try:
     import datadog_agent
 except ImportError:
@@ -41,7 +41,7 @@ class HealthStatus(Enum):
 
 
 class Health:
-    def __init__(self, check: DBCheck):
+    def __init__(self, check: DatabaseCheck):
         """
         Initialize the HealthCheck instance.
 

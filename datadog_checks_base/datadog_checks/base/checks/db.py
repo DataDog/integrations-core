@@ -5,7 +5,7 @@
 from . import AgentCheck
 
 
-class DBCheck(AgentCheck):
+class DatabaseCheck(AgentCheck):
     def database_monitoring_query_sample(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-samples")
 

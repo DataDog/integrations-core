@@ -10,7 +10,7 @@ from string import Template
 
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, DBCheck
+from datadog_checks.base import AgentCheck, DatabaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
@@ -116,7 +116,7 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 
-class SQLServer(DBCheck):
+class SQLServer(DatabaseCheck):
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True
