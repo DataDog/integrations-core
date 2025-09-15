@@ -58,7 +58,6 @@ class ClickhouseCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
-        # breakpoint()
         self.connect()
         self._query_manager.execute()
         self.collect_version()
