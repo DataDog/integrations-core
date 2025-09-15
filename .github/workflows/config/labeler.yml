@@ -765,8 +765,6 @@ integration/zeek:
 - zeek/**/*
 integration/zero_networks:
 - zero_networks/**/*
-integration/zerofox_cloud_platform:
-- zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
 qa/skip-qa:
