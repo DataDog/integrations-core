@@ -115,7 +115,7 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\perl\perl\bin" && `
     Remove-Item "strawberry-perl-$Env:PERL_VERSION-64bit.zip"
 
-ENV OPENSSL_VERSION="3.4.1"
+ENV OPENSSL_VERSION="3.5.2"
 
 ENV CURL_VERSION="8.15.0"
 
