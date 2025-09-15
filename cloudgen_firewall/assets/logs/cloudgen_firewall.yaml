@@ -52,95 +52,77 @@ pipeline:
   filter:
     query: source:barracuda_cloudgen_logs
   processors:
-    - type: attribute-remapper
-      name: " Map `timestamp` to `syslog.timestamp`"
+    - type: grok-parser
+      name: Field Extract
       enabled: true
-      sources:
-        - timestamp
-      sourceType: attribute
-      target: syslog.timestamp
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map hostname to syslog.hostname
+      source: message
+      samples:
+        - "2025-03-05T12:35:00+05:30 sacumentestlocal
+          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
+          ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from
+          127.0.0.1 : Allowed."
+        - "2025-03-07T12:41:41+05:30 sacumentestlocal
+          sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal
+          Block:
+          FWD|UDP|eth0|10.10.17.9|38721|a0:d0:5b:29:32:2e|10.10.17.255|15600|||\
+          BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+        - "2025-04-09T23:25:00+05:30 sacumentestlocal
+          sacumentestlocal/box_SSH_config:  Info     sacumentestlocal [0210107]
+          writeSSHdconf(): ARGS=N /var/phion/preserve/ssh/ssh.conf.rollout
+          127.0.0.1 10.10.16.167"
+        - "2025-04-09T23:25:00+05:30 sacumentestlocal
+          sacumentestlocal/box_Firewall_threat:  Notice sacumentestlocal
+          firewall: [Off] Sync: This Box RSA Pub Hash LVJOLP-1024 c: BOX"
+        - "2025-03-20T14:01:19+05:30 sacumentestlocal
+          sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event:
+          [1071065] Insert Event from 127.0.0.1:28764 -
+          (D|2|log|2|Login|2420|abhishek|sacumentestlocal|1742479279|Login
+          abhishek from 10.10.16.1 : Allowed.)"
+      grok:
+        supportRules: ""
+        matchRules: parsing_rule1
+          %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{hostname:hostname}\s+%{notSpace:log_element}:\s+%{word:level}\s+%{data:nested_message}
+    - type: grok-parser
+      name: Filter Rule Extract
       enabled: true
-      sources:
-        - hostname
-      sourceType: attribute
-      target: syslog.hostname
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map 'component' to 'service'
-      enabled: true
-      sources:
-        - component
-      sourceType: attribute
-      target: service
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Remapping status from level attribute
-      enabled: true
-      sources:
-        - level
-      sourceType: attribute
-      target: status
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: status-remapper
-      name: Remapper level to status
-      enabled: true
-      sources:
-        - level
-    - type: date-remapper
-      name: "Define `timestamp` as the official date of the log "
-      enabled: true
-      sources:
-        - timestamp
+      source: log_element
+      samples:
+        - sacumentestlocal/box_Auth_access
+        - sacumentestlocal/box_Firewall_Activity
+        - sacumentestlocal/box_Config_daemon_download
+      grok:
+        supportRules: ""
+        matchRules: |
+          rule1 %{hostname}/box_%{notSpace:component}_%{data}
     - type: pipeline
       name: Box Authentication
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs
+        query: source:barracuda_cloudgen_logs component:Auth
       processors:
         - type: grok-parser
           name: Box Auth Access
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-03-17T08:24:45+05:30 sacumentestlocal
-              sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-              boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
-            - "2025-03-05T12:35:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
-              ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from
-              127.0.0.1 : Allowed."
-            - "2025-04-10T10:44:34+05:30 sacumentestlocal
-              sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-              phiona[24524]: Session abhishek: Closed"
-            - "2025-04-10T10:44:34+05:30 sacumentestlocal
-              sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-              box_control[24539]: Session abhishek: Closed"
-            - "2025-03-05T12:35:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
-              ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from
-              127.0.0.1 : Allowed."
+            - "sacumentestlocal boxconfig[27474]: Session
+              localhost_sacumentestlocal: Closed"
+            - "sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login
+              localhost_sacumentestlocal from 127.0.0.1 : Allowed."
+            - "sacumentestlocal phiona[24524]: Session abhishek: Closed"
+            - "sacumentestlocal box_control[24539]: Session abhishek: Closed"
+            - "sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login
+              localhost_sacumentestlocal from 127.0.0.1 : Allowed."
           grok:
             supportRules: ""
             matchRules: >
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{hostname:hostname}
-              %{data:component}:\s+%{word:level}\s+%{word:source}\s+(%{data:event}:)?%{data:process}\[%{integer:pid}\]:\s+%{data:message}(\s+)?:\s+%{word:session_status}(.)?
+              autoFilledRule1
+              %{word:source}\s+(%{data:event}:\s+)?%{word:process}\[%{integer:pid}\]:\s+%{data:message}(\s+)?:\s+%{word:session_status}(.)?
     - type: pipeline
       name: Box Firewall
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:firewall
+        query: source:barracuda_cloudgen_logs component:Firewall
       processors:
         - type: grok-parser
           name: Box Firewall Activity
@@ -166,12 +148,12 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}:\s+(%{data:text}:\s+\[\s+)?%{word:level}\s+%{word:source}\s+%{word:status}:
+              %{word:hostname}
+              %{notSpace:component}:\s+(%{greedyData:text}:\s+\[\s+)?%{word:level}\s+%{word:source}\s+%{word:status}:
               (%{data::csv("traffic,protocol,srcIf,source_ip,source_port,source_mac,dest_ip,dest_port,dest_service,destIf,rule,info,src_nat,dest_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets,user,session_protocol,application,target,content,urlcat","|")})?\]?
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+ %{word:level} %{data:source} %{data:status}: %{data:message.details}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+ %{word:level} %{word:source} %{word:status}: %{greedyData:message.details}
         - type: grok-parser
           name: Box Firewall IPSDownload
           enabled: true
@@ -188,20 +170,20 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{hostname:hostname} %{data:component}:\s+
-              %{word:level}\s+%{data:source}\s+%{word:process}:\s+\[%{number:process_id}\]\s+%{word:action}:\s+(%{data::csv("traffic,protocol,sourceIf,source_ip,source_port,source_mac,destip","|")})
+              %{hostname:hostname} %{notSpace:component}:\s+
+              %{word:level}\s+%{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]\s+%{word:action}:\s+(%{data::csv("traffic,protocol,sourceIf,source_ip,source_port,source_mac,destip","|")})
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{data:component}:\s+ %{word:level}\s+%{data:source}\s+%{data:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{data:component}:\s+ %{word:level}\s+%{word:source}\s+%{greedyData:message}
         - type: grok-parser
           name: Box Firewall Audit
           enabled: true
           source: message
           samples:
-            - '2025-03-19T09:31:22+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_audit":  Info sacumentestlocal
-              firewall: [Main] Sync: Authentication audit is set to ''auto'', auto
-              detection '
+            - "2025-03-19T09:31:22+05:30 sacumentestlocal
+              sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal
+              firewall: [Main] Sync: Authentication audit is set to 'auto', auto
+              detection "
             - '2025-03-19T09:31:22+05:30 sacumentestlocal
               sacumentestlocal/box_Firewall_audit":  Info sacumentestlocal
               Block: <cumulative>|10.10.17.255|137'
@@ -213,27 +195,39 @@ pipeline:
             supportRules: ""
             matchRules: >
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}":\s+%{word:level}\s+%{data:source}\s+%{data:status}:\s+(%{data::csv("method,ip,port","|")})
+              %{word:hostname}
+              %{notSpace:component}":\s+%{word:level}\s+%{word:source}\s+%{word:status}:\s+(%{data::csv("method,ip,port","|")})
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+%{greedyData:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:status}:\s+%{greedyData:message}
         - type: grok-parser
           name: Box Firewall
           enabled: true
           source: message
           samples:
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Request] Configuration: Reload AppDB"
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Notice   sacumentestlocal firewall: [Request] Operation: App DB changed"
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin Session @127.0.0.1] AdminAction: localhost_challenge sent"
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal firewall: [Admin Session @10.10.16.167] AdminAction: abhishek logged in"
+            - "2025-04-22T12:33:00+05:30 sacumentestlocal
+              sacumentestlocal/box_Firewall:  Info     sacumentestlocal
+              firewall: [Request] Configuration: Reload AppDB"
+            - "2025-04-22T12:33:00+05:30 sacumentestlocal
+              sacumentestlocal/box_Firewall:  Notice   sacumentestlocal
+              firewall: [Request] Operation: App DB changed"
+            - "2025-04-22T12:33:00+05:30 sacumentestlocal
+              sacumentestlocal/box_Firewall:  Info     sacumentestlocal
+              firewall: [Admin Session @127.0.0.1] AdminAction: localhost_
+              challenge sent"
+            - "2025-04-22T12:33:00+05:30 sacumentestlocal
+              sacumentestlocal/box_Firewall:  Info     sacumentestlocal
+              firewall: [Admin Session @10.10.16.167] AdminAction: abhishek
+              logged in"
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:log_type}:\s+\[%{word:status}\]\s+%{word:process}:\s+%{data:message}
+              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
+              %{word:hostname}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{word:status}\]\s+%{word:process}:\s+%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:log_type}:\s+\[%{data:status}\s+@%{ip:ip}\]\s+%{word:process}:\s+%{data:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{data:status}\s+@%{ip:ip}\]\s+%{word:process}:\s+%{greedyData:message}
         - type: grok-parser
           name: Box Firewall Auditop
           enabled: true
@@ -249,10 +243,9 @@ pipeline:
               Connection terminated (while 'ecachepb')"
           grok:
             supportRules: ""
-            matchRules:
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+%{greedyData:Action}
+            matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
+              %{host:hostname}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+AdminAction:\s+%{greedyData:Action}
         - type: grok-parser
           name: Box Firewall Threat
           enabled: true
@@ -269,10 +262,9 @@ pipeline:
               firewall: [Main] Sync: BOX sacumentestlocal IP 10.10.16.167"
           grok:
             supportRules: ""
-            matchRules:
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:log_type}:\s+\[%{word:status}\]\s+%{word:action}:\s+%{data:message}
+            matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
+              %{word:hostname}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{word:status}\]\s+%{word:action}:\s+%{greedyData:message}
     - type: pipeline
       name: Box Events
       enabled: true
@@ -303,11 +295,11 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{number:event_id}\]\s+%{data:event}\s+from\s+%{ip:source_ip}:%{port:source_port}\s+-\s+\((%{data::csv("event_type,severity,category,subcategory,action,user_id,username,source_host,session_id,description","|")}\))
+              %{word:hostname}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{number:event_id}\]\s+%{data:event}\s+from\s+%{ip:source_ip}:%{port:source_port}\s+-\s+\((%{data::csv("event_type,severity,category,subcategory,action,user_id,username,source_host,session_id,description","|")}\))
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component} %{word:level}  %{data:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component} %{word:level}  %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
         - type: grok-parser
           name: Box Event Operative
           enabled: true
@@ -331,11 +323,11 @@ pipeline:
             supportRules: ""
             matchRules: >
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{word:process}:\s+\[%{number:process_id}\]%{data:message}
+              %{word:hostname}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component} %{word:level}  %{data:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component} %{word:level}  %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
     - type: pipeline
       name: Box SSH
       enabled: true
@@ -362,7 +354,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{word:source}\s+(:\s+)?\[%{number:process_id}\]\s*%{word:function}\(\):\s*%{greedyData:message}
+              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+(:\s+)?\[%{number:process_id}\]\s*%{word:function}\(\):\s*%{greedyData:message}
         - type: grok-parser
           name: Box SSH sshd
           enabled: true
@@ -388,10 +380,10 @@ pipeline:
             matchRules: >-
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
               %{hostname:hostname}
-              %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:service}?:\s+%{word:sub_type}?:\s+%{data:message}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:service}?:\s+%{word:sub_type}?:\s+%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{data:component}:\s+%{word:level}\s+%{data:source}\s+%{data:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
     - type: pipeline
       name: Box Config
       enabled: true
@@ -422,7 +414,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{data:level}\s+%{data:source}\s+%{data:message}
+              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
         - type: grok-parser
           name: Box Config Admin
           enabled: true
@@ -439,11 +431,11 @@ pipeline:
             supportRules: ""
             matchRules: >
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}:\s+%{data:level}\s+%{data:source}\s+%{ip:ip}:%{integer:port}\s+%{data:event_type}:\s+%{greedyData:message}
+              %{word:hostname}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{ip:ip}:%{integer:port}\s+%{data:event_type}:\s+%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{data:hostname} %{data:component}:\s+%{data:level}\s+%{data:source}\s+%{greedyData:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
         - type: grok-parser
           name: Box Config Sync
           enabled: true
@@ -461,9 +453,9 @@ pipeline:
             supportRules: ""
             matchRules: >
               autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{data:hostname}
-              %{data:component}:\s+%{data:level}\s+%{data:source}
-              %{data:message}
+              %{word:hostname}
+              %{notSpace:component}:\s+%{word:level}\s+%{word:source}
+              %{greedyData:message}
         - type: grok-parser
           name: Box Config Changes
           enabled: true
@@ -486,12 +478,12 @@ pipeline:
               lock"
           grok:
             supportRules: ""
-            matchRules: >
+            matchRules: >-
               autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+(%{data:action}:)?\s+\[%{data:user_name}\@%{ip:source_ip}\]\s+%{greedyData:message}
+              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+(%{word:action}:)?\s+\[%{data:user_name}\@%{ip:source_ip}\]\s+%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+\[%{data:user_name}\@%{ip:source_ip}(\_%{port:port})?\]\s+%{greedyData:message}
+              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+\[%{data:user_name}\@%{ip:source_ip}(\_%{port:port})?\]\s+%{greedyData:message}
     - type: pipeline
       name: Box Control
       enabled: true
@@ -510,7 +502,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+%{greedyData:message}
+              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
     - type: pipeline
       name: Box System
       enabled: true
@@ -531,31 +523,54 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{data:hostname}\s+%{data:component}:\s+%{word:level}\s+%{data:source}\s+%{greedyData:message}
-    - type: grok-parser
-      name: Box Auth Access
+              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{hostname:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
+    - type: attribute-remapper
+      name: " Map `timestamp` to `syslog.timestamp`"
       enabled: true
-      source: message
-      samples:
-        - "2025-03-17T08:24:45+05:30 sacumentestlocal
-          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-          boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
-        - "2025-03-05T12:35:00+05:30 sacumentestlocal
-          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
-          ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from
-          127.0.0.1 : Allowed."
-        - "2025-04-10T10:44:34+05:30 sacumentestlocal
-          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-          phiona[24524]: Session abhishek: Closed"
-        - "2025-04-10T10:44:34+05:30 sacumentestlocal
-          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-          box_control[24539]: Session abhishek: Closed"
-        - "2025-03-05T12:35:00+05:30 sacumentestlocal
-          sacumentestlocal/box_Auth_access:  Info     sacumentestlocal LOGIN
-          ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from
-          127.0.0.1 : Allowed."
-      grok:
-        supportRules: ""
-        matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-          %{hostname:hostname}
-          %{data:component}:\s+%{word:level}\s+%{word:source}\s+(%{data:event}:)?%{data:process}\[%{integer:pid}\]:\s+%{data:message}(\s+)?:\s+%{word:session_status}(.)?
+      sources:
+        - timestamp
+      sourceType: attribute
+      target: syslog.timestamp
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map hostname to syslog.hostname
+      enabled: true
+      sources:
+        - hostname
+      sourceType: attribute
+      target: syslog.hostname
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map 'component' to 'service'
+      enabled: true
+      sources:
+        - component
+      sourceType: attribute
+      target: service
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Remapping status from level attribute
+      enabled: true
+      sources:
+        - level
+      sourceType: attribute
+      target: status
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: status-remapper
+      name: Remapper level to status
+      enabled: true
+      sources:
+        - level
+    - type: date-remapper
+      name: "Define `timestamp` as the official date of the log "
+      enabled: true
+      sources:
+        - timestamp
