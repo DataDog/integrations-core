@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 
 from datadog_checks.base.checks.base import AgentCheck
-from datadog_checks.base.utils.cache_key.config_set import ConfigSetCacheKey
+from datadog_checks.base.utils.cache_key.config_set_invalidation import ConfigSetInvalidationStrategy
 from datadog_checks.base.utils.containers import hash_mutable
 
 
@@ -35,8 +35,8 @@ def check(config: dict[str, Any], instance: dict[str, Any]) -> AgentCheck:
 
 
 @pytest.fixture(scope='module')
-def cache_key(check: AgentCheck) -> ConfigSetCacheKey:
-    return ConfigSetCacheKey(check, init_config_options=['init_option1'])
+def cache_key(check: AgentCheck) -> ConfigSetInvalidationStrategy:
+    return ConfigSetInvalidationStrategy(check, init_config_options=['init_option1'])
 
 
 class TestCheck(AgentCheck):
@@ -48,30 +48,30 @@ def normalized_hash(value: object) -> str:
     return str(hash_mutable(value)).replace("-", "")
 
 
-def test_config_set_caches_key(cache_key: ConfigSetCacheKey):
-    assert cache_key._ConfigSetCacheKey__key is None  # type: ignore
-    assert cache_key.base_key() == normalized_hash(('init_value1',))
-    assert cache_key._ConfigSetCacheKey__key is not None  # type: ignore
+def test_config_set_caches_invalidation_token(cache_key: ConfigSetInvalidationStrategy):
+    assert cache_key._ConfigSetInvalidationStrategy__invalidation_token is None  # type: ignore
+    assert cache_key.invalidation_token() == normalized_hash(('init_value1',))
+    assert cache_key._ConfigSetInvalidationStrategy__invalidation_token is not None  # type: ignore
 
 
-def test_config_set_respect_cached_key(cache_key: ConfigSetCacheKey):
-    cache_key._ConfigSetCacheKey__key = "123"  # type: ignore
-    assert cache_key.base_key() == "123"
+def test_config_set_respect_cached_invalidation_token(cache_key: ConfigSetInvalidationStrategy):
+    cache_key._ConfigSetInvalidationStrategy__invalidation_token = "123"  # type: ignore
+    assert cache_key.invalidation_token() == "123"
 
 
-def test_initialization_failes_without_any_options(check: AgentCheck):
+def test_initialization_fails_without_any_options(check: AgentCheck):
     with pytest.raises(ValueError):
-        ConfigSetCacheKey(check)
+        ConfigSetInvalidationStrategy(check)
 
 
-def test_same_key_on_changes_in_unlesected_other_options(config: dict[str, Any], check: AgentCheck):
-    cache_key = ConfigSetCacheKey(check, init_config_options=['init_option1'])
-    expected_key = normalized_hash(('init_value1',))
-    assert cache_key.base_key() == expected_key
+def test_same_invalidation_token_on_changes_in_unlesected_other_options(config: dict[str, Any], check: AgentCheck):
+    cache_key = ConfigSetInvalidationStrategy(check, init_config_options=['init_option1'])
+    expected_invalidation_token = normalized_hash(('init_value1',))
+    assert cache_key.invalidation_token() == expected_invalidation_token
 
     config['init_option2'] = 'something elese'
-    cache_key = ConfigSetCacheKey(check, init_config_options=['init_option1'])
-    assert cache_key.base_key() == expected_key
+    cache_key = ConfigSetInvalidationStrategy(check, init_config_options=['init_option1'])
+    assert cache_key.invalidation_token() == expected_invalidation_token
 
 
 @pytest.mark.parametrize(
@@ -90,9 +90,9 @@ def test_support_for_complex_option_values(
     extra_option: list[str] | tuple[str, str] | dict[str, str] | dict[str, dict[str, str]],
 ):
     instance['extra_option'] = extra_option
-    cache_key = ConfigSetCacheKey(check, instance_config_options=['extra_option'])
-    expected_key = normalized_hash((extra_option,))
-    assert cache_key.base_key() == expected_key
+    cache_key = ConfigSetInvalidationStrategy(check, instance_config_options=['extra_option'])
+    expected_invalidation_token = normalized_hash((extra_option,))
+    assert cache_key.invalidation_token() == expected_invalidation_token
 
 
 def deep_reverse(obj: Any) -> Any:
@@ -123,19 +123,19 @@ def test_order_does_not_affect_key(
     extra_option: list[str] | tuple[str, str] | dict[str, str] | dict[str, dict[str, str]],
 ):
     instance['extra_option'] = extra_option
-    cache_key = ConfigSetCacheKey(check, instance_config_options=['extra_option'])
-    expected_key = normalized_hash((extra_option,))
+    cache_key = ConfigSetInvalidationStrategy(check, instance_config_options=['extra_option'])
+    expected_invalidation_token = normalized_hash((extra_option,))
 
     instance['extra_option'] = deep_reverse(extra_option)
-    cache_key = ConfigSetCacheKey(check, instance_config_options=['extra_option'])
-    assert cache_key.base_key() == expected_key
+    cache_key = ConfigSetInvalidationStrategy(check, instance_config_options=['extra_option'])
+    assert cache_key.invalidation_token() == expected_invalidation_token
 
 
 def test_same_option_names_in_init_config_and_instance_config(check: AgentCheck, instance: dict[str, Any]):
-    cache_key = ConfigSetCacheKey(check, init_config_options=['global'])
-    expected_key = normalized_hash(('init_global_value',))
+    cache_key = ConfigSetInvalidationStrategy(check, init_config_options=['global'])
+    expected_invalidation_token = normalized_hash(('init_global_value',))
 
     # Modifying the same option name in instance has no effect on key
     instance['global'] = 'something'
 
-    assert cache_key.base_key() == expected_key
+    assert cache_key.invalidation_token() == expected_invalidation_token

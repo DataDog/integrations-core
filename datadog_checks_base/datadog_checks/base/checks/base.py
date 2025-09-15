@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     import traceback as _module_traceback
     import unicodedata as _module_unicodedata
 
-    from datadog_checks.base.utils.cache_key.base import CacheKey
+    from datadog_checks.base.utils.cache_key.invalidation_strategy import CacheInvalidationStrategy
     from datadog_checks.base.utils.diagnose import Diagnosis
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
@@ -286,11 +286,16 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
-        self.check_initializations.append(self.load_configuration_models)
+        self.check_initializations.extend(
+            [
+                self.load_configuration_models,
+                self.__initialize_persistent_cache_key_preffix,
+            ]
+        )
 
         self.__formatted_tags = None
         self.__logs_enabled = None
-        self.__persistent_cache_key: CacheKey | None = None
+        self.__persistent_cache_key_preffix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
@@ -484,15 +489,13 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def persistent_cache_key(self) -> CacheKey:
+    def cache_invalidation_strategy(self) -> CacheInvalidationStrategy:
         """
-        Returns the cache key for the logs persistent cache.
-
-        Override this method to modify how the log cursor is persisted between agent restarts.
+        Returns an invalidation strategy for the cache.
         """
-        from datadog_checks.base.utils.cache_key.full_config import FullConfigCacheKey
+        from datadog_checks.base.utils.cache_key.full_config_invalidation import FullConfigInvalidationStrategy
 
-        return FullConfigCacheKey(self)
+        return FullConfigInvalidationStrategy(self)
 
     def log_typos_in_options(self, user_config, models_config, level):
         # See Performance Optimizations in this package's README.md.
@@ -1087,10 +1090,8 @@ class AgentCheck(object):
 
         return entrypoint
 
-    def __initialize_persistent_cache_key(self) -> CacheKey:
-        if self.__persistent_cache_key is None:
-            self._persistent_cache_key = self.persistent_cache_key()
-        return self._persistent_cache_key
+    def __initialize_persistent_cache_key_preffix(self):
+        self.__persistent_cache_key_preffix = self.cache_invalidation_strategy().key_preffix()
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
@@ -1100,10 +1101,9 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        cache_key = self.__persistent_cache_key or self.__initialize_persistent_cache_key()
-        return datadog_agent.read_persistent_cache(cache_key.key_for(key))
+        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_preffix}_{key}")
 
-    def write_persistent_cache(self, key: str, value: str, cache_key: CacheKey | None = None):
+    def write_persistent_cache(self, key: str, value: str):
         # type: (str, str) -> None
         """Stores `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
@@ -1117,8 +1117,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        cache_key = self.__persistent_cache_key or self.__initialize_persistent_cache_key()
-        datadog_agent.write_persistent_cache(cache_key.key_for(key), value)
+        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_preffix}_{key}", value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
@@ -1290,13 +1289,7 @@ class AgentCheck(object):
 
                 run_with_isolation(self, aggregator, datadog_agent)
             else:
-                while self.check_initializations:
-                    initialization = self.check_initializations.popleft()
-                    try:
-                        initialization()
-                    except Exception:
-                        self.check_initializations.appendleft(initialization)
-                        raise
+                self.run_initializations()
 
                 instance = copy.deepcopy(self.instances[0])
 
@@ -1335,6 +1328,15 @@ class AgentCheck(object):
                 self.metric_limiter.reset()
 
         return error_report
+
+    def run_initializations(self):
+        while self.check_initializations:
+            initialization = self.check_initializations.popleft()
+            try:
+                initialization()
+            except Exception:
+                self.check_initializations.appendleft(initialization)
+                raise
 
     def event(self, event):
         # type: (Event) -> None

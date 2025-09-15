@@ -3,19 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from .base import CacheKey
+from .invalidation_strategy import CacheInvalidationStrategy
 
 
-class FullConfigCacheKey(CacheKey):
+class FullConfigInvalidationStrategy(CacheInvalidationStrategy):
     """
-    Cache key based on the check_id of the check where it is being used.
+    Cache invalidation strategy based on the check_id of the check where it is being used.
 
     The check_id includes a digest of the full configuration of the check. The cache is invalidated
     whenever the configuration of the check changes.
     """
 
-    def key(self) -> str:
-        return self.check.check_id
+    def key_preffix(self) -> str:
+        return self.invalidation_token()
 
-    def base_key(self) -> str:
+    def invalidation_token(self) -> str:
         return self.check.check_id
