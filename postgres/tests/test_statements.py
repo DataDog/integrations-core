@@ -1019,19 +1019,18 @@ def test_activity_snapshot_collection(
         # cannot catch any queries from other users
         # only can see own queries
         return
-    dbm_instance['dbname'] = "postgres"
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['collect_resources'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
     blocking_conn = psycopg.connect(host=HOST, dbname=dbname, user="blocking_bob", password=password, autocommit=False)
-    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=False)
     wg = WaitGroup()
 
+    conn = None
     def execute_in_thread(q):
+        conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=False)
         with conn.cursor() as cursor:
             cursor.execute(q)
             wg.done()
@@ -1152,7 +1151,6 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['collect_raw_query_statement'] = {'enabled': True}
-    dbm_instance['collect_resources'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
