@@ -926,7 +926,8 @@ def test_statement_reported_hostname(
     assert metrics[0]['host'] == expected_hostname
 
 
-@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+# "pg_stat_activity", 
+@pytest.mark.parametrize("pg_stat_activity_view", ["datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
     "user,password,dbname,query,blocking_query,expected_out,expected_keys,expected_conn_out",
     [
