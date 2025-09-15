@@ -1,11 +1,42 @@
 id: cloudgen_firewall
 tests:
-  - sample: "2025-09-12T18:53:00+05:30 testsdemoslocals
-      sacumentestlocal/box_Auth_access:  Notice     sacumentestlocal LOGIN
-      ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from 127.0.0.1
-      : Allowed."
-    result: null
-  - sample: "2025-09-12T18:36:00+05:30 sacumentestlocal
-      sacumentestlocal/box_Auth_access:  Info     sacumentestlocal
-      boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
-    result: null
+ -
+  sample: "2025-09-12T18:53:00+05:30 testsdemoslocals sacumentestlocal/box_Auth_access:  Notice     sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
+  result:
+    custom:
+      component: "Auth"
+      hostname: "testsdemoslocals"
+      level: "Notice"
+      log_element: "sacumentestlocal/box_Auth_access"
+      nested_message: "sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
+      service: "Auth"
+      status: "Notice"
+      syslog:
+        hostname: "testsdemoslocals"
+        timestamp: 1757683380000
+      timestamp: 1757683380000
+    message: "2025-09-12T18:53:00+05:30 testsdemoslocals sacumentestlocal/box_Auth_access:  Notice     sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757683380000
+ -
+  sample: "2025-09-12T18:36:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
+  result:
+    custom:
+      component: "Auth"
+      hostname: "sacumentestlocal"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Auth_access"
+      nested_message: "sacumentestlocal boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
+      service: "Auth"
+      status: "Info"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1757682360000
+      timestamp: 1757682360000
+    message: "2025-09-12T18:36:00+05:30 sacumentestlocal sacumentestlocal/box_Auth_access:  Info     sacumentestlocal boxconfig[27474]: Session localhost_sacumentestlocal: Closed"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757682360000
