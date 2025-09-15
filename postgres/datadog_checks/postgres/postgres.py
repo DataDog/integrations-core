@@ -139,12 +139,29 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = LRUConnectionPoolManager(
-            max_db=self._config.max_connections,
-            base_conn_args=self.build_connection_args(),
-            statement_timeout=self._config.query_timeout,
-            sqlascii_encodings=self._config.query_encodings,
-        )
+        # Use dynamic per-connection args (fresh IAM token) when AWS managed auth is enabled.
+        use_dynamic_conn_args = False
+        try:
+            if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
+                use_dynamic_conn_args = bool(self.cloud_metadata['aws']['managed_authentication'].get('enabled'))
+        except Exception:
+            use_dynamic_conn_args = False
+
+        if use_dynamic_conn_args:
+            self.log.debug("AWS managed auth enabled: enabling dynamic connection args for pool")
+            self.db_pool = LRUConnectionPoolManager(
+                max_db=self._config.max_connections,
+                conn_args_provider=self.build_connection_args,
+                statement_timeout=self._config.query_timeout,
+                sqlascii_encodings=self._config.query_encodings,
+            )
+        else:
+            self.db_pool = LRUConnectionPoolManager(
+                max_db=self._config.max_connections,
+                base_conn_args=self.build_connection_args(),
+                statement_timeout=self._config.query_timeout,
+                sqlascii_encodings=self._config.query_encodings,
+            )
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
