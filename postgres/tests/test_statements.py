@@ -1019,6 +1019,7 @@ def test_activity_snapshot_collection(
         # cannot catch any queries from other users
         # only can see own queries
         return
+    dbm_instance['dbname'] = "postgres"
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
