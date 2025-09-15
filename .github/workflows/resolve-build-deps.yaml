@@ -276,6 +276,9 @@ jobs:
         path: output
 
   measure-disk-usage:
+    permissions:
+      contents: read
+      actions: read
     needs:
     # - build
     - build-macos
