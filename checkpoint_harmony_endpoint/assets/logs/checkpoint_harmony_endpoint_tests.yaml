@@ -1,0 +1,161 @@
+id: checkpoint_harmony_endpoint
+tests:
+  -
+    sample: "<134>1 2025-06-25T16:30:39Z gw-30c1b9 CheckPoint 23656 - [action:\"Prevent\"; flags:\"133376\"; ifdir:\"inbound\"; loguid:\"{0x685ab0ad,0x0,0xad100a0a,0x2e37dc68}\"; origin:\"10.10.16.777\"; sequencenum:\"1\"; time:\"1234773939\"; version:\"5\"; additional_info:\" \"; attack_status:\"Cleaned\"; client_name:\"Check Point Endpoint Security Client\"; client_version:\"88.72.2001\"; confidence_level:\"High\"; description:\"To exclude the file: On the Harmony Endpoint Management add this sha1 exclusion: 3395856c-e81f2b73-82dee726-02f798b6-42f14140 Attack status: Cleaned.\"; detected_by:\"Endpoint Anti-Malware\"; event_type:\"Forensics Case Analysis\"; file_md5:\"44d88612fea8a8f36de82e1278abb02f\"; file_name:\"eps.txt\"; file_sha1:\"3395856ce81f2b7382dee72602f798b642f14140\"; file_sha256:\" \"; file_size:\"68\"; file_type:\"txt\"; host_type:\"Laptop\"; impacted_files:\"Data Tampering: ; \"; incident_details:\"notepad.exe(c80c8eaa6b19de55ba740f86021e461e); \"; installed_products:\"Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Capsule Docs; Anti-Bot; Forensics; Threat Emulation\"; local_time:\"1750773939\"; machine_guid:\" \"; malware_action:\" \"; os_name:\"Microsoft Windows 11 Pro\"; os_version:\"10.0-26100-SP0.0-SMP\"; packet_capture_unique_id:\"61e37374-216b-48f1-ad19-9641e38544b2\"; policy_date:\"1123435146\"; policy_name:\"Default Forensics settings\"; policy_number:\"1\"; product:\"Forensics\"; product_family:\"Endpoint\"; protection_name:\"EICAR-AV-Test\"; protection_type:\"Protection\"; remediated_files:\"notepad.exe(Terminated before), eps.txt(Deleted before)\"; resource:\"c:\\\\users\\\\sacuser\\\\desktop\\\\eps.txt\"; service_domain:\"ep-demo\"; severity:\"3\"; src:\"10.11.123.4\"; src_machine_name:\"SacTest\"; src_user_name:\"Sacusername\"; suspicious_events:\"User Execution: Malicious File: notepad.exe; Subvert Trust Controls: Code Signing: notepad.exe; Modify Registry: notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe; Data Encrypted for Impact: notepad.exe; Query Registry: notepad.exe, notepad.exe, notepad.exe; \"; user_name:\" \"; user_sid:\"S-1-5-21-3778999731-2883901839-149064092-1001\"]  message repeated 355 times: []"
+    result:
+      custom:
+        action: "Prevent"
+        additional_info: ""
+        appname: "CheckPoint"
+        attack_status: "Cleaned"
+        client_name: "Check Point Endpoint Security Client"
+        client_version: "88.72.2001"
+        confidence_level: "High"
+        description: "To exclude the file: On the Harmony Endpoint Management add this sha1 exclusion: 3395856c-e81f2b73-82dee726-02f798b6-42f14140 Attack status: Cleaned."
+        detected_by: "Endpoint Anti-Malware"
+        event_type: "Forensics Case Analysis"
+        file_md5: "44d88612fea8a8f36de82e1278abb02f"
+        file_name: "eps.txt"
+        file_sha1: "3395856ce81f2b7382dee72602f798b642f14140"
+        file_sha256: ""
+        file_size: "68"
+        file_type: "txt"
+        flags: "133376"
+        host_type: "Laptop"
+        ifdir: "inbound"
+        impacted_files: "Data Tampering: ;"
+        incident_details: "notepad.exe(c80c8eaa6b19de55ba740f86021e461e);"
+        installed_products: "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Capsule Docs; Anti-Bot; Forensics; Threat Emulation"
+        local_time: "1750773939"
+        loguid: "{0x685ab0ad,0x0,0xad100a0a,0x2e37dc68}"
+        machine_guid: ""
+        malware_action: ""
+        origin: "10.10.16.777"
+        os_name: "Microsoft Windows 11 Pro"
+        os_version: "10.0-26100-SP0.0-SMP"
+        packet_capture_unique_id: "61e37374-216b-48f1-ad19-9641e38544b2"
+        pid: 23656.0
+        policy_date: "1123435146"
+        policy_name: "Default Forensics settings"
+        policy_number: "1"
+        product: "Forensics"
+        product_family: "Endpoint"
+        protection_name: "EICAR-AV-Test"
+        protection_type: "Protection"
+        remediated_files: "notepad.exe(Terminated before), eps.txt(Deleted before)"
+        resource: "c:\\\\users\\\\sacuser\\\\desktop\\\\eps.txt"
+        sequencenum: "1"
+        service_domain: "ep-demo"
+        severity: "3"
+        src: "10.11.123.4"
+        src_machine_name: "SacTest"
+        src_user_name: "Sacusername"
+        suspicious_events: "User Execution: Malicious File: notepad.exe; Subvert Trust Controls: Code Signing: notepad.exe; Modify Registry: notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe; Data Encrypted for Impact: notepad.exe; Query Registry: notepad.exe, notepad.exe, notepad.exe;"
+        syslog:
+          hostname: "gw-30c1b9"
+          priority: 134.0
+          version: 1.0
+        time: "1234773939"
+        timestamp: 1750869039000
+        user_name: ""
+        user_sid: "S-1-5-21-3778999731-2883901839-149064092-1001"
+        version: "5"
+      message: "<134>1 2025-06-25T16:30:39Z gw-30c1b9 CheckPoint 23656 - [action:\"Prevent\"; flags:\"133376\"; ifdir:\"inbound\"; loguid:\"{0x685ab0ad,0x0,0xad100a0a,0x2e37dc68}\"; origin:\"10.10.16.777\"; sequencenum:\"1\"; time:\"1234773939\"; version:\"5\"; additional_info:\" \"; attack_status:\"Cleaned\"; client_name:\"Check Point Endpoint Security Client\"; client_version:\"88.72.2001\"; confidence_level:\"High\"; description:\"To exclude the file: On the Harmony Endpoint Management add this sha1 exclusion: 3395856c-e81f2b73-82dee726-02f798b6-42f14140 Attack status: Cleaned.\"; detected_by:\"Endpoint Anti-Malware\"; event_type:\"Forensics Case Analysis\"; file_md5:\"44d88612fea8a8f36de82e1278abb02f\"; file_name:\"eps.txt\"; file_sha1:\"3395856ce81f2b7382dee72602f798b642f14140\"; file_sha256:\" \"; file_size:\"68\"; file_type:\"txt\"; host_type:\"Laptop\"; impacted_files:\"Data Tampering: ; \"; incident_details:\"notepad.exe(c80c8eaa6b19de55ba740f86021e461e); \"; installed_products:\"Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Capsule Docs; Anti-Bot; Forensics; Threat Emulation\"; local_time:\"1750773939\"; machine_guid:\" \"; malware_action:\" \"; os_name:\"Microsoft Windows 11 Pro\"; os_version:\"10.0-26100-SP0.0-SMP\"; packet_capture_unique_id:\"61e37374-216b-48f1-ad19-9641e38544b2\"; policy_date:\"1123435146\"; policy_name:\"Default Forensics settings\"; policy_number:\"1\"; product:\"Forensics\"; product_family:\"Endpoint\"; protection_name:\"EICAR-AV-Test\"; protection_type:\"Protection\"; remediated_files:\"notepad.exe(Terminated before), eps.txt(Deleted before)\"; resource:\"c:\\\\users\\\\sacuser\\\\desktop\\\\eps.txt\"; service_domain:\"ep-demo\"; severity:\"3\"; src:\"10.11.123.4\"; src_machine_name:\"SacTest\"; src_user_name:\"Sacusername\"; suspicious_events:\"User Execution: Malicious File: notepad.exe; Subvert Trust Controls: Code Signing: notepad.exe; Modify Registry: notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe, notepad.exe; Data Encrypted for Impact: notepad.exe; Query Registry: notepad.exe, notepad.exe, notepad.exe; \"; user_name:\" \"; user_sid:\"S-1-5-21-3778999731-2883901839-149064092-1001\"]  message repeated 355 times: []"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1750869039000
+  -
+    sample: "<134>1 2025-07-15T08:01:58Z gw-30c1b9 CheckPoint 11919 - [action:\"Prevent\"; flags:\"133376\"; ifdir:\"inbound\"; loguid:\"{0x68760a3a,0x0,0xad100a0a,0x174a2e8f}\"; origin:\"10.10.16.173\"; sequencenum:\"1\"; time:\"1752566338\"; version:\"5\"; additional_info:\" \"; attack_status:\"Blocked\"; client_name:\"Check Point Endpoint Security Client\"; client_version:\"88.72.2001\"; confidence_level:\"High\"; description:\"To exclude the file: On the Harmony Endpoint Management add this sha1 exclusion: 861673a1-614a140a-df1a2364-5f52da05-b211a684 Attack status: Blocked.\"; detected_by:\"Endpoint File Reputation\"; event_type:\"Forensics Case Analysis\"; file_md5:\"2f0ffd8b3601374b96f56386056eada6\"; file_name:\"ninja_syscall1.exe\"; file_sha1:\"861673a1614a140adf1a23645f52da05b211a684\"; file_sha256:\" \"; file_size:\"2364608\"; file_type:\"exe\"; host_type:\"Laptop\"; impacted_files:\" \"; incident_details:\" \"; installed_products:\"Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Capsule Docs; Anti-Bot; Forensics; Threat Emulation\"; local_time:\"1752566338\"; machine_guid:\" \"; malware_action:\" \"; os_name:\"Microsoft Windows 11 Pro\"; os_version:\"10.0-26100-SP0.0-SMP\"; packet_capture_unique_id:\"67d370dd-aade-4809-b801-cbf4b32f2750\"; policy_date:\"1751446556\"; policy_name:\"Default Forensics settings\"; policy_number:\"6\"; product:\"Forensics\"; product_family:\"Endpoint\"; protection_name:\"Gen.Rep.exe\"; protection_type:\"File Reputation\"; remediated_files:\"ninja_syscall1.exe(Deleted before)\"; resource:\"c:\\\\users\\\\sacumen\\\\downloads\\\\atomic-red-team-master (2)\\\\atomic-red-team-master\\\\atomics\\\\t1027.007\\\\bin\\\\ninja_syscall1.exe\"; service_domain:\"ep-demo\"; severity:\"4\"; src:\"10.81.234.3\"; src_machine_name:\"SacumenTest\"; src_user_name:\"vk_sacumen\"; suspicious_events:\" \"; user_name:\" \"; user_sid:\"S-1-5-21-3778999731-2883901839-149064092-1001\"]"
+    result:
+      custom:
+        action: "Prevent"
+        additional_info: ""
+        appname: "CheckPoint"
+        attack_status: "Blocked"
+        client_name: "Check Point Endpoint Security Client"
+        client_version: "88.72.2001"
+        confidence_level: "High"
+        description: "To exclude the file: On the Harmony Endpoint Management add this sha1 exclusion: 861673a1-614a140a-df1a2364-5f52da05-b211a684 Attack status: Blocked."
+        detected_by: "Endpoint File Reputation"
+        event_type: "Forensics Case Analysis"
+        file_md5: "2f0ffd8b3601374b96f56386056eada6"
+        file_name: "ninja_syscall1.exe"
+        file_sha1: "861673a1614a140adf1a23645f52da05b211a684"
+        file_sha256: ""
+        file_size: "2364608"
+        file_type: "exe"
+        flags: "133376"
+        host_type: "Laptop"
+        ifdir: "inbound"
+        impacted_files: ""
+        incident_details: ""
+        installed_products: "Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Capsule Docs; Anti-Bot; Forensics; Threat Emulation"
+        local_time: "1752566338"
+        loguid: "{0x68760a3a,0x0,0xad100a0a,0x174a2e8f}"
+        machine_guid: ""
+        malware_action: ""
+        origin: "10.10.16.173"
+        os_name: "Microsoft Windows 11 Pro"
+        os_version: "10.0-26100-SP0.0-SMP"
+        packet_capture_unique_id: "67d370dd-aade-4809-b801-cbf4b32f2750"
+        pid: 11919.0
+        policy_date: "1751446556"
+        policy_name: "Default Forensics settings"
+        policy_number: "6"
+        product: "Forensics"
+        product_family: "Endpoint"
+        protection_name: "Gen.Rep.exe"
+        protection_type: "File Reputation"
+        remediated_files: "ninja_syscall1.exe(Deleted before)"
+        resource: "c:\\\\users\\\\sacumen\\\\downloads\\\\atomic-red-team-master (2)\\\\atomic-red-team-master\\\\atomics\\\\t1027.007\\\\bin\\\\ninja_syscall1.exe"
+        sequencenum: "1"
+        service_domain: "ep-demo"
+        severity: "4"
+        src: "10.81.234.3"
+        src_machine_name: "SacumenTest"
+        src_user_name: "vk_sacumen"
+        suspicious_events: ""
+        syslog:
+          hostname: "gw-30c1b9"
+          priority: 134.0
+          version: 1.0
+        time: "1752566338"
+        timestamp: 1752566518000
+        user_name: ""
+        user_sid: "S-1-5-21-3778999731-2883901839-149064092-1001"
+        version: "5"
+      message: "<134>1 2025-07-15T08:01:58Z gw-30c1b9 CheckPoint 11919 - [action:\"Prevent\"; flags:\"133376\"; ifdir:\"inbound\"; loguid:\"{0x68760a3a,0x0,0xad100a0a,0x174a2e8f}\"; origin:\"10.10.16.173\"; sequencenum:\"1\"; time:\"1752566338\"; version:\"5\"; additional_info:\" \"; attack_status:\"Blocked\"; client_name:\"Check Point Endpoint Security Client\"; client_version:\"88.72.2001\"; confidence_level:\"High\"; description:\"To exclude the file: On the Harmony Endpoint Management add this sha1 exclusion: 861673a1-614a140a-df1a2364-5f52da05-b211a684 Attack status: Blocked.\"; detected_by:\"Endpoint File Reputation\"; event_type:\"Forensics Case Analysis\"; file_md5:\"2f0ffd8b3601374b96f56386056eada6\"; file_name:\"ninja_syscall1.exe\"; file_sha1:\"861673a1614a140adf1a23645f52da05b211a684\"; file_sha256:\" \"; file_size:\"2364608\"; file_type:\"exe\"; host_type:\"Laptop\"; impacted_files:\" \"; incident_details:\" \"; installed_products:\"Full Disk Encryption; Media Encryption & Port Protection; Firewall; Compliance; Application Control; Anti-Malware; VPN; Capsule Docs; Anti-Bot; Forensics; Threat Emulation\"; local_time:\"1752566338\"; machine_guid:\" \"; malware_action:\" \"; os_name:\"Microsoft Windows 11 Pro\"; os_version:\"10.0-26100-SP0.0-SMP\"; packet_capture_unique_id:\"67d370dd-aade-4809-b801-cbf4b32f2750\"; policy_date:\"1751446556\"; policy_name:\"Default Forensics settings\"; policy_number:\"6\"; product:\"Forensics\"; product_family:\"Endpoint\"; protection_name:\"Gen.Rep.exe\"; protection_type:\"File Reputation\"; remediated_files:\"ninja_syscall1.exe(Deleted before)\"; resource:\"c:\\\\users\\\\sacumen\\\\downloads\\\\atomic-red-team-master (2)\\\\atomic-red-team-master\\\\atomics\\\\t1027.007\\\\bin\\\\ninja_syscall1.exe\"; service_domain:\"ep-demo\"; severity:\"4\"; src:\"10.81.234.3\"; src_machine_name:\"SacumenTest\"; src_user_name:\"vk_sacumen\"; suspicious_events:\" \"; user_name:\" \"; user_sid:\"S-1-5-21-3778999731-2883901839-149064092-1001\"]"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1752566518000
+  -
+    sample: "<134>1 2025-06-26T12:21:47Z gw-30c1b9 CheckPoint 23656 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x685d3b5c,0x0,0xad100a0a,0x2e37dc68}\"; origin:\"10.10.16.173\"; sequencenum:\"1\"; time:\"1750940507\"; version:\"5\"; additional_info:\"Authentication method: Unix Password\"; administrator:\"admin\"; client_ip:\"10.10.17.131\"; machine:\"10.10.17.131\"; operation:\"Log In\"; operation_number:\"10\"; product:\"SmartConsole\"; subject:\"Administrator Login\"]  message repeated 291 times: []"
+    result:
+      custom:
+        action: "Accept"
+        additional_info: "Authentication method: Unix Password"
+        administrator: "admin"
+        appname: "CheckPoint"
+        client_ip: "10.10.17.131"
+        flags: "163872"
+        ifdir: "outbound"
+        loguid: "{0x685d3b5c,0x0,0xad100a0a,0x2e37dc68}"
+        machine: "10.10.17.131"
+        operation: "Log In"
+        operation_number: "10"
+        origin: "10.10.16.173"
+        pid: 23656.0
+        product: "SmartConsole"
+        sequencenum: "1"
+        subject: "Administrator Login"
+        syslog:
+          hostname: "gw-30c1b9"
+          priority: 134.0
+          version: 1.0
+        time: "1750940507"
+        timestamp: 1750940507000
+        version: "5"
+      message: "<134>1 2025-06-26T12:21:47Z gw-30c1b9 CheckPoint 23656 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x685d3b5c,0x0,0xad100a0a,0x2e37dc68}\"; origin:\"10.10.16.173\"; sequencenum:\"1\"; time:\"1750940507\"; version:\"5\"; additional_info:\"Authentication method: Unix Password\"; administrator:\"admin\"; client_ip:\"10.10.17.131\"; machine:\"10.10.17.131\"; operation:\"Log In\"; operation_number:\"10\"; product:\"SmartConsole\"; subject:\"Administrator Login\"]  message repeated 291 times: []"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1750940507000

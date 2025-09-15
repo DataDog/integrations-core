@@ -50,7 +50,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 
 ![Full length example](../assets/images/example_full_length.png)
 
-- [x] Attention-grabbing "about" section with a banner image, concise copy, useful links, and a good typography hierarchy
+- [x] Attention-grabbing "about" section with the integration logo, concise copy, useful links, and a good typography hierarchy
 - [x] A brief, annotated "overview" section with the most important data, right at the top
 - [x] Simple graph titles and title-case group names
 - [x] Nearly symmetrical in high density mode
@@ -88,7 +88,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 
 ### Standard Groups to Include
 
-1. Always include an *About* group for the integration containing a brief description and helpful links. Edit the *About* group and select the "banner" display option (with the "Show Title" option unchecked), then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`. For instructions on how to create and upload a banner image, go to the [DRUIDS logo gallery](https://druids.datadoghq.com/logos/logo-gallery), click the relevant logo, and click the *Dashboard Banner* tab. The *About* section should contain content, not data; avoid making the *About* section full-width. Consider copying the content in the *About* section into the hovercard that appears when hovering over the dashboard title.
+1. Always include an *About* group for the integration containing a brief description and helpful links. The first element in the *About* group should be an *Image* widget with the *Large* variant of the integration logo. Link the image like this: `static/images/logos/<your-logo>.svg`. To find the correct path to use, go to the [DRUIDS logo gallery](https://druids.datadoghq.com/logos/logo-gallery), click the relevant logo, and click the *Large* tab. Use both light and dark variant to ensure the logo displays properly for the them selected by the user. The *About* section should contain content, not data; avoid making the *About* section full-width. Consider copying the content in the *About* section into the hovercard that appears when hovering over the dashboard title.
 
 1. Also include an *Overview* group containing service checks (e.g. liveness or readiness checks), a few of the most important metrics, and a monitor summary if you have pre-existing monitors for this integration, and place it at the top of the dashboard. The *Overview* section should contain data.
    ![About and overview groups](../assets/images/about_and_overview_groups.png)

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6024e97b-c3c6-45e3-ba71-a48adeebc191",
   "app_id": "hyper-v",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "36f45cb9-4d2f-4c0b-90b0-947623e2534f",
   "app_id": "bitdefender",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

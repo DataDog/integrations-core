@@ -440,9 +440,10 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
 def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
+    app = 'test_activity_vacuum_excluded'
 
     # Run vacuum in a thread
-    thread = run_vacuum_thread(pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING, ANALYZE) persons', application_name='test')
+    thread = run_vacuum_thread(pg_instance, 'VACUUM (DISABLE_PAGE_SKIPPING, ANALYZE) persons', application_name=app)
 
     # Wait for vacuum to be running
     _wait_for_value(
@@ -451,7 +452,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
         query="SELECT count(*) from pg_stat_activity WHERE backend_type = 'client backend' AND query ~* '^vacuum';",
     )
 
-    conn_increase_txid = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name='test')
+    conn_increase_txid = _get_conn(pg_instance, user=USER_ADMIN, password=PASSWORD_ADMIN, application_name=app)
     cur = conn_increase_txid.cursor()
     # Increase txid counter
     _increase_txid(cur)
@@ -463,7 +464,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     # Gather metrics
     check.run()
 
-    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user=USER_ADMIN)
+    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app=app, user=USER_ADMIN)
     aggregator.assert_metric('postgresql.waiting_queries', value=1, count=1, tags=expected_tags)
     # Vacuum process with 3 xmin age should not be reported
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=1, tags=expected_tags)
@@ -477,24 +478,20 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     thread.join()
 
 
-@pytest.mark.flaky(max_runs=10)
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
 
     check.run()
 
-    dd_agent_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='datadog-agent', user='datadog')
-    test_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app='test', user='datadog')
-    # No transaction in progress, we have 0
-    if float(POSTGRES_VERSION) >= 9.6:
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
-    else:
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
-
-    conn1 = _get_conn(pg_instance)
+    app = 'test_backend_transaction_age'
+    conn1 = _get_conn(pg_instance, application_name=app)
     cur = conn1.cursor()
+
+    test_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, app=app, user='datadog')
+    # No transaction in progress, nothing should be reported for test app
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=test_tags)
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=0, tags=test_tags)
 
     # Start a transaction in repeatable read to force pinning of backend_xmin
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
@@ -510,15 +507,9 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     if float(POSTGRES_VERSION) >= 9.6:
         aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=test_tags)
-
-        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
     else:
         aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=test_tags)
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=test_tags)
-
-        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
 
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
 
@@ -535,9 +526,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         # Check that the xmin and xid is 2 tx old
         aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
-
-        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
 
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)

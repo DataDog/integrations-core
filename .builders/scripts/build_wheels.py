@@ -112,10 +112,14 @@ def main():
             str(python_path), '-m', 'pip', 'wheel',
             '-r', str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir', str(staged_wheel_dir),
-            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+            # Temporarily removing extra index urls. See below.
+            # '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
         ]
-        if args.use_built_index:
-            command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
+        # Temporarily disable extra index urls. There are broken wheels in the gcloud bucket
+        # while working on removing tests from them. Adding extra indices causes undefined behavior
+        # and can pull a broken image, preventing the building from running.
+        # if args.use_built_index:
+        #     command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
 
         check_process(command_args, env=env_vars)
 

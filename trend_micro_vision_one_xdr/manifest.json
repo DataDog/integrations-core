@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5efb1591-f9ef-45a3-8b8e-9f716df68f16",
   "app_id": "trend-micro-vision-one-xdr",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

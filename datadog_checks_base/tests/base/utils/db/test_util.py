@@ -105,7 +105,7 @@ def test_constant_rate_limiter_shell_execute():
 
 
 def test_ratelimiting_ttl_cache():
-    ttl = 0.1
+    ttl = 2
     cache = RateLimitingTTLCache(maxsize=5, ttl=ttl)
 
     for i in range(5):

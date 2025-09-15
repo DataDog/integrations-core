@@ -1,0 +1,1 @@
+Remove usage of bitnami images for testing and add ruff rules from parent directory

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a86b9a64-3785-471a-9563-a40e6f3fb86e",
   "app_id": "authorize-net",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
       "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b6d1ad60-e67f-4612-92fd-4fe4b4182b22",
   "app_id": "plivo",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

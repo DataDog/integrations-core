@@ -1,1 +1,0 @@
-Fix innodb buffer pool utilization metrics collection for Aurora MySQL reader instances by ensuring `process_innodb_stats` runs even when `SHOW ENGINE INNODB STATUS` is skipped

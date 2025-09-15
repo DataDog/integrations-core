@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "acd85f97-d968-4fd9-9a36-0f131ddafe38",
   "app_id": "tanium",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

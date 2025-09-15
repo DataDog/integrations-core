@@ -358,7 +358,7 @@
     {
       "id": 4075969519773896,
       "definition": {
-        "title": "Parition and Node Metrics",
+        "title": "Partition and Node Metrics",
         "background_color": "vivid_blue",
         "show_title": true,
         "type": "group",

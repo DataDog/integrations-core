@@ -135,10 +135,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def collect_per_statement_metrics(self):
         # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
         # just returns no rows without errors if the performance schema is disabled
-        if self._check.performance_schema_enabled is None:
-            self.log.debug('Waiting for performance schema availability to be determined by the check, skipping run.')
-            return
-        if self._check.performance_schema_enabled is False:
+        if self._check.global_variables.performance_schema_enabled is False:
             self._check.record_warning(
                 DatabaseConfigurationError.performance_schema_not_enabled,
                 warning_with_tags(
