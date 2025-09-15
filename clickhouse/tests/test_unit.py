@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from clickhouse_driver.errors import Error, NetworkError
+from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.clickhouse import ClickhouseCheck, queries
 
@@ -16,23 +16,24 @@ def test_config(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test-clickhouse'
 
-    with mock.patch('clickhouse_driver.Client') as m:
+    with mock.patch('clickhouse_connect.get_client') as m:
+        mock_client = mock.MagicMock()
+        m.return_value = mock_client
         check.connect()
         m.assert_called_once_with(
             host=instance['server'],
             port=instance['port'],
-            user=instance['username'],
+            username=instance['username'],
             password=instance['password'],
             database='default',
-            connect_timeout=10,
-            send_receive_timeout=10,
-            sync_request_timeout=10,
-            compression=False,
+            connect_timeout=10.0,
+            send_receive_timeout=10.0,
             secure=False,
-            ca_certs=None,
+            ca_cert=None,
             verify=True,
-            settings={},
             client_name='datadog-test-clickhouse',
+            compression=False,
+            settings={},
         )
 
 
@@ -93,7 +94,7 @@ def test_can_connect_submits_on_every_check_run(is_metadata_collection_enabled, 
     (It used to be submitted only once on check init, which led to customer seeing "no data" in the UI.)
     """
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_driver"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
         # Test for consecutive healthy clickhouse.can_connect statuses
         num_runs = 3
         for _ in range(num_runs):
@@ -106,15 +107,15 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
     check = ClickhouseCheck('clickhouse', {}, [instance])
 
     # Test 1 healthy connection --> 2 Unhealthy service checks --> 1 healthy connection. Recovered
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_driver"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
         check.check({})
-    with mock.patch('clickhouse_driver.Client', side_effect=NetworkError('Connection refused')):
+    with mock.patch('clickhouse_connect.get_client', side_effect=OperationalError('Connection refused')):
         with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', return_value=False):
             with pytest.raises(Exception):
                 check.check({})
             with pytest.raises(Exception):
                 check.check({})
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_driver"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
         check.check({})
     aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.CRITICAL)
     aggregator.assert_service_check("clickhouse.can_connect", count=2, status=check.OK)
@@ -124,7 +125,7 @@ def test_can_connect_recovers_after_failed_connection(is_metadata_collection_ena
 def test_can_connect_recovers_after_failed_ping(is_metadata_collection_enabled, aggregator, instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     # Test Exception in ping_clickhouse(), but reestablishes connection.
-    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_driver"):
+    with mock.patch("datadog_checks.clickhouse.clickhouse.clickhouse_connect"):
         check.check({})
         with mock.patch('datadog_checks.clickhouse.ClickhouseCheck.ping_clickhouse', side_effect=Error()):
             # connect() should be able to handle an exception in ping_clickhouse() and attempt reconnection
