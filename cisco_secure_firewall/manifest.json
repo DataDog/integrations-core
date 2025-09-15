@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "15c8217d-1a43-4efb-a338-053fca68169d",
   "app_id": "cisco-secure-firewall",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
