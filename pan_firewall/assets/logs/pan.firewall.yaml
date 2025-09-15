@@ -525,6 +525,23 @@ pipeline:
                 query: "@subtype:deny"
               name: "Refuse"
           target: ocsf.activity_name
+        - type: category-processor
+          name: Activity ID Category
+          enabled: true
+          categories:
+            - filter:
+                query: "@subtype:start"
+              name: "1"
+            - filter:
+                query: "@subtype:end"
+              name: "2"
+            - filter:
+                query: "@subtype:drop"
+              name: "3"
+            - filter:
+                query: "@subtype:deny"
+              name: "5"
+          target: ocsf.activity_id
         - type: string-builder-processor
           name: Add category uid
           enabled: true
@@ -543,23 +560,6 @@ pipeline:
           template: "4001"
           target: ocsf.class_uid
           replaceMissing: false
-        - type: category-processor
-          name: Activity ID Category
-          enabled: true
-          categories:
-            - filter:
-                query: "@subtype:start"
-              name: "1"
-            - filter:
-                query: "@subtype:end"
-              name: "2"
-            - filter:
-                query: "@subtype:drop"
-              name: "3"
-            - filter:
-                query: "@subtype:deny"
-              name: "5"
-          target: ocsf.activity_id
         - type: attribute-remapper
           name: Map `network.destination.ip` to `ocsf.dst_endpoint.ip`
           enabled: true
@@ -990,6 +990,32 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: category-processor
+          name: map status id
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.status_id:0"
+              name: "Unknown"
+            - filter:
+                query: "@ocsf.status_id:1"
+              name: "New"
+            - filter:
+                query: "@ocsf.status_id:2"
+              name: "In Progress"
+            - filter:
+                query: "@ocsf.status_id:3"
+              name: "Suppressed"
+            - filter:
+                query: "@ocsf.status_id:4"
+              name: "Resolved"
+            - filter:
+                query: "@ocsf.status_id:5"
+              name: "Archived"
+            - filter:
+                query: "@ocsf.status_id:99"
+              name: "Other"
+          target: ocsf.status
     - type: pipeline
       name: misc field URL extraction
       enabled: true
@@ -1198,32 +1224,6 @@ pipeline:
           targetFormat: integer
           preserveSource: false
           overrideOnConflict: false
-        - type: category-processor
-          name: Map status id
-          enabled: true
-          categories:
-            - filter:
-                query: "@ocsf.status_id:0"
-              name: "Unknown"
-            - filter:
-                query: "@ocsf.status_id:1"
-              name: "New"
-            - filter:
-                query: "@ocsf.status_id:2"
-              name: "In Progress"
-            - filter:
-                query: "@ocsf.status_id:3"
-              name: "Suppressed"
-            - filter:
-                query: "@ocsf.status_id:4"
-              name: "Resolved"
-            - filter:
-                query: "@ocsf.status_id:5"
-              name: "Archived"
-            - filter:
-                query: "@ocsf.status_id:99"
-              name: "Other"
-          target: ocsf.status
         - type: attribute-remapper
           name: Map `ocsf.class_uid` to `ocsf.class_uid`
           enabled: true
@@ -1330,7 +1330,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-            name: Map `ocsf.dst_endpoint.port` to `ocsf.dst_endpoint.port` 
+          name: Map `ocsf.dst_endpoint.port` to `ocsf.dst_endpoint.port` 
           enabled: true
           sources:
             - ocsf.dst_endpoint.port
