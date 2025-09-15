@@ -926,7 +926,6 @@ def test_statement_reported_hostname(
     assert metrics[0]['host'] == expected_hostname
 
 
-# "pg_stat_activity",
 @pytest.mark.parametrize("pg_stat_activity_view", ["datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
     "user,password,dbname,query,blocking_query,expected_out,expected_keys,expected_conn_out",
@@ -1023,6 +1022,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
