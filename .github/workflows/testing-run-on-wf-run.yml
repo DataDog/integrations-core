@@ -1,13 +1,10 @@
 name: Run on PR Check
 
 on:
-  # workflow_run:
-  #   workflows: ['Check PR']
-  #   types:
-  #     - completed
-  pull_request:
-    branches:
-      - master
+  workflow_run:
+    workflows: ['Check PR']
+    types:
+      - completed
 
 jobs:
   run-on-pr-check:
