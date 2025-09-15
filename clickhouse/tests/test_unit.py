@@ -32,7 +32,7 @@ def test_config(instance):
             ca_cert=None,
             verify=True,
             client_name='datadog-test-clickhouse',
-            compression=False,
+            compress=False,
             settings={},
         )
 
