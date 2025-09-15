@@ -13,7 +13,6 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.model import DatabaseMonitoringAgentCheck
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -117,7 +116,7 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 
-class SQLServer(DatabaseMonitoringAgentCheck):
+class SQLServer(AgentCheck):
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True

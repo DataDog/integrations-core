@@ -11,7 +11,6 @@ from cachetools import TTLCache
 from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.base.utils.db.model import DatabaseMonitoringAgentCheck
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.mongo.__about__ import __version__
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
@@ -56,7 +55,7 @@ except ImportError:
 long = int
 
 
-class MongoDb(DatabaseMonitoringAgentCheck):
+class MongoDb(AgentCheck):
     """
     MongoDB agent check.
 
