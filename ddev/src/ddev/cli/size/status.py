@@ -4,7 +4,6 @@
 
 import os
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -16,7 +15,9 @@ from ddev.cli.size.utils.common_funcs import (
     export_format,
     format_modules,
     get_dependencies,
+    get_dependencies_from_json,
     get_files,
+    get_last_dependency_sizes_artifact,
     get_valid_platforms,
     get_valid_versions,
     plot_treemap,
@@ -32,17 +33,21 @@ console = Console(stderr=True)
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
 @click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
+@click.option("--dependency-sizes", help="Path to the dependency sizes file.")
+@click.option("--commit", help="Commit hash to check the status of.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(
     app: Application,
-    platform: Optional[str],
-    version: Optional[str],
+    platform: str | None,
+    version: str | None,
     compressed: bool,
     format: list[str],
     show_gui: bool,
     to_dd_org: str,
     to_dd_key: str,
+    dependency_sizes: str | None,
+    commit: str | None,
 ) -> None:
     """
     Show the current size of all integrations and dependencies.
@@ -65,7 +70,10 @@ def status(
         platforms = valid_platforms if platform is None else [platform]
         versions = valid_versions if version is None else [version]
         combinations = [(p, v) for p in platforms for v in versions]
+
         for plat, ver in combinations:
+            if commit and not dependency_sizes:
+                dependency_sizes = get_last_dependency_sizes_artifact(commit, plat)
             parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
@@ -78,6 +86,7 @@ def status(
                 status_mode(
                     repo_path,
                     parameters,
+                    dependency_sizes,
                 )
             )
 
@@ -92,11 +101,17 @@ def status(
 def status_mode(
     repo_path: Path,
     params: CLIParameters,
+    dependency_sizes: str | None,
 ) -> list[FileDataEntryPlatformVersion]:
     with console.status("[cyan]Calculating sizes...", spinner="dots"):
-        modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
-            repo_path, params["platform"], params["version"], params["compressed"]
-        )
+        if dependency_sizes:
+            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies_from_json(
+                dependency_sizes, params["platform"], params["version"], params["compressed"]
+            )
+        else:
+            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
+                repo_path, params["platform"], params["version"], params["compressed"]
+            )
 
     formatted_modules = format_modules(modules, params["platform"], params["version"])
     formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
