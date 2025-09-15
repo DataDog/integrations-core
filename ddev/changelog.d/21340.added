@@ -1,1 +1,1 @@
-Adds a new helper method `get_merge_base` in the `GitRepository` class. 
+Adds a new method `get_merge_base` in the `GitRepository` class. 
