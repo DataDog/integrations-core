@@ -6,9 +6,6 @@ on:
   #   workflows: ['Resolve Dependencies and Build Wheels']
   #   types:
   #     - completed
-  pull_request:
-    branches:
-      - master
 env:
   PYTHON_VERSION: "3.12"
 

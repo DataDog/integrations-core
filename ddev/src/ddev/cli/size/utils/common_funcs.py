@@ -1104,33 +1104,35 @@ def get_last_dependency_sizes_artifact(commit: str, platform: str) -> str:
 
 
 def get_run_id(commit, workflow):
-    print(f"Getting run id for commit: {commit}, workflow: {workflow}")
-    try:
-        result = subprocess.run(
-            [
-                'gh',
-                'run',
-                'list',
-                '--workflow',
-                workflow,
-                '-c',
-                commit,
-                '--json',
-                'databaseId',
-                '--jq',
-                '.[-1].databaseId',
-            ],
-            capture_output=True,
-            text=True,
-        )
-    except subprocess.CalledProcessError as e:
-        stderr = (e.stderr or '').strip()
-        if stderr:
-            print(stderr)
-        print("Failed to get run id")
-        return None
-    run_id = result.stdout.strip() if result.stdout else None
-    print(f"Run id: {run_id}")
+    # print(f"Getting run id for commit: {commit}, workflow: {workflow}")
+    # try:
+    #     result = subprocess.run(
+    #         [
+    #             'gh',
+    #             'run',
+    #             'list',
+    #             '--workflow',
+    #             workflow,
+    #             '-c',
+    #             commit,
+    #             '--json',
+    #             'databaseId',
+    #             '--jq',
+    #             '.[-1].databaseId',
+    #         ],
+    #         capture_output=True,
+    #         text=True,
+    #     )
+    # except subprocess.CalledProcessError as e:
+    #     stderr = (e.stderr or '').strip()
+    #     if stderr:
+    #         print(stderr)
+    #     print("Failed to get run id")
+    #     return None
+    # run_id = result.stdout.strip() if result.stdout else None
+    # print(f"Run id: {run_id}")
+    run_id = os.environ.get("GITHUB_RUN_ID")
+
     return run_id
 
 
