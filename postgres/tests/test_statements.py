@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
-from pprint import pprint
 import re
 import threading
 import time
 from collections import Counter, namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
+from pprint import pprint
 
 import mock
 import psycopg
