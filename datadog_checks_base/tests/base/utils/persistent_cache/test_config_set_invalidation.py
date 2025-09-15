@@ -3,8 +3,8 @@ from typing import Any
 import pytest
 
 from datadog_checks.base.checks.base import AgentCheck
-from datadog_checks.base.utils.cache_key.config_set_invalidation import ConfigSetInvalidationStrategy
 from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.base.utils.persistent_cache.config_set_invalidation import ConfigSetInvalidationStrategy
 
 
 @pytest.fixture(scope='module')

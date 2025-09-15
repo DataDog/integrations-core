@@ -14,7 +14,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.base.utils.cache_key.invalidation_strategy import CacheInvalidationStrategy
+from datadog_checks.base.utils.persistent_cache.invalidation_strategy import CacheInvalidationStrategy
 
 from .utils import BaseModelTest
 
@@ -560,7 +560,7 @@ class TestLogSubmission:
         )
         assert check.get_log_cursor() == {'data': '2'}
 
-    def test_cursor_with_custom_cache_invalidation_strategy_after_restart(self):
+    def custom_invalidation_strategy_check(self) -> AgentCheck:
         class ConstantStrategy(CacheInvalidationStrategy):
             def invalidation_token(self) -> str:
                 return "always_the_same"
@@ -569,36 +569,39 @@ class TestLogSubmission:
             def persistent_cache_key(self) -> CacheInvalidationStrategy:
                 return ConstantStrategy(self)
 
-        check = TestCheck(name="test", init_config={}, instances=[{}])
+        return TestCheck(name="test", init_config={}, instances=[{}])
+
+    def test_cursor_with_custom_cache_invalidation_strategy_after_restart(self):
+        check = self.custom_invalidation_strategy_check()
         check.check_id = 'test:bar:123'
         check.send_log({'message': 'foo'}, cursor={'data': '1'})
 
         assert check.get_log_cursor() == {'data': '1'}
 
-        new_check = TestCheck(name="test", init_config={}, instances=[{}])
+        new_check = self.custom_invalidation_strategy_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
+
+        check = self.custom_invalidation_strategy_check()
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = self.custom_invalidation_strategy_check()
         new_check.check_id = 'test:bar:123456'
         assert new_check.get_log_cursor() == {'data': '1'}
 
     def test_cursor_invalidated_for_different_persistent_check_id_part(self):
-        class ConstantStrategy(CacheInvalidationStrategy):
-            def invalidation_token(self) -> str:
-                return "always_the_same"
-
-        class TestCheck(AgentCheck):
-            def persistent_cache_key(self) -> CacheInvalidationStrategy:
-                return ConstantStrategy(self)
-
-        check = TestCheck(name="test", init_config={}, instances=[{}])
+        check = self.custom_invalidation_strategy_check()
         check.check_id = 'test:bar:123'
-        check.run_initializations()
         check.send_log({'message': 'foo'}, cursor={'data': '1'})
 
         assert check.get_log_cursor() == {'data': '1'}
 
-        new_check = TestCheck(name="test", init_config={}, instances=[{}])
-        new_check.check_id = 'test2:bar:456'
-        new_check.run_initializations()
-        assert new_check.get_log_cursor() is None
+        new_check = self.custom_invalidation_strategy_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
 
     def test_no_cursor(self, datadog_agent):
         check = AgentCheck('check_name', {}, [{}])

@@ -1,7 +1,7 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.cache_key.full_config_invalidation import FullConfigInvalidationStrategy
+from datadog_checks.base.utils.persistent_cache.full_config_invalidation import FullConfigInvalidationStrategy
 
 
 @pytest.fixture

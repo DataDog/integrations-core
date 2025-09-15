@@ -493,7 +493,7 @@ class AgentCheck(object):
         """
         Returns an invalidation strategy for the cache.
         """
-        from datadog_checks.base.utils.cache_key.full_config_invalidation import FullConfigInvalidationStrategy
+        from datadog_checks.base.utils.persistent_cache.full_config_invalidation import FullConfigInvalidationStrategy
 
         return FullConfigInvalidationStrategy(self)
 
