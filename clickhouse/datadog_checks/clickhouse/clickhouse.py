@@ -78,6 +78,12 @@ class ClickhouseCheck(AgentCheck):
         if not self._server:
             raise ConfigurationError('the `server` setting is required')
 
+        # Validate compression type
+        if self._compression and self._compression not in ['lz4', 'zstd', 'br', 'gzip']:
+            raise ConfigurationError(
+                f'Invalid compression type "{self._compression}". Valid values are: lz4, zstd, br, gzip'
+            )
+
     def ping_clickhouse(self):
         return self._client.ping()
 

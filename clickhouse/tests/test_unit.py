@@ -5,6 +5,7 @@ import mock
 import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse import ClickhouseCheck, queries
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
@@ -132,3 +133,10 @@ def test_can_connect_recovers_after_failed_ping(is_metadata_collection_enabled, 
             check.check({})
         check.check({})
     aggregator.assert_service_check("clickhouse.can_connect", count=3, status=check.OK)
+
+
+def test_validate_config(instance):
+    instance['compression'] = 'invalid-compression-type'
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.validate_config()
