@@ -1,11 +1,14 @@
 name: Measure Disk Usage
 
 on:
-  workflow_run:
-    workflows: ['Resolve Dependencies and Build Wheels']
-    types:
-      - completed
-
+  workflow_call:
+  # workflow_run:
+  #   workflows: ['Resolve Dependencies and Build Wheels']
+  #   types:
+  #     - completed
+  pull_request:
+    branches:
+      - master
 env:
   PYTHON_VERSION: "3.12"
 
@@ -43,23 +46,17 @@ jobs:
 
     - name: Measure disk usage
       run: |
-        cmd="ddev size status \
-          --platform ${{ matrix.platform }} \
-          --format json"
-    
+        cmd="python .github/workflows/scripts/measure-disk-usage.py \
+          --current-commit ${{ github.sha }} \
+          --base-commit ${{ github.event.pull_request.base.sha }} \
+          --platform ${{ matrix.platform }} "
+        
         # Send metrics to Datadog only on push to default branch
         if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
         
-        if [ "${{ github.event_name }}" = "workflow_run" ]; then
-          cmd="$cmd --dependency-sizes dependency_sizes_${{ matrix.platform }}.json"
-        fi
-        # Uncompressed metrics
         $cmd
-
-        # Compressed metrics
-        $cmd --compressed      
 
     - name: Upload JSON uncompressed sizes artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

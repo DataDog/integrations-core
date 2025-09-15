@@ -56,7 +56,7 @@ jobs:
             echo "No dependency files changed."
           fi
       - name: Cancel workflow if no dependency changes
-        if: true # steps.dependency-check.outputs.changed == 'false'
+        if: steps.dependency-check.outputs.changed == 'false'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
@@ -275,14 +275,12 @@ jobs:
         name: target-macos-${{ matrix.job.arch }}
         path: output
 
-  # measure-disk-usage:
-  #   needs:
-  #   - build
-  #   - build-macos
-  #   uses: ./.github/workflows/measure-disk-usage.yml
-  #   with:
-  #     platforms: linux-aarch64 linux-x86_64 windows-x86_64 macos-x86_64 macos-aarch64
-  #     resolved-deps: true
+  measure-disk-usage:
+    needs:
+    # - build
+    - build-macos
+    uses: ./.github/workflows/measure-disk-usage.yml
+
 
    
 
