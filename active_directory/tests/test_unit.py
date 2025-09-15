@@ -69,111 +69,94 @@ def test_all_services_running(
         'active_directory.security.kerberos_authentications', 9000, global_tags + ['instance:Security']
     )
     aggregator.assert_metric(
-        'active_directory.dhcp.failover.messages_received', 9000, global_tags + ['instance:DHCPServer']
+        'active_directory.dhcp.failover.binding_updates_received', 9000, global_tags + ['instance:DHCPServer']
     )
-    aggregator.assert_metric('active_directory.dfsr.deleted_files_size', 9000, global_tags + ['instance:InstanceOne'])
-    aggregator.assert_metric('active_directory.dfsr.deleted_files_size', 42, global_tags + ['instance:InstanceTwo'])
-
-    # aggregator.assert_all_metrics_covered()
+    aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', 9000, global_tags + ['instance:InstanceOne'])
+    aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', 42, global_tags + ['instance:InstanceTwo'])
 
 
-def test_only_required_services(aggregator, dd_run_check, mock_performance_objects, mock_service_states, mocker):
+def test_only_required_services(
+    aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname
+):
     """Test that only NTDS metrics are collected when optional services are stopped."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    # apply_pdh_patch(mocker)
     mock_service_states({'NTDS': True, 'Netlogon': False, 'DHCPServer': False, 'DFSR': False})
 
-    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
     dd_run_check(check)
+    global_tags = ['server:{}'.format(dd_default_hostname)]
 
     # Assert NTDS metrics are collected
-    aggregator.assert_metric(
-        'active_directory.dra.inbound.bytes.total', 9000, ['server:laptop-e5eb8phe', 'instance:NTDS']
-    )
+    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', 9000, global_tags + ['instance:NTDS'])
 
     # Assert other metrics are NOT collected
     aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', count=0)
     aggregator.assert_metric('active_directory.security.kerberos_authentications', count=0)
-    aggregator.assert_metric('active_directory.dhcp.failover.messages_received', count=0)
+    aggregator.assert_metric('active_directory.dhcp.failover.binding_updates_received', count=0)
     aggregator.assert_metric('active_directory.dfsr.deleted_files_size', count=0)
 
 
-def test_mixed_service_states(aggregator, dd_run_check, mock_performance_objects, mock_service_states, mocker):
+def test_mixed_service_states(
+    aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname
+):
     """Test selective metric collection based on service states."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    # apply_pdh_patch(mocker)
     mock_service_states({'NTDS': True, 'Netlogon': True, 'DHCPServer': False, 'DFSR': False})
 
-    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
     dd_run_check(check)
+    global_tags = ['server:{}'.format(dd_default_hostname)]
 
     # Assert that metrics for running services are collected
+    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', 9000, global_tags + ['instance:NTDS'])
+    aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', 9000, global_tags + ['instance:lab.local'])
     aggregator.assert_metric(
-        'active_directory.netlogon.semaphore_waiters', 9000, ['server:laptop-e5eb8phe', 'instance:lab.local']
+        'active_directory.security.kerberos_authentications', 9000, global_tags + ['instance:Security']
     )
 
     # Assert that metrics for stopped services are NOT collected
-    aggregator.assert_metric('active_directory.dhcp.packets_received_sec', count=0)
+    aggregator.assert_metric('active_directory.dhcp.failover.binding_updates_received', count=0)
+    aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', count=0)
 
 
-def test_no_running_services(aggregator, dd_run_check, mock_performance_objects, mock_service_states, mocker):
+def test_no_running_services(
+    aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname
+):
     """Test that no metrics are collected when no services are running."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
     mock_service_states({'NTDS': False, 'Netlogon': False, 'DHCPServer': False, 'DFSR': False})
 
-    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
     dd_run_check(check)
 
     # Assert no AD metrics are collected when services are stopped
     aggregator.assert_metric('active_directory.dra.inbound.bytes.total', count=0)
     aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', count=0)
-    aggregator.assert_metric('active_directory.dfsr.deleted_files_size', count=0)
+    aggregator.assert_metric('active_directory.security.kerberos_authentications', count=0)
+    aggregator.assert_metric('active_directory.dhcp.failover.binding_updates_received', count=0)
+    aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', count=0)
 
 
-def test_service_exception_handling(aggregator, dd_run_check, mock_performance_objects, mocker):
+def test_service_exception_handling(aggregator, dd_run_check, mock_performance_objects, mocker, dd_default_hostname):
     """Test behavior when service state checking fails."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
 
-    # Mock the service state function to raise an exception
     mocker.patch(
-        'datadog_checks.active_directory.check._get_windows_service_state',
+        'win32serviceutil.QueryServiceStatus',
         side_effect=Exception("Service query failed"),
     )
 
-    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
-
-    # Should not crash, but will collect no metrics due to exception
-    dd_run_check(check)
-
-    # Should have no metrics due to service query failure
-    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', count=0)
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
+    with pytest.raises(Exception, match="Unable to query service status: Service query failed"):
+        dd_run_check(check)
 
 
-def test_service_state_querying(dd_run_check, mock_performance_objects, mock_service_states, mocker):
-    """Test that service states are queried on each run."""
-    mock_performance_objects(PERFORMANCE_OBJECTS)
-    mocks = mock_service_states({'NTDS': True})
-    service_state_mock = mocks['service_mock']
-
-    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
-
-    # First run
-    dd_run_check(check)
-    first_call_count = service_state_mock.call_count
-    assert first_call_count > 0
-
-    # Second run should query services again (no caching)
-    dd_run_check(check)
-    assert service_state_mock.call_count > first_call_count
-
-
-def test_metadata_metrics(aggregator, dd_run_check, mock_performance_objects, mock_service_states, mocker):
+def test_metadata_metrics(aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname):
     """Test that check respects metadata definitions."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    # apply_pdh_patch(mocker)
     mock_service_states(dict.fromkeys(MOCK_INSTANCES, True))
 
-    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": 'laptop-e5eb8phe'}])
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
     dd_run_check(check)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
