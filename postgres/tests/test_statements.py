@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
+from pprint import pprint
 import re
 import threading
 import time
@@ -310,6 +311,8 @@ def test_statement_metrics(
         fqt_events = [e for e in dbm_samples if e.get('dbm_type') == 'fqt']
         assert len(fqt_events) > 0
         matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
+        if len(matching) > 1:
+            pprint(matching)
         assert len(matching) == 1
         fqt_event = matching[0]
         assert fqt_event['ddagentversion'] == datadog_agent.get_version()
