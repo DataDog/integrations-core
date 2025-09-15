@@ -24,6 +24,7 @@ jobs:
       - set-platforms
     permissions:
         contents: read
+        actions: read
     strategy:
       matrix:
         platform: ${{ fromJSON(needs.set-platforms.outputs.platforms) }}
