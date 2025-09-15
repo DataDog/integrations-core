@@ -72,19 +72,21 @@ PERFORMANCE_OBJECTS = {
     "DHCP Server": (
         ["DHCPServer"],
         {
-            'Binding Updates Dropped': [9000],
-            'Failover: Update pending messages': [9000],
-            'Failover: Messages received/sec': [9000],
-            'Failover: Messages sent/sec': [9000],
+            'Failover: BndUpd Dropped': [9000],
+            'Failover: BndUpd pending in outbound queue': [9000],
+            'Failover: BndUpd received/sec': [9000],
+            'Failover: BndAck received/sec': [9000],
+            'Failover: BndUpd sent/sec': [9000],
+            'Failover: BndAck sent/sec': [9000],
         },
     ),
     "DFS Replicated Folders": (
         ["InstanceOne", "InstanceTwo"],
         {
-            'Size of Files Deleted': [9000, 42],
+            'Deleted Space In Use': [9000, 42],
             'Staging Space In Use': [9000, 42],
             'File Installs Retried': [9000, 42],
-            'Conflict Folder Size': [9000, 42],
+            'Conflict Space In Use': [9000, 42],
         },
     ),
 }

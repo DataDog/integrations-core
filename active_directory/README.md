@@ -65,10 +65,7 @@ The Netlogon and Security metrics help address several monitoring scenarios:
 
 #### Service-Aware Metric Collection
 
-The integration automatically detects which Windows services are running and only collects metrics for available services. This prevents errors when optional roles like DHCP Server or DFS Replication are not installed. You can control this behavior with:
-
-- `service_check_enabled`: Enable/disable service detection (default: `true`)
-- `force_all_metrics`: Force collection of all metrics regardless of service state (default: `false`)
+The integration automatically detects which Windows services are running and only collects metrics for available services. This prevents errors when optional roles like DHCP Server or DFS Replication are not installed.
 
 #### Additional Metrics
 
