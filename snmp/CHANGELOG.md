@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 11.0.0 / 2025-09-05
+
+***Changed***:
+
+* Add correct units and/or scale factor for UCD profile memory metrics ([#20818](https://github.com/DataDog/integrations-core/pull/20818))
+
 ## 10.1.1 / 2025-07-10 / Agent 7.69.0
 
 ***Fixed***:

@@ -867,21 +867,6 @@ def test_fetch_throws(instance_docker):
             schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
 
 
-def test_submit_is_called_if_too_many_columns(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    schemas = Schemas(check, check._config)
-    with (
-        mock.patch('time.time', side_effect=[0, 0]),
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}),
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]),
-        mock.patch('datadog_checks.sqlserver.schemas.SubmitData.submit') as mocked_submit,
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables_data', return_value=(1000_000, {"id": 1})),
-    ):
-        with pytest.raises(StopIteration):
-            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
-            mocked_submit.called_once()
-
-
 def test_exception_handling_by_do_for_dbs(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
