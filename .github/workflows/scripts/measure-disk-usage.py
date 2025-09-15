@@ -19,8 +19,6 @@ def get_run_id(commit, workflow):
                 workflow,
                 '-c',
                 commit,
-                '--status',
-                'completed',
                 '--json',
                 'databaseId',
                 '--jq',
@@ -174,7 +172,7 @@ def parse_sizes_json(compressed_json_path, uncompressed_json_path):
 
 def main():
     parser = argparse.ArgumentParser(description='Calculate the current repo size')
-    parser.add_argument('--current-commit', required=True, help='Current commit hash')
+    parser.add_argument('--current-commit', required=True, help='Current commit sha')
     parser.add_argument('--base-commit', required=True, help='Base commit hash')
     parser.add_argument('--platform', required=True, help='Platform to compare')
     parser.add_argument('--to-dd-key', required=False, help='Send to Datadog')
