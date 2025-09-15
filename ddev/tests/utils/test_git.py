@@ -108,8 +108,8 @@ def test_fetch_tags(repository, mocker):
 def test_get_merge_base(repository):
     repo = Repository(repository.path.name, str(repository.path))
     commit = repo.git.latest_commit()
-    repo.git.capture('branch', 'test')
-    repo.git.capture('checkout', 'test')
+    repo.git.capture('branch', 'test_merge_base')
+    repo.git.capture('checkout', 'test_merge_base')
     (repo.path / 'test1.txt').touch()
     repo.git.capture('add', '.')
     repo.git.capture('commit', '-m', 'test1')
@@ -121,20 +121,20 @@ def test_get_merge_base_two_branches(repository):
     repo = Repository(repository.path.name, str(repository.path))
     commit = repo.git.latest_commit()
 
-    repo.git.capture('branch', 'test')
-    repo.git.capture('checkout', 'test')
+    repo.git.capture('branch', 'test1_merge_base')
+    repo.git.capture('checkout', 'test1_merge_base')
 
     (repo.path / 'test1.txt').touch()
     repo.git.capture('add', '.')
     repo.git.capture('commit', '-m', 'test1')
 
-    repo.git.capture('branch', 'test2')
+    repo.git.capture('branch', 'test2_merge_base')
 
     (repo.path / 'test1_1.txt').touch()
     repo.git.capture('add', '.')
     repo.git.capture('commit', '-m', 'test1_1')
 
-    repo.git.capture('checkout', 'test2')
+    repo.git.capture('checkout', 'test2_merge_base')
     (repo.path / 'test2_1.txt').touch()
     repo.git.capture('add', '.')
     repo.git.capture('commit', '-m', 'test2')
