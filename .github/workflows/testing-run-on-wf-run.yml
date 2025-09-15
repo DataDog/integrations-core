@@ -36,6 +36,6 @@ jobs:
           fi
           echo "sha=$sha" >> $GITHUB_OUTPUT
  
-          run_id=$(gh run --list --workflow "Check PR" -c $sha --json databaseId --jq '.[-1].databaseId')
+          run_id=$(gh run list --workflow "Check PR" -c $sha --json databaseId --jq '.[-1].databaseId')
           echo "Run ID: $run_id"
           
