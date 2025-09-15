@@ -47,7 +47,7 @@ jobs:
     - name: Measure disk usage
       run: |
         cmd="python .github/workflows/scripts/measure-disk-usage.py \
-          --current-commit ${{ github.sha }} \
+          --current-commit ${{ github.event.pull_request.head.sha }} \
           --base-commit ${{ github.event.pull_request.base.sha }} \
           --platform ${{ matrix.platform }} "
         
