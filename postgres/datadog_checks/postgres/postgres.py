@@ -14,6 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
+from datadog_checks.base.utils.db.model import DatabaseMonitoringAgentCheck
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -90,7 +91,7 @@ MAX_CUSTOM_RESULTS = 100
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
 
-class PostgreSql(AgentCheck):
+class PostgreSql(DatabaseMonitoringAgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     __NAMESPACE__ = 'postgresql'

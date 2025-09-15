@@ -17,6 +17,7 @@ from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.model import DatabaseMonitoringAgentCheck
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -99,7 +100,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
-class MySql(AgentCheck):
+class MySql(DatabaseMonitoringAgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
