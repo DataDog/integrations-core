@@ -442,6 +442,50 @@
                             "width": 6,
                             "height": 4
                         }
+                    },
+                    {
+                        "id": 1773283333656778,
+                        "definition": {
+                            "title": "Control Event Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:pushsecurity service:CONTROL $user_email $event_outcome $application_type $client_ip",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@evt.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 12,
+                            "height": 4
+                        }
                     }
                 ]
             },
@@ -449,7 +493,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 12
+                "height": 16
             }
         },
         {
@@ -1031,7 +1075,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 19,
                 "width": 12,
                 "height": 16
             }
@@ -1499,7 +1543,7 @@
                         "layout": {
                             "x": 0,
                             "y": 7,
-                            "width": 3,
+                            "width": 6,
                             "height": 4
                         }
                     },
@@ -1537,9 +1581,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 6,
                             "y": 7,
-                            "width": 9,
+                            "width": 6,
                             "height": 4
                         }
                     }
@@ -1547,7 +1591,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 31,
+                "y": 35,
                 "width": 12,
                 "height": 12
             }
@@ -2262,7 +2306,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 47,
                 "width": 12,
                 "height": 20
             }
@@ -2701,7 +2745,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 63,
+                "y": 67,
                 "width": 12,
                 "height": 12
             }
@@ -3355,7 +3399,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 75,
+                "y": 79,
                 "width": 12,
                 "height": 16
             }
@@ -4001,7 +4045,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 91,
+                "y": 95,
                 "width": 12,
                 "height": 20
             }
@@ -4442,7 +4486,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 111,
+                "y": 115,
                 "width": 12,
                 "height": 12
             }
@@ -4507,7 +4551,7 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 4,
+                            "width": 3,
                             "height": 3
                         }
                     },
@@ -4556,9 +4600,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 4,
+                            "x": 3,
                             "y": 0,
-                            "width": 8,
+                            "width": 9,
                             "height": 3
                         }
                     },
@@ -4883,7 +4927,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 123,
+                "y": 127,
                 "width": 12,
                 "height": 12
             }

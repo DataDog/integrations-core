@@ -362,7 +362,7 @@
                     {
                         "id": 6612787829156264,
                         "definition": {
-                            "title": "Activity Events Over Time",
+                            "title": "Activity Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -476,10 +476,18 @@
                     {
                         "id": 4500961091615137,
                         "definition": {
-                            "title": "Audit Events Over Time",
+                            "title": "Audit Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -582,10 +590,18 @@
                     {
                         "id": 1425482385795097,
                         "definition": {
-                            "title": "Control Events Over Time",
+                            "title": "Control Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -688,10 +704,18 @@
                     {
                         "id": 8985578754747413,
                         "definition": {
-                            "title": "Detection Events Over Time",
+                            "title": "Detection Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -794,10 +818,18 @@
                     {
                         "id": 8915696879594161,
                         "definition": {
-                            "title": "Entity Events Over Time",
+                            "title": "Entity Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -817,17 +849,7 @@
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@evt.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -877,6 +899,10 @@
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "@evt.name",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "content",
                                             "width": "auto"
                                         }
@@ -898,7 +924,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 1
+                "height": 25
             }
         },
         {
@@ -1400,7 +1426,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 28,
                 "width": 12,
                 "height": 10,
                 "is_column_break": true

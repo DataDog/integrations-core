@@ -110,10 +110,18 @@
                     {
                         "id": 7792055127330449,
                         "definition": {
-                            "title": "Login Events Over Time",
+                            "title": "Login Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -229,7 +237,7 @@
                     {
                         "id": 7407259663740449,
                         "definition": {
-                            "title": "Top Emails by Login activity",
+                            "title": "Top Emails by Login Activity",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",

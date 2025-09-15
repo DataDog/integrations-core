@@ -368,8 +368,8 @@
                         "layout": {
                             "x": 0,
                             "y": 7,
-                            "width": 3,
-                            "height": 3
+                            "width": 4,
+                            "height": 4
                         }
                     },
                     {
@@ -399,6 +399,10 @@
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "@evt.name",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "content",
                                             "width": "auto"
                                         }
@@ -408,10 +412,10 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 7,
-                            "width": 9,
-                            "height": 3
+                            "width": 8,
+                            "height": 4
                         }
                     }
                 ]
@@ -420,7 +424,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 11
+                "height": 12
             }
         },
         {
@@ -490,10 +494,18 @@
                     {
                         "id": 6692167947772074,
                         "definition": {
-                            "title": "Blocked URL Events Over Time",
+                            "title": "Blocked URL Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -878,7 +890,7 @@
                         "layout": {
                             "x": 0,
                             "y": 11,
-                            "width": 3,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -916,9 +928,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 11,
-                            "width": 9,
+                            "width": 8,
                             "height": 4
                         }
                     }
@@ -926,7 +938,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 15,
                 "width": 12,
                 "height": 16
             }
@@ -998,10 +1010,18 @@
                     {
                         "id": 1056274768693752,
                         "definition": {
-                            "title": "Phishing Events Over Time",
+                            "title": "Phishing Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1388,7 +1408,7 @@
                         "layout": {
                             "x": 0,
                             "y": 11,
-                            "width": 3,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -1426,9 +1446,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 11,
-                            "width": 9,
+                            "width": 8,
                             "height": 4
                         }
                     }
@@ -1436,7 +1456,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 30,
+                "y": 31,
                 "width": 12,
                 "height": 16,
                 "is_column_break": true
@@ -1509,10 +1529,18 @@
                     {
                         "id": 2418825306345170,
                         "definition": {
-                            "title": "Stolen Credentials Events Over Time",
+                            "title": "Stolen Credentials Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1899,7 +1927,7 @@
                         "layout": {
                             "x": 0,
                             "y": 11,
-                            "width": 3,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -1937,9 +1965,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 11,
-                            "width": 9,
+                            "width": 8,
                             "height": 4
                         }
                     }
@@ -1947,7 +1975,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 46,
+                "y": 47,
                 "width": 12,
                 "height": 16
             }

@@ -110,10 +110,18 @@
                     {
                         "id": 3570499936240261,
                         "definition": {
-                            "title": "Audit Events Over Time",
+                            "title": "Audit Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -228,7 +236,7 @@
                     {
                         "id": 5261648611943507,
                         "definition": {
-                            "title": "Audit Events by User",
+                            "title": "Top Users by Audit Events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -366,7 +374,7 @@
                     {
                         "id": 566360616673284,
                         "definition": {
-                            "title": "Audit Events by Source IP",
+                            "title": "Top Source IP by Audit Events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -457,7 +465,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "evt.name",
+                                            "field": "@usr.email",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@evt.name",
                                             "width": "auto"
                                         },
                                         {
@@ -473,7 +485,7 @@
                             "x": 0,
                             "y": 11,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
@@ -482,7 +494,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 16
+                "height": 15
             }
         },
         {
@@ -855,6 +867,14 @@
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "@usr.email",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@evt.name",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "content",
                                             "width": "auto"
                                         }
@@ -867,16 +887,16 @@
                             "x": 0,
                             "y": 7,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 18,
                 "width": 12,
-                "height": 12
+                "height": 11
             }
         },
         {
@@ -1089,7 +1109,7 @@
                     {
                         "id": 6399225792205824,
                         "definition": {
-                            "title": "API Key creation by Permission",
+                            "title": "API Key Creation by Permission",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1182,6 +1202,14 @@
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "@usr.email",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@evt.name",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "content",
                                             "width": "auto"
                                         }
@@ -1194,16 +1222,16 @@
                             "x": 0,
                             "y": 7,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 31,
+                "y": 29,
                 "width": 12,
-                "height": 12
+                "height": 11
             }
         },
         {
@@ -1428,7 +1456,7 @@
                     {
                         "id": 7424395028179887,
                         "definition": {
-                            "title": "Top Apps with label Modification",
+                            "title": "Top Apps with Label Modification",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1609,16 +1637,16 @@
                             "x": 0,
                             "y": 10,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 40,
                 "width": 12,
-                "height": 15
+                "height": 14
             }
         },
         {
@@ -1949,16 +1977,16 @@
                             "x": 0,
                             "y": 7,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 58,
+                "y": 54,
                 "width": 12,
-                "height": 12
+                "height": 11
             }
         },
         {
@@ -1973,7 +2001,7 @@
                     {
                         "id": 7969483374672391,
                         "definition": {
-                            "title": "Employee Events Over Time",
+                            "title": "Employee Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -2251,16 +2279,16 @@
                             "x": 0,
                             "y": 7,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 70,
+                "y": 65,
                 "width": 12,
-                "height": 12
+                "height": 11
             }
         },
         {
@@ -2534,16 +2562,16 @@
                             "x": 0,
                             "y": 7,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 82,
+                "y": 76,
                 "width": 12,
-                "height": 12
+                "height": 11
             }
         }
     ],
