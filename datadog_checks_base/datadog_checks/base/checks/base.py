@@ -62,7 +62,6 @@ if TYPE_CHECKING:
     import traceback as _module_traceback
     import unicodedata as _module_unicodedata
 
-    from datadog_checks.base.utils.cache_key.invalidation_strategy import CacheInvalidationStrategy
     from datadog_checks.base.utils.diagnose import Diagnosis
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
@@ -489,13 +488,17 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def cache_invalidation_strategy(self) -> CacheInvalidationStrategy:
+    def persistent_cache_id(self) -> str:
         """
-        Returns an invalidation strategy for the cache.
-        """
-        from datadog_checks.base.utils.persistent_cache.full_config_invalidation import FullConfigInvalidationStrategy
+        Returns the ID that identifies this check instance in the Agent persistent cache.
 
-        return FullConfigInvalidationStrategy(self)
+        Overriding this method modifies the default behavior of the AgentCheck and can
+        be used to customize when the persistent cache is invalidated. The default behavior
+        defines the persistent cache ID as the digest of the full check configuration.
+
+        Some per-check isolation is still applied to avoid different checks with the same ID to share the same keys.
+        """
+        return self.check_id.split(":")[-1]
 
     def log_typos_in_options(self, user_config, models_config, level):
         # See Performance Optimizations in this package's README.md.
@@ -1091,7 +1094,12 @@ class AgentCheck(object):
         return entrypoint
 
     def __initialize_persistent_cache_key_prefix(self):
-        self.__persistent_cache_key_prefix = self.cache_invalidation_strategy().key_prefix()
+        if namespace := self.check_id.split(':')[:-1]:
+            namespace = ':'.join(namespace) + ':'
+        else:
+            namespace = ''
+
+        self.__persistent_cache_key_prefix = f'{namespace}{self.persistent_cache_id()}_'
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
@@ -1101,7 +1109,7 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_prefix}_{key}")
+        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}")
 
     def write_persistent_cache(self, key: str, value: str):
         # type: (str, str) -> None
@@ -1117,7 +1125,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_prefix}_{key}", value)
+        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}", value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
