@@ -35,7 +35,7 @@ jobs:
           fi
       - name: Get run ID
         run: |
-          run_id=$(gh run list --workflow "Check PR" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
+          run_id=$(gh run list --workflow ".github/workflows/resolve-build-deps.yaml" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
           echo "run_id_list=$run_id" 
           echo "run_id_variable=${{ github.event.workflow_run.id }}"         
         env:
