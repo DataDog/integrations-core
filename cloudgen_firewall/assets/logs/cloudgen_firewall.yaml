@@ -1,49 +1,48 @@
-id: REPLACE_WITH_APP_ID
-# See app_id in your integration's manifest.json file to learn more:
-# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
-metric_id: REPLACE_WITH_APP_ID
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
+# bypass-global-grok-parser-rules-checks
+id: cloudgen_firewall
+metric_id: cloudgen-firewall
 backend_only: false
+installation_sources:
+  - barracuda_cloudgen_logs
 facets:
-  - description: ""
+  - description: "Shows the component of the Barracuda CloudGen Firewall log."
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: component
-    path: component
+    path: cloudgen_firewall.component
     source: log
     type: string
-  - description: ""
+  - description: "Shows the IP address of the Barracuda CloudGen Firewall log."
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: IPs
-    path: ip
+    path: cloudgen_firewall.ip
     source: log
     type: string
-  - description: ""
+  - description: "Shows the process of the Barracuda CloudGen Firewall log."
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: process
-    path: process
+    path: cloudgen_firewall.process
     source: log
     type: string
-  - description: ""
+  - description: "process ID of the Barracuda CloudGen Firewall log."
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: process ID
-    path: pid
+    path: cloudgen_firewall.pid
     source: log
     type: string
-  - description: ""
+  - description: "session status of the Barracuda CloudGen Firewall log."
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: session_status
-    path: session_status
+    path: cloudgen_firewall.session_status
     source: log
     type: string
 pipeline:

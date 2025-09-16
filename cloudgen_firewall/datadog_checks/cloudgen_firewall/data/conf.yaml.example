@@ -16,4 +16,4 @@
 # logs:
 #   - type: file
 #     path: /var/log/cloudgen_firewall.log
-#     source: barracuda_cloudgen_logs
+#     source: cloudgen_firewall
