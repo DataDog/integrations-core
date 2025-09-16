@@ -98,7 +98,7 @@ pipeline:
       name: Box Authentication
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs component:Auth
+        query: source:barracuda_cloudgen_logs @component:Auth
       processors:
         - type: grok-parser
           name: Box Auth Access
@@ -122,239 +122,182 @@ pipeline:
       name: Box Firewall
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs component:Firewall
+        query: source:barracuda_cloudgen_logs @component:Firewall
       processors:
         - type: grok-parser
           name: Box Firewall Activity
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-03-07T12:41:41+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal
-              Block:
+            - "sacumentestlocal Block:
               FWD|UDP|eth0|10.10.17.9|38721|a0:d0:5b:29:32:2e|10.10.17.255|1560\
               0|||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
-            - "2025-04-09T10:49:43+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal
-              Block:
+            - "sacumentestlocal Block:
               FWD|UDP|eth0|0.0.0.0|68|60:e9:aa:3e:5f:99|255.255.255.255|67|boot\
               ps||BLOCKALL|4002|||0|1|0|0|0|0||||||"
-            - "2025-04-07T08:55:39+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_Activity: message repeated 2 times:
-              [  Security sacumentestlocal Block:
+            - "sacumentestlocal Block:
               FWD|UDP|eth0|10.10.17.167|137|7c:f3:4d:d6:ac:4d|10.10.17.255|137|\
               netbios-ns||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||]"
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}:\s+(%{greedyData:text}:\s+\[\s+)?%{word:level}\s+%{word:source}\s+%{word:status}:
+              autoFilledRule1 %{word:source}\s+%{word:status}:
               (%{data::csv("traffic,protocol,srcIf,source_ip,source_port,source_mac,dest_ip,dest_port,dest_service,destIf,rule,info,src_nat,dest_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets,user,session_protocol,application,target,content,urlcat","|")})?\]?
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+ %{word:level} %{word:source} %{word:status}: %{greedyData:message.details}
+              autoFilledRule2 %{word:source} %{word:status}: %{greedyData:message.details}
         - type: grok-parser
           name: Box Firewall IPSDownload
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-04-09T23:00:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_IPSDownload:  Security
-              sacumentestlocal fwauthd: [2601509] Block:
+            - "sacumentestlocal fwauthd: [2601509] Block:
               FWD|UDP|eth0|0.0.0.0|68|bc:d0:74:54:b0:c2|"
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_IPSDownload:  Info sacumentestlocal
-              Starting main loop pid=4623"
+            - sacumentestlocal Starting main loop pid=4623
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{hostname:hostname} %{notSpace:component}:\s+
-              %{word:level}\s+%{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]\s+%{word:action}:\s+(%{data::csv("traffic,protocol,sourceIf,source_ip,source_port,source_mac,destip","|")})
+              autoFilledRule1
+              %{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]\s+%{word:action}:\s+(%{data::csv("traffic,protocol,sourceIf,source_ip,source_port,source_mac,destip","|")})
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{data:component}:\s+ %{word:level}\s+%{word:source}\s+%{greedyData:message}
+              autoFilledRule2 %{word:source}\s+%{greedyData:message}
         - type: grok-parser
           name: Box Firewall Audit
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-03-19T09:31:22+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_audit\":  Info sacumentestlocal
-              firewall: [Main] Sync: Authentication audit is set to 'auto', auto
-              detection "
-            - '2025-03-19T09:31:22+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_audit":  Info sacumentestlocal
-              Block: <cumulative>|10.10.17.255|137'
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_audit:  Security sacumentestlocal
-              firewall: [Admin Session abhishek@10.10.16.167] AdminAction:
-              Connection terminated (while 'ecachepb')"
+            - "sacumentestlocal firewall: [Main] Sync: Authentication audit is
+              set to 'auto', auto detection "
+            - "sacumentestlocal Block: <cumulative>|10.10.17.255|137"
+            - "sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167]
+              AdminAction: Connection terminated (while 'ecachepb')"
           grok:
             supportRules: ""
             matchRules: >
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}":\s+%{word:level}\s+%{word:source}\s+%{word:status}:\s+(%{data::csv("method,ip,port","|")})
+              autoFilledRule1
+              %{word:source}\s+%{word:status}:\s+(%{data::csv("method,ip,port","|")})
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:status}:\s+%{greedyData:message}
+              autoFilledRule2 %{word:source}\s+%{word:status}:\s+%{greedyData:message}
         - type: grok-parser
           name: Box Firewall
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall:  Info     sacumentestlocal
-              firewall: [Request] Configuration: Reload AppDB"
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall:  Notice   sacumentestlocal
-              firewall: [Request] Operation: App DB changed"
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall:  Info     sacumentestlocal
-              firewall: [Admin Session @127.0.0.1] AdminAction: localhost_
-              challenge sent"
-            - "2025-04-22T12:33:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall:  Info     sacumentestlocal
-              firewall: [Admin Session @10.10.16.167] AdminAction: abhishek
-              logged in"
+            - "sacumentestlocal firewall: [Request] Configuration: Reload AppDB"
+            - "sacumentestlocal firewall: [Request] Operation: App DB changed"
+            - "sacumentestlocal firewall: [Admin Session @127.0.0.1]
+              AdminAction: localhost_ challenge sent"
+            - "sacumentestlocal firewall: [Admin Session @10.10.16.167]
+              AdminAction: abhishek logged in"
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{word:status}\]\s+%{word:process}:\s+%{greedyData:message}
+              autoFilledRule1
+              %{word:source}\s+%{word:log_type}:\s+\[%{word:status}\]\s+%{word:process}:\s+%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{data:status}\s+@%{ip:ip}\]\s+%{word:process}:\s+%{greedyData:message}
+              autoFilledRule2 %{word:source}\s+%{word:log_type}:\s+\[%{data:status}\s+@%{ip:ip}\]\s+%{word:process}:\s+%{greedyData:message}
         - type: grok-parser
           name: Box Firewall Auditop
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-04-24T07:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal
-              firewall: [Admin Session abhishek@10.10.16.167] AdminAction: 0
-              VDevs"
-            - "2025-04-24T07:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_auditop:  Security sacumentestlocal
-              firewall: [Admin Session abhishek@10.10.16.167] AdminAction:
-              Connection terminated (while 'ecachepb')"
+            - "sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167]
+              AdminAction: 0 VDevs"
+            - "sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167]
+              AdminAction: Connection terminated (while 'ecachepb')"
           grok:
             supportRules: ""
-            matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{host:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+AdminAction:\s+%{greedyData:Action}
+            matchRules: autoFilledRule1
+              %{word:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+AdminAction:\s+%{greedyData:Action}
         - type: grok-parser
           name: Box Firewall Threat
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal
-              firewall: [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_threat:  Notice sacumentestlocal
-              firewall: [Off] Sync: This Box RSA Pub Hash LVJOLP-1024 c: BOX"
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Firewall_threat:  Notice sacumentestlocal
-              firewall: [Main] Sync: BOX sacumentestlocal IP 10.10.16.167"
+            - "sacumentestlocal firewall: [Off] Sync: BOX IP is 10.10.16.167 Box
+              RSA Pub"
+            - "sacumentestlocal firewall: [Off] Sync: This Box RSA Pub Hash
+              LVJOLP-1024 c: BOX"
+            - "sacumentestlocal firewall: [Main] Sync: BOX sacumentestlocal IP
+              10.10.16.167"
           grok:
             supportRules: ""
-            matchRules: autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{word:status}\]\s+%{word:action}:\s+%{greedyData:message}
+            matchRules: autoFilledRule1
+              %{word:source}\s+%{word:log_type}:\s+\[%{word:status}\]\s+%{word:action}:\s+%{greedyData:message}
     - type: pipeline
       name: Box Events
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:event
+        query: source:barracuda_cloudgen_logs @component:Event
       processors:
         - type: grok-parser
           name: Box Event Events
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-03-20T14:01:19+05:30 sacumentestlocal
-              sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal
-              event: [1071065] Insert Event from 127.0.0.1:28764 -
+            - "sacumentestlocal event: [1071065] Insert Event from
+              127.0.0.1:28764 -
               (D|2|log|2|Login|2420|abhishek|sacumentestlocal|1742479279|Login
               abhishek from 10.10.16.1 : Allowed.)"
-            - "2025-04-09T13:06:41+05:30 sacumentestlocal
-              sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal
-              event: [1071065] Insert Event from 127.0.0.1:10024 -
-              (D|2|ccactivate|1|License|4700|Query Activation State for 3343643
-              Failed|sacumentestlocal|1744204001|Querying licensing servers for
-              the license activation state failed)"
-            - "2025-03-14T11:04:10+05:30 sacumentestlocal
-              sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal
-              event: [1071065] Drop Event from 127.0.0.1:56866 -
-              (D|3|boxfw|2|Firewall|2500|10.10.16.167:80|sacumentestlocal)"
+            - "sacumentestlocal event: [1071065] Insert Event from
+              127.0.0.1:10024 - (D|2|ccactivate|1|License|4700|Query Activation
+              State for 3343643 Failed|sacumentestlocal|1744204001|Querying
+              licensing servers for the license activation state failed)"
+            - "sacumentestlocal event: [1071065] Drop Event from 127.0.0.1:56866
+              - (D|3|boxfw|2|Firewall|2500|10.10.16.167:80|sacumentestlocal)"
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:log_type}:\s+\[%{number:event_id}\]\s+%{data:event}\s+from\s+%{ip:source_ip}:%{port:source_port}\s+-\s+\((%{data::csv("event_type,severity,category,subcategory,action,user_id,username,source_host,session_id,description","|")}\))
+              autoFilledRule1
+              %{word:source}\s+%{word:log_type}:\s+\[%{number:event_id}\]\s+%{data:event}\s+from\s+%{ip:source_ip}:%{port:source_port}\s+-\s+\((%{data::csv("event_type,severity,category,subcategory,action,user_id,username,source_host,session_id,description","|")}\))
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component} %{word:level}  %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
+              autoFilledRule2 %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
         - type: grok-parser
           name: Box Event Operative
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-03-20T14:01:16+05:30 sacumentestlocal
-              sacumentestlocal/box_Event_operative:  Error     sacumentestlocal
-              event: [1070256] (11) IOStreamSock: Receive() error:068000DF:asn1
-              encoding routines::too large"
-            - "2025-04-09T13:04:59+05:30 sacumentestlocal
-              sacumentestlocal/box_Event_operative:  Error    sacumentestlocal
-              event: [1070256] (15) IOStreamSock: Receive() end of file"
-            - "2025-04-04T12:09:03+05:30 sacumentestlocal
-              sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal
-              event: [1071200] starting worker 27849: connected from
-              10.10.16.167:38188"
-            - "2025-04-04T12:08:17+05:30 sacumentestlocal
-              sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal
-              event: [1070211] TCP worker 27503 exiting with -30"
+            - "sacumentestlocal event: [1070256] (11) IOStreamSock: Receive()
+              error:068000DF:asn1 encoding routines::too large"
+            - "sacumentestlocal event: [1070256] (15) IOStreamSock: Receive()
+              end of file"
+            - "sacumentestlocal event: [1071200] starting worker 27849:
+              connected from 10.10.16.167:38188"
+            - "sacumentestlocal event: [1070211] TCP worker 27503 exiting with
+              -30"
           grok:
             supportRules: ""
             matchRules: >
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]%{greedyData:message}
+              autoFilledRule1
+              %{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component} %{word:level}  %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
+              autoFilledRule2 %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
     - type: pipeline
       name: Box SSH
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:ssh
+        query: source:barracuda_cloudgen_logs @component:SSH
       processors:
         - type: grok-parser
           name: Box SSH Config
           enabled: true
           source: message
           samples:
-            - "2025-03-07T12:41:41+05:30 sacumentestlocal
-              sacumentestlocal/box_SSH_config:  Internal sacumentestlocal
-              [0210108] writeSSHdconf(): starting handling of ssh daemon
-              configuration"
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_SSH_config:  Info     sacumentestlocal
-              [0210107] writeSSHdconf(): ARGS=N
-              /var/phion/preserve/ssh/ssh.conf.rollout 127.0.0.1 10.10.16.167"
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_SSH_config:  Info     sacumentestlocal :
-              [0210108] writeSSHdconf(): starting network triggered handling of
+            - "sacumentestlocal [0210108] writeSSHdconf(): starting handling of
               ssh daemon configuration"
+            - "sacumentestlocal [0210107] writeSSHdconf(): ARGS=N
+              /var/phion/preserve/ssh/ssh.conf.rollout 127.0.0.1 10.10.16.167"
+            - "sacumentestlocal : [0210108] writeSSHdconf(): starting network
+              triggered handling of ssh daemon configuration"
           grok:
             supportRules: ""
             matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+(:\s+)?\[%{number:process_id}\]\s*%{word:function}\(\):\s*%{greedyData:message}
+              %{word:source}\s+(:\s+)?\[%{number:process_id}\]\s*%{word:function}\(\):\s*%{greedyData:message}
         - type: grok-parser
           name: Box SSH sshd
           enabled: true
