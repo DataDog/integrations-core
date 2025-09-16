@@ -112,7 +112,6 @@ If you wish to ingest non JSON TGI logs, use the following logs configuration:
            name: strip_ansi
            pattern: "\\x1B\\[[0-9;]*m"
            replace_placeholder: ""
-
 ```
 
 Need help? Contact [Datadog support][9].
