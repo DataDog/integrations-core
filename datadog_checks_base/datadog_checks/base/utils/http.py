@@ -104,6 +104,67 @@ KERBEROS_STRATEGIES = {}
 
 UDS_SCHEME = 'unix'
 
+# --- Probe adapter: ONLY used after a failure, to read certs. ---
+class UnixHTTPSProbeAdapter(requests_unixsocket.UnixAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE  # probe only (after failure)
+        kwargs["ssl_context"] = ctx
+        return super().init_poolmanager(*args, **kwargs)
+
+def _find_ssl_socket(resp):
+    """Best-effort to get the underlying SSLSocket from a requests/urllib3 response."""
+    cand = getattr(resp.raw, "_connection", None)
+    sock = getattr(cand, "sock", None)
+    if isinstance(sock, ssl.SSLSocket):
+        return sock
+    # Fallback seen in some urllib3 versions
+    try:
+        return resp.raw._fp.fp.raw._sock  # type: ignore[attr-defined]
+    except Exception:
+        return None
+
+def _log_leaf_cert_from_response(resp, logger):
+    sslsock = _find_ssl_socket(resp)
+    if not isinstance(sslsock, ssl.SSLSocket):
+        logger.warning("Couldn't locate SSLSocket on response to dump certificate.")
+        return
+    der = sslsock.getpeercert(binary_form=True)
+    pem = (
+        "-----BEGIN CERTIFICATE-----\n"
+        + base64.encodebytes(der).decode("ascii")
+        + "-----END CERTIFICATE-----\n"
+    )
+    logger.error("TLS verification failed. Leaf certificate (PEM):\n%s", pem)
+
+# Optional: if PyOpenSSL is available, dump the full chain.
+try:
+    from urllib3.contrib import pyopenssl
+    pyopenssl.inject_into_urllib3()
+    from OpenSSL import crypto
+    HAVE_PYOPENSSL = True
+except Exception:
+    HAVE_PYOPENSSL = False
+
+def _log_chain_from_response(resp, logger):
+    if not HAVE_PYOPENSSL:
+        return False
+    sslsock = _find_ssl_socket(resp)
+    # PyOpenSSL wraps sockets and exposes .connection
+    conn = getattr(sslsock, "connection", None)
+    if not conn:
+        return False
+    try:
+        chain = conn.get_peer_cert_chain()  # list[OpenSSL.crypto.X509]
+        if not chain:
+            return False
+        for i, cert in enumerate(chain):
+            pem = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode("ascii")
+            logger.error("Certificate %d in chain:\n%s", i, pem)
+        return True
+    except Exception:
+        return False
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
     """See: https://github.com/python/cpython/blob/40ee9a3640d702bce127e9877c82a99ce817f0d1/Lib/socket.py#L691"""
@@ -508,6 +569,18 @@ class RequestsWrapper(object):
         try:
             response = request_method(url, **new_options)
         except SSLError as e:
+            # Dump the certs
+            probe_sess = requests.Session()
+            probe_sess.mount("https+unix://", UnixHTTPSProbeAdapter())
+            try:
+                probe_method = "HEAD" if method not in {"GET", "HEAD"} else method
+                resp = probe_sess.request(probe_method, url, stream=True, timeout=kwargs.get("timeout", 10))
+                # Try full chain first (if PyOpenSSL), else leaf
+                if not _log_chain_from_response(resp, self.logger):
+                    _log_leaf_cert_from_response(resp, self.logger)
+            except Exception as probe_err:
+                self.logger.error("Probe to dump certificates also failed: %s", probe_err)
+
             # fetch the intermediate certs
             parsed_url = urlparse(url)
             hostname = parsed_url.hostname
