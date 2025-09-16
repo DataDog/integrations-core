@@ -6,18 +6,11 @@ on:
     branches:
     - master
     - 7.*.*
-    # paths:
-    # - .github/workflows/resolve-build-deps.yml
-    # - .builders/**
-    # - agent_requirements.in
+
   push:
     branches:
     - master
     - 7.*.*
-    # paths:
-    # - .github/workflows/resolve-build-deps.yml
-    # - .builders/**
-    # - agent_requirements.in
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -68,6 +61,8 @@ jobs:
 
   test:
     name: Run tests
+    needs:
+      - check-dependency-changes
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -87,6 +82,8 @@ jobs:
 
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
+    needs:
+      - check-dependency-changes
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -204,6 +201,8 @@ jobs:
 
   build-macos:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
+    needs:
+      - check-dependency-changes
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -293,6 +292,7 @@ jobs:
     needs:
     # - build
     - build-macos
+    - check-dependency-changes
     runs-on: ubuntu-latest
 
     permissions:
