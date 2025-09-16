@@ -2,7 +2,7 @@
   "name": "Hugging Face TGI Logs Overview",
   "type": "logs",
   "page": "stream",
-  "query": "source:velero",
+  "query": "source:hugging_face_tgi",
   "timerange": {
     "interval_ms": 3600000
   },
