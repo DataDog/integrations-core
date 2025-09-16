@@ -96,8 +96,8 @@ rm "${DD_PREFIX_PATH}/bin/curl"
 
 # libpq and pg_config as needed by psycopg
 DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
-VERSION="17.5" \
-SHA256="fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8" \
+VERSION="16.9" \
+SHA256="07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005" \
 RELATIVE_PATH="postgresql-{{version}}" \
   install-from-source --without-readline --with-openssl --without-icu
 # Add paths to pg_config and to the library

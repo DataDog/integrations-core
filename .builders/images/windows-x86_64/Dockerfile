@@ -140,12 +140,12 @@ RUN Get-RemoteFile `
     nmake && `
     nmake install_sw'
 # libpq and pg_config as needed by psycopg
-ENV PG_VERSION="17.5"
+ENV PG_VERSION="16.9"
 COPY pg_config.pl C:\pg_config.pl
 RUN Get-RemoteFile `
       -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
       -Path postgresql-$Env:PG_VERSION.tar.bz2 `
-      -Hash 'fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8'; `
+      -Hash '07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src && `
     cd C:\postgresql_src\postgresql-$Env:PG_VERSION\src\tools\msvc && `
