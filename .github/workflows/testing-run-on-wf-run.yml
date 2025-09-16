@@ -18,24 +18,26 @@ jobs:
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.12'
+
       - name: Define SHA
         id: define_sha
         run: |
-          # Determine if the triggering event was a push or a pull request
+          Determine if the triggering event was a push or a pull request
           if [[ "${{ github.event.workflow_run.event }}" == "push" ]]; then
             echo "Triggered by push"
-            sha=${{ github.sha }}
+            echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+
           elif [[ "${{ github.event.workflow_run.event }}" == "pull_request" ]]; then
             echo "Triggered by pull_request"
-            sha=${{ github.event.pull_request.head.sha }}
+            echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
           else
             echo "Triggered by unknown event: ${{ github.event.workflow_run.event }}"
-            sha=${{ github.sha }}
+            echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
-          echo "sha=$sha" >> $GITHUB_OUTPUT
       - name: Get run ID
         run: |
           run_id=$(gh run list --workflow "Check PR" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
-          echo "run_id=$run_id"          
+          echo "run_id_list=$run_id" 
+          echo "run_id_variable=${{ github.event.workflow_run.id }}"         
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
