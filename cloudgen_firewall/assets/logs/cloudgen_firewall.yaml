@@ -1,48 +1,49 @@
-# bypass-global-grok-parser-rules-checks
-id: cloudgen_firewall
-metric_id: cloudgen-firewall
+id: REPLACE_WITH_APP_ID
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+metric_id: REPLACE_WITH_APP_ID
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
 backend_only: false
-installation_sources:
-  - barracuda_cloudgen_logs
 facets:
-  - description: "Shows the component of the Barracuda CloudGen Firewall log."
+  - description: ""
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: component
-    path: cloudgen_firewall.component
+    path: component
     source: log
     type: string
-  - description: "Shows the IP address of the Barracuda CloudGen Firewall log."
+  - description: ""
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: IPs
-    path: cloudgen_firewall.ip
+    path: ip
     source: log
     type: string
-  - description: "Shows the process of the Barracuda CloudGen Firewall log."
+  - description: ""
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: process
-    path: cloudgen_firewall.process
+    path: process
     source: log
     type: string
-  - description: "process ID of the Barracuda CloudGen Firewall log."
+  - description: ""
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: process ID
-    path: cloudgen_firewall.pid
+    path: pid
     source: log
     type: string
-  - description: "session status of the Barracuda CloudGen Firewall log."
+  - description: ""
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
     name: session_status
-    path: cloudgen_firewall.session_status
+    path: session_status
     source: log
     type: string
 pipeline:
@@ -90,10 +91,11 @@ pipeline:
         - sacumentestlocal/box_Auth_access
         - sacumentestlocal/box_Firewall_Activity
         - sacumentestlocal/box_Config_daemon_download
+        - sacumentestlocal/box_Firewall
       grok:
         supportRules: ""
         matchRules: |
-          rule1 %{hostname}/box_%{notSpace:component}_%{data}
+          rule1 %{hostname}/box_%{data:component}(_%{data})?
     - type: pipeline
       name: Box Authentication
       enabled: true
@@ -286,7 +288,7 @@ pipeline:
         - type: grok-parser
           name: Box SSH Config
           enabled: true
-          source: message
+          source: nested_message
           samples:
             - "sacumentestlocal [0210108] writeSSHdconf(): starting handling of
               ssh daemon configuration"
@@ -301,172 +303,129 @@ pipeline:
         - type: grok-parser
           name: Box SSH sshd
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-03-07T12:41:41+05:30 sacumentestlocal
-              sacumentestlocal/box_SSH_sshd:  Notice sacumentestlocal sshd:
-              notice: Starting session: shell on pts/0 for abhishek from
-              10.10.16.1 port 61649 id 0"
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_SSH_sshd:  Info     sacumentestlocal LOGIN
-              ATTEMPT: : pam_unix(sshd:auth): Login abhishek from sshd: Allowed"
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_SSH_sshd:  Info     sacumentestlocal :
-              pam_unix(sshd:session): session opened for user abhishek by
-              (uid=0)"
-            - "2025-04-10T10:35:58+05:30 sacumentestlocal
-              sacumentestlocal/box_SSH_sshd:  Info     sacumentestlocal sshd:
-              srclimit_penalise: ipv4: new 10.10.16.1/32 deferred penalty of 5
-              seconds for penalty: failed authentication"
-          grok:
-            supportRules: ""
-            matchRules: >-
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{hostname:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{word:service}?:\s+%{word:sub_type}?:\s+%{greedyData:message}
-
-
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{hostname:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
-    - type: pipeline
-      name: Box Config
-      enabled: true
-      filter:
-        query: source:barracuda_cloudgen_logs service:config
-      processors:
-        - type: grok-parser
-          name: Box Config Daemon Download
-          enabled: true
-          source: message
-          samples:
-            - "2025-03-19T09:27:26+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_daemon_download:  Info     sacumentes\
-              tlocal Download of geo returned: Success: software up to date,
-              version  Geo Location Definitions : 85 (allow box distribution)"
-            - "2025-03-28T23:53:54+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_daemon_download:  Info     sacumentes\
-              tlocal [Download-avira-28381]  Line: Update: new files to be
-              installed for aviradef"
-            - "2025-03-28T23:53:52+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_daemon_download:  Notice   sacumentes\
-              tlocal Start download for avira PID=28381 last 3608 seconds ago"
-            - "2025-03-28T23:40:05+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_daemon_download:  Error    sacumentes\
-              tlocal Download of agentid returned: Error : software install for
-              ngagentiddef failed. Next retry in 3764 seconds (disable box
-              distribution)"
-          grok:
-            supportRules: ""
-            matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
-        - type: grok-parser
-          name: Box Config Admin
-          enabled: true
-          source: message
-          samples:
-            - "2025-03-17T10:54:54+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_admin:  Info     sacumentestlocal  ch\
-              allenge sent for localhost_sacumentestlocal"
-            - "2025-03-19T09:37:26+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_admin:  Notice     sacumentestlocal
-              127.0.0.1:17513 login succeeded: localhost_sacumentestlocal Valid
-              password and valid challenge"
-          grok:
-            supportRules: ""
-            matchRules: >
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{ip:ip}:%{integer:port}\s+%{data:event_type}:\s+%{greedyData:message}
-
-
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp} %{word:hostname} %{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
-        - type: grok-parser
-          name: Box Config Sync
-          enabled: true
-          source: message
-          samples:
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal
-              Starting main loop pid=5429."
-            - "2025-04-09T23:00:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_sync:  Notice     sacumentestlocal
-              Starting main loop pid=5965
-              name=abhishek,syspwd=!-1L0,lstchg=20147,min=0,max=99999,warn=0,in\
-              act=0,expire=-1"
-          grok:
-            supportRules: ""
-            matchRules: >
-              autoFilledRule1 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}
-              %{word:hostname}
-              %{notSpace:component}:\s+%{word:level}\s+%{word:source}
-              %{greedyData:message}
-        - type: grok-parser
-          name: Box Config Changes
-          enabled: true
-          source: message
-          samples:
-            - "2025-04-09T23:25:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_changes:  Security sacumentestlocal
-              firewall: [Admin Session abhishek@10.10.16.167] AdminAction:
-              Connection terminated (while 'ecachepb')"
-            - "2025-04-04T11:49:18+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_changes:  Info     sacumentestlocal
-              [abhishek@10.10.16.1_1694]  Deleting session
-              GCSID_abhishek_10.10.16.1_1694_19208"
-            - "2025-03-24T07:11:59+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_changes:  Info     sacumentestlocal
-              [abhishek@10.10.16.1_31208]  File Commit start"
-            - "2025-03-06T07:39:45+05:30 sacumentestlocal
-              sacumentestlocal/box_Config_changes:  Info     sacumentestlocal
-              [abhishek@10.10.16.1_61134]  configupdate - commit - successful
-              lock"
+            - "sacumentestlocal sshd: notice: Starting session: shell on pts/0
+              for abhishek from 10.10.16.1 port 61649 id 0"
+            - "sacumentestlocal LOGIN ATTEMPT: : pam_unix(sshd:auth): Login
+              abhishek from sshd: Allowed"
+            - "sacumentestlocal : pam_unix(sshd:session): session opened for
+              user abhishek by (uid=0)"
+            - "sacumentestlocal sshd: srclimit_penalise: ipv4: new 10.10.16.1/32
+              deferred penalty of 5 seconds for penalty: failed authentication"
           grok:
             supportRules: ""
             matchRules: >-
               autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+(%{word:action}:)?\s+\[%{data:user_name}\@%{ip:source_ip}\]\s+%{greedyData:message}
+              %{word:source}\s+%{word:service}?:\s+%{word:sub_type}?:\s+%{greedyData:message}
 
 
-              autoFilledRule2 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+\[%{data:user_name}\@%{ip:source_ip}(\_%{port:port})?\]\s+%{greedyData:message}
+              autoFilledRule2 %{word:source}\s+%{greedyData:message}
+    - type: pipeline
+      name: Box Config
+      enabled: true
+      filter:
+        query: source:barracuda_cloudgen_logs @component:Config
+      processors:
+        - type: grok-parser
+          name: Box Config Admin
+          enabled: true
+          source: nested_message
+          samples:
+            - sacumentestlocal  challenge sent for localhost_sacumentestlocal
+            - "sacumentestlocal 127.0.0.1:17513 login succeeded:
+              localhost_sacumentestlocal Valid password and valid challenge"
+          grok:
+            supportRules: ""
+            matchRules: >
+              autoFilledRule1
+              %{word:source}\s+%{ip:ip}:%{integer:port}\s+%{data:event_type}:\s+%{greedyData:message}
+
+
+              autoFilledRule2 %{word:source}\s+%{greedyData:message}
+        - type: grok-parser
+          name: Box Config Sync
+          enabled: true
+          source: nested_message
+          samples:
+            - sacumentestlocal Starting main loop pid=5429.
+            - sacumentestlocal Starting main loop pid=5965
+              name=abhishek,syspwd=!-1L0,lstchg=20147,min=0,max=99999,warn=0,inact=0,expire=-1
+          grok:
+            supportRules: ""
+            matchRules: |
+              autoFilledRule1 %{word:source} %{greedyData:message}
+        - type: grok-parser
+          name: Box Config Changes
+          enabled: true
+          source: nested_message
+          samples:
+            - "sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167]
+              AdminAction: Connection terminated (while 'ecachepb')"
+            - sacumentestlocal [abhishek@10.10.16.1_1694]  Deleting session
+              GCSID_abhishek_10.10.16.1_1694_19208
+            - sacumentestlocal [abhishek@10.10.16.1_31208]  File Commit start
+            - sacumentestlocal [abhishek@10.10.16.1_61134]  configupdate -
+              commit - successful lock
+          grok:
+            supportRules: ""
+            matchRules: >-
+              autoFilledRule1
+              %{word:source}\s+(%{word:action}:)?\s+\[%{data:user_name}\@%{ip:source_ip}\]\s+%{greedyData:message}
+
+
+              autoFilledRule2 %{word:source}\s+\[%{data:user_name}\@%{ip:source_ip}(\_%{port:port})?\]\s+%{greedyData:message}
+        - type: grok-parser
+          name: Box Config Daemon Download
+          enabled: true
+          source: nested_message
+          samples:
+            - "sacumentestlocal Download of geo returned: Success: software up
+              to date, version  Geo Location Definitions : 85 (allow box
+              distribution)"
+            - "sacumentestlocal [Download-avira-28381]  Line: Update: new files
+              to be installed for aviradef"
+            - sacumentestlocal Start download for avira PID=28381 last 3608
+              seconds ago
+            - "sacumentestlocal Download of agentid returned: Error : software
+              install for ngagentiddef failed. Next retry in 3764 seconds
+              (disable box distribution)"
+          grok:
+            supportRules: ""
+            matchRules: autoFilledRule1 %{word:source}\s+%{greedyData:message}
     - type: pipeline
       name: Box Control
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:control
+        query: source:barracuda_cloudgen_logs @component:Control
       processors:
         - type: grok-parser
           name: Box Control Auth Service
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-07-17T13:18:00+05:30 sacumentestlocal
-              sacumentestlocal/box_Control_AuthService:  Info     sacumentestlo\
-              cal MSAD-Offline-Groups Setting MSAD offline group sync cache to
-              117.49 MByte (auto-calculated)"
+            - sacumentestlocal MSAD-Offline-Groups Setting MSAD offline group
+              sync cache to 117.49 MByte (auto-calculated)
           grok:
             supportRules: ""
-            matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{word:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
+            matchRules: autoFilledRule1 %{word:source}\s+%{greedyData:message}
     - type: pipeline
       name: Box System
       enabled: true
       filter:
-        query: source:barracuda_cloudgen_logs service:system
+        query: source:barracuda_cloudgen_logs @component:System
       processors:
         - type: grok-parser
           name: Box System Mgmaccess
           enabled: true
-          source: message
+          source: nested_message
           samples:
-            - "2025-03-17T18:51:54+03:10 sacumentestlocal
-              sacumentestlocal/box_System_mgmaccess:  Info   sacumentestlocal
-              Connected new handler #1296 of type 'Virus Scanner'"
-            - "2025-04-10T10:44:34+05:30 sacumentestlocal
-              sacumentestlocal/box_System_mgmaccess:  Info     sacumentestlocal
-              Handler #1473 returned with code 0 (No error.)"
+            - "sacumentestlocal Connected new handler #1296 of type 'Virus
+              Scanner'"
+            - "sacumentestlocal Handler #1473 returned with code 0 (No error.)"
           grok:
             supportRules: ""
-            matchRules: autoFilledRule1
-              %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):timestamp}\s+%{hostname:hostname}\s+%{notSpace:component}:\s+%{word:level}\s+%{word:source}\s+%{greedyData:message}
+            matchRules: autoFilledRule1 %{word:source}\s+%{greedyData:message}
     - type: attribute-remapper
       name: " Map `timestamp` to `syslog.timestamp`"
       enabled: true
@@ -484,26 +443,6 @@ pipeline:
         - hostname
       sourceType: attribute
       target: syslog.hostname
-      targetType: attribute
-      preserveSource: true
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map 'component' to 'service'
-      enabled: true
-      sources:
-        - component
-      sourceType: attribute
-      target: service
-      targetType: attribute
-      preserveSource: true
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Remapping status from level attribute
-      enabled: true
-      sources:
-        - level
-      sourceType: attribute
-      target: status
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
