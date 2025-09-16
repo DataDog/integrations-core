@@ -125,6 +125,9 @@ class GitRepository:
 
         return process.stdout
 
+    def merge_base(self, ref_a: str, ref_b: str | None = "HEAD") -> str:
+        return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
+
     @staticmethod
     def __is_warning_line(line):
         return line.startswith('warning: ') or 'original line endings' in line
