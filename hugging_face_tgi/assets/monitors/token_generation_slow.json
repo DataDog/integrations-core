@@ -10,7 +10,7 @@
 		"query": "sum(last_5m):sum:hugging_face_tgi.request.mean_time_per_token.duration.sum{*}.as_count() / sum:hugging_face_tgi.request.mean_time_per_token.duration.count{*}.as_count() > 0.2",
 		"message": "Hugging Face TGI token generation is slow (>200ms per token).\n\nThis indicates:\n* Model inference performance degradation\n* Resource constraints (GPU memory/compute)\n* Inefficient model configuration or parameters\n\n{{#is_alert}}\nMean time per token: {{value}}s\n{{/is_alert}}\n\nInvestigate:\n1. GPU utilization and memory usage\n2. Model configuration and quantization settings\n3. Batch size optimization\n4. Temperature and sampling parameters",
 		"tags": [
-			"integration:hugging_face_tgi"
+			"integration:hugging-face-tgi"
 		],
 		"options": {
 			"thresholds": {
@@ -29,6 +29,6 @@
 		"priority": 2
 	},
 	"tags": [
-		"integration:hugging_face_tgi"
+		"integration:hugging-face-tgi"
 	]
 }

@@ -10,7 +10,7 @@
 		"query": "sum(last_5m):avg:hugging_face_tgi.request.duration.sum{*}.as_count() / avg:hugging_face_tgi.request.duration.count{*}.as_count() > 10",
 		"message": "Hugging Face TGI request latency is high (>10s average).\n\nThis could indicate:\n* Model inference bottlenecks\n* Resource contention (CPU/GPU/memory)\n* Inefficient batch processing\n* Queue buildup\n\n{{#is_alert}}\nAverage latency: {{value}}s\n{{/is_alert}}\n\nCheck:\n1. TGI server resource utilization\n2. Queue size and batch processing metrics\n3. Model performance and configuration",
 		"tags": [
-			"integration:hugging_face_tgi"
+			"integration:hugging-face-tgi"
 		],
 		"options": {
 			"thresholds": {
@@ -29,6 +29,6 @@
 		"priority": 2
 	},
 	"tags": [
-		"integration:hugging_face_tgi"
+		"integration:hugging-face-tgi"
 	]
 }

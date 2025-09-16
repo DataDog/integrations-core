@@ -10,7 +10,7 @@
 		"query": "avg(last_5m):avg:hugging_face_tgi.queue.size{*} > 50",
 		"message": "Hugging Face TGI queue size is high (>50 requests).\n\nThis indicates:\n* Requests arriving faster than processing capacity\n* Potential for increased latency and timeouts\n* Need for scaling or optimization\n\n{{#is_alert}}\nCurrent queue size: {{value}} requests\n{{/is_alert}}\n\nActions:\n1. Consider scaling TGI instances\n2. Review batch size configuration\n3. Check for inefficient request patterns\n4. Monitor resource utilization",
 		"tags": [
-			"integration:hugging_face_tgi"
+			"integration:hugging-face-tgi"
 		],
 		"options": {
 			"thresholds": {
@@ -29,6 +29,6 @@
 		"priority": 2
 	},
 	"tags": [
-		"integration:hugging_face_tgi"
+		"integration:hugging-face-tgi"
 	]
 }
