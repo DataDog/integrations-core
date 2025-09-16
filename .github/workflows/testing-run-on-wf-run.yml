@@ -36,8 +36,7 @@ jobs:
           #   echo "Triggered by unknown event: ${{ github.event.workflow_run.event }}"
           #   sha=${{ github.sha }}
           # fi
-          sha = ${{ github.event.pull_request.head.sha }}
-          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
       - name: Get run ID
         run: |
           run_id=$(gh run list --workflow "Check PR" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
