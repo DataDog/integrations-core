@@ -2,7 +2,7 @@ name: Run on PR Check
 
 on:
   workflow_run:
-    workflows: ['Check PR']
+    workflows: ['Resolve Dependencies and Build Wheels']
     types:
       - completed
 
