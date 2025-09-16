@@ -1,1 +1,1 @@
-Change clickhouse integration to use the official HTTP connector
+*BREAKING CHANGE* Modify Clickhouse integration to use the official HTTP connector
