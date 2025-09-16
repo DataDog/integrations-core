@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from openstack.config import loader
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.models.types import copy_raw
 from datadog_checks.openstack_controller.api.type import ApiType
@@ -129,6 +127,8 @@ class OpenstackConfig:
     def _validate_cloud_config(self):
         self.log.debug("openstack_config_file_path: %s", self.openstack_config_file_path)
         self.log.debug("openstack_cloud_name: %s", self.openstack_cloud_name)
+        from openstack.config import loader
+
         config = loader.OpenStackConfig(load_envvars=False, config_files=[self.openstack_config_file_path])
         config.get_all_clouds()
         self.api_type = ApiType.SDK

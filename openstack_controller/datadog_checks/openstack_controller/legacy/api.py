@@ -7,7 +7,11 @@ from os import environ
 from urllib.parse import urljoin
 
 import requests
-from openstack import connection
+
+try:
+    from openstack import connection
+except ImportError:
+    pass
 
 from .exceptions import (
     AuthenticationNeeded,
