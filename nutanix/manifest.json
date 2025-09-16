@@ -1,0 +1,54 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d9a4c6cb-fd64-463a-860d-03e9c7fd463b",
+  "app_id": "nutanix",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "Nutanix",
+    "media": [],
+    "classifier_tags": [
+      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::<FILL IN>",
+      "Offering::<FILL IN>",
+      "Queried Data Type::<FILL IN>",
+      "Submitted Data Type::<FILL IN>"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 58023117,
+      "source_type_name": "Nutanix",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "nutanix.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {
+        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
+    },
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
