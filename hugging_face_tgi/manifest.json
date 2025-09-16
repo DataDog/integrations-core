@@ -38,7 +38,10 @@
       }
     },
     "monitors": {},
-    "saved_views": {}
+    "saved_views": {
+      "Hugging Face TGI Logs Overview": "assets/saved_views/logs_overview.json",
+      "Hugging Face TGI Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
