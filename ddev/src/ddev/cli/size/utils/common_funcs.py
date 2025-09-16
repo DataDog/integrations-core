@@ -1098,10 +1098,10 @@ class GitRepo:
 
 
 @cache
-def get_last_dependency_sizes_artifact(commit: str, platform: str) -> str:
+def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str) -> str:
     dep_sizes_json = get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes_json(commit, platform)  # change for merge base
+        dep_sizes_json = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "master"), platform)
     return dep_sizes_json
 
 
@@ -1134,7 +1134,6 @@ def get_run_id(commit, workflow):
         return None
     run_id = result.stdout.strip() if result.stdout else None
     print(f"Run id: {run_id}")
-    # run_id = 17758756093 # os.environ.get("GITHUB_RUN_ID")
 
     return run_id
 

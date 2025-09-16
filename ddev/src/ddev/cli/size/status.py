@@ -73,7 +73,7 @@ def status(
 
         for plat, ver in combinations:
             if commit and not dependency_sizes:
-                dependency_sizes = get_last_dependency_sizes_artifact(commit, plat)
+                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat)
             parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
