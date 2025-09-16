@@ -4,7 +4,7 @@
 
 
 E2E_METADATA = {
-    'post_install_commands': [
+    'start_commands': [
         # Need new version of pip to upgrade setuptools...
         'pip install openstacksdk==4.7.0'
     ]
