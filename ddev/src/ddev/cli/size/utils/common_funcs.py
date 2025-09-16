@@ -12,6 +12,7 @@ import tempfile
 import zipfile
 import zlib
 from datetime import date
+from functools import cache
 from pathlib import Path
 from types import TracebackType
 from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
@@ -1096,46 +1097,49 @@ class GitRepo:
             shutil.rmtree(self.repo_dir)
 
 
+@cache
 def get_last_dependency_sizes_artifact(commit: str, platform: str) -> str:
     dep_sizes_json = get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes_json(commit, platform)
+        dep_sizes_json = get_previous_dep_sizes_json(commit, platform)  # change for merge base
     return dep_sizes_json
 
 
+@cache
 def get_run_id(commit, workflow):
-    # print(f"Getting run id for commit: {commit}, workflow: {workflow}")
-    # try:
-    #     result = subprocess.run(
-    #         [
-    #             'gh',
-    #             'run',
-    #             'list',
-    #             '--workflow',
-    #             workflow,
-    #             '-c',
-    #             commit,
-    #             '--json',
-    #             'databaseId',
-    #             '--jq',
-    #             '.[-1].databaseId',
-    #         ],
-    #         capture_output=True,
-    #         text=True,
-    #     )
-    # except subprocess.CalledProcessError as e:
-    #     stderr = (e.stderr or '').strip()
-    #     if stderr:
-    #         print(stderr)
-    #     print("Failed to get run id")
-    #     return None
-    # run_id = result.stdout.strip() if result.stdout else None
-    # print(f"Run id: {run_id}")
-    run_id = os.environ.get("GITHUB_RUN_ID")
+    print(f"Getting run id for commit: {commit}, workflow: {workflow}")
+    try:
+        result = subprocess.run(
+            [
+                'gh',
+                'run',
+                'list',
+                '--workflow',
+                workflow,
+                '-c',
+                commit,
+                '--json',
+                'databaseId',
+                '--jq',
+                '.[-1].databaseId',
+            ],
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        stderr = (e.stderr or '').strip()
+        if stderr:
+            print(stderr)
+        print("Failed to get run id")
+        return None
+    run_id = result.stdout.strip() if result.stdout else None
+    print(f"Run id: {run_id}")
+    # run_id = 17758756093 # os.environ.get("GITHUB_RUN_ID")
 
     return run_id
 
 
+@cache
 def get_dep_sizes_json(current_commit, platform):
     print(f"Getting dependency sizes json for commit: {current_commit}, platform: {platform}")
     run_id = get_run_id(current_commit, '.github/workflows/resolve-build-deps.yaml')
@@ -1148,6 +1152,7 @@ def get_dep_sizes_json(current_commit, platform):
         return None
 
 
+@cache
 def check_artifact_exists(run_id, artifact_name):
     print(f"Checking if artifact exists: run_id={run_id}, artifact_name={artifact_name}")
     result = subprocess.run(
@@ -1173,6 +1178,7 @@ def check_artifact_exists(run_id, artifact_name):
     return True
 
 
+@cache
 def get_current_sizes_json(run_id, platform):
     print(f"Getting current sizes json for run_id={run_id}, platform={platform}")
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -1206,6 +1212,7 @@ def get_current_sizes_json(run_id, platform):
             return None
 
 
+@cache
 def get_artifact(run_id, artifact_name):
     print(f"Downloading artifact: {artifact_name} from run_id={run_id}")
     _ = subprocess.run(
@@ -1226,6 +1233,7 @@ def get_artifact(run_id, artifact_name):
     return artifact_path
 
 
+@cache
 def get_previous_dep_sizes_json(base_commit, platform):
     print(f"Getting previous dependency sizes json for base_commit={base_commit}, platform={platform}")
     run_id = get_run_id(base_commit, '.github/workflows/measure-disk-usage.yml')
@@ -1246,6 +1254,7 @@ def get_previous_dep_sizes_json(base_commit, platform):
     return output_path
 
 
+@cache
 def parse_sizes_json(compressed_json_path, uncompressed_json_path):
     with open(compressed_json_path, 'r') as f:
         compressed_list = list(json.load(f))
