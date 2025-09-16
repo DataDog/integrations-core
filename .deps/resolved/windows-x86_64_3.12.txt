@@ -17,9 +17,9 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-win_amd64.whl#sha256=0409917be29f5ad80a6772712fce954b5e81450555636e8523290ee9740a2dbb
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl#sha256=de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250218143924-py3-none-win_amd64.whl#sha256=02165c52665dfa139b6606bd802b996c51bcbc8c89f3c79801833d53e838d735
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.11.1-20250915152248-cp312-cp312-win_amd64.whl#sha256=704e853a2dcebc5e62e7830a5e0faf4ebb5ef1ddd9ea925d92fa1466b6540557
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.11.1-20250916164653-cp312-cp312-win_amd64.whl#sha256=ca7e6ccdb2822c3edf5f222b1ae5548a32303f97d94769aa2ae128716d19d67b
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-45.0.6-cp311-abi3-win_amd64.whl#sha256=833dc32dfc1e39b7376a87b9a6a4288a10aae234631268486558920029b086ec
-ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.12.3-cp312-cp312-win_amd64.whl#sha256=648198520d5d725d16fb1600e6b0c686bf11c16743129ca00198e096806f1151
+ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.12.5-cp312-cp312-win_amd64.whl#sha256=e9ab796491ef6bb3048b55b9e8a26ffbd1d6abb94be7dd8656ff2804b160fa3b
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
 dnspython @ https://agent-int-packages.datadoghq.com/external/dnspython/dnspython-2.7.0-py3-none-any.whl#sha256=b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86
 dogpile-cache @ https://agent-int-packages.datadoghq.com/external/dogpile-cache/dogpile_cache-1.4.1-py3-none-any.whl#sha256=99130ce990800c8d89c26a5a8d9923cbe1b78c8a9972c2aaa0abf3d2ef2984ad
@@ -74,7 +74,7 @@ pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2
 pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.33.2-cp312-cp312-win_amd64.whl#sha256=f941635f2a3d96b2973e867144fde513665c87f13fe0e193c158ac51bfaaa7b2
 pyjwt @ https://agent-int-packages.datadoghq.com/external/pyjwt/PyJWT-2.10.1-py3-none-any.whl#sha256=dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb
 pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.8.0-cp312-cp312-win_amd64.whl#sha256=e84bc7707492f06fbc37a9f215374d2977d21b72e10a67f1b31893ec5a140ad8
-pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250915152249-cp312-cp312-win_amd64.whl#sha256=7bcdc8635911369660f424035b4b074747bc0ead59d881d63c34b577632c4c8a
+pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250916164653-cp312-cp312-win_amd64.whl#sha256=c5b198fa13f3ca0f803c6a52028b06569f28a0f30e6f319036e7da92654e4920
 pymysql @ https://agent-int-packages.datadoghq.com/external/pymysql/pymysql-1.1.2-py3-none-any.whl#sha256=e6b1d89711dd51f8f74b1631fe08f039e7d76cf67a42a323d3178f0f25762ed9
 pynacl @ https://agent-int-packages.datadoghq.com/external/pynacl/pynacl-1.6.0-cp38-abi3-win_amd64.whl#sha256=cf831615cc16ba324240de79d925eacae8265b7691412ac6b24221db157f6bd1
 pyodbc @ https://agent-int-packages.datadoghq.com/external/pyodbc/pyodbc-5.2.0-cp312-cp312-win_amd64.whl#sha256=b1f5686b142759c5b2bdbeaa0692622c2ebb1f10780eb3c174b85f5607fbcf55
