@@ -1,1 +1,1 @@
-Moves the command `ddev size` to `ddev release size`
+Moves the command `ddev size` to `ddev release stats size`
