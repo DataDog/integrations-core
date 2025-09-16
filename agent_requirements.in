@@ -11,7 +11,7 @@ clickhouse-driver==0.2.9
 cm-client==45.0.4
 confluent-kafka==2.8.0
 cryptography==45.0.6
-ddtrace==3.9.3
+ddtrace==3.12.5
 dnspython==2.7.0
 fastavro==1.12.0
 foundationdb==6.3.25
