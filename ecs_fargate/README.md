@@ -1068,6 +1068,10 @@ module "ecs_fargate_task" {
 
 Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to route logs to Datadog.
 
+
+<div class="alert alert-warning"> Fargate logs sent via the log driver may have correlation limitations. Use the Firlens integration for comprehensive metrics, logs, and traces correlation. 
+</div>
+
 1. Define the log driver as `awslogs` in the application container in the task or job you want to collect logs from. [Consult the AWS Fargate developer guide][29] for instructions.
 
 2. This configures your Fargate tasks or jobs to send log information to Amazon CloudWatch Logs. The following shows a snippet of a task/job definition where the awslogs log driver is configured:
