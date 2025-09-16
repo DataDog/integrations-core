@@ -27,6 +27,8 @@ RUN curl -SL --output vs_buildtools.exe https://download.visualstudio.microsoft.
      || IF "%ERRORLEVEL%"=="3010" EXIT 0) `
  && del /q vs_buildtools.exe
 
+ ENV VCVARSALL_BAT="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+
 # Upgrade PowerShell
 ENV POWERSHELL_VERSION="7.4.0"
 RUN curl -SL --output PowerShell-%POWERSHELL_VERSION%-win-x64.msi https://github.com/PowerShell/PowerShell/releases/download/v%POWERSHELL_VERSION%/PowerShell-%POWERSHELL_VERSION%-win-x64.msi `
@@ -115,7 +117,42 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\perl\perl\bin" && `
     Remove-Item "strawberry-perl-$Env:PERL_VERSION-64bit.zip"
 
+# Nasm
+ENV NASM_VERSION="2.16.03"
+RUN Get-RemoteFile `
+      -Uri https://www.nasm.us/pub/nasm/releasebuilds/$Env:NASM_VERSION/win64/nasm-$Env:NASM_VERSION-win64.zip `
+      -Path "nasm-$Env:NASM_VERSION-win64.zip" `
+    -Hash '3ee4782247bcb874378d02f7eab4e294a84d3d15f3f6ee2de2f47a46aa7226e6' && `
+    7z x "nasm-$Env:NASM_VERSION-win64.zip" -o"C:\nasm" && `
+    Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
+    Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
+
 ENV OPENSSL_VERSION="3.5.2"
+RUN Get-RemoteFile `
+      -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Hash '002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3'; `
+    7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
+    7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
+    cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
+    RunOnVSConsole -Command `
+    'C:\perl\perl\bin\perl.exe Configure && `
+    nmake && `
+    nmake install_sw'
+# libpq and pg_config as needed by psycopg
+ENV PG_VERSION="17.5"
+COPY pg_config.pl C:\pg_config.pl
+RUN Get-RemoteFile `
+      -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
+      -Path postgresql-$Env:PG_VERSION.tar.bz2 `
+      -Hash 'fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8'; `
+    7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
+    7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src && `
+    cd C:\postgresql_src\postgresql-$Env:PG_VERSION\src\tools\msvc && `
+    Copy-Item C:\pg_config.pl -Destination .\config.pl && `
+    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe build.pl' && `
+    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
+    Add-ToPath -Append "C:\postgresql\bin"
 
 ENV CURL_VERSION="8.15.0"
 

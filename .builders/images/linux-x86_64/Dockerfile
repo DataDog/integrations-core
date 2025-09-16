@@ -111,8 +111,8 @@ RUN \
 # libpq and pg_config as needed by psycopg2
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
- VERSION="16.0" \
- SHA256="df9e823eb22330444e1d48e52cc65135a652a6fdb3ce325e3f08549339f51b99" \
+ VERSION="17.5" \
+ SHA256="fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8" \
  RELATIVE_PATH="postgresql-{{version}}" \
  bash install-from-source.sh --without-readline --with-openssl --without-icu
 # Add paths to pg_config and to the library
