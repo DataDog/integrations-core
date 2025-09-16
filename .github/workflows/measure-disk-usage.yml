@@ -87,4 +87,4 @@ jobs:
       with:
         name: status_compressed_${{ matrix.platform }}.json
         path: status_compressed_${{ matrix.platform }}.json
-        if-no-files-found: error
+        if-no-files-found: error        
