@@ -61,11 +61,13 @@ instances:
 
     ## @param compression - string - optional
     ## The compression algorithm to use. The default is no compression.
+    ## If br is specified, the brotli library must be installed separately.
     ##
     ## Valid values are:
-    ##
     ##   - lz4
-    ##   - lz4hc
+    ##   - zstd
+    ##   - br
+    ##   - gzip
     #
     # compression: <COMPRESSION>
 
