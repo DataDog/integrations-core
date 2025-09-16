@@ -36,7 +36,7 @@ def fake_consumer_offsets_for_times(partitions):
 def seed_mock_client(cluster_id="cluster_id"):
     """Set some common defaults for the mock client to kafka."""
     client = mock.create_autospec(KafkaClient)
-    client.list_consumer_groups.return_value = ["consumer_group1"]
+    client.list_consumer_groups.return_value = ["consumer_group1", "datadog-agent"]
     client.get_partitions_for_topic.return_value = ['partition1']
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
     client.describe_consumer_group.return_value = 'STABLE'
@@ -133,6 +133,20 @@ def test_tls_verify_is_string(tls_verify, expected, check, kafka_instance):
 
 mock_client = mock.MagicMock()
 mock_client.get_highwater_offsets.return_value = ({}, "")
+mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
+    "cluster_id",
+    # topics
+    [
+        # Used in unit tets
+        ('topic1', ["partition1"]),
+        ('topic2', ["partition2"]),
+        # Copied from integration tests
+        ('dc', [0, 1]),
+        ('unconsumed_topic', [0, 1]),
+        ('marvel', [0, 1]),
+        ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+    ],
+)
 
 
 @pytest.mark.parametrize(
@@ -468,7 +482,7 @@ def test_load_broker_timestamps_empty(
 
 def test_client_init(kafka_instance, check, dd_run_check):
     """
-    We only open a connection to a consumer once per consumer group.
+    We only open a connection to datadog-agent consumer once.
 
     Doing so more often degrades performance, as described in this issue:
     https://github.com/DataDog/integrations-core/issues/19564
@@ -478,7 +492,7 @@ def test_client_init(kafka_instance, check, dd_run_check):
     check.client = mock_client
     dd_run_check(check)
 
-    assert check.client.open_consumer.mock_calls == [mock.call("consumer_group1")]
+    assert check.client.open_consumer.mock_calls == [mock.call("datadog-agent")]
 
 
 def test_resolve_start_offsets():
@@ -985,3 +999,49 @@ def test_build_schema_none_handling():
     # Test Protobuf schema with None - should raise TypeError or base64.binascii.Error
     with pytest.raises((TypeError, base64.binascii.Error)):
         build_protobuf_schema(None)
+
+
+def test_count_consumer_contexts(check, kafka_instance):
+    kafka_consumer_check = check(kafka_instance)
+    consumer_offsets = {
+        'consumer_group1': {('topic1', 'partition0'): 1, ('topic1', 'partition1'): 2},  # 2 contexts
+        'consumer_group2': {('topic2', 'partition0'): 3},  # 1 context
+    }
+    assert kafka_consumer_check.count_consumer_contexts(consumer_offsets) == 3
+
+
+def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):
+    mock_client = seed_mock_client()
+    # Set up two partitions for same topic to check multiple contexts in same consumer group
+    partitions = ['partition1', 'partition2']
+    offsets = [2, 3]
+    topic = 'topic1'
+    consumer_group = 'consumer_group1'
+    mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
+        'cluster_id',
+        [(topic, partitions)],
+    )
+    mock_client.get_partitions_for_topic.return_value = partitions
+    consumer_group_offsets = [(topic, p, o) for p, o in zip(partitions, offsets)]
+    mock_client.list_consumer_group_offsets.return_value = [
+        (
+            consumer_group,
+            consumer_group_offsets,
+        )
+    ]
+    kafka_instance["collect_consumer_group_state"] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    # Check that the consumer group state is fetched only once
+    assert mock_client.describe_consumer_group.call_count == 1
+
+    # Check that both partitions include the state tag
+    for metric in ("kafka.consumer_offset", "kafka.consumer_lag"):
+        for partition in partitions:
+            aggregator.assert_metric_has_tags(
+                metric,
+                tags=[f'partition:{partition}', 'consumer_group_state:STABLE'],
+            )

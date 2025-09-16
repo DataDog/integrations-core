@@ -62,8 +62,9 @@ class KafkaCheck(AgentCheck):
         broker_timestamps = defaultdict(dict)
         cluster_id = ""
         persistent_cache_key = "broker_timestamps_"
+        consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            if len(consumer_offsets) < self._context_limit:
+            if consumer_contexts_count < self._context_limit:
                 # Fetch highwater offsets
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
@@ -80,7 +81,7 @@ class KafkaCheck(AgentCheck):
                 self.client.close_admin_client()
             raise
 
-        total_contexts = sum(len(v) for v in consumer_offsets.values()) + len(highwater_offsets)
+        total_contexts = consumer_contexts_count + len(highwater_offsets)
         self.log.debug(
             "Total contexts: %s, Consumer offsets: %s, Highwater offsets: %s",
             total_contexts,
@@ -107,6 +108,9 @@ class KafkaCheck(AgentCheck):
         self.data_streams_live_message(highwater_offsets or {}, cluster_id)
         if self.config._close_admin_client:
             self.client.close_admin_client()
+
+    def count_consumer_contexts(self, consumer_offsets):
+        return sum(len(offsets) for offsets in consumer_offsets.values())
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -243,6 +247,7 @@ class KafkaCheck(AgentCheck):
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
         for consumer_group, offsets in consumer_offsets.items():
+            consumer_group_state = None
             for (topic, partition), consumer_offset in offsets.items():
                 if reported_contexts >= contexts_limit:
                     self.log.debug(
@@ -259,7 +264,8 @@ class KafkaCheck(AgentCheck):
                     'kafka_cluster_id:%s' % cluster_id,
                 ]
                 if self.config._collect_consumer_group_state:
-                    consumer_group_state = self.get_consumer_group_state(consumer_group)
+                    if consumer_group_state is None:
+                        consumer_group_state = self.get_consumer_group_state(consumer_group)
                     consumer_group_tags.append(f'consumer_group_state:{consumer_group_state}')
                 consumer_group_tags.extend(self.config._custom_tags)
 
@@ -343,60 +349,43 @@ class KafkaCheck(AgentCheck):
         self.log.debug('Getting highwater offsets')
 
         cluster_id = ""
+        dd_consumer_group = "datadog-agent"
         highwater_offsets = {}
-        topics_with_consumer_offset = set()
-        topic_partition_with_consumer_offset = set()
+        topic_partitions_to_check = set()
 
-        for consumer_group, offsets in consumer_offsets.items():
-            self.log.debug('CONSUMER GROUP: %s', consumer_group)
-            topic_partitions_for_highwater_offsets = set()
-            self.client.open_consumer(consumer_group)
-            cluster_id, topics = self.client.consumer_get_cluster_id_and_list_topics(consumer_group)
-
-            if not self.config._monitor_all_broker_highwatermarks:
-                for topic, partition in offsets:
-                    topics_with_consumer_offset.add(topic)
-                    topic_partition_with_consumer_offset.add((topic, partition))
-
-            for topic, partitions in topics:
+        if self.config._monitor_all_broker_highwatermarks:
+            all_topic_partitions = self.client.get_topic_partitions()
+            for topic in all_topic_partitions:
                 if topic in KAFKA_INTERNAL_TOPICS:
                     self.log.debug("Skipping internal topic %s", topic)
                     continue
-                if not self.config._monitor_all_broker_highwatermarks and topic not in topics_with_consumer_offset:
-                    self.log.debug("Skipping non-relevant topic %s", topic)
-                    continue
 
-                for partition in partitions:
-                    if (topic, partition) in highwater_offsets:
-                        self.log.debug(
-                            'Highwater offset already collected for topic %s with partition %s', topic, partition
-                        )
+                for partition in all_topic_partitions[topic]:
+                    topic_partitions_to_check.add((topic, partition))
+
+        else:
+            for _, offsets in consumer_offsets.items():
+                for topic, partition in offsets:
+                    if topic in KAFKA_INTERNAL_TOPICS:
+                        self.log.debug("Skipping internal topic %s", topic)
                         continue
-                    if (
-                        self.config._monitor_all_broker_highwatermarks
-                        or (topic, partition) in topic_partition_with_consumer_offset
-                    ):
-                        topic_partitions_for_highwater_offsets.add((topic, partition))
-                        self.log.debug('TOPIC: %s', topic)
-                        self.log.debug('PARTITION: %s', partition)
-                    else:
-                        self.log.debug("Skipping non-relevant partition %s of topic %s", partition, topic)
 
-            if topic_partitions_for_highwater_offsets:
-                self.log.debug(
-                    'Querying %s highwater offsets for consumer group %s',
-                    len(topic_partitions_for_highwater_offsets),
-                    consumer_group,
-                )
-                for topic, partition, offset in self.client.consumer_offsets_for_times(
-                    partitions=topic_partitions_for_highwater_offsets
-                ):
-                    highwater_offsets[(topic, partition)] = offset
-            else:
-                self.log.debug('No new highwater offsets to query for consumer group %s', consumer_group)
+                    topic_partitions_to_check.add((topic, partition))
 
-            self.client.close_consumer()
+        self.client.open_consumer(dd_consumer_group)
+        cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        self.log.debug(
+            'Querying %s highwater offsets for consumer group %s',
+            len(topic_partitions_to_check),
+            dd_consumer_group,
+        )
+        if topic_partitions_to_check:
+            for topic, partition, offset in self.client.consumer_offsets_for_times(
+                partitions=topic_partitions_to_check
+            ):
+                highwater_offsets[(topic, partition)] = offset
 
+        self.client.close_consumer()
         self.log.debug('Got %s highwater offsets', len(highwater_offsets))
         return highwater_offsets, cluster_id
 
