@@ -4,9 +4,9 @@
 
 import click
 
-from ddev.cli.release.size.diff import diff
-from ddev.cli.release.size.status import status
-from ddev.cli.release.size.timeline import timeline
+from ddev.cli.release.stats.size.diff import diff
+from ddev.cli.release.stats.size.status import status
+from ddev.cli.release.stats.size.timeline import timeline
 
 
 @click.group(short_help='Analyze the size of integrations and dependencies deployed with the Datadog Agent.')

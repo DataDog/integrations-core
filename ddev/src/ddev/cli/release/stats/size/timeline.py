@@ -12,7 +12,7 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
-from ddev.cli.release.size.utils.common_params import common_params
+from ddev.cli.release.stats.size.utils.common_params import common_params
 
 from .utils.common_funcs import (
     CommitEntry,

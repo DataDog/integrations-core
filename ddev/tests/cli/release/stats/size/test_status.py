@@ -43,45 +43,48 @@ def mock_size_status():
     ]
 
     with (
-        patch("ddev.cli.release.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch(
-            "ddev.cli.release.size.status.get_valid_platforms",
+            "ddev.cli.release.stats.size.status.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
-            "ddev.cli.release.size.status.get_valid_versions",
+            "ddev.cli.release.stats.size.status.get_valid_versions",
             return_value=({'3.12'}),
         ),
-        patch("ddev.cli.release.size.status.get_files", return_value=fake_files),
-        patch("ddev.cli.release.size.status.get_dependencies", return_value=fake_deps),
+        patch("ddev.cli.release.stats.size.status.get_files", return_value=fake_files),
+        patch("ddev.cli.release.stats.size.status.get_dependencies", return_value=fake_deps),
         patch(
-            "ddev.cli.release.size.utils.common_funcs.os.path.relpath",
+            "ddev.cli.release.stats.size.utils.common_funcs.os.path.relpath",
             side_effect=lambda path, _: path.replace(f"fake_root{os.sep}", ""),
         ),
-        patch("ddev.cli.release.size.utils.common_funcs.compress", return_value=1234),
-        patch("ddev.cli.release.size.utils.common_funcs.os.walk", return_value=mock_walk),
-        patch("ddev.cli.release.size.utils.common_funcs.os.listdir", return_value=["fake_dep.whl"]),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.compress", return_value=1234),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.walk", return_value=mock_walk),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.listdir", return_value=["fake_dep.whl"]),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.open", MagicMock()),
     ):
         yield mock_app
 
 
 def test_status_no_args(ddev, mock_size_status):
-    assert ddev("release", "size", "status").exit_code == 0
-    assert ddev("release", "size", "status", "--compressed").exit_code == 0
-    assert ddev("release", "size", "status", "--format", "csv,markdown,json,png").exit_code == 0
-    assert ddev("release", "size", "status", "--show-gui").exit_code == 0
+    assert ddev("release", "stats", "size", "status").exit_code == 0
+    assert ddev("release", "stats", "size", "status", "--compressed").exit_code == 0
+    assert ddev("release", "stats", "size", "status", "--format", "csv,markdown,json,png").exit_code == 0
+    assert ddev("release", "stats", "size", "status", "--show-gui").exit_code == 0
 
 
 def test_status(ddev, mock_size_status):
-    assert (ddev("release", "size", "status", "--platform", "linux-aarch64", "--python", "3.12")).exit_code == 0
     assert (
-        ddev("release", "size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--compressed")
+        ddev("release", "stats", "size", "status", "--platform", "linux-aarch64", "--python", "3.12")
+    ).exit_code == 0
+    assert (
+        ddev("release", "stats", "size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--compressed")
     ).exit_code == 0
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "status",
             "--platform",
@@ -93,50 +96,52 @@ def test_status(ddev, mock_size_status):
         )
     ).exit_code == 0
     assert (
-        ddev("release", "size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--show-gui")
+        ddev("release", "stats", "size", "status", "--platform", "linux-aarch64", "--python", "3.12", "--show-gui")
     ).exit_code == 0
 
 
 def test_status_wrong_platform(ddev):
     with (
         patch(
-            "ddev.cli.release.size.status.get_valid_platforms",
+            "ddev.cli.release.stats.size.status.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
-            "ddev.cli.release.size.status.get_valid_versions",
+            "ddev.cli.release.stats.size.status.get_valid_versions",
             return_value=({'3.12'}),
         ),
     ):
-        result = ddev("release", "size", "status", "--platform", "linux", "--python", "3.12", "--compressed")
+        result = ddev("release", "stats", "size", "status", "--platform", "linux", "--python", "3.12", "--compressed")
         assert result.exit_code != 0
 
 
 def test_status_wrong_version(ddev):
     with (
         patch(
-            "ddev.cli.release.size.status.get_valid_platforms",
+            "ddev.cli.release.stats.size.status.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
-            "ddev.cli.release.size.status.get_valid_versions",
+            "ddev.cli.release.stats.size.status.get_valid_versions",
             return_value=({'3.12'}),
         ),
     ):
-        result = ddev("release", "size", "status", "--platform", "linux-aarch64", "--python", "2.10", "--compressed")
+        result = ddev(
+            "release", "stats", "size", "status", "--platform", "linux-aarch64", "--python", "2.10", "--compressed"
+        )
         assert result.exit_code != 0
 
 
 def test_status_wrong_plat_and_version(ddev):
     with (
         patch(
-            "ddev.cli.release.size.status.get_valid_platforms",
+            "ddev.cli.release.stats.size.status.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
-            "ddev.cli.release.size.status.get_valid_versions",
+            "ddev.cli.release.stats.size.status.get_valid_versions",
             return_value=({'3.12'}),
         ),
     ):
-        result = ddev("release", "size", "status", "--platform", "linux", "--python", "2.10", "--compressed")
+        result = ddev("release", "stats", "size", "status", "--platform", "linux", "--python", "2.10", "--compressed")
         assert result.exit_code != 0

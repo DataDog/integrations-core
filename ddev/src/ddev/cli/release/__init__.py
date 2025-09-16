@@ -12,7 +12,6 @@ from ddev.cli.release.branch import branch
 from ddev.cli.release.changelog import changelog
 from ddev.cli.release.list_versions import list_versions
 from ddev.cli.release.show import show
-from ddev.cli.release.size import size
 from ddev.cli.release.stats import stats
 
 
@@ -33,4 +32,3 @@ release.add_command(show)
 release.add_command(stats)
 release.add_command(tag)
 release.add_command(upload)
-release.add_command(size)

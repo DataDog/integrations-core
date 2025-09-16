@@ -14,23 +14,23 @@ def mock_timeline():
     mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Initial commit", c)
 
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
-        patch("ddev.cli.release.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("ddev.cli.release.size.timeline.GitRepo.sparse_checkout_commit"),
-        patch("ddev.cli.release.size.utils.common_funcs.get_gitignore_files", return_value=set()),
-        patch("ddev.cli.release.size.timeline.compress", return_value=1234),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.sparse_checkout_commit"),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.release.stats.size.timeline.compress", return_value=1234),
         patch(
-            "ddev.cli.release.size.timeline.os.walk",
+            "ddev.cli.release.stats.size.timeline.os.walk",
             return_value=[(Path("/tmp") / "fake_repo" / "int", [], ["file1.py"])],
         ),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.exists", return_value=True),
-        patch("ddev.cli.release.size.timeline.format_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.release.size.timeline.trim_modules", side_effect=lambda m, *_: m),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.release.stats.size.timeline.format_modules", side_effect=lambda m, *_: m),
+        patch("ddev.cli.release.stats.size.timeline.trim_modules", side_effect=lambda m, *_: m),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.release.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 
@@ -46,6 +46,7 @@ def test_timeline_integration(ddev, mock_timeline, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "integration",
@@ -62,6 +63,7 @@ def test_timeline_integration(ddev, mock_timeline, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "integration",
@@ -79,6 +81,7 @@ def test_timeline_integration(ddev, mock_timeline, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "integration",
@@ -95,6 +98,7 @@ def test_timeline_integration(ddev, mock_timeline, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "integration",
@@ -119,21 +123,21 @@ def mock_timeline_dependencies():
     mock_git_repo.get_commit_metadata.side_effect = lambda c: ("Apr 4 2025", "Fix dep", c)
     mock_git_repo.get_creation_commit_module.side_effect = "initial_commit"
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
-        patch("ddev.cli.release.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("ddev.cli.release.size.timeline.GitRepo.sparse_checkout_commit"),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.sparse_checkout_commit"),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_.utils.common_funcs.64", "linux-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.release.size.timeline.get_dependency_list", return_value={"dep1"}),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.exists", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isdir", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.release.stats.size.timeline.get_dependency_list", return_value={"dep1"}),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch(
-            "ddev.cli.release.size.timeline.get_dependencies",
+            "ddev.cli.release.stats.size.timeline.get_dependencies",
             return_value={
                 "Size_Bytes": 12345,
                 "Version": "1.2.3",
@@ -143,9 +147,9 @@ def mock_timeline_dependencies():
                 "Commit_SHA": "abcdef123456",
             },
         ),
-        patch("ddev.cli.release.size.timeline.format_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.release.size.timeline.trim_modules", side_effect=lambda m, *_: m),
-        patch("ddev.cli.release.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.release.stats.size.timeline.format_modules", side_effect=lambda m, *_: m),
+        patch("ddev.cli.release.stats.size.timeline.trim_modules", side_effect=lambda m, *_: m),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 
@@ -154,6 +158,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -171,6 +176,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -186,6 +192,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -204,6 +211,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -224,6 +232,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -242,6 +251,7 @@ def test_timeline_dependency(ddev, mock_timeline_dependencies, app):
     assert (
         ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -268,14 +278,15 @@ def test_timeline_invalid_platform(ddev):
     mock_git_repo.__enter__.return_value = mock_git_repo
 
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo", return_value=mock_git_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo", return_value=mock_git_repo),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
     ):
         result = ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -299,13 +310,13 @@ def test_timeline_integration_no_changes(ddev):
     mock_git_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
-        patch("ddev.cli.release.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.exists", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isdir", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.listdir", return_value=[]),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__enter__", return_value=mock_git_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.listdir", return_value=[]),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
     ):
@@ -314,6 +325,7 @@ def test_timeline_integration_no_changes(ddev):
             in (
                 result := ddev(
                     "release",
+                    "stats",
                     "size",
                     "timeline",
                     "integration",
@@ -331,6 +343,7 @@ def test_timeline_integration_no_changes(ddev):
             in (
                 result := ddev(
                     "release",
+                    "stats",
                     "size",
                     "timeline",
                     "integration",
@@ -349,6 +362,7 @@ def test_timeline_integration_no_changes(ddev):
             in (
                 result := ddev(
                     "release",
+                    "stats",
                     "size",
                     "timeline",
                     "integration",
@@ -368,6 +382,7 @@ def test_timeline_integration_no_changes(ddev):
             in (
                 result := ddev(
                     "release",
+                    "stats",
                     "size",
                     "timeline",
                     "integration",
@@ -386,6 +401,7 @@ def test_timeline_integration_no_changes(ddev):
             in (
                 result := ddev(
                     "release",
+                    "stats",
                     "size",
                     "timeline",
                     "integration",
@@ -405,6 +421,7 @@ def test_timeline_integration_no_changes(ddev):
             in (
                 result := ddev(
                     "release",
+                    "stats",
                     "size",
                     "timeline",
                     "integration",
@@ -430,16 +447,17 @@ def test_timeline_integration_not_found(ddev):
     mock_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo.__enter__", return_value=mock_repo),
-        patch("ddev.cli.release.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__enter__", return_value=mock_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__exit__", return_value=None),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.release.size.timeline.module_exists", return_value=False),
+        patch("ddev.cli.release.stats.size.timeline.module_exists", return_value=False),
     ):
         result = ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "integration",
@@ -462,22 +480,23 @@ def test_timeline_dependency_missing_no_platform(ddev):
     mock_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo.__enter__", return_value=mock_repo),
-        patch("ddev.cli.release.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("ddev.cli.release.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__enter__", return_value=mock_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.release.size.timeline.get_dependency_list", return_value=set()),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.exists", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isdir", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.release.stats.size.timeline.get_dependency_list", return_value=set()),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -500,22 +519,23 @@ def test_timeline_dependency_missing_for_platform(ddev, app):
     mock_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo.__enter__", return_value=mock_repo),
-        patch("ddev.cli.release.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("ddev.cli.release.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__enter__", return_value=mock_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.release.size.timeline.get_dependency_list", return_value=set()),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.exists", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isdir", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.release.stats.size.timeline.get_dependency_list", return_value=set()),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
@@ -544,22 +564,23 @@ def test_timeline_dependency_no_changes(ddev, app):
     mock_repo.get_commit_metadata.return_value = ("Feb 1 2025", "", "")
 
     with (
-        patch("ddev.cli.release.size.timeline.GitRepo.__enter__", return_value=mock_repo),
-        patch("ddev.cli.release.size.timeline.GitRepo.__exit__", return_value=None),
-        patch("ddev.cli.release.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__enter__", return_value=mock_repo),
+        patch("ddev.cli.release.stats.size.timeline.GitRepo.__exit__", return_value=None),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.get_valid_versions", return_value={"3.12"}),
         patch(
-            "ddev.cli.release.size.timeline.get_valid_platforms",
+            "ddev.cli.release.stats.size.timeline.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
-        patch("ddev.cli.release.size.timeline.get_dependency_list", return_value={"dep1"}),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.exists", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isdir", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
-        patch("ddev.cli.release.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.release.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.release.stats.size.timeline.get_dependency_list", return_value={"dep1"}),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.exists", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isdir", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.listdir", return_value=["linux-x86_64-3.12"]),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.os.path.isfile", return_value=True),
+        patch("ddev.cli.release.stats.size.utils.common_funcs.open", MagicMock()),
     ):
         result = ddev(
             "release",
+            "stats",
             "size",
             "timeline",
             "dependency",
