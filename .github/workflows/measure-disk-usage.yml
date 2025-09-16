@@ -16,7 +16,7 @@ jobs:
       platforms: ${{ steps.set.outputs.platforms }}
     steps:
       - id: set
-        run: echo 'platforms=["linux-aarch64","linux-x86_64","windows-x86_64","macos-x86_64","macos-aarch64"]' >> "$GITHUB_OUTPUT"
+        run: echo 'platforms=["macos-x86_64","macos-aarch64"]' >> "$GITHUB_OUTPUT" # "linux-aarch64","linux-x86_64","windows-x86_64",
 
   measure-disk-usage:
     runs-on: ubuntu-22.04
