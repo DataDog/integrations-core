@@ -105,7 +105,7 @@ RUN \
  --disable-static
 
 # libpq and pg_config as needed by psycopg
-RUN \
+RUN yum install -y flex && \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
  VERSION="17.5" \
  SHA256="fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8" \
