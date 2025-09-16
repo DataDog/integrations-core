@@ -23,6 +23,7 @@ jobs:
         id: define_sha
         run: |
           # Determine if the triggering event was a push or a pull request
+
           if [[ "${{ github.event.workflow_run.event }}" == "push" ]]; then
             echo "Triggered by push"
             echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
@@ -36,6 +37,7 @@ jobs:
       - name: Get run ID
         run: |
           run_id=$(gh run list --workflow ".github/workflows/resolve-build-deps.yaml" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
+
           echo "run_id_list=$run_id" 
           echo "run_id_variable=${{ github.event.workflow_run.id }}"         
         env:
