@@ -2,17 +2,17 @@
 
 ## Overview
 
-[Trend Micro Cloud One][1] is a cloud-native security platform designed to protect multi-cloud and hybrid environments like AWS, Azure, and Google Cloud. It provides unified protection across workloads, files, and networks, all managed from a single console.
+[Trend Micro Cloud One][1] is a cloud-native security platform designed to protect multi-cloud and hybrid environments such as AWS, Azure, and Google Cloud. It provides unified protection across workloads, files, and networks, all managed from a single console.
 
-Integrate Trend Micro Cloud One with Datadog to gain insights into Endpoint & Workload security, File Storage security, and Network Security events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and workload security, file storage security, and network security events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
 ### Log Collection Overview
 
-**Note**: To collect all the log types, configure both log collection methods.
+**Note**: To collect all log types, you must configure both log collection methods.
 
-The following table shows the log collection methods, the logs collected, and the dashboards populated for each methods.
+The following table shows the log collection methods, the logs collected, and the dashboards populated for each method.
 | Log Collection Method | Logs Collected | Dashboards Populated |
 |-----------------------------------------|---------------------------------------------------------------------------|------------------------------|
 | [Agent and Event Forwarder Configuration][8] | <li> Workload Security <ul> <li> System Events <li> Anti-Malware Events <li> Application Control Events <li> Firewall Events <li> Integrity Monitoring Events <li> Intrusion Prevention Events <li> Log Inspection Events <li> Device Control Events </ul> <li> Network Security <ul> <li> Reputation Events <li> IPS Events </ul> | <li> Trend Micro Cloud One - Workload Security Insights <li> Trend Micro Cloud One - System Events <li> Trend Micro Cloud One - Anti-Malware Events <li> Trend Micro Cloud One - Application Control and Device Control Events <li> Trend Micro Cloud One - Firewall Events <li> Trend Micro Cloud One - Integrity Monitoring Log Events <li> Trend Micro Cloud One - Intrusion Prevention Events <li> Trend Micro Cloud One - Log Inspection and Web Reputation Events <li> Trend Micro Cloud One - Network Security Insights |
@@ -38,7 +38,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `trend_micro_cloud_one.d/conf.yaml` file to start collecting your logs.
+2. To collect logs, add the following configuration block to your `trend_micro_cloud_one.d/conf.yaml` file.
 
    See the sample [trend_micro_cloud_one.d/conf.yaml][7] for available configuration options.
 
@@ -54,22 +54,22 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
        service: network-security
    ```
 
-   **Note**:
+   **Notes**:
 
-   - `UDP-PORT`: Specify the publicly accessible UDP port that Datadog will listen on. This port will be used later in the **Configure syslog message forwarding from Workload Security** section.
-   - `TCP-PORT`: Specify the TCP port that Datadog will listen on. This port will be used later in the **Configure syslog message forwarding from Network Security** section.
-   - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
+   - `UDP-PORT`: Specify the publicly accessible UDP port that Datadog will listen on. This port is referenced later in the **Configure syslog message forwarding from Workload Security** section.
+   - `TCP-PORT`: Specify the TCP port that Datadog will listen on. This port is referenced later in the **Configure syslog message forwarding from Network Security** section.
+   - It is recommended to keep the default service and source values, as they are essential to the pipeline's functionality.
 
 3. [Restart the Agent][5].
 
 #### Configure syslog message forwarding from Workload Security
 
-1. Login to [Trend Micro Cloud One][1], Select **Endpoint & Workload Security**.
+1. Log in to [Trend Micro Cloud One][1] and select **Endpoint & Workload Security**.
 2. Go to **Policies** > **Common Objects** > **Other** > **Syslog Configurations**.
 3. Click **New** > **New Configuration** > **General** and specify the following:
    - **Name**: Unique name that identifies the configuration.
-   - **Server Name**: Datadog Agent's IP address
-   - **Server Port**: Same `UDP-PORT` configured in [Log Collection][10].
+   - **Server Name**: Datadog Agent's IP address.
+   - **Server Port**: The `UDP-PORT` configured in [Log Collection][10].
    - **Transport**: Select UDP.
    - **Event Format**: Select Log Event Extended Format 2.0.
    - Enable Include time zone in events.
@@ -84,19 +84,19 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
 6. Forward Security events:
    <ol type="i">
       <li>Go to <strong>Policies</strong>.</li>
-      <li>Double-click policy whose events you want pushed to Datadog.</li>
+      <li>Double-click the policy whose events you want to push to Datadog.</li>
       <li>Go to <strong>Settings</strong> > <strong>Event Forwarding</strong>.</li>
-      <li>Under Event Forwarding Frequency (from the Agent/Appliance), use Period between sending of events to select how often the security events are to be forwarded.</li>
-      <li>Under Event Forwarding Configuration (from the Agent/Appliance), use Anti-Malware Syslog Configuration and other protection modules' lists and select An existing Syslog configuration.</li>
+      <li>Under Event Forwarding Frequency (from the Agent/Appliance), use Period between sending of events to select how often the security events are forwarded.</li>
+      <li>Under Event Forwarding Configuration (from the Agent/Appliance), use Anti-Malware Syslog Configuration and other protection modules' lists and select an existing Syslog configuration.</li>
       <li>Click <strong>Save</strong>.</li>
       <li>Repeat steps <strong>ii</strong> to <strong>vi</strong> for each base policy you want to push to Datadog.</li>
    </ol>
 
 #### Configure syslog message forwarding from Network Security
 
-1. Login to [Trend Micro Cloud One][1] Platform.
-2. In the upper right, select the account for which you want to add an API key.
-3. In Dropdown, select **Account Settings**.
+1. Log in to [Trend Micro Cloud One][1] Platform.
+2. On the upper-right corner of the page, select the account for which you want to add an API key.
+3. In the Dropdown, select **Account Settings**.
 4. Navigate to **API Keys**.
 5. Click New. In the New API Key section, provide the following details:
    - **API Key Alias**: Enter a descriptive name.
@@ -116,7 +116,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    curl -X POST -k "https://network.<region>.cloudone.trendmicro.com/api/appliances/<appliances-id>/remotesyslogs" --header "api-version: v1" --header "Content-Type: application/json" --header "Authorization: ApiKey <api-key>" --header --data "{\"host\": \"<ip-address>\", \"port\": <port>, \"enabled\": true}"
    ```
 
-9. Repeat above step for each appliance you want to push to Datadog
+9. Repeat the above step for each appliance you want to push to Datadog.
 
 #### Validation
 
@@ -126,9 +126,9 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
 
 #### Generate API credentials in Trend Micro Cloud One
 
-1. Login to [Trend Micro Cloud One][1] Platform.
-2. In the upper right, select the account for which you want to add an API key.
-3. In Dropdown, select **Account Settings**.
+1. Log in to [Trend Micro Cloud One][1] Platform.
+2. On the upper-right corner of the page, select the account for which you want to add an API key.
+3. In the dropdown, select **Account Settings**.
 4. Navigate to **API Keys**.
 5. Click New. In the New API Key section, provide the following details:
    - **API Key Alias**: Enter a descriptive name.
