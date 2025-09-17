@@ -225,7 +225,7 @@ def test__perform_custom_queries(check, mocker):
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
     conn_mock.rebind.assert_called_once_with(user="user", password="pass", authentication=ldap3.SIMPLE)
-    conn_mock.search.assert_called_once_with("base", "filter", attributes=None)
+    conn_mock.search.assert_called_once_with("base", "filter", search_scope="subtree", attributes=None)
     log_mock.error.assert_not_called()  # No error logged
 
     # Check query rebind different user
@@ -248,8 +248,65 @@ def test__perform_custom_queries(check, mocker):
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
     conn_mock.rebind.assert_called_once_with(user="user2", password="pass2", authentication=ldap3.SIMPLE)
-    conn_mock.search.assert_called_once_with("base", "filter", attributes=["*"])
+    conn_mock.search.assert_called_once_with("base", "filter", search_scope="subtree", attributes=["*"])
     log_mock.error.assert_not_called()  # No error logged
+
+
+def test_custom_query_search_scope(check, mocker):
+    """Test that search_scope parameter is properly used in custom queries"""
+    # Test with explicit search_scope
+    instance = {
+        "url": "url",
+        "custom_queries": [
+            {
+                "name": "test_query",
+                "search_base": "ou=users,dc=example,dc=com",
+                "search_filter": "(objectClass=person)",
+                "search_scope": "level"
+            }
+        ],
+    }
+    
+    log_mock = mocker.MagicMock()
+    check.log = log_mock
+    conn_mock = mocker.MagicMock()
+    conn_mock.rebind.return_value = True
+    conn_mock.entries = []
+    
+    _, _, _, _, queries, tags = check._get_instance_params(instance)
+    check._perform_custom_queries(conn_mock, queries, tags, instance)
+    
+    # Verify search_scope is passed correctly
+    conn_mock.search.assert_called_once_with(
+        "ou=users,dc=example,dc=com", 
+        "(objectClass=person)", 
+        search_scope="level", 
+        attributes=None
+    )
+    
+    # Test with default search_scope (should be 'subtree')
+    conn_mock.reset_mock()
+    instance_default = {
+        "url": "url",
+        "custom_queries": [
+            {
+                "name": "test_query_default",
+                "search_base": "dc=example,dc=com",
+                "search_filter": "(objectClass=*)"
+            }
+        ],
+    }
+    
+    _, _, _, _, queries_default, tags = check._get_instance_params(instance_default)
+    check._perform_custom_queries(conn_mock, queries_default, tags, instance_default)
+    
+    # Verify default search_scope is 'subtree'
+    conn_mock.search.assert_called_once_with(
+        "dc=example,dc=com", 
+        "(objectClass=*)", 
+        search_scope="subtree", 
+        attributes=None
+    )
 
 
 def test__extract_common_name(check):

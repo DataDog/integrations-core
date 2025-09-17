@@ -155,6 +155,7 @@ class OpenLDAP(AgentCheck):
                 self.log.error("`search_filter` field is required for custom query #%s", name)
                 continue
             attrs = query.get("attributes")
+            search_scope = query.get("search_scope", "subtree")
             if "username" in query:
                 username = query.get("username")
                 password = query.get("password")
@@ -181,7 +182,7 @@ class OpenLDAP(AgentCheck):
 
             try:
                 # Perform the search query
-                conn.search(search_base, search_filter, attributes=attrs)
+                conn.search(search_base, search_filter, search_scope=search_scope, attributes=attrs)
             except ldap3.core.exceptions.LDAPException:
                 self.log.exception("Unable to perform search query for %s", name)
                 continue
