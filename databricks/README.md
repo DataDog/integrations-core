@@ -62,12 +62,17 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
 #### Data Jobs Monitoring 
 
 1. Connect a workspace in Datadog's Databricks integration tile.
-2. In the **Select products to set up integration** section, set **Data Jobs Monitoring** to **Enabled** in order to start monitoring Databricks jobs and clusters. See [the docs for Data Jobs Monitoring][33] to complete configuration of this product. Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
+2. In the **Select products to set up integration** section, set **Data Jobs Monitoring** to **Enabled** to start monitoring Databricks jobs and clusters. 
+3. See [the docs for Data Jobs Monitoring][33] to complete the configuration. 
+
+**Note**: Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
 
 #### Cloud Cost Management 
 
 1. Connect a workspace in Datadog's Databricks integration tile.
-2. In the **Select products to set up integration** section, set **Cloud Cost Management** to **Enabled** in order to view and analyze Databricks DBU costs alongside the associated cloud spend. Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
+2. In the **Select products to set up integration** section, set **Cloud Cost Management** to **Enabled** to view and analyze Databricks DBU costs alongside the associated cloud cost. 
+
+**Note**: Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
 
 #### Model Serving
 
