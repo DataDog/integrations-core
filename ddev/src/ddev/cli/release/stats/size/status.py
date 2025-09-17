@@ -10,7 +10,7 @@ import click
 from rich.console import Console
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_funcs import (
+from ddev.cli.release.stats.size.utils.common_funcs import (
     CLIParameters,
     FileDataEntryPlatformVersion,
     export_format,
@@ -23,7 +23,7 @@ from ddev.cli.size.utils.common_funcs import (
     print_table,
     send_metrics_to_dd,
 )
-from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.release.stats.size.utils.common_params import common_params
 
 console = Console(stderr=True)
 

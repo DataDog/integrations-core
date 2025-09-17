@@ -29,16 +29,16 @@ jobs:
         ddev config set repo core
     - name: Measure disk usage (uncompressed)
       run: | 
-        ddev size status --to-dd-key ${{secrets.DD_API_KEY}} > size-uncompressed.txt 
-        ddev size status  --format png,csv,markdown
+        ddev release stats size status --to-dd-key ${{secrets.DD_API_KEY}} > size-uncompressed.txt 
+        ddev release stats size status  --format png,csv,markdown
         cat size-uncompressed.txt
         echo "# Size (uncompressed)" >> $GITHUB_STEP_SUMMARY
         cat uncompressed_status.md >> $GITHUB_STEP_SUMMARY
   
     - name: Measure disk usage (compressed)
       run: |
-        ddev size status --compressed --to-dd-key ${{secrets.DD_API_KEY}} > size-compressed.txt 
-        ddev size status --compressed  --format png,csv,markdown
+        ddev release stats size status --compressed --to-dd-key ${{secrets.DD_API_KEY}} > size-compressed.txt 
+        ddev release stats size status --compressed  --format png,csv,markdown
         cat size-compressed.txt
         echo "# Size (compressed)" >> $GITHUB_STEP_SUMMARY
         cat compressed_status.md >> $GITHUB_STEP_SUMMARY
@@ -49,8 +49,8 @@ jobs:
       run: | 
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
-        ddev size diff $BEFORE $AFTER > diff-uncompressed.txt
-        ddev size diff $BEFORE $AFTER  --format png,csv,markdown
+        ddev release stats size diff $BEFORE $AFTER > diff-uncompressed.txt
+        ddev release stats size diff $BEFORE $AFTER  --format png,csv,markdown
         cat diff-uncompressed.txt
         echo "# Size diff (uncompressed)" >> $GITHUB_STEP_SUMMARY
         if [ -f uncompressed_diff.md ]; then
@@ -61,8 +61,8 @@ jobs:
       run: | 
         BEFORE=$(git rev-parse HEAD^)
         AFTER=$(git rev-parse HEAD)
-        ddev size diff $BEFORE $AFTER --compressed > diff-compressed.txt
-        ddev size diff $BEFORE $AFTER --compressed  --format png,csv,markdown
+        ddev release stats size diff $BEFORE $AFTER --compressed > diff-compressed.txt
+        ddev release stats size diff $BEFORE $AFTER --compressed  --format png,csv,markdown
         cat diff-compressed.txt
         echo "# Size diff (compressed)" >> $GITHUB_STEP_SUMMARY
         if [ -f compressed_diff.md ]; then

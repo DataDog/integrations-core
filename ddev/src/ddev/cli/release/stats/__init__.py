@@ -4,6 +4,8 @@
 import click
 from datadog_checks.dev.tooling.commands.release.stats.stats import merged_prs, report
 
+from ddev.cli.release.stats.size import size
+
 
 @click.group(short_help='A collection of tasks to generate reports about releases')
 def stats():
@@ -14,3 +16,4 @@ def stats():
 
 stats.add_command(merged_prs)
 stats.add_command(report)
+stats.add_command(size)
