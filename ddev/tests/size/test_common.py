@@ -21,6 +21,7 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
+    parse_sizes_json,
     save_csv,
     save_json,
     save_markdown,
@@ -400,3 +401,47 @@ def test_get_org():
     }
 
     assert result == expected
+
+
+def test_parse_sizes_json():
+    compressed_data = json.dumps(
+        [
+            {
+                "Name": "module1",
+                "Size_Bytes": 123,
+                "Size": "2 B",
+                "Type": "Integration",
+            }
+        ]
+    )
+    uncompressed_data = json.dumps(
+        [
+            {
+                "Name": "module1",
+                "Size_Bytes": 456,
+                "Size": "4 B",
+                "Type": "Integration",
+            }
+        ]
+    )
+
+    expected_output = {
+        "module1": {
+            "compressed": 123,
+            "uncompressed": 456,
+            "version": None,
+        }
+    }
+
+    mock_file_handler = mock_open()
+    mock_file_handler.side_effect = [
+        mock_open(read_data=compressed_data).return_value,
+        mock_open(read_data=uncompressed_data).return_value,
+    ]
+
+    target_path = "ddev.cli.size.utils.common_funcs.open"
+
+    with patch(target_path, mock_file_handler):
+        result = parse_sizes_json("compressed.json", "uncompressed.json")
+
+    assert result == expected_output

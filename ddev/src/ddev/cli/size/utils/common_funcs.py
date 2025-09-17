@@ -25,7 +25,7 @@ from ddev.cli.application import Application
 from ddev.utils.toml import load_toml_file
 
 METRIC_VERSION = 2
-METRIC_NAME = "datadog.agent_integrations"
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Patch
@@ -842,7 +842,7 @@ def send_metrics_to_dd(
     key: str,
     compressed: bool,
 ) -> None:
-    metric_name = METRIC_NAME
+    metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
     config_file_info = get_org(app, org) if org else {"api_key": key, "site": "datadoghq.com"}
@@ -976,12 +976,9 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
     result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
-    if "BRANCH_NAME" in os.environ:
-        print(f"BRANCH_NAME: {os.environ['BRANCH_NAME']}")
-        tickets = re.findall(ticket_pattern, os.environ["BRANCH_NAME"])
 
     message = result.stdout.strip()
-    tickets = re.findall(ticket_pattern, message) if not tickets else tickets
+    tickets = re.findall(ticket_pattern, message)
     prs = re.findall(pr_pattern, message)
     if not tickets:
         tickets = [""]
@@ -1108,30 +1105,25 @@ def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: 
 @cache
 def get_run_id(commit, workflow):
     print(f"Getting run id for commit: {commit}, workflow: {workflow}")
-    try:
-        result = subprocess.run(
-            [
-                'gh',
-                'run',
-                'list',
-                '--workflow',
-                workflow,
-                '-c',
-                commit,
-                '--json',
-                'databaseId',
-                '--jq',
-                '.[-1].databaseId',
-            ],
-            capture_output=True,
-            text=True,
-        )
-    except subprocess.CalledProcessError as e:
-        stderr = (e.stderr or '').strip()
-        if stderr:
-            print(stderr)
-        print("Failed to get run id")
-        return None
+
+    result = subprocess.run(
+        [
+            'gh',
+            'run',
+            'list',
+            '--workflow',
+            workflow,
+            '-c',
+            commit,
+            '--json',
+            'databaseId',
+            '--jq',
+            '.[-1].databaseId',
+        ],
+        capture_output=True,
+        text=True,
+    )
+
     run_id = result.stdout.strip() if result.stdout else None
     print(f"Run id: {run_id}")
 
@@ -1198,7 +1190,6 @@ def get_current_sizes_json(run_id, platform):
             text=True,
         )
         print(f"Downloaded artifacts to {tmpdir}")
-        # Look for the sizes.json file in the downloaded artifacts
         sizes_file = os.path.join(tmpdir, platform, 'py3', 'sizes.json')
 
         if os.path.exists(sizes_file):
