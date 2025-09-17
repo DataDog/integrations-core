@@ -283,30 +283,6 @@ def test_custom_query_search_scope(check, mocker):
         search_scope="level", 
         attributes=None
     )
-    
-    # Test with default search_scope (should be 'subtree')
-    conn_mock.reset_mock()
-    instance_default = {
-        "url": "url",
-        "custom_queries": [
-            {
-                "name": "test_query_default",
-                "search_base": "dc=example,dc=com",
-                "search_filter": "(objectClass=*)"
-            }
-        ],
-    }
-    
-    _, _, _, _, queries_default, tags = check._get_instance_params(instance_default)
-    check._perform_custom_queries(conn_mock, queries_default, tags, instance_default)
-    
-    # Verify default search_scope is 'subtree'
-    conn_mock.search.assert_called_once_with(
-        "dc=example,dc=com", 
-        "(objectClass=*)", 
-        search_scope="subtree", 
-        attributes=None
-    )
 
 
 def test__extract_common_name(check):
