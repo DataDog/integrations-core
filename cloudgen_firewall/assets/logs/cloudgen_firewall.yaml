@@ -9,7 +9,7 @@ facets:
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
-    name: component
+    name: Component
     path: cloudgen_firewall.component
     source: log
     type: string
@@ -17,7 +17,7 @@ facets:
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
-    name: IPs
+    name: IP
     path: cloudgen_firewall.ip
     source: log
     type: string
@@ -25,7 +25,7 @@ facets:
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
-    name: process
+    name: Process
     path: cloudgen_firewall.process
     source: log
     type: string
@@ -33,7 +33,7 @@ facets:
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
-    name: process ID
+    name: Process ID
     path: cloudgen_firewall.pid
     source: log
     type: string
@@ -41,7 +41,7 @@ facets:
     facetType: list
     groups:
       - Barracuda CloudGen Firewall
-    name: session_status
+    name: Session Status
     path: cloudgen_firewall.session_status
     source: log
     type: string
