@@ -21,7 +21,7 @@ Model serving metrics provide insights into how your  Databricks model serving i
 
 ### Installation
 
-First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspace) in Datadog’s Databricks integration tile. Complete installation by configuring one or more capabilities of the integration: [Data Jobs Monitoring](#data-jobs-monitoring), [Cloud Cost Management](#cloud-cost-management), and/or [Model Serving](#model-serving). 
+First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspace) in Datadog's Databricks integration tile. Complete installation by configuring one or more capabilities of the integration: [Data Jobs Monitoring](#data-jobs-monitoring), [Cloud Cost Management](#cloud-cost-management), and/or [Model Serving](#model-serving). 
 
 ### Configuration
 #### Connect to a new Databricks Workspace
@@ -61,17 +61,17 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
 
 #### Data Jobs Monitoring 
 
-1. Connect a workspace in Datadog’s Databricks integration tile.
+1. Connect a workspace in Datadog's Databricks integration tile.
 2. In the **Select products to set up integration** section, set **Data Jobs Monitoring** to **Enabled** in order to start monitoring Databricks jobs and clusters. See [the docs for Data Jobs Monitoring][33] to complete configuration of this product. Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
 
 #### Cloud Cost Management 
 
-1. Connect a workspace in Datadog’s Databricks integration tile.
+1. Connect a workspace in Datadog's Databricks integration tile.
 2. In the **Select products to set up integration** section, set **Cloud Cost Management** to **Enabled** in order to view and analyze Databricks DBU costs alongside the associated cloud spend. Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
 
 #### Model Serving
 
-1. Configure a workspace in Datadog’s Databricks integration tile.
+1. Configure a workspace in Datadog's Databricks integration tile.
 2. In the **Select resources to set up collection** section, set **Metrics - Model Serving** to **Enabled** in order to ingest model serving metrics.
 
 #### Reference Table Configuration
@@ -95,9 +95,6 @@ For Datadog to access your Databricks cost data in Data Jobs Monitoring or [Clou
    ```
    The user granting these must have `MANAGE` privilege on `CATALOG system`.
 
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
-
 ## Data Collected
 
 ### Metrics
@@ -120,18 +117,11 @@ You can troubleshoot issues yourself by enabling the [Databricks web terminal][1
 
 Need help? Contact [Datadog support][10].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Uploading a Script to Unity Catalog Volume][24]
-
 [10]: https://docs.datadoghq.com/help/
 [18]: https://docs.databricks.com/en/clusters/web-terminal.html
 [19]: https://docs.databricks.com/en/notebooks/index.html
 [20]: https://docs.datadoghq.com/agent/troubleshooting/
 [21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
-[24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume
 [25]: https://www.datadoghq.com/product/data-jobs-monitoring/
 [26]: https://www.datadoghq.com/product/cloud-cost-management/
 [27]: https://www.datadoghq.com/product/log-management/
