@@ -316,7 +316,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1
-              %{word:source}\s+%{word:service}?:\s+%{word:sub_type}?:\s+%{greedyData:message}
+              %{word:source}\s+%{word:sub_component}?:\s+%{word:sub_type}?:\s+%{greedyData:message}
 
 
               autoFilledRule2 %{word:source}\s+%{greedyData:message}
