@@ -17,7 +17,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-macosx_11_0_arm64.whl#sha256=acfa79048ac3b8203feba108c2d637d89ce1dfeaefabc1272a5c4e2dab716314
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-macosx_11_0_arm64.whl#sha256=b7a3e6b0a1eb218e3d870a94c76daaf65da46dca8f6888ea6542f94905c24d88
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20241216144620-py3-none-macosx_10_12_universal2.whl#sha256=72f55306e2e3df9291ee55e3a6b2f6698fe3999db9570a14da0ea56bbf51e5a9
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250916202518-cp312-cp312-macosx_11_0_arm64.whl#sha256=536ecc725d696cc08c27e0a5507bb9737cd6577c9ba1cde91189665f69138820
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250917031649-cp312-cp312-macosx_11_0_arm64.whl#sha256=382945640883ecb6f30c3cf3790074a08bd6e33367c0a18f8bee9d4460afdecc
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-45.0.6-cp311-abi3-macosx_10_9_universal2.whl#sha256=048e7ad9e08cf4c0ab07ff7f36cc3115924e22e2266e034450a890d9e312dd74
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.12.5-cp312-cp312-macosx_12_0_arm64.whl#sha256=ab456684eb8f2e5a190e512b83e401d60b4fb12b69c4684381187b21663d92b6
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
@@ -76,7 +76,7 @@ pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2
 pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.33.2-cp312-cp312-macosx_11_0_arm64.whl#sha256=3c6db6e52c6d70aa0d00d45cdb9b40f0433b96380071ea80b09277dba021ddf7
 pyjwt @ https://agent-int-packages.datadoghq.com/external/pyjwt/PyJWT-2.10.1-py3-none-any.whl#sha256=dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb
 pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.8.0-cp312-cp312-macosx_11_0_arm64.whl#sha256=31e4d21201bdf15064cf47ce7b74722d3e1aea2597c6785882244a3bb58c7eab
-pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250916202519-cp312-cp312-macosx_11_0_arm64.whl#sha256=70e73701edfa61a550a6b094d4b7ae15fc426dadc956151ad8eddb61de8a6e51
+pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250917031650-cp312-cp312-macosx_11_0_arm64.whl#sha256=0ca2b81e547ca0071fe8763aaac6754f7457dee1cc4fe334a89171007dcca3b1
 pymysql @ https://agent-int-packages.datadoghq.com/external/pymysql/pymysql-1.1.2-py3-none-any.whl#sha256=e6b1d89711dd51f8f74b1631fe08f039e7d76cf67a42a323d3178f0f25762ed9
 pynacl @ https://agent-int-packages.datadoghq.com/external/pynacl/pynacl-1.6.0-cp38-abi3-macosx_10_10_universal2.whl#sha256=f4b3824920e206b4f52abd7de621ea7a44fd3cb5c8daceb7c3612345dfc54f2e
 pyodbc @ https://agent-int-packages.datadoghq.com/external/pyodbc/pyodbc-5.2.0-cp312-cp312-macosx_11_0_arm64.whl#sha256=9f7badd0055221a744d76c11440c0856fd2846ed53b6555cf8f0a8893a3e4b03
@@ -93,7 +93,7 @@ python3-gearman @ https://agent-int-packages.datadoghq.com/external/python3-gear
 pytz @ https://agent-int-packages.datadoghq.com/external/pytz/pytz-2025.2-py2.py3-none-any.whl#sha256=5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00
 pyvmomi @ https://agent-int-packages.datadoghq.com/built/pyvmomi/pyvmomi-8.0.3.0.1-20241216144622-py2.py3-none-macosx_10_12_universal2.whl#sha256=0d5c361674512c65adbdc32e05eaffb60be72b246efb3ea1ce2edb10dd6698c8
 pyyaml @ https://agent-int-packages.datadoghq.com/external/pyyaml/PyYAML-6.0.2-cp312-cp312-macosx_11_0_arm64.whl#sha256=ce826d6ef20b1bc864f0a68340c8b3287705cae2f8b4b1d932177dcc76721725
-redis @ https://agent-int-packages.datadoghq.com/external/redis/redis-6.4.0-py3-none-any.whl#sha256=f0544fa9604264e9464cdf4814e7d4830f74b165d52f2a330a760a88dd248b7f
+redis @ https://agent-int-packages.datadoghq.com/external/redis/redis-6.2.0-py3-none-any.whl#sha256=c8ddf316ee0aab65f04a11229e94a64b2618451dab7a67cb2f77eb799d872d5e
 requests @ https://agent-int-packages.datadoghq.com/external/requests/requests-2.32.5-py3-none-any.whl#sha256=2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6
 requests-kerberos @ https://agent-int-packages.datadoghq.com/external/requests-kerberos/requests_kerberos-0.15.0-py2.py3-none-any.whl#sha256=ba9b0980b8489c93bfb13854fd118834e576d6700bfea3745cb2e62278cd16a6
 requests-ntlm @ https://agent-int-packages.datadoghq.com/external/requests-ntlm/requests_ntlm-1.3.0-py3-none-any.whl#sha256=4c7534a7d0e482bb0928531d621be4b2c74ace437e88c5a357ceb7452d25a510
