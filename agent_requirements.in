@@ -39,7 +39,6 @@ pymqi==1.12.11
 pymysql==1.1.2
 pyodbc==5.2.0
 pyopenssl==25.1.0
-pysmi==1.2.1
 pysnmp==5.1.0
 pysocks==1.7.1
 python-binary-memcached==0.31.4; sys_platform != 'win32'
