@@ -23,6 +23,10 @@ jobs:
         id: define_sha
         run: |
           echo "sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+          echo "event=${{ github.event.workflow_run.event }}" >> $GITHUB_OUTPUT
+          echo "ref_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          echo "default_branch=${{ github.event.workflow_run.repository.default_branch }}" >> $GITHUB_OUTPUT
       - name: Get run ID
         run: |
           echo "run_id_variable=${{ github.event.workflow_run.id }}"         
