@@ -309,10 +309,12 @@ class HTTPCheck(AgentCheck):
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
     def _get_service_checks_tags(self, instance):
+        instance_name = self.normalize_instance_tag(instance["name"])
         url = instance.get("url", None)
         if url is not None:
             url = ensure_unicode(url)
         tags = instance.get("tags", [])
+        tags.append("instance:{}".format(instance_name))
 
         # Only add the URL tag if it's not already present
         if not any(filter(re.compile("^url:").match, tags)):
