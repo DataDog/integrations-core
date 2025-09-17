@@ -8,6 +8,8 @@ import os
 import re
 import socket
 import warnings
+import ssl
+import base64
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
@@ -574,7 +576,7 @@ class RequestsWrapper(object):
             probe_sess.mount("https+unix://", UnixHTTPSProbeAdapter())
             try:
                 probe_method = "HEAD" if method not in {"GET", "HEAD"} else method
-                resp = probe_sess.request(probe_method, url, stream=True, timeout=kwargs.get("timeout", 10))
+                resp = probe_sess.request(probe_method, url, stream=True, timeout=20)
                 # Try full chain first (if PyOpenSSL), else leaf
                 if not _log_chain_from_response(resp, self.logger):
                     _log_leaf_cert_from_response(resp, self.logger)
