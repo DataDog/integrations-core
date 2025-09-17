@@ -21,7 +21,7 @@ Model serving metrics provide insights into how your  Databricks model serving i
 
 ### Installation
 
-First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspace) in Datadog's Databricks integration tile. Complete installation by configuring one or more capabilities of the integration: [Data Jobs Monitoring](#data-jobs-monitoring), [Cloud Cost Management](#cloud-cost-management), and/or [Model Serving](#model-serving). 
+First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspace) in Datadog's Databricks integration tile. Complete installation by configuring one or more capabilities of the integration: [Data Jobs Monitoring](#data-jobs-monitoring), [Cloud Cost Management](#cloud-cost-management), and [Model Serving](#model-serving). 
 
 ### Configuration
 #### Connect to a new Databricks Workspace
@@ -93,7 +93,7 @@ For Datadog to access your Databricks cost data in Data Jobs Monitoring or [Clou
    GRANT SELECT ON CATALOG system TO <service_principal>;
    GRANT USE SCHEMA ON CATALOG system TO <service_principal>;
    ```
-   The user granting these must have `MANAGE` privilege on `CATALOG system`.
+   The user granting these must have the `MANAGE` privilege on `CATALOG system`.
 
 ## Data Collected
 
