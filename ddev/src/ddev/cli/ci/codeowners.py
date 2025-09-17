@@ -62,6 +62,8 @@ def get_owners_per_file(files: list[str], codeowners: CodeOwners) -> dict[str, l
                 # Collect all owner names for this file in a list
                 owner_names = [owner_name for _, owner_name in owners]
                 file_to_owners[file] = sorted(owner_names)
+            else:
+                file_to_owners[file] = ["No owners found"]
 
     return file_to_owners
 
