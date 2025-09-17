@@ -362,7 +362,7 @@ pipeline:
           zero %{date("yyyy/MM/dd HH:mm:ss"):time_generated}
         supportRules: ""
     - type: date-remapper
-      name: Define `time_generated` as the official date of the log
+      name: Define `time_generated` as the official date of the logs
       enabled: true
       sources:
         - time_generated
