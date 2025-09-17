@@ -151,7 +151,6 @@ unsorted = [
 [overrides.dep.updates]
 exclude = [
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
-    'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
     # https://github.com/DataDog/integrations-core/pull/16080

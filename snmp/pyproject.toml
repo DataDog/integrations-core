@@ -36,9 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "ply==3.11",
     "pyasn1==0.4.8",
-    "pysmi==1.2.1",
     "pysnmp-mibs==0.1.6",
     "pysnmp==5.1.0",
 ]
