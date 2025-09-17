@@ -52,7 +52,7 @@ jobs:
         --commit ${{ github.event.workflow_run.head_sha }} \
         --format json"
 
-        # Send metrics to Datadog only on push to default branch
+        # Send metrics to Datadog only on push to master
         if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
