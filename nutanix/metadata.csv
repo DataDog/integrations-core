@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+nutanix.health.up,count,,,,"Value of 1 if the agent can connect to the Prism Central, and 0 otherwise.",0,nutanix,health,,
