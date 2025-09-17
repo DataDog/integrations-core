@@ -156,7 +156,7 @@ class OpenLDAP(AgentCheck):
                 continue
             attrs = query.get("attributes")
             search_scope_str = query.get("search_scope", "subtree")
-            
+
             # Convert string to ldap3 constant
             if search_scope_str.lower() == "base":
                 search_scope = ldap3.BASE
