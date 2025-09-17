@@ -22,8 +22,8 @@ defaults:
 
 env:
   PYTHONUNBUFFERED: "1"
-  DIRECT_DEPENDENCY_FILE: agent_requirements.in
   PYTHON_VERSION: "3.12"
+  DIRECT_DEPENDENCY_FILE: agent_requirements.in
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
 
@@ -40,10 +40,18 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
+      - name: Set Base SHA Output
+        id: set_base_sha
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "base_sha=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "base_sha=${{ github.event.before }}" >> $GITHUB_OUTPUT
+          fi
       - name: Check for dependency changes
         id: dependency-check
         run: |
-          if git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"; then
+          if git diff --name-only ${{ steps.set_base_sha.outputs.base_sha }} ${{ github.sha }} | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "Dependency files changed."
           else
