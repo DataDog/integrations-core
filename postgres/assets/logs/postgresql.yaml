@@ -72,9 +72,9 @@ pipeline:
           suggested_format %{_prefix} %{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
 
           #See RDS documentation for more data-rich format
-          enhanced_rds %{_timestamp_ms}:%{_client_ip}\(%{port:network.client.port:integer}\):%{_user}@%{_database}:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname})?:%{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
-
           enhanced_rds_with_duration %{_timestamp_ms}:%{_client_ip}\(%{port:network.client.port:integer}\):%{_user}@%{_database}:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname})?:%{_severity}:\s+duration:\s+%{_duration}\s+ms\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+
+          enhanced_rds %{_timestamp_ms}:%{_client_ip}\(%{port:network.client.port:integer}\):%{_user}@%{_database}:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname})?:%{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
 
           default_format (%{_timestamp}|%{_timestamp_ms} \[%{_proc_id}])\s+%{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
 
