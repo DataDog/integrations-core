@@ -138,7 +138,7 @@ class GitHubManager:
         response = self.__api_get(self.PULL_REQUEST_FILES_API.format(repo_id=self.repo_id, pr_number=pr.number))
         return [file_data['filename'] for file_data in response.json()]
 
-    def get_changed_files_by_sha(self, sha: str) -> list[str] | None:
+    def get_changed_files_by_commit_sha(self, sha: str) -> list[str] | None:
         from httpx import HTTPStatusError
 
         try:

@@ -6,18 +6,26 @@ from ddev.cli.application import Application
 
 @click.command()
 @click.option('--pr', help='Check the codeowners for the given PR')
-@click.option('--sha', help='Check the codeowners for the given sha')
+@click.option('--commit-sha', help='Check the codeowners for the given commit SHA')
 @click.option('--files', help='Check the codeowners for the given files separated by commas')
 @click.option('--per-file', is_flag=True, help='Output the codeowners for each file')
 @click.pass_obj
-def codeowners(app: Application, pr: str, sha: str, files: str, per_file: bool):
+def codeowners(app: Application, pr: str, commit_sha: str, files: str, per_file: bool):
     """
     Check the codeowners for the given PR, commit, or files.
     """
+    # Check that only one of pr, commit_sha, or files is provided
+    selected_options = [opt for opt in (pr, commit_sha, files) if opt]
+    if len(selected_options) != 1:
+        app.display_error('Please provide exactly one of --pr, --commit-sha, or --files')
+        return
+
     codeowners_file = app.repo.path / '.github' / 'CODEOWNERS'
-    with open(codeowners_file, 'r') as f:
-        codeowners_content = f.readlines()
-    codeowners: CodeOwners = CodeOwners("\n".join(codeowners_content))
+    if not codeowners_file.exists():
+        raise FileNotFoundError(f"{codeowners_file} does not exist")
+
+    codeowners_content = codeowners_file.read_text()
+    codeowners = CodeOwners(codeowners_content)
 
     if files:
         file_list = files.split(',') if ',' in files else [files]
@@ -28,25 +36,23 @@ def codeowners(app: Application, pr: str, sha: str, files: str, per_file: bool):
             app.display_error(f'Pull request {pr} not found')
             return
         file_list = github.get_changed_files_by_pr(pr_obj)
-    elif sha:
+    elif commit_sha:
         github = app.github
-        files_by_sha = github.get_changed_files_by_sha(sha)
-        if files_by_sha is None:
-            app.display_error(f'Commit {sha} not found')
+        files_by_commit_sha = github.get_changed_files_by_commit_sha(commit_sha)
+        if files_by_commit_sha is None:
+            app.display_error(f'Commit {commit_sha} not found')
             return
-        file_list = files_by_sha
-    else:
-        app.display_error('No files provided')
-        return
+        file_list = files_by_commit_sha
+
     if per_file:
-        owners_per_file = map_files_to_teams(file_list, codeowners)
+        owners_per_file = get_owners_per_file(file_list, codeowners)
         app.display_info(owners_per_file)
     else:
         owners = get_owners(file_list, codeowners)
         app.display_info(sorted(owners))
 
 
-def map_files_to_teams(files: list[str], codeowners: CodeOwners) -> dict[str, list[str]]:
+def get_owners_per_file(files: list[str], codeowners: CodeOwners) -> dict[str, list[str]]:
     file_to_owners = {}
     for file in files:
         file = file.strip()
@@ -56,6 +62,7 @@ def map_files_to_teams(files: list[str], codeowners: CodeOwners) -> dict[str, li
                 # Collect all owner names for this file in a list
                 owner_names = [owner_name for _, owner_name in owners]
                 file_to_owners[file] = sorted(owner_names)
+
     return file_to_owners
 
 

@@ -36,7 +36,7 @@ def mock_github():
     with (
         patch('ddev.utils.github.GitHubManager.get_pull_request_by_number', return_value=MagicMock()),
         patch('ddev.utils.github.GitHubManager.get_changed_files_by_pr', return_value=changed_files),
-        patch('ddev.utils.github.GitHubManager.get_changed_files_by_sha', return_value=changed_files),
+        patch('ddev.utils.github.GitHubManager.get_changed_files_by_commit_sha', return_value=changed_files),
     ):
         yield
 
@@ -85,14 +85,14 @@ def test_codeowners_pr_per_file(ddev, temp_repo, mock_github):
 
 
 def test_codeowners_sha(ddev, temp_repo, mock_github):
-    result = ddev('--here', 'ci', 'codeowners', '--sha', '1234567890')
+    result = ddev('--here', 'ci', 'codeowners', '--commit-sha', '1234567890')
     assert result.exit_code == 0
     expected_output = "['@DataDog/team1', '@DataDog/team2', '@DataDog/team3']\n"
     assert result.output == expected_output
 
 
 def test_codeowners_sha_per_file(ddev, temp_repo, mock_github):
-    result = ddev('--here', 'ci', 'codeowners', '--sha', '1234567890', '--per-file')
+    result = ddev('--here', 'ci', 'codeowners', '--commit-sha', '1234567890', '--per-file')
     assert result.exit_code == 0
     expected_output = (
         "{\n"
