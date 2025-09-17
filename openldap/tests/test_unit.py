@@ -262,26 +262,23 @@ def test_custom_query_search_scope(check, mocker):
                 "name": "test_query",
                 "search_base": "ou=users,dc=example,dc=com",
                 "search_filter": "(objectClass=person)",
-                "search_scope": "level"
+                "search_scope": "level",
             }
         ],
     }
-    
+
     log_mock = mocker.MagicMock()
     check.log = log_mock
     conn_mock = mocker.MagicMock()
     conn_mock.rebind.return_value = True
     conn_mock.entries = []
-    
+
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
-    
+
     # Verify search_scope is passed correctly
     conn_mock.search.assert_called_once_with(
-        "ou=users,dc=example,dc=com", 
-        "(objectClass=person)", 
-        search_scope="level", 
-        attributes=None
+        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope="level", attributes=None
     )
 
 
