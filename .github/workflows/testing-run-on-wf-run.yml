@@ -2,7 +2,7 @@ name: Run on PR Check
 
 on:
   workflow_run:
-    workflows: ['Check PR']
+    workflows: ['Resolve Dependencies and Build Wheels']
     types:
       - completed
 
@@ -22,22 +22,11 @@ jobs:
       - name: Define SHA
         id: define_sha
         run: |
-          Determine if the triggering event was a push or a pull request
-          if [[ "${{ github.event.workflow_run.event }}" == "push" ]]; then
-            echo "Triggered by push"
-            echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
-
-          elif [[ "${{ github.event.workflow_run.event }}" == "pull_request" ]]; then
-            echo "Triggered by pull_request"
-            echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "Triggered by unknown event: ${{ github.event.workflow_run.event }}"
-            echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
-          fi
+          echo "sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
       - name: Get run ID
         run: |
-          run_id=$(gh run list --workflow "Check PR" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
-          echo "run_id_list=$run_id" 
           echo "run_id_variable=${{ github.event.workflow_run.id }}"         
+          run_id=$(gh run list --workflow ".github/workflows/resolve-build-deps.yaml" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
+          echo "run_id_list=$run_id" 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
