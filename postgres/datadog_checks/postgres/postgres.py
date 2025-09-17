@@ -11,7 +11,7 @@ from time import time
 import psycopg
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, DatabaseCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.utils import (
@@ -90,7 +90,7 @@ MAX_CUSTOM_RESULTS = 100
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
 
-class PostgreSql(DatabaseCheck):
+class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     __NAMESPACE__ = 'postgresql'

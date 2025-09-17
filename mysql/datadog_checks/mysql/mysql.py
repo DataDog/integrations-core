@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 import pymysql
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
     TagManager,
@@ -99,7 +99,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
-class MySql(DatabaseCheck):
+class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
