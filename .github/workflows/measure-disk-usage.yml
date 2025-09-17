@@ -16,7 +16,7 @@ jobs:
       platforms: ${{ steps.set.outputs.platforms }}
     steps:
       - id: set
-        run: echo 'platforms=["macos-x86_64","macos-aarch64"]' >> "$GITHUB_OUTPUT" # "linux-aarch64","linux-x86_64","windows-x86_64",
+        run: echo 'platforms=["macos-x86_64","macos-aarch64", "linux-aarch64","linux-x86_64","windows-x86_64"]' >> "$GITHUB_OUTPUT" 
 
   measure-disk-usage:
     runs-on: ubuntu-22.04
@@ -54,7 +54,6 @@ jobs:
               echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
             elif [ "${{ github.event_name }}" = "push" ]; then # CHANGE TO github.event.workflow_run.event
               echo "current_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
-              echo "base_sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
             fi
 
     - name: Measure disk usage
