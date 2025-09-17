@@ -1,0 +1,11 @@
+[
+  {
+    "agent_version": "5.5.0",
+    "integration": "Nutanix",
+    "check": "nutanix.can_connect",
+    "statuses": ["ok", "critical"],
+    "groups": ["host", "pc_ip", "pc_port"],
+    "name": "Can Connect",
+    "description": "Returns `CRITICAL` if the Agent is unable to connect to the Prism Central instance. Returns `OK` otherwise."
+  }
+]

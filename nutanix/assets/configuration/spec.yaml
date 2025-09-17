@@ -1,10 +1,32 @@
 name: Nutanix
 files:
-- name: nutanix.yaml
-  options:
-  - template: init_config
+  - name: nutanix.yaml
     options:
-    - template: init_config/default
-  - template: instances
-    options:
-    - template: instances/default
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: pc_ip
+            description: The IP address or FQDN of the Prism Central.
+            display_priority: 4
+            value:
+              type: string
+          - name: pc_port
+            description: The port of the Prism Central.
+            display_priority: 3
+            value:
+              type: integer
+              example: 9440
+          - name: pc_api_key
+            description: The API key to authenticate with.
+            value:
+              type: string
+              required: false
+          - template: instances/http
+            overrides:
+              username.description: The username to authenticate with.
+              username.display_priority: 2
+              password.description: The password to authenticate with.
+              password.display_priority: 2
+          - template: instances/default
