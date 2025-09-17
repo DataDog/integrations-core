@@ -12,6 +12,8 @@ Whether you use Redis as a database, cache, or message queue, this integration t
 - Expired and evicted keys
 - and many more
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

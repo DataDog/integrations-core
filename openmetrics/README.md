@@ -8,6 +8,8 @@ Extract custom metrics from any OpenMetrics or Prometheus endpoints.
 
 The integration is compatible with both the [Prometheus exposition format][12] as well as with the [OpenMetrics specification][13].
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
