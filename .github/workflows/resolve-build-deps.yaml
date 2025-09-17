@@ -28,8 +28,10 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs: 
-  # measure-disk-usage.yml depends on this workflow being triggered.
-  # This 'on' setting makes sure it runs, but this job cancels it if no dependency changes are detected.
+  # measure-disk-usage.yml depends on this workflow being triggered and completed,
+  # so it can wait for the build to calculate dependency sizes.
+  # The 'on' setting ensures it runs, but this job cancels it if no dependency changes are detected.
+
   check-dependency-changes:
     name: Check dependency changes
     runs-on: ubuntu-22.04
