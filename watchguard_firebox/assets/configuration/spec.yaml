@@ -1,0 +1,10 @@
+name: WatchGuard Firebox
+files:
+- name: watchguard_firebox.yaml
+  options:
+  - template: logs
+    example:
+    - type: udp
+      port: <PORT>
+      service: watchguard-firebox
+      source: watchguard-firebox

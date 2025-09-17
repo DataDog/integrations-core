@@ -4,7 +4,7 @@
 import copy
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from pytest import fail
 from semver import VersionInfo
@@ -124,10 +124,10 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
 
     check = integration_check(pg_instance)
     try:
-        check.db_pool.get_connection(pg_instance['dbname'], 100)
-    except psycopg2.ProgrammingError as e:
+        check.db_pool.get_connection(pg_instance['dbname'])
+    except psycopg.ProgrammingError as e:
         fail(str(e))
-    except psycopg2.OperationalError:
+    except psycopg.OperationalError:
         # could not connect to server because there is no server running
         pass
 
@@ -144,6 +144,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
         (
@@ -156,6 +157,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'dd.internal.resource:database_instance:stubbed.hostname',
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
+                'ddagenthostname:stubbed.hostname',
             },
         ),
     ],
@@ -201,3 +203,37 @@ def test_database_identifier(pg_instance, template, expected, tags):
     pg_instance['tags'] = tags
     check = PostgreSql('postgres', {}, [pg_instance])
     assert check.database_identifier == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query,expected_trimmed_query",
+    [
+        ("SELECT * FROM pg_settings WHERE name = $1", "SELECT * FROM pg_settings WHERE name = $1"),
+        ("SELECT * FROM pg_settings; DELETE FROM pg_settings;", "SELECT * FROM pg_settings; DELETE FROM pg_settings;"),
+        ("SET search_path TO 'my_schema', public; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
+        ("SET TIME ZONE 'Europe/Rome'; SELECT * FROM pg_settings", "SELECT * FROM pg_settings"),
+        (
+            "SET LOCAL request_id = 1234; SET LOCAL hostname TO 'Bob''s Laptop'; SELECT * FROM pg_settings",
+            "SELECT * FROM pg_settings",
+        ),
+        ("SET LONG;" * 1024 + "SELECT *;", "SELECT *;"),
+        ("SET " + "'quotable'" * 1024 + "; SELECT *;", "SELECT *;"),
+        ("SET 'l" + "o" * 1024 + "ng'; SELECT *;", "SELECT *;"),
+        (" /** pl/pgsql **/ SET 'comment'; SELECT *;", "SELECT *;"),
+        ("this isn't SQL", "this isn't SQL"),
+        (
+            "SET SESSION min_wal_size = 14400; "
+            + "SET LOCAL wal_buffers TO 2048; "
+            + "/* testing id 1234 */ set send_abort_for_kill TO 'stderr'; "
+            + "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) "
+            + "or (cast(null as point) <@ cast(null as line))) or (public.my table",
+            "set id = case when (false) and ((((cast(null as box) ~= cast(null as box)) "
+            + "or (cast(null as point) <@ cast(null as line))) or (public.my table",
+        ),
+        ("", ""),
+    ],
+)
+def test_trim_set_stmts(query, expected_trimmed_query):
+    trimmed_query = util.trim_leading_set_stmts(query)
+    assert trimmed_query == expected_trimmed_query

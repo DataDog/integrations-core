@@ -7,8 +7,6 @@ from datadog_checks.base.utils.tracking import tracked_method
 from .base import XESessionBase, agent_check_getter
 from .xml_tools import (
     extract_field,
-    extract_int_value,
-    extract_value,
 )
 
 
@@ -91,10 +89,7 @@ class ErrorEventsHandler(XESessionBase):
             )
 
         # Extract action elements
-        for action in event.findall('./action'):
-            action_name = action.get('name')
-            if action_name:
-                event_data[action_name] = extract_value(action)
+        self._process_action_elements(event, event_data)
 
         return True
 
@@ -117,18 +112,7 @@ class ErrorEventsHandler(XESessionBase):
             )
 
         # Extract action elements
-        for action in event.findall('./action'):
-            action_name = action.get('name')
-            if not action_name:
-                continue
-
-            if action_name == 'session_id' or action_name == 'request_id':
-                # These are numeric values in the actions
-                value = extract_int_value(action)
-                if value is not None:
-                    event_data[action_name] = value
-            else:
-                event_data[action_name] = extract_value(action)
+        self._process_action_elements(event, event_data)
 
         return True
 
@@ -137,11 +121,12 @@ class ErrorEventsHandler(XESessionBase):
         # First use the base normalization with type-specific fields
         normalized = self._normalize_event(event)
 
-        # For error events, remove query_start and duration_ms fields since they're not applicable
-        if 'query_start' in normalized:
-            del normalized['query_start']
-        if 'duration_ms' in normalized:
-            del normalized['duration_ms']
+        # For error_reported events only, remove query_start and duration_ms fields since they're not applicable
+        if normalized.get('xe_type') == 'error_reported':
+            if 'query_start' in normalized:
+                del normalized['query_start']
+            if 'duration_ms' in normalized:
+                del normalized['duration_ms']
 
         return normalized
 

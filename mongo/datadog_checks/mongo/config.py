@@ -108,7 +108,8 @@ class MongoConfig(object):
         self.cloud_metadata = self._compute_cloud_metadata(instance)
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
-        self._schemas_config = instance.get('schemas', {})
+        # Backward compatibility: check new names first, then fall back to old names
+        self._schemas_config = instance.get('collect_schemas', instance.get('schemas', {}))
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')

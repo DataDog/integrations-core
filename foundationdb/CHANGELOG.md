@@ -2,7 +2,21 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.1 / 2025-04-17
+## 3.3.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Respect `tls_ca_file` and `tls_password` config options ([#19865](https://github.com/DataDog/integrations-core/pull/19865))
+
+## 3.3.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Tag FoundationDB process metrics with process class, assigned roles ([#19682](https://github.com/DataDog/integrations-core/pull/19682))
+* Introduce a `foundationdb.processes_per_role` gauge tagged by process role/class ([#19706](https://github.com/DataDog/integrations-core/pull/19706))
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+## 3.2.1 / 2025-04-17 / Agent 7.66.0
 
 ***Fixed***:
 

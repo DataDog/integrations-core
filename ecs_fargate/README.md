@@ -16,9 +16,7 @@ The Datadog Agent retrieves metrics for the task definition's containers with th
 
 The Task Metadata endpoint is only available from within the task definition itself, which is why the Datadog Agent needs to be run as an additional container within each task definition to be monitored.
 
-The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
-
-**Note**: Cloud Network Monitoring (CNM) is not supported for ECS Fargate.
+To enable metric collection, set the environment variable `ECS_FARGATE` to `"true"` in the Datadog container definition.
 
 ## Setup
 
@@ -203,7 +201,7 @@ partial -->
 
 ```hcl
 module "ecs_fargate_task" {
-  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "DataDog/ecs-datadog/aws//modules/ecs_fargate"
   version = "1.0.0"
 
   # Configure Datadog
@@ -438,7 +436,9 @@ You can monitor Fargate logs by using either:
 - The AWS FireLens integration built on Datadog's Fluent Bit output plugin to send logs directly to Datadog
 - Using the `awslogs` log driver to store the logs in a CloudWatch Log Group, and then a Lambda function to route logs to Datadog
 
-Datadog recommends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
+Datadog recommends using AWS FireLens for the following reasons:
+- You can configure Fluent Bit directly in your Fargate tasks.
+- The Datadog Fluent Bit output plugin provides additional tagging on logs. The [ECS Explorer][75] uses the tags to correlate logs with ECS resources.
 
 **Note**: Log collection with Fluent Bit and FireLens is not supported for AWS Batch on ECS Fargate.
 
@@ -1038,7 +1038,7 @@ To enable logging through the [Datadog ECS Fargate Terraform][71] module, config
 
 ```hcl
 module "ecs_fargate_task" {
-  source  = "https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest"
+  source  = "DataDog/ecs-datadog/aws//modules/ecs_fargate"
   version = "1.0.0"
 
   # Configure Datadog
@@ -1257,3 +1257,4 @@ Need help? Contact [Datadog support][18].
 [72]: https://github.com/datadog/datadog-cdk-constructs/
 [73]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
 [74]: https://registry.terraform.io/modules/DataDog/ecs-datadog/aws/latest/submodules/ecs_fargate
+[75]: https://docs.datadoghq.com/infrastructure/containers/amazon_elastic_container_explorer

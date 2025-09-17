@@ -45,6 +45,8 @@ integration/airbyte:
 - airbyte/**/*
 integration/airflow:
 - airflow/**/*
+integration/amazon_app_mesh:
+- amazon_app_mesh/**/*
 integration/amazon_eks:
 - amazon_eks/**/*
 integration/amazon_eks_blueprints:
@@ -55,6 +57,8 @@ integration/ambari:
 - ambari/**/*
 integration/anthropic:
 - anthropic/**/*
+integration/anthropic_usage_and_costs:
+- anthropic_usage_and_costs/**/*
 integration/anyscale:
 - anyscale/**/*
 integration/apache:
@@ -85,12 +89,22 @@ integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
 - azure_iot_edge/**/*
+integration/bentoml:
+- bentoml/**/*
+integration/beyondtrust_identity_security_insights:
+- beyondtrust_identity_security_insights/**/*
+integration/beyondtrust_password_safe:
+- beyondtrust_password_safe/**/*
 integration/bitdefender:
 - bitdefender/**/*
+integration/bitwarden:
+- bitwarden/**/*
 integration/blazemeter:
 - blazemeter/**/*
 integration/boundary:
 - boundary/**/*
+integration/box:
+- box/**/*
 integration/brevo:
 - brevo/**/*
 integration/btrfs:
@@ -99,6 +113,8 @@ integration/cacti:
 - cacti/**/*
 integration/calico:
 - calico/**/*
+integration/carbon_black_cloud:
+- carbon_black_cloud/**/*
 integration/cassandra:
 - cassandra/**/*
 integration/cassandra_nodetool:
@@ -111,6 +127,8 @@ integration/cert_manager:
 - cert_manager/**/*
 integration/checkpoint_harmony_email_and_collaboration:
 - checkpoint_harmony_email_and_collaboration/**/*
+integration/checkpoint_harmony_endpoint:
+- checkpoint_harmony_endpoint/**/*
 integration/checkpoint_quantum_firewall:
 - checkpoint_quantum_firewall/**/*
 integration/cilium:
@@ -159,6 +177,8 @@ integration/couch:
 - couch/**/*
 integration/couchbase:
 - couchbase/**/*
+integration/crewai:
+- crewai/**/*
 integration/cri:
 - cri/**/*
 integration/crio:
@@ -169,6 +189,8 @@ integration/datadog_checks_tests_helper:
 - datadog_checks_tests_helper/**/*
 integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
+integration/datadog_csi_driver:
+- datadog_csi_driver/**/*
 integration/datadog_operator:
 - datadog_operator/**/*
 integration/dcgm:
@@ -183,6 +205,8 @@ integration/disk:
 - disk/**/*
 integration/dns_check:
 - dns_check/**/*
+integration/dnsfilter:
+- dnsfilter/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
 integration/docusign:
@@ -203,6 +227,8 @@ integration/elastic:
 - elastic/**/*
 integration/envoy:
 - envoy/**/*
+integration/eset_protect:
+- eset_protect/**/*
 integration/esxi:
 - esxi/**/*
 integration/etcd:
@@ -277,6 +303,8 @@ integration/hubspot_content_hub:
 - hubspot_content_hub/**/*
 integration/hudi:
 - hudi/**/*
+integration/hugging_face_tgi:
+- hugging_face_tgi/**/*
 integration/hyperv:
 - hyperv/**/*
 integration/iam_access_analyzer:
@@ -291,6 +319,8 @@ integration/ibm_mq:
 - ibm_mq/**/*
 integration/ibm_was:
 - ibm_was/**/*
+integration/iboss:
+- iboss/**/*
 integration/ignite:
 - ignite/**/*
 integration/iis:
@@ -309,6 +339,8 @@ integration/ivanti_connect_secure:
 - ivanti_connect_secure/**/*
 integration/ivanti_nzta:
 - ivanti_nzta/**/*
+integration/jamf_pro:
+- jamf_pro/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
@@ -323,14 +355,18 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
-integration/kaspersky:
-- kaspersky/**/*
 integration/keda:
 - keda/**/*
+integration/keeper:
+- keeper/**/*
 integration/keycloak:
 - keycloak/**/*
+integration/klaviyo:
+- klaviyo/**/*
 integration/kong:
 - kong/**/*
+integration/krakend:
+- krakend/**/*
 integration/kube_apiserver_metrics:
 - kube_apiserver_metrics/**/*
 integration/kube_controller_manager:
@@ -365,6 +401,8 @@ integration/kubevirt_controller:
 - kubevirt_controller/**/*
 integration/kubevirt_handler:
 - kubevirt_handler/**/*
+integration/kuma:
+- kuma/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
@@ -381,6 +419,12 @@ integration/linux_audit_logs:
 - linux_audit_logs/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/litellm:
+- litellm/**/*
+integration/lustre:
+- lustre/**/*
+integration/mac_audit_logs:
+- mac_audit_logs/**/*
 integration/mailchimp:
 - mailchimp/**/*
 integration/mapr:
@@ -399,6 +443,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_dns:
+- microsoft_dns/**/*
 integration/microsoft_sysmon:
 - microsoft_sysmon/**/*
 integration/milvus:
@@ -499,6 +545,12 @@ integration/process:
 - process/**/*
 integration/prometheus:
 - prometheus/**/*
+integration/proofpoint_on_demand:
+- proofpoint_on_demand/**/*
+integration/proofpoint_tap:
+- proofpoint_tap/**/*
+integration/proxmox:
+- proxmox/**/*
 integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
@@ -525,8 +577,6 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
-integration/servicenow_performance:
-- servicenow_performance/**/*
 integration/shopify:
 - shopify/**/*
 integration/sidekiq:
@@ -567,6 +617,8 @@ integration/snmp_netapp:
 - snmp_netapp/**/*
 integration/snowflake:
 - snowflake/**/*
+integration/solarwinds:
+- solarwinds/**/*
 integration/solr:
 - solr/**/*
 integration/sonarqube:
@@ -595,6 +647,8 @@ integration/supabase:
 - supabase/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/supply_chain_firewall:
+- supply_chain_firewall/**/*
 integration/suricata:
 - suricata/**/*
 integration/symantec_endpoint_protection:
@@ -647,6 +701,8 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trellix_endpoint_security:
 - trellix_endpoint_security/**/*
+integration/trend_micro_cloud_one:
+- trend_micro_cloud_one/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
@@ -663,6 +719,8 @@ integration/vault:
 - vault/**/*
 integration/velero:
 - velero/**/*
+integration/versa:
+- versa/**/*
 integration/vertica:
 - vertica/**/*
 integration/vllm:
@@ -673,6 +731,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/watchguard_firebox:
+- watchguard_firebox/**/*
 integration/wazuh:
 - wazuh/**/*
 integration/weaviate:
@@ -683,6 +743,8 @@ integration/win32_event_log:
 - win32_event_log/**/*
 integration/wincrashdetect:
 - wincrashdetect/**/*
+integration/windows_certificate:
+- windows_certificate/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
 integration/windows_registry:
@@ -691,14 +753,20 @@ integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
 - winkmem/**/*
+integration/wlan:
+- wlan/**/*
 integration/wmi_check:
 - wmi_check/**/*
+integration/workato:
+- workato/**/*
 integration/yarn:
 - yarn/**/*
 integration/zeek:
 - zeek/**/*
 integration/zero_networks:
 - zero_networks/**/*
+integration/zerofox_cloud_platform:
+- zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
 qa/skip-qa:

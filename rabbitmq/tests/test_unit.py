@@ -25,7 +25,8 @@ pytestmark = [pytest.mark.unit, common.requires_management]
 
 
 def test__get_data(check):
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
         with pytest.raises(RabbitMQException) as e:
             check._get_data('')
@@ -57,10 +58,10 @@ def test_status_check(check, aggregator):
     assert len(scs) == 2
     sc = scs[0]
     assert sc.status == RabbitMQ.CRITICAL
-    assert sc.tags == [u'vhost:vhost1']
+    assert sc.tags == ['vhost:vhost1']
     sc = scs[1]
     assert sc.status == RabbitMQ.CRITICAL
-    assert sc.tags == [u'vhost:vhost2']
+    assert sc.tags == ['vhost:vhost2']
 
     aggregator.reset()
     check._get_data = mock.MagicMock()
@@ -138,7 +139,8 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
     config.update(extra_config)
     check = RabbitMQ('rabbitmq', {}, instances=[config])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         check.check(config)
@@ -158,7 +160,6 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
 
 
 def test_nodes(aggregator, check):
-
     # default, node metrics are collected
     check = RabbitMQ('rabbitmq', {}, instances=[common.CONFIG])
     check.check(common.CONFIG)
@@ -170,7 +171,6 @@ def test_nodes(aggregator, check):
 
 
 def test_disable_nodes(aggregator, check):
-
     # node metrics collection disabled in config, node metrics should not appear
     check = RabbitMQ('rabbitmq', {}, instances=[common.CONFIG_NO_NODES])
     check.check(common.CONFIG_NO_NODES)

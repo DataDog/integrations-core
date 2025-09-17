@@ -6,8 +6,8 @@ from typing import Callable, Dict, List, Optional, Tuple  # noqa: F401
 
 import win32wnet
 
-from ... import AgentCheck, is_affirmative
-from ...utils.containers import hash_mutable
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.containers import hash_mutable
 
 try:
     from .winpdh import DATA_TYPE_DOUBLE, DATA_TYPE_INT, WinPDHCounter

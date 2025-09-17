@@ -66,10 +66,13 @@ def test_token_path(dd_run_check, aggregator):
     tokens = ['mytoken1', 'mytoken2', 'mytoken3']
 
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    with mock.patch(
-        'datadog_checks.snowflake.check.open',
-        side_effect=[mock.mock_open(read_data=tok).return_value for tok in tokens],
-    ), mock.patch('datadog_checks.snowflake.check.sf') as sf:
+    with (
+        mock.patch(
+            'datadog_checks.snowflake.check.open',
+            side_effect=[mock.mock_open(read_data=tok).return_value for tok in tokens],
+        ),
+        mock.patch('datadog_checks.snowflake.check.sf') as sf,
+    ):
         dd_run_check(check)
         sf.connect.assert_called_once_with(token='mytoken1', **default_args)
 

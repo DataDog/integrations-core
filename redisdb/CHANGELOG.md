@@ -2,6 +2,39 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.1 / 2025-09-17
+
+***Fixed***:
+
+* Downgrade redis module ([#21366](https://github.com/DataDog/integrations-core/pull/21366))
+
+## 8.1.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 8.0.0 / 2025-06-12 / Agent 7.68.0
+
+***Changed***:
+
+* Bump `redis` dependency to `6.0.0` and stop supporting `charset`, `connection_pool`, and `errors` configuration options. ([#20265](https://github.com/DataDog/integrations-core/pull/20265))
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+## 7.3.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Adds redisdb replication byte metrics ([#20029](https://github.com/DataDog/integrations-core/pull/20029))
+* Add support of Redis 8 ([#20227](https://github.com/DataDog/integrations-core/pull/20227))
+
+***Fixed***:
+
+* Allow slowlog collection to fail without error to support some managed Redis that do not allow SLOWLOG GET. ([#20261](https://github.com/DataDog/integrations-core/pull/20261))
+
 ## 7.2.0 / 2025-03-19 / Agent 7.65.0
 
 ***Added***:

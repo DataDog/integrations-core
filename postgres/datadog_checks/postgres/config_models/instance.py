@@ -136,6 +136,16 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class LocksIdleInTransaction(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_rows: Optional[int] = None
+
+
 class ManagedIdentity(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -263,6 +273,7 @@ class InstanceConfig(BaseModel):
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
     ignore_schemas_owned_by: Optional[tuple[str, ...]] = None
+    locks_idle_in_transaction: Optional[LocksIdleInTransaction] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     managed_identity: Optional[ManagedIdentity] = None
@@ -277,6 +288,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int] = None
     propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
+    query_encodings: Optional[tuple[str, ...]] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     query_timeout: Optional[int] = None

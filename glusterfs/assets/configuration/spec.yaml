@@ -12,7 +12,7 @@ files:
         If you are using a source install, specify the location of gstatus.
       value:
         type: string
-        example: /opt/datadog-agent/embedded/sbin/gstatus
+        example: <datadog-agent>/embedded/sbin/gstatus
     - template: init_config/default
   - template: instances
     options:
@@ -20,7 +20,7 @@ files:
       description: |
         GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
 
-        dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
+        dd-agent ALL=(ALL) NOPASSWD:<datadog-agent>/embedded/sbin/gstatus
 
         Enable the option for the check to run with sudo.
       value:

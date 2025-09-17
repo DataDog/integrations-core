@@ -1,0 +1,59 @@
+id: supply-chain-firewall
+metric_id: supply-chain-firewall
+backend_only: false
+installation_sources: 
+  - scfw
+facets:
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+pipeline:
+  type: pipeline
+  name: Supply Chain Firewall
+  enabled: true
+  filter:
+    query: source:scfw
+  processors:
+    - type: arithmetic-processor
+      name: Convert `created` epoch to milliseconds epoch
+      enabled: true
+      expression: created * 1000
+      target: created
+      replaceMissing: false
+    - type: date-remapper
+      name: Define `created` as the official date of the log
+      enabled: true
+      sources:
+        - created
+    - type: attribute-remapper
+      name: Map `username` to `usr.name`
+      enabled: true
+      sources:
+        - username
+      sourceType: attribute
+      target: usr.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `action` to `evt.outcome`
+      enabled: true
+      sources:
+        - action
+      sourceType: attribute
+      target: evt.outcome
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: message-remapper
+      name: Define `msg` as the official message of the log
+      enabled: true
+      sources:
+        - msg

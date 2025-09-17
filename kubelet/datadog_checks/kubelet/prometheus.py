@@ -367,7 +367,7 @@ class CadvisorPrometheusScraperMixin(object):
             labels = []
 
         # track containers that still exist in the cache
-        seen_keys = {k: False for k in cache}
+        seen_keys = dict.fromkeys(cache, False)
 
         samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
         for c_id, sample in samples.items():

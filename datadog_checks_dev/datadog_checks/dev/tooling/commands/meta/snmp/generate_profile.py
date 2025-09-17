@@ -9,7 +9,8 @@ from tempfile import gettempdir
 import click
 import yaml
 
-from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+
 from .constants import MIB_COMPILED_URL, MIB_SOURCE_URL
 
 
@@ -311,7 +312,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
             'textFilter': False and (lambda symbol, text: text) or None,
             'writeMibs': True,
             'ignoreErrors': False,
-        }
+        },
     )
 
     return processed

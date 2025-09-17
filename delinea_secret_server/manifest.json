@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "69a8e7df-7ed3-451c-948b-43303a5219e3",
   "app_id": "delinea-secret-server",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

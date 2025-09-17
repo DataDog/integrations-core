@@ -51,7 +51,6 @@ def parse_duration(time_str):
 
 
 class SlurmCheck(AgentCheck, ConfigMixin):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'slurm'
 
@@ -69,6 +68,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
         self.collect_scontrol_stats = is_affirmative(self.instance.get('collect_scontrol_stats', False))
+        self.collect_seff_stats = is_affirmative(self.instance.get('collect_seff_stats', False))
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
@@ -100,6 +100,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         if self.collect_sdiag_stats:
             self.sdiag_cmd = self.get_slurm_command('sdiag', [])
+
+        if self.collect_seff_stats:
+            self.seff_cmd = self.get_slurm_command('seff', [])
 
         if self.collect_sshare_stats:
             self.sshare_cmd = self.get_slurm_command('sshare', SSHARE_PARAMS)
@@ -209,7 +212,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             if self.gpu_stats:
                 tags.extend(gpu_info_tags)
 
-            self._process_metrics(partition_data, PARTITION_MAP, tags)
+            self._process_metrics(partition_data, PARTITION_MAP["metrics"], tags)
             self.gauge('partition.info', 1, tags)
 
         self.gauge('sinfo.partition.enabled', 1)
@@ -234,7 +237,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 gpu_tags, gpu_info_tags = self._process_sinfo_gpu(node_data[-2], node_data[-1], "node", tags)
                 tags.extend(gpu_tags)
 
-            self._process_metrics(node_data, NODE_MAP, tags)
+            self._process_metrics(node_data, NODE_MAP["metrics"], tags)
+            if self.sinfo_collection_level > 2:
+                self._process_metrics(node_data, NODE_MAP["extended_metrics"], tags)
 
             self._process_sinfo_aiot_state(node_data[3], 'node', tags)
 
@@ -285,7 +290,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             # Process the JobID
             job_id_full = job_data[0].strip()
-            if '.' in job_id_full:
+            has_suffix = '.' in job_id_full
+            if has_suffix:
                 job_id, job_id_suffix = job_id_full.split('.', 1)
                 tags.append(f"slurm_job_id:{job_id}")
                 tags.append(f"slurm_job_id_suffix:{job_id_suffix}")
@@ -296,7 +302,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             tags = self._process_tags(job_data, SACCT_MAP["tags"], tags)
 
             # Process job metrics
-            self._process_metrics(job_data, SACCT_MAP, tags)
+            self._process_metrics(job_data, SACCT_MAP["metrics"], tags)
 
             duration = parse_duration(job_data[6])
             ave_cpu = parse_duration(job_data[10])
@@ -307,8 +313,62 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('sacct.job.duration', duration, tags=tags)
             self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
+            if self.collect_seff_stats:
+                job_state = job_data[12].strip().upper()
+                # Run on Completed Jobs only https://wiki.rcs.huji.ac.il/hurcs/guides/resource-utilization
+                if not has_suffix and job_state == 'COMPLETED':
+                    self.log.debug("Processing seff for job %s", job_id)
+                    self.process_seff(job_id, tags)
 
         self.gauge('sacct.enabled', 1)
+
+    def process_seff(self, job_id, tags):
+        cmd = self.seff_cmd + [str(job_id)]
+        self.log.debug("Running seff command: %s", cmd)
+        out, err, ret = get_subprocess_output(cmd)
+        if ret != 0 or not out:
+            self.log.debug("seff command failed for job %s: %s", job_id, err)
+            return
+
+        cpu_utilized = None
+        cpu_eff = None
+        mem_utilized = None
+        mem_eff = None
+
+        for line in out.splitlines():
+            line = line.strip()
+
+            # CPU Utilized: 00:00:01
+            if line.startswith('CPU Utilized:'):
+                cpu_utilized = parse_duration(line.split(':', 1)[1].strip())
+                continue
+
+            # CPU Efficiency: 20.00% of 00:00:05 core-walltime
+            match = re.match(r'CPU Efficiency: ([\d.]+)%', line)
+            if match:
+                cpu_eff = float(match.group(1))
+                continue
+
+            # Memory Utilized: 0.00 MB (estimated maximum)
+            match = re.match(r'Memory Utilized: ([\d.]+) MB', line)
+            if match:
+                mem_utilized = float(match.group(1))
+                continue
+
+            # Memory Efficiency: 0.00% of 16.00 B (16.00 B/node)
+            match = re.match(r'Memory Efficiency: ([\d.]+)%', line)
+            if match:
+                mem_eff = float(match.group(1))
+                continue
+
+        if cpu_utilized is not None:
+            self.gauge('seff.cpu_utilized', cpu_utilized, tags)
+        if cpu_eff is not None:
+            self.gauge('seff.cpu_efficiency', cpu_eff, tags)
+        if mem_utilized is not None:
+            self.gauge('seff.memory_utilized_mb', mem_utilized, tags)
+        if mem_eff is not None:
+            self.gauge('seff.memory_efficiency', mem_eff, tags)
 
     def process_sshare(self, output):
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                     # noqa: E501
@@ -326,7 +386,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             tags = self._process_tags(sshare_data, SSHARE_MAP["tags"], tags)
 
-            self._process_metrics(sshare_data, SSHARE_MAP, tags)
+            self._process_metrics(sshare_data, SSHARE_MAP["metrics"], tags)
 
         self.gauge('sshare.enabled', 1, tags=tags)
 
@@ -451,7 +511,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def _process_tags(self, data, map, tags):
         for tag_info in map:
-            value = data[tag_info["index"]]
+            index = tag_info['index']
+            if index >= len(data):
+                self.log.debug("Index %d out of range for tag '%s'. Skipping.", index, tag_info['name'])
+                continue
+            value = data[index]
 
             # Strip parantheses
             if value.startswith('(') and value.endswith(')'):
@@ -482,8 +546,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         return tags
 
     def _process_metrics(self, data, metrics_map, tags):
-        for metric_info in metrics_map["metrics"]:
-            metric_value_str = data[metric_info["index"]]
+        for metric_info in metrics_map:
+            index = metric_info['index']
+            if index >= len(data):
+                self.log.debug("Index %d out of range for metric '%s'. Skipping.", index, metric_info["name"])
+                continue
+            metric_value_str = data[index]
 
             if metric_value_str.strip() == '':
                 self.log.debug("Empty metric value for '%s'. Skipping.", metric_info["name"])

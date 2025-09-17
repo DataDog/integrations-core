@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 from lxml import etree
 
+from datadog_checks.base.utils.db.utils import TagManager
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler
 from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
@@ -52,14 +53,13 @@ def assert_event_field_values(event, expected_values):
             assert event[field] == expected
 
 
-def validate_common_payload_fields(payload, expected_source, expected_type):
+def validate_common_payload_fields(payload, expected_type):
     """Validate common fields in event payloads"""
     assert 'timestamp' in payload
     assert payload['host'] == 'test-host'
     assert payload['ddagentversion'] == '7.30.0'
     assert payload['ddsource'] == 'sqlserver'
     assert payload['dbm_type'] == expected_type
-    assert payload['event_source'] == expected_source
     assert 'service' in payload
 
     # Fields that only exist in regular events (non-RQT)
@@ -101,7 +101,8 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
-    check.tags = ["test:tag"]
+    check.tag_manager = TagManager()
+    check.tag_manager.set_tag('test', 'tag')
     check.database_monitoring_query_activity = Mock()
     check.database_monitoring_query_sample = Mock()
     return check
@@ -190,6 +191,7 @@ def rpc_completed_expected_values():
         'client_hostname': 'EC2AMAZ-ML3E0PH',
         'client_app_name': 'SQLAgent - Job Manager',
         'username': 'NT AUTHORITY\\NETWORK SERVICE',
+        'object_name': 'sp_executesql',
     }
 
 
@@ -208,6 +210,8 @@ def error_expected_values():
         'client_app_name': 'go-mssqldb',
         'username': 'shopper_4',
         'message': "'REPEAT' is not a recognized built-in function name.",
+        'activity_id': 'F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1',
+        'activity_id_xfer': 'AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0',
     }
 
 
@@ -253,6 +257,8 @@ def attention_expected_values():
         'client_hostname': 'COMP-MX2YQD7P2P',
         'client_app_name': 'azdata',
         'username': 'datadog',
+        'activity_id': 'F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1',
+        'activity_id_xfer': 'AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0',
     }
 
 
@@ -621,6 +627,8 @@ class TestEventProcessing:
         assert 'sp_executesql' in event['statement']
         assert 'sql_text' in event
         assert 'EXECUTE [msdb].[dbo].[sp_agent_log_job_history]' in event['sql_text']
+        assert 'object_name' in event
+        assert event['object_name'] == 'sp_executesql'
 
     def test_process_events_error_reported(self, error_events_handler, sample_error_event_xml, error_expected_values):
         """Test processing of error reported events"""
@@ -733,7 +741,7 @@ class TestPayloadGeneration:
             'sql_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
         }
 
-        obfuscated_event, raw_sql_fields = query_completion_handler._obfuscate_sql_fields(event)
+        obfuscated_event, raw_sql_fields, primary_sql_field = query_completion_handler._obfuscate_sql_fields(event)
 
         # Verify obfuscated fields
         assert obfuscated_event['batch_text'] == 'SELECT * FROM Customers WHERE CustomerId = ?'
@@ -746,6 +754,9 @@ class TestPayloadGeneration:
         assert raw_sql_fields['batch_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
         assert raw_sql_fields['sql_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
         assert raw_sql_fields['raw_query_signature'] == 'abc123'
+
+        # Verify primary SQL field
+        assert primary_sql_field == 'batch_text'
 
         # Verify raw_query_signature is added to the obfuscated event when collect_raw_query is enabled
         assert 'raw_query_signature' in obfuscated_event
@@ -821,6 +832,34 @@ class TestPayloadGeneration:
         assert 'duration_ms' not in normalized
         assert 'query_start' not in normalized
 
+    def test_normalize_attention_event(self, error_events_handler):
+        """Test attention event normalization"""
+        # Test attention event with fields
+        event = {
+            'event_name': 'attention',
+            'timestamp': '2023-01-01T12:00:00.123Z',
+            'duration_ms': 328.677,
+            'session_id': 123,
+            'request_id': 456,
+            'database_name': 'TestDB',
+            'sql_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
+        }
+
+        normalized = error_events_handler._normalize_event_impl(event)
+
+        # Verify normalized fields
+        assert normalized['xe_type'] == 'attention'
+        assert normalized['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
+        assert normalized['session_id'] == 123
+        assert normalized['request_id'] == 456
+        assert normalized['database_name'] == 'TestDB'
+        assert normalized['sql_text'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
+
+        # Verify duration_ms and query_start are preserved for attention events
+        assert 'duration_ms' in normalized
+        assert normalized['duration_ms'] == 328.677
+        assert 'query_start' in normalized  # Query start should be calculated from timestamp and duration
+
     @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
     def test_create_event_payload(self, mock_agent, query_completion_handler):
         """Test creation of event payload"""
@@ -836,15 +875,17 @@ class TestPayloadGeneration:
             'database_name': 'TestDB',
             'batch_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
             'query_signature': 'abc123',
+            'primary_sql_field': 'batch_text',
+            'dd_tables': ['Customers'],
+            'dd_commands': ['SELECT'],
+            'dd_comments': [],
         }
 
         # Create payload
         payload = query_completion_handler._create_event_payload(raw_event)
 
         # Validate common payload fields
-        validate_common_payload_fields(
-            payload, expected_source='datadog_query_completions', expected_type='query_completion'
-        )
+        validate_common_payload_fields(payload, expected_type='query_completion')
 
         # Verify query details
         query_details = payload['query_details']
@@ -854,6 +895,14 @@ class TestPayloadGeneration:
         assert query_details['request_id'] == 456
         assert query_details['database_name'] == 'TestDB'
         assert query_details['query_signature'] == 'abc123'
+        assert query_details['primary_sql_field'] == 'batch_text'
+
+        # Verify metadata structure
+        assert 'metadata' in query_details
+        metadata = query_details['metadata']
+        assert metadata['tables'] == ['Customers']
+        assert metadata['commands'] == ['SELECT']
+        assert metadata['comments'] == []
 
     @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
     def test_create_rqt_event(self, mock_agent, query_completion_handler):
@@ -869,6 +918,10 @@ class TestPayloadGeneration:
             'database_name': 'TestDB',
             'batch_text': 'SELECT * FROM Customers WHERE CustomerId = ?',
             'query_signature': 'abc123',
+            'primary_sql_field': 'batch_text',
+            'dd_tables': ['Customers'],
+            'dd_commands': ['SELECT'],
+            'dd_comments': [],
         }
 
         # Create raw SQL fields
@@ -884,7 +937,66 @@ class TestPayloadGeneration:
         rqt_event = query_completion_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
         # Validate common payload fields
-        validate_common_payload_fields(rqt_event, expected_source='datadog_query_completions', expected_type='rqt')
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
+
+        # Verify DB fields
+        assert rqt_event['db']['instance'] == 'TestDB'
+        assert rqt_event['db']['query_signature'] == 'abc123'
+        assert rqt_event['db']['raw_query_signature'] == 'def456'
+        assert rqt_event['db']['statement'] == 'SELECT * FROM Customers WHERE CustomerId = 123'
+
+        # Verify metadata is present in the RQT event (RQT events already have this structure)
+        assert 'metadata' in rqt_event['db']
+        metadata = rqt_event['db']['metadata']
+        assert metadata['tables'] == ['Customers']
+        assert metadata['commands'] == ['SELECT']
+        assert metadata['comments'] == []
+
+        # Verify sqlserver fields
+        assert rqt_event['sqlserver']['session_id'] == 123
+        assert rqt_event['sqlserver']['xe_type'] == 'sql_batch_completed'
+        assert rqt_event['sqlserver']['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
+        assert rqt_event['sqlserver']['duration_ms'] == 10.0
+        assert rqt_event['sqlserver']['query_start'] == '2023-01-01T11:59:50.123Z'
+        assert rqt_event['sqlserver']['primary_sql_field'] == 'batch_text'
+
+    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
+    def test_create_rqt_event_attention(self, mock_agent, error_events_handler):
+        """Test creation of Raw Query Text event for attention event"""
+        mock_agent.get_version.return_value = '7.30.0'
+
+        # Create attention event with SQL fields - from the error_events_handler
+        event = {
+            'event_name': 'attention',
+            'timestamp': '2023-01-01T12:00:00.123Z',
+            'duration_ms': 328.677,
+            'session_id': 123,
+            'database_name': 'TestDB',
+            'sql_text': 'SELECT * FROM Customers WHERE CustomerId = ?',
+            'query_signature': 'abc123',
+            'primary_sql_field': 'sql_text',
+            'dd_tables': ['Customers'],
+            'dd_commands': ['SELECT'],
+        }
+
+        # Create raw SQL fields
+        raw_sql_fields = {
+            'sql_text': 'SELECT * FROM Customers WHERE CustomerId = 123',
+            'raw_query_signature': 'def456',
+        }
+
+        # Query details with formatted timestamps
+        query_details = {
+            'event_fire_timestamp': '2023-01-01T12:00:00.123Z',
+            'query_start': '2023-01-01T11:59:59.795Z',  # 328.677ms before timestamp
+            'duration_ms': 328.677,
+        }
+
+        # Create RQT event
+        rqt_event = error_events_handler._create_rqt_event(event, raw_sql_fields, query_details)
+
+        # Validate common payload fields
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'
@@ -894,10 +1006,15 @@ class TestPayloadGeneration:
 
         # Verify sqlserver fields
         assert rqt_event['sqlserver']['session_id'] == 123
-        assert rqt_event['sqlserver']['xe_type'] == 'sql_batch_completed'
+        assert rqt_event['sqlserver']['xe_type'] == 'attention'
         assert rqt_event['sqlserver']['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
-        assert rqt_event['sqlserver']['duration_ms'] == 10.0
-        assert rqt_event['sqlserver']['query_start'] == '2023-01-01T11:59:50.123Z'
+
+        # Key check: verify that duration_ms and query_start are present for attention events
+        # even though they come from the error_events_handler
+        assert 'duration_ms' in rqt_event['sqlserver']
+        assert rqt_event['sqlserver']['duration_ms'] == 328.677
+        assert 'query_start' in rqt_event['sqlserver']
+        assert rqt_event['sqlserver']['query_start'] == '2023-01-01T11:59:59.795Z'
 
     def test_create_rqt_event_disabled(self, mock_check, mock_config):
         """Test RQT event creation when disabled"""
@@ -945,6 +1062,63 @@ class TestPayloadGeneration:
         # Should return None when missing signature
         assert query_completion_handler._create_rqt_event(event, raw_sql_fields, query_details) is None
 
+    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
+    def test_create_rqt_event_error_reported(self, mock_agent, error_events_handler):
+        """Test creation of Raw Query Text event for error_reported event"""
+        mock_agent.get_version.return_value = '7.30.0'
+
+        # Create error_reported event with SQL fields
+        event = {
+            'event_name': 'error_reported',
+            'timestamp': '2023-01-01T12:00:00.123Z',
+            'error_number': 8134,
+            'severity': 15,
+            'session_id': 123,
+            'database_name': 'TestDB',
+            'sql_text': 'SELECT 1/0',
+            'message': 'Division by zero error',
+            'query_signature': 'abc123',
+            'primary_sql_field': 'sql_text',
+        }
+
+        # Create raw SQL fields
+        raw_sql_fields = {
+            'sql_text': 'SELECT 1/0',
+            'raw_query_signature': 'def456',
+        }
+
+        # Query details would not have duration_ms or query_start for error_reported events
+        query_details = {
+            'event_fire_timestamp': '2023-01-01T12:00:00.123Z',
+        }
+
+        # Create RQT event
+        rqt_event = error_events_handler._create_rqt_event(event, raw_sql_fields, query_details)
+
+        # Validate common payload fields
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
+
+        # Verify DB fields
+        assert rqt_event['db']['instance'] == 'TestDB'
+        assert rqt_event['db']['query_signature'] == 'abc123'
+        assert rqt_event['db']['raw_query_signature'] == 'def456'
+        assert rqt_event['db']['statement'] == 'SELECT 1/0'
+
+        # Verify sqlserver fields
+        assert rqt_event['sqlserver']['session_id'] == 123
+        assert rqt_event['sqlserver']['xe_type'] == 'error_reported'
+        assert rqt_event['sqlserver']['event_fire_timestamp'] == '2023-01-01T12:00:00.123Z'
+
+        # Key check: verify that error_number and message are included for error_reported events
+        assert 'error_number' in rqt_event['sqlserver']
+        assert rqt_event['sqlserver']['error_number'] == 8134
+        assert 'message' in rqt_event['sqlserver']
+        assert rqt_event['sqlserver']['message'] == 'Division by zero error'
+
+        # Verify that duration_ms and query_start are NOT present for error_reported events
+        assert 'duration_ms' not in rqt_event['sqlserver']
+        assert 'query_start' not in rqt_event['sqlserver']
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -976,10 +1150,10 @@ class TestRunJob:
         # Create modified XML with specific timestamp
         modified_xml = sample_multiple_events_xml.replace("2023-01-01T12:01:00.456Z", "2023-01-01T12:02:00.789Z")
 
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=modified_xml
+        with (
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=modified_xml),
         ):
-
             # Process events directly to set timestamp
             events = query_completion_handler._process_events(modified_xml)
             if events:
@@ -1001,10 +1175,11 @@ class TestRunJob:
             return '{}'
 
         # Mock all necessary methods
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
-        ), patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit, patch(
-            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        with (
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit,
+            patch('datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload),
         ):
             # Run the job
             query_completion_handler.run_job()
@@ -1065,16 +1240,14 @@ class TestRunJob:
 
         # Create a spy on the _create_event_payload method to capture what would be created
         # for each individual event before batching
-        with patch.object(
-            query_completion_handler, '_create_event_payload', wraps=query_completion_handler._create_event_payload
-        ) as mock_create_payload, patch.object(
-            query_completion_handler, 'session_exists', return_value=True
-        ), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
-        ), patch.object(
-            query_completion_handler._check, 'database_monitoring_query_activity'
-        ) as mock_submit, patch(
-            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        with (
+            patch.object(
+                query_completion_handler, '_create_event_payload', wraps=query_completion_handler._create_event_payload
+            ) as mock_create_payload,
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit,
+            patch('datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload),
         ):
             # Run the job
             query_completion_handler.run_job()
@@ -1098,3 +1271,21 @@ class TestRunJob:
             # Verify the batch exists and contains multiple events
             assert batch_key in original_payload, f"Missing '{batch_key}' array in payload"
             assert len(original_payload[batch_key]) > 1, "Expected multiple events in the batch"
+
+
+@pytest.mark.unit
+def test_collect_xe_config(instance_docker):
+    instance_docker['collect_xe'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    assert check._config.xe_collection_config == {
+        "query_completions": {"enabled": True},
+        "query_errors": {"enabled": True},
+    }
+
+    instance_docker.pop('collect_xe')
+    instance_docker['xe_collection'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    assert check._config.xe_collection_config == {
+        "query_completions": {"enabled": True},
+        "query_errors": {"enabled": True},
+    }

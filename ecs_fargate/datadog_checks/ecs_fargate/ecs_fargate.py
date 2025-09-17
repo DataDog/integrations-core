@@ -90,7 +90,6 @@ EPHEMERAL_STORAGE_GAUGE_METRICS = {
 
 
 class FargateCheck(AgentCheck):
-
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
     def __init__(self, name, init_config, instances):
@@ -345,7 +344,6 @@ class FargateCheck(AgentCheck):
                     continue
 
                 for blkio_stat in blkio_stats:
-
                     if blkio_stat["op"] == "Read" and "value" in blkio_stat:
                         read_counter += blkio_stat["value"]
                     elif blkio_stat["op"] == "Write" and "value" in blkio_stat:

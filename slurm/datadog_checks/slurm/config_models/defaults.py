@@ -21,11 +21,15 @@ def instance_collect_sacct_stats():
 
 
 def instance_collect_scontrol_stats():
-    return True
+    return False
 
 
 def instance_collect_sdiag_stats():
     return True
+
+
+def instance_collect_seff_stats():
+    return False
 
 
 def instance_collect_sinfo_stats():

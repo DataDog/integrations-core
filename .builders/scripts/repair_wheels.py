@@ -16,13 +16,20 @@ from zipfile import ZipFile
 import urllib3
 from utils import extract_metadata, normalize_project_name
 
+# Packages for which we're skipping the openssl-3 build check
+OPENSSL_PACKAGE_BYPASS = ["psycopg"]
+
 
 @cache
 def get_wheel_hashes(project) -> dict[str, str]:
     retry_wait = 2
     while True:
         try:
-            response = urllib3.request('GET', f'https://pypi.org/simple/{project}')
+            response = urllib3.request(
+                'GET',
+                f'https://pypi.org/simple/{project}',
+                headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            )
         except urllib3.exceptions.HTTPError as e:
             err_msg = f'Failed to fetch hashes for `{project}`: {e}'
         else:
@@ -37,16 +44,12 @@ def get_wheel_hashes(project) -> dict[str, str]:
         retry_wait *= 2
         continue
 
-    html = response.data.decode('utf-8')
-    hashes: dict[str, str] = {}
-    for line in html.splitlines():
-        match = re.search(r'<a href="(?:.+?/)?([^"]+)#sha256=([^"]+)"[^>]*>\1</a>', line)
-        if match:
-            file_name, file_hash = match.groups()
-            if file_name.endswith('.whl'):
-                hashes[file_name] = file_hash
-
-    return hashes
+    data = response.json()
+    return {
+        file['filename']: file['hashes']['sha256']
+        for file in data['files']
+        if file['filename'].endswith('.whl') and 'sha256' in file['hashes']
+    }
 
 
 def iter_wheels(source_dir: str) -> Iterator[Path]:
@@ -97,6 +100,28 @@ class WheelName(NamedTuple):
         ]) + '.whl'
 
 
+def check_unacceptable_files(
+    wheel: Path,
+    bypass_prefixes: list[str],
+    invalid_file_patterns: list[str],
+):
+    """Check if a wheel contains any unacceptable files and exit if found."""
+    if any(wheel.name.startswith(pkg_prefix) for pkg_prefix in bypass_prefixes):
+        print(
+            f'Warning: Bypassing unacceptable file check for {wheel.name}'
+        )
+        return
+
+    unacceptable_files = find_patterns_in_wheel(wheel, invalid_file_patterns)
+    if unacceptable_files:
+        print(
+            f"Found copies of unacceptable files in external wheel '{wheel.name}'",
+            f'(matching {invalid_file_patterns}): ',
+            unacceptable_files,
+        )
+        sys.exit(1)
+
+
 def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
     from auditwheel.policy import WheelPolicies
@@ -129,15 +154,11 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
         if not wheel_was_built(wheel):
             print('Using existing wheel')
 
-            unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
-            if unacceptable_files:
-                print(
-                    f"Found copies of unacceptable files in external wheel '{wheel.name}'",
-                    f'(matching {external_invalid_file_patterns}): ',
-                    unacceptable_files,
-                )
-                sys.exit(1)
-
+            check_unacceptable_files(
+                wheel,
+                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
+                invalid_file_patterns=external_invalid_file_patterns,
+            )
             shutil.move(wheel, external_dir)
             continue
 
@@ -179,15 +200,11 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
         if not wheel_was_built(wheel):
             print('Using existing wheel')
 
-            unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
-            if unacceptable_files:
-                print(
-                    f"Found copies of unacceptable files in external wheel '{wheel.name}'",
-                    f'(matching {external_invalid_file_patterns}): ',
-                    unacceptable_files,
-                )
-                sys.exit(1)
-
+            check_unacceptable_files(
+                wheel,
+                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
+                invalid_file_patterns=external_invalid_file_patterns,
+            )
             shutil.move(wheel, external_dir)
             continue
 
@@ -211,6 +228,8 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
 def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
+    from packaging.version import Version
+
     exclusions = [re.compile(s) for s in [
         # pymqi
         r'pymqe\.cpython-\d+-darwin\.so',
@@ -260,12 +279,17 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
             shutil.move(wheel, Path(built_dir) / dest)
             continue
 
+        # Platform dependent wheels: rename with single arch and verify target macOS version
+        single_arch = os.uname().machine
+        dest = str(wheel_name._replace(platform_tag=wheel_name.platform_tag.replace('universal2', single_arch)))
         copied_libs = delocate_wheel(
             str(wheel),
-            os.path.join(built_dir, wheel.name),
+            os.path.join(built_dir, dest),
             copy_filt_func=copy_filt_func,
+            # require_archs=[single_arch],  TODO(regis): address multi-arch confluent_kafka/cimpl.cpython-312-darwin.so
+            require_target_macos_version=Version(os.environ["MACOSX_DEPLOYMENT_TARGET"]),
         )
-        print('Repaired wheel')
+        print(f'Repaired wheel to {dest}')
         if copied_libs:
             print('Libraries copied into the wheel:')
             print('\n'.join(copied_libs))

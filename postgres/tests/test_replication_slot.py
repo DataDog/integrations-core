@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-import psycopg2
+import psycopg
 import pytest
 
 from datadog_checks.dev.docker import get_container_ip
@@ -30,17 +30,19 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     time.sleep(5)
     redo_lsn_age = 0
     xmin_age_higher_bound = 1
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        with conn.cursor() as cur:
-            cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
-            redo_lsn_age = int(cur.fetchall()[0][0])
-            cur.execute("select age(xmin) FROM pg_replication_slots;")
-            bound = cur.fetchall()[0][0]
-            xmin_age_higher_bound += int(bound) if bound is not None else 0
+    # Keep the connection open so that the temporary replication slots are not dropped
+    conn = psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g")
+    with conn.cursor() as cur:
+        cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
+        redo_lsn_age = int(cur.fetchall()[0][0])
+        cur.execute("select age(xmin) FROM pg_replication_slots;")
+        bound = cur.fetchall()[0][0]
+        xmin_age_higher_bound += int(bound) if bound is not None else 0
 
-            cur.execute("select * from pg_create_physical_replication_slot('phys_1');")
-            cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
-            cur.execute("select * from pg_create_physical_replication_slot('phys_3', true, true);")
+        cur.execute("select * from pg_create_physical_replication_slot('phys_1');")
+        cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
+        cur.execute("select * from pg_create_physical_replication_slot('phys_3', true, true);")
+
     check.check(pg_instance)
 
     #     slot_name     | slot_type | temporary | active | active_pid | xmin | restart_lsn
@@ -94,11 +96,13 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         count=1,
     )
 
+    conn.close()
+
 
 @requires_over_10
 def test_logical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) FROM pg_replication_slots;")
             restart_age = cur.fetchall()[0][0]

@@ -579,6 +579,9 @@ jobs:
 
     permissions:
       contents: write
+      id-token: write
+
+    environment: pypi-ddev
 
     steps:
     - name: Download Python artifacts
@@ -601,12 +604,15 @@ jobs:
         path: installers
         merge-multiple: true
 
+    # Publish wheels to PyPI using Trusted Publishers.
+    # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+    # This job needs to run from within the pypi-ddev environment. PyPi validates the
+    # workflow file name, environment and repository the request is comming from to
+    # provide the valid JWT token.
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
       with:
         skip-existing: true
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN_DDEV_2 }}
 
     - name: Add assets to current release
       uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2

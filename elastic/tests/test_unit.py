@@ -134,7 +134,7 @@ def test_get_template_metrics(aggregator, instance, mock_http_response):
 
 def test_get_template_metrics_raise_exception(aggregator, instance):
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=MockResponse(status_code=403),
     ):
         check = ESCheck('elastic', {}, instances=[instance])
@@ -151,7 +151,7 @@ def test_get_value_from_path():
 
 def test__get_data_throws_authentication_error(instance):
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=MockResponse(status_code=400),
     ):
         check = ESCheck('elastic', {}, instances=[instance])
@@ -162,7 +162,7 @@ def test__get_data_throws_authentication_error(instance):
 
 def test__get_data_creates_critical_service_alert(aggregator, instance):
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=MockResponse(status_code=500),
     ):
         check = ESCheck('elastic', {}, instances=[instance])
@@ -193,7 +193,7 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
 )
 def test_disable_legacy_sc_tags(aggregator, es_instance):
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=MockResponse(status_code=500),
     ):
         check = ESCheck('elastic', {}, instances=[es_instance])

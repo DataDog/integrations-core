@@ -1,3 +1,5 @@
+# bypass-global-grok-parser-rules-checks
+# bypass-global-facets-path-checks
 id: airflow
 metric_id: airflow
 backend_only: false
@@ -82,3 +84,28 @@ pipeline:
       enabled: true
       sources:
         - message
+    - type: pipeline
+      name: Task logs pipeline 
+      enabled: true
+      filter:
+        query: "dirname:*dag_id*"
+      processors:
+        - type: attribute-remapper
+          name: Map tag `dirname` to an attribute
+          enabled: true
+          sources:
+            - dirname
+          sourceType: tag
+          target: dirname
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Task Attributes Parser
+          enabled: true
+          source: dirname
+          samples:
+            - /airflow_logs/dag_id_log_heavy_test_dag/run_id_manual__2025-05-09t13:51:47.462683_00:00/task_id_generate_logs_1
+          grok:
+            supportRules: ""
+            matchRules: default (.*dag_id_%{data:airflow.dagRun.dag_id}/run_id_%{data:airflow.dagRun.run_id}/task_id_%{data:airflow.task.task_id})
