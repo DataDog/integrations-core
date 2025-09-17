@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -64,32 +63,9 @@ def mock_size_status():
         patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["fake_dep.whl"]),
         patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.size.status.get_dependencies_from_json", return_value=fake_deps),
     ):
         yield mock_app
-
-
-@pytest.fixture
-def temp_dep_sizes_file(tmp_path: Path):
-    dep_sizes_data = {
-        "dep1": {
-            "version": "1.1.1",
-            "compressed": 5678,
-            "uncompressed": 12345,
-        },
-        "dep2": {
-            "version": "2.2.2",
-            "compressed": 4321,
-            "uncompressed": 54321,
-        },
-        "dep3": {
-            "version": "3.3.3",
-            "compressed": 1234,
-            "uncompressed": 2345,
-        },
-    }
-    with open(tmp_path / "dep_sizes.json", "w") as f:
-        json.dump(dep_sizes_data, f)
-    return tmp_path / "dep_sizes.json"
 
 
 def test_status_no_args(ddev, mock_size_status):
@@ -153,9 +129,8 @@ def test_status_wrong_plat_and_version(ddev):
         assert result.exit_code != 0
 
 
-def test_status_dependency_sizes(ddev, mock_size_status, temp_dep_sizes_file):
-    sizes = str(temp_dep_sizes_file)
-    assert ddev("size", "status", "--compressed", "--dependency-sizes", sizes).exit_code == 0
-    assert ddev("size", "status", "--commit", "1234567890", "--dependency-sizes", sizes).exit_code == 1
-    assert ddev("size", "status", "--format", "csv,markdown,json,png", "--dependency-sizes", sizes).exit_code == 0
-    assert ddev("size", "status", "--dependency-sizes", sizes).exit_code == 0
+def test_status_dependency_sizes(ddev, mock_size_status):
+    assert ddev("size", "status", "--compressed", "--dependency-sizes", "sizes").exit_code == 0
+    assert ddev("size", "status", "--commit", "1234567890", "--dependency-sizes", "sizes").exit_code == 1
+    assert ddev("size", "status", "--format", "csv,markdown,json,png", "--dependency-sizes", "sizes").exit_code == 0
+    assert ddev("size", "status", "--dependency-sizes", "sizes").exit_code == 0
