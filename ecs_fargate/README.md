@@ -16,7 +16,7 @@ The Datadog Agent retrieves metrics for the task definition's containers with th
 
 The Task Metadata endpoint is only available from within the task definition itself, which is why the Datadog Agent needs to be run as an additional container within each task definition to be monitored.
 
-The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
+To enable metric collection, set the environment variable `ECS_FARGATE` to `"true"` in the Datadog container definition.
 
 ## Setup
 
