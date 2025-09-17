@@ -1,1 +1,1 @@
-Remove pycryptodomex dependency.
+Remove pycryptodomex dependency and unpin indirect dependencies.
