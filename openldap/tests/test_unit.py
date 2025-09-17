@@ -225,7 +225,7 @@ def test__perform_custom_queries(check, mocker):
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
     conn_mock.rebind.assert_called_once_with(user="user", password="pass", authentication=ldap3.SIMPLE)
-    conn_mock.search.assert_called_once_with("base", "filter", search_scope="subtree", attributes=None)
+    conn_mock.search.assert_called_once_with("base", "filter", search_scope=ldap3.SUBTREE, attributes=None)
     log_mock.error.assert_not_called()  # No error logged
 
     # Check query rebind different user
@@ -248,7 +248,7 @@ def test__perform_custom_queries(check, mocker):
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
     conn_mock.rebind.assert_called_once_with(user="user2", password="pass2", authentication=ldap3.SIMPLE)
-    conn_mock.search.assert_called_once_with("base", "filter", search_scope="subtree", attributes=["*"])
+    conn_mock.search.assert_called_once_with("base", "filter", search_scope=ldap3.SUBTREE, attributes=["*"])
     log_mock.error.assert_not_called()  # No error logged
 
 
@@ -278,7 +278,7 @@ def test_custom_query_search_scope(check, mocker):
 
     # Verify search_scope is passed correctly
     conn_mock.search.assert_called_once_with(
-        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope="level", attributes=None
+        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope=ldap3.LEVEL, attributes=None
     )
 
 

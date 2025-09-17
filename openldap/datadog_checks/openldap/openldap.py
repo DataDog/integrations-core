@@ -155,7 +155,15 @@ class OpenLDAP(AgentCheck):
                 self.log.error("`search_filter` field is required for custom query #%s", name)
                 continue
             attrs = query.get("attributes")
-            search_scope = query.get("search_scope", "subtree")
+            search_scope_str = query.get("search_scope", "subtree")
+            
+            # Convert string to ldap3 constant
+            if search_scope_str.lower() == "base":
+                search_scope = ldap3.BASE
+            elif search_scope_str.lower() == "level":
+                search_scope = ldap3.LEVEL
+            else:  # default to subtree
+                search_scope = ldap3.SUBTREE
             if "username" in query:
                 username = query.get("username")
                 password = query.get("password")
