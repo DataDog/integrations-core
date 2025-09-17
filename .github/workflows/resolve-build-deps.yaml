@@ -51,7 +51,7 @@ jobs:
       - name: Check for dependency changes
         id: dependency-check
         run: |
-          if git diff --name-only ${{ steps.set_base_sha.outputs.base_sha }} ${{ github.sha }} | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"; then
+          if git diff --name-only ${{ steps.set_base_sha.outputs.base_sha }} ${{ github.sha }} | grep -qE "(\.cursor/)"; then # "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "Dependency files changed."
           else
