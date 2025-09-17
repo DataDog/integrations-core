@@ -41,7 +41,11 @@
 	    "text-generation-router"
       ]
     },
-    "monitors": {},
+    "monitors": {
+      "High request latency": "assets/monitors/request_latency_high.json",
+      "High queue size": "assets/monitors/queue_size_high.json", 
+      "Slow token generation": "assets/monitors/token_generation_slow.json"
+    },
     "saved_views": {}
   },
   "author": {
