@@ -228,7 +228,7 @@ datadog-twemproxy==3.0.0
 datadog-twistlock==6.0.1
 datadog-varnish==4.0.0
 datadog-vault==7.0.1
-datadog-velero==3.0.1
+datadog-velero==3.0.2
 datadog-vertica==6.1.1
 datadog-vllm==3.0.1
 datadog-voltdb==6.0.1
