@@ -1,11 +1,10 @@
 name: Measure Disk Usage
 
 on:
-  workflow_call:
-  # workflow_run:
-  #   workflows: ['Resolve Dependencies and Build Wheels']
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ['Resolve Dependencies and Build Wheels']
+    types:
+      - completed
 env:
   PYTHON_VERSION: "3.12"
 
@@ -44,29 +43,17 @@ jobs:
       run: |
             ddev config override
 
-    - name: Determine commit SHAs
-      id: commits
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-            if [ "${{ github.event_name }}" = "pull_request" ]; then # CHANGE TO github.event.workflow_run.event
-              echo "current_sha=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
-              echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
-            elif [ "${{ github.event_name }}" = "push" ]; then # CHANGE TO github.event.workflow_run.event
-              echo "current_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
-            fi
-
     - name: Measure disk usage
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cmd="ddev size status \
         --platform ${{ matrix.platform }} \
-        --commit ${{ steps.commits.outputs.current_sha }} \
+        --commit ${{ github.event.workflow_run.head_sha }} \
         --format json"
 
         # Send metrics to Datadog only on push to default branch
-        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then # CHANGE TO github.event.workflow_run.event
+        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
         

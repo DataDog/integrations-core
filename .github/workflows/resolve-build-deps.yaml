@@ -28,6 +28,8 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs: 
+  # measure-disk-usage.yml depends on this workflow being triggered.
+  # This 'on' setting makes sure it runs, but this job cancels it if no dependency changes are detected.
   check-dependency-changes:
     name: Check dependency changes
     runs-on: ubuntu-22.04
@@ -273,15 +275,6 @@ jobs:
       with:
         name: target-macos-${{ matrix.job.arch }}
         path: output
-
-  measure-disk-usage:
-    permissions:
-      contents: read
-      actions: read
-    needs:
-    - build
-    - build-macos
-    uses: ./.github/workflows/measure-disk-usage.yml
 
 
   publish:
