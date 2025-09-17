@@ -38,7 +38,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    logs_enabled: true
    ```
 
-2. To collect logs, add the following configuration block to your `trend_micro_cloud_one.d/conf.yaml` file.
+2. To collect logs, add the following configuration block to your `trend_micro_cloud_one.d/conf.yaml` file:
 
    See the sample [trend_micro_cloud_one.d/conf.yaml][7] for available configuration options.
 
