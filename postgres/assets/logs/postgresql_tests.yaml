@@ -112,7 +112,7 @@ tests:
         xid: "2823"
       session_lineno: 34853
       sql_state: "00000"
-    message: "duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
+    message: "execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
