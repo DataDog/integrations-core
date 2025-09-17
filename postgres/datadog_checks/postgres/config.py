@@ -285,6 +285,14 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
                 **{"enabled": False},
                 **(instance.get('collect_raw_query_statement', {})),
             },
+            "locks_idle_in_transaction": {
+                **{
+                    'enabled': True,
+                    'collection_interval': 300,
+                    'max_rows': 100,
+                }
+                ** (instance.get('locks_idle_in_transaction', {})),
+            },
             "propagate_agent_tags": should_propagate_agent_tags(instance=instance, init_config=init_config),
             "service": instance.get('service', init_config.get('service', None)),
             # Metric filtering by pattern is implemented downstream, theoretically

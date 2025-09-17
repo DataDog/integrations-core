@@ -4,6 +4,11 @@ backend_only: false
 facets:
   - groups:
       - Web Access
+    name: URL Host
+    path: http.url_details.host
+    source: log
+  - groups:
+      - Web Access
     name: Client IP
     path: network.client.ip
     source: log
@@ -66,6 +71,28 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: pipeline
+      name: String Builder for Threat Response Alerts
+      enabled: true
+      filter:
+        query: service:threat-response-alerts
+      processors:
+        - type: attribute-remapper
+          name: Map `api_host` to `http.url_details.host`
+          enabled: true
+          sources:
+            - api_host
+          sourceType: tag
+          target: http.url_details.host
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Build Tanium alert link
+          enabled: true
+          template: https://%{http.url_details.host}/ui/threatresponse/alerts?guid=%{guid}
+          target: alert_link
+          replaceMissing: true
+    - type: pipeline
       name: Platform Audit Logs for Authentication
       enabled: true
       filter:
@@ -92,7 +119,8 @@ pipeline:
             supportRules: ""
             matchRules: >-
               new_system_user_session_created_rule UserID: %{word:usr.id};
-              Session ID: %{integer:session_id}; IP Address: %{ip:network.client.ip}
+              Session ID: %{integer:session_id}; IP Address:
+              %{ip:network.client.ip}
 
               new_session_created_rule User: %{regex("[^;]*"):usr.name}; Session ID: %{integer:session_id}; Authentication Type: %{regex("[^;]*"):authentication_type}(; Originated from %{notSpace:originated_from})?(; IP Address: %{ip:network.client.ip})?
 
