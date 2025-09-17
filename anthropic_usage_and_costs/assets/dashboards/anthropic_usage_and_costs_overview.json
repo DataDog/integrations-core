@@ -8,11 +8,17 @@
         "title": "Total Snowflake Costs",
         "title_size": "16",
         "title_align": "left",
-        "time": { "hide_incomplete_cost_data": true },
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
         "type": "query_value",
         "requests": [
           {
-            "formulas": [{ "formula": "query1" }],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
             "queries": [
               {
                 "data_source": "cloud_cost",
@@ -27,11 +33,18 @@
         "autoscale": true,
         "precision": 2,
         "timeseries_background": {
-          "yaxis": { "include_zero": true },
+          "yaxis": {
+            "include_zero": true
+          },
           "type": "area"
         }
       },
-      "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 427419291647524,
@@ -48,7 +61,11 @@
         "type": "query_value",
         "requests": [
           {
-            "formulas": [{ "formula": "query1" }],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
             "queries": [
               {
                 "data_source": "cloud_cost",
@@ -63,11 +80,18 @@
         "autoscale": true,
         "precision": 2,
         "timeseries_background": {
-          "yaxis": { "include_zero": true },
+          "yaxis": {
+            "include_zero": true
+          },
           "type": "area"
         }
       },
-      "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 1930536889981146,
@@ -84,7 +108,11 @@
         "type": "query_value",
         "requests": [
           {
-            "formulas": [{ "formula": "timeshift(query1, -2592000)" }],
+            "formulas": [
+              {
+                "formula": "timeshift(query1, -2592000)"
+              }
+            ],
             "queries": [
               {
                 "query": "sum:all.cost{providername:Anthropic,$model,$user_name,$email,$organization_name,$token_type,$workspace_name}",
@@ -99,11 +127,18 @@
         "autoscale": true,
         "precision": 2,
         "timeseries_background": {
-          "yaxis": { "include_zero": true },
+          "yaxis": {
+            "include_zero": true
+          },
           "type": "area"
         }
       },
-      "layout": { "x": 6, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 2475617524760759,
@@ -123,7 +158,10 @@
             "formulas": [
               {
                 "number_format": {
-                  "unit": { "type": "canonical_unit", "unit_name": "percent" }
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
                 },
                 "formula": "(query1 - timeshift(query2, -2592000)) / timeshift(query2, -2592000) * 100"
               }
@@ -159,7 +197,11 @@
                 "value": 100,
                 "palette": "black_on_light_red"
               },
-              { "comparator": ">=", "value": 100, "palette": "white_on_red" }
+              {
+                "comparator": ">=",
+                "value": 100,
+                "palette": "white_on_red"
+              }
             ]
           }
         ],
@@ -167,10 +209,17 @@
         "precision": 2,
         "timeseries_background": {
           "type": "area",
-          "yaxis": { "include_zero": true }
+          "yaxis": {
+            "include_zero": true
+          }
         }
       },
-      "layout": { "x": 9, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 2,
@@ -191,13 +240,22 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 202,
             "definition": {
               "title": "Total Tokens (Last Hour)",
-              "time": { "type": "live", "unit": "hour", "value": 1 },
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 1
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -216,18 +274,29 @@
                       "aggregator": "last"
                     }
                   ],
-                  "formulas": [{ "formula": "query1 + query2" }]
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ]
                 }
               ],
               "autoscale": true,
               "text_align": "center",
               "precision": 0,
               "timeseries_background": {
-                "yaxis": { "include_zero": true },
+                "yaxis": {
+                  "include_zero": true
+                },
                 "type": "area"
               }
             },
-            "layout": { "x": 3, "y": 0, "width": 3, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 201,
@@ -235,7 +304,13 @@
               "title": "Token Usage Over Time",
               "show_legend": false,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -247,7 +322,11 @@
                       "query": "sum:anthropic.messages.input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -264,7 +343,11 @@
                       "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -273,9 +356,17 @@
                   "display_type": "line"
                 }
               ],
-              "yaxis": { "include_zero": true, "scale": "linear" }
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 203,
@@ -293,18 +384,31 @@
                       "aggregator": "sum"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 10,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {}
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 204,
@@ -330,18 +434,33 @@
                   ],
                   "sort": {
                     "order_by": [
-                      { "type": "group", "name": "org_name", "order": "desc" }
+                      {
+                        "type": "group",
+                        "name": "org_name",
+                        "order": "desc"
+                      }
                     ],
                     "count": 500
                   },
                   "formulas": [
-                    { "alias": "Input Tokens", "formula": "query1" },
-                    { "alias": "Output Tokens", "formula": "query2" }
+                    {
+                      "alias": "Input Tokens",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Output Tokens",
+                      "formula": "query2"
+                    }
                   ]
                 }
               ]
             },
-            "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 205,
@@ -355,13 +474,22 @@
               "tick_pos": "50%",
               "tick_edge": "right"
             },
-            "layout": { "x": 0, "y": 6, "width": 3, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
           },
           {
             "id": 7106833146706646,
             "definition": {
               "title": "Input Tokens (Last Hour)",
-              "time": { "type": "live", "unit": "hour", "value": 1 },
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 1
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -374,24 +502,39 @@
                       "aggregator": "last"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }]
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
                 }
               ],
               "autoscale": true,
               "text_align": "center",
               "precision": 0,
               "timeseries_background": {
-                "yaxis": { "include_zero": true },
+                "yaxis": {
+                  "include_zero": true
+                },
                 "type": "area"
               }
             },
-            "layout": { "x": 3, "y": 6, "width": 4, "height": 2 }
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 8885191409050300,
             "definition": {
               "title": "Output Tokens (Last Hour)",
-              "time": { "type": "live", "unit": "hour", "value": 1 },
+              "time": {
+                "type": "live",
+                "unit": "hour",
+                "value": 1
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -404,18 +547,29 @@
                       "aggregator": "last"
                     }
                   ],
-                  "formulas": [{ "formula": "query2" }]
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ]
                 }
               ],
               "autoscale": true,
               "text_align": "center",
               "precision": 0,
               "timeseries_background": {
-                "yaxis": { "include_zero": true },
+                "yaxis": {
+                  "include_zero": true
+                },
                 "type": "area"
               }
             },
-            "layout": { "x": 7, "y": 6, "width": 5, "height": 2 }
+            "layout": {
+              "x": 7,
+              "y": 6,
+              "width": 5,
+              "height": 2
+            }
           },
           {
             "id": 207,
@@ -427,11 +581,21 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 8, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 1
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 2, "width": 12, "height": 10 }
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 10
+      }
     },
     {
       "id": 4,
@@ -454,7 +618,12 @@
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 401,
@@ -462,7 +631,13 @@
               "title": "Daily Costs by Model (30 Days)",
               "show_legend": false,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "time": {
                 "type": "live",
                 "unit": "month",
@@ -472,7 +647,11 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "cloud_cost",
@@ -489,9 +668,17 @@
                   "display_type": "bars"
                 }
               ],
-              "yaxis": { "include_zero": true, "scale": "linear" }
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
             },
-            "layout": { "x": 3, "y": 0, "width": 9, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
           },
           {
             "id": 403,
@@ -513,13 +700,24 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "formulas": [{ "formula": "query1" }]
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
                 }
               ],
               "type": "sunburst",
-              "legend": { "type": "automatic" }
+              "legend": {
+                "type": "automatic"
+              }
             },
-            "layout": { "x": 0, "y": 3, "width": 12, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
           },
           {
             "id": 404,
@@ -542,11 +740,21 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "formulas": [{ "alias": "Cost ($)", "formula": "query1" }]
+                  "formulas": [
+                    {
+                      "alias": "Cost ($)",
+                      "formula": "query1"
+                    }
+                  ]
                 }
               ]
             },
-            "layout": { "x": 0, "y": 7, "width": 12, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 3
+            }
           },
           {
             "id": 405,
@@ -569,12 +777,23 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "style": { "palette": "classic" },
-                  "formulas": [{ "formula": "query1" }]
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
                 }
               ]
             },
-            "layout": { "x": 0, "y": 10, "width": 12, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 4
+            }
           },
           {
             "id": 409,
@@ -586,11 +805,21 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 14, "width": 12, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 12,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 12, "width": 12, "height": 17 }
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 17
+      }
     },
     {
       "id": 3,
@@ -611,7 +840,12 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 301,
@@ -619,7 +853,13 @@
               "title": "Cache Token Usage Trends",
               "show_legend": false,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -631,7 +871,11 @@
                       "query": "sum:anthropic.messages.cache_creation.ephemeral_5m_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -648,7 +892,11 @@
                       "query": "sum:anthropic.messages.cache_creation.ephemeral_1h_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -665,7 +913,11 @@
                       "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -674,9 +926,17 @@
                   "display_type": "line"
                 }
               ],
-              "yaxis": { "include_zero": true, "scale": "linear" }
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
             },
-            "layout": { "x": 3, "y": 0, "width": 5, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
           },
           {
             "id": 3321592471666638,
@@ -686,7 +946,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -728,7 +994,12 @@
                 }
               ]
             },
-            "layout": { "x": 8, "y": 0, "width": 4, "height": 3 }
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 305,
@@ -742,7 +1013,12 @@
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
-            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
           },
           {
             "id": 302,
@@ -789,11 +1065,18 @@
               "text_align": "center",
               "precision": 2,
               "timeseries_background": {
-                "yaxis": { "include_zero": true },
+                "yaxis": {
+                  "include_zero": true
+                },
                 "type": "area"
               }
             },
-            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
           },
           {
             "id": 5373233506863203,
@@ -803,7 +1086,13 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -845,7 +1134,12 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 3, "width": 6, "height": 2 }
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 303,
@@ -853,7 +1147,10 @@
               "title": "Cache Usage Patterns",
               "show_legend": false,
               "type": "heatmap",
-              "yaxis": { "include_zero": true, "scale": "linear" },
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              },
               "requests": [
                 {
                   "response_format": "timeseries",
@@ -864,11 +1161,20 @@
                       "query": "sum:anthropic.messages.cache_read_input_tokens{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }]
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
                 }
               ]
             },
-            "layout": { "x": 0, "y": 5, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 4026529261321278,
@@ -897,7 +1203,11 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   },
                   "formulas": [
@@ -916,7 +1226,12 @@
               ],
               "has_search_bar": "auto"
             },
-            "layout": { "x": 6, "y": 5, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 306,
@@ -928,11 +1243,21 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 8, "width": 12, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 29, "width": 12, "height": 11 }
+      "layout": {
+        "x": 0,
+        "y": 29,
+        "width": 12,
+        "height": 11
+      }
     },
     {
       "id": 5,
@@ -953,7 +1278,12 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 501,
@@ -961,7 +1291,13 @@
               "title": "Token Usage by Model",
               "show_legend": false,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -982,9 +1318,17 @@
                   "display_type": "bars"
                 }
               ],
-              "yaxis": { "include_zero": true, "scale": "linear" }
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
             },
-            "layout": { "x": 3, "y": 0, "width": 4, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 502,
@@ -1008,17 +1352,30 @@
                       "aggregator": "sum"
                     }
                   ],
-                  "formulas": [{ "formula": "query1 + query2" }],
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
                   "sort": {
                     "count": 10,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ]
             },
-            "layout": { "x": 7, "y": 0, "width": 5, "height": 3 }
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
           },
           {
             "id": 508,
@@ -1030,13 +1387,20 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 3, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 503,
             "definition": {
               "title": "Cost vs Usage Correlation (7 days)",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "scatterplot",
               "requests": {
                 "table": {
@@ -1062,7 +1426,10 @@
                     }
                   ],
                   "formulas": [
-                    { "dimension": "x", "formula": "query2" },
+                    {
+                      "dimension": "x",
+                      "formula": "query2"
+                    },
                     {
                       "dimension": "y",
                       "number_format": {
@@ -1090,7 +1457,12 @@
               },
               "color_by_groups": []
             },
-            "layout": { "x": 3, "y": 3, "width": 4, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 3009394555165132,
@@ -1100,8 +1472,16 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": { "hide_incomplete_cost_data": true },
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -1114,7 +1494,11 @@
                       "query": "sum:all.cost{providername:Anthropic,$workspace_name,$organization_name,$model,$email,$user_name,$token_type} by {model}.rollup(sum, daily)"
                     }
                   ],
-                  "formulas": [{ "formula": "query0" }],
+                  "formulas": [
+                    {
+                      "formula": "query0"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "order_reverse": false,
@@ -1140,8 +1524,12 @@
                     }
                   ],
                   "formulas": [
-                    { "formula": "query0" },
-                    { "formula": "query1" }
+                    {
+                      "formula": "query0"
+                    },
+                    {
+                      "formula": "query1"
+                    }
                   ],
                   "style": {
                     "palette": "dog_classic",
@@ -1153,7 +1541,12 @@
                 }
               ]
             },
-            "layout": { "x": 7, "y": 3, "width": 5, "height": 3 }
+            "layout": {
+              "x": 7,
+              "y": 3,
+              "width": 5,
+              "height": 3
+            }
           }
         ]
       },
@@ -1186,7 +1579,12 @@
               "tick_pos": "50%",
               "tick_edge": "right"
             },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 701,
@@ -1230,9 +1628,17 @@
                   "display_type": "line"
                 }
               ],
-              "yaxis": { "include_zero": true, "scale": "linear" }
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
             },
-            "layout": { "x": 3, "y": 0, "width": 9, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
           },
           {
             "id": 708,
@@ -1244,7 +1650,12 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 3, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 705,
@@ -1252,7 +1663,10 @@
               "title": "User Activity Heatmap",
               "show_legend": false,
               "type": "heatmap",
-              "yaxis": { "include_zero": true, "scale": "linear" },
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              },
               "requests": [
                 {
                   "response_format": "timeseries",
@@ -1268,11 +1682,20 @@
                       "query": "sum:anthropic.messages.output_tokens{$model,$workspace_name,$user_name,$email,$organization_name,$token_type} by {user_name}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1 + query2" }]
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ]
                 }
               ]
             },
-            "layout": { "x": 3, "y": 3, "width": 9, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 9,
+              "height": 3
+            }
           },
           {
             "id": 709,
@@ -1286,7 +1709,12 @@
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
-            "layout": { "x": 0, "y": 6, "width": 3, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 702,
@@ -1310,18 +1738,31 @@
                       "aggregator": "sum"
                     }
                   ],
-                  "formulas": [{ "formula": "query1 + query2" }],
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
                   "sort": {
                     "count": 100,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {}
             },
-            "layout": { "x": 3, "y": 6, "width": 3, "height": 3 }
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 704,
@@ -1352,9 +1793,18 @@
                     }
                   ],
                   "formulas": [
-                    { "alias": "Input Tokens", "formula": "query1" },
-                    { "alias": "Output Tokens", "formula": "query2" },
-                    { "alias": "Cached Input Tokens", "formula": "query3" },
+                    {
+                      "alias": "Input Tokens",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Output Tokens",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Cached Input Tokens",
+                      "formula": "query3"
+                    },
                     {
                       "alias": "IO Ratio",
                       "formula": "(query1 + query3) / query2"
@@ -1363,7 +1813,12 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 6, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 706,
@@ -1386,20 +1841,37 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "style": { "palette": "dog_classic" },
-                  "formulas": [{ "formula": "query1 + query2" }],
+                  "style": {
+                    "palette": "dog_classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
                   "sort": {
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ],
                     "count": 500
                   }
                 }
               ],
               "type": "sunburst",
-              "legend": { "type": "automatic" }
+              "legend": {
+                "type": "automatic"
+              }
             },
-            "layout": { "x": 0, "y": 9, "width": 5, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 5,
+              "height": 4
+            }
           },
           {
             "id": 707,
@@ -1423,12 +1895,23 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "style": { "palette": "dog_classic" },
-                  "formulas": [{ "formula": "query1 + query2" }]
+                  "style": {
+                    "palette": "dog_classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ]
                 }
               ]
             },
-            "layout": { "x": 5, "y": 9, "width": 7, "height": 4 }
+            "layout": {
+              "x": 5,
+              "y": 9,
+              "width": 7,
+              "height": 4
+            }
           },
           {
             "id": 7960539772614678,
@@ -1475,7 +1958,11 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   },
                   "formulas": [
@@ -1494,8 +1981,14 @@
                       "cell_display_mode": "bar",
                       "formula": "query3"
                     },
-                    { "alias": "Input Tokens", "formula": "query4" },
-                    { "alias": "Output Tokens", "formula": "query5" },
+                    {
+                      "alias": "Input Tokens",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Output Tokens",
+                      "formula": "query5"
+                    },
                     {
                       "cell_display_mode": "bar",
                       "alias": "Cache Hit %",
@@ -1506,7 +1999,12 @@
               ],
               "has_search_bar": "auto"
             },
-            "layout": { "x": 0, "y": 13, "width": 12, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 12,
+              "height": 4
+            }
           },
           {
             "id": 712,
@@ -1518,11 +2016,21 @@
               "text_align": "left",
               "show_tick": false
             },
-            "layout": { "x": 0, "y": 17, "width": 12, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 17,
+              "width": 12,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 47, "width": 12, "height": 20 }
+      "layout": {
+        "x": 0,
+        "y": 47,
+        "width": 12,
+        "height": 20
+      }
     },
     {
       "id": 6,
@@ -1545,7 +2053,12 @@
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 607,
@@ -1559,7 +2072,12 @@
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
-            "layout": { "x": 4, "y": 0, "width": 8, "height": 2 }
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 8,
+              "height": 2
+            }
           },
           {
             "id": 602,
@@ -1583,11 +2101,18 @@
               "text_align": "center",
               "precision": 0,
               "timeseries_background": {
-                "yaxis": { "include_zero": true },
+                "yaxis": {
+                  "include_zero": true
+                },
                 "type": "area"
               }
             },
-            "layout": { "x": 0, "y": 2, "width": 4, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 601,
@@ -1595,7 +2120,13 @@
               "title": "Web Search Tool Usage by Model",
               "show_legend": false,
               "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
@@ -1607,7 +2138,11 @@
                       "query": "sum:anthropic.messages.server_tool_use.web_search_requests{$model,$workspace_name,$organization_name,$email,$user_name,$token_type} by {model}.as_count()"
                     }
                   ],
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "style": {
                     "palette": "dog_classic",
                     "order_by": "values",
@@ -1617,9 +2152,17 @@
                   "display_type": "line"
                 }
               ],
-              "yaxis": { "include_zero": true, "scale": "linear" }
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
             },
-            "layout": { "x": 4, "y": 2, "width": 8, "height": 3 }
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 8,
+              "height": 3
+            }
           },
           {
             "id": 603,
@@ -1640,17 +2183,29 @@
                   "sort": {
                     "count": 10,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   },
                   "formulas": [
-                    { "formula": "query1", "cell_display_mode": "bar" }
+                    {
+                      "formula": "query1",
+                      "cell_display_mode": "bar"
+                    }
                   ]
                 }
               ],
               "has_search_bar": "auto"
             },
-            "layout": { "x": 0, "y": 5, "width": 12, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 3
+            }
           },
           {
             "id": 606,
@@ -1664,11 +2219,21 @@
               "tick_pos": "50%",
               "tick_edge": "top"
             },
-            "layout": { "x": 0, "y": 8, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 1
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 67, "width": 12, "height": 10 }
+      "layout": {
+        "x": 0,
+        "y": 67,
+        "width": 12,
+        "height": 10
+      }
     }
   ],
   "template_variables": [

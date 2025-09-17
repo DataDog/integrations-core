@@ -8,11 +8,17 @@
         "title": "Total OpenAI Spend",
         "title_size": "16",
         "title_align": "left",
-        "time": { "hide_incomplete_cost_data": true },
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
         "type": "query_value",
         "requests": [
           {
-            "formulas": [{ "formula": "query1" }],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
             "queries": [
               {
                 "data_source": "cloud_cost",
@@ -28,10 +34,17 @@
         "precision": 2,
         "timeseries_background": {
           "type": "area",
-          "yaxis": { "include_zero": true }
+          "yaxis": {
+            "include_zero": true
+          }
         }
       },
-      "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 5042132219805083,
@@ -48,7 +61,11 @@
         "type": "query_value",
         "requests": [
           {
-            "formulas": [{ "formula": "query1" }],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
             "queries": [
               {
                 "data_source": "cloud_cost",
@@ -64,10 +81,17 @@
         "precision": 2,
         "timeseries_background": {
           "type": "area",
-          "yaxis": { "include_zero": true }
+          "yaxis": {
+            "include_zero": true
+          }
         }
       },
-      "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 3253421450589468,
@@ -84,7 +108,11 @@
         "type": "query_value",
         "requests": [
           {
-            "formulas": [{ "formula": "timeshift(query1, -2592000)" }],
+            "formulas": [
+              {
+                "formula": "timeshift(query1, -2592000)"
+              }
+            ],
             "queries": [
               {
                 "query": "sum:custom.cost.amortized{provider_name:OpenAI,$api_key,$ml_app,$service,$model,$project}",
@@ -100,10 +128,17 @@
         "precision": 2,
         "timeseries_background": {
           "type": "area",
-          "yaxis": { "include_zero": true }
+          "yaxis": {
+            "include_zero": true
+          }
         }
       },
-      "layout": { "x": 6, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 1285180881880373,
@@ -123,7 +158,10 @@
             "formulas": [
               {
                 "number_format": {
-                  "unit": { "type": "canonical_unit", "unit_name": "percent" }
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
                 },
                 "formula": "(query1 - timeshift(query2, -2592000)) / timeshift(query2, -2592000) * 100"
               }
@@ -159,7 +197,11 @@
                 "value": 100,
                 "palette": "black_on_light_red"
               },
-              { "comparator": ">=", "value": 100, "palette": "white_on_red" }
+              {
+                "comparator": ">=",
+                "value": 100,
+                "palette": "white_on_red"
+              }
             ]
           }
         ],
@@ -167,10 +209,17 @@
         "precision": 2,
         "timeseries_background": {
           "type": "area",
-          "yaxis": { "include_zero": true }
+          "yaxis": {
+            "include_zero": true
+          }
         }
       },
-      "layout": { "x": 9, "y": 0, "width": 3, "height": 2 }
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
     },
     {
       "id": 7348898798385615,
@@ -195,7 +244,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
           },
           {
             "id": 6176679445548644,
@@ -203,7 +257,9 @@
               "title": "Cost per ServiceName",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "requests": [
                 {
                   "response_format": "scalar",
@@ -215,20 +271,37 @@
                       "aggregator": "sum"
                     }
                   ],
-                  "style": { "palette": "classic" },
-                  "formulas": [{ "formula": "query1" }],
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "type": "sunburst",
-              "legend": { "type": "table" }
+              "legend": {
+                "type": "table"
+              }
             },
-            "layout": { "x": 3, "y": 0, "width": 9, "height": 4 }
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
           },
           {
             "id": 5809017898757948,
@@ -238,11 +311,21 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "cloud_cost",
@@ -261,7 +344,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 4, "width": 12, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
           },
           {
             "id": 132965784094236,
@@ -269,7 +357,9 @@
               "title": "Cost by Organization and Project",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -282,21 +372,37 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 0, "y": 7, "width": 5, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 5,
+              "height": 3
+            }
           },
           {
             "id": 3178117944554849,
@@ -306,12 +412,25 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": { "hide_incomplete_cost_data": true },
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "alias": "Total Cost", "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "alias": "Total Cost",
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "cloud_cost",
@@ -330,11 +449,21 @@
                 }
               ]
             },
-            "layout": { "x": 5, "y": 7, "width": 7, "height": 3 }
+            "layout": {
+              "x": 5,
+              "y": 7,
+              "width": 7,
+              "height": 3
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 2, "width": 12, "height": 11 }
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 11
+      }
     },
     {
       "id": 2162071155995882,
@@ -359,7 +488,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
           },
           {
             "id": 7450240655684922,
@@ -367,7 +501,9 @@
               "title": "Cost per Model",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -412,16 +548,28 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" }
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
               }
             },
-            "layout": { "x": 0, "y": 1, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 2146480474569892,
@@ -429,7 +577,9 @@
               "title": "Cost per Operation",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "requests": [
                 {
                   "queries": [
@@ -465,7 +615,9 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "style": { "palette": "classic" },
+                  "style": {
+                    "palette": "classic"
+                  },
                   "formulas": [
                     {
                       "number_format": {
@@ -480,15 +632,26 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "type": "sunburst",
-              "legend": { "type": "automatic" }
+              "legend": {
+                "type": "automatic"
+              }
             },
-            "layout": { "x": 6, "y": 1, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 92163252088124,
@@ -496,7 +659,9 @@
               "title": "Cost per 1 Billion Tokens",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -541,7 +706,12 @@
               "autoscale": false,
               "precision": 2
             },
-            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
           },
           {
             "id": 2871269133729220,
@@ -549,11 +719,17 @@
               "title": "# Input Tokens",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query5" }],
+                  "formulas": [
+                    {
+                      "formula": "query5"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -568,7 +744,12 @@
               "autoscale": true,
               "precision": 2
             },
-            "layout": { "x": 6, "y": 4, "width": 3, "height": 2 }
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 3,
+              "height": 2
+            }
           },
           {
             "id": 5960580251979426,
@@ -576,11 +757,17 @@
               "title": "# Output Tokens",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query5" }],
+                  "formulas": [
+                    {
+                      "formula": "query5"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
@@ -595,11 +782,21 @@
               "autoscale": true,
               "precision": 2
             },
-            "layout": { "x": 9, "y": 4, "width": 3, "height": 2 }
+            "layout": {
+              "x": 9,
+              "y": 4,
+              "width": 3,
+              "height": 2
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 13, "width": 12, "height": 7 }
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 12,
+        "height": 7
+      }
     },
     {
       "id": 3812785000101592,
@@ -624,7 +821,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
           },
           {
             "id": 6305672979624266,
@@ -632,7 +834,9 @@
               "title": "Cost per Service",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -671,17 +875,29 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 0, "y": 1, "width": 4, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 205108745443972,
@@ -691,8 +907,16 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": { "hide_incomplete_cost_data": true },
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -735,7 +959,12 @@
                 }
               ]
             },
-            "layout": { "x": 4, "y": 1, "width": 8, "height": 3 }
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 8,
+              "height": 3
+            }
           },
           {
             "id": 2997929981443078,
@@ -743,7 +972,9 @@
               "title": "Cost per Org",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -782,17 +1013,29 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 0, "y": 4, "width": 4, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 1477288913573598,
@@ -800,7 +1043,9 @@
               "title": "Cost per Env",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -839,17 +1084,29 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 4, "y": 4, "width": 4, "height": 3 }
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 5959445400656100,
@@ -857,7 +1114,9 @@
               "title": "Cost per API key",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -896,17 +1155,29 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 8, "y": 4, "width": 4, "height": 3 }
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
           }
         ]
       },
@@ -941,7 +1212,12 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
           },
           {
             "id": 2767009516392116,
@@ -949,7 +1225,9 @@
               "title": "Cost per ML App",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "requests": [
                 {
                   "queries": [
@@ -985,7 +1263,9 @@
                     }
                   ],
                   "response_format": "scalar",
-                  "style": { "palette": "classic" },
+                  "style": {
+                    "palette": "classic"
+                  },
                   "formulas": [
                     {
                       "formula": "query2 * (query3 + query4) / (query1 + query5)"
@@ -994,15 +1274,26 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "type": "sunburst",
-              "legend": { "type": "automatic" }
+              "legend": {
+                "type": "automatic"
+              }
             },
-            "layout": { "x": 0, "y": 1, "width": 4, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 650790161525400,
@@ -1012,8 +1303,16 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": { "hide_incomplete_cost_data": true },
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -1060,7 +1359,12 @@
                 }
               ]
             },
-            "layout": { "x": 4, "y": 1, "width": 8, "height": 3 }
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 8,
+              "height": 3
+            }
           },
           {
             "id": 1463818413200384,
@@ -1068,7 +1372,9 @@
               "title": "Cost per Service",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -1113,17 +1419,29 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 0, "y": 4, "width": 4, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 1324979932092638,
@@ -1131,7 +1449,9 @@
               "title": "Cost per Env",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -1176,17 +1496,29 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 4, "y": 4, "width": 4, "height": 3 }
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
           },
           {
             "id": 6992909168651373,
@@ -1194,7 +1526,9 @@
               "title": "Cost per Model Name",
               "title_size": "16",
               "title_align": "left",
-              "time": { "hide_incomplete_cost_data": true },
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "toplist",
               "requests": [
                 {
@@ -1239,21 +1573,38 @@
                   "sort": {
                     "count": 500,
                     "order_by": [
-                      { "type": "formula", "index": 0, "order": "desc" }
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
                     ]
                   }
                 }
               ],
               "style": {
-                "display": { "type": "stacked", "legend": "automatic" },
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
                 "palette": "dog_classic"
               }
             },
-            "layout": { "x": 8, "y": 4, "width": 4, "height": 3 }
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 28, "width": 12, "height": 8 }
+      "layout": {
+        "x": 0,
+        "y": 28,
+        "width": 12,
+        "height": 8
+      }
     }
   ],
   "template_variables": [
