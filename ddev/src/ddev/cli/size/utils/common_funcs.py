@@ -866,7 +866,7 @@ def send_metrics_to_dd(
     for item in modules:
         metrics.append(
             {
-                "metric": f"{metric_name}.size_status",
+                "metric": f"{metric_name}.size",
                 "type": "gauge",
                 "points": [(timestamp, item["Size_Bytes"])],
                 "tags": [
