@@ -34,7 +34,7 @@ console = Console(stderr=True)
 @click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--dependency-sizes", help="Path to the dependency sizes file.")
-@click.option("--commit", help="Commit hash to check the status of.")
+@click.option("--commit", help="Commit hash to check the status of. It takes the commit's dependency sizes file.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(
@@ -60,6 +60,8 @@ def status(
             raise ValueError(f"Invalid platform: {platform}")
         elif version and version not in valid_versions:
             raise ValueError(f"Invalid version: {version}")
+        elif commit and dependency_sizes:
+            raise ValueError("--commit already contains the path to the dependency sizes file")
         elif format:
             for fmt in format:
                 if fmt not in ["png", "csv", "markdown", "json"]:
@@ -72,7 +74,7 @@ def status(
         combinations = [(p, v) for p in platforms for v in versions]
 
         for plat, ver in combinations:
-            if commit and not dependency_sizes:
+            if commit:
                 dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat)
             parameters: CLIParameters = {
                 "app": app,
