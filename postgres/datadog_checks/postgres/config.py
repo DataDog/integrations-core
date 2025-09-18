@@ -221,7 +221,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             # Metadata collection
             "collect_settings": {
                 **{
-                    "enabled": False,
+                    "enabled": True,
                     "collection_interval": DEFAULT_SETTINGS_COLLECTION_INTERVAL,
                     "ignored_settings_patterns": DEFAULT_SETTINGS_IGNORED_PATTERNS,
                     "run_sync": False,
