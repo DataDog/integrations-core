@@ -1,1 +1,2 @@
-Add agent health event for Postgres config validation
+* Add agent health event for Postgres config validation
+* Refactor Postgres configuration with fixes and clarifications on default values

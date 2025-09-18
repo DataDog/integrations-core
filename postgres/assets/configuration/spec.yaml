@@ -20,20 +20,18 @@ files:
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
         e.g. `/var/run/postgresql/.s.PGSQL.5432`.
       value:
-        example: "localhost"
         type: string
-        default: ""
+        display_default: "localhost"
     - name: port
       description: The port to use when connecting to PostgreSQL.
       value:
         type: integer
-        example: 5432
+        display_default: 5432
     - name: username
       description: The Datadog username created to connect to PostgreSQL.
       value:
         type: string
-        example: datadog
-        default: ""
+        display_default: "datadog"
     - name: password
       description: The password associated with the Datadog user.
       value:
@@ -58,7 +56,6 @@ files:
       value:
         type: boolean
         example: false
-      default: false
     - name: database_identifier
       description: |
         Controls how the database is identified. The default value is the resolved hostname for the instance, 
@@ -388,7 +385,7 @@ files:
       description: The maximum number of tables to collect metrics from.
       value:
         type: integer
-        example: 200
+        display_default: 200
     - template: instances/db
       overrides:
         custom_queries.value.example:
@@ -403,6 +400,7 @@ files:
             metric_prefix: postgresql
     - name: custom_metrics
       description: This option is deprecated. Use `custom_queries` instead.
+      hidden: true
       value:
         type: array
         items:
@@ -547,21 +545,21 @@ files:
             higher than this threshold, a warning is emitted to recommend lowering the setting value.
           value:
             type: number
-            example: 10000
+            default: 10000
         - name: full_statement_text_cache_max_size
           hidden: true
           description: |
             Set the max size of the cache used for the full statement text.
           value:
             type: number
-            example: 10000
+            default: 10000
         - name: full_statement_text_samples_per_hour_per_query
           hidden: true
           description: |
             Set the max number of full statement text samples to collect per hour per query.
           value:
             type: number
-            example: 10000
+            default: 10000
         - name: incremental_query_metrics
           hidden: true
           description: |
@@ -1132,7 +1130,7 @@ files:
         This collection does not involve any additional queries to the database.
       value:
         type: number
-        example: 300
+        default: 300
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
