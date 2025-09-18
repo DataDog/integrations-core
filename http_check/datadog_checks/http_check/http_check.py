@@ -81,7 +81,7 @@ class HTTPCheck(AgentCheck):
         if isinstance(tag, str):
             tag = tag.encode('utf-8', 'ignore')
 
-        # Only replace characters that are NOT allowed in DataDog tags
+        # Only replace characters that are NOT allowed in Datadog tags
         # Allowed: alphanumerics, underscores, minuses, colons, periods, slashes
         # Pattern matches: commas, plus, asterisk, parentheses, brackets, braces, whitespace
         tag = re.sub(rb'[,\+\*()\[\]{}\s]', rb'_', tag)
