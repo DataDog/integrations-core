@@ -1,6 +1,6 @@
 {
   "title": "Hugging Face TGI - Overview",
-  "description": "# About\nThis dashboard provides comprehensive observability for your Hugging Face Text Generation Inference (TGI) deployment, monitoring request performance, token generation, batch processing, queue depth, and overall server health.\n",
+  "description": "# About\nMonitor your Hugging Face Text Generation Inference deployment with real-time metrics for requests, tokens, batching, and system health.",
   "widgets": [
     {
       "id": 1,
@@ -15,7 +15,7 @@
             "id": 2,
             "definition": {
               "type": "note",
-              "content": "# Hugging Face TGI Monitoring\nThis dashboard provides observability for your Text Generation Inference server:\n\n- **Request Performance**: Monitor throughput, latency, and success rates\n- **Token Generation**: Track generation speed and efficiency metrics\n- **Batch Processing**: Monitor batch sizes and processing durations\n- **Queue Management**: Track request queuing and wait times\n- **Server Health**: Overall system status and alerts",
+              "content": "# Hugging Face TGI Monitoring\n\nTrack your Text Generation Inference server performance with key metrics for throughput, latency, token generation, and batch processing. Identify bottlenecks and optimize your deployment for better efficiency.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -75,7 +75,7 @@
             "id": 5,
             "definition": {
               "type": "note",
-              "content": "Quick health check of your TGI deployment. Monitor service health, request rates, queue depth, and active alerts at a glance.",
+              "content": "Get an instant overview of your TGI deployment's operational status. These key performance indicators provide immediate visibility into service health, processing capacity, and potential bottlenecks that require attention.",
               "background_color": "yellow",
               "font_size": "16",
               "text_align": "center",
@@ -397,7 +397,7 @@
             "id": 12,
             "definition": {
               "type": "note",
-              "content": "Monitor request throughput, latency distribution, and success rates. Track overall system performance and identify bottlenecks.",
+              "content": "Analyze how your TGI server handles incoming requests over time. These metrics reveal processing patterns, help identify peak usage periods, and show the complete request lifecycle from queuing through validation to final inference completion.",
               "background_color": "yellow",
               "font_size": "16",
               "text_align": "center",
@@ -644,7 +644,7 @@
             "id": 16,
             "definition": {
               "type": "note",
-              "content": "Monitor token generation efficiency including generation speed, input/output sizes, and inference timing metrics.",
+              "content": "Understand your model's token generation characteristics and performance patterns. These metrics help optimize inference efficiency by tracking generation rates and analyzing the relationship between input complexity and output quality.",
               "background_color": "yellow",
               "font_size": "16",
               "text_align": "center",
@@ -792,7 +792,7 @@
             "id": 20,
             "definition": {
               "type": "note",
-              "content": "Monitor batch processing efficiency including batch sizes, processing durations, and throughput optimization.",
+              "content": "Explore how TGI optimizes inference through intelligent batching. These metrics reveal batch composition strategies, processing pipeline efficiency, and help identify opportunities to improve throughput by understanding the various stages of batch execution.",
               "background_color": "yellow",
               "font_size": "16",
               "text_align": "center",
@@ -824,7 +824,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -882,7 +881,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -987,7 +985,6 @@
               "title": "Top inference batch methods",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "queries": [
@@ -1035,7 +1032,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 18,
         "width": 12,
         "height": 6,
         "is_column_break": true
@@ -1054,7 +1051,7 @@
             "id": 4434208871632602,
             "definition": {
               "type": "note",
-              "content": "View Hugging Face TGI system logs and track log patterns by status. Useful for troubleshooting and monitoring system events.",
+              "content": "Access comprehensive logging information from your TGI deployment. These logs provide detailed insights into system behavior, error patterns, and operational events that complement the performance metrics for thorough troubleshooting and monitoring.",
               "background_color": "yellow",
               "font_size": "16",
               "text_align": "center",
@@ -1192,7 +1189,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 24,
         "width": 12,
         "height": 6
       }
