@@ -58,7 +58,9 @@
       "Supported OS::iOS",
       "Offering::Integration",
       "Submitted Data Type::Logs",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Cloud"
     ]
   },
   "assets": {
