@@ -9,7 +9,9 @@ from time import time
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from httpx import Client
+    from collections.abc import Generator
+
+    from httpx import Client, Response
 
     from ddev.cli.terminal import BorrowedStatus
     from ddev.repo.core import Repository
@@ -74,6 +76,12 @@ class GitHubManager:
 
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
     COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
+
+    # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-repository
+    ACTION_RUNS_API = 'https://api.github.com/repos/{repo_id}/actions/runs'
+
+    # https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#list-repository-workflows
+    WORKFLOWS_API = 'https://api.github.com/repos/{repo_id}/actions/workflows'
 
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
@@ -155,19 +163,122 @@ class GitHubManager:
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')
 
-    def __api_post(self, *args, **kwargs):
-        return self.__api_call('post', *args, **kwargs)
+    def get_workflows(self) -> Generator[dict[str, Any]]:
+        yield from self.__paginate(
+            "get",
+            url=self.WORKFLOWS_API.format(repo_id=self.repo_id),
+            element_key='workflows',
+        )
 
-    def __api_get(self, *args, **kwargs):
-        return self.__api_call('get', *args, **kwargs)
+    def get_workflow(self, workflow_name: str) -> dict[str, Any] | None:
+        if not workflow_name.startswith('.github/workflows/'):
+            workflow_name = f'.github/workflows/{workflow_name}'
 
-    def __api_call(self, method, *args, **kwargs):
+        for workflow in self.get_workflows():
+            if workflow['path'] == workflow_name:
+                return workflow
+        return None
+
+    def get_repo_workflow_runs(
+        self,
+        *,
+        commit_sha: str | None = None,
+        branch: str | None = None,
+        event: str | None = None,
+        status: str | None = None,
+        per_page: int = 30,
+    ) -> Generator[Any]:
+        """
+        Get the list of workflows run for a specific commit.
+
+        Parameters:
+            commit_sha: The SHA of the commit to get the workflows for.
+            branch: The branch to get the workflows for.
+            event: The event to get the workflows for.
+            status: The status to get the workflows for.
+            per_page: The number of workflows to get per page.
+
+        Returns:
+            A generator of workflows run for the upplied parameters.
+        """
+        params = {
+            'head_sha': commit_sha,
+            'branch': branch,
+            'event': event,
+            'status': status,
+            'per_page': per_page,
+        }
+
+        yield from self.__paginate(
+            "get",
+            url=self.ACTION_RUNS_API.format(repo_id=self.repo_id),
+            element_key='workflow_runs',
+            params={k: v for k, v in params.items() if v is not None},
+        )
+
+    def get_workflow_runs_by_workflow_name(
+        self,
+        *,
+        workflow_name: str,
+        commit_sha: str | None = None,
+        branch: str | None = None,
+        event: str | None = None,
+        status: str | None = None,
+        per_page: int = 30,
+    ) -> Generator[Any]:
+        workflow = self.get_workflow(workflow_name)
+
+        if workflow is None:
+            raise ValueError(f'Workflow {workflow_name} not found')
+
+        params = {
+            'head_sha': commit_sha,
+            'branch': branch,
+            'event': event,
+            'status': status,
+            'per_page': per_page,
+        }
+
+        yield from self.__paginate(
+            "get",
+            url=f"{self.WORKFLOWS_API.format(repo_id=self.repo_id)}/{workflow['id']}/runs",
+            element_key='workflow_runs',
+            params={k: v for k, v in params.items() if v is not None},
+        )
+
+    def __paginate(self, method: str, *, url: str, element_key: str, **kwargs) -> Generator[dict[str, Any]]:
+        """
+        Pagine over the results of the API call.
+
+        The pagination will be done over the elment of the json response represented by the element_key.
+        """
+        next_page = url
+        while next_page:
+            response = self.__api_call(method, next_page, **kwargs)
+            elements = response.json().get(element_key)
+
+            if not isinstance(elements, list):
+                raise ValueError(f'The element key {element_key} is not iterable')
+
+            yield from elements
+
+            next_page = response.links.get('next', {}).get('url')
+            # Params will be included int he next page, pop it if supplied
+            kwargs.pop('params', None)
+
+    def __api_post(self, url: str, **kwargs):
+        return self.__api_call('post', url, **kwargs)
+
+    def __api_get(self, url: str, **kwargs):
+        return self.__api_call('get', url, **kwargs)
+
+    def __api_call(self, method: str, url: str, **kwargs) -> Response:
         from httpx import HTTPError
 
         retry_wait = 2
         while True:
             try:
-                response = getattr(self.client, method)(*args, auth=self.__auth, **kwargs)
+                response = self.client.request(method, url, auth=self.__auth, **kwargs)
 
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits
