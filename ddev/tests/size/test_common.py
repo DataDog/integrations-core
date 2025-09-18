@@ -2,7 +2,7 @@ import io
 import json
 import os
 import zipfile
-from unittest.mock import MagicMock, Mock, mock_open, patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
@@ -17,7 +17,6 @@ from ddev.cli.size.utils.common_funcs import (
     get_dependencies_sizes,
     get_files,
     get_gitignore_files,
-    get_org,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
@@ -376,35 +375,7 @@ def test_extract_version_from_about_py(file_content, expected_version):
     assert version == expected_version
 
 
-def test_get_org():
-    mock_app = Mock()
-    mock_path = Mock()
-
-    toml_data = """
-        [orgs.default]
-        api_key = "test_api_key"
-        app_key = "test_app_key"
-        site = "datadoghq.com"
-        """
-
-    mock_app.config_file.path = mock_path
-
-    with (
-        patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=toml_data)),
-        patch.object(mock_path, "open", mock_open(read_data=toml_data)),
-    ):
-        result = get_org(mock_app, "default")
-
-    expected = {
-        "api_key": "test_api_key",
-        "app_key": "test_app_key",
-        "site": "datadoghq.com",
-    }
-
-    assert result == expected
-
-
-def test_parse_sizes_json():
+def test_parse_sizes_json(tmp_path):
     compressed_data = json.dumps(
         [
             {
@@ -433,15 +404,11 @@ def test_parse_sizes_json():
             "version": None,
         }
     }
-
-    with patch(
-        "ddev.cli.size.utils.common_funcs.open",
-        side_effect=[
-            io.StringIO(compressed_data),
-            io.StringIO(uncompressed_data),
-        ],
-    ):
-        result = parse_sizes_json(Path("compressed.json"), Path("uncompressed.json"))
+    compressed_json_path = tmp_path / "compressed.json"
+    compressed_json_path.write_text(compressed_data)
+    uncompressed_json_path = tmp_path / "uncompressed.json"
+    uncompressed_json_path.write_text(uncompressed_data)
+    result = parse_sizes_json(compressed_json_path, uncompressed_json_path)
 
     assert result == expected_output
 

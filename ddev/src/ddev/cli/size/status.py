@@ -23,6 +23,7 @@ from ddev.utils.fs import Path
 
 @click.command()
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-key", type=str, help="Send metrics to Datadog using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes file. If no")
 @click.option("--commit", help="Commit hash to check the status of. It takes the commit's dependency sizes file.")
@@ -36,6 +37,7 @@ def status(
     format: list[str],
     show_gui: bool,
     to_dd_org: str | None,
+    to_dd_key: str | None,
     dependency_sizes: Path | None,
     commit: str | None,
 ) -> None:
@@ -58,6 +60,7 @@ def status(
             to_dd_org,
             commit,
             dependency_sizes,
+            to_dd_key,
             app,
         )
         modules_plat_ver: list[FileDataEntryPlatformVersion] = []
@@ -89,10 +92,10 @@ def status(
             from ddev.cli.size.utils.common_funcs import export_format
 
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
-        if to_dd_org:
+        if to_dd_org or to_dd_key:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
 
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, compressed)
+            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, compressed)
     except Exception as e:
         app.abort(str(e))
 
@@ -106,6 +109,7 @@ def validate_parameters(
     to_dd_org: str | None,
     commit: str | None,
     dependency_sizes: Path | None,
+    to_dd_key: str | None,
     app: Application,
 ) -> None:
     errors = []
@@ -121,7 +125,8 @@ def validate_parameters(
                 errors.append(f"Invalid format: {fmt!r}. Only png, csv, markdown, and json are supported.")
     if dependency_sizes and not dependency_sizes.is_file():
         errors.append(f"Dependency sizes file does not exist: {dependency_sizes!r}")
-
+    if to_dd_org and to_dd_key:
+        errors.append("Specify either --to-dd-org or --to-dd-key, not both")
     if errors:
         app.abort("\n".join(errors))
 

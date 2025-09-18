@@ -838,13 +838,14 @@ def draw_treemap_rects_with_labels(
 def send_metrics_to_dd(
     app: Application,
     modules: list[FileDataEntryPlatformVersion],
-    org: str,
+    org: str | None,
+    key: str | None,
     compressed: bool,
 ) -> None:
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
-    config_file_info = app.config.orgs.get(org, {})
+    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
     if not is_everything_committed():
         raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
     if "api_key" not in config_file_info:

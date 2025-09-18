@@ -125,7 +125,7 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         "to_dd_org",
         "to_dd_key",
         "commit",
-        "dependency_sizes_filename",
+        "dependency_sizes_path",
         "create_dependency_sizes_file",
         "should_abort",
     ),
@@ -133,13 +133,13 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         # Valid cases
         ("linux-x86_64", "3.12", ["csv"], None, None, None, None, False, False),
         ("macos-x86_64", "3.12", [], None, None, "1234567890", None, False, False),
-        ("linux-aarch64", "3.12", [], None, None, None, "sizes", True, False),
+        ("linux-aarch64", "3.12", [], None, None, None, Path("sizes"), True, False),
         # Invalid platform
         ("invalid-platform", "3.12", [], None, None, None, None, False, True),
         # Invalid version
         ("linux-x86_64", "2.7", [], None, None, None, None, False, True),
         # Invalid dependency sizes file
-        ("linux-x86_64", "3.12", [], None, None, None, "sizes", False, True),
+        ("linux-x86_64", "3.12", [], None, None, None, Path("sizes"), False, True),
         # Both commit and dependency_sizes
         (
             "linux-x86_64",
@@ -148,7 +148,7 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
             None,
             None,
             "1234567890",
-            "sizes",
+            Path("sizes"),
             True,
             True,
         ),
@@ -174,7 +174,7 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
             "test-org",
             "test-key",
             "1234567890",
-            "sizes",
+            Path("sizes"),
             True,
             True,
         ),
@@ -199,7 +199,7 @@ def test_validate_parameters(
     to_dd_org,
     to_dd_key,
     commit,
-    dependency_sizes_filename,
+    dependency_sizes_path,
     create_dependency_sizes_file,
     should_abort,
     tmp_path,
@@ -208,8 +208,8 @@ def test_validate_parameters(
     valid_versions = ["3.12"]
 
     dependency_sizes = None
-    if dependency_sizes_filename:
-        dependency_sizes = tmp_path / dependency_sizes_filename
+    if dependency_sizes_path:
+        dependency_sizes = tmp_path / dependency_sizes_path
         if create_dependency_sizes_file:
             dependency_sizes.touch()
     app = MagicMock()
@@ -224,9 +224,9 @@ def test_validate_parameters(
                 version,
                 format,
                 to_dd_org,
-                to_dd_key,
                 commit,
                 dependency_sizes,
+                to_dd_key,
                 app,
             )
         app.abort.assert_called_once()
@@ -238,9 +238,9 @@ def test_validate_parameters(
             version,
             format,
             to_dd_org,
-            to_dd_key,
             commit,
             dependency_sizes,
+            to_dd_key,
             app,
         )
         app.abort.assert_not_called()
