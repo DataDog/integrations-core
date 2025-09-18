@@ -55,7 +55,7 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::iOS",
+      "Supported OS::macOS",
       "Offering::Integration",
       "Submitted Data Type::Logs",
       "Category::Log Collection",
