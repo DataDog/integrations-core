@@ -17,7 +17,7 @@ import urllib3
 from utils import extract_metadata, normalize_project_name
 
 # Packages for which we're skipping the openssl-3 build check
-OPENSSL_PACKAGE_BYPASS = ["psycopg"]
+OPENSSL_PACKAGE_BYPASS = []
 
 
 @cache
