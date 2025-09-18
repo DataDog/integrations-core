@@ -83,7 +83,7 @@ class HTTPCheck(AgentCheck):
 
         # Only replace characters that are NOT allowed in Datadog tags
         # Allowed: alphanumerics, underscores, minuses, colons, periods, slashes
-        # Pattern matches: commas, plus, asterisk, parentheses, brackets, braces, whitespace
+        # Pattern matches: commas, pluses, asterisks, parentheses, brackets, braces, whitespaces
         tag = re.sub(rb'[,\+\*()\[\]{}\s]', rb'_', tag)
 
         # Clean up multiple underscores
