@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "46e76528-8e93-4a7c-9299-387ce0a905c6",
   "app_id": "openai",
+  "owner": "ml-observability",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
