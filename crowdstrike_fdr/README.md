@@ -4,7 +4,7 @@
 
 [CrowdStrike Falcon Data Replicator (FDR)][1] is a high-fidelity data export solution that enables organizations to securely stream raw endpoint telemetry in near real time. FDR delivers detailed event data through a data feed in JSON format using Amazon Web Services Simple Storage Service (Amazon S3) and Amazon Simple Queue Service (Amazon SQS).
 
-Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity and Network Behavior events using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search, and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate CrowdStrike FDR with Datadog to gain insights into Authentication & Identity, Account & Privilege Changes, Execution Monitoring & Threat Detection, File & Malware Activity, and Network Behavior events using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search, and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
