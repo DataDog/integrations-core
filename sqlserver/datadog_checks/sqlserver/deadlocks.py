@@ -215,6 +215,12 @@ class Deadlocks(DBMAsyncJob):
 
     def _create_deadlock_rows(self):
         db_rows = self._query_deadlocks()
+        
+        # Handle case where db_rows is None (e.g., when XE session is not found)
+        if db_rows is None:
+            self._log.warning("No deadlock data returned from query - XE session may not exist")
+            return []
+            
         deadlock_events = []
         total_number_of_characters = 0
         for i, row in enumerate(db_rows):

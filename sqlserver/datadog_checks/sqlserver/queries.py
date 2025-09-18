@@ -90,6 +90,7 @@ GROUP BY
 
 FOREIGN_KEY_QUERY = """
 SELECT
+    FK.object_id AS fk_id,
     FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
@@ -104,6 +105,7 @@ FROM
 WHERE
     FK.parent_object_id IN ({})
 GROUP BY
+    FK.object_id,
     FK.name,
     FK.parent_object_id,
     FK.referenced_object_id,
