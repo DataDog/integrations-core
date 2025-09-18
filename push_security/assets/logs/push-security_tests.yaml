@@ -1,0 +1,869 @@
+id: push-security
+tests:
+ -
+  sample: |-
+    {
+      "new" : {
+        "os" : "MACOS",
+        "loginType" : "PASSWORD_LOGIN",
+        "sourceIpAddress" : "10.10.10.10",
+        "employeeId" : "emp1",
+        "userAgent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15",
+        "passwordManuallyTyped" : true,
+        "accountId" : "acc1",
+        "weakPassword" : false,
+        "passwordId" : "pass1",
+        "appType" : "EXAMPLE_APP",
+        "loginUrl" : "https://example.com/authorize",
+        "appId" : "app1",
+        "browser" : "SAFARI",
+        "workApp" : true,
+        "loginTimestamp" : 1757326157,
+        "email" : "test.user@example.com",
+        "leakedPassword" : false
+      },
+      "description" : "test.user@example.com logged into https://example.com/authorize using a password",
+      "id" : "123",
+      "category" : "ACTIVITY",
+      "version" : "1",
+      "friendlyName" : "Login",
+      "timestamp" : 1757326162,
+      "object" : "LOGIN"
+    }
+  result:
+    custom:
+      category: "ACTIVITY"
+      evt:
+        name: "Login"
+      http:
+        url: "https://example.com/authorize"
+        useragent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15"
+        useragent_details:
+          browser:
+            family: "Safari"
+            major: "17"
+            minor: "6"
+          device:
+            brand: "Apple"
+            category: "Desktop"
+            family: "Mac"
+            model: "Mac"
+          os:
+            family: "Mac OS X"
+            major: "10"
+            minor: "15"
+            patch: "7"
+      id: "123"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      new:
+        accountId: "acc1"
+        appId: "app1"
+        appType: "EXAMPLE_APP"
+        browser: "SAFARI"
+        email: "test.user@example.com"
+        leakedPassword: false
+        loginTimestamp: 1757326157
+        loginType: "PASSWORD_LOGIN"
+        os: "MACOS"
+        passwordId: "pass1"
+        passwordManuallyTyped: true
+        weakPassword: false
+        workApp: true
+      object: "LOGIN"
+      timestamp: 1.757326162E12
+      usr:
+        id: "emp1"
+      version: "1"
+    message: "test.user@example.com logged into https://example.com/authorize using a password"
+    service: "ACTIVITY"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757326162000
+ -
+  sample: |-
+    {
+      "new" : {
+        "indicator" : "TEST_IND",
+        "mode" : "WARN",
+        "os" : "WINDOWS",
+        "browser" : "CHROME",
+        "sourceIpAddress" : "10.10.10.10",
+        "action" : "DISPLAYED",
+        "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "employee" : {
+          "firstName" : "test",
+          "lastName" : "user",
+          "licensed" : true,
+          "creationTimestamp" : 1754473323,
+          "id" : "emp1",
+          "department" : "/",
+          "email" : "test.user@example.com",
+          "chatopsEnabled" : false
+        },
+        "url" : "https://example.dev/"
+      },
+      "description" : "test.user@example.com was blocked from visiting https://example.dev/",
+      "id" : "123",
+      "category" : "CONTROL",
+      "version" : "1",
+      "friendlyName" : "Phishing tool detected",
+      "timestamp" : 1757404789,
+      "object" : "PHISHING_TOOL_DETECTED"
+    }
+  result:
+    custom:
+      category: "CONTROL"
+      evt:
+        name: "Phishing tool detected"
+        outcome: "DISPLAYED"
+      http:
+        url: "https://example.dev/"
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "140"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      id: "123"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      new:
+        browser: "CHROME"
+        employee:
+          chatopsEnabled: false
+          creationTimestamp: 1754473323
+          department: "/"
+          firstName: "test"
+          lastName: "user"
+          licensed: true
+        indicator: "TEST_IND"
+        mode: "WARN"
+        os: "WINDOWS"
+      object: "PHISHING_TOOL_DETECTED"
+      timestamp: 1.757404789E12
+      usr:
+        email: "test.user@example.com"
+        id: "emp1"
+        name: "test user"
+      version: "1"
+    message: "test.user@example.com was blocked from visiting https://example.dev/"
+    service: "CONTROL"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757404789000
+ -
+  sample: |-
+    {
+      "new" : {
+        "severity" : "MEDIUM",
+        "lastActivityTimestamp" : 1757404789,
+        "archived" : false,
+        "browserId" : "browser1",
+        "detectionType" : "PHISHING",
+        "detectionLink" : "https://pushsecurity.com/app/detections?id=test_id1",
+        "response" : "EMPLOYEE_WARNED",
+        "creationTimestamp" : 1757404789,
+        "employeeId" : "emp1",
+        "id" : "abc",
+        "employee" : {
+          "firstName" : "test",
+          "lastName" : "user",
+          "licensed" : true,
+          "creationTimestamp" : 1754473323,
+          "id" : "emp1",
+          "department" : "/",
+          "email" : "test.user@example.com",
+          "chatopsEnabled" : false
+        }
+      },
+      "description" : "test.user@example.com triggered a new phishing detection",
+      "id" : "123",
+      "category" : "DETECTION",
+      "type" : "CREATE",
+      "version" : "1",
+      "friendlyName" : "Phishing attack",
+      "timestamp" : 1757404789,
+      "object" : "PHISHING"
+    }
+  result:
+    custom:
+      category: "DETECTION"
+      evt:
+        name: "Phishing attack"
+        outcome: "EMPLOYEE_WARNED"
+      id: "123"
+      new:
+        archived: false
+        browserId: "browser1"
+        creationTimestamp: 1757404789
+        detectionLink: "https://pushsecurity.com/app/detections?id=test_id1"
+        detectionType: "PHISHING"
+        employee:
+          chatopsEnabled: false
+          creationTimestamp: 1754473323
+          department: "/"
+          firstName: "test"
+          lastName: "user"
+          licensed: true
+        employeeId: "emp1"
+        id: "abc"
+        lastActivityTimestamp: 1757404789
+        severity: "MEDIUM"
+      object: "PHISHING"
+      severity: "notice"
+      timestamp: 1.757404789E12
+      type: "CREATE"
+      usr:
+        email: "test.user@example.com"
+        id: "emp1"
+        name: "test user"
+      version: "1"
+    message: "test.user@example.com triggered a new phishing detection"
+    service: "DETECTION"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757404789000
+ -
+  sample: |-
+    {
+      "new" : {
+        "severity" : "HIGH",
+        "lastActivityTimestamp" : 1757334485,
+        "archived" : false,
+        "browserId" : "browser_1",
+        "detectionType" : "PHISHING",
+        "detectionLink" : "https://pushsecurity.com/app/detections?id=test_id1",
+        "response" : "EMPLOYEE_IGNORED_WARNING",
+        "creationTimestamp" : 1757334476,
+        "employeeId" : "emp1",
+        "id" : "test_id1",
+        "employee" : {
+          "firstName" : "test",
+          "lastName" : "user",
+          "licensed" : true,
+          "creationTimestamp" : 1752659761,
+          "id" : "emp1",
+          "email" : "test.user@example.com",
+          "chatopsEnabled" : false
+        }
+      },
+      "old" : {
+        "severity" : "MEDIUM",
+        "lastActivityTimestamp" : 1757334476,
+        "archived" : false,
+        "browserId" : "browser_1",
+        "detectionType" : "PHISHING",
+        "detectionLink" : "https://pushsecurity.com/app/detections?id=test_id1",
+        "response" : "EMPLOYEE_WARNED",
+        "creationTimestamp" : 1757334476,
+        "employeeId" : "emp1",
+        "id" : "test_id1",
+        "employee" : {
+          "firstName" : "test",
+          "lastName" : "user",
+          "licensed" : true,
+          "creationTimestamp" : 1752659761,
+          "id" : "emp1",
+          "email" : "test.user@example.com",
+          "chatopsEnabled" : false
+        }
+      },
+      "description" : "Phishing detection for test.user@example.com updated",
+      "id" : "123",
+      "category" : "DETECTION",
+      "type" : "UPDATE",
+      "version" : "1",
+      "friendlyName" : "Phishing attack",
+      "timestamp" : 1757334485,
+      "object" : "PHISHING"
+    }
+  result:
+    custom:
+      category: "DETECTION"
+      evt:
+        name: "Phishing attack"
+        outcome: "EMPLOYEE_IGNORED_WARNING"
+      id: "123"
+      new:
+        archived: false
+        browserId: "browser_1"
+        creationTimestamp: 1757334476
+        detectionLink: "https://pushsecurity.com/app/detections?id=test_id1"
+        detectionType: "PHISHING"
+        employee:
+          chatopsEnabled: false
+          creationTimestamp: 1752659761
+          firstName: "test"
+          lastName: "user"
+          licensed: true
+        employeeId: "emp1"
+        id: "test_id1"
+        lastActivityTimestamp: 1757334485
+        severity: "HIGH"
+      object: "PHISHING"
+      old:
+        archived: false
+        browserId: "browser_1"
+        creationTimestamp: 1757334476
+        detectionLink: "https://pushsecurity.com/app/detections?id=test_id1"
+        detectionType: "PHISHING"
+        employee:
+          chatopsEnabled: false
+          creationTimestamp: 1752659761
+          email: "test.user@example.com"
+          firstName: "test"
+          id: "emp1"
+          lastName: "user"
+          licensed: true
+        employeeId: "emp1"
+        id: "test_id1"
+        lastActivityTimestamp: 1757334476
+        response: "EMPLOYEE_WARNED"
+        severity: "MEDIUM"
+      severity: "warning"
+      timestamp: 1.757334485E12
+      type: "UPDATE"
+      usr:
+        email: "test.user@example.com"
+        id: "emp1"
+        name: "test user"
+      version: "1"
+    message: "Phishing detection for test.user@example.com updated"
+    service: "DETECTION"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757334485000
+ -
+  sample: |-
+    {
+      "actor" : {
+        "role" : "FULL_ACCESS",
+        "sourceIpAddress" : "10.10.10.10",
+        "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "source" : "UI",
+        "email" : "test.user@example.com"
+      },
+      "new" : {
+        "query" : "events",
+        "arguments" : {
+          "sortDirection" : "DESC",
+          "category" : "AUDIT",
+          "first" : 50
+        }
+      },
+      "description" : "test.user@example.com listed events from event log",
+      "id" : "123",
+      "category" : "AUDIT",
+      "version" : "1",
+      "friendlyName" : "Admin loaded data",
+      "timestamp" : 1757488503,
+      "object" : "ADMIN_LOADED_DATA"
+    }
+  result:
+    custom:
+      actor:
+        role: "FULL_ACCESS"
+        source: "UI"
+      category: "AUDIT"
+      evt:
+        name: "Admin loaded data"
+      http:
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "140"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      id: "123"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      new:
+        arguments:
+          category: "AUDIT"
+          first: 50
+          sortDirection: "DESC"
+        query: "events"
+      object: "ADMIN_LOADED_DATA"
+      timestamp: 1.757488503E12
+      usr:
+        email: "test.user@example.com"
+      version: "1"
+    message: "test.user@example.com listed events from event log"
+    service: "AUDIT"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757488503000
+ -
+  sample: |-
+    {
+      "actor" : {
+        "apiKeyCreatedBy" : "adm1",
+        "sourceIpAddress" : "10.10.10.10",
+        "apiKeyName" : "key-1",
+        "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "source" : "API"
+      },
+      "new" : {
+        "query" : "events",
+        "arguments" : {
+          "sortDirection" : "DESC",
+          "category" : "AUDIT",
+          "first" : 50
+        }
+      },
+      "description" : "test.user@example.com listed events from event log",
+      "id" : "123",
+      "category" : "AUDIT",
+      "version" : "1",
+      "friendlyName" : "Admin loaded data",
+      "timestamp" : 1757488503,
+      "object" : "ADMIN_LOADED_DATA"
+    }
+  result:
+    custom:
+      actor:
+        apiKeyName: "key-1"
+        source: "API"
+      category: "AUDIT"
+      evt:
+        name: "Admin loaded data"
+      http:
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "140"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      id: "123"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      new:
+        arguments:
+          category: "AUDIT"
+          first: 50
+          sortDirection: "DESC"
+        query: "events"
+      object: "ADMIN_LOADED_DATA"
+      timestamp: 1.757488503E12
+      usr:
+        email: "adm1"
+      version: "1"
+    message: "test.user@example.com listed events from event log"
+    service: "AUDIT"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757488503000
+ -
+  sample: |-
+    {
+      "new" : {
+        "lastOnlineTimestamp" : 1757404720,
+        "os" : "WINDOWS",
+        "profileSyncEnabled" : true,
+        "employeeId" : "emp_1",
+        "language" : "en-GB",
+        "isActive" : true,
+        "version" : "140.0.0.0",
+        "profileEmail" : "test.user@example.com",
+        "browser" : "CHROME",
+        "creationTimestamp" : 1757337192,
+        "extensionVersion" : "2.0.0",
+        "id" : "abc",
+        "tokenType" : "INDIVIDUAL",
+        "email" : "test.user@example.com"
+      },
+      "old" : {
+        "lastOnlineTimestamp" : 1757404720,
+        "os" : "WINDOWS",
+        "profileSyncEnabled" : true,
+        "employeeId" : "emp_1",
+        "language" : "en-GB",
+        "isActive" : true,
+        "version" : "140.0.0.0",
+        "profileEmail" : "test.user@example.com",
+        "browser" : "CHROME",
+        "creationTimestamp" : 1757337192,
+        "extensionVersion" : "1.96.19",
+        "id" : "abc",
+        "tokenType" : "INDIVIDUAL",
+        "email" : "test.user@example.com"
+      },
+      "description" : "Browser for test.user@example.com updated",
+      "id" : "123",
+      "category" : "ENTITY",
+      "type" : "UPDATE",
+      "version" : "1",
+      "friendlyName" : "Browser",
+      "timestamp" : 1757404720,
+      "object" : "BROWSER"
+    }
+  result:
+    custom:
+      category: "ENTITY"
+      evt:
+        name: "Browser"
+      id: "123"
+      new:
+        browser: "CHROME"
+        creationTimestamp: 1757337192
+        extensionVersion: "2.0.0"
+        id: "abc"
+        isActive: true
+        language: "en-GB"
+        lastOnlineTimestamp: 1757404720
+        os: "WINDOWS"
+        profileEmail: "test.user@example.com"
+        profileSyncEnabled: true
+        tokenType: "INDIVIDUAL"
+        version: "140.0.0.0"
+      object: "BROWSER"
+      old:
+        browser: "CHROME"
+        creationTimestamp: 1757337192
+        email: "test.user@example.com"
+        employeeId: "emp_1"
+        extensionVersion: "1.96.19"
+        id: "abc"
+        isActive: true
+        language: "en-GB"
+        lastOnlineTimestamp: 1757404720
+        os: "WINDOWS"
+        profileEmail: "test.user@example.com"
+        profileSyncEnabled: true
+        tokenType: "INDIVIDUAL"
+        version: "140.0.0.0"
+      timestamp: 1.75740472E12
+      type: "UPDATE"
+      usr:
+        email: "test.user@example.com"
+        id: "emp_1"
+      version: "1"
+    message: "Browser for test.user@example.com updated"
+    service: "ENTITY"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757404720000
+ -
+  sample: |-
+    {
+      "old" : {
+        "requestSupportStatus" : "DISCOVERED",
+        "hidden" : false,
+        "domain" : "www.example.com",
+        "creationTimestamp" : 1754559431,
+        "id" : "abc"
+      },
+      "description" : "www.example.com removed",
+      "id" : "123",
+      "category" : "ENTITY",
+      "type" : "DELETE",
+      "version" : "1",
+      "friendlyName" : "App (Other)",
+      "timestamp" : 1757390436,
+      "object" : "APP_OTHER"
+    }
+  result:
+    custom:
+      category: "ENTITY"
+      evt:
+        name: "App (Other)"
+      id: "123"
+      object: "APP_OTHER"
+      old:
+        creationTimestamp: 1754559431
+        domain: "www.example.com"
+        hidden: false
+        id: "abc"
+        requestSupportStatus: "DISCOVERED"
+      timestamp: 1.757390436E12
+      type: "DELETE"
+      version: "1"
+    message: "www.example.com removed"
+    service: "ENTITY"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757390436000
+ -
+  sample: |-
+    {
+      "new" : {
+        "accountId" : "acc_1",
+        "appType" : "PUSH_SECURITY",
+        "appId" : "app_1",
+        "creationTimestamp" : 1757333626,
+        "employeeId" : "emp_1",
+        "id" : "abc",
+        "state" : "OPEN",
+        "type" : "SHARED_ACCOUNT",
+        "employee" : {
+          "firstName" : "test",
+          "lastName" : "user",
+          "licensed" : true,
+          "creationTimestamp" : 1754480521,
+          "id" : "emp_1",
+          "department" : "/",
+          "email" : "test.user@example.com",
+          "chatopsEnabled" : false
+        }
+      },
+      "description" : "Shared account finding observed for test.user@example.com on Push Security",
+      "id" : "123",
+      "category" : "ENTITY",
+      "type" : "CREATE",
+      "version" : "1",
+      "friendlyName" : "Finding",
+      "timestamp" : 1757333626,
+      "object" : "FINDING"
+    }
+  result:
+    custom:
+      category: "ENTITY"
+      evt:
+        name: "Finding"
+      id: "123"
+      new:
+        accountId: "acc_1"
+        appId: "app_1"
+        appType: "PUSH_SECURITY"
+        creationTimestamp: 1757333626
+        employee:
+          chatopsEnabled: false
+          creationTimestamp: 1754480521
+          department: "/"
+          firstName: "test"
+          id: "emp_1"
+          lastName: "user"
+          licensed: true
+        employeeId: "emp_1"
+        id: "abc"
+        state: "OPEN"
+        type: "SHARED_ACCOUNT"
+      object: "FINDING"
+      timestamp: 1.757333626E12
+      type: "CREATE"
+      usr:
+        email: "test.user@example.com"
+        name: "test user"
+      version: "1"
+    message: "Shared account finding observed for test.user@example.com on Push Security"
+    service: "ENTITY"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757333626000
+ -
+  sample: |-
+    {
+      "new" : {
+        "firstName" : "test",
+        "lastName" : "user",
+        "licensed" : true,
+        "creationTimestamp" : 1754480521,
+        "id" : "abc",
+        "department" : "/",
+        "email" : "test.user@example.com",
+        "chatopsEnabled" : false
+      },
+      "old" : {
+        "firstName" : "test",
+        "lastName" : "user",
+        "licensed" : false,
+        "creationTimestamp" : 1754480521,
+        "id" : "abc",
+        "department" : "/",
+        "email" : "test.user@example.com",
+        "chatopsEnabled" : false
+      },
+      "description" : "test.user@example.com updated",
+      "id" : "123",
+      "category" : "ENTITY",
+      "type" : "UPDATE",
+      "version" : "1",
+      "friendlyName" : "Employee",
+      "timestamp" : 1757327806,
+      "object" : "EMPLOYEE"
+    }
+  result:
+    custom:
+      category: "ENTITY"
+      evt:
+        name: "Employee"
+      id: "123"
+      new:
+        chatopsEnabled: false
+        creationTimestamp: 1754480521
+        department: "/"
+        email: "test.user@example.com"
+        firstName: "test"
+        lastName: "user"
+        licensed: true
+      object: "EMPLOYEE"
+      old:
+        chatopsEnabled: false
+        creationTimestamp: 1754480521
+        department: "/"
+        email: "test.user@example.com"
+        firstName: "test"
+        id: "abc"
+        lastName: "user"
+        licensed: false
+      timestamp: 1.757327806E12
+      type: "UPDATE"
+      usr:
+        id: "abc"
+        name: "test user"
+      version: "1"
+    message: "test.user@example.com updated"
+    service: "ENTITY"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757327806000
+ -
+  sample: |-
+    {
+      "old" : {
+        "accountId" : "acc_1",
+        "appType" : "PUSH_SECURITY",
+        "appId" : "app_1",
+        "creationTimestamp" : 1757333626,
+        "employeeId" : "emp_1",
+        "id" : "abc",
+        "state" : "OPEN",
+        "type" : "SHARED_ACCOUNT",
+        "employee" : {
+          "firstName" : "test",
+          "lastName" : "user",
+          "licensed" : true,
+          "creationTimestamp" : 1754480521,
+          "id" : "emp_1",
+          "department" : "/",
+          "email" : "test.user@example.com",
+          "chatopsEnabled" : false
+        }
+      },
+      "description" : "Shared account finding observed for test.user@example.com on Push Security",
+      "id" : "123",
+      "category" : "ENTITY",
+      "type" : "CREATE",
+      "version" : "1",
+      "friendlyName" : "Finding",
+      "timestamp" : 1757333626,
+      "object" : "FINDING"
+    }
+  result:
+    custom:
+      category: "ENTITY"
+      evt:
+        name: "Finding"
+      id: "123"
+      object: "FINDING"
+      old:
+        accountId: "acc_1"
+        appId: "app_1"
+        appType: "PUSH_SECURITY"
+        creationTimestamp: 1757333626
+        employee:
+          chatopsEnabled: false
+          creationTimestamp: 1754480521
+          department: "/"
+          email: "test.user@example.com"
+          firstName: "test"
+          id: "emp_1"
+          lastName: "user"
+          licensed: true
+        employeeId: "emp_1"
+        id: "abc"
+        state: "OPEN"
+        type: "SHARED_ACCOUNT"
+      timestamp: 1.757333626E12
+      type: "CREATE"
+      usr:
+        name: " "
+      version: "1"
+    message: "Shared account finding observed for test.user@example.com on Push Security"
+    service: "ENTITY"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757333626000
+ -
+  sample: |-
+    {
+      "old" : {
+        "firstName" : "test",
+        "lastName" : "user",
+        "licensed" : false,
+        "creationTimestamp" : 1754480521,
+        "id" : "abc",
+        "department" : "/",
+        "email" : "test.user@example.com",
+        "chatopsEnabled" : false
+      },
+      "description" : "test.user@example.com updated",
+      "id" : "123",
+      "category" : "ENTITY",
+      "type" : "DELETE",
+      "version" : "1",
+      "friendlyName" : "Employee",
+      "timestamp" : 1757327806,
+      "object" : "EMPLOYEE"
+    }
+  result:
+    custom:
+      category: "ENTITY"
+      evt:
+        name: "Employee"
+      id: "123"
+      object: "EMPLOYEE"
+      old:
+        chatopsEnabled: false
+        creationTimestamp: 1754480521
+        department: "/"
+        email: "test.user@example.com"
+        firstName: "test"
+        lastName: "user"
+        licensed: false
+      timestamp: 1.757327806E12
+      type: "DELETE"
+      usr:
+        id: "abc"
+        name: "test user"
+      version: "1"
+    message: "test.user@example.com updated"
+    service: "ENTITY"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757327806000
