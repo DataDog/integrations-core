@@ -121,18 +121,24 @@ def validate_parameters(
     errors = []
     if platform and platform not in valid_platforms:
         errors.append(f"Invalid platform: {platform!r}")
+
     if version and version not in valid_versions:
         errors.append(f"Invalid version: {version!r}")
+
     if commit and dependency_sizes:
         errors.append("Pass either 'commit' or 'dependency-sizes'. Both options cannot be supplied.")
+
     if format:
         for fmt in format:
             if fmt not in ["png", "csv", "markdown", "json"]:
                 errors.append(f"Invalid format: {fmt!r}. Only png, csv, markdown, and json are supported.")
+
     if dependency_sizes and not dependency_sizes.is_file():
         errors.append(f"Dependency sizes file does not exist: {dependency_sizes!r}")
+
     if to_dd_org and to_dd_key:
         errors.append("Specify either --to-dd-org or --to-dd-key, not both")
+
     if errors:
         app.abort("\n".join(errors))
 

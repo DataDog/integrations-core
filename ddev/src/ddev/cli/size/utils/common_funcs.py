@@ -1028,10 +1028,16 @@ def get_current_sizes_json(run_id: str, platform: str) -> Path | None:
                     tmpdir,
                 ],
                 check=True,
+                capture_output=True,
                 text=True,
             )
         except subprocess.CalledProcessError as e:
-            print(f"No artifact found for run_id={run_id}, platform={platform}: {e}")
+            if e.stderr and "no artifact matches any of the names or patterns provided" in e.stderr:
+                print(f"No artifact found for run_id={run_id}, platform={platform}")
+            else:
+                print(f"Failed to download current sizes json: {e}")
+
+            print("Comparing to merge base commit")
             return None
 
         print(f"Downloaded artifacts to {tmpdir}")

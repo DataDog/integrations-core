@@ -47,15 +47,15 @@ def mock_size_status():
     with (
         patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
         patch(
-            "ddev.cli.size.status.get_valid_platforms",
+            "ddev.cli.size.utils.common_funcs.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
-            "ddev.cli.size.status.get_valid_versions",
+            "ddev.cli.size.utils.common_funcs.get_valid_versions",
             return_value=({'3.12'}),
         ),
-        patch("ddev.cli.size.status.get_files", return_value=fake_files),
-        patch("ddev.cli.size.status.get_dependencies", return_value=fake_deps),
+        patch("ddev.cli.size.utils.common_funcs.get_files", return_value=fake_files),
+        patch("ddev.cli.size.utils.common_funcs.get_dependencies", return_value=fake_deps),
         patch(
             "ddev.cli.size.utils.common_funcs.os.path.relpath",
             side_effect=lambda path, _: path.replace(f"fake_root{os.sep}", ""),
