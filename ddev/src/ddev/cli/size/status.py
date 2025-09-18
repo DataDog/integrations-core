@@ -23,7 +23,7 @@ from ddev.utils.fs import Path
 
 @click.command()
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
-@click.option("--to-dd-key", type=str, help="Send metrics to Datadog using the specified API key.")
+@click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes file. If no")
 @click.option("--commit", help="Commit hash to check the status of. It takes the commit's dependency sizes file.")
