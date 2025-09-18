@@ -8,9 +8,16 @@ from itertools import product
 import click
 import requests
 
-from ....fs import dir_exists, path_join, write_file_lines
-from ...constants import get_root
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from datadog_checks.dev.fs import dir_exists, path_join, write_file_lines
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import get_root
 
 METRIC_SEPARATORS = ('.', '_')
 TYPE_MAP = {'gauge': 'gauge', 'counter': 'count', 'rate': 'gauge', 'histogram': 'gauge', 'summary': 'gauge'}

@@ -9,7 +9,8 @@ from typing import Callable, Iterable, List, Optional
 
 from pathspec.gitignore import GitIgnoreSpec
 
-from ..errors import SubprocessError
+from datadog_checks.dev.errors import SubprocessError
+
 from .constants import get_root
 from .git import git_show_file
 from .utils import get_license_header as get_default_license_header

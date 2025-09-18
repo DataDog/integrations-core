@@ -1,1 +1,0 @@
-Fix WithHttpCodeClass decorator not keeping track of internal state of the scraper

@@ -1,1 +1,0 @@
-Stop relying on hardcoded value of run_path, and use the value in the agent config

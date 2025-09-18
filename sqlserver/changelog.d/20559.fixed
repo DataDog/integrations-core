@@ -1,1 +1,0 @@
-emit session_id in XE events as an integer always, remove unnecessary event_source field

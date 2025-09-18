@@ -1,0 +1,743 @@
+{
+  "title": "Kuma Service Communication",
+  "description": "## Service Communication Insights\n\nThis dashboard tracks communication between services in your Kuma mesh, helping you:\n\n**Identify issues:**\n- Connection failures and timeouts\n- Increased latency between services\n- Traffic imbalances and hotspots\n\n**Further Reading:**\n- [Traffic Metrics Policy](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Observability Guide](https://kuma.io/docs/latest/explore/observability/)\n\n[[suggested_dashboards]]",
+  "widgets": [
+    {
+      "id": 2802235483003109,
+      "definition": {
+        "title": "",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7965937770186760,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/kuma_large.svg",
+              "url_dark_theme": "/static/images/logos/kuma_reversed_large.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": true,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
+          },
+          {
+            "id": 1097825529901868,
+            "definition": {
+              "type": "note",
+              "content": "## Service Communication Insights\n\nThis dashboard tracks communication between services in your Kuma mesh, helping you:\n\n**Identify issues:**\n- Connection failures and timeouts\n- Increased latency between services\n- Traffic imbalances and hotspots\n\n**Further Reading:**\n- [Traffic Metrics Policy](https://kuma.io/docs/latest/policies/traffic-metrics/)\n- [Observability Guide](https://kuma.io/docs/latest/explore/observability/)\\\\\n  \n**Note:** If your environment also runs Envoy proxies that **aren’t** managed by Kuma, you can set a mesh [template variable](https://docs.datadoghq.com/dashboards/template_variables/) in this dashboard to filter them out.\n",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 2, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 10 }
+    },
+    {
+      "id": 9876543210987654,
+      "definition": {
+        "title": "Service Communication Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8765432109876543,
+            "definition": {
+              "type": "note",
+              "content": "Get a high-level view of service communication health across your mesh.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
+          },
+          {
+            "id": 7654321098765432,
+            "definition": {
+              "title": "Request Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq.count{$destination_cluster,$source_service,$zone,$mesh}.as_rate()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": { "include_zero": true },
+                "type": "area"
+              }
+            },
+            "layout": { "x": 0, "y": 1, "width": 3, "height": 1 }
+          },
+          {
+            "id": 4321098765432109,
+            "definition": {
+              "title": "Active Connections",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_cx_active{$destination_cluster,$source_service,$zone,$mesh}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": { "include_zero": true },
+                "type": "area"
+              }
+            },
+            "layout": { "x": 3, "y": 1, "width": 3, "height": 1 }
+          },
+          {
+            "id": 6543210987654321,
+            "definition": {
+              "title": "Success Percentage",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(1 - query1 / query2) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq_xx.count{$destination_cluster AND $source_service AND $zone AND $mesh AND envoy_response_code_class IN (4, 5)}.as_rate()"
+                    },
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:envoy.cluster.upstream_rq_completed.count{$destination_cluster,$source_service,$zone,$mesh}.as_rate()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0.95,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 0.95,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": { "include_zero": true },
+                "type": "area"
+              }
+            },
+            "layout": { "x": 0, "y": 2, "width": 3, "height": 1 }
+          },
+          {
+            "id": 5432109876543210,
+            "definition": {
+              "title": "Latency (Average)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq_time.sum{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    },
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:envoy.cluster.upstream_rq_time.count{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": { "include_zero": true },
+                "type": "area"
+              }
+            },
+            "layout": { "x": 3, "y": 2, "width": 3, "height": 1 }
+          },
+          {
+            "id": 3210987654321098,
+            "definition": {
+              "title": "Top Service Pairs by Traffic",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq.count{$zone,$mesh,$destination_cluster,$source_service} by {kuma_io_service,envoy_cluster}.as_rate()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Request Rate",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+          },
+          {
+            "id": 2109876543210987,
+            "definition": {
+              "title": "Service Communication",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq.count{$zone,$mesh,$destination_cluster,$source_service} by {kuma_io_service,envoy_cluster}.as_rate()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": { "palette": "classic" },
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" }
+            },
+            "layout": { "x": 0, "y": 5, "width": 6, "height": 4 }
+          }
+        ]
+      },
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 10 }
+    },
+    {
+      "id": 5555555555555555,
+      "definition": {
+        "title": "Request Performance",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6666666666666666,
+            "definition": {
+              "type": "note",
+              "content": "Analyze request-level performance metrics to ensure services meet SLOs and identify optimization opportunities.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
+          },
+          {
+            "id": 7777777777777777,
+            "definition": {
+              "title": "Request Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq.count{$destination_cluster,$source_service,$zone,$mesh}.as_rate()"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 6, "height": 2 }
+          },
+          {
+            "id": 8888888888888888,
+            "definition": {
+              "title": "Request Duration (Average)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq_time.sum{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:envoy.cluster.upstream_rq_time.count{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "markers": [
+                { "value": "y > 500", "display_type": "error dashed" },
+                { "value": "y > 200", "display_type": "warning dashed" }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+          },
+          {
+            "id": 10000000000000000,
+            "definition": {
+              "title": "HTTP Response Codes",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_rq_xx.count{$destination_cluster,$source_service,$zone,$mesh} by {envoy_response_code_class}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": { "palette": "semantic" },
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "hide_total": false,
+              "legend": { "type": "automatic" }
+            },
+            "layout": { "x": 0, "y": 5, "width": 6, "height": 4 }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 10,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 3304026508757406,
+      "definition": {
+        "title": "Traffic Patterns",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1234567890123456,
+            "definition": {
+              "type": "note",
+              "content": "Monitor service-to-service traffic patterns to understand communication flows and identify anomalies.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 1 }
+          },
+          {
+            "id": 584737675619954,
+            "definition": {
+              "title": "Bytes Transmitted to Destination",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_cx_tx_bytes.count{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 6, "height": 2 }
+          },
+          {
+            "id": 8620186812746711,
+            "definition": {
+              "title": "Connection Establishment Time (Average)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_cx_connect_ms.sum{$zone,$source_service,$destination_cluster,$mesh}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:envoy.cluster.upstream_cx_connect_ms.count{$zone,$source_service,$destination_cluster,$mesh}.as_rate()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
+          },
+          {
+            "id": 8405221309961872,
+            "definition": {
+              "title": "Connection and Request Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_cx_destroy_remote_with_active_rq.count{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:envoy.cluster.upstream_cx_connect_timeout.count{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:envoy.cluster.upstream_rq_timeout.count{$destination_cluster,$source_service,$zone,$mesh}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    { "formula": "query1" },
+                    { "formula": "query2" },
+                    { "formula": "query3" }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
+          },
+          {
+            "id": 6621706999193019,
+            "definition": {
+              "title": "Connection Duration (Average)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:envoy.cluster.upstream_cx_length_ms.sum{$zone,$source_service,$destination_cluster,$mesh}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:envoy.cluster.upstream_cx_length_ms.count{$zone,$source_service,$destination_cluster,$mesh}.as_rate()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 5, "width": 6, "height": 2 }
+          },
+          {
+            "id": 4967730596643575,
+            "definition": {
+              "title": "Active Upstream Connections",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:envoy.cluster.upstream_cx_active{$destination_cluster,$zone,$source_service,$mesh}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 7, "width": 6, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 10 }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "source_service",
+      "prefix": "kuma_io_service",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "destination_cluster",
+      "prefix": "envoy_cluster",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "zone",
+      "prefix": "kuma_io_zone",
+      "available_values": [],
+      "default": "*"
+    },
+    { "name": "mesh", "prefix": "mesh", "available_values": [], "default": "*" }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

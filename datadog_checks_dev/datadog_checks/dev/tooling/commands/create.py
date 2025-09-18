@@ -8,15 +8,16 @@ from datetime import date
 
 import click
 
-from ...fs import resolve_path
-from ..constants import get_root
-from ..create import (
+from datadog_checks.dev.fs import resolve_path
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.create import (
     construct_template_fields,
     create_template_files,
     get_valid_templates,
     prefill_template_fields_for_check_only,
 )
-from ..utils import kebab_case_name, normalize_display_name, normalize_package_name
+from datadog_checks.dev.tooling.utils import kebab_case_name, normalize_display_name, normalize_package_name
+
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')

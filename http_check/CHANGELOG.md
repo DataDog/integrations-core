@@ -2,7 +2,33 @@
 
 <!-- towncrier release notes start -->
 
-## 11.5.0 / 2025-06-12
+## 12.1.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+***Fixed***:
+
+* support http certificate check via proxy ([#20473](https://github.com/DataDog/integrations-core/pull/20473))
+
+## 12.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 12.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+***Added***:
+
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+
+## 11.5.0 / 2025-06-12 / Agent 7.68.0
 
 ***Added***:
 

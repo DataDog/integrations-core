@@ -826,36 +826,6 @@
                         },
                         {
                             "events": [],
-                            "name": "gridCell5_copy6",
-                            "properties": {
-                                "children": [
-                                    {
-                                        "events": [],
-                                        "name": "datadog_logo",
-                                        "properties": {
-                                            "content": "![](https://app-builder-demo.s3.amazonaws.com/metrics-monitors/dd.svg)",
-                                            "contentType": "markdown",
-                                            "isVisible": true,
-                                            "textAlign": "center",
-                                            "verticalAlign": "center"
-                                        },
-                                        "type": "text"
-                                    }
-                                ],
-                                "isVisible": "true",
-                                "layout": {
-                                    "default": {
-                                        "height": 11,
-                                        "width": 7,
-                                        "x": 2,
-                                        "y": 0
-                                    }
-                                }
-                            },
-                            "type": "gridCell"
-                        },
-                        {
-                            "events": [],
                             "name": "gridCell3",
                             "properties": {
                                 "children": [
@@ -1130,6 +1100,36 @@
                                 }
                             },
                             "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell11",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "integrationLogo0",
+                                        "properties": {
+                                            "horizontalAlign": "center",
+                                            "integrationId": "_datadog",
+                                            "isLoading": false,
+                                            "isVisible": true,
+                                            "verticalAlign": "center"
+                                        },
+                                        "type": "integrationLogo"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 11,
+                                        "width": 1,
+                                        "x": 5,
+                                        "y": 0
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
                         }
                     ]
                 },
@@ -1215,7 +1215,7 @@
         "workflow_output": {}
     },
     "tile_background": "table-with-modal",
-    "tile_icon_action_fqn": "com.datadoghq.github.getProjectDeployments",
+    "tile_icon_action_fqn": "com.datadoghq.gitlab.getProjectDeployments",
     "tags": [
         "software_delivery"
     ],

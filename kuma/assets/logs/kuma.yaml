@@ -1,0 +1,160 @@
+id: kuma
+metric_id: kuma
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - description: Destination Kuma service for the request.
+    facetType: list
+    groups:
+      - Kuma
+    name: kuma.destination_service
+    path: kuma.destination_service
+    source: log
+    type: string
+  - description: Name of the Kuma mesh.
+    facetType: list
+    groups:
+      - Kuma
+    name: kuma.mesh
+    path: kuma.mesh
+    source: log
+    type: string
+  - description: Source Kuma service for the request (without port).
+    facetType: list
+    groups:
+      - Kuma
+    name: kuma.source_address_without_port
+    path: kuma.source_address_without_port
+    source: log
+    type: string
+  - description: Source Kuma service for the request.
+    facetType: list
+    groups:
+      - Kuma
+    name: kuma.source_service
+    path: kuma.source_service
+    source: log
+    type: string
+  - description: Upstream host for the request.
+    facetType: list
+    groups:
+      - Kuma
+    name: kuma.upstream.host
+    path: kuma.upstream.host
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Kuma
+  enabled: true
+  filter:
+    query: source:kuma
+  processors:
+    - type: grok-parser
+      name: Kuma Log Parser
+      enabled: true
+      source: message
+      samples:
+        - '[2025-06-26T21:29:21.535Z] - default 10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms, sent 6195 bytes, received: 194 bytes'
+        - '[2025-06-26T13:19:18.314Z] default "GET /api?timeout=32s HTTP/1.1" 404 NR 0 0 0 - "10.42.1.26" "kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd" "-" "0efbfa26-1e2d-9144-919a-e9985d0eab30" "localhost:8080" "unknown" "edge-gateway_kuma-demo_svc" "10.42.3.27" "-"'
+
+      grok:
+        supportRules: |-
+          isoTimestamp     %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ")}
+          goTimestamp      %{date("yyyy/MM/dd HH:mm:ss")}
+          notTab           %{regex("[^\\t]*")}
+          notQuote         %{regex("[^\"]*")}
+          notOpeningParens %{regex("[^\\(]*")}
+          serviceName      %{regex("[a-zA-Z0-9_\\*-]*")}
+          loggerName       %{regex("[a-zA-Z0-9_\\.-]+")}
+          xForwardedFor    %{regex("[0-9\\., ]+")}
+          httpVersion      %{regex("HTTP/[0-9\\.]+")}
+          traceId          %{regex("[0-9a-f]+")}
+          authority        %{regex("[0-9a-zA-Z@:\\._-]+")}
+        matchRules: >
+          # TCP access log
+          # Format: [%START_TIME%] %RESPONSE_FLAGS% %KUMA_MESH% %KUMA_SOURCE_ADDRESS_WITHOUT_PORT%(%KUMA_SOURCE_SERVICE%)->%UPSTREAM_HOST%(%KUMA_DESTINATION_SERVICE%) took %DURATION%ms, sent %BYTES_SENT% bytes, received: %BYTES_RECEIVED% bytes
+          # Reference: https://github.com/kumahq/kuma/blob/2.11.1/pkg/plugins/policies/meshaccesslog/plugin/xds/configurer.go#L28
+          # Sample:
+          # [2025-06-26T21:29:21.535Z] - default 10.42.1.5(unknown)->10.42.1.5:6379(redis_kuma-demo_svc_6379) took 14004ms, sent 6195 bytes, received: 194 bytes
+
+          kuma_dp_tcp_log (\[%{isoTimestamp:date}\])? (%{word:response.flags}|-) %{notSpace:kuma.mesh} %{ipOrHost:kuma.source_address_without_port}\((unknown|%{serviceName:kuma.source_service})\)\->(-|%{notOpeningParens:kuma.upstream.host})\((unknown|%{serviceName:kuma.destination_service})\) took %{integer:duration:scale(1000000)}ms, sent %{integer:network.bytes_written} bytes, received: %{integer:network.bytes_read} bytes
+
+          # HTTP Access log
+          # Format: [%START_TIME%] %KUMA_MESH% "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%" "%REQ(X-B3-TRACEID?X-DATADOG-TRACEID)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%KUMA_SOURCE_SERVICE%" "%KUMA_DESTINATION_SERVICE%" "%KUMA_SOURCE_ADDRESS_WITHOUT_PORT%" "%UPSTREAM_HOST%"
+          # Reference: https://github.com/kumahq/kuma/blob/2.11.1/pkg/plugins/policies/meshaccesslog/plugin/xds/configurer.go#L29
+          # Trace ID References: https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers#x-datadog-trace-id https://github.com/openzipkin/b3-propagation 
+          # Sample:
+          # [2025-06-26T13:19:18.314Z] default "GET /api?timeout=32s HTTP/1.1" 404 NR 0 0 0 - "10.42.1.26" "kubectl/v1.31.5+k3s1 (linux/arm64) kubernetes/56ec5dd" "-" "0efbfa26-1e2d-9144-919a-e9985d0eab30" "localhost:8080" "unknown" "edge-gateway_kuma-demo_svc" "10.42.3.27" "-"
+
+
+          kuma_dp_http_access_log (\[%{isoTimestamp:date}\])? %{notSpace:kuma.mesh} "%{word:http.method} %{notSpace:http.url} %{httpVersion:http.version}" %{integer:http.status_code} %{word:response.flags} %{integer:network.bytes_read} %{integer:network.bytes_written} %{integer:duration:scale(1000000)} (%{integer:response.x_envoy_upstream_service_time}|-) "%{xForwardedFor:http._x_forwarded_for}" "%{notQuote:http.useragent}" "(-|%{traceId:kuma.trace_id})" "%{uuid:http.request_id}" "%{authority:kuma.http.request.authority}" "(unknown|%{serviceName:kuma.source_service})" "(unknown|%{serviceName:kuma.destination_service})" "(%{ipOrHost:kuma.source_address_without_port}|-)" "(%{ipOrHost:kuma.upstream.host}|-)"
+          
+          # Log message from a Kuma dataplane
+          # Samples
+          # [2025-06-03 18:44:06.650][31][info][upstream] [source/common/listener_manager/lds_api.cc:106] lds: add/update listener 'outbound:10.43.182.159:80'
+          # [2025-06-03 18:54:23.975][32][info][main] [source/server/server.cc:998] main dispatch loop exited
+
+          kuma_dp \[%{date("yyyy-MM-dd HH:mm:ss.SSS"):date}\]\[%{number:logger.thread_name}\]\[%{word:level}\]\[%{word:component}\] \[%{data:logger.file}:%{number:logger.lineno}\] %{data:message}
+
+          # Log messages in structured format
+          # Samples
+          # 2025-05-26T20:44:41.327Z	INFO	plugin.runtime.gateway	registered gateway plugin
+          # 2025-05-26T20:47:04.174Z	INFO	controllers.Service	annotating service which is part of the mesh	{"service": {"name":"datadog-admission-controller","namespace":"datadog-operator"}, "annotation": "ingress.kubernetes.io/service-upstream=true"}
+
+          kuma_cp_structured_log %{isoTimestamp:date}\t%{word:level}\t%{loggerName:logger.name}\t%{notTab:message}(\t%{data::json})?
+
+          # Log messages from Kubernetes libraries used by Kuma
+          # Sample
+          # I0526 20:44:41.456499       1 leaderelection.go:257] attempting to acquire leader lease kuma-system/cp-leader-lease...
+
+          kuma_cp_glog %{regex("\\w"):level}%{date("MMdd HH:mm:ss.SSSSSS"):date}\s+%{number:logger.thread_name} %{loggerName:logger.name}:%{number:logger.lineno}\] %{data:message}
+
+          # Log messages from Kuma's built-in HTTP server
+          # Sample
+          # 2025/05/31 15:56:10 http: TLS handshake error from 10.42.0.1:41588: EOF
+
+          kuma_cp_go_http  %{goTimestamp:date}\s%{word:prefix}:\s%{data:message}
+
+          # Log message for Kuma dataplane shutdown (SIGTERM)
+          # Sample:
+          # [INFO] SIGTERM: Shutting down servers then terminating
+
+          kuma_dp_signal \[%{word:level}\] %{word:signal}: %{data:message}
+    - type: user-agent-parser
+      name: User-Agent Parser
+      enabled: true
+      sources:
+        - http.useragent
+      target: http.useragent_details
+      encoded: false
+      combineVersionDetails: false
+    - type: message-remapper
+      name: Define `message` as the official message of the of the log
+      enabled: true
+      sources:
+        - message
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
+    - type: date-remapper
+      name: Define 'date' as the official date of the log
+      enabled: true
+      sources:
+        - date

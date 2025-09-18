@@ -5,10 +5,11 @@ from __future__ import unicode_literals
 
 import copy
 import time
+from typing import Tuple
 
-import psycopg2
-import psycopg2.extras
+import psycopg
 from cachetools import TTLCache
+from psycopg.rows import dict_row
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
@@ -17,8 +18,6 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
-from datadog_checks.postgres.encoding import decode_with_encodings
 
 from .query_calls_cache import QueryCallsCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
@@ -27,7 +26,7 @@ from .version_utils import V9_4, V10, V14
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 QUERYID_TO_CALLS_QUERY = """
 SELECT queryid, calls
@@ -157,7 +156,7 @@ DEFAULT_COLLECTION_INTERVAL = 10
 class PostgresStatementMetrics(DBMAsyncJob):
     """Collects telemetry for SQL statements"""
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         collection_interval = float(
             config.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -167,12 +166,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
             check,
             run_sync=is_affirmative(config.statement_metrics_config.get('run_sync', False)),
             enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
-            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
+            expected_db_exceptions=(psycopg.errors.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
             dbms="postgres",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._metrics_collection_interval = collection_interval
@@ -203,14 +201,19 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
 
-    def _execute_query(self, cursor, query, params=()):
+    def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         try:
-            self._log.debug("Running query [%s] %s", query, params)
-            cursor.execute(query, params)
-            return cursor.fetchall()
-        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+            with self._check._get_main_db() as conn:
+                with conn.cursor(row_factory=row_factory) as cursor:
+                    self._log.debug("Running query [%s] %s", query, params)
+                    cursor.execute(query, params=params, binary=binary)
+                    return cursor.fetchall(), cursor.description
+        except psycopg.Error as e:
             # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
             # but the next time the query is run, it will retrieve the correct columns.
+            self._log.warning("Failed to run query [%s] %s", query, params)
             self._stat_column_cache = []
             raise e
 
@@ -230,12 +233,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
             pg_stat_statements_view=self._config.pg_stat_statements_view,
             extra_clauses="LIMIT 0",
         )
-        with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
-                self._execute_query(cursor, query, params=(self._config.dbname,))
-                col_names = [desc[0] for desc in cursor.description] if cursor.description else []
-                self._stat_column_cache = col_names
-                return col_names
+
+        _, description = self._execute_query(query)
+        col_names = [desc[0] for desc in description] if description else []
+        self._stat_column_cache = col_names
+        self._log.debug("Fetched columns %s", col_names)
+        return col_names
 
     def _check_called_queries(self):
         pgss_view_without_query_text = self._config.pg_stat_statements_view
@@ -246,20 +249,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
             # For more info: https://www.postgresql.org/docs/current/pgstatstatements.html#PGSTATSTATEMENTS-FUNCS
             pgss_view_without_query_text = "pg_stat_statements(false)"
 
-        with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
-                rows = self._execute_query(cursor, query, params=(self._config.dbname,))
-                self._query_calls_cache.set_calls(rows)
-                self._check.gauge(
-                    "dd.postgresql.pg_stat_statements.calls_changed",
-                    len(self._query_calls_cache.called_queryids),
-                    tags=self.tags,
-                    hostname=self._check.reported_hostname,
-                    raw=True,
-                )
+            query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
+            rows, _ = self._execute_query(query, row_factory=dict_row)
+            self._query_calls_cache.set_calls(rows)
+            self._check.gauge(
+                "dd.postgresql.pg_stat_statements.calls_changed",
+                len(self._query_calls_cache.called_queryids),
+                tags=self.tags,
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
 
-                return self._query_calls_cache.called_queryids
+            return self._query_calls_cache.called_queryids
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -400,39 +401,33 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
-            with self._check._get_main_db() as conn:
-                with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                    if conn.encoding == "SQLASCII":
-                        # SQLASCII can truncate encodings across bytes, e.g. UTF8 multi-byte characters
-                        # so we need to read in the data as bytes and then decode as best we can
-                        psycopg2.extensions.register_type(psycopg2.extensions.BYTES, cursor)
-                    if len(self._query_calls_cache.cache) > 0:
-                        return self._execute_query(
-                            cursor,
-                            statements_query(
-                                cols=', '.join(query_columns),
-                                pg_stat_statements_view=self._config.pg_stat_statements_view,
-                                filters=filters,
-                                called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
-                            ),
-                            params=params,
-                        )
-                    else:
-                        return self._execute_query(
-                            cursor,
-                            statements_query(
-                                cols=', '.join(query_columns),
-                                pg_stat_statements_view=self._config.pg_stat_statements_view,
-                                filters=filters,
-                            ),
-                            params=params,
-                        )
-        except psycopg2.Error as e:
+            if len(self._query_calls_cache.cache) > 0:
+                rows, _ = self._execute_query(
+                    statements_query(
+                        cols=', '.join(query_columns),
+                        pg_stat_statements_view=self._config.pg_stat_statements_view,
+                        filters=filters,
+                        called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
+                    ),
+                    params=params,
+                    row_factory=dict_row,
+                )
+                return rows
+            else:
+                rows, _ = self._execute_query(
+                    statements_query(
+                        cols=', '.join(query_columns),
+                        pg_stat_statements_view=self._config.pg_stat_statements_view,
+                        filters=filters,
+                    ),
+                    params=params,
+                    row_factory=dict_row,
+                )
+                return rows
+        except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
-            if (
-                isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
-            ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
+            if (isinstance(e, psycopg.errors.ObjectNotInPrerequisiteState)) and 'pg_stat_statements' in str(e):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
                 self._check.record_warning(
                     DatabaseConfigurationError.pg_stat_statements_not_loaded,
@@ -448,7 +443,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
                     ),
                 )
-            elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
+            elif isinstance(e, psycopg.errors.UndefinedTable) and 'pg_stat_statements' in str(e):
                 error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
                 self._check.record_warning(
                     DatabaseConfigurationError.pg_stat_statements_not_created,
@@ -490,33 +485,27 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if self._check.version < V14:
             return
         try:
-            with self._check._get_main_db() as conn:
-                with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                    rows = self._execute_query(
-                        cursor,
-                        PG_STAT_STATEMENTS_DEALLOC,
-                    )
-                if rows:
-                    dealloc = rows[0][0]
-                    self._check.monotonic_count(
-                        "pg_stat_statements.dealloc",
-                        dealloc,
-                        tags=self.tags,
-                        hostname=self._check.reported_hostname,
-                    )
-        except psycopg2.Error as e:
+            rows, _ = self._execute_query(
+                PG_STAT_STATEMENTS_DEALLOC,
+            )
+            if rows:
+                dealloc = rows[0][0]
+                self._check.monotonic_count(
+                    "pg_stat_statements.dealloc",
+                    dealloc,
+                    tags=self.tags,
+                    hostname=self._check.reported_hostname,
+                )
+        except psycopg.Error as e:
             self._log.warning("Failed to query for pg_stat_statements_info: %s", e)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
-            with self._check._get_main_db() as conn:
-                with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                    rows = self._execute_query(
-                        cursor,
-                        query,
-                    )
+            rows, _ = self._execute_query(
+                query,
+            )
             count = 0
             if rows:
                 count = rows[0][0]
@@ -532,7 +521,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 tags=self.tags,
                 hostname=self._check.reported_hostname,
             )
-        except psycopg2.Error as e:
+        except psycopg.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     def _baseline_metrics_query_key(self, row):
@@ -572,7 +561,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if (
             self._last_baseline_metrics_expiry is None
             or self._last_baseline_metrics_expiry + self._config.baseline_metrics_expiry < time.time()
-            or len(self._baseline_metrics) > 3 * int(self._check.pg_settings.get("pg_stat_statements.max"))
+            or len(self._baseline_metrics) > 3 * int(self._check.pg_settings.get("pg_stat_statements.max", 10000))
         ):
             self._baseline_metrics = {}
             self._query_calls_cache = QueryCallsCache()
@@ -630,18 +619,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
         return rows
 
     def _normalize_queries(self, rows):
-        with self._check._get_main_db() as conn:
-            encoding = conn.encoding if conn.encoding != "SQLASCII" else 'utf-8'
-
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                query_text = (
-                    decode_with_encodings(row['query'], self._config.query_encodings)
-                    if type(row['query']) is bytes
-                    else row['query']
-                )
+                query_text = row['query']
                 statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
@@ -653,21 +635,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             obfuscated_query = statement['query']
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            for key in ['datname', 'rolname']:
-                value = row[key]
-                if type(value) is not bytes:
-                    normalized_row[key] = value
-                    continue
-                try:
-                    # Decode other columns as database encoding, or default to utf-8
-                    try:
-                        normalized_row[key] = value.decode(encoding)
-                    except Exception:
-                        # Fallback to trying utf-8
-                        normalized_row[key] = value.decode('utf-8', 'backslashreplace')
-                except Exception as e:
-                    self._log.warning("Unable to decode column: %s: %s | Error: %s", key, value, e)
-                    normalized_row[key] = "unknown"
 
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)

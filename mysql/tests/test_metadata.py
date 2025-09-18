@@ -72,6 +72,7 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     event = next((e for e in dbm_metadata if e['kind'] == 'mysql_variables'), None)
     assert event is not None
     assert event['host'] == "stubbed.hostname"
+    assert event['database_instance'] == "stubbed.hostname"
     assert event['dbms'] == "mysql"
     assert len(event["metadata"]) > 0
 
@@ -661,6 +662,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
         'dd.internal.resource:database_instance:stubbed.hostname',
+        'ddagenthostname:stubbed.hostname',
         'port:13306',
         'tag1:value1',
         'tag2:value2',

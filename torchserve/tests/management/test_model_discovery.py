@@ -109,7 +109,8 @@ def test_get_models(check, mocked_management_instance, expected_models, fixture_
                 mock_resp.raise_for_status.side_effect = HTTPError() if status_code != 200 else None
                 responses.append(mock_resp)
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    req = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
         discovery = ModelDiscovery(check(mocked_management_instance), include=[".*"])
         req.get.side_effect = responses
         assert [('.*', model['modelName'], model, None) for model in expected_models] == list(discovery.get_items())
