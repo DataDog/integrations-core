@@ -140,11 +140,11 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     """
 
     args = {}
-    # Automatically set values that support defaults or that have simple values in the instance
-    import importlib
 
+    # Automatically set values that support defaults or that have simple values in the instance
     instance_config_fields = set(InstanceConfig.__annotations__.keys())
-    defaults = importlib.import_module("datadog_checks.postgres.config_models.defaults")
+    from datadog_checks.postgres.config_models import defaults
+
     for f in instance_config_fields:
         try:
             args[f] = getattr(defaults, f"instance_{f}")()
@@ -403,13 +403,6 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     # in case existing integrations use the faulty behavior.
     # Instead we copy the behavior of the base check and instantiate this way
     config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
-
-    # Validate required fields
-    if not config.host:
-        validation_result.add_error("Please specify a valid host to connect to using the `host` parameter.")
-
-    if not config.username:
-        validation_result.add_error("Please specify a user to connect to the database using the `username` parameter.")
 
     # Validate config after defaults have been applied
     if not config.application_name.isascii():

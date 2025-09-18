@@ -41,22 +41,6 @@ def test_initialize_valid_config(mock_check, minimal_instance):
     assert not result.errors
 
 
-def test_initialize_missing_host(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
-    instance.pop('host')
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
-    assert not result.valid
-    assert any("Please specify a valid host" in str(e) for e in result.errors)
-
-
-def test_initialize_missing_username(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
-    instance.pop('username')
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
-    assert not result.valid
-    assert any("specify a user" in str(e).lower() for e in result.errors)
-
-
 def test_initialize_invalid_ssl_mode(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['ssl'] = 'invalid_ssl'

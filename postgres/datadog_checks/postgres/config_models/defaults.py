@@ -89,7 +89,7 @@ def instance_exclude_hostname():
 
 
 def instance_host():
-    return False
+    return 'localhost'
 
 
 def instance_idle_connection_timeout():
