@@ -104,7 +104,6 @@ FROM
 WHERE
     FK.parent_object_id IN ({})
 GROUP BY
-    FK.object_id,
     FK.name,
     FK.parent_object_id,
     FK.referenced_object_id,
