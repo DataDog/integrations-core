@@ -139,10 +139,6 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         The instance configuration object.
     """
 
-    # Spec doesn't support dictionary defaults, so we use dict literals here
-    # Spec also doesn't support some hidden defaults
-    # If you change a literal value here, make sure to update spec.yaml
-
     args = {}
     # Automatically set values that support defaults or that have simple values in the instance
     import importlib
@@ -159,6 +155,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
 
     # Set values for args that have deprecated fallbacks, are not supported by the spec model
     # or have other complexities
+    # If you change a literal value here, make sure to update spec.yaml
     args.update(
         {
             # Set the default port to None if the host is a socket path
