@@ -968,7 +968,7 @@ def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: 
 
 
 @cache
-def get_dep_sizes_json(current_commit, platform) -> Path | None:
+def get_dep_sizes_json(current_commit: str, platform: str) -> Path | None:
     print(f"Getting dependency sizes json for commit: {current_commit}, platform: {platform}")
     run_id = get_run_id(current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
