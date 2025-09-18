@@ -112,7 +112,7 @@
               "x": 0,
               "y": 1,
               "width": 2,
-              "height": 2
+              "height": 1
             }
           },
           {
@@ -164,7 +164,7 @@
               "x": 2,
               "y": 1,
               "width": 2,
-              "height": 2
+              "height": 1
             }
           },
           {
@@ -226,9 +226,9 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
+              "y": 2,
               "width": 2,
-              "height": 2
+              "height": 1
             }
           },
           {
@@ -290,8 +290,88 @@
             },
             "layout": {
               "x": 2,
-              "y": 3,
+              "y": 2,
               "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 4097212373930688,
+            "definition": {
+              "title": "Host performance summary",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:hugging_face_tgi.request.count{$host} by {host}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:hugging_face_tgi.queue.size{$host} by {host}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:hugging_face_tgi.request.duration.sum{$host} by {host}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:hugging_face_tgi.request.duration.count{$host} by {host}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Requests per second",
+                      "formula": "throughput(query1)"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Avg queue size",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Avg req duration",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query2 / query4",
+                      "cell_display_mode": "bar"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
               "height": 2
             }
           }
@@ -407,14 +487,14 @@
             "layout": {
               "x": 0,
               "y": 1,
-              "width": 6,
+              "width": 4,
               "height": 4
             }
           },
           {
-            "id": 14,
+            "id": 26,
             "definition": {
-              "title": "End to End Request Duration",
+              "title": "Request Processing Timeline",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -426,30 +506,61 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "alias": "Total Duration",
-                      "number_format": {},
-                      "style": {
-                        "palette": "classic",
-                        "palette_index": 4
+                      "alias": "Queue Duration",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
                       },
                       "formula": "query1"
+                    },
+                    {
+                      "alias": "Validation Duration",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Inference Duration",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query3"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:hugging_face_tgi.request.duration.sum{$host}.as_count()"
+                      "query": "sum:hugging_face_tgi.request.queue.duration.sum{$host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:hugging_face_tgi.request.validation.duration.sum{$host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:hugging_face_tgi.request.inference.duration.sum{$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
+                    "palette": "dog_classic",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -458,9 +569,56 @@
               ]
             },
             "layout": {
-              "x": 6,
+              "x": 4,
               "y": 1,
-              "width": 6,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 25,
+            "definition": {
+              "title": "Queue Depth Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Queue Size",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:hugging_face_tgi.queue.size{$host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
               "height": 4
             }
           }
@@ -518,7 +676,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -570,7 +727,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -656,7 +812,7 @@
           {
             "id": 21,
             "definition": {
-              "title": "Batch Sizes",
+              "title": "Batch sizes",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -707,14 +863,14 @@
             "layout": {
               "x": 0,
               "y": 1,
-              "width": 6,
+              "width": 4,
               "height": 4
             }
           },
           {
             "id": 22,
             "definition": {
-              "title": "Batch Processing Duration",
+              "title": "Batch processing durations",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -732,7 +888,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Forward Duration",
+                      "alias": "Forward",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -742,7 +898,7 @@
                       "formula": "query1"
                     },
                     {
-                      "alias": "Decode Duration",
+                      "alias": "Decode",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -752,7 +908,7 @@
                       "formula": "query2"
                     },
                     {
-                      "alias": "Concatenate Duration",
+                      "alias": "Concatenate",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -760,6 +916,26 @@
                         }
                       },
                       "formula": "query3"
+                    },
+                    {
+                      "alias": "Inference",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query4"
+                    },
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "Filter",
+                      "formula": "query5"
                     }
                   ],
                   "queries": [
@@ -777,178 +953,16 @@
                       "data_source": "metrics",
                       "name": "query3",
                       "query": "sum:hugging_face_tgi.batch.concat.duration.sum{$host} by {method}.as_count()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 1,
-              "width": 6,
-              "height": 4
-            }
-          }
-        ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 18,
-        "width": 12,
-        "height": 6,
-        "is_column_break": true
-      }
-    },
-    {
-      "id": 23,
-      "definition": {
-        "title": "Queue and Latency Analysis",
-        "background_color": "vivid_yellow",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 24,
-            "definition": {
-              "type": "note",
-              "content": "Monitor request queuing behavior and latency breakdown including queue duration, validation time, and inference timing.",
-              "background_color": "yellow",
-              "font_size": "16",
-              "text_align": "center",
-              "vertical_align": "top",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 12,
-              "height": 1
-            }
-          },
-          {
-            "id": 25,
-            "definition": {
-              "title": "Queue Depth Over Time",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {},
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "alias": "Queue Size",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:hugging_face_tgi.queue.size{$host}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 1,
-              "width": 4,
-              "height": 4
-            }
-          },
-          {
-            "id": 26,
-            "definition": {
-              "title": "Request Processing Timeline",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {},
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "alias": "Queue Duration",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query1"
-                    },
-                    {
-                      "alias": "Validation Duration",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query2"
-                    },
-                    {
-                      "alias": "Inference Duration",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query3"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:hugging_face_tgi.request.queue.duration.sum{$host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:hugging_face_tgi.request.validation.duration.sum{$host}.as_count()"
+                      "name": "query4",
+                      "query": "sum:hugging_face_tgi.batch.inference.duration.sum{$host} by {method}.as_count()"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "query3",
-                      "query": "sum:hugging_face_tgi.request.inference.duration.sum{$host}.as_count()"
+                      "name": "query5",
+                      "query": "sum:hugging_face_tgi.batch.filter.duration.sum{$host} by {method}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -970,29 +984,31 @@
           {
             "id": 27,
             "definition": {
-              "title": "Top Batch Operations",
+              "title": "Top inference batch methods",
               "title_size": "16",
               "title_align": "left",
               "time": {},
-              "type": "toplist",
               "requests": [
                 {
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:hugging_face_tgi.batch.inference.success.count{$host} by {method}.as_count()",
+                      "query": "sum:hugging_face_tgi.batch.inference.count{$host} by {method}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
                   "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
                   "formulas": [
                     {
                       "formula": "query1"
                     }
                   ],
                   "sort": {
-                    "count": 10,
+                    "count": 500,
                     "order_by": [
                       {
                         "type": "formula",
@@ -1003,11 +1019,9 @@
                   }
                 }
               ],
-              "style": {
-                "display": {
-                  "type": "stacked",
-                  "legend": "automatic"
-                }
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
               }
             },
             "layout": {
@@ -1021,9 +1035,10 @@
       },
       "layout": {
         "x": 0,
-        "y": 24,
+        "y": 0,
         "width": 12,
-        "height": 6
+        "height": 6,
+        "is_column_break": true
       }
     },
     {
@@ -1039,7 +1054,7 @@
             "id": 4434208871632602,
             "definition": {
               "type": "note",
-              "content": "View Lustre system logs and track log patterns by operation type. Useful for troubleshooting and monitoring system events.",
+              "content": "View Hugging Face TGI system logs and track log patterns by status. Useful for troubleshooting and monitoring system events.",
               "background_color": "yellow",
               "font_size": "16",
               "text_align": "center",
@@ -1071,7 +1086,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1132,7 +1146,6 @@
               "title": "Logs",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -1179,7 +1192,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 30,
+        "y": 6,
         "width": 12,
         "height": 6
       }
