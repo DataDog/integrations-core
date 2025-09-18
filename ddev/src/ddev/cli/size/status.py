@@ -2,23 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 import click
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_funcs import (
-    CLIParameters,
-    FileDataEntryPlatformVersion,
-    format_modules,
-    get_dependencies,
-    get_files,
-    get_valid_platforms,
-    get_valid_versions,
-    print_table,
-)
 from ddev.cli.size.utils.common_params import common_params
 from ddev.utils.fs import Path
+
+if TYPE_CHECKING:
+    from ddev.cli.size.utils.common_funcs import (
+        CLIParameters,
+        FileDataEntryPlatformVersion,
+    )
 
 
 @click.command()
@@ -47,10 +46,16 @@ def status(
     and prints the results to the terminal.
 
     """
+    from ddev.cli.size.utils.common_funcs import (
+        get_valid_platforms,
+        get_valid_versions,
+    )
+
     try:
         repo_path = app.repo.path
         valid_versions = get_valid_versions(repo_path)
         valid_platforms = get_valid_platforms(repo_path, valid_versions)
+
         validate_parameters(
             valid_platforms,
             valid_versions,
@@ -63,6 +68,7 @@ def status(
             to_dd_key,
             app,
         )
+
         modules_plat_ver: list[FileDataEntryPlatformVersion] = []
         platforms = valid_platforms if platform is None else [platform]
         versions = valid_versions if version is None else [version]
@@ -136,6 +142,13 @@ def status_mode(
     params: CLIParameters,
     dependency_sizes: Path | None,
 ) -> list[FileDataEntryPlatformVersion]:
+    from ddev.cli.size.utils.common_funcs import (
+        format_modules,
+        get_dependencies,
+        get_files,
+        print_table,
+    )
+
     with params["app"].status("Calculating sizes..."):
         if dependency_sizes:
             from ddev.cli.size.utils.common_funcs import get_dependencies_from_json
