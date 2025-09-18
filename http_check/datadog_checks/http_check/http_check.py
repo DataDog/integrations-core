@@ -71,7 +71,7 @@ class HTTPCheck(AgentCheck):
 
     def normalize_instance_tag(self, tag):
         # type: (Union[str, bytes]) -> str
-        """Normalize instance tag values according to DataDog tag rules.
+        """Normalize instance tag values according to Datadog tag rules.
 
         Datadog tags may contain alphanumerics, underscores, minuses, colons, periods, and slashes.
         Other characters are converted to underscores.
