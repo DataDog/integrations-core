@@ -49,7 +49,7 @@
     {
       "id": 7402251919033163,
       "definition": {
-        "title": "Total Costs (past 30d)",
+        "title": "Total Spend (past 30d)",
         "title_size": "16",
         "title_align": "left",
         "time": {
@@ -96,7 +96,7 @@
     {
       "id": 5674547883690658,
       "definition": {
-        "title": "Total Costs (30d prior)",
+        "title": "Total Spend (30d prior)",
         "title_size": "16",
         "title_align": "left",
         "time": {
