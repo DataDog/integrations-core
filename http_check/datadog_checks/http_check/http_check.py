@@ -73,7 +73,7 @@ class HTTPCheck(AgentCheck):
         # type: (Union[str, bytes]) -> str
         """Normalize instance tag values according to DataDog tag rules.
 
-        DataDog tags may contain alphanumerics, underscores, minuses, colons, periods, and slashes.
+        Datadog tags may contain alphanumerics, underscores, minuses, colons, periods, and slashes.
         Other characters are converted to underscores.
 
         This is different from the base normalize_tag which incorrectly converts minuses to underscores.
