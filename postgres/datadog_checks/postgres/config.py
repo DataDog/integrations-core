@@ -97,7 +97,6 @@ class ValidationResult:
     def __init__(self, valid=True):
         """
         :param valid: Whether the validation passed.
-        :param features: A list of features that were validated.
         """
         self.valid = valid
         self.features: list[Feature] = []
