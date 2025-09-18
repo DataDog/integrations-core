@@ -2,12 +2,6 @@
 
 <!-- towncrier release notes start -->
 
-## 2.0.1 / TBD
-
-***Fixed***:
-
-* Handle AttributeError when Qemu Agent is not available. ([#21399](https://github.com/DataDog/integrations-core/pull/21399))
-
 ## 2.0.0 / 2025-08-07 / Agent 7.70.0
 
 ***Changed***:
