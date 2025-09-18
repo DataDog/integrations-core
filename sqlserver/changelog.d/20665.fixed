@@ -1,1 +1,0 @@
-Fix schemas_collection errors on Azure SQL Database - add FK.object_id to SELECT clause and handle None in deadlock collection
