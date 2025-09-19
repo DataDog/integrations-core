@@ -399,7 +399,7 @@ def map_custom_metrics(custom_metrics):
     for m in custom_metrics:
         for param in required_parameters:
             if param not in m:
-                raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
+                raise ConfigurationError(f'Missing {param} parameter in custom metric {m}')
 
         # Old formatting to new formatting. The first params is always the columns names from which to
         # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
@@ -414,7 +414,7 @@ def map_custom_metrics(custom_metrics):
                 cap_mtype = mtype.upper()
                 if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                     raise ConfigurationError(
-                        'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
+                        'Collector method {} for custom metric {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype, m)
                     )
 
                 m['metrics'][ref][1] = METRIC_TYPES[cap_mtype]
