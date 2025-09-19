@@ -27,24 +27,28 @@ def mock_expand_counter_path(wildcard_path):
 @pytest.fixture
 def mock_service_states(mocker):
     """
-    Mocks the _get_windows_service_state function.
+    Mocks the _get_windows_service_state function with updateable state.
     """
     import win32service
 
-    created_mocks = {}
+    # Mutable container to hold current service states
+    current_states = {}
+
+    def service_state_mock(service_name):
+        # Return SERVICE_RUNNING (4) if service should be running, SERVICE_STOPPED (1) otherwise
+        is_running = current_states.get(service_name, True)
+        return win32service.SERVICE_RUNNING if is_running else win32service.SERVICE_STOPPED
+
+    # Create the patch once (now patching the instance method)
+    service_mock = mocker.patch.object(
+        ActiveDirectoryCheckV2, '_get_windows_service_state', side_effect=service_state_mock
+    )
 
     def _mock_services(service_states):
-        def service_state_mock(service_name):
-            # Return SERVICE_RUNNING (4) if service should be running, SERVICE_STOPPED (1) otherwise
-            is_running = service_states.get(service_name, True)
-            return win32service.SERVICE_RUNNING if is_running else win32service.SERVICE_STOPPED
-
-        service_mock = mocker.patch(
-            'datadog_checks.active_directory.check._get_windows_service_state',
-            side_effect=service_state_mock,
-        )
-        created_mocks['service_mock'] = service_mock
-        return created_mocks
+        # Update the mutable state container instead of creating new patches
+        current_states.clear()
+        current_states.update(service_states)
+        return {'service_mock': service_mock}
 
     return _mock_services
 
@@ -137,8 +141,10 @@ def test_no_running_services(
     aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', count=0)
 
 
-def test_service_exception_handling(aggregator, dd_run_check, mock_performance_objects, mocker, dd_default_hostname):
+def test_service_exception_handling(dd_run_check, mock_performance_objects, mocker, dd_default_hostname, caplog):
     """Test behavior when service state checking fails."""
+    import logging
+
     mock_performance_objects(PERFORMANCE_OBJECTS)
 
     mocker.patch(
@@ -147,8 +153,44 @@ def test_service_exception_handling(aggregator, dd_run_check, mock_performance_o
     )
 
     check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
-    with pytest.raises(Exception, match="Unable to query service status: Service query failed"):
+
+    with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
+
+    assert "Unable to query service status: Service query failed" in caplog.text
+
+
+def test_service_states_changed(
+    aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname
+):
+    """Test that the check collects metrics when service states change."""
+    mock_performance_objects(PERFORMANCE_OBJECTS)
+    mock_service_states({'NTDS': True, 'Netlogon': True, 'DHCPServer': True, 'DFSR': True})
+
+    check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
+    dd_run_check(check)
+    global_tags = ['server:{}'.format(dd_default_hostname)]
+
+    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', 9000, global_tags + ['instance:NTDS'])
+    aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', 9000, global_tags + ['instance:lab.local'])
+    aggregator.assert_metric(
+        'active_directory.security.kerberos_authentications', 9000, global_tags + ['instance:Security']
+    )
+    aggregator.assert_metric(
+        'active_directory.dhcp.failover.binding_updates_received', 9000, global_tags + ['instance:DHCPServer']
+    )
+    aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', 9000, global_tags + ['instance:InstanceOne'])
+    aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', 42, global_tags + ['instance:InstanceTwo'])
+
+    # Change service states and reset aggregator to test second run independently
+    mock_service_states({'NTDS': False, 'Netlogon': False, 'DHCPServer': False, 'DFSR': False})
+    aggregator.reset()
+    dd_run_check(check)
+    aggregator.assert_metric('active_directory.dra.inbound.bytes.total', count=0)
+    aggregator.assert_metric('active_directory.netlogon.semaphore_waiters', count=0)
+    aggregator.assert_metric('active_directory.security.kerberos_authentications', count=0)
+    aggregator.assert_metric('active_directory.dhcp.failover.binding_updates_received', count=0)
+    aggregator.assert_metric('active_directory.dfsr.deleted_space_in_use', count=0)
 
 
 def test_metadata_metrics(aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname):
