@@ -48,7 +48,7 @@ class TestValidations:
             Errors: {errors}
             """
         )
-        
+
     def test_already_exists(self, ddev, helpers, data_dir, mocker):
         mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
