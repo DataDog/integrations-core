@@ -1,0 +1,2 @@
+Windows Service
+Refactored the check to use the shared service checks function mapping from the datadog_checks_base package to improve code maintainability 

@@ -9,6 +9,7 @@ import win32service
 import winerror
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.windows_service import STATE_TO_STATUS
 
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
@@ -206,23 +207,6 @@ class ServiceView(object):
 
 class WindowsService(AgentCheck):
     SERVICE_CHECK_NAME = 'windows_service.state'
-    # https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status_process
-    STATE_TO_STATUS = {
-        # STOPPED
-        1: AgentCheck.CRITICAL,
-        # START_PENDING
-        2: AgentCheck.WARNING,
-        # STOP_PENDING
-        3: AgentCheck.WARNING,
-        # RUNNING
-        4: AgentCheck.OK,
-        # CONTINUE_PENDING
-        5: AgentCheck.WARNING,
-        # PAUSE_PENDING
-        6: AgentCheck.WARNING,
-        # PAUSED
-        7: AgentCheck.WARNING,
-    }
 
     def check(self, instance):
         services = instance.get('services', [])
@@ -280,7 +264,7 @@ class WindowsService(AgentCheck):
                     continue
 
             state = service_status[1]
-            status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
+            status = STATE_TO_STATUS.get(state, self.UNKNOWN)
 
             tags = ['windows_service:{}'.format(short_name)]
             tags.extend(custom_tags)
