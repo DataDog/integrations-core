@@ -1511,7 +1511,14 @@ def test_sqlserver_database_stats_metrics(
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
         ]
         for result in mocked_results:
-            db, database, database_user_access_desc, database_state_desc, database_recovery_model_desc, *metric_values = result
+            (
+                db,
+                database,
+                database_user_access_desc,
+                database_state_desc,
+                database_recovery_model_desc,
+                *metric_values,
+            ) = result
             metrics = zip(database_stats_metrics.metric_names()[0], metric_values)
             expected_tags = [
                 f'db:{db}',
