@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "34f4e81a-6fd2-48fd-a10c-5bffb75bbd0e",
   "app_id": "twemproxy",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
