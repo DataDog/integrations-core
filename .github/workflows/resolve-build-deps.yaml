@@ -288,6 +288,9 @@ jobs:
 
   measure-disk-usage:
     name: Measure disk usage
+    permissions:
+      contents: read
+      actions: read
     needs:
       - build-macos
     uses: ./.github/workflows/measure-disk-usage.yml
