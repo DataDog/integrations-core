@@ -414,7 +414,8 @@ def map_custom_metrics(custom_metrics):
                 cap_mtype = mtype.upper()
                 if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                     raise ConfigurationError(
-                        'Collector method {} for custom metric {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype, m)
+                        f"Collector method {cap_mtype} for custom metric {m} is not known. "
+                        "Known methods are RATE, GAUGE, MONOTONIC"
                     )
 
                 m['metrics'][ref][1] = METRIC_TYPES[cap_mtype]
