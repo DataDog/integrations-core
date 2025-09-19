@@ -1,6 +1,6 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
+# Licensed under Simplified BSD License (see LICENSE)
 
 MOCK_INSTANCES = {
     "NTDS": ["NTDS"],
