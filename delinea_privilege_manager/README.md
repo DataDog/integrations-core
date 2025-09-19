@@ -14,6 +14,8 @@ This integration supports the following types of logs:
 
 View detailed insights into these logs using the out-of-the-box dashboards. The integration also includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.64.0
+
 ## Setup
 
 ### Installation

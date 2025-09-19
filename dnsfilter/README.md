@@ -10,6 +10,8 @@ This integration ingests the following logs:
 
 This integration collects DNS Traffic Logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling search and analysis. The integration provides insight into DNS traffic logs through out-of-the-box dashboards and includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
 
+**Minimum Agent version:** 7.66.0
+
 ## Setup
 
 ### Generate API credentials in DNSFilter

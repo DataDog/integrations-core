@@ -10,6 +10,8 @@ The check collects metrics from the head node (`slurmctld`) by executing and par
 
 On worker nodes, the check can also collect metrics using [`scontrol`][13], which provides process IDs (PIDs) and other job information that is not available through the head node.
 
+**Minimum Agent version:** 7.59.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various Slurm binaries, monitoring Slurm in containerized environments is not recommended.

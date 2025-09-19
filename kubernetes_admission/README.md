@@ -7,6 +7,8 @@ Kubernetes Admission will generate Datadog Events for Kubernetes Admission Reque
 The Kubernetes Admission for Datadog's Cluster Agent offers an easy-to-deploy solution for tracking and monitoring Kubernetes Admission activity.
 By sending real-time Datadog Events for every request, it provides comprehensive visibility and enhances security.
 
+**Minimum Agent version:** 7.59.0
+
 ## Setup
 
 ### Installation

@@ -11,6 +11,8 @@ This integration collects logs from the sources listed above and sends them to D
 * [Log Explorer][3]
 * [Cloud SIEM][4]
 
+**Minimum Agent version:** 7.56.1
+
 ## Setup
 
 ### Generate API Credentials in Trend Micro Vision One XDR

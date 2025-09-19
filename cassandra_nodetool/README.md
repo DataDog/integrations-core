@@ -6,6 +6,8 @@
 
 This check collects metrics for your Cassandra cluster that are not available through [jmx integration][2]. It uses the `nodetool` utility to collect them.
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 ### Installation

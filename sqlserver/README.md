@@ -10,6 +10,8 @@ Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (D
 
 SQL Server 2012, 2014, 2016, 2017, 2019, and 2022 are supported.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 <div class="alert alert-info">This page describes the SQL Server Agent standard integration. If you are looking for the Database Monitoring product for SQL Server, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>

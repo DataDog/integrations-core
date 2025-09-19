@@ -4,6 +4,8 @@
 
 Get metrics from Microsoft Active Directory to visualize and monitor its performances.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

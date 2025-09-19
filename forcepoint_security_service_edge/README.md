@@ -14,6 +14,8 @@ This integration ingests the following logs:
 Forcepoint Security Service Edge integration gathers these logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured out-of-the-box dashboards, the integration offers clear visibility into activities within the Forcepoint Security Service Edge platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 
+**Minimum Agent version:** 7.61.0
+
 ## Setup
 
 ### Generate OAuth Token in Forcepoint Security Service Edge:

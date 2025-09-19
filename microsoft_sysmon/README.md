@@ -6,6 +6,8 @@
 
 This integration enriches and ingests the [Sysmon event logs][5]. Use the pre-built dashboard to get a high-level view of the Sysmon events helping security teams monitor system activity.
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Installation

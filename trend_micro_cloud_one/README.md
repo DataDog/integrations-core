@@ -4,6 +4,8 @@
 
 This check monitors [Trend Micro Cloud One][1].
 
+**Minimum Agent version:** 7.69.2
+
 ## Setup
 
 ### Installation

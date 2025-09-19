@@ -4,6 +4,8 @@
 
 This check monitors your vSphere [ESXi][1] hosts and the virtual machines running on them in a distributed manner. To monitor your entire vSphere deployment in a centralized way through your vCenter, see the [vSphere integration][11].
 
+**Minimum Agent version:** 7.54.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

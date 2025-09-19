@@ -6,6 +6,8 @@
 
 The Genesys integration collects conversations (Voice, Email, Message, Callback, Chat) analytics metrics and audit logs and ingests them into Datadog for comprehensive analysis.
 
+**Minimum Agent version:** 7.59.1
+
 ## Setup
 
 ### Generate Client ID and Client Secret config parameters in Genesys

@@ -16,6 +16,8 @@ This check monitors [Spark][2] through the Datadog Agent. Collect Spark metrics 
 - Tasks: number of tasks active, skipped, failed, and total.
 - Job state: number of jobs active, completed, skipped, and failed.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

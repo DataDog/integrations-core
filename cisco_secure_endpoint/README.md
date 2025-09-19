@@ -10,6 +10,8 @@ The Cisco Secure Endpoint integration provides out-of-the-box dashboards so you 
 
 **Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
 
+**Minimum Agent version:** 7.54.1
+
 ## Setup
 
 ### Generate API credentials in Cisco Secure Endpoint
