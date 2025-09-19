@@ -22,6 +22,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Log Collection",
+      "Category::Network",
       "Category::Security",
       "Offering::Integration",
       "Submitted Data Type::Logs"
