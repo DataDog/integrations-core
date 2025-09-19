@@ -494,7 +494,7 @@
           {
             "id": 26,
             "definition": {
-              "title": "Request Processing Timeline",
+              "title": "Processing Timeline Per Request ",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -506,6 +506,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -518,7 +519,7 @@
                           "unit_name": "second"
                         }
                       },
-                      "formula": "query1"
+                      "formula": "query1 / query4"
                     },
                     {
                       "alias": "Validation Duration",
@@ -528,7 +529,7 @@
                           "unit_name": "second"
                         }
                       },
-                      "formula": "query2"
+                      "formula": "query2 / query5"
                     },
                     {
                       "alias": "Inference Duration",
@@ -538,7 +539,7 @@
                           "unit_name": "second"
                         }
                       },
-                      "formula": "query3"
+                      "formula": "query3 / query6"
                     }
                   ],
                   "queries": [
@@ -549,13 +550,28 @@
                     },
                     {
                       "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:hugging_face_tgi.request.queue.duration.count{$host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
                       "name": "query2",
                       "query": "sum:hugging_face_tgi.request.validation.duration.sum{$host}.as_count()"
                     },
                     {
                       "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:hugging_face_tgi.request.validation.duration.count{$host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
                       "name": "query3",
                       "query": "sum:hugging_face_tgi.request.inference.duration.sum{$host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:hugging_face_tgi.request.inference.duration.count{$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
