@@ -314,6 +314,9 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name == 'application_name':
+                value = validators.instance_application_name(value, field=field)
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

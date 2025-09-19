@@ -6,7 +6,7 @@ files:
     options:
     - name: propagate_agent_tags
       description: |
-        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+        Set to `true` to prpagate the tags from `datadog.yaml` and the agent host tags to the check.
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
       value:
         type: boolean
@@ -516,6 +516,8 @@ files:
         type: string
         default: "datadog-agent"
         example: "datadog-agent"
+        validators:
+          - instance_application_name
     - name: dbm
       description: |
         Set to `true` to enable Database Monitoring.
@@ -582,6 +584,8 @@ files:
             type: number
             default: 10
             example: 10
+            validators:
+              - instance_query_metrics_collection_interval
         - name: pg_stat_statements_max_warning_threshold
           hidden: true
           description: |
@@ -659,6 +663,8 @@ files:
             type: number
             default: 1
             example: 1
+            validators:
+              - instance_query_samples_collection_interval
         - name: explain_function
           description: |
             Override the default function used to collect execution plans for queries.
@@ -732,6 +738,8 @@ files:
             type: number
             default: 10
             example: 10
+            validators:
+              - instance_query_activity_collection_interval
           hidden: true
         - name: payload_row_limit
           description: |

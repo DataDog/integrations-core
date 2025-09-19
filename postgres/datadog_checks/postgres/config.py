@@ -8,12 +8,7 @@ import copy
 from typing import TYPE_CHECKING, Optional, Tuple
 
 from datadog_checks.postgres.config_models import InstanceConfig
-from datadog_checks.postgres.config_models.defaults import (
-    instance_dbm,
-    instance_disable_generic_tags,
-    instance_port,
-    instance_propagate_agent_tags,
-)
+# Defaults are now handled by Pydantic automatically from spec.yaml
 from datadog_checks.postgres.config_models.instance import (
     Aws,
     Azure,
@@ -86,9 +81,202 @@ class ValidationResult:
         self.warnings.append(warning)
 
 
+def _handle_deprecated_fields(instance: dict) -> dict:
+    """
+    Handle deprecated field mappings before Pydantic validation.
+    """
+    processed = instance.copy()
+
+    # Handle deprecated field mappings
+    if 'deep_database_monitoring' in processed and 'dbm' not in processed:
+        processed['dbm'] = processed['deep_database_monitoring']
+
+    if 'statement_samples' in processed and 'query_samples' not in processed:
+        processed['query_samples'] = processed['statement_samples']
+
+    if 'managed_authentication' in processed and 'azure' not in processed:
+        # This will be handled in the Azure validation logic
+        pass
+
+    # Handle custom_metrics -> custom_queries mapping
+    if 'custom_metrics' in processed:
+        processed['custom_metrics'] = map_custom_metrics(processed['custom_metrics'])
+
+    return processed
+
+
+def _handle_special_cases(instance: dict, init_config: dict) -> dict:
+    """
+    Handle special cases that need custom logic before Pydantic validation.
+    """
+    processed = instance.copy()
+
+    # Handle port logic for socket paths
+    if 'port' not in processed and processed.get('host', '').startswith('/'):
+        processed['port'] = None
+    # If port is not set, Pydantic will apply the default from spec.yaml (5432)
+
+    # Handle batch_max_content_size from init_config
+    if 'query_metrics' in processed:
+        query_metrics = processed['query_metrics'].copy()
+        if 'batch_max_content_size' not in query_metrics:
+            batch_size = init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000)
+            query_metrics['batch_max_content_size'] = batch_size
+        processed['query_metrics'] = query_metrics
+
+    # Handle service from init_config
+    if 'service' not in processed and 'service' in init_config:
+        processed['service'] = init_config['service']
+
+    # Handle propagate_agent_tags logic
+    processed['propagate_agent_tags'] = should_propagate_agent_tags(
+        instance=instance, init_config=init_config
+    )
+
+    # Handle invalid numbers gracefully (for backward compatibility)
+    processed = _handle_invalid_numbers(processed)
+
+    # Ensure nested objects are properly initialized with defaults
+    processed = _ensure_nested_defaults(processed)
+
+    return processed
+
+
+def _handle_invalid_numbers(instance: dict) -> dict:
+    """
+    Handle invalid numbers by converting them to defaults (for backward compatibility).
+    """
+    processed = instance.copy()
+
+    # Handle query_metrics collection_interval
+    if 'query_metrics' in processed:
+        query_metrics = processed['query_metrics'].copy()
+        if 'collection_interval' in query_metrics:
+            try:
+                # Try to convert to float, if it fails, set to default
+                float(query_metrics['collection_interval'])
+            except (ValueError, TypeError):
+                # Set to default value instead of removing
+                query_metrics['collection_interval'] = 10  # Default from spec.yaml
+        processed['query_metrics'] = query_metrics
+
+    # Handle query_samples collection_interval
+    if 'query_samples' in processed:
+        query_samples = processed['query_samples'].copy()
+        if 'collection_interval' in query_samples:
+            try:
+                float(query_samples['collection_interval'])
+            except (ValueError, TypeError):
+                query_samples['collection_interval'] = 1  # Default from spec.yaml
+        processed['query_samples'] = query_samples
+
+    # Handle query_activity collection_interval
+    if 'query_activity' in processed:
+        query_activity = processed['query_activity'].copy()
+        if 'collection_interval' in query_activity:
+            try:
+                float(query_activity['collection_interval'])
+            except (ValueError, TypeError):
+                query_activity['collection_interval'] = 10  # Default from spec.yaml
+        processed['query_activity'] = query_activity
+
+    return processed
+
+
+def _ensure_nested_defaults(instance: dict) -> dict:
+    """
+    Ensure that nested objects are properly initialized with defaults.
+    This is needed because Pydantic doesn't automatically create nested objects with defaults.
+    """
+    processed = instance.copy()
+
+    # List of nested objects that need default initialization
+    nested_objects = [
+        'query_activity',
+        'query_samples',
+        'query_metrics',
+        'collect_settings',
+        'collect_schemas',
+        'database_autodiscovery',
+        'obfuscator_options',
+        'collect_raw_query_statement',
+        'locks_idle_in_transaction',
+        'aws',
+        'gcp',
+        'azure'
+    ]
+
+    for obj_name in nested_objects:
+        if obj_name not in processed:
+            # Initialize with empty dict so Pydantic will apply defaults
+            processed[obj_name] = {}
+        else:
+            # Ensure that existing nested objects have their required fields set
+            obj = processed[obj_name]
+            if isinstance(obj, dict):
+                # For query_samples, ensure enabled is set to default if not present
+                if obj_name == 'query_samples' and 'enabled' not in obj:
+                    obj['enabled'] = True  # Default from spec.yaml
+                elif obj_name == 'query_activity' and 'enabled' not in obj:
+                    obj['enabled'] = True  # Default from spec.yaml
+                elif obj_name == 'query_metrics' and 'enabled' not in obj:
+                    obj['enabled'] = True  # Default from spec.yaml
+                elif obj_name == 'collect_settings' and 'enabled' not in obj:
+                    obj['enabled'] = True  # Default from spec.yaml
+                elif obj_name == 'collect_schemas' and 'enabled' not in obj:
+                    obj['enabled'] = False  # Default from spec.yaml
+
+    return processed
+
+
+def _add_invalid_number_warnings(instance: dict, config: InstanceConfig, validation_result: ValidationResult):
+    """
+    Add warnings for invalid numbers that were converted to defaults.
+    """
+    from datadog_checks.postgres.statements import DEFAULT_COLLECTION_INTERVAL
+    from datadog_checks.postgres.statement_samples import DEFAULT_COLLECTION_INTERVAL as DEFAULT_SAMPLES_COLLECTION_INTERVAL
+    from datadog_checks.postgres.statement_samples import DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+
+    # Check query_metrics collection_interval
+    if 'query_metrics' in instance:
+        query_metrics = instance['query_metrics']
+        if 'collection_interval' in query_metrics:
+            try:
+                float(query_metrics['collection_interval'])
+            except (ValueError, TypeError):
+                validation_result.add_warning(
+                    f"query_metrics.collection_interval must be greater than 0, defaulting to "
+                    f"{DEFAULT_COLLECTION_INTERVAL} seconds."
+                )
+
+    # Check query_samples collection_interval
+    if 'query_samples' in instance:
+        query_samples = instance['query_samples']
+        if 'collection_interval' in query_samples:
+            try:
+                float(query_samples['collection_interval'])
+            except (ValueError, TypeError):
+                validation_result.add_warning(
+                    f"query_samples.collection_interval must be greater than 0, defaulting to "
+                    f"{DEFAULT_SAMPLES_COLLECTION_INTERVAL} seconds."
+                )
+
+    # Check query_activity collection_interval
+    if 'query_activity' in instance:
+        query_activity = instance['query_activity']
+        if 'collection_interval' in query_activity:
+            try:
+                float(query_activity['collection_interval'])
+            except (ValueError, TypeError):
+                validation_result.add_warning(
+                    f"query_activity.collection_interval must be greater than 0, defaulting to "
+                    f"{DEFAULT_ACTIVITY_COLLECTION_INTERVAL} seconds."
+                )
+
+
 def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     """
-    Build the Postgres configuration.
+    Build the Postgres configuration using Pydantic's built-in default system.
     :param check: The check instance.
     :param init_config: The init_config for the Postgres check.
     :param instance: The instance configuration for the Postgres check.
@@ -99,128 +287,24 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     instance = check.instance
     init_config = check.init_config
 
-    args = {}
+    # Handle deprecated field mappings before Pydantic validation
+    processed_instance = _handle_deprecated_fields(instance)
 
-    # Automatically set values that support defaults or that have simple values in the instance
-    instance_config_fields = set(InstanceConfig.__annotations__.keys())
-    from datadog_checks.postgres.config_models import defaults
+    # Handle special cases that need custom logic
+    processed_instance = _handle_special_cases(processed_instance, init_config)
 
-    for f in instance_config_fields:
-        try:
-            args[f] = getattr(defaults, f"instance_{f}")()
-        except AttributeError:
-            args[f] = None
-        if f in instance:
-            args[f] = instance[f]
-
-    from datadog_checks.postgres.config_models import dict_defaults
-
-    # Set values for args that have deprecated fallbacks, are not supported by the spec model
-    # or have other complexities
-    # If you change a literal value here, make sure to update spec.yaml
-    args.update(
-        {
-            # Set the default port to None if the host is a socket path
-            "port": instance.get('port', instance_port() if not instance.get('host', '').startswith('/') else None),
-            # Set None values for ssl
-            # Database configuration
-            "dbm": instance.get(
-                'dbm', instance.get('deep_database_monitoring', instance_dbm())
-            ),  # Deprecated, use `dbm` instead
-            "custom_metrics": map_custom_metrics(
-                instance.get('custom_metrics', [])
-            ),  # Deprecated, use `custom_queries` instead
-            "custom_queries": instance.get('custom_queries', []),
-            "database_identifier": instance.get('database_identifier', {"template": "$resolved_hostname"}),
-            "database_autodiscovery": {
-                **dict_defaults.instance_database_autodiscovery(),
-                **(instance.get('database_autodiscovery', {})),
-            },
-            "query_metrics": {
-                **dict_defaults.instance_query_metrics(),
-                **{
-                    "batch_max_content_size": init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000),
-                },
-                **(instance.get('query_metrics', {})),
-            },
-            "query_samples": {
-                **dict_defaults.instance_query_samples(),
-                **(instance.get('statement_samples', {})),  # Deprecated, use `query_samples` instead
-                **(instance.get('query_samples', {})),
-            },
-            "query_activity": {
-                **dict_defaults.instance_query_activity(),
-                **(instance.get('query_activity', {})),
-            },
-            # Metadata collection
-            "collect_settings": {
-                **dict_defaults.instance_collect_settings(),
-                **(instance.get('collect_settings') or {}),
-            },
-            "collect_schemas": {
-                **dict_defaults.instance_collect_schemas(),
-                **(instance.get('collect_schemas', {})),
-            },
-            # Cloud
-            "aws": {
-                **Aws(managed_authentication=ManagedAuthentication()).model_dump(),
-                **(instance.get('aws', {})),
-            },
-            "gcp": {
-                **Gcp().model_dump(),
-                **(instance.get('gcp', {})),
-            },
-            "azure": {
-                **Azure(managed_authentication=ManagedAuthentication1()).model_dump(),
-                **(instance.get('azure', {})),
-            },
-            # Obfuscation and query logging
-            "obfuscator_options": {
-                **dict_defaults.instance_obfuscator_options(),
-                **(instance.get('obfuscator_options', {})),
-            },
-            "collect_raw_query_statement": {
-                **dict_defaults.instance_collect_raw_query_statement(),
-                **(instance.get('collect_raw_query_statement', {})),
-            },
-            "locks_idle_in_transaction": {
-                **dict_defaults.instance_locks_idle_in_transaction(),
-                **(instance.get('locks_idle_in_transaction', {})),
-            },
-            "propagate_agent_tags": should_propagate_agent_tags(instance=instance, init_config=init_config),
-            "service": instance.get('service', init_config.get('service', None)),
-            # Metric filtering by pattern is implemented downstream, theoretically
-            "metric_patterns": instance.get('metric_patterns', None),
-        }
-    )
+    # Let Pydantic handle all default application and validation
+    config = InstanceConfig.model_validate(processed_instance, context={
+        'init_config': init_config,
+        'configured_fields': set(processed_instance.keys())
+    })
 
     validation_result = ValidationResult()
 
-    # Check provided values and revert to defaults if they are invalid
-    if safefloat(args['query_metrics']['collection_interval']) <= 0:
-        args['query_metrics']['collection_interval'] = DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
-        validation_result.add_warning(
-            "query_metrics.collection_interval must be greater than 0, defaulting to "
-            f"{DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL} seconds."
-        )
-
-    if safefloat(args['query_samples']['collection_interval']) <= 0:
-        args['query_samples']['collection_interval'] = DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL
-        validation_result.add_warning(
-            "query_samples.collection_interval must be greater than 0, defaulting to "
-            f"{DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL} seconds."
-        )
-
-    if safefloat(args['query_activity']['collection_interval']) <= 0:
-        args['query_activity']['collection_interval'] = DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL
-        validation_result.add_warning(
-            "query_activity.collection_interval must be greater than 0, defaulting to "
-            f"{DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL} seconds."
-        )
-
     # Generate and validate tags
-    tags, tag_errors = build_tags(instance=instance, init_config=init_config, config=args)
-    args['tags'] = tags
+    tags, tag_errors = build_tags(instance=instance, init_config=init_config, config=config.model_dump())
+    # Update config with tags (this is a special case that can't be handled by Pydantic defaults)
+    config = config.model_copy(update={'tags': tags})
     for error in tag_errors:
         # If there are errors in the tags, we add them to the validation result
         # but we don't raise an exception here, as we want to validate the rest of the configuration
@@ -229,47 +313,60 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     # AWS backfill and validation
     if (
         not instance.get("aws", {}).get("managed_authentication", None)
-        and args['aws'].get('region')
-        and not args['password']
+        and config.aws and config.aws.region
+        and not config.password
     ):
         # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
-        args['aws']['managed_authentication']['enabled'] = True
+        if config.aws.managed_authentication:
+            config.aws.managed_authentication.enabled = True
+        else:
+            from datadog_checks.postgres.config_models.instance import ManagedAuthentication
+            config.aws.managed_authentication = ManagedAuthentication(enabled=True)
 
-    if args['aws']['managed_authentication']['enabled'] and not args['aws']['region']:
+    if config.aws and config.aws.managed_authentication and config.aws.managed_authentication.enabled and not config.aws.region:
         validation_result.add_error('AWS region must be set when using AWS managed authentication')
 
     # Azure backfill and validation
     if not instance.get("azure", {}).get("managed_authentication", None) and (
-        args['azure'].get('managed_authentication', {}).get('client_id')
+        (config.azure and config.azure.managed_authentication and config.azure.managed_authentication.client_id)
         or instance.get('managed_identity', {}).get('client_id')
     ):
         # if managed_authentication is not set, we assume it is enabled if client_id is set
-        args['azure']['managed_authentication']['enabled'] = True
+        if config.azure and config.azure.managed_authentication:
+            config.azure.managed_authentication.enabled = True
+        else:
+            from datadog_checks.postgres.config_models.instance import ManagedAuthentication1
+            config.azure.managed_authentication = ManagedAuthentication1(enabled=True)
 
     if instance.get("managed_identity"):
         validation_result.add_warning(
             'The `managed_identity` option is deprecated. Use `azure.managed_authentication` instead.'
         )
-        args['azure']['managed_authentication'] = {
-            **args['azure']['managed_authentication'],
-            **instance.get('managed_identity', {}),
-        }
+        # Merge managed_identity into azure.managed_authentication
+        if config.azure and config.azure.managed_authentication:
+            managed_identity = instance.get('managed_identity', {})
+            if 'client_id' in managed_identity:
+                config.azure.managed_authentication.client_id = managed_identity['client_id']
+            if 'identity_scope' in managed_identity:
+                config.azure.managed_authentication.identity_scope = managed_identity['identity_scope']
 
-    if args['azure'].get('managed_authentication', {}).get('enabled') and not args['azure'].get(
-        'managed_authentication', {}
-    ).get('client_id'):
+    if config.azure and config.azure.managed_authentication and config.azure.managed_authentication.enabled and not config.azure.managed_authentication.client_id:
         validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
 
-    if args.get('collect_default_database'):
-        args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
+    if config.collect_default_database:
+        # Remove 'postgres' from ignore_databases if collect_default_database is True
+        if config.ignore_databases and 'postgres' in config.ignore_databases:
+            ignore_list = list(config.ignore_databases)
+            ignore_list.remove('postgres')
+            config = config.model_copy(update={'ignore_databases': tuple(ignore_list)})
 
     # Validate config arguments for invalid or deprecated options
-    if args['ssl'] not in SSL_MODES:
-        warning = f"Invalid ssl option '{args['ssl']}', should be one of {SSL_MODES}. Defaulting to 'allow'."
+    if config.ssl not in SSL_MODES:
+        warning = f"Invalid ssl option '{config.ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'."
         validation_result.add_warning(warning)
-        args['ssl'] = "allow"
+        config = config.model_copy(update={'ssl': 'allow'})
 
-    # Deprecated options
+    # Deprecated options warnings
     if instance.get('custom_metrics'):
         validation_result.add_warning('The `custom_metrics` option is deprecated. Use `custom_queries` instead.')
 
@@ -289,30 +386,15 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             'The `postgres` database cannot be ignored when `collect_default_database` is enabled.'
         )
 
-    # Validate that the keys of args match the fields of InstanceConfig
-    args_keys = set(args.keys())
-    missing_fields = instance_config_fields - args_keys
-    extra_fields = args_keys - instance_config_fields
-    if missing_fields or extra_fields:
-        # This should get caught at test time and never execute at runtime
-        raise ConfigurationError(
-            f"build_config: args keys do not match InstanceConfig fields. "
-            f"Missing: {missing_fields}, Extra: {extra_fields}"
-        )
+    # Additional validation after Pydantic has processed the config
+    # Note: Most validation is now handled by Pydantic validators in validators.py
 
-    # The current InstanceConfig cannot be instantiated directly and integrations team is reluctant to fix it
-    # in case existing integrations use the faulty behavior.
-    # Instead we copy the behavior of the base check and instantiate this way
-    config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
-
-    # Validate config after defaults have been applied
+    # Validate application_name for ASCII characters
     if not config.application_name.isascii():
         validation_result.add_error(f"Application name can include only ASCII characters: {config.application_name}")
 
-    if config.relations and not (config.dbname or config.database_autodiscovery.enabled):
-        validation_result.add_error(
-            '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
-        )
+    # Add warnings for invalid numbers that were converted to defaults
+    _add_invalid_number_warnings(instance, config, validation_result)
 
     if config.empty_default_hostname:
         validation_result.add_warning(
@@ -356,7 +438,7 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
     tags = list(set(instance.get('tags', [])))
 
     # preset tags to host
-    if not instance.get('disable_generic_tags', instance_disable_generic_tags()):
+    if not instance.get('disable_generic_tags', False):  # Default is False from spec.yaml
         tags.append('server:{}'.format(config.get('host')))
     if config.get('port'):
         tags.append('port:{}'.format(config.get('port')))
@@ -387,7 +469,9 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
                 )
             )
 
-    tags.extend(["raw_query_statement:enabled"] if config.get('collect_raw_query_statement', {}).get("enabled") else [])
+    collect_raw_query_statement = config.get('collect_raw_query_statement')
+    if collect_raw_query_statement and collect_raw_query_statement.get("enabled"):
+        tags.extend(["raw_query_statement:enabled"])
 
     return tags, errors
 
@@ -444,7 +528,7 @@ def should_propagate_agent_tags(instance, init_config) -> bool:
         # if the init_config has explicitly set the value, return the boolean
         return init_config_propagate
     # if neither the instance nor the init_config has set the value, return default for instance
-    return instance_propagate_agent_tags()
+    return False  # Default is False from spec.yaml
 
 
 def sanitize(config: Union[InstanceConfig, dict]) -> dict:
