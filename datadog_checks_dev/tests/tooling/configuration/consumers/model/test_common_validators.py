@@ -99,12 +99,12 @@ def test():
                     value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
                     if info.field_name == 'foo':
-                        value = validation.pkg.subpkg2.validate2(value, field=field)
-                        value = validation.pkg.subpkg2.validate1(value, field=field)
+                        value = validators.pkg.subpkg2.validate2(value, field=field)
+                        value = validators.pkg.subpkg2.validate1(value, field=field)
 
                     if info.field_name == 'tags':
-                        value = validation.pkg.subpkg1.validate2(value, field=field)
-                        value = validation.pkg.subpkg1.validate1(value, field=field)
+                        value = validators.pkg.subpkg1.validate2(value, field=field)
+                        value = validators.pkg.subpkg1.validate1(value, field=field)
 
                 return validation.utils.make_immutable(value)
 
