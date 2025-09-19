@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      PYTHON_VERSION: "3.12"
+      PYTHON_VERSION: "3.13"
       TARGET: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
 
     steps:
