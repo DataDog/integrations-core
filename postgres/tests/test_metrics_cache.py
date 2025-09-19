@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from datadog_checks.postgres.config import PostgresConfig
+from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.util import (
     COMMON_METRICS,
@@ -28,7 +28,7 @@ COMMON_AND_MAIN_CHECK_METRICS = dict(COMMON_METRICS, **DBM_MIGRATED_METRICS)
     ],
 )
 def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_metrics):
-    config = PostgresConfig(instance=pg_instance, init_config={}, check={'warning': print})
+    config, _ = build_config(init_config={}, check={'warning': print}, instance=pg_instance)
     cache = PostgresMetricsCache(config)
     replication_metrics = cache.get_replication_metrics(version, is_aurora)
     assert replication_metrics == expected_metrics
@@ -48,9 +48,9 @@ def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_me
 )
 def test_dbm_enabled_conn_metric(pg_instance, version, is_dbm_enabled, expected_metrics):
     pg_instance['dbm'] = is_dbm_enabled
-    pg_instance['collect_resources'] = {'enabled': False}
     pg_instance['collect_database_size_metrics'] = False
-    config = PostgresConfig(instance=pg_instance, init_config={}, check={'warning': print})
+    config, _ = build_config(init_config={}, check={'warning': print}, instance=pg_instance)
+    assert config.collect_database_size_metrics is False
     cache = PostgresMetricsCache(config)
     instance_metrics = cache.get_instance_metrics(version)
     assert instance_metrics['metrics'] == expected_metrics
