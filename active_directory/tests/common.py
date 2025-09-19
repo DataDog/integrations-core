@@ -59,7 +59,6 @@ PERFORMANCE_OBJECTS = {
             'Semaphore Acquires': [9000],
             'Semaphore Timeouts': [9000],
             'Average Semaphore Hold Time': [9000],
-            'Last Authentication Time': [9000],
         },
     ),
     "Security System-Wide Statistics": (
@@ -75,9 +74,7 @@ PERFORMANCE_OBJECTS = {
             'Failover: BndUpd Dropped': [9000],
             'Failover: BndUpd pending in outbound queue': [9000],
             'Failover: BndUpd received/sec': [9000],
-            'Failover: BndAck received/sec': [9000],
             'Failover: BndUpd sent/sec': [9000],
-            'Failover: BndAck sent/sec': [9000],
         },
     ),
     "DFS Replicated Folders": (
