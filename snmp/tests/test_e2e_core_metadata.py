@@ -80,6 +80,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     'status': 1,
                     'sys_object_id': '1.3.6.1.4.1.3375.2.1.3.4.43',
                     'tags': [
+                        'agent_host:' + common.get_agent_hostname(),
                         'device_hostname:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
                         'device_id:' + device_id,
                         'device_ip:' + device_ip,
@@ -216,6 +217,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.1745',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_hostname:Cat-3850-4th-Floor.companyname.local',
             'device_id:' + device_id,
             'device_ip:' + device_ip,
@@ -278,6 +280,7 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.241',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -327,6 +330,7 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.232.9.4.10',
         'version': 'A04-08/12/2018',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -376,6 +380,7 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
         'version': 'A04-08/12/2019',
         'sys_object_id': '1.3.6.1.4.1.232.1.2',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -428,6 +433,7 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.318.1.1.1',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -481,6 +487,7 @@ def test_e2e_core_metadata_juniper_ex(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.2636.1.1.1.2.30',
         'serial_number': 'dXPEdPBE5yKtjW9xx3',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -530,6 +537,7 @@ def test_e2e_core_metadata_juniper_mx(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.2636.1.1.1.2.25',
         'serial_number': 'dXPEdPBE5yKtjW9xx4',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -579,6 +587,7 @@ def test_e2e_core_metadata_juniper_srx(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.2636.1.1.1.2.35',
         'serial_number': 'dXPEdPBE5yKtjW9xx5',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -627,6 +636,7 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.14823.1.1.36',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -675,6 +685,7 @@ def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.14823.1.2.80',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -725,6 +736,7 @@ def test_e2e_core_metadata_arista(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.30065.1.3011.7504',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -774,6 +786,7 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -821,6 +834,7 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.789.2.5',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -871,6 +885,7 @@ def test_e2e_core_metadata_checkpoint(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.2620.1.1',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -922,6 +937,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.2620.1.1',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -971,6 +987,7 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12356.101.1.1',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -1019,6 +1036,7 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
         'version': '2.5.4',
         'sys_object_id': '1.3.6.1.4.1.674.10892.2',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -1066,6 +1084,7 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'cluster_name:testcluster1',
@@ -1167,6 +1186,7 @@ def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.1861',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -1211,6 +1231,7 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.1639',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -1255,6 +1276,7 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.2658',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',
@@ -1403,6 +1425,7 @@ def test_e2e_core_metadata_cisco_wlc(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.1069',
         'tags': [
+            'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
             'device_ip:' + device_ip,
             'device_namespace:default',

@@ -32,6 +32,7 @@ def test_e2e_profile_avaya_cajun_switch(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + ['avaya_gen_cpu_utilization_enable_monitoring:enabled']
 
     # --- TEST EXTENDED METRICS ---
