@@ -6,7 +6,7 @@ files:
     options:
     - name: propagate_agent_tags
       description: |
-        Set to `true` to prpagate the tags from `datadog.yaml` and the agent host tags to the check.
+        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
       value:
         type: boolean
