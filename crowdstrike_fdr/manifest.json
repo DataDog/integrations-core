@@ -44,6 +44,7 @@
     ],
     "classifier_tags": [
       "Category::AWS",
+      "Category::Cloud",
       "Category::Log Collection",
       "Category::Security",
       "Offering::Integration",
