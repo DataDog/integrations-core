@@ -29,11 +29,12 @@ def test_get_diff():
 
     expected = [
         {
-            "Name": "deleted (DELETED)",
+            "Name": "deleted",
             "Version": "3.0.0",
             "Type": "Integration",
             "Size_Bytes": -1500,
             "Size": convert_to_human_readable_size(-1500),
+            "Change_Type": "Removed",
         },
         {
             "Name": "foo",
@@ -41,13 +42,15 @@ def test_get_diff():
             "Type": "Integration",
             "Size_Bytes": 200,
             "Size": convert_to_human_readable_size(200),
+            "Change_Type": "Modified",
         },
         {
-            "Name": "new (NEW)",
+            "Name": "new",
             "Version": "0.1.0",
             "Type": "Integration",
             "Size_Bytes": 800,
             "Size": convert_to_human_readable_size(800),
+            "Change_Type": "New",
         },
     ]
 

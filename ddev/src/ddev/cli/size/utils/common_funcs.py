@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
 import requests
 import squarify
 from datadog import api, initialize
+from typing_extensions import NotRequired
 
 from ddev.cli.application import Application
 from ddev.utils.toml import load_toml_file
@@ -36,6 +37,7 @@ class FileDataEntry(TypedDict):
     Size_Bytes: int  # Size in bytes
     Size: str  # Human-readable size
     Type: str  # Integration/Dependency
+    Change_Type: NotRequired[str]  # Change type (New, Removed, Modified)
 
 
 class FileDataEntryPlatformVersion(FileDataEntry):
@@ -444,7 +446,7 @@ def format_modules(
     py_version: str,
 ) -> list[FileDataEntryPlatformVersion]:
     """
-    Formats the modules list, adding platform and Python version information.
+    Formats the modules list (status or diff), adding platform and Python version information.
     """
     new_modules: list[FileDataEntryPlatformVersion] = [
         {**entry, "Platform": platform, "Python_Version": py_version} for entry in modules
@@ -546,6 +548,102 @@ def save_markdown(
     app.display(f"Markdown table saved to {file_path}")
 
 
+def save_html(
+    app: Application,
+    title: str,
+    modules: list[FileDataEntryPlatformVersion],
+    file_path: str,
+) -> None:
+    """
+    Saves the modules list to HTML format, if the ouput is larger than the PR comment size max,
+    it ouputs the short version.
+    """
+    if modules == []:
+        return
+    MAX_HTML_SIZE = 65536  # PR comment size max
+    html = str()
+    groups = group_modules(modules)
+
+    html_headers = "<h1>Size Changes</h1>"
+    for (platform, py_version), group in groups.items():
+        html_subheaders = str()
+        total_diff_bytes = sum(int(item.get("Size_Bytes", 0)) for item in group)
+        sign_total = "+" if total_diff_bytes > 0 else ""
+        total_diff = convert_to_human_readable_size(total_diff_bytes)
+
+        added = [g for g in group if g.get("Change_Type") == "New"]
+        removed = [g for g in group if g.get("Change_Type") == "Removed"]
+        modified = [g for g in group if g.get("Change_Type") == "Modified"]
+
+        total_added = sum(int(x.get("Size_Bytes", 0)) for x in added)
+        total_removed = sum(int(x.get("Size_Bytes", 0)) for x in removed)
+        total_modified = sum(int(x.get("Size_Bytes", 0)) for x in modified)
+
+        html_subheaders += f"<details><summary><h4>Size Delta for {platform} and Python {py_version}:\n"
+        html_subheaders += f"{sign_total}{total_diff}</h4></summary>\n\n"
+
+        tables = str()
+
+        # Added summary
+        tables += append_html_entry(total_added, "Added", added)
+        tables += append_html_entry(total_removed, "Removed", removed)
+        tables += append_html_entry(total_modified, "Modified", modified)
+
+        close_details = "</details>\n\n"
+        if len(html_headers) + len(html_subheaders) + len(tables) + len(close_details) > MAX_HTML_SIZE:
+            tables = str()
+            tables += append_html_short_entry(total_added, "Added", added)
+            tables += append_html_short_entry(total_removed, "Removed", removed)
+            tables += append_html_short_entry(total_modified, "Modified", modified)
+
+        html += f"{html_subheaders}\n{tables}\n{close_details}"
+
+    html = f"{html_headers}\n{html}"
+
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(html)
+    app.display(f"HTML file saved to {file_path}")
+
+
+def group_modules(
+    modules: list[FileDataEntryPlatformVersion],
+) -> dict[tuple[str, str], list[FileDataEntryPlatformVersion]]:
+    groups: dict[tuple[str, str], list[FileDataEntryPlatformVersion]] = {}
+    for m in modules:
+        key = (m.get("Platform", ""), m.get("Python_Version", ""))
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(m)
+    return groups
+
+
+def append_html_entry(total: int, type: str, entries: list[FileDataEntryPlatformVersion]) -> str:
+    html = str()
+    if total != 0:
+        sign = "+" if total > 0 else ""
+        html += f"<b>{type}:</b> {len(entries)} item(s), {sign}{convert_to_human_readable_size(total)}\n"
+        html += "<table><tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th></tr>\n"
+        for e in entries:
+            html += f"<tr><td>{e.get('Type', '')}</td><td>{e.get('Name', '')}</td><td>{e.get('Version', '')}</td>"
+            html += f"<td>{e.get('Size', '')}</td></tr>\n"
+        html += "</table>\n"
+    else:
+        html += f"No {type.lower()} dependencies/integrations\n"
+
+    return html
+
+
+def append_html_short_entry(total: int, type: str, entries: list[FileDataEntryPlatformVersion]) -> str:
+    html = str()
+    if total != 0:
+        sign = "+" if total > 0 else ""
+        html += f"<b>{type}:</b> {len(entries)} item(s), {sign}{convert_to_human_readable_size(total)}\n"
+    else:
+        html += f"No {type.lower()} dependencies/integrations\n"
+
+    return html
+
+
 def print_table(
     app: Application,
     mode: str,
@@ -615,6 +713,22 @@ def export_format(
                 )
             )
             save_markdown(app, "Status", modules, markdown_filename)
+
+        elif output_format == "html":
+            html_filename = (
+                f"{platform}_{version}_{size_type}_{mode}.html"
+                if platform and version
+                else (
+                    f"{version}_{size_type}_{mode}.html"
+                    if version
+                    else f"{platform}_{size_type}_{mode}.html"
+                    if platform
+                    else f"{size_type}_{mode}.html"
+                )
+            )
+            title = "Status" if mode == "status" else "Diff"
+            # mypy: modules narrowed to FileDataEntryPlatformVersion when mode == diff
+            save_html(app, title, modules, html_filename)  # type: ignore[arg-type]
 
 
 def plot_treemap(
