@@ -1477,11 +1477,11 @@ def test_sqlserver_database_stats_metrics(
     }
 
     mocked_results = [
-        ('master', 'master', 'ONLINE', 'SIMPLE', 0, False, False, False),
-        ('tempdb', 'tempdb', 'ONLINE', 'SIMPLE', 0, False, False, False),
-        ('model', 'model', 'ONLINE', 'FULL', 0, False, False, False),
-        ('msdb', 'msdb', 'ONLINE', 'SIMPLE', 0, False, False, False),
-        ('datadog_test', 'datadog_test', 'ONLINE', 'FULL', 0, False, False, False),
+        ('master', 'master', 'MULTI_USER', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('tempdb', 'tempdb', 'MULTI_USER', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('model', 'model', 'MULTI_USER', 'ONLINE', 'FULL', 0, 0, False, False, False),
+        ('msdb', 'msdb', 'MULTI_USER', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('datadog_test', 'datadog_test', 'MULTI_USER', 'ONLINE', 'FULL', 0, 0, False, False, False),
     ]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1511,11 +1511,12 @@ def test_sqlserver_database_stats_metrics(
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
         ]
         for result in mocked_results:
-            db, database, database_state_desc, database_recovery_model_desc, *metric_values = result
+            db, database, database_user_access_desc, database_state_desc, database_recovery_model_desc, *metric_values = result
             metrics = zip(database_stats_metrics.metric_names()[0], metric_values)
             expected_tags = [
                 f'db:{db}',
                 f'database:{database}',
+                f'database_user_access_desc:{database_user_access_desc}',
                 f'database_state_desc:{database_state_desc}',
                 f'database_recovery_model_desc:{database_recovery_model_desc}',
             ] + tags
