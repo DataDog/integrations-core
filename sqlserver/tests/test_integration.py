@@ -988,6 +988,7 @@ def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
         ]
         + [
             'database_recovery_model_desc:SIMPLE',
+            'database_user_access_desc:MULTI_USER',
             'database_state_desc:ONLINE',
             'database:{}'.format(instance_docker['database']),
             'db:{}'.format(instance_docker['database']),
