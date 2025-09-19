@@ -92,3 +92,5 @@ kubernetes.node.filesystem.usage,gauge,,byte,,The amount of disk used at node le
 kubernetes.node.filesystem.usage_pct,gauge,,fraction,,The percentage of disk space used at node level,-1,kubernetes,k8s.node.disk.used_pct,
 kubernetes.node.image.filesystem.usage,gauge,,byte,,The amount of disk used on image filesystem (node level),-1,kubernetes,k8s.node.image.disk.usage,
 kubernetes.node.image.filesystem.usage_pct,gauge,,fraction,,The percentage of disk used (node level),-1,kubernetes,k8s.node.image.disk.used_pct,
+kubernetes.pod.terminating.duration,gauge,,second,,Amount of time the pod hangs in termination phase,0,kubernetes,,
+kubernetes.pod.resize.pending,gauge,,,,Number of pods with resource resize request in pending state,0,kubernetes,,

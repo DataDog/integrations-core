@@ -45,6 +45,8 @@ integration/airbyte:
 - airbyte/**/*
 integration/airflow:
 - airflow/**/*
+integration/amazon_app_mesh:
+- amazon_app_mesh/**/*
 integration/amazon_eks:
 - amazon_eks/**/*
 integration/amazon_eks_blueprints:
@@ -645,6 +647,8 @@ integration/supabase:
 - supabase/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/supply_chain_firewall:
+- supply_chain_firewall/**/*
 integration/suricata:
 - suricata/**/*
 integration/symantec_endpoint_protection:
@@ -697,6 +701,8 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trellix_endpoint_security:
 - trellix_endpoint_security/**/*
+integration/trend_micro_cloud_one:
+- trend_micro_cloud_one/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
@@ -759,6 +765,8 @@ integration/zeek:
 - zeek/**/*
 integration/zero_networks:
 - zero_networks/**/*
+integration/zerofox_cloud_platform:
+- zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
 qa/skip-qa:

@@ -173,7 +173,7 @@ def main():
 
     output_path = MOUNT_DIR / 'sizes.json'
     with output_path.open('w', encoding='utf-8') as fp:
-        json.dump(dict(sorted(sizes.items())), fp, indent=2, sort_keys=True)
+        json.dump(sizes, fp, indent=2, sort_keys=True)
 
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:
