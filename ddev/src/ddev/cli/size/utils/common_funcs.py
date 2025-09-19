@@ -1091,7 +1091,7 @@ def get_previous_dep_sizes_json(base_commit: str, platform: str) -> Path | None:
     print(f"Uncompressed json: {uncompressed_json}")
     if not compressed_json or not uncompressed_json:
         return None
-    sizes_json = parse_dep_sizes_json(compressed_json, uncompressed_json)
+    sizes_json = parse_sizes_json(compressed_json, uncompressed_json)
     output_path = Path(f'{platform}.json')
     output_path.write_text(json.dumps(sizes_json, indent=2))
     print(f"Wrote merged sizes json to {output_path}")
@@ -1099,7 +1099,7 @@ def get_previous_dep_sizes_json(base_commit: str, platform: str) -> Path | None:
 
 
 @cache
-def parse_dep_sizes_json(compressed_json_path: Path, uncompressed_json_path: Path) -> dict[str, dict[str, int]]:
+def parse_sizes_json(compressed_json_path: Path, uncompressed_json_path: Path) -> dict[str, dict[str, int]]:
     compressed_list = list(json.loads(compressed_json_path.read_text()))
     uncompressed_list = list(json.loads(uncompressed_json_path.read_text()))
 

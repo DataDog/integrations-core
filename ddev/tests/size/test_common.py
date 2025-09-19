@@ -379,26 +379,38 @@ def test_parse_sizes_json(tmp_path):
     compressed_data = json.dumps(
         [
             {
+                "Name": "dep1",
+                "Size_Bytes": 123,
+                "Size": "2 B",
+                "Type": "Dependency",
+            },
+            {
                 "Name": "module1",
                 "Size_Bytes": 123,
                 "Size": "2 B",
                 "Type": "Integration",
-            }
+            },
         ]
     )
     uncompressed_data = json.dumps(
         [
             {
+                "Name": "dep1",
+                "Size_Bytes": 456,
+                "Size": "4 B",
+                "Type": "Dependency",
+            },
+            {
                 "Name": "module1",
                 "Size_Bytes": 456,
                 "Size": "4 B",
                 "Type": "Integration",
-            }
+            },
         ]
     )
 
     expected_output = {
-        "module1": {
+        "dep1": {
             "compressed": 123,
             "uncompressed": 456,
             "version": None,
