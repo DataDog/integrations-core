@@ -5,8 +5,7 @@
 from __future__ import annotations
 
 import copy
-from enum import Enum
-from typing import TYPE_CHECKING, Optional, Tuple, TypedDict
+from typing import TYPE_CHECKING, Optional, Tuple
 
 from datadog_checks.postgres.config_models import InstanceConfig
 from datadog_checks.postgres.config_models.defaults import (
@@ -23,18 +22,17 @@ from datadog_checks.postgres.config_models.instance import (
     ManagedAuthentication1,
     Union,
 )
-from datadog_checks.postgres.discovery import (
-    DEFAULT_MAX_DATABASES,
-)
-from datadog_checks.postgres.discovery import (
-    DEFAULT_REFRESH as DEFAULT_AUTODISCOVERY_REFRESH_INTERVAL,
-)
-from datadog_checks.postgres.metadata import (
-    DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
-    DEFAULT_SETTINGS_COLLECTION_INTERVAL,
-    DEFAULT_SETTINGS_IGNORED_PATTERNS,
-)
 from datadog_checks.postgres.relationsmanager import RelationsManager
+
+# We need to use TYPE_CHECKING to avoid circular imports, which are ok while type checking
+# but not while executing
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
+from datadog_checks.base.utils.db.utils import get_agent_host_tags
+from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
 from datadog_checks.postgres.statement_samples import (
     DEFAULT_ACTIVITY_COLLECTION_INTERVAL as DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL,
 )
@@ -43,49 +41,8 @@ from datadog_checks.postgres.statement_samples import (
 )
 from datadog_checks.postgres.statements import DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
 
-if TYPE_CHECKING:
-    from datadog_checks.postgres import PostgreSql
-
-from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
-from datadog_checks.base.utils.db.utils import get_agent_host_tags
-
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
-
-
-class FeatureKey(Enum):
-    """
-    Enum representing the keys for features in the Postgres configuration.
-    """
-
-    RELATION_METRICS = "relation_metrics"
-    QUERY_SAMPLES = "query_samples"
-    COLLECT_SETTINGS = "collect_settings"
-    COLLECT_SCHEMAS = "collect_schemas"
-    QUERY_ACTIVITY = "query_activity"
-    QUERY_METRICS = "query_metrics"
-
-
-FeatureNames = {
-    FeatureKey.RELATION_METRICS: 'Relation Metrics',
-    FeatureKey.QUERY_SAMPLES: 'Query Samples',
-    FeatureKey.COLLECT_SETTINGS: 'Collect Settings',
-    FeatureKey.COLLECT_SCHEMAS: 'Collect Schemas',
-    FeatureKey.QUERY_ACTIVITY: 'Query Activity',
-    FeatureKey.QUERY_METRICS: 'Query Metrics',
-}
-
-
-class Feature(TypedDict):
-    """
-    A feature in the Postgres configuration that can be enabled or disabled.
-    """
-
-    key: str
-    name: str
-    enabled: bool
-    description: str | None
 
 
 class ValidationResult:
@@ -129,7 +86,7 @@ class ValidationResult:
         self.warnings.append(warning)
 
 
-def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[InstanceConfig, ValidationResult]:
+def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     """
     Build the Postgres configuration.
     :param check: The check instance.
@@ -138,6 +95,9 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
     :return: InstanceConfig
         The instance configuration object.
     """
+
+    instance = check.instance
+    init_config = check.init_config
 
     args = {}
 
@@ -152,6 +112,8 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             args[f] = None
         if f in instance:
             args[f] = instance[f]
+
+    from datadog_checks.postgres.config_models import dict_defaults
 
     # Set values for args that have deprecated fallbacks, are not supported by the spec model
     # or have other complexities
@@ -171,76 +133,32 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             "custom_queries": instance.get('custom_queries', []),
             "database_identifier": instance.get('database_identifier', {"template": "$resolved_hostname"}),
             "database_autodiscovery": {
-                **{
-                    "enabled": False,
-                    "global_view_db": "postgres",
-                    "max_databases": DEFAULT_MAX_DATABASES,
-                    "include": [".*"],
-                    "exclude": ["cloudsqladmin"],
-                    "refresh": DEFAULT_AUTODISCOVERY_REFRESH_INTERVAL,
-                },
+                **dict_defaults.instance_database_autodiscovery(),
                 **(instance.get('database_autodiscovery', {})),
             },
             "query_metrics": {
+                **dict_defaults.instance_query_metrics(),
                 **{
-                    "enabled": True,
-                    "collection_interval": DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL,
-                    "pg_stat_statements_max_warning_threshold": 10000,
-                    "incremental_query_metrics": False,
-                    "baseline_metrics_expiry": 300,
-                    "full_statement_text_cache_max_size": 10000,
-                    "full_statement_text_samples_per_hour_per_query": 10000,
-                    "run_sync": False,
                     "batch_max_content_size": init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000),
                 },
                 **(instance.get('query_metrics', {})),
             },
             "query_samples": {
-                **{
-                    "enabled": True,
-                    "collection_interval": DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL,
-                    "explain_function": "datadog.explain_statement",
-                    "explained_queries_per_hour_per_query": 60,
-                    "samples_per_hour_per_query": 15,
-                    "explained_queries_cache_maxsize": 5000,
-                    "seen_samples_cache_maxsize": 10000,
-                    "explain_parameterized_queries": True,
-                    "run_sync": False,
-                },
+                **dict_defaults.instance_query_samples(),
                 **(instance.get('statement_samples', {})),  # Deprecated, use `query_samples` instead
                 **(instance.get('query_samples', {})),
             },
             "query_activity": {
-                **{
-                    "enabled": True,
-                    "collection_interval": DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL,
-                    "payload_row_limit": 3500,
-                },
+                **dict_defaults.instance_query_activity(),
                 **(instance.get('query_activity', {})),
             },
             # Metadata collection
             "collect_settings": {
-                **{
-                    "enabled": True,
-                    "collection_interval": DEFAULT_SETTINGS_COLLECTION_INTERVAL,
-                    "ignored_settings_patterns": DEFAULT_SETTINGS_IGNORED_PATTERNS,
-                    "run_sync": False,
-                },
+                **dict_defaults.instance_collect_settings(),
                 **(instance.get('collect_settings') or {}),
             },
             "collect_schemas": {
-                **{
-                    "enabled": False,
-                    "max_tables": 300,
-                    "max_columns": 50,
-                    "collection_interval": DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
-                    "include_databases": [],
-                    "exclude_databases": [],
-                    "include_schemas": [],
-                    "exclude_schemas": [],
-                    "include_tables": [],
-                    "exclude_tables": [],
-                },
+                **dict_defaults.instance_collect_schemas(),
                 **(instance.get('collect_schemas', {})),
             },
             # Cloud
@@ -258,35 +176,15 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             },
             # Obfuscation and query logging
             "obfuscator_options": {
-                **{
-                    "obfuscation_mode": "obfuscate_and_normalize",
-                    "replace_digits": False,
-                    "collect_metadata": True,
-                    "collect_tables": True,
-                    "collect_commands": True,
-                    "collect_comments": True,
-                    "keep_sql_alias": True,
-                    "keep_dollar_quoted_func": True,
-                    "remove_space_between_parentheses": False,
-                    "keep_null": False,
-                    "keep_boolean": False,
-                    "keep_positional_parameter": False,
-                    "keep_trailing_semicolon": False,
-                    "keep_identifier_quotation": False,
-                    "keep_json_path": False,
-                },
+                **dict_defaults.instance_obfuscator_options(),
                 **(instance.get('obfuscator_options', {})),
             },
             "collect_raw_query_statement": {
-                **{"enabled": False},
+                **dict_defaults.instance_collect_raw_query_statement(),
                 **(instance.get('collect_raw_query_statement', {})),
             },
             "locks_idle_in_transaction": {
-                **{
-                    "enabled": True,
-                    "collection_interval": 300,
-                    "max_rows": 100,
-                },
+                **dict_defaults.instance_locks_idle_in_transaction(),
                 **(instance.get('locks_idle_in_transaction', {})),
             },
             "propagate_agent_tags": should_propagate_agent_tags(instance=instance, init_config=init_config),
@@ -298,6 +196,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
 
     validation_result = ValidationResult()
 
+    # Check provided values and revert to defaults if they are invalid
     if safefloat(args['query_metrics']['collection_interval']) <= 0:
         args['query_metrics']['collection_interval'] = DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
         validation_result.add_warning(
@@ -319,6 +218,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
             f"{DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL} seconds."
         )
 
+    # Generate and validate tags
     tags, tag_errors = build_tags(instance=instance, init_config=init_config, config=args)
     args['tags'] = tags
     for error in tag_errors:
@@ -369,6 +269,7 @@ def build_config(check: PostgreSql, init_config: dict, instance: dict) -> Tuple[
         validation_result.add_warning(warning)
         args['ssl'] = "allow"
 
+    # Deprecated options
     if instance.get('custom_metrics'):
         validation_result.add_warning('The `custom_metrics` option is deprecated. Use `custom_queries` instead.')
 
