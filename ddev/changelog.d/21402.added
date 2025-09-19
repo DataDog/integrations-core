@@ -1,0 +1,2 @@
+Improve error created when Kind or other dependencies are not installed
+Fix read_text signature for Python 3.12 mypy compatibility
