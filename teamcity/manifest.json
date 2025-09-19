@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8dd65d36-9cb4-4295-bb0c-68d67c0cdd4b",
   "app_id": "teamcity",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
