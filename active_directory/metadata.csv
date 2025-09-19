@@ -16,10 +16,6 @@ active_directory.dhcp.failover.binding_updates_sent,rate,,,second,The rate of DH
 
 active_directory.dhcp.failover.binding_updates_pending,gauge,,message,,The current number of DHCP failover update messages waiting to be processed.,-1,active_directory,ad dhcp pending,,
 
-active_directory.dhcp.failover.binding_acks_received,rate,,,second,The rate of DHCP failover binding acknowledgments received from the failover partner.,0,active_directory,ad dhcp recv rate,,
-
-active_directory.dhcp.failover.binding_acks_sent,rate,,,second,The rate of DHCP failover binding acknowledgments sent to the failover partner.,0,active_directory,ad dhcp sent rate,,
-
 active_directory.dra.inbound.bytes.after_compression,gauge,,byte,,The compressed size (in bytes) of compressed replication data inbound from directory system agents (DSAs) in other sites (per second).,-1,active_directory,ad dra inbound comp,,
 
 active_directory.dra.inbound.bytes.before_compression,gauge,,byte,,The uncompressed size (in bytes) of compressed replication data inbound from DSAs in other sites (per second).,-1,active_directory,ad dra inbound precomp,,
@@ -85,8 +81,6 @@ active_directory.ldap.searches_persec,gauge,,,second,The number of search operat
 active_directory.ldap.successful_binds_persec,gauge,,,second,The number of LDAP bindings (per second) that occurred successfully.,-1,active_directory,ad ldap binds,,
 
 active_directory.ldap.writes_persec,rate,,,second,The rate of LDAP write operations performed per second.,0,active_directory,ad ldap writes,,
-
-active_directory.netlogon.last_authentication_time,gauge,,second,,The elapsed time since the last authentication occurred. Lower values indicate recent authentication activity.,-1,active_directory,ad last auth time,,
 
 active_directory.netlogon.semaphore_acquires,count,,,,The total number of times the Netlogon semaphore has been obtained since system startup.,0,active_directory,ad netlogon acquires,,
 

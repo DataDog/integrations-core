@@ -65,7 +65,6 @@ METRICS_CONFIG = {
                 'Semaphore Acquires': {'name': 'semaphore_acquires', 'type': 'count'},
                 'Semaphore Timeouts': {'name': 'semaphore_timeouts', 'type': 'count'},
                 'Average Semaphore Hold Time': 'semaphore_hold_time',
-                'Last Authentication Time': {'name': 'last_authentication_time', 'type': 'time_elapsed'},
             }
         ],
     },
@@ -85,9 +84,7 @@ METRICS_CONFIG = {
                 'Failover: BndUpd Dropped': {'name': 'failover.binding_updates_dropped', 'type': 'count'},
                 'Failover: BndUpd pending in outbound queue': 'failover.binding_updates_pending',
                 'Failover: BndUpd received/sec': {'name': 'failover.binding_updates_received', 'type': 'rate'},
-                'Failover: BndAck received/sec': {'name': 'failover.binding_acks_received', 'type': 'rate'},
                 'Failover: BndUpd sent/sec': {'name': 'failover.binding_updates_sent', 'type': 'rate'},
-                'Failover: BndAck sent/sec': {'name': 'failover.binding_acks_sent', 'type': 'rate'},
             }
         ],
     },
