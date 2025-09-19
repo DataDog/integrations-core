@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-import socket
 
 from datadog_checks.dev.utils import get_metadata_metrics
 

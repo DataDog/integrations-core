@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-import socket
 
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.dev.utils import get_metadata_metrics
