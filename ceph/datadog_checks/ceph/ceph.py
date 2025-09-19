@@ -43,7 +43,6 @@ class Ceph(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(Ceph, self).__init__(name, init_config, instances)
-        self._octopus = False
 
     def _collect_raw(self, ceph_cmd, ceph_cluster, instance):
         use_sudo = _is_affirmative(instance.get('use_sudo', False))
@@ -58,6 +57,7 @@ class Ceph(AgentCheck):
         ceph_args = '{} --cluster {}'.format(ceph_args, ceph_cluster)
 
         raw = {}
+        # `mon_status` is only a valid command in versions of Ceph prior to `octopus` (released 2020-03-23)
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
@@ -73,24 +73,22 @@ class Ceph(AgentCheck):
         mon_map = raw.get('status', {}).get('monmap')
         if mon_map is None:
             raise RuntimeError("Could not detect Ceph release series")
-        if 'min_mon_release_name' in mon_map and mon_map['min_mon_release_name'] == 'octopus':
-            self.log.debug("Detected octopus version of ceph...")
-            self._octopus = True
-        else:
-            self._octopus = False
 
         return raw
 
     def _extract_tags(self, raw, instance):
         tags = instance.get('tags', [])
         fsid = None
-        if self._octopus:
+        try:
             fsid = raw['status']['fsid']
-        elif 'mon_status' in raw:
-            fsid = raw['mon_status']['monmap']['fsid']
+        except KeyError:
+            if 'mon_status' in raw:
+                fsid = raw['mon_status']['monmap']['fsid']
+            else:
+                self.log.debug("Could not find fsid")
+
+        if 'mon_status' in raw:
             tags.append(self.NAMESPACE + '_mon_state:%s' % raw['mon_status']['state'])
-        else:
-            self.log.debug("Could not find fsid")
 
         if fsid is not None:
             tags.append(self.NAMESPACE + '_fsid:%s' % fsid)
@@ -276,29 +274,29 @@ class Ceph(AgentCheck):
         except KeyError:
             self.log.debug('Error retrieving pgstatus metrics')
 
-        if self._octopus:
-            try:
-                num_mons = int(raw['status']['monmap']['num_mons'])
-                self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
-            except KeyError:
-                self.log.debug('Error retrieving num_mons metric')
-        else:
-            try:
-                num_mons = len(raw['mon_status']['monmap']['mons'])
-                self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
-            except KeyError:
-                self.log.debug('Error retrieving mon_status metrics')
+        try:
+            num_mons = int(raw['status']['monmap']['num_mons'])
+            self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
+        except KeyError:
+            if 'mon_status' in raw:
+                try:
+                    num_mons = len(raw['mon_status']['monmap']['mons'])
+                    self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
+                except KeyError:
+                    self.log.debug('Error retrieving mon_status metrics')
 
-            try:
-                num_mons_active = len(raw['mon_status']['quorum'])
-                self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
-            except KeyError:
-                self.log.debug('Error retrieving mon_status quorum metrics')
+                try:
+                    num_mons_active = len(raw['mon_status']['quorum'])
+                    self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
+                except KeyError:
+                    self.log.debug('Error retrieving mon_status quorum metrics')
+            else:
+                self.log.debug('Error retrieving num_mons metric')
 
         try:
             stats = raw['df_detail']['stats']
-            if not self._octopus:
-                self._publish(stats, self.gauge, ['total_objects'], tags)
+            # This will only work on Ceph versions prior to `octopus`, but will catch+return on later versions
+            self._publish(stats, self.gauge, ['total_objects'], tags)
             used = float(stats['total_used_bytes'])
             total = float(stats['total_bytes'])
             if total > 0:
