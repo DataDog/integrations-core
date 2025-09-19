@@ -1,0 +1,54 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "9afc329a-e4bc-44c0-97a6-ccd7151feca2",
+  "app_id": "have-i-been-pwned",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Have I Been Pwned breaches",
+    "title": "Have I Been Pwned",
+    "media": [
+      {
+        "caption": "Have I Been Pwned - Overview",
+        "image_url": "images/have_i_been_pwned_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Have I Been Pwned - Overview",
+        "image_url": "images/have_i_been_pwned_overview_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 54391682,
+      "source_type_name": "Have I Been Pwned",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Have I Been Pwned - Overview": "assets/dashboards/have_i_been_pwned_overview.json"
+    },
+    "logs": {
+      "source": "have-i-been-pwned"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
