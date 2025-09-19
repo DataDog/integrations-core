@@ -963,8 +963,14 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
 def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str) -> Path | None:
     dep_sizes_json = get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "master"), platform)
-    return Path(dep_sizes_json) if dep_sizes_json else None
+        previous_sizes = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "master"))
+        if previous_sizes:
+            compressed_json, uncompressed_json = previous_sizes["compressed"], previous_sizes["uncompressed"]
+            sizes = parse_sizes_json(compressed_json, uncompressed_json, platform)
+            with open(f"{platform}.json", "w") as f:
+                json.dump(sizes, f, indent=2)
+            dep_sizes_json = Path(f"{platform}.json")
+    return dep_sizes_json if dep_sizes_json else None
 
 
 @cache
@@ -1077,48 +1083,48 @@ def get_artifact(run_id: str, artifact_name: str) -> Path | None:
 
 
 @cache
-def get_previous_dep_sizes_json(base_commit: str, platform: str) -> Path | None:
-    print(f"Getting previous dependency sizes json for {base_commit=}, {platform=}")
+def get_previous_dep_sizes_json(base_commit: str) -> dict[str, Path] | None:
+    print(f"Getting previous dependency sizes json for {base_commit=}")
     run_id = get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)
     print(f"Previous run_id: {run_id}")
     compressed_json = None
     uncompressed_json = None
     if run_id:
-        compressed_json = get_artifact(run_id, f'status_compressed_{platform}.json')
+        compressed_json = get_artifact(run_id, 'status_compressed.json')
     if run_id:
-        uncompressed_json = get_artifact(run_id, f'status_uncompressed_{platform}.json')
+        uncompressed_json = get_artifact(run_id, 'status_uncompressed.json')
     print(f"Compressed json: {compressed_json}")
     print(f"Uncompressed json: {uncompressed_json}")
     if not compressed_json or not uncompressed_json:
         return None
-    sizes_json = parse_sizes_json(compressed_json, uncompressed_json)
-    output_path = Path(f'{platform}.json')
-    output_path.write_text(json.dumps(sizes_json, indent=2))
-    print(f"Wrote merged sizes json to {output_path}")
-    return output_path
+    return {
+        "compressed": compressed_json,
+        "uncompressed": uncompressed_json,
+    }
 
 
 @cache
-def parse_sizes_json(compressed_json_path: Path, uncompressed_json_path: Path) -> dict[str, dict[str, int]]:
+def parse_sizes_json(
+    compressed_json_path: Path, uncompressed_json_path: Path, platform: str
+) -> dict[str, dict[str, int]]:
     compressed_list = list(json.loads(compressed_json_path.read_text()))
     uncompressed_list = list(json.loads(uncompressed_json_path.read_text()))
-
-    sizes_json = {
+    sizes = {
         dep["Name"]: {
             "compressed": int(dep["Size_Bytes"]),
             "version": dep.get("Version"),
         }
         for dep in compressed_list
-        if dep.get("Type") == "Dependency"
+        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform
     }
 
     for dep in uncompressed_list:
-        if dep.get("Type") == "Dependency":
+        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform:
             name = dep["Name"]
-            entry = sizes_json.setdefault(name, {"version": dep.get("Version")})
+            entry = sizes.setdefault(name, {"version": dep.get("Version")})
             entry["uncompressed"] = int(dep["Size_Bytes"])
 
-    return sizes_json
+    return sizes
 
 
 class WrongDependencyFormat(Exception):
