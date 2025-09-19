@@ -31,7 +31,13 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
         "x": 0,
@@ -43,7 +49,7 @@
     {
       "id": 5042132219805083,
       "definition": {
-        "title": "Total Costs (past 30d)",
+        "title": "Total Spend (past 30d)",
         "title_size": "16",
         "title_align": "left",
         "time": {
@@ -72,7 +78,13 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
         "x": 3,
@@ -84,11 +96,11 @@
     {
       "id": 3253421450589468,
       "definition": {
-        "title": "Total Costs (30d prior)",
+        "title": "Total Spend (30d prior)",
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "live",
+           "type": "live",
           "unit": "month",
           "value": 1,
           "hide_incomplete_cost_data": true
@@ -113,7 +125,13 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
         "x": 6,
@@ -188,7 +206,13 @@
           }
         ],
         "autoscale": true,
-        "precision": 2
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
       },
       "layout": {
         "x": 9,
@@ -198,232 +222,247 @@
       }
     },
     {
-      "id": 4923995266806901,
+      "id": 7348898798385615,
       "definition": {
-        "type": "note",
-        "content": "OpenAI models have different capabilities and price points, and are priced by the **number of input and output tokens**.\n\nIn Cloud Cost Management, costs are broken down by the **input and output costs per model**. ",
-        "background_color": "green",
-        "font_size": "14",
-        "text_align": "center",
-        "vertical_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left",
-        "has_padding": true
-      },
-      "layout": {
-        "x": 0,
-        "y": 2,
-        "width": 3,
-        "height": 4
-      }
-    },
-    {
-      "id": 6176679445548644,
-      "definition": {
-        "title": "Cost per ServiceName",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "requests": [
+        "title": "Cost Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "response_format": "scalar",
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {servicename}",
-                "aggregator": "sum"
-              }
-            ],
-            "style": {
-              "palette": "classic"
+            "id": 4923995266806901,
+            "definition": {
+              "type": "note",
+              "content": "OpenAI models have different capabilities and price points, and are priced by the **number of input and output tokens**.\n\nIn Cloud Cost Management, costs are broken down by the **input and output costs per model**. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "sort": {
-              "count": 500,
-              "order_by": [
-                {
-                  "type": "formula",
-                  "index": 0,
-                  "order": "desc"
-                }
-              ]
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
             }
-          }
-        ],
-        "type": "sunburst",
-        "legend": {
-          "type": "table"
-        }
-      },
-      "layout": {
-        "x": 3,
-        "y": 2,
-        "width": 9,
-        "height": 4
-      }
-    },
-    {
-      "id": 5809017898757948,
-      "definition": {
-        "title": "Cost Changes Over Time by ServiceName",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_layout": "auto",
-        "legend_columns": [
-          "avg",
-          "min",
-          "max",
-          "value",
-          "sum"
-        ],
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {servicename}.rollup(sum, daily)"
-              }
-            ],
-            "response_format": "timeseries",
-            "style": {
-              "palette": "classic",
-              "order_by": "values",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "bars"
-          }
-        ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 6,
-        "width": 12,
-        "height": 3
-      }
-    },
-    {
-      "id": 132965784094236,
-      "definition": {
-        "title": "Cost by Organization and Project",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "type": "toplist",
-        "requests": [
-          {
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {organization_name,project_name}",
-                "aggregator": "sum"
-              }
-            ],
-            "response_format": "scalar",
-            "formulas": [
-              {
-                "formula": "query1"
-              }
-            ],
-            "sort": {
-              "count": 500,
-              "order_by": [
-                {
-                  "type": "formula",
-                  "index": 0,
-                  "order": "desc"
-                }
-              ]
-            }
-          }
-        ],
-        "style": {
-          "display": {
-            "type": "stacked",
-            "legend": "automatic"
           },
-          "palette": "dog_classic"
-        }
-      },
-      "layout": {
-        "x": 0,
-        "y": 9,
-        "width": 5,
-        "height": 3
-      }
-    },
-    {
-      "id": 3178117944554849,
-      "definition": {
-        "title": "Project Costs Over Time",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_layout": "auto",
-        "legend_columns": [
-          "avg",
-          "min",
-          "max",
-          "value",
-          "sum"
-        ],
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
-        "type": "timeseries",
-        "requests": [
           {
-            "formulas": [
-              {
-                "alias": "Total Cost",
-                "formula": "query1"
+            "id": 6176679445548644,
+            "definition": {
+              "title": "Cost per ServiceName",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {servicename}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
               }
-            ],
-            "queries": [
-              {
-                "data_source": "cloud_cost",
-                "name": "query1",
-                "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {project_name}.rollup(sum, daily)"
-              }
-            ],
-            "response_format": "timeseries",
-            "style": {
-              "palette": "classic",
-              "order_by": "values",
-              "line_type": "solid",
-              "line_width": "normal"
             },
-            "display_type": "bars"
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
+          },
+          {
+            "id": 5809017898757948,
+            "definition": {
+              "title": "Cost Changes Over Time by ServiceName",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {servicename}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 132965784094236,
+            "definition": {
+              "title": "Cost by Organization and Project",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {organization_name,project_name}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "dog_classic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 3178117944554849,
+            "definition": {
+              "title": "Project Costs Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total Cost",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:OpenAI,$api_key,$ml_app,$service,$model,$project} by {project_name}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 5,
+              "y": 7,
+              "width": 7,
+              "height": 3
+            }
           }
         ]
       },
       "layout": {
-        "x": 5,
-        "y": 9,
-        "width": 7,
-        "height": 3
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 11
       }
     },
     {
@@ -680,6 +719,9 @@
               "title": "# Input Tokens",
               "title_size": "16",
               "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -700,10 +742,7 @@
                 }
               ],
               "autoscale": true,
-              "precision": 2,
-              "time": {
-                "hide_incomplete_cost_data": true
-              }
+              "precision": 2
             },
             "layout": {
               "x": 6,
@@ -718,6 +757,9 @@
               "title": "# Output Tokens",
               "title_size": "16",
               "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -738,10 +780,7 @@
                 }
               ],
               "autoscale": true,
-              "precision": 2,
-              "time": {
-                "hide_incomplete_cost_data": true
-              }
+              "precision": 2
             },
             "layout": {
               "x": 9,
@@ -754,7 +793,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 12,
+        "y": 13,
         "width": 12,
         "height": 7
       }
@@ -1144,7 +1183,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 19,
+        "y": 20,
         "width": 12,
         "height": 8,
         "is_column_break": true
@@ -1562,7 +1601,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 27,
+        "y": 28,
         "width": 12,
         "height": 8
       }
