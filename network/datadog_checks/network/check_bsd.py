@@ -90,7 +90,7 @@ class BSDNetwork(Network):
             self.log.exception("Error collecting connection stats.")
 
         try:
-            netstat, _, _ = get_subprocess_output(["netstat", "-s", "-p" "tcp"], self.log)
+            netstat, _, _ = get_subprocess_output(["netstat", "-s", "-p", "tcp"], self.log)
             # 3651535 packets sent
             #         972097 data packets (615753248 bytes)
             #         5009 data packets (2832232 bytes) retransmitted

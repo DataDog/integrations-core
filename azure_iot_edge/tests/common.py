@@ -346,8 +346,7 @@ E2E_EXTRA_SPAWNED_CONTAINERS = [
 
 E2E_METRICS = (
     # All metrics...
-    {name for name, _ in MODULE_METRICS}
-    .union(name for name, _, _ in AGENT_METRICS)
+    {name for name, _ in MODULE_METRICS}.union(name for name, _, _ in AGENT_METRICS)
     .union(name for name, _ in HUB_METRICS)
     # ... Except a few that don't get emitted by default.
     .difference(

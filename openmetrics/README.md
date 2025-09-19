@@ -72,6 +72,18 @@ By default, the integration skips metrics that come without a type on a Promethe
         "type": "gauge"
 ```
 
+If you are collecting metrics through annotations, refer to the following example:
+
+```json
+  "metrics": [
+  {
+    "<NAME_OF_METRIC_WITHOUT_TYPE>": {
+      "type": "gauge"
+    }
+  }
+  ]
+```
+
 Remember that metric names can be specified as regular expressions, making it possible to specify the type for a set of metrics without listing all of them individually.
 
 ### Errors parsing the OpenMetrics payload with Agent 7.46

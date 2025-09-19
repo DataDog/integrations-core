@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import string
 from enum import Enum
 from typing import Any, List, Tuple  # noqa: F401
@@ -90,6 +91,8 @@ class DBExplainError(Enum):
     # PostgreSQL cannot determine the data type of a parameter in the query
     indeterminate_datatype = 'indeterminate_datatype'
 
+    unknown_error = 'unknown_error'
+
 
 class DatabaseHealthCheckError(Exception):
     pass
@@ -128,6 +131,40 @@ def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+SET_TRIM_PATTERN = re.compile(
+    r"""
+    ^
+    (?:
+        \s*
+        # match one leading comment
+        (?:
+            /\*
+            .*
+            \*/
+            \s*
+        )?
+
+        # match leading SET commands
+        SET\b
+        (?:
+            [^';] | # keywords, integer literals, etc.
+            '[^']*' # single-quoted strings
+        )+
+        ;
+    )+
+    """,
+    flags=(re.I | re.X),
+)
+
+
+# Expects one or more SQL statements in a string. If the string
+# begins with any SET statements, they are removed and the rest
+# of the string is returned. Otherwise, the string is returned
+# as it was received.
+def trim_leading_set_stmts(sql):
+    return SET_TRIM_PATTERN.sub('', sql, 1).lstrip()
 
 
 fmt = PartialFormatter()
@@ -211,6 +248,34 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
         {'name': 'conflicts.snapshot', 'type': 'monotonic_count'},
         {'name': 'conflicts.bufferpin', 'type': 'monotonic_count'},
         {'name': 'conflicts.deadlock', 'type': 'monotonic_count'},
+    ],
+}
+
+QUERY_PG_STAT_RECOVERY_PREFETCH = {
+    'name': 'pg_stat_recovery_prefetch',
+    'query': """
+        SELECT
+            prefetch,
+            hit,
+            skip_init,
+            skip_new,
+            skip_fpw,
+            skip_rep,
+            wal_distance,
+            block_distance,
+            io_depth
+        FROM pg_stat_recovery_prefetch
+    """.strip(),
+    'columns': [
+        {'name': 'recovery_prefetch.prefetch', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.hit', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_init', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_new', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_fpw', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.skip_rep', 'type': 'monotonic_count'},
+        {'name': 'recovery_prefetch.wal_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.block_distance', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.io_depth', 'type': 'gauge'},
     ],
 }
 
@@ -491,6 +556,23 @@ SELECT
     total_txns, total_bytes
 FROM pg_stat_replication_slots AS stat
 JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
+""".strip(),
+}
+
+QUERY_PG_WAIT_EVENT_METRICS = {
+    'name': 'wait_event_stats',
+    'columns': [
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'user', 'type': 'tag_not_null'},
+        {'name': 'wait_event', 'type': 'tag'},
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'activity.wait_event', 'type': 'gauge'},
+    ],
+    'query': """
+SELECT application_name, datname, usename, COALESCE(wait_event, 'NoWaitEvent'), backend_type, COUNT(*)
+FROM pg_stat_activity
+GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
 
@@ -1001,5 +1083,47 @@ LIMIT 200
         {'name': 'io.reads', 'type': 'monotonic_count'},
         {'name': 'io.write_time', 'type': 'monotonic_count'},
         {'name': 'io.writes', 'type': 'monotonic_count'},
+    ],
+}
+
+# Measures the age (in seconds) of idle-in-transaction sessions holding exclusive relation locks.
+# Limits result set to 10 rows to avoid tag explosion.
+IDLE_TX_LOCK_AGE_METRICS = {
+    'name': 'idle_tx_lock_age_metrics',
+    'query': (
+        """
+SELECT
+    l.pid,
+    a.datname,
+    a.usename             AS session_user,
+    a.application_name,
+    a.client_hostname,
+    l.mode,
+    c.oid::regclass       AS relation,
+    r.rolname             AS relation_owner,
+    EXTRACT(EPOCH FROM (now() - a.xact_start)) AS xact_age
+FROM pg_locks l
+JOIN pg_stat_activity a ON a.pid = l.pid
+JOIN pg_class c         ON c.oid = l.relation
+JOIN pg_roles r         ON r.oid = c.relowner
+WHERE l.locktype = 'relation'
+  AND l.granted = true
+  AND l.mode like '%Exclusive%'
+  AND a.state = 'idle in transaction'
+  AND a.state_change IS NOT NULL
+  AND now() - a.state_change > interval '60 seconds'
+ORDER BY xact_age DESC
+LIMIT {max_rows} ;        """
+    ).strip(),
+    'columns': [
+        {'name': 'pid', 'type': 'tag'},
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'session_user', 'type': 'tag'},
+        {'name': 'app', 'type': 'tag'},
+        {'name': 'client_hostname', 'type': 'tag_not_null'},
+        {'name': 'lock_mode', 'type': 'tag'},
+        {'name': 'relation', 'type': 'tag'},
+        {'name': 'relation_owner', 'type': 'tag'},
+        {'name': 'locks.idle_in_transaction_age', 'type': 'gauge'},
     ],
 }

@@ -52,7 +52,7 @@ The check automatically tags emitted metrics with SSID, BSSID, MAC Address, Wi-F
 
 ### Metrics
 
-See [metadata.csv][14] for a list of metrics that this integration provides.
+See [metadata.csv][14] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -193,7 +193,7 @@ trap - ERR
 [7]: https://superuser.com/questions/122441/how-can-i-get-the-same-ssid-for-multiple-access-points
 [8]: https://app.datadoghq.com/account/settings/agent/latest
 [9]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
-[10]: https://github.com/DataDog/datadog-agent/blob/main/poc/cmd/agent/dist/conf.d/wlan.d/conf.yaml.example
+[10]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/wlan.d/conf.yaml.example
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [12]: https://docs.datadoghq.com/getting_started/tagging/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

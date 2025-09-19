@@ -28,7 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.4.0",
+    "datadog-checks-base>=37.16.0",
 ]
 dynamic = [
     "version",
@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "openstacksdk==4.5.0",
+    "openstacksdk==4.7.0",
 ]
 
 [project.urls]

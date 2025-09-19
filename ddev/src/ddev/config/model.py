@@ -79,7 +79,7 @@ class RootConfig(LazilyParsedConfig):
             if not isinstance(repo, str):
                 self.raise_error('must be a string')
             elif repo not in self.repos:
-                self.raise_error('unknown repository')
+                self.raise_error(f'unknown Repository: {repo!r}')
 
             self.raw_data['repo'] = repo
             self._field_repo = RepoConfig({'name': repo, 'path': self.repos[repo]}, ('repo',))
@@ -98,7 +98,7 @@ class RootConfig(LazilyParsedConfig):
             if not isinstance(agent, str):
                 self.raise_error('must be a string')
             elif agent not in self.agents:
-                self.raise_error('unknown Agent')
+                self.raise_error(f'unknown Agent: {agent!r}')
 
             self.raw_data['agent'] = agent
             self._field_agent = AgentConfig({'name': agent, 'config': self.agents[agent]}, ('agent',))
@@ -117,7 +117,7 @@ class RootConfig(LazilyParsedConfig):
             if not isinstance(org, str):
                 self.raise_error('must be a string')
             elif org not in self.orgs:
-                self.raise_error('unknown Org')
+                self.raise_error(f'unknown Org: {org!r}')
 
             self.raw_data['org'] = org
             self._field_org = OrgConfig({'name': org, 'config': self.orgs[org]}, ('org',))

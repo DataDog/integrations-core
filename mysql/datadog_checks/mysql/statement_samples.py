@@ -17,7 +17,7 @@ from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
@@ -34,7 +34,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 from .util import (
     DatabaseConfigurationError,
     StatementTruncationState,
-    connect_with_autocommit,
+    connect_with_session_variables,
     get_truncation_state,
     warning_with_tags,
 )
@@ -280,7 +280,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = connect_with_autocommit(**self._connection_args)
+            self._db = connect_with_session_variables(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):

@@ -3,7 +3,8 @@ from posixpath import join
 
 import jsonschema
 
-from .....constants import get_root
+from datadog_checks.dev.tooling.constants import get_root
+
 from .utils import find_profile_in_path, get_all_profiles_for_directories, get_profile
 
 
@@ -270,9 +271,7 @@ class TableColumnHasTagValidator(ProfileValidator):
                     if not all_metric_tags_are_valid:
                         self.fail(
                             "metric_tables defined in lines {} are not valid. \
-                        \nmetric_tags must have 'column' or 'index' value".format(
-                                lines
-                            )
+                        \nmetric_tags must have 'column' or 'index' value".format(lines)
                         )
 
         if not self.result.failed:

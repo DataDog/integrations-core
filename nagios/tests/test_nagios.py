@@ -221,8 +221,9 @@ class TestPerfDataTailer:
 
         # Get the config
         config, _ = get_config(
-            "service_perfdata_file={}\n"
-            "service_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE),
+            "service_perfdata_file={}\nservice_perfdata_file_template={}".format(
+                self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE
+            ),
             service_perf=True,
             tags=CUSTOM_TAGS,
         )
@@ -261,8 +262,9 @@ class TestPerfDataTailer:
         self.log_file = tempfile.NamedTemporaryFile()
         # Get the config
         config, _ = get_config(
-            "service_perfdata_file={}\n"
-            "service_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE),
+            "service_perfdata_file={}\nservice_perfdata_file_template={}".format(
+                self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE
+            ),
             service_perf=True,
             tags=CUSTOM_TAGS,
         )
@@ -301,8 +303,9 @@ class TestPerfDataTailer:
 
         # Get the config
         config, _ = get_config(
-            "host_perfdata_file={}\n"
-            "host_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_HOST_TEMPLATE),
+            "host_perfdata_file={}\nhost_perfdata_file_template={}".format(
+                self.log_file.name, NAGIOS_TEST_HOST_TEMPLATE
+            ),
             host_perf=True,
             tags=CUSTOM_TAGS,
         )
@@ -346,8 +349,9 @@ class TestPerfDataTailer:
 
         # Get the config
         config, _ = get_config(
-            "service_perfdata_file={}\n"
-            "service_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_ALT_SVC_TEMPLATE),
+            "service_perfdata_file={}\nservice_perfdata_file_template={}".format(
+                perfdata_file.name, NAGIOS_TEST_ALT_SVC_TEMPLATE
+            ),
             service_perf=True,
         )
 
@@ -411,8 +415,9 @@ class TestPerfDataTailer:
 
         # Get the config
         config, _ = get_config(
-            "host_perfdata_file={}\n"
-            "host_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_ALT_HOST_TEMPLATE),
+            "host_perfdata_file={}\nhost_perfdata_file_template={}".format(
+                perfdata_file.name, NAGIOS_TEST_ALT_HOST_TEMPLATE
+            ),
             host_perf=True,
         )
 

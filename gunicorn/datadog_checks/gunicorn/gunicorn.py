@@ -7,6 +7,7 @@ Collects metrics from the gunicorn web server.
 
 http://gunicorn.org/
 """
+
 import re
 import subprocess
 import time
@@ -28,7 +29,6 @@ def get_gunicorn_version(cmd):
 
 
 class GUnicornCheck(AgentCheck):
-
     # Config
     PROC_NAME = 'proc_name'
 
@@ -149,11 +149,11 @@ class GUnicornCheck(AgentCheck):
         master_procs = []
         for p in psutil.process_iter():
             try:
-                if p.cmdline()[0] == master_name:
+                if len(p.cmdline()) > 0 and p.cmdline()[0] == master_name:
                     master_procs.append(p)
             except psutil.NoSuchProcess:
                 self.log.debug("Process %s disappeared while scanning", p.name())
-            except (IndexError, psutil.Error) as e:
+            except psutil.Error as e:
                 self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
         self.log.debug("There are %s master process(es) with the name %s", len(master_procs), name)
         return master_procs

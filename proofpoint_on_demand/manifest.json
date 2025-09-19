@@ -1,0 +1,50 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "1cef2070-562b-4d59-b035-ea26d6a2cd75",
+  "app_id": "proofpoint-on-demand",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Proofpoint On-Demand message logs",
+    "title": "Proofpoint On-Demand Email Security",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Proofpoint On-Demand - Overview",
+        "image_url": "images/proofpoint_on_demand_overview.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 49112871,
+      "source_type_name": "Proofpoint On-Demand Email Security",
+      "events": {
+        "creates_events": false
+      }      
+    },
+    "dashboards": {
+      "Proofpoint On-Demand - Overview": "assets/dashboards/proofpoint_on_demand_overview.json"
+    },
+    "logs": {
+      "source": "proofpoint-on-demand"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

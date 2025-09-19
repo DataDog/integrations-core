@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0f9508bc-f260-4268-b94d-13c8da1525fb",
   "app_id": "kube-proxy",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

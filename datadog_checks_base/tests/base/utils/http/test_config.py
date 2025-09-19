@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ssl
+
+import mock
+
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 
 
@@ -72,16 +76,25 @@ class TestVerify:
     def test_config_ca_cert(self):
         instance = {'tls_ca_cert': 'ca_cert'}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
 
-        assert http.options['verify'] == 'ca_cert'
+        with mock.patch.object(ssl.SSLContext, 'load_verify_locations') as mock_load_verify_locations:
+            http = RequestsWrapper(instance, init_config)
+
+            assert http.session.verify == 'ca_cert'  # The session attribute instantiates the SSLContext
+            assert mock_load_verify_locations.call_count == 1
+            assert mock_load_verify_locations.call_args[1]['cafile'] == 'ca_cert'
 
     def test_config_verify_and_ca_cert(self):
         instance = {'tls_verify': True, 'tls_ca_cert': 'ca_cert'}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
 
-        assert http.options['verify'] == 'ca_cert'
+        with mock.patch.object(ssl.SSLContext, 'load_verify_locations') as mock_load_verify_locations:
+            http = RequestsWrapper(instance, init_config)
+
+            assert http.session.verify == 'ca_cert'  # The session attribute instantiates the SSLContext
+            assert http.options['verify'] == 'ca_cert'
+            assert mock_load_verify_locations.call_count == 1
+            assert mock_load_verify_locations.call_args[1]['cafile'] == 'ca_cert'
 
 
 class TestRemapper:

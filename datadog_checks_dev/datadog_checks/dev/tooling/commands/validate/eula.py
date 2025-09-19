@@ -3,10 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_manifest_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_debug, echo_failure, echo_info, echo_success
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
+from datadog_checks.dev.tooling.manifest_utils import Manifest
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_manifest_file
 
 
 @click.command('eula', context_settings=CONTEXT_SETTINGS, short_help='Validate EULA files')

@@ -29,7 +29,6 @@ from .queries import DEFAULT_QUERIES
 
 
 class DuckdbCheck(AgentCheck):
-
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'duckdb'
 

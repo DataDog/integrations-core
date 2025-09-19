@@ -13,7 +13,6 @@ btrfs_check = datadog_checks.btrfs.BTRFS('btrfs', {}, [{}])
 
 
 def mock_get_usage():
-
     return [
         (1, 9672065024, 9093722112),
         (34, 33554432, 16384),
@@ -25,7 +24,6 @@ def mock_get_usage():
 # Just return a single device so the psutil portion of the check doesn't fail
 # The real data to check against is in mock_get_usage.
 def get_mock_devices():
-
     device_tuple = collections.namedtuple('device_tuple', 'device mountpoint fstype opts')
 
     return [device_tuple(device='/dev/disk1', mountpoint='/', fstype='btrfs', opts='local,multilabel')]

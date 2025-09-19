@@ -105,6 +105,33 @@ def test__check_total_commands_processed_present(check, aggregator, redis_instan
     aggregator.assert_metric('redis.net.commands', value=1000, tags=['test_total_commands_processed'])
 
 
+def test_check_all_available_config_options(check, aggregator, redis_instance, dd_run_check):
+    """
+    The check should should create a connection with the supported config options
+    """
+
+    connection_args = {
+        'db': 1,
+        'username': 'user',
+        'password': 'devops-best-friend',
+        'socket_timeout': 5,
+        'host': 'localhost',
+        'port': '6379',
+        'unix_socket_path': '/path',
+        'ssl': True,
+        'ssl_certfile': '/path',
+        'ssl_keyfile': '/path',
+        'ssl_ca_certs': '/path',
+        'ssl_cert_reqs': 0,
+    }
+    redis_instance.update(connection_args)
+
+    redis_check = check(redis_instance)
+    with mock.patch('redis.Redis') as redis_conn:
+        dd_run_check(redis_check)
+        assert redis_conn.call_args.kwargs == connection_args
+
+
 def test_slowlog_quiet_failure(check, aggregator, redis_instance):
     """
     The check should not fail if the slowlog command fails with redis.ResponseError

@@ -8,7 +8,7 @@
             "definition": {
                 "title": "About Celery",
                 "title_align": "left",
-                "banner_img": "/static/images/logos/celery_large.svg",
+                "banner_img": "/static/images/logos/celery_avatar.svg",
                 "show_title": false,
                 "type": "group",
                 "layout_type": "ordered",

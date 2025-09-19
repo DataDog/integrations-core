@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ...errors import CheckException
-from ...utils.common import to_native_string
-from .. import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import to_native_string
+
 from .mixins import PrometheusScraperMixin
 
 
