@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+import socket
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -32,6 +33,7 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'servertech_sentry3_system_nic_serial_number:oxen',
         'servertech_sentry3_system_version:zombies acted kept quaintly but but',
