@@ -7,13 +7,7 @@ from __future__ import annotations
 import copy
 from typing import TYPE_CHECKING, Optional, Tuple
 
-from datadog_checks.postgres.config_models import InstanceConfig
-from datadog_checks.postgres.config_models.defaults import (
-    instance_dbm,
-    instance_disable_generic_tags,
-    instance_port,
-    instance_propagate_agent_tags,
-)
+from datadog_checks.postgres.config_models import InstanceConfig, defaults, dict_defaults
 from datadog_checks.postgres.config_models.instance import (
     Aws,
     Azure,
@@ -103,7 +97,6 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
 
     # Automatically set values that support defaults or that have simple values in the instance
     instance_config_fields = set(InstanceConfig.__annotations__.keys())
-    from datadog_checks.postgres.config_models import defaults
 
     for f in instance_config_fields:
         try:
@@ -113,19 +106,19 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
         if f in instance:
             args[f] = instance[f]
 
-    from datadog_checks.postgres.config_models import dict_defaults
-
     # Set values for args that have deprecated fallbacks, are not supported by the spec model
     # or have other complexities
     # If you change a literal value here, make sure to update spec.yaml
     args.update(
         {
             # Set the default port to None if the host is a socket path
-            "port": instance.get('port', instance_port() if not instance.get('host', '').startswith('/') else None),
+            "port": instance.get(
+                'port', defaults.instance_port() if not instance.get('host', '').startswith('/') else None
+            ),
             # Set None values for ssl
             # Database configuration
             "dbm": instance.get(
-                'dbm', instance.get('deep_database_monitoring', instance_dbm())
+                'dbm', instance.get('deep_database_monitoring', defaults.instance_dbm())
             ),  # Deprecated, use `dbm` instead
             "custom_metrics": map_custom_metrics(
                 instance.get('custom_metrics', [])
@@ -356,7 +349,7 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
     tags = list(set(instance.get('tags', [])))
 
     # preset tags to host
-    if not instance.get('disable_generic_tags', instance_disable_generic_tags()):
+    if not instance.get('disable_generic_tags', defaults.instance_disable_generic_tags()):
         tags.append('server:{}'.format(config.get('host')))
     if config.get('port'):
         tags.append('port:{}'.format(config.get('port')))
@@ -444,7 +437,7 @@ def should_propagate_agent_tags(instance, init_config) -> bool:
         # if the init_config has explicitly set the value, return the boolean
         return init_config_propagate
     # if neither the instance nor the init_config has set the value, return default for instance
-    return instance_propagate_agent_tags()
+    return defaults.instance_propagate_agent_tags()
 
 
 def sanitize(config: Union[InstanceConfig, dict]) -> dict:
