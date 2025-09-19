@@ -23,11 +23,14 @@ def free_port(mocker):
 class TestValidations:
     def test_no_result_file(self, ddev, helpers, mocker):
         result_file = Path()
+        mock_process = None
 
         def _save_result_file(*args, **kwargs):
-            nonlocal result_file
+            nonlocal result_file, mock_process
             result_file = Path(os.environ[E2EEnvVars.RESULT_FILE])
-            return mocker.MagicMock(returncode=0)
+            mock_process = mocker.MagicMock(returncode=0)
+            mock_process.stderr = "Kind not installed, please install to run the 'test' command"
+            return mock_process
 
         mocker.patch('subprocess.run', side_effect=_save_result_file)
 
@@ -35,15 +38,17 @@ class TestValidations:
         environment = 'py3.12'
 
         result = ddev('env', 'start', integration, environment)
+        errors = mock_process.stderr
 
         assert result.exit_code == 1, result.output
         assert result.output == helpers.dedent(
             f"""
             ─────────────────────────────── Starting: py3.12 ───────────────────────────────
             No E2E result file found: {result_file}
+            Errors: {errors}
             """
         )
-
+        
     def test_already_exists(self, ddev, helpers, data_dir, mocker):
         mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
