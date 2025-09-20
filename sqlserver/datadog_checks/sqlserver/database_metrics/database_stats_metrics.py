@@ -10,8 +10,10 @@ DATABASE_STATS_METRICS_QUERY = {
     "query": """SELECT
         name as db,
         name as database_name,
+        user_access_desc,
         state_desc,
         recovery_model_desc,
+        user_access,
         state,
         is_sync_with_backup,
         is_in_standby,
@@ -21,8 +23,10 @@ DATABASE_STATS_METRICS_QUERY = {
     "columns": [
         {"name": "db", "type": "tag"},
         {"name": "database", "type": "tag"},
+        {"name": "database_user_access_desc", "type": "tag"},
         {"name": "database_state_desc", "type": "tag"},
         {"name": "database_recovery_model_desc", "type": "tag"},
+        {"name": "database.user_access", "type": "gauge"},
         {"name": "database.state", "type": "gauge"},
         {"name": "database.is_sync_with_backup", "type": "gauge"},
         {"name": "database.is_in_standby", "type": "gauge"},
