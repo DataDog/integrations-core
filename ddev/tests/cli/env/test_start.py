@@ -44,8 +44,7 @@ class TestValidations:
         assert result.output == helpers.dedent(
             f"""
             ─────────────────────────────── Starting: py3.12 ───────────────────────────────
-            No E2E result file found: {result_file}
-            Errors: {errors}
+            No E2E result file found: {result_file}, Errors: {errors}
             """
         )
 

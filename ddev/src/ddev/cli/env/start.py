@@ -127,7 +127,7 @@ def start(
 
         if not result_file.is_file():  # no cov
             errors = process.stderr
-            app.abort(f'No E2E result file found: {result_file} \nErrors: {errors}')
+            app.abort(f'No E2E result file found: {result_file}, Errors: {errors}')
 
         result = json.loads(result_file.read_text())
 
