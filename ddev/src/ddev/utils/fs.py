@@ -44,7 +44,7 @@ class Path(_PathBase):
         # https://bugs.python.org/issue38671
         return Path(os.path.realpath(self))
 
-    def read_text(self, encoding: str | None = None, errors: str | None = None, newline: str | None = None) -> str:
+    def read_text(self, encoding=None, errors=None, newline=None) -> str:
         return super().read_text(encoding, errors)
 
     def write_text(self, *args, **kwargs) -> int:
