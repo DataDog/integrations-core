@@ -1,3 +1,14 @@
+## Datadog Agent version [7.70.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7702)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.70.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7701)
+
+* Datadog Checks Base [37.18.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* PGBouncer [8.5.0](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/CHANGELOG.md)
+* Postgres [22.18.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Silverstripe CMS [1.3.0](https://github.com/DataDog/integrations-core/blob/master/silverstripe_cms/CHANGELOG.md)
+
 ## Datadog Agent version [7.70.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7700)
 
 * ActiveMQ XML [5.1.1](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)

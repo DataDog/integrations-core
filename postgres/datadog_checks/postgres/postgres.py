@@ -47,6 +47,7 @@ from .util import (
     CONNECTION_METRICS,
     COUNT_METRICS,
     FUNCTION_METRICS,
+    IDLE_TX_LOCK_AGE_METRICS,
     INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_CONTROL_CHECKPOINT_LT_10,
@@ -380,6 +381,13 @@ class PostgreSql(AgentCheck):
         if self.version >= V16:
             if self._config.dbm_enabled:
                 queries.append(STAT_IO_METRICS)
+
+        if self._config.dbm_enabled and self._config.locks_idle_in_transaction['enabled']:
+            query_def = copy.deepcopy(IDLE_TX_LOCK_AGE_METRICS)
+            query_def['collection_interval'] = self._config.locks_idle_in_transaction['collection_interval']
+            max_rows = self._config.locks_idle_in_transaction.get('max_rows', 100)
+            query_def['query'] = query_def['query'].format(max_rows=max_rows)
+            per_database_queries.append(query_def)
 
         if not queries:
             self.log.debug("no dynamic queries defined")

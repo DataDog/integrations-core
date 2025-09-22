@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.1.2 / 2025-09-05
+
+***Fixed***:
+
+* Fix collection of queues with a `none` prefetch value ([#21039](https://github.com/DataDog/integrations-core/pull/21039))
+
 ## 2.1.1 / 2025-08-07 / Agent 7.70.0
 
 ***Fixed***:
