@@ -32,6 +32,7 @@ def test_e2e_profile__generic_ups(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'ups_ident_manufacturer:quaintly forward driving Jaded',
         'ups_ident_model:but zombies acted kept forward zombies quaintly acted Jaded',
