@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Barracuda CloudGen Firewall is a NGFW that protect networks and Internet traffic",
+    "description": "Barracuda CloudGen Firewall is an NGFW that protects networks and Internet traffic",
     "title": "Barracuda CloudGen Firewall",
     "media": [
       {
@@ -23,7 +23,7 @@
       },
       {
         "media_type": "image",
-        "caption": "Some more Events types of CloudGen Firewall",
+        "caption": "Some more Event types of CloudGen Firewall",
         "image_url": "images/cloudgen_firewall_logs1.png"
       }
     ],
