@@ -18,13 +18,18 @@
       },
       {
         "media_type": "image", 
-        "caption": "Kong Mesh Control Plane Overview",
-        "image_url": "images/control_plane_2.png"
+        "caption": "Kong Mesh Control Plane (Dark Theme)",
+        "image_url": "images/control_plane_dark.png"
       },
       {
         "media_type": "image",
         "caption": "Kong Mesh Service Communication",
         "image_url": "images/service_communication.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Kong Mesh Service Communication (Dark Theme)",
+        "image_url": "images/service_communication_dark.png"
       }
     ],
     "classifier_tags": [
