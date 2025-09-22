@@ -67,6 +67,7 @@ def dd_environment(e2e_instance):
         os.path.join(HERE, 'compose', compose_file),
         conditions=[WaitFor(connect_to_pg)],
         env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE, "POSTGRES_LOCALE": POSTGRES_LOCALE},
+        capture=True,
     ):
         yield e2e_instance, E2E_METADATA
 
