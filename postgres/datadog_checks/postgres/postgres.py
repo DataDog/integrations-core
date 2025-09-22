@@ -244,6 +244,7 @@ class PostgreSql(AgentCheck):
 
     def execute_query_raw(self, query, db):
         with db() as conn:
+            print(f"Executing query {query} on connection {conn}")
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
