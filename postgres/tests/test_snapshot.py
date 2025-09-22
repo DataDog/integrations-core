@@ -60,7 +60,7 @@ class CursorObserver():
         self.snapshot.append(result)
         return result
         
-
+import types
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 def test_snapshot(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
@@ -68,16 +68,18 @@ def test_snapshot(aggregator, integration_check, pg_instance):
 
     def generate_new_connection(new_connection):
         print(f"Generating new connection function")
-        def observed_new_connection(dbname):
+        def observed_new_connection(self,dbname):
             print(f"Getting new connection to {dbname}")
             conn = new_connection(dbname)
             print(f"New connection: {conn}")
             return ConnectionObserver(conn, observer.snapshot)
         return observed_new_connection
-    check._new_connection = generate_new_connection(check._new_connection)
+    check._new_connection = generate_new_connection(check._new_connection).__get__(check, check.__class__)
     check.db_pool = observer
     # conn = check._new_connection(check, "test")
-    # conn = check.db()
-    # print(f"New connection: {conn}")
+    # with check.db() as conn:
+    #     print(f"Got connection: {conn}")
+    #     with conn.cursor() as cursor:
+    #         cursor.execute("SELECT 1")
     check.run()
     assert observer.snapshot == ["SELECT 1"]
