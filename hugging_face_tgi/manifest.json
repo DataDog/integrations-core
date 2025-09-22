@@ -35,9 +35,17 @@
         "prefix": "hugging_face_tgi.",
         "check": "hugging_face_tgi.queue.size",
         "metadata_path": "metadata.csv"
-      }
+      },
+      "process_signatures": [
+	    "text-generation-launcher",
+	    "text-generation-router"
+      ]
     },
-    "monitors": {},
+    "monitors": {
+      "High request latency": "assets/monitors/request_latency_high.json",
+      "High queue size": "assets/monitors/queue_size_high.json", 
+      "Slow token generation": "assets/monitors/token_generation_slow.json"
+    },
     "saved_views": {}
   },
   "author": {
