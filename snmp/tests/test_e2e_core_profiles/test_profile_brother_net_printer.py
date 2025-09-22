@@ -32,6 +32,7 @@ def test_e2e_profile_brother_net_printer(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + ['br_info_serial_number:acted oxen quaintly Jaded oxen kept']
 
     # --- TEST EXTENDED METRICS ---
