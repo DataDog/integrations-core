@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from json import JSONDecodeError
 from typing import Any  # noqa: F401
 
 import ntnx_prism_py_client as nutanix
@@ -9,11 +8,8 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
-# from datadog_checks.base.utils.db import QueryManager
-
 
 class NutanixCheck(AgentCheck):
-    # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = 'nutanix'
 
     def __init__(self, name, init_config, instances):
@@ -42,9 +38,7 @@ class NutanixCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
 
-        # First, perform a health check on the Prism Central
         try:
-            # Try to connect to the Prism Central API
             response = self.http.get(self.health_check_url)
             response.raise_for_status()
 
@@ -52,16 +46,14 @@ class NutanixCheck(AgentCheck):
 
         except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
             # Connection failed
-            error_msg = f"Cannot connect to Prism Central at {self.pc_ip}:{self.pc_port}: {e}"
-            self.log.error(error_msg)
+            self.log.error("Cannot connect to Prism Central at %s:%s : %s", self.pc_ip, self.pc_port, str(e))
 
             self.count("health.up", 0)
             raise
 
         except Exception as e:
             # Unexpected error
-            error_msg = f"Unexpected error when connecting to Prism Central: {e}"
-            self.log.error(error_msg, exc_info=True)
+            self.log.exception("Unexpected error when connecting to Prism Central: %s", e)
 
             self.count("health.up", 0)
             raise
@@ -70,13 +62,22 @@ class NutanixCheck(AgentCheck):
             # Try to connect to the Prism Central API
             response = self.http.get(self.base_url + "/api/clustermgmt/v4.0/config/clusters")
             response.raise_for_status()
+            response = response.json()
 
             if response["data"]:
                 for cluster in response["data"]:
-                    self.gauge("clusters.count", 1, tags=[f"cluster_id:{cluster['extId']}"])
+                    cluster_id = cluster["extId"]
+                    cluster_name = cluster["name"]
+                    self.log.info(cluster)
+
+                    self.gauge(
+                        "clusters.count",
+                        1,
+                        tags=[f"nutanix_cluster_id:{cluster_id}", f"nutanix_cluster_name:{cluster_name}"],
+                    )
 
         except Exception as e:
             # Unexpected error
             error_msg = f"Unexpected error when collecting clusters: {e}"
-            self.log.error(error_msg, exc_info=True)
+            self.log.exception(error_msg)
             raise
