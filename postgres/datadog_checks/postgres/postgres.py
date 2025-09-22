@@ -244,7 +244,6 @@ class PostgreSql(AgentCheck):
 
     def execute_query_raw(self, query, db):
         with db() as conn:
-            print(f"Executing query {query} on connection {conn}")
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
@@ -258,11 +257,8 @@ class PostgreSql(AgentCheck):
         if not self._db or self._db.closed:
             # if the connection is closed, we need to reinitialize the connection
             self._db = self._new_connection(self._config.dbname)
-            print(f"Got connection {self._db}")
             # once the connection is reinitialized, we need to reload the pg_settings
-            print(f"Loading pg_settings for {self._config.dbname}")
             self._load_pg_settings(self._db)
-            print(f"Loaded pg_settings for {self._config.dbname}")
         if self._db.info.status != psycopg.pq.ConnStatus.OK:
             self._db.rollback()
         try:
@@ -289,7 +285,6 @@ class PostgreSql(AgentCheck):
             # run a simple query to check if the connection is healthy
             # health check should run after a connection is established
             with conn.cursor() as cursor:
-                self.log.warning("Running health check with cursor %s", cursor)
                 cursor.execute("SELECT 1")
                 cursor.fetchall()
                 self.log.debug("Connection health check passed for database %s", conn.info.dbname)
@@ -937,9 +932,7 @@ class PostgreSql(AgentCheck):
     def _new_connection(self, dbname):
         # TODO: Keeping this main connection outside of the pool for now to keep existing behavior.
         # We should move this to the pool in the future.
-        print(f"Gettings args for {dbname}")
         conn_args = self.build_connection_args()
-        print(f"Building connection to {dbname} with {conn_args}")
         conn = psycopg.connect(**conn_args.as_kwargs(dbname=dbname))
         self.db_pool._configure_connection(conn)
         return conn
@@ -951,15 +944,13 @@ class PostgreSql(AgentCheck):
         evicted from the connection pool.
         """
         with self.db() as conn:
-            self.log.warning(f"Connected to database {conn}")
             self._connection_health_check(conn)
 
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
             with db.cursor() as cursor:
-                print(f"Using cursor {cursor}")
-                print("Running query [%s]", PG_SETTINGS_QUERY)
+                self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
                     ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),

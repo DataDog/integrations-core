@@ -124,7 +124,6 @@ class LRUConnectionPoolManager:
         conn.cursor_factory = CommenterCursor
 
         with conn.cursor() as cur:
-            print("Setting statement timeout to %s", self.statement_timeout)
             if self.statement_timeout is not None:
                 cur.execute("SET statement_timeout = %s", (self.statement_timeout,))
 
