@@ -33,6 +33,7 @@ def test_e2e_profile_ruckus_unleashed(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'ruckus_unleashed_system_licensed_aps:34750',
         'ruckus_unleashed_system_serial_number:acted but',

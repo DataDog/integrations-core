@@ -1,6 +1,6 @@
 {
-  "title": "Versa Dashboard Draft (Preview 8/20)",
-  "description": "[[suggested_dashboards]] (cloned)",
+  "title": "Versa SD-WAN Overview",
+  "description": "[[suggested_dashboards]]",
   "widgets": [
     {
       "id": 1937983187702050,
@@ -110,6 +110,7 @@
               "title": "Site table (Volume, Bandwidth, Availability)",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -117,31 +118,31 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:versa.site.volume_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.volume_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:versa.site.volume_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.volume_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:versa.site.bandwidth_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.bandwidth_rx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "sum:versa.site.bandwidth_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.bandwidth_tx{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "sum:versa.site.availability{$device_namespace,$device_hostname} by {device_hostname,device_id}",
+                      "query": "avg:versa.site.availability{$device_namespace,$device_hostname} by {device_hostname,device_id}",
                       "aggregator": "avg"
                     }
                   ],
@@ -947,382 +948,6 @@
       }
     },
     {
-      "id": 2867797573402597,
-      "definition": {
-        "title": "Interfaces",
-        "background_color": "blue",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 8495732616336603,
-            "definition": {
-              "title": "Inbound Throughput (bps)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:versa.interface.bandwidth{$device_namespace,$device_hostname} by {device_id,site,interface}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 3,
-              "height": 3
-            }
-          },
-          {
-            "id": 3761648095963762,
-            "definition": {
-              "title": "Outbound Throughput (bps)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:versa.interface.bandwidth_rx{$device_namespace,$device_hostname} by {device_id,site,interface}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 3,
-              "y": 0,
-              "width": 3,
-              "height": 3
-            }
-          },
-          {
-            "id": 5205000034452573,
-            "definition": {
-              "title": "Inbound Utilization (%)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:versa.interface.rx_util{$device_namespace,$device_hostname} by {device_id,site,interface}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 0,
-              "width": 3,
-              "height": 3
-            }
-          },
-          {
-            "id": 5403848799954680,
-            "definition": {
-              "title": "Outbound Utilization (%)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:versa.interface.tx_util{$device_namespace,$device_hostname} by {device_id,site,interface}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "order_by": "values",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 9,
-              "y": 0,
-              "width": 3,
-              "height": 3
-            }
-          },
-          {
-            "id": 394385377410930,
-            "definition": {
-              "title": "Interfaces (Throughput (bps), Utilization (%))",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:versa.interface.bandwidth_rx{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:versa.interface.bandwidth_tx{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:versa.interface.rx_util{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query4",
-                      "query": "avg:versa.interface.tx_util{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "text_formats": [
-                    [],
-                    [],
-                    [
-                      {
-                        "match": {
-                          "type": "is",
-                          "value": "up"
-                        },
-                        "palette": "white_on_green"
-                      },
-                      {
-                        "match": {
-                          "type": "is",
-                          "value": "down"
-                        },
-                        "palette": "white_on_red"
-                      },
-                      {
-                        "match": {
-                          "type": "is",
-                          "value": "off"
-                        },
-                        "palette": "black_on_light_red"
-                      }
-                    ]
-                  ],
-                  "sort": {
-                    "count": 500,
-                    "order_by": [
-                      {
-                        "type": "formula",
-                        "index": 5,
-                        "order": "desc"
-                      }
-                    ]
-                  },
-                  "formulas": [
-                    {
-                      "cell_display_mode": "bar",
-                      "alias": "Inbound Throughput",
-                      "formula": "query1"
-                    },
-                    {
-                      "cell_display_mode": "bar",
-                      "alias": "Outbound Throughput",
-                      "formula": "query2"
-                    },
-                    {
-                      "cell_display_mode": "number",
-                      "alias": "Inbound Utilization",
-                      "formula": "query3",
-                      "conditional_formats": [
-                        {
-                          "comparator": "<=",
-                          "value": 50,
-                          "palette": "white_on_green"
-                        },
-                        {
-                          "comparator": ">=",
-                          "value": 50,
-                          "palette": "white_on_yellow"
-                        },
-                        {
-                          "comparator": ">=",
-                          "value": 90,
-                          "palette": "white_on_red"
-                        }
-                      ]
-                    },
-                    {
-                      "cell_display_mode": "number",
-                      "alias": "Outbound Utilization",
-                      "formula": "query4",
-                      "conditional_formats": [
-                        {
-                          "comparator": "<=",
-                          "value": 50,
-                          "palette": "white_on_green"
-                        },
-                        {
-                          "comparator": ">=",
-                          "value": 50,
-                          "palette": "white_on_yellow"
-                        },
-                        {
-                          "comparator": ">=",
-                          "value": 90,
-                          "palette": "white_on_red"
-                        }
-                      ]
-                    },
-                    {
-                      "alias": "Total Throughput",
-                      "cell_display_mode": "bar",
-                      "formula": "query1 + query2"
-                    },
-                    {
-                      "alias": "Total Utilization",
-                      "formula": "query3 + query4",
-                      "conditional_formats": [
-                        {
-                          "comparator": "<=",
-                          "value": 50,
-                          "palette": "white_on_green"
-                        },
-                        {
-                          "comparator": ">=",
-                          "value": 50,
-                          "palette": "white_on_yellow"
-                        },
-                        {
-                          "comparator": ">",
-                          "value": 90,
-                          "palette": "white_on_red"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 12,
-              "height": 3
-            }
-          }
-        ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 23,
-        "width": 12,
-        "height": 7
-      }
-    },
-    {
       "id": 6111342913598089,
       "definition": {
         "title": "Links",
@@ -1617,7 +1242,7 @@
                           "palette": "white_on_green"
                         },
                         {
-                          "comparator": ">=",
+                          "comparator": ">",
                           "value": 50,
                           "palette": "white_on_yellow"
                         },
@@ -1639,7 +1264,7 @@
                           "palette": "white_on_green"
                         },
                         {
-                          "comparator": ">=",
+                          "comparator": ">",
                           "value": 50,
                           "palette": "white_on_yellow"
                         },
@@ -1657,10 +1282,10 @@
                       "formula": "query1 + query2"
                     },
                     {
-                      "alias": "Total Utilization",
+                      "alias": "Max Utilization (either direction)",
                       "conditional_formats": [
                         {
-                          "comparator": "<=",
+                          "comparator": "<",
                           "value": 50,
                           "palette": "white_on_green"
                         },
@@ -1670,12 +1295,12 @@
                           "palette": "white_on_yellow"
                         },
                         {
-                          "comparator": ">",
+                          "comparator": ">=",
                           "value": 90,
                           "palette": "white_on_red"
                         }
                       ],
-                      "formula": "query3 + query4"
+                      "formula": "max(query3, query4)"
                     }
                   ]
                 }
@@ -1693,7 +1318,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 30,
+        "y": 23,
         "width": 12,
         "height": 7
       }
@@ -1720,37 +1345,37 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.sla.delay{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id}",
+                      "query": "avg:versa.sla.delay{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id,forwarding_class}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:versa.sla.fwd_delay_var{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id}",
+                      "query": "avg:versa.sla.fwd_delay_var{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id,forwarding_class}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:versa.sla.rev_delay_var{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id}",
+                      "query": "avg:versa.sla.rev_delay_var{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id,forwarding_class}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "avg:versa.sla.fwd_loss_ratio{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id}",
+                      "query": "avg:versa.sla.fwd_loss_ratio{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id,forwarding_class}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "avg:versa.sla.rev_loss_ratio{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id}",
+                      "query": "avg:versa.sla.rev_loss_ratio{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id,forwarding_class}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query6",
-                      "query": "avg:versa.sla.pdu_loss_ratio{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id}",
+                      "query": "avg:versa.sla.pdu_loss_ratio{$device_namespace,$device_hostname} by {local_site,remote_site,local_access_circuit,remote_access_circuit,device_id,forwarding_class}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1845,7 +1470,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.sla.delay{$device_namespace,$device_hostname} by {device_id,local_site,remote_site,local_access_circuit,remote_access_circuit,device_hostname}"
+                      "query": "avg:versa.sla.delay{$device_namespace,$device_hostname} by {device_id,local_site,remote_site,local_access_circuit,remote_access_circuit,device_hostname,forwarding_class}"
                     }
                   ],
                   "formulas": [
@@ -1874,7 +1499,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 37,
+        "y": 30,
         "width": 12,
         "height": 9
       }
@@ -1901,19 +1526,19 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.path_qos.volume_tx{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
+                      "query": "avg:versa.qos.volume_tx{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:versa.path_qos.total_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
+                      "query": "avg:versa.qos.total_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:versa.path_qos.percent_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
+                      "query": "avg:versa.qos.percent_drop{$site,$device_namespace,$device_hostname} by {local_site,remote_site,device_id}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1976,7 +1601,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.path_qos.volume_tx{$device_namespace,$device_hostname, $site}"
+                      "query": "avg:versa.qos.volume_tx{$device_namespace,$device_hostname, $site}"
                     }
                   ],
                   "formulas": [
@@ -2024,7 +1649,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.path_qos.percent_drop{$device_namespace,$device_hostname, $site}"
+                      "query": "avg:versa.qos.percent_drop{$device_namespace,$device_hostname, $site}"
                     }
                   ],
                   "formulas": [
@@ -2053,7 +1678,144 @@
       },
       "layout": {
         "x": 0,
-        "y": 46,
+        "y": 39,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 8614837194469100,
+      "definition": {
+        "title": "Tunnels",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6376822767038620,
+            "definition": {
+              "title": "Tunnel Utilizations (appliance, local/remote IP, Volume RX/TX)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:versa.tunnel.volume_tx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:versa.tunnel.volume_rx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Volume TX",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Volume RX",
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6708211809539018,
+            "definition": {
+              "title": "Tunnel Volume (TX, RX, Total)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:versa.tunnel.volume_tx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:versa.tunnel.volume_rx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Volume TX",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Volume RX",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Volume Total",
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 44,
         "width": 12,
         "height": 5
       }
@@ -2265,7 +2027,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 51,
+        "y": 49,
         "width": 12,
         "height": 9
       }
@@ -2282,7 +2044,7 @@
           {
             "id": 868146667782968,
             "definition": {
-              "title": "DIA Application Traffic Usage (site, acckt, IP; volume TX, volume RX, bandwidth TX, RX)",
+              "title": "DIA Application Traffic Usage",
               "title_size": "16",
               "title_align": "left",
               "type": "query_table",
@@ -2415,81 +2177,24 @@
       },
       "layout": {
         "x": 0,
-        "y": 60,
+        "y": 58,
         "width": 12,
         "height": 5
       }
     },
     {
-      "id": 8614837194469100,
+      "id": 2867797573402597,
       "definition": {
-        "title": "Tunnels",
-        "background_color": "vivid_green",
+        "title": "Interfaces",
+        "background_color": "blue",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 6376822767038620,
+            "id": 8495732616336603,
             "definition": {
-              "title": "Tunnel Utilizations (appliance, local/remote IP, Volume RX/TX)",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:versa.tunnel.volume_tx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:versa.tunnel.volume_rx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "sort": {
-                    "count": 500,
-                    "order_by": [
-                      {
-                        "type": "formula",
-                        "index": 0,
-                        "order": "desc"
-                      }
-                    ]
-                  },
-                  "formulas": [
-                    {
-                      "cell_display_mode": "bar",
-                      "alias": "Volume TX",
-                      "formula": "query1"
-                    },
-                    {
-                      "cell_display_mode": "bar",
-                      "alias": "Volume RX",
-                      "formula": "query2"
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 4
-            }
-          },
-          {
-            "id": 6708211809539018,
-            "definition": {
-              "title": "Tunnel Volume (TX, RX, Total)",
+              "title": "Inbound Throughput (bps)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -2504,33 +2209,115 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "response_format": "timeseries",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:versa.tunnel.volume_tx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:versa.tunnel.volume_rx{$device_namespace,$device_hostname} by {appliance,local_ip,remote_ip,vpn_prof_name}"
+                      "query": "avg:versa.interface.bandwidth{$device_namespace,$device_hostname} by {device_id,site,interface}"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 3761648095963762,
+            "definition": {
+              "title": "Outbound Throughput (bps)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
                   "formulas": [
                     {
-                      "alias": "Volume TX",
                       "formula": "query1"
-                    },
-                    {
-                      "alias": "Volume RX",
-                      "formula": "query2"
-                    },
-                    {
-                      "alias": "Volume Total",
-                      "formula": "query1 + query2"
                     }
                   ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:versa.interface.bandwidth_rx{$device_namespace,$device_hostname} by {device_id,site,interface}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5205000034452573,
+            "definition": {
+              "title": "Inbound Utilization (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:versa.interface.rx_util{$device_namespace,$device_hostname} by {device_id,site,interface}"
+                    }
+                  ],
+                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "order_by": "values",
@@ -2544,17 +2331,231 @@
             "layout": {
               "x": 6,
               "y": 0,
-              "width": 6,
-              "height": 4
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5403848799954680,
+            "definition": {
+              "title": "Outbound Utilization (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:versa.interface.tx_util{$device_namespace,$device_hostname} by {device_id,site,interface}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 394385377410930,
+            "definition": {
+              "title": "Interfaces (Throughput (bps), Utilization (%))",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:versa.interface.bandwidth_rx{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:versa.interface.bandwidth_tx{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:versa.interface.rx_util{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:versa.interface.tx_util{$device_namespace,$device_hostname} by {device_hostname,interface,device_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [
+                    [],
+                    [],
+                    [
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "up"
+                        },
+                        "palette": "white_on_green"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "down"
+                        },
+                        "palette": "white_on_red"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "off"
+                        },
+                        "palette": "black_on_light_red"
+                      }
+                    ]
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 5,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Inbound Throughput",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Outbound Throughput",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Inbound Utilization",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "value": 50,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 50,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 90,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Outbound Utilization",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "value": 50,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 50,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 90,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Total Throughput",
+                      "cell_display_mode": "bar",
+                      "formula": "query1 + query2"
+                    },
+                    {
+                      "alias": "Max Utilization (Either Direction)",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "value": 50,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 50,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 90,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "max(query3, query4)"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 3
             }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 65,
+        "y": 63,
         "width": 12,
-        "height": 5
+        "height": 7
       }
     }
   ],

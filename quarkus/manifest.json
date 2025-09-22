@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "78e72ed2-6ea6-4186-9e57-2015a4a52afc",
   "app_id": "quarkus",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
