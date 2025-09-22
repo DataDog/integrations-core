@@ -69,7 +69,7 @@ The Barracuda CloudGen Firewall integration does not include any metrics.
 
 ### Logs
 
-The Barracuda CloudGen Firewall logs contain key information such as the event timestamp, source and destination IPs and ports, protocol used, firewall action (allow or deny), the matched rule name, user identity (if available), log type (such as firewall, VPN, authentication), network interface, device name, and status of the operation, and many more. This helps you to monitor traffic behavior, access control, and system activity.
+The Barracuda CloudGen Firewall logs contain key information such as the event timestamp, source and destination IPs and ports, protocol used, firewall action (allow or deny), the matched rule name, user identity (if available), log type (such as firewall, VPN, authentication), network interface, device name, status of the operation, and many more. This helps you to monitor traffic behavior, access control, and system activity.
 
 
 ### Events
