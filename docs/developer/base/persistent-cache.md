@@ -45,26 +45,27 @@ The value returned by this method is cached internally after the first call, so 
 
 ### Example: Stable Cache ID
 
-Imagine an integration that collects logs and has multiple configuration options, but only the `log_file_path` should determine the cache's identity. You can implement `persistent_cache_id` to create a stable ID based on just that option.
+Imagine an integration that collects data from a specific endpoint and has multiple configuration options, but only the `endpoint` and `port` should determine the cache's identity. You can implement `persistent_cache_id` to create a stable ID based on just those options.
 
 ```python
 from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.utils.persistent_cache import config_set_persistent_cache_id
 
-class MyLogCheck(AgentCheck):
+class MyCustomCheck(AgentCheck):
     def persistent_cache_id(self):
-        return self.instance.get('log_file_path', 'default_log_file_path_id')
+        endpoint = self.instance.get('endpoint', 'default_endpoint')
+        port = self.instance.get('port', 8080)
+        return f'{endpoint}:{port}'
 
     def check(self, instance):
-        last_cursor = self.read_persistent_cache('log_cursor')
+        last_cursor = self.read_persistent_cache('cursor')
 
-        # ... collect logs using the cursor ...
-        new_cursor = '...' # The new cursor after processing logs
+        # ... collect data using the cursor ...
+        new_cursor = '...' # The new cursor after processing
 
-        self.write_persistent_cache('log_cursor', new_cursor)
+        self.write_persistent_cache('cursor', new_cursor)
 ```
 
-In this example, changing other instance settings like `timeout` or `tags` will not invalidate the cache after the Agent restrats, as the `persistent_cache_id` will remain the same as long as `log_file_path` is unchanged. This ensures that the log cursor is preserved, preventing data duplication or loss.
+In this example, changing other instance settings like `timeout` or `tags` will not invalidate the cache after the Agent restrats, as the `persistent_cache_id` will remain the same as long as `endpoint` and `port` are unchanged. This ensures that the cursor is preserved, preventing data duplication or loss.
 
 ## Using a Subset of Configuration Options
 
@@ -80,19 +81,19 @@ Here is the same example as before, but using the helper method to achieve the s
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.persistent_cache import config_set_persistent_cache_id
 
-class MyLogCheck(AgentCheck):
+class MyCustomCheck(AgentCheck):
     def persistent_cache_id(self):
         return config_set_persistent_cache_id(
             self,
-            instance_config_options=['log_file_path']
+            instance_config_options=['endpoint', 'port']
         )
 
     def check(self, instance):
-        last_cursor = self.read_persistent_cache('log_cursor')
+        last_cursor = self.read_persistent_cache('cursor')
 
-        # ... collect logs using the cursor ...
+        # ... collect data using the cursor ...
         new_cursor = '...'  # The new cursor after processing logs
 
-        self.write_persistent_cache('log_cursor', new_cursor)
+        self.write_persistent_cache('cursor', new_cursor)
 ```
 
