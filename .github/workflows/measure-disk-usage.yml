@@ -109,7 +109,7 @@ jobs:
         ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts --quality-gate-threshold ${{ env.SIZE_THRESHOLD }} # TODO: change to ${{ github.event.workflow_run.head_sha }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SIZE_THRESHOLD: 1000000000000
+        SIZE_THRESHOLD: -1000000000000
 
     - name: Check diff
       id: check_diff
