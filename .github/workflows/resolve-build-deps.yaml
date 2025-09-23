@@ -246,7 +246,7 @@ jobs:
 
   publish:
     name: Publish artifacts and update lockfiles via PR
-    # if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.')))
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.')))
     needs:
     - build
     - build-macos
