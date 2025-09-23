@@ -490,7 +490,11 @@ class RequestsWrapper(object):
             if url.startswith('https'):
                 # Only mount custom adapter if we have non-default TLS config
                 tls_config = ChainMap(get_tls_config_from_options(new_options), self.tls_config)
-                if tls_config.get('tls_ca_cert') or tls_config.get('tls_cert') or not tls_config.get('tls_verify', True):
+                if (
+                    tls_config.get('tls_ca_cert')
+                    or tls_config.get('tls_cert')
+                    or not tls_config.get('tls_verify', True)
+                ):
                     self._mount_https_adapter(session, tls_config)
             request_method = getattr(session, method)
 
@@ -522,7 +526,11 @@ class RequestsWrapper(object):
             if parsed_url.scheme == "https":
                 # Only mount custom adapter if we have non-default TLS config
                 tls_config_with_certs = ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config)
-                if tls_config_with_certs.get('tls_ca_cert') or tls_config_with_certs.get('tls_cert') or not tls_config_with_certs.get('tls_verify', True):
+                if (
+                    tls_config_with_certs.get('tls_ca_cert')
+                    or tls_config_with_certs.get('tls_cert')
+                    or not tls_config_with_certs.get('tls_verify', True)
+                ):
                     self._mount_https_adapter(session, tls_config_with_certs)
             request_method = getattr(session, method)
             response = request_method(url, **new_options)
@@ -622,7 +630,11 @@ class RequestsWrapper(object):
             # Create a new session if it doesn't exist and mount HTTPS adapter if needed.
             self._session = self._create_session()
             # Only mount custom adapter if we have non-default TLS config
-            if self.tls_config.get('tls_ca_cert') or self.tls_config.get('tls_cert') or not self.tls_config.get('tls_verify', True):
+            if (
+                self.tls_config.get('tls_ca_cert')
+                or self.tls_config.get('tls_cert')
+                or not self.tls_config.get('tls_verify', True)
+            ):
                 self._mount_https_adapter(self._session, self.tls_config)
         return self._session
 
