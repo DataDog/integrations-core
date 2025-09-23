@@ -131,7 +131,7 @@ ENV OPENSSL_VERSION="3.4.1"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash 'c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec'; `
+      -Hash '002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
