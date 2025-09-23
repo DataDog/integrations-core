@@ -47,8 +47,8 @@ jobs:
     - name: Configure ddev
       run: |
             ddev config override
-            ddev config set orgs.default.site datadoghq.com
-            ddev config set orgs.default.api_key ${{ secrets.DD_API_KEY }}
+            ddev config set orgs.default.site datadoghq.com --quiet
+            ddev config set orgs.default.api_key ${{ secrets.DD_API_KEY }} --quiet
 
     - name: Measure disk usage
       env:
@@ -107,8 +107,8 @@ jobs:
     - name: Configure ddev
       run: |
             ddev config override
-            ddev config set orgs.default.site datadoghq.com
-            ddev config set orgs.default.api_key ${{ secrets.DD_API_KEY }}
+            ddev config set orgs.default.site datadoghq.com --quiet
+            ddev config set orgs.default.api_key ${{ secrets.DD_API_KEY }} --quiet
 
     - name: Calculate diff
       run: |
