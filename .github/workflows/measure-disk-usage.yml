@@ -54,8 +54,8 @@ jobs:
       run: |
         cmd="ddev size status \
         --commit ${{github.event.pull_request.head.sha }} \
-        --format json" # TODO: change to ${{ github.event.workflow_run.head_sha }}
-        --platform macos-x86_64
+        --format json \
+        --platform macos-x86_64 " # TODO: change to ${{ github.event.workflow_run.head_sha }}
         # Send metrics to Datadog only on push to master
 
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
