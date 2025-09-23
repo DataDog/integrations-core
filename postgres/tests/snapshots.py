@@ -97,12 +97,12 @@ class PoolObserver(Observer):
         self.snapshot = []
         self.target = pool_manager
 
+    @contextlib.contextmanager
     def get_connection(self, dbname: str, persistent: bool = False):
-        conn = self.target.get_connection(dbname, persistent)
-        return ConnectionObserver(conn, self.snapshot, self.mode)
+        with self.target.get_connection(dbname, persistent) as conn:
+            yield ConnectionObserver(conn, self.snapshot, self.mode)
 
 
-@contextlib.contextmanager
 class ConnectionObserver(Observer):
     def __init__(self, conn: Connection, snapshot: list, mode: str):
         # print(f"Initializing connection observer")
