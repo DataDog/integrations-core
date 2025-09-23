@@ -38,7 +38,7 @@ No additional installation is needed on your server.
 
 #### Logs
 
-The Hugging Face TGI integration can collect logs from the server container and forward them to Datadog. The TGI server container needs to be started with the environment variable `NO_COLOR=1` and the option `--json-output` for the logs output to be correctly parsed by Datadog. After setting these variables, the server must be restarted to enable log ingestion
+The Hugging Face TGI integration can collect logs from the server container and forward them to Datadog. The TGI server container needs to be started with the environment variable `NO_COLOR=1` and the option `--json-output` for the logs output to be correctly parsed by Datadog. After setting these variables, the server must be restarted to enable log ingestion.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
